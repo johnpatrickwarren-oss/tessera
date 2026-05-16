@@ -4,7 +4,8 @@ STATUS: READY
 
 ## Inputs for next role
 - Branch: main
-- Attestation SHA: 8d724de (GREEN commit: feat(R05): GREEN — Welford-into-PerShardResidual composition (SLICE 2b3))
+- Attestation SHA: 485ce36 (HEAD at chore commit: chore(R05): route to REVIEWER — NEXT-ROLE.md + MEMORIAL.md)
+- GREEN commit SHA: 8d724de (feat(R05): GREEN — Welford-into-PerShardResidual composition (SLICE 2b3))
 - Q-R05-SPEC.md: coordination/specs/Q-R05-SPEC.md
 - Audit sidecar (Reviewer MAY read per CLAUDE-REVIEWER.md): coordination/specs/Q-R05-SPEC-AUDIT.md
 
