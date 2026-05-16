@@ -1,56 +1,69 @@
 CURRENT-ROUND: R04
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 
 ## Inputs for next role
-- /Users/johnwarren/concord/tessera/coordination/specs/Q-R04-SPEC.md (full spec — reviewer source-of-truth)
-- /Users/johnwarren/concord/tessera/coordination/specs/Q-R04-SPEC-AUDIT.md (architect audit sidecar — reviewer reads this; implementer did not)
-- /Users/johnwarren/concord/tessera/coordination/PRD.md (PRD AC-P2 reference)
-- Attested HEAD SHA: see "Binding command results" below
-- Existing source/test files: engine/per-shard/welford.ts (CREATED R04), test/q04-welford-stats.test.ts (CREATED R04), test/q03-warm-start-runtime.test.ts (CHANGED R04 — additive Delta 3a + 3b + 3c)
+- /Users/johnwarren/concord/tessera/coordination/reviews/REVIEWER-REPORT-R04.md (full audit; 0 CRITICAL + 0 MAJOR + 0 MINOR + 7 OBS; 18/18 ACs PASS)
+- /Users/johnwarren/concord/tessera/coordination/specs/Q-R04-SPEC.md (spec — for Memorial-Updater context on architect pre-predictions)
+- /Users/johnwarren/concord/tessera/coordination/specs/Q-R04-SPEC-AUDIT.md (audit sidecar — architect pre-predictions to grade)
+- /Users/johnwarren/concord/tessera/coordination/NEXT-ROLE.md (this file)
+- Reviewer-attested HEAD: 9e8304a (chore commit including routing/attestation series); GREEN at 7796f29; RED at 4468b5e
 
 ## Escalation items
-(none)
+(none — STATUS: MERGE-READY)
 
-## Binding command results (observed, not predicted)
+## Reviewer-run binding command results (independent of Implementer attestation; R06+ standing policy)
 
-Attested at: chore commit following GREEN commit `7796f29` (Implementer records chore SHA below after commit)
+- **grep -n "^import" engine/per-shard/welford.ts** → exit 1, 0 matches (zero inherited imports — spec § Integration points claim ✓)
+- **git diff 2160b7e..7796f29 -- engine/per-shard/warm-start.ts engine/types/config.ts package.json tsconfig.json tsconfig.test.json test/_substrate/factories.ts** → empty (anti-scope clean per R04-SAS-1/2/10/17 ✓)
+- **npm run typecheck** → exit 0; clean (AC-15 ✓)
+- **node --test test/q04-welford-stats.test.js** → pass 11 / fail 0 (AC-17 ✓)
+- **node --test test/q03-warm-start-runtime.test.js** → pass 13 / fail 0 (R03 AC-1..11 + R04 AC-12 + R04 AC-13)
+- **node --test test/q01-vendoring-coverage.test.js test/q01-no-at-pin-deltas.test.js test/q01-schema-additions.test.js test/q02-schema-extension.test.js test/betting-e-process-class-dispatch.test.js** → pass 20 / fail 0 (AC-16 + AC-18 ✓; per-file q01-vc=3, q01-no=1, q01-sa=5, q02-se=6, smoke=5)
+- **git log --oneline** (TDD ordering AC-14) → RED 4468b5e (test-only, +190) precedes GREEN 7796f29 (welford.ts +114 + q03 +69/-2) ✓
 
-**npm run typecheck** (tsc -p tsconfig.test.json --noEmit):
-- Exit code: 0
-- Output: clean (no errors, no warnings)
+Total: 44 tests; all green. Matches Implementer attestation.
 
-**node --test test/q04-welford-stats.test.js** (R04 new q04 tests, AC-17):
-- pass 11 / fail 0
-- All 11 AC-1 through AC-11 tests pass
+## Findings summary (full detail in REVIEWER-REPORT-R04.md)
 
-**node --test test/q03-warm-start-runtime.test.js** (R03+R04 q03 tests, AC-12/AC-13):
-- pass 13 / fail 0
-- 11 original R03 tests + 2 new R04 tests (AC-12 strict-tier reset + AC-13 immutability)
+- 0 CRITICAL — no correctness, security, or data-integrity defects.
+- 0 MAJOR — no functional gaps, missing error paths, or broken edge cases.
+- 0 MINOR — no test gaps, unclear code, or misleading names rising above accepted-residual.
+- 7 OBS — observations only; all are accepted-residuals or wording quibbles documented per architect spec disposition.
 
-**node --test test/q01-vendoring-coverage.test.js test/q01-no-at-pin-deltas.test.js test/q01-schema-additions.test.js test/q02-schema-extension.test.js test/betting-e-process-class-dispatch.test.js** (AC-16 + AC-18):
-- pass 20 / fail 0
-- Observed per-file: q01-vendoring-coverage=3, q01-no-at-pin-deltas=1, q01-schema-additions=5, q02-schema-extension=6, smoke=5
+OBS roll-up:
+- OBS-1: `welfordCovariance` defensive-copy not test-bound (load-bearing by construction at HEAD; analog to AC-9 for welfordMean missing).
+- OBS-2: AC-2 m2-zeros assertion is tautological at n=1 (M2 update collapses to 0 by formula; AC-3 supplies discriminating M2 binding).
+- OBS-3: AC-6 one-sided Welford error bound (architect-accepted at OQ-4).
+- OBS-4: AC-13 covers only normal-increment branch (architect-acknowledged in § Mechanism primitive 4).
+- OBS-5: welford.ts JSDoc points to Q-R03-SPEC-AUDIT.md § Q-R03 → Q-R04 sequencing context (R04 sidecar is the more-current reference for R05).
+- OBS-6: "defensive deep copy" wording in welfordCovariance JSDoc; impl constructs fresh matrix, not copy.
+- OBS-7: AC-11 final two assertions are redundant given first JSON-snapshot assertion.
 
-**Total observed: 13 + 20 + 11 = 44 tests; all green.**
+## R03 carry-forward closure status (Reviewer-verified)
 
-Pre-R04 baseline per R03 Reviewer-verified at HEAD `e698c20` (no code changes through `2160b7e`): 31 tests. Delta: +13 (q03 grows 11→13; q04 new at 11). Matches predicted.
+| Finding | Disposition | Status |
+|---|---|---|
+| R03 MINOR-1 (AC-9 vacuous-assertion clarification) | Delta 3c in-place comment + AC-12 load-bearing complement | ✓ closed |
+| R03 MINOR-2 (grep-pattern-soundness) | Architect-discipline reinforcement consumed at spec time (no R04 grep-evidence ACs) | ✓ closed |
+| R03 MINOR-3 (re-export-chain-check) | Architect-discipline reinforcement consumed (welford.ts has 0 imports — Reviewer-verified) | ✓ closed |
+| R03 MINOR-4 (empirically-verified test counts) | Architect-discipline reinforcement consumed (AC-16 has no pre-stated counts) | ✓ closed |
+| R03 MINOR-5 (observeSample immutability not bound) | Delta 3b AC-13 JSON-snapshot test | ✓ closed |
+| R03 OBS-1 (newConfidence literal-union) | No R04 surface; R04-SAS-21 defer | (deferred, intentional) |
+| R03 OBS-2 (no test bind for reset-from-strict) | Delta 3a AC-12 strict-tier reset test | ✓ closed |
+| R03 OBS-3 (JSDoc reference in warm-start.ts) | No R04 surface; R04-SAS-21 defer | (deferred, intentional) |
+| R03 OBS-4 (void _missing in q02) | No R04 surface; R04-SAS-18 fence | (deferred, intentional) |
+| R03 OBS-5 (spec-inaccuracy threshold policy) | Operator/architect policy question; R04-SAS-21 defer | (deferred, intentional) |
 
-**TDD ordering (AC-14):**
-- RED commit: `4468b5e` — test/q04-welford-stats.test.ts alone; import from ../engine/per-shard/welford → TS2307 confirmed
-- GREEN commit: `7796f29` — engine/per-shard/welford.ts + test/q03-warm-start-runtime.test.ts Delta 3
+5 of 10 R03 findings actively closed (3 MINORs as architect-reinforcement-consumed; 1 MINOR + 1 OBS via R04 test additions; 1 MINOR via in-place comment); 4 R03 OBS items + 1 architect-policy item deferred per anti-scope. No R03 finding remains in undefined state.
 
-**Integration-point verification (spec § Integration points):**
-- grep -n "^import" engine/per-shard/welford.ts → 0 matches (zero inherited imports; verified pre-commit)
+## Routing notes for Memorial-Updater
+
+- Tier: full (A2 + A4 + A7). Cross-section consistency pass executed 12 resolved-decision checks (4th consecutive Tessera application; the pattern is now standing discipline).
+- Memorial-Updater grading items: (1) architect pre-prediction 1 ("All 18 ACs PASS at first IMPLEMENTER pass; no fix-cycle required") — confirmed; (2) prediction 2 ("zero halt conditions") — confirmed; (3) prediction 3 ("TDD two-commit sequence verifiable") — confirmed; (4) prediction 5 ("≤3 MINOR + 0 MAJOR + 0 CRITICAL") — over-predicted (actual 0 MINOR); (5) prediction 6 ("3 CONFIRMATIONs expected including 4th cross-section pass + 3rd narrow-layer round + Skill 14 PRD-conjunction catch") — applicable; (6) prediction 7 ("session-crash risk: low") — confirmed; (7) prediction 8 ("R03 carry-forwards close at R04") — confirmed; (8) prediction 9 ("R03 MINOR-2/3/4 architect-reinforcement consumption Reviewer-verifies positive compounding") — confirmed (Reviewer ran each check; all PASS).
+- This is the third consecutive Tessera round with 0 CRITICAL + 0 MAJOR (R02 + R03 + R04 streak); first round to ship at 0 MINOR.
+- Welford module has ZERO inherited imports — verified by grep at HEAD 9e8304a.
+- No anti-scope violations across 9 SAS clauses Reviewer-diffed.
 
 ## Chore commit attestation
-Attested SHA: 2b7995b
-
-## Routing notes
-- Tier: full (A2 + A4 + A7; see spec preamble and audit sidecar)
-- Three surfaces of change: 1 production CREATED (engine/per-shard/welford.ts) + 1 test CREATED (test/q04-welford-stats.test.ts) + 1 test CHANGED (test/q03-warm-start-runtime.test.ts — additive only, 2 new tests + 1 comment block)
-- Reviewer reads Q-R04-SPEC-AUDIT.md (Architect ceremony sidecar) — Implementer did not
-- R03 carry-forwards closed: MINOR-1 (AC-9 clarifying comment + AC-12 load-bearing complement), MINOR-5 (AC-13 immutability), OBS-2 (AC-12 strict-tier reset)
-- R03 carry-forwards NOT closed at R04 (deferred): MINOR-2 (architect reinforcement only), MINOR-3 (architect reinforcement only), MINOR-4 (discipline reinforcement only), OBS-1/3/4/5 (orthogonal; R04-SAS-21)
-- Welford module has ZERO inherited imports — verified by grep
-- No anti-scope violations: no modification to engine/types/config.ts, engine/per-shard/warm-start.ts, tsconfig*, package.json, inherited vendored files, factories.ts
+Reviewer-report routing chore SHA: to be recorded after Reviewer-routing chore commit lands (Memorial-Updater follows).
