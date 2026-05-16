@@ -6,7 +6,7 @@ STATUS: READY
 - Branch: main
 - Spec: coordination/specs/Q-R02-SPEC.md
 - Spec audit sidecar: coordination/specs/Q-R02-SPEC-AUDIT.md
-- Attestation SHA: (see chore commit below — updated after coordination commit)
+- Attestation SHA: 8ef1735
 
 ## Binding command results (all run at HEAD after all implementation commits)
 
