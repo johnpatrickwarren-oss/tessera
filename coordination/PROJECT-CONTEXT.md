@@ -85,14 +85,45 @@ The v0.3 memo (TBD authoring) reframes the architectural commitment with these a
 
 These get submitted as Anchor PRs once patterns stabilize across multiple project instances (e.g., post-Tessera Phase 1 close walk validates the pattern).
 
-## Conventions for future Tessera coordination artifacts
+## Conventions for future Tessera coordination artifacts (Mode 2 pipeline)
 
-- Architect memo files: `<TOPIC>-SPEC.md` or `<TOPIC>-SCOPING-MEMO-v<N>.md`.
-- Reviewer reports: `REVIEWER-REPORT-<topic>-v<N>.md`.
-- Architect dispositions: `ARCHITECT-REPLY-<topic>-<context>.md`.
-- ADR clauses + anti-scope: Tessera's own `coordination/ANTI-SCOPE-LEDGER.md` once Tessera's first Q-cycle closes (currently no Tessera-specific LEDGER; DeploySignal LEDGER referenced via engine vendoring).
-- Project-roles mapping: deferred until Tessera commits to multi-chat coordination (John-as-solo-operator at v0 sufficient).
+Per anchor `integrations/superpowers-claude-code/README.md` Mode 2 (automated pipeline via `run-pipeline.sh` + `NEXT-ROLE.md` state machine). Mode 1 manual coordination (TPM routing pasteables) is **deprecated for Tessera** as of 2026-05-16 Mode 2 retrofit — pipeline orchestrates roles automatically; operator (John) intervenes only at explicit escalation points.
+
+**Canonical artifact paths** (per anchor `new-project.sh` layout):
+
+- `coordination/specs/Q-RNN-SPEC.md` — per-round architect output (R01, R02, ...).
+- `coordination/reviews/REVIEWER-REPORT-RNN.md` — per-round Reviewer cold-context audit.
+- `coordination/diagnostics/DIAGNOSTIC-RNN-<topic>.md` — Implementer/Architect/Reviewer halt artifacts.
+- `coordination/logs/pipeline-RNN.log` — pipeline run logs (gitignored or kept depending on operator pref).
+- `coordination/NEXT-ROLE.md` — routing state machine (CURRENT-ROUND / NEXT-ROLE / STATUS).
+- `coordination/MEMORIAL.md` — per-project Memorial record (CONFIRMATION / VIOLATION entries; reinforcement rules).
+
+**Project-level artifacts at coordination/ top** (persistent context across rounds):
+
+- `coordination/PRD.md` — thin pointer to SCOPING-MEMO-v0.3.md as the load-bearing scoping artifact.
+- `coordination/SCOPING-MEMO-v0.3.md` — canonical Tessera scoping (Phase 1 + 2 commitment; § 1.6 Existing architectural surface for inherited citations).
+- `coordination/ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md` — architect-pre-prediction picks for Q-J1..Q-J5; Q-J6 escalated.
+- `coordination/ARCHITECT-REPLY-Q-01-DISPOSITION.md` — Memorial D state stamp + R01 spec dispositions.
+- `coordination/PROJECT-CONTEXT.md` — this file; project-level reference + framing-history.
+
+**Mode 2 pipeline run conventions:**
+
+- Pipeline reads `PRD.md` as Architect input + cross-project memorial at `~/.claude/CROSS-PROJECT-MEMORIAL.md`.
+- Round naming: R01, R02, ... (pipeline convention; equivalent to anchor Q-cycles Q1, Q2, ...).
+- Tier selection per `anchor/skills/11-round-scaling.md`: solo / audit / full (default: full). For SLICE-1-equivalent rounds (pure mechanical vendoring) consider --tier solo with explicit Z-criteria justification recorded in PRD scope block.
+- Escalation surface: NEXT-ROLE.md STATUS: ESCALATE pauses pipeline; operator resolves; resume via `--start-at <ROLE>`.
+
+**Mode 1 → Mode 2 migration notes (2026-05-16):**
+
+- `TPM-REPLY-Q-01-MAC-CLAUDE-ROUTING.md` (Mode 1 routing pasteable) **deleted** at this retrofit. Superseded by `NEXT-ROLE.md` + pipeline orchestration. Git history at commit `29b94ec` preserves literal text.
+- `Q-01-PHASE-1-SLICE-1-SPEC.md` **moved** to `coordination/specs/Q-R01-SPEC.md` (anchor pipeline convention).
+- `REVIEWER-REPORT-Q-01-PHASE-1-SLICE-1.md` **moved** to `coordination/reviews/REVIEWER-REPORT-R01-pre-implementation.md` (distinguishes the pre-implementation Reviewer pass from the canonical post-implementation Reviewer-RNN.md that will fire after R01 Implementer completion).
+- `CLAUDE.md` **added** at tessera root (canonical role-discipline + Superpowers-disciplines-inlined + reinforcements-section + tier-selection rubric).
+- `run-pipeline.sh` + `scripts/` **copied** from `~/anchor/integrations/superpowers-claude-code/` per new-project.sh convention.
+- `.gitignore` **updated** with pipeline-artifact exclusions (`coordination/.prompt-*.md`, `.role-stamp`, `.pipeline-*.lock`, etc.).
+
+**Multi-chat coordination** (deferred): when Tessera's complexity warrants multi-chat (multiple parallel Cowork chats per role), drop `coordination/PROJECT-ROLES.md` per anchor `templates/PROJECT-ROLES-TEMPLATE.md` with chat→role mapping. At Mode 2 pipeline operation with John-as-solo-operator, the pipeline's headless Claude Code sessions handle role coordination automatically; PROJECT-ROLES.md is not load-bearing until multi-chat coordination begins.
 
 ---
 
-_For Tessera's overall product framing, see [`../README.md`](../README.md). For Anchor methodology reference, see [github.com/johnpatrickwarren-oss/anchor](https://github.com/johnpatrickwarren-oss/anchor)._
+_For Tessera's overall product framing, see [`../README.md`](../README.md). For Anchor methodology reference, see [github.com/johnpatrickwarren-oss/anchor](https://github.com/johnpatrickwarren-oss/anchor). For Mode 2 pipeline operator runbook, see anchor `integrations/superpowers-claude-code/README.md`._
