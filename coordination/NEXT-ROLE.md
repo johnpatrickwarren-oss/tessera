@@ -38,7 +38,7 @@ If a fixture error is discovered mid-implementation, commit the test-side fix as
   (b) type-declaration-site discipline (R02 reinforcement; every external type's declaration site cited at line-range precision — 1st application);
   (c) file-deletion track-state (R02 reinforcement; no deletions at R03; parallel discipline of pre-emit directory-non-existence verification applied);
   (d) compilation-dependency enumeration (R01 reinforcement; new file's deps explicitly enumerated in audit sidecar).
-- Implementer attestation SHA: `dea1d7a08b3d3e1865fb4d4cc96a2610d507b813` (GREEN commit HEAD at route time).
+- Implementer attestation SHA: `bcd7ede4e5529572a29d08b5fe45a5592d680b8a` (HEAD at chore-commit route time; per discipline the chore SHA is the attestation).
 
 ## Binding commands — R03 results
 1. `npm run typecheck` → exit 0 (tsc clean; tsconfig.test.json)
