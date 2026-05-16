@@ -78,3 +78,17 @@ All unresolved decisions → open questions in the spec.
 # Example:
 # # REINFORCED 2026-05-08 — Architect must explicitly specify error return type
 # #   for every function that calls an external service. "Handle errors" is not spec.
+
+# REINFORCED 2026-05-16 — Pre-emit grilling must include a cross-spec-section consistency
+#   pass before routing to Implementer. For every resolved decision (Q-N section) that names
+#   a module model, type structure, naming convention, or deferral policy, verify that ALL
+#   subsequent spec sections (§Mechanism, §Implementation surface pseudocode, §Tests pseudocode,
+#   Acceptance criteria) use a consistent surface. Contradictions between resolved decisions and
+#   spec pseudocode (e.g., Q1.1 "vendor tsconfig at-pin" → CJS contradicting §Implementation
+#   surface ESM/Bundler; "defer typedef extraction" in §Mechanism contradicting §Tests pseudocode
+#   importing named typedefs; `confidence` in §Mechanism contradicting `cell_confidence` in §Tests)
+#   are each an independent HALT condition (c) for the Implementer — they cannot be resolved without
+#   an architectural decision. The cross-section pass runs after all spec sections are written: for
+#   each Q-N pick, grep the remaining spec sections for any use of the alternative surface or a
+#   contradicting name. Detected R01: 3 uncaught contradictions produced REVIEWER MAJOR-5, MINOR-1,
+#   MINOR-2 and 2 additional silent Implementer absorptions.
