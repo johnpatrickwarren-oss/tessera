@@ -51,6 +51,41 @@ Re-runs of the script at re-pin time (Phase 1 close-walk / Phase 2 close-walk pe
 
 ---
 
+## Existing architectural surface (REVIEWER-ANCHOR — mandatory)
+
+_Per anchor `templates/Q-NN-SPEC-TEMPLATE.md` v2 (per anchor PR #35) — added retroactively at Q1 v0.3 amendment 2026-05-16 to close the file-opened-discipline gap (MD-F6 sub-variant) at the structural level. All citations are against DeploySignal main@SHA `5a72371` (current main at clone-time 2026-05-15; Tessera SLICE 1 vendoring pin)._
+
+_Architect note: this section was retroactively added at Q1 v0.3-equivalent amendment (post anchor PR #35 emit). The discipline failure that produced MD-F6 (architect cited inherited types from memory without opening `config.ts`) was caught by Reviewer F1; v0.2 amendment opened the file and corrected the citations; this v0.3-equivalent section structurally captures the corrected citations so future Reviewer audit + script verification have grep-evidenced anchors._
+
+| Inherited file | Pinned SHA | Lines opened | Verbatim snippet | Date+time opened |
+|---|---|---|---|---|
+| `deploysignal/engine/types/config.ts` | `5a72371` | `69-70` | `export interface CompiledConfig {`<br/>&nbsp;&nbsp;`version: string;` | 2026-05-16 02:00 |
+| `deploysignal/engine/types/config.ts` | `5a72371` | `95` | `baseline_cells?: BaselineCellsConfig;` | 2026-05-16 02:00 |
+| `deploysignal/engine/types/config.ts` | `5a72371` | `400-413` | `/** One cell in the \`baseline_cells.cells\` array. */`<br/>`export interface BaselineCellEntry {`<br/>&nbsp;&nbsp;`key: CellKey;`<br/>&nbsp;&nbsp;`n_samples: number;`<br/>&nbsp;&nbsp;`confidence: 'strict' \| 'pooled' \| 'aggregate' \| 'none';` | 2026-05-16 02:00 |
+| `deploysignal/engine/types/config.ts` | `5a72371` | `420-432` | `export interface BaselineCellsConfig {`<br/>&nbsp;&nbsp;`dimensions: Array<'hour_of_day' \| 'day_of_week' \| 'workload_class' \| 'tenant_slice' \| 'tenant_tier' \| 'region'>;`<br/>&nbsp;&nbsp;`cells: BaselineCellEntry[];` | 2026-05-16 02:00 |
+| `deploysignal/engine/types/verdict.ts` | `5a72371` | `141-188` | `// ── Addition #25 (ARCHITECT-REPLY-47) — L3b VerdictGroup aggregator ──`<br/>`export interface VerdictGroup { ... }` (full 47 LOC interface declaration; group_id format at :155-159; close-trigger at :149-153; verdicts/firing_verdicts/root_cause at :172-178) | 2026-05-16 02:00 |
+| `deploysignal/engine/types/verdict.ts` | `5a72371` | `237-240` | `/** A correlational candidate surfaced for a VerdictGroup. Explicitly`<br/>&nbsp;`*  NOT a causal claim per D4 — \`correlational_not_causal: true\` is a`<br/>&nbsp;`*  required literal label on the wire. */`<br/>`export interface TopologyCandidate {` | 2026-05-16 02:00 |
+| `deploysignal/engine/topology-overlay.ts` | `5a72371` | `40-43` | `/** Abstract topology-source contract per D1 Option E. v1 ships`<br/>&nbsp;`*  \`OtelServiceGraphV1\`; v2 adds Istio / K8s / Linkerd / custom impls`<br/>&nbsp;`*  against this same interface without VerdictGroupWithTopology`<br/>&nbsp;`*  consumer changes. */` | 2026-05-16 02:00 |
+| `deploysignal/tools/ingest-real-trace.ts` | `5a72371` | `106` | `const tickSeconds = opts.tick_seconds ?? 5;` | 2026-05-16 02:00 |
+
+**Architect self-attest (Q1 v0.3-equivalent retroactive emit, 2026-05-16):**
+
+- [x] I opened every file in this table at v0.2-amendment time (NOT recalled from memory). The opening was Reviewer-prompted (F1 caught the v0.1 violation); the citations above reflect actual file contents as verified at v0.2-amendment grep operations earlier this cycle.
+- [x] Each snippet is verbatim from the file at the pinned SHA `5a72371` (line-numbers verified via `grep -n` output; multi-line snippets shown with `<br/>` for table readability but represent contiguous source content).
+- [x] Each line number was verified against actual file content at the pinned SHA (not against a remembered prior version).
+- [x] I ran `integrations/superpowers-claude-code/scripts/verify-citations.sh` against this spec from the anchor PR #35 feature branch (`feat/md-f6-existing-architectural-surface`). Output: 8 citation rows verified; 0 failures. Each row's actual file content at the pinned SHA matches the snippet column above. Script invocation: `verify-citations.sh tessera/coordination/Q-01-PHASE-1-SLICE-1-SPEC.md --repo-root /Users/johnwarren/concord/deploysignal`. Smoke-test surfaced two script bugs (markdown-backtick stripping; repo-name-prefix path resolution) which were fixed at the same anchor PR #35 commit chain — empirical exercise of the discipline validated the script.
+
+**Bulk-vendoring inventory** (vendored at-pin per § Implementation surface; NO per-file citation table row required since these are vendored verbatim without architectural-claim references in this spec; full file count + paths in VENDORING-MANIFEST.md):
+- 11 files under `deploysignal/engine/detectors/` (excluding `_q72-trace.ts` per SAS-7)
+- 5 files under `deploysignal/engine/types/families/`
+- 5 core orchestration primitives under `deploysignal/engine/`
+- 7 type files under `deploysignal/engine/types/` (excluding `agent.ts` per SAS-8 + `config.ts` which is vendored-with-deltas, cited above)
+- 2 smoke-test files under `deploysignal/test/`
+
+**Failure-mode acknowledgment:** the v0.1 emit of this spec violated the file-opened discipline (architect cited `CellDimension` and `CellConfidence` as standalone typedefs which don't exist; cited `'pod_id'` and `'low'` enum values which don't exist in inherited code). Reviewer F1 caught it; v0.2 amendment opened the file; this v0.3-equivalent section captures the corrected citations structurally. **Both same-session MD-F6 violations (SCOPING-MEMO v0.1 missed Addition #25/#26 primitives; Q1 spec v0.1 missed actual config.ts type-state) are the originating case anchor PR #35 ([feat/md-f6-existing-architectural-surface](https://github.com/johnpatrickwarren-oss/anchor/pull/35)) was drafted to prevent.**
+
+---
+
 ## Open questions resolved at spec-emit (Q1.1 → Q1.5)
 
 ### Q1.1 — TypeScript build configuration
