@@ -1,6 +1,7 @@
 node_modules/
 .DS_Store
 *.log
+*.bak
 runs/
 .auto-memory/
 .env
@@ -9,3 +10,10 @@ dist/
 build/
 coverage/
 *.tsbuildinfo
+
+# Anchor Mode 2 pipeline artifacts (gitignored per new-project.sh convention)
+coordination/.prompt-*.md
+coordination/.pipeline-*.lock
+coordination/.role-stamp
+coordination/clusters/
+coordination/multi-track-status.json
