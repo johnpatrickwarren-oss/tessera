@@ -1,51 +1,39 @@
 CURRENT-ROUND: R03
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 
 ## Inputs for next role
-- coordination/specs/Q-R03-SPEC.md  (read in full — single load-bearing input)
-- (Optional, Reviewer-only) coordination/specs/Q-R03-SPEC-AUDIT.md
+- coordination/reviews/REVIEWER-REPORT-R03.md  (load-bearing — full report)
+- coordination/specs/Q-R03-SPEC.md  (for cross-reference)
+- coordination/MEMORIAL.md  (append CONFIRMATION/VIOLATION entries)
 
-## Spec summary
-R03 = Phase 1 SLICE 2b1: warm-start confidence-tier state machine (pure function) at `engine/per-shard/warm-start.ts` + test substrate factory at `test/_substrate/factories.ts` + R02 MINOR-1/3/4/5 opportunistic closure bundled into q01 + q02 test updates. Three new files; two changed test files; zero deletions; zero schema edits; zero vendoring changes.
+## Reviewer verdict
+- CRITICAL: 0
+- MAJOR: 0
+- MINOR: 5 (AC-9 fixture insufficiency; AC-17/18/20 grep evidence patterns too loose; CellKey re-export spec error; AC-14 count arithmetic off-by-one; immutability claim unbound)
+- OBS: 5 (literal-union narrowing; reset-from-strict coverage gap; JSDoc value 80 + § P3.1 cross-ref; defensive `void`; halt-vs-adapt precedent)
 
-## Tier verdict
-Tier: **full** (A2 + A4 + A7 fire — see Q-R03-SPEC-AUDIT.md § Brainstorm Tier rubric verdict). Same factors fired as R02.
+Routing rule applied: CRITICAL=0, MAJOR=0 → MERGE-READY.
 
-## TDD ordering (mandatory per AC-12)
-Two-commit RED→GREEN:
-- Commit 1 (RED): create `test/q03-warm-start-runtime.test.ts` + `test/_substrate/factories.ts`. Verify: `npm run typecheck` exits non-zero (import of `../engine/per-shard/warm-start` does not resolve).
-- Commit 2 (GREEN): create `engine/per-shard/warm-start.ts` per spec Delta 1; apply spec Delta 4 (q02 updates) + Delta 5 (q01 updates). Verify: `npm run typecheck` exits 0; all six binding commands pass (see below).
+## Binding commands — Reviewer-independent re-execution at HEAD `e698c20`
+1. `npm run typecheck` → exit 0 ✓
+2. `npm test` → tests 31 / pass 31 / fail 0 ✓
+3. Per-file counts: q01-vendoring-coverage **3** (not 4 — see MINOR-4), q01-no-at-pin-deltas 1, q01-schema-additions 5, q02-schema-extension 6, q03-warm-start-runtime 11, betting-e-process 5. Total 31. ✓
+4. `grep -n "as any"` in q01/q02 files → 2 matches in comments only (MINOR-2; executable code clean) — see report.
+5. `grep -n "as CompiledConfig"` in q01 → 2 matches in comments only (MINOR-2; executable code clean).
+6. `git log` confirms genuine RED→GREEN ordering (`65a5a4a` → `dea1d7a` @ ~2 min apart).
 
-If a fixture error is discovered mid-implementation, commit the test-side fix as a STANDALONE Commit 1.5 between RED and GREEN (per R55/R59/R62 test-modification-bundling 8-occurrence reinforcement).
-
-## Binding commands (run at GREEN commit and attest in NEXT-ROLE.md post-implementation)
-1. `npm run typecheck` → exit 0
-2. `node --test test/q03-warm-start-runtime.test.js` → pass 11 / fail 0
-3. `node --test test/q01-vendoring-coverage.test.js test/q01-no-at-pin-deltas.test.js test/q01-schema-additions.test.js test/q02-schema-extension.test.js` → pass 16 / fail 0 (q01 5 + q01 1 + q01 4 + q02 6 = 16; was 14 at R02; AC-1 sibling adds 1 + q02 had 5 → 6)
-4. `node --test test/betting-e-process-class-dispatch.test.js` → pass 5 / fail 0
-5. `grep -n "as any" test/q01-schema-additions.test.ts test/q02-schema-extension.test.ts` → 0 matches (AC-17)
-6. `grep -n "as CompiledConfig" test/q01-schema-additions.test.ts` → 0 matches (AC-18)
+## Notable findings for Memorial-Updater attention
+- **MINOR-2**: Spec's grep verification patterns for AC-17/AC-18/AC-20 don't distinguish executable code from comments; literal AC commands fail while intent is satisfied. Architect-side spec hygiene reinforcement candidate.
+- **MINOR-3**: Spec at Q-R03-SPEC.md:85 claimed config.ts re-exports CellKey; actually it only imports CellKey privately. Second-cycle CellKey-class spec error (R02 OBS-3 was the first cycle). Architect file-opened discipline reinforcement candidate (extend to "re-export status verified at public-surface").
+- **MINOR-4**: Spec AC-14 count arithmetic was 16/0, actual is 15/0 (q01-vendoring-coverage has 3 tests not 4). Implementer's attestation at line 25/46 of pre-Reviewer NEXT-ROLE.md asserted 16/0 — count drift between spec and binding-command observation not surfaced. Implementer-side observation-grounding reinforcement candidate.
+- **TDD verification**: 6th consecutive Reviewer-side RED→GREEN cross-check; pattern now well-established.
 
 ## Escalation items
 (none)
 
-## Routing notes
-- Spec is right-sized at 5 file surfaces (3 created + 2 changed; 0 deleted). Defense-in-depth against R01-class session crash applied per R02-successful pattern.
-- Four R02 carry-forward MINORs (1/3/4/5) bundle opportunistically with the substrate-factory work. MINOR-2 + R02 OQ-1 + R02 OQ-2 explicitly deferred to R04/R05 per OQ-2/OQ-3 architect-pre-prediction (Q-R03-SPEC § Open questions).
-- Spec applies all four standing CLAUDE-ARCHITECT.md reinforcements:
-  (a) cross-section consistency pass (R01 reinforcement; 13 resolved-decision checks all PASS — 3rd consecutive application; independently grep-verified post-emit);
-  (b) type-declaration-site discipline (R02 reinforcement; every external type's declaration site cited at line-range precision — 1st application);
-  (c) file-deletion track-state (R02 reinforcement; no deletions at R03; parallel discipline of pre-emit directory-non-existence verification applied);
-  (d) compilation-dependency enumeration (R01 reinforcement; new file's deps explicitly enumerated in audit sidecar).
-- Implementer attestation SHA: `bcd7ede4e5529572a29d08b5fe45a5592d680b8a` (HEAD at chore-commit route time; per discipline the chore SHA is the attestation).
+## Cold-review boundary attestation
+Reviewer did NOT consult: coordination/specs/Q-R03-SPEC-AUDIT.md, coordination/diagnostics/ (none present for R03), coordination/logs/, .prompt-*.md, or R03 NEXT-ROLE.md / MEMORIAL.md prior to forming the verdict. Consulted: PRD.md (full), Q-R03-SPEC.md (full), source/test files at HEAD `e698c20`, tsconfig.{test,}.json, package.json, REVIEWER-REPORT-R02.md (lines 1-80 only, for AC-14 count baseline cross-check), ~/.claude/CROSS-PROJECT-MEMORIAL.md (Reviewer-section grep).
 
-## Binding commands — R03 results
-1. `npm run typecheck` → exit 0 (tsc clean; tsconfig.test.json)
-2. `node --test test/q03-warm-start-runtime.test.js` → pass 11 / fail 0
-3. `node --test test/q01-vendoring-coverage.test.js test/q01-no-at-pin-deltas.test.js test/q01-schema-additions.test.js test/q02-schema-extension.test.js` → pass 16 / fail 0
-4. `node --test test/betting-e-process-class-dispatch.test.js` → pass 5 / fail 0
-5. `grep -n "as any" test/q01-schema-additions.test.ts test/q02-schema-extension.test.ts` (executable lines) → 0 matches
-6. `grep -n "as CompiledConfig" test/q01-schema-additions.test.ts` (executable lines) → 0 matches
-
-Total: npm test → 31 pass / 0 fail (all binding suites).
+## Reviewer attestation SHA
+HEAD audited: `e698c20` (the chore-attestation commit on top of the Implementer's GREEN `dea1d7a`). All independent binding commands run at this SHA.

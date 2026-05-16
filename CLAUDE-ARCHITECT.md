@@ -114,3 +114,31 @@ All unresolved decisions → open questions in the spec.
 #   calls the spec should have pre-empted. Detected R02: ville-preservation .test.js was
 #   gitignored; spec prescribed `git rm` for both .ts and .js companions; Implementer correctly
 #   adapted but spec prescription was over-broad (REVIEWER OBS-2).
+
+# REINFORCED 2026-05-16 — When spec Integration points section describes how module A makes
+#   type T available to module B, verify BOTH (a) T's shape at its declaration site AND (b)
+#   whether A actually re-exports T at its public surface (run `grep -n "export.*T\|export.*from"
+#   engine/types/A.ts`). A plain `import type { T }` in A.ts is NOT a re-export. Verifying the
+#   type shape at the declaration site (primitives.ts) does not confirm the re-export chain from
+#   the consuming module (config.ts). Detected R03: spec Q-R03-SPEC.md:85 stated config.ts
+#   "re-exports CellKey through its own import from ./primitives" — factually wrong (plain import,
+#   no re-export); 2nd-cycle CellKey-class spec error despite primitives.ts:44 being opened
+#   (REVIEWER MINOR-3).
+
+# REINFORCED 2026-05-16 — When an AC prescribes a grep verification command to confirm absence
+#   or presence of a string in source files (e.g., `grep -n "as any"`, `grep -n "@ts-expect-error"`),
+#   the grep pattern must distinguish executable code from comment lines. Use `grep -nE "^[^/]*(pattern)"
+#   file.ts` or equivalent. A pattern that matches in `//` comments produces a literal-AC-fails
+#   outcome even when the implementation is correct. Add a "verification-command-soundness" step
+#   to pre-emit grilling: for each grep-based AC evidence command, ask "does this grep match in
+#   comments?" — if yes, tighten. Detected R03: AC-17/18/20 grep patterns matched in closure-
+#   documentation comments written by the Implementer (REVIEWER MINOR-2).
+
+# REINFORCED 2026-05-16 — When AC-N states per-file test counts (e.g., "q01-vendoring-coverage
+#   4 / 0"), verify by running each named test file independently via `node --test <file.js>`
+#   and recording the OBSERVED count — do not reconstruct from memory or copy from a prior spec.
+#   If a prior Reviewer report states the counts (e.g., REVIEWER-REPORT-R02.md), use that as the
+#   ground truth. Writing a count that has not been empirically observed is not verification; the
+#   Reviewer will independently run the files and any discrepancy will surface as a MINOR. Detected
+#   R03: AC-14 stated q01-vendoring-coverage = 4 (actual = 3); total 16 (actual = 15); REVIEWER-
+#   REPORT-R02.md (read at spec time) contained 9/0 for those three files (REVIEWER MINOR-4).
