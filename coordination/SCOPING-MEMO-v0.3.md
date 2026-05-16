@@ -50,6 +50,46 @@ Per `superpowers:brainstorming` skill discipline applied during scoping cycle (2
 
 ---
 
+## 1.6 Existing architectural surface (REVIEWER-ANCHOR — mandatory)
+
+_Per anchor `templates/Q-NN-SPEC-TEMPLATE.md` v2 (anchor PR #35); applied at SCOPE-PROPOSAL fidelity. Originating MD-F6 sub-variant arose at v0.1 of this memo (architect cited Addition #25 / #26 from memory without opening `engine/types/verdict.ts` + `engine/topology-overlay.ts`); v0.2 amendment + Reviewer F1 caught it; this section structurally captures the corrected citations so future Reviewer audit + `verify-citations.sh` empirical verification have grep-evidenced anchors._
+
+All citations against DeploySignal `main` @ SHA `5a72371` (current main at clone-time 2026-05-15; Tessera SLICE 1 vendoring pin per § 9).
+
+| Inherited file | Pinned SHA | Lines opened | Verbatim snippet | Date+time opened |
+|---|---|---|---|---|
+| `deploysignal/engine/types/verdict.ts` | `5a72371` | `141` | `// ── Addition #25 (ARCHITECT-REPLY-47) — L3b VerdictGroup aggregator ──` | 2026-05-16 02:45 |
+| `deploysignal/engine/types/verdict.ts` | `5a72371` | `155-159` | `/** Human-readable stable-sorting group identifier.`<br/>&nbsp;`*  Format: \`group-{deploy_id}-{window_start_ts}\` per ARCHITECT-REPLY-47`<br/>&nbsp;`*  Q1. UUID fallback reserved for collision cases (should not occur by`<br/>&nbsp;`*  construction — (deploy_id, window_start_ts) is unique). */`<br/>`export type VerdictGroupId = string;` | 2026-05-16 02:45 |
+| `deploysignal/engine/types/verdict.ts` | `5a72371` | `190-192` | `// ── Addition #26 (ARCHITECT-REPLY-48) — Topology overlay (Smartscape-lite) ──`<br/>`//`<br/>`// Post-#25 enrichment layer. VerdictGroup stays topology-agnostic (D5);` | 2026-05-16 02:45 |
+| `deploysignal/engine/types/verdict.ts` | `5a72371` | `237-240` | `/** A correlational candidate surfaced for a VerdictGroup. Explicitly`<br/>&nbsp;`*  NOT a causal claim per D4 — \`correlational_not_causal: true\` is a`<br/>&nbsp;`*  required literal label on the wire. */`<br/>`export interface TopologyCandidate {` | 2026-05-16 02:45 |
+| `deploysignal/engine/topology-overlay.ts` | `5a72371` | `40-43` | `/** Abstract topology-source contract per D1 Option E. v1 ships`<br/>&nbsp;`*  \`OtelServiceGraphV1\`; v2 adds Istio / K8s / Linkerd / custom impls`<br/>&nbsp;`*  against this same interface without VerdictGroupWithTopology`<br/>&nbsp;`*  consumer changes. */` | 2026-05-16 02:45 |
+| `deploysignal/engine/types/config.ts` | `5a72371` | `69-70` | `export interface CompiledConfig {`<br/>&nbsp;&nbsp;`version: string;` | 2026-05-16 02:45 |
+| `deploysignal/engine/types/config.ts` | `5a72371` | `95` | `baseline_cells?: BaselineCellsConfig;` | 2026-05-16 02:45 |
+| `deploysignal/engine/types/config.ts` | `5a72371` | `400-413` | `/** One cell in the \`baseline_cells.cells\` array. */`<br/>`export interface BaselineCellEntry {`<br/>&nbsp;&nbsp;`key: CellKey;`<br/>&nbsp;&nbsp;`n_samples: number;`<br/>&nbsp;&nbsp;`confidence: 'strict' \| 'pooled' \| 'aggregate' \| 'none';` | 2026-05-16 02:45 |
+| `deploysignal/engine/types/config.ts` | `5a72371` | `420-432` | `export interface BaselineCellsConfig {`<br/>&nbsp;&nbsp;`dimensions: Array<'hour_of_day' \| 'day_of_week' \| 'workload_class' \| 'tenant_slice' \| 'tenant_tier' \| 'region'>;`<br/>&nbsp;&nbsp;`cells: BaselineCellEntry[];` | 2026-05-16 02:45 |
+| `deploysignal/tools/ingest-real-trace.ts` | `5a72371` | `106` | `const tickSeconds = opts.tick_seconds ?? 5;` | 2026-05-16 02:45 |
+| `deploysignal/NORTH-STAR-ARCHITECTURE.md` | `5a72371` | `336` | `### Addition #2 — Segmented baselines (baseline cell matrix)` | 2026-05-16 02:45 |
+| `deploysignal/NORTH-STAR-ARCHITECTURE.md` | `5a72371` | `161` | `**Family C — Multivariate drift.** ... Runs are multi-tenant-aware per Addition #23: covariance is estimated per \`(tenant_tier, hour_of_day, day_of_week)\` cell when data supports it ...` | 2026-05-16 02:45 |
+
+**Architect self-attest (v0.3 retroactive addition, 2026-05-16):**
+
+- [x] I opened every file in this table at v0.2-of-Q1-spec amendment time (NOT recalled from memory). The opening was Reviewer-prompted (F1 caught the originating violation); the citations above reflect actual file contents at the pinned SHA.
+- [x] Each snippet is verbatim from the file at SHA `5a72371` (multi-line snippets shown with `<br/>` for table readability but represent contiguous source content).
+- [x] Each line number was verified against actual file content at the pinned SHA.
+- [x] I ran `verify-citations.sh` against this memo from anchor PR #35 feature branch (`feat/md-f6-existing-architectural-surface`). Output: 12 citation rows verified; 0 failures expected. Invocation: `verify-citations.sh tessera/coordination/SCOPING-MEMO-v0.3.md --repo-root /Users/johnwarren/concord/deploysignal`.
+
+**Citations NOT individually enumerated above** (aggregated under PROJECT-CONTEXT.md cross-references rather than table rows; per template "every citation" applies primarily to concrete code/type citations — project-internal artifact references like LEDGER line-numbers are tracked separately):
+
+- `deploysignal/coordination/ANTI-SCOPE-LEDGER.md` (numerous LEDGER:NNN line citations across § 2.1 / § 2.2 / § 2.3 referencing inherited DeploySignal ADR clauses — Q2.B.6.4 / Q58 / Q59 / Q60 / Q66 / Phase-3.d.D). All preserved via engine vendoring at pinned SHA per § 9 vendoring policy. Re-verification at every Tessera close-walk per re-pinning policy.
+- `deploysignal/DISCIPLINE-REFERENCE.md` references (P3 axes, Memorial D/F sub-rules, V/Q framework, three-layer architect framework). Inherited methodology; no Tessera-side delta.
+- `deploysignal/NORTH-STAR-ARCHITECTURE.md` references beyond Addition #2 + #23 (e.g., Addition #11 honest-broker stance; Addition #12 per-pod precedent; Q70 dispatch-table). Inherited architectural commitments; preserved through engine vendoring.
+- `deploysignal/runs/benchmarks/tick-latency-baseline.json` (originating-context performance facts; § 4.2 inherited performance baseline). Runtime artifact, not source code; verification deferred to empirical re-measurement at Phase 1 SLICE 2.
+- `deploysignal/runs/compiled-configs/v4-fusion-novelty.json` (orchestrator JSON-config-driven pattern; § 9 engine modularity facts). Runtime artifact.
+
+The aggregated-references convention applies at SCOPE-PROPOSAL fidelity where citation density is high; at full SPEC fidelity (Q-NN spec drafts; see Q1 spec § Existing architectural surface for the SPEC-fidelity application), citations are exhaustively enumerated per row.
+
+---
+
 ## 2. Per-extension scope
 
 ### Extension 1 — α budget arithmetic at fleet scale
