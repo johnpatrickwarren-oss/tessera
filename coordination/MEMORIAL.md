@@ -79,3 +79,13 @@ Candidate cross-project contributions from this overnight scoping cycle (await s
 ---
 
 _Memorial bootstrap: 2026-05-16 (Mode 2 retrofit). Inherited active Memorials from DeploySignal SHA `5a72371`; Tessera-specific lineage starts at this entry. Memorial Updater appends after R01 close-walk._
+
+---
+
+## R01 — manual coordination capture (2026-05-16)
+
+_Memorial entries below are operator-written placeholders pending the MEMORIAL-UPDATER pass after the REVIEWER cold audit. Per role discipline, the operator does not pre-empt the Memorial Updater's full accretion — these entries record only what is incontrovertible (the IMPLEMENTER session crash) so the audit trail is unbroken._
+
+VIOLATION: halt-discipline | R01 IMPLEMENTER session terminated with three consecutive API 500 errors at the coordination step (commit + artifact + route phase); did NOT write a DIAGNOSTIC, did NOT flip STATUS to ESCALATE, did NOT route — the session simply died. Operator manually captured the work product (~32 vendored files + 3 new tests + 4 config files) to commit `4b56831` so the REVIEWER could audit it cold. Root-cause hypothesis: per-session prompt weight exceeded context window once the session accumulated all file reads + writes + final-step coordination content; cf. CLAUDE.md split infrastructure landed same day (commit `c8f8ba7`) which targets this failure mode. | R01 | IMPLEMENTER
+
+OBS: infrastructure-improvement-from-incident | The R01 crash motivated an infrastructure cycle (per-role CLAUDE.md split + spec audit-sidecar pattern + reinforcement consolidation script) that landed before the manual coordination capture. R01 REVIEWER + MEMORIAL-UPDATER pipeline runs are the first validation of the split discipline in a real cycle. | R01 | OPERATOR
