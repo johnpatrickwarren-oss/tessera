@@ -1,69 +1,61 @@
 CURRENT-ROUND: R01
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
-## Operator decision (John 2026-05-16)
+## Implementer attestation (manual coordination capture)
 
-**Q-J6 dispositioned: option (iv) — Tessera takes priority; DeploySignal Phase E indefinitely deferred.**
+**Attestation SHA: `4b56831`** (`feat(R01): manual capture of IMPLEMENTER output (session crashed at coordination)`).
 
-Rationale (verbatim from John 2026-05-16 disposition):
-- No one is waiting for DeploySignal to ship; DS is a technical artifact for resume building.
-- Parallel tracks not needed (no concrete DS Phase E work to parallelize).
-- Tessera is a separate product using the same statistical engine to perform a different job at different abstraction levels.
+The R01 IMPLEMENTER session crashed at the coordination step with three consecutive API 500 errors. Work product was complete in the working tree but never committed by the session and never routed to REVIEWER. Operator manually captured the implementer output to git so the cold-eye REVIEWER can audit it (per `Q-R01-SPEC.md` § Acceptance criteria).
 
-Implication: all engineering capacity for the foreseeable future goes to Tessera. DS continues operational maintenance only (security patches, critical bugs); no Phase E roadmap.
-
-**Q-J1..Q-J5 default-accepted** (no amendment requested at first review). Architect-pre-prediction picks per `ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md` stand as-is.
-
-**Q1 v0.2 default-accepted** (no amendment requested at first review).
-
-**Anchor PR #34 / #35 status:** unmerged at pipeline-fire time. Implementer uses `~/concord/anchor/feat/md-f6-existing-architectural-surface` directly if verify-citations.sh is needed; document the branch-dependency in R01 close-walk artifact. Both PRs are non-blocking for SLICE 1 implementation.
+**Operator note:** the manual capture was done specifically so the REVIEWER reads cold and produces findings independent of any post-hoc fixes. Do not "rescue" failing ACs before the audit; their failure is the data we want.
 
 ## Inputs for next role
 
-The Implementer reads:
+The REVIEWER reads (cold; do NOT read diagnostics/, logs, or .prompt-*.md):
 
-- `coordination/specs/Q-R01-SPEC.md` — full SPEC fidelity per anchor `templates/Q-NN-SPEC-TEMPLATE.md`. Vendor engine subset from DeploySignal main @ SHA `5a72371` + 3 schema additions (shard_id cell dimension; per_shard_cells field; warm_start confidence enum). 10 ACs; ~32 vendored files + 4 project-config files + 3 new test files; ~6h focused / 1-2 days wall-clock.
-- `coordination/reviews/REVIEWER-REPORT-R01-pre-implementation.md` — pre-implementation Reviewer audit of the spec (1 FAIL + 5 GAP all AMENDED at spec v0.2). No outstanding Reviewer findings against the spec.
-- `coordination/SCOPING-MEMO-v0.3.md` — canonical Tessera scope; § 1.6 Existing architectural surface (12 grep-evidenced citations at SHA `5a72371`) is the inherited-engine anchor.
-- `coordination/ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md` — Q-J1..Q-J5 architect-pre-prediction picks (subject to John override on first review).
-- `coordination/ARCHITECT-REPLY-Q-01-DISPOSITION.md` — Memorial D state 22V/8C stamp; Reviewer finding dispositions.
-- `coordination/PROJECT-CONTEXT.md` — project-relationship diagram; Memorial D state lineage; conventions.
+- `coordination/PRD.md`
+- `coordination/specs/Q-R01-SPEC.md` — spec proper (Implementer's reference; the contract being audited).
+- `coordination/specs/Q-R01-SPEC-AUDIT.md` — Architect ceremony sidecar (REVIEWER-only; loaded for completeness of audit context — discipline output, decision rationale, amendment table).
+- `coordination/VENDORING-MANIFEST.md` — Implementer-written; verify against AC-5.
+- `engine/**/*.ts` — vendored + delta files (verify headers, byte-identity for at-pin files, schema deltas in `engine/types/config.ts`).
+- `test/**/*.ts` — three new SLICE 1 tests + two vendored smoke tests.
+- `tools/vendor-from-deploysignal.sh` — vendoring script (AC-8).
+- `package.json`, `tsconfig.json`, `tsconfig.test.json` — project config (AC-9).
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` — Reviewer section (check first per role discipline).
 
-## Escalation items
+## Known issues to find or confirm (do not pre-empt the audit)
 
-(none — all 5 gating items resolved at John 2026-05-16 disposition above; STATUS flipped to READY)
+The operator flagged these in the Implementer-output commit message so the audit trail records that they were known at routing time — but the REVIEWER must re-derive them independently as a smoke test of cold-eye discipline. If the cold audit MISSES any of these, that is itself a data point about the per-role-split CLAUDE.md validation.
 
-## Routing notes
+1. **AC-6 likely FAIL.** `npm run typecheck` exits 2: `tsconfig.test.json(3,3): error TS5103: Invalid value for '--ignoreDeprecations'`. Root cause is `"ignoreDeprecations": "6.0"` in `tsconfig.json`. Verify and surface as MAJOR (blocks AC-10 too via `pretest`).
+2. **AC-10 likely FAIL.** `npm test` fails because `pretest` runs the failing tsc; the smoke test never executes.
+3. **Anti-scope drift (4 items vendored outside the spec's surface):**
+   - `engine/detectors/_q72-trace.ts` (SAS-7 explicit).
+   - `engine/types/agent.ts` (SAS-8 explicit).
+   - `engine/l0/schema-continuity.ts` (spec § Skipped at SLICE 1).
+   - `engine/o0/{lifecycle-events,reversibility-source,reversibility-translator}.ts` (spec § Skipped at SLICE 1).
+   Assess each: does the spec § Anti-scope language make this CRITICAL (correctness/scope violation), MAJOR (ship-blocker on the round's contract), or MINOR (delta that needs removal-or-justification)? Use file:line evidence.
 
-**Pipeline run procedure (when STATUS becomes READY):**
+## Routing
 
 ```
 cd ~/concord/tessera
-./run-pipeline.sh --round R01 --start-at IMPLEMENTER --tier full
+./run-pipeline.sh --round R01 --start-at REVIEWER --tier full
 ```
 
-`--start-at IMPLEMENTER` is correct because:
-- Architect work for R01 is **already complete** (Q-R01-SPEC.md emitted; 10 ACs; v0.2 post-Reviewer-amendment).
-- Pre-implementation Reviewer pass already complete (REVIEWER-REPORT-R01-pre-implementation.md; 1 FAIL + 5 GAP all AMENDED).
-- Pipeline IMPLEMENTER → reads spec → invokes superpowers:writing-plans + superpowers:using-git-worktrees + superpowers:test-driven-development + superpowers:verification-before-completion → emits implementation diff + close-walk artifact.
-- Pipeline REVIEWER → cold-context audit of implementation against spec; emits `coordination/reviews/REVIEWER-REPORT-R01.md`. (Note: pre-implementation Reviewer pass at `REVIEWER-REPORT-R01-pre-implementation.md` is a SEPARATE artifact; do not confuse.)
-- Pipeline MEMORIAL-UPDATER → updates `coordination/MEMORIAL.md` + `~/.claude/CROSS-PROJECT-MEMORIAL.md` with R01 reinforcement learnings.
+`--start-at REVIEWER` skips ARCHITECT + IMPLEMENTER. The REVIEWER stage runs; on completion the MEMORIAL-UPDATER stage runs and produces a full Memorial accretion (this round had a halt-discipline failure — the Implementer session crashed instead of writing a DIAGNOSTIC + escalation — and the Memorial Updater records that as a VIOLATION).
 
-**On escalation during pipeline run:** any role that hits a halt-condition writes a `coordination/diagnostics/DIAGNOSTIC-R01-<topic>.md` and updates this NEXT-ROLE.md with STATUS: ESCALATE + new escalation item. Pipeline exits with code 2. Resume via `./run-pipeline.sh --round R01 --start-at <ROLE> --tier full` after John resolves.
+## Escalation items
 
-**State after R01 close (architect-pre-prediction; clean-close ~70%):**
-
-- `coordination/specs/Q-R02-SPEC.md` emitted by Architect for Phase 1 SLICE 2 (per-shard residual schema + warm-start cold-start mechanism + empirical P6 storage profile via PR-F5).
-- NEXT-ROLE rolled to R02 ARCHITECT (or R02 IMPLEMENTER if architect-skip per --tier audit).
-- Memorial D state stamp re-evaluated (no-increment vs increment-with-reason at R01 close).
+(none — all 5 gating items from initial R01 dispositioned at John 2026-05-16; manual coordination capture closes the IMPLEMENTER-stage gap)
 
 ## Update history
 
 | Date | Event |
 |---|---|
-| 2026-05-16 | Mode 2 retrofit. Tessera scaffolded with anchor pipeline structure; NEXT-ROLE.md initialized with R01 IMPLEMENTER STATUS: ESCALATE (5 gating items). |
-
----
-
-_State machine per anchor `integrations/superpowers-claude-code/README.md` § Mode 2 automated pipeline. Status values: READY (next role can fire) | ESCALATE (one or more escalation items require resolution) | RUNNING (pipeline mid-execution) | DONE (round complete; ready for next round). Pipeline reads this file to determine fire behavior._
+| 2026-05-16 | Mode 2 retrofit. R01 IMPLEMENTER initially STATUS: ESCALATE (5 gating items). |
+| 2026-05-16 | All 5 gating items dispositioned by John; STATUS → READY. |
+| 2026-05-16 | R01 IMPLEMENTER pipeline run: session crashed with API 500s at coordination step after ~14 min on attempt 1; retries failed identically. STATUS → BLOCKED. |
+| 2026-05-16 | Infrastructure: CLAUDE.md split per-role + spec audit-sidecar pattern + reinforcement consolidation script landed (commit `c8f8ba7`). Targets the context-pressure mode that caused the crash. |
+| 2026-05-16 | Manual coordination capture: R01 IMPLEMENTER output committed as `4b56831`. STATUS → READY for REVIEWER. |
