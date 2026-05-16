@@ -122,3 +122,53 @@ with a clear commit message.
 # Example:
 # # REINFORCED 2026-05-08 — Implementer must run failing test BEFORE writing
 # #   implementation. Tests written after passing-implementation are self-confirming.
+
+# REINFORCED 2026-05-16 — Compilation-dependency justification does not authorize
+#   silent vendoring of anti-scope files. When a spec explicitly mandates "halt and
+#   route back" on encountering a structural dependency (e.g., OQ-3 for _q72-trace.ts,
+#   SAS-7, SAS-8), the Implementer must write DIAGNOSTIC-RNN-[topic].md + STATUS:
+#   ESCALATE even when the dependency is a compile-time-only type import. The Architect
+#   decides whether to approve, stub, or strip the import. Documenting the dependency
+#   in a test comment ("compilation dependency at-pin") is not a substitute for a
+#   DIAGNOSTIC file. DIAGNOSTIC is required at point-of-encounter — not deferred to the
+#   coordination step. Detected R01: 6 anti-scope files vendored; REVIEWER OBS-2 confirms
+#   awareness at test-write time; no DIAGNOSTIC files produced.
+
+# REINFORCED 2026-05-16 — Spec-internal contradictions (two spec sections that prescribe
+#   mutually incompatible implementation choices) are HALT condition (c): "a requirement
+#   cannot be expressed as a test / implementation without a design decision." All three
+#   sub-types require DIAGNOSTIC + ESCALATE: (a) resolved-decision-vs-pseudocode (Q1.1
+#   CJS vs §Implementation surface ESM); (b) mechanism-vs-test (§Mechanism "defer typedef
+#   extraction" vs §Tests importing named typedefs); (c) field-name (§Mechanism `confidence`
+#   vs §Tests `cell_confidence`). "Only one reasonable choice exists" does not bypass the
+#   discipline — auditability requires the contradiction to be surfaced regardless of
+#   resolution difficulty. Detected R01: 3 contradictions silently absorbed; each surfaced
+#   as a separate REVIEWER finding.
+
+# REINFORCED 2026-05-16 — Spec prescriptions in §Implementation surface (e.g., "script
+#   verifies via grep that the source SHA matches the expected pin") are binding for the
+#   named implementation artifact — equivalent to ACs, not optional suggestions. When a
+#   spec prescription for a tool/script is not achievable or is dropped for pragmatic
+#   reasons, surface as a spec/reality conflict via DIAGNOSTIC + bounded question. The
+#   Architect's explicit prescription is an architectural commitment. Detected R01:
+#   tools/vendor-from-deploysignal.sh does not verify source SHA (embeds PINNED_SHA in
+#   header only); spec prescription at Q-R01-SPEC.md:132 not met; REVIEWER MINOR-4.
+
+# REINFORCED 2026-05-16 — When an AC says "enumerates every vendored file," resolve the
+#   coverage scope for ALL files the vendoring workflow touches — not just the primary
+#   target directory. Files in test/ or tools/ with provenance headers are "vendored files"
+#   under that AC. If coverage scope is ambiguous, surface as HALT condition (c) before
+#   implementing. Detected R01: 2 vendored smoke-test files (test/betting-e-process-class-
+#   dispatch.test.ts, test/ville-preservation-per-profile.test.ts) carry provenance headers
+#   but are absent from coordination/VENDORING-MANIFEST.md; REVIEWER MAJOR-4.
+
+# REINFORCED 2026-05-16 — When vendoring a file prescribed as a smoke-test or regression-
+#   baseline (per spec Q1.4 or equivalent), verify the test can actually run in the target
+#   environment before committing it. If the test has hard-coded dependencies the target
+#   environment does not carry (e.g., tools/calibrate.js), it must be either (a) flagged
+#   as UNRUNNABLE with a DIAGNOSTIC explaining the missing dependency and recommending
+#   deactivation or future reactivation, or (b) explicitly deferred per the anti-scope entry.
+#   Silently committing a permanently-failing test under the active test root is hostile to
+#   future operators who see unexplained failures on every test run. Detected R01:
+#   test/ville-preservation-per-profile.test.js shells out to tools/calibrate.js; 5 sub-tests
+#   fail with "Cannot find module"; no diagnostic or comment; REVIEWER MINOR-7.
