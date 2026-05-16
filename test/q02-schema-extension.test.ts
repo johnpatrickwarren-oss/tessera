@@ -1,4 +1,4 @@
-// test/q02-schema-extension.test.ts — R02 AC-1 through AC-5
+// test/q02-schema-extension.test.ts — R02 AC-1 through AC-5 (R03-updated for MINOR-1/3/5 closures)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type {
@@ -7,17 +7,24 @@ import type {
   PerShardCell,
   PerShardResidual,
 } from '../engine/types/config';
+import { makePerShardCell, makeCellKey } from './_substrate/factories';
 
 test('R02 AC-1 — PerShardResidual.n_samples is mandatory and typed number', () => {
-  // Type-level: omitting n_samples must fail tsc. The runtime assertion confirms the
-  // field shape at the instantiation site.
   const r: PerShardResidual = { n_samples: 42, confidence: 'warm_start' };
   assert.strictEqual(r.n_samples, 42);
   assert.strictEqual(typeof r.n_samples, 'number');
 });
 
+test('R02 AC-1 sibling — PerShardResidual literal omitting n_samples fails tsc (closes R02 MINOR-1)', () => {
+  // @ts-expect-error — n_samples is mandatory; omission must fail tsc.
+  const _missing: PerShardResidual = { confidence: 'warm_start' };
+  void _missing;
+  // Load-bearing check is the @ts-expect-error directive: if n_samples were made
+  // optional, tsc would error "Unused @ts-expect-error directive."
+  assert.ok(true);
+});
+
 test('R02 AC-2 — PerShardResidual sparse encoding by confidence tier (warm_start)', () => {
-  // Warm-start convention: mean_delta present; mean_vector + covariance absent.
   const warm: PerShardResidual = {
     n_samples: 25,
     confidence: 'warm_start',
@@ -32,31 +39,48 @@ test('R02 AC-2 — PerShardResidual sparse encoding by confidence tier (warm_sta
   assert.strictEqual(warm.last_observed_at, 1747987200000);
 });
 
-test('R02 AC-3 — PerShardCell carries shard_id + key + residual', () => {
-  // Delta 6: PerShardCell mirrors BaselineCellEntry shape with `key: CellKey`.
-  const cell: PerShardCell = {
+test('R02 AC-3 — PerShardCell carries shard_id + key + residual (R03: factory call)', () => {
+  // R03 closes R02 MINOR-3: factory call instead of `as any` cast.
+  const cell: PerShardCell = makePerShardCell({
     shard_id: 'shard-42',
-    key: { hour_of_day: 14, day_of_week: 3 } as any,
+    key: makeCellKey({ hour_of_day: 14, day_of_week: 3 }),
     residual: { n_samples: 100, confidence: 'strict', mean_vector: [1.0, 2.0] },
-  };
+  });
   assert.strictEqual(cell.shard_id, 'shard-42');
   assert.strictEqual(cell.residual.n_samples, 100);
-  // `key` field must be present (Delta 6 restructure binding).
   assert.notStrictEqual(cell.key, undefined);
 });
 
-test('R02 AC-4 — CellDimension typedef canonically references all 7 members', () => {
-  // Extraction (Delta 7) preserves the inline-union literal value-by-value.
-  const all: CellDimension[] = [
-    'hour_of_day', 'day_of_week', 'workload_class',
-    'tenant_slice', 'tenant_tier', 'region', 'shard_id',
-  ];
-  assert.strictEqual(all.length, 7);
-  assert.strictEqual(all.includes('shard_id'), true);
+// R03 closes R02 MINOR-5 — bidirectional cardinality binding.
+// Member removal: any key dropped from the literal → "Property 'X' does not exist on type ...".
+// Member addition: any new CellDimension/CellConfidence member without a corresponding
+// key here → "Property 'newMember' is missing in type ... but required in type ...".
+const CELL_DIMENSION_EXHAUSTIVE: Record<CellDimension, true> = {
+  hour_of_day: true,
+  day_of_week: true,
+  workload_class: true,
+  tenant_slice: true,
+  tenant_tier: true,
+  region: true,
+  shard_id: true,
+};
+
+test('R02 AC-4 — CellDimension typedef is exhaustively bound to 7 members', () => {
+  const members = Object.keys(CELL_DIMENSION_EXHAUSTIVE) as CellDimension[];
+  assert.strictEqual(members.length, 7);
+  assert.strictEqual(members.includes('shard_id'), true);
 });
 
-test('R02 AC-5 — CellConfidence typedef canonically references all 5 members', () => {
-  const all: CellConfidence[] = ['strict', 'pooled', 'aggregate', 'none', 'warm_start'];
-  assert.strictEqual(all.length, 5);
-  assert.strictEqual(all.includes('warm_start'), true);
+const CELL_CONFIDENCE_EXHAUSTIVE: Record<CellConfidence, true> = {
+  strict: true,
+  pooled: true,
+  aggregate: true,
+  none: true,
+  warm_start: true,
+};
+
+test('R02 AC-5 — CellConfidence typedef is exhaustively bound to 5 members', () => {
+  const members = Object.keys(CELL_CONFIDENCE_EXHAUSTIVE) as CellConfidence[];
+  assert.strictEqual(members.length, 5);
+  assert.strictEqual(members.includes('warm_start'), true);
 });
