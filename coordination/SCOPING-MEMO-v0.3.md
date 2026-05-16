@@ -3,7 +3,7 @@
 _From: Architect. To: John (decision-routing). Routed via: TPM._
 _Date: 2026-05-15._
 _Type: **SCOPE-PROPOSAL v0.3** — standalone Tessera-product framing replacing v0.1 + v0.2 (which scoped the same architectural extensions under a DeploySignal-extension framing now superseded). Per anchor `templates/Q-NN-SPEC-TEMPLATE.md` frame at reduced fidelity._
-_Foundation: project-reframe disposition (John 2026-05-15, post-disposition same session); engine-vendoring strategy (vendor-first; extract-to-npm at Phase 2); DeploySignal engine state pinned at SHA `5a72371` (current main); anchor latest skills 13-15 + hybrid Reviewer design (commits `c2a24dc` + `9aec8d7`); audit-trail predecessors v0.1 + v0.2 + Reviewer report + ARCHITECT-REPLY disposition all preserved in `tessera/coordination/` for audit (see PROJECT-CONTEXT.md)._
+_Foundation: project-reframe disposition (John 2026-05-15, post-disposition same session); engine-vendoring strategy (vendor-first; extract-to-npm at Phase 2); DeploySignal engine state pinned at SHA `5a72371` (current main); anchor latest skills 13-15 + hybrid Reviewer design (commits `c2a24dc` + `9aec8d7`); audit-trail predecessors v0.1 + v0.2 of fleet-mode-scoping memo + Reviewer report + initial disposition deleted 2026-05-16 per John cleanup disposition (substantive content subsumed into this v0.3 + framing-history preserved in `PROJECT-CONTEXT.md`; literal text in git history at commits `884c08e`, `e4a956a`, `aa4fa97`)._
 _Sequencing: Tessera Phase 1 (per-shard infrastructure: Extensions 1 + 2 bundled) + Tessera Phase 2 (cross-shard correlation: Extension 3) — decoupled from DeploySignal's Phase E (production deployment hardening). See § 5 Q-J6._
 
 ---
@@ -518,15 +518,11 @@ The publisher-vs-consumer decision for DeploySignal at extract-time is a future 
 
 ## 10. Audit-trail predecessors
 
-This v0.3 memo is the standalone canonical Tessera scoping artifact. Predecessor artifacts in `tessera/coordination/` are preserved for audit-trail integrity:
+This v0.3 memo is the standalone canonical Tessera scoping artifact. **Predecessor artifacts (v0.1 + v0.2 of fleet-mode-scoping memo + Reviewer report + initial disposition) were deleted 2026-05-16 per John cleanup disposition** — they added no unique substantive content beyond what's preserved in this v0.3 memo + `ARCHITECT-REPLY-Q-01-DISPOSITION.md` + `PROJECT-CONTEXT.md`. The framing-history audit trail lives in `PROJECT-CONTEXT.md` § Audit-trail history (table with original framing + resolution + Memorial D state lineage). Literal text of deleted artifacts is preserved in git history at commits `884c08e` (scaffold), `e4a956a` (v0.3 emit), `aa4fa97` (Q1 v0.1).
 
-- **`ARCHITECT-MEMO-fleet-mode-scoping-v0.1.md`** — original scoping (2026-05-15 morning); DeploySignal-extension framing; Phase F + G of DeploySignal.
-- **`REVIEWER-REPORT-fleet-mode-scoping-v0.1.md`** — cold-context Reviewer audit of v0.1; 2 FAIL (F1 existing-architecture-coverage; F2 D4 stance conflict) + 8 GAP + 6 PASS.
-- **`ARCHITECT-MEMO-fleet-mode-scoping-v0.2.md`** — post-Reviewer amendment; 10/10 findings addressed; anchor skills 14/15 + hybrid Reviewer design incorporated; still DeploySignal-extension framing.
-- **`ARCHITECT-REPLY-fleet-mode-scoping-v0.1-DISPOSITION.md`** — architect disposition closing v0.1 → v0.2 cycle; Memorial D state 20V/8C → 21V/8C.
-- **`PROJECT-CONTEXT.md`** — transitional context note explaining the v0.1/v0.2 framing-history pending this v0.3 product reframe; project-relationship diagram + conventions.
+- **`PROJECT-CONTEXT.md`** — context note explaining the v0.1/v0.2 framing-history + Memorial D state lineage table + project-relationship diagram + conventions.
 
-v0.3's relationship to predecessors: **standalone replacement** under Tessera-product framing; v0.1/v0.2 architectural commitments (recommended approaches, anti-scope clauses, Memorial D candidates, pair-review triggers, Open Qs) carry forward unchanged in substance, reframed in language. The Reviewer report's 2 FAIL + 8 GAP findings remain dispositioned-and-amended (per v0.2 + this v0.3) — re-amendment not required at v0.3.
+v0.3's relationship to (now-deleted) predecessors: **standalone replacement** under Tessera-product framing; v0.1/v0.2 architectural commitments (recommended approaches, anti-scope clauses, Memorial D candidates, pair-review triggers, Open Qs) carry forward unchanged in substance, reframed in language. The Reviewer report's 2 FAIL + 8 GAP findings are addressed throughout this v0.3 — F1 (missed Addition #25/#26) addressed in § 2.3 (Extension 3 builds on Addition #25/#26 explicitly); F2 (D4 conflict) addressed in § 2.3 (Extension 3 (c) framed as event-conditional correlational attribution) + A16 (Addition #26 D4 preservation); G1-G8 subsumed into v0.3 framing and § 8 discipline-archive observations.
 
 ---
 

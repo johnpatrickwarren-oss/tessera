@@ -128,7 +128,7 @@ None of these are architecturally derivable — they are John-the-Product-Manage
 
 ## Memorial D state delta from this disposition
 
-Pre-v0.3 (and pre-this-disposition): **21V/8C** (per ARCHITECT-REPLY-v0.1-DISPOSITION § Memorial D state evolution).
+Pre-v0.3 (and pre-this-disposition): **21V/8C** (lineage preserved in `PROJECT-CONTEXT.md` § Memorial D state lineage table; literal text of the predecessor v0.1-DISPOSITION at commit `aa4fa97` in git history).
 
 Post-this-PRE-DISPOSITION: **21V/8C unchanged.** Architect-pre-prediction picks under overnight authority are not Memorial D events themselves (they don't surface new architect-grilling-discipline gaps; they exercise existing disciplines). The Memorial D class would increment if PR-F1 / PR-F2 / PR-F4 / PR-F5 / PR-F6 / PR-F7 pair-review evidence surfaces architect-pre-prediction violations at empirical-evidence time; that's a future-cycle accounting, not pre-disposition-emit.
 

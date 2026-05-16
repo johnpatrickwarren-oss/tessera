@@ -6,18 +6,30 @@ _Authored: 2026-05-15. Transitional context note explaining the audit trail of a
 
 Architect + Reviewer + Disposition artifacts for the Tessera scoping cycle. Per [Anchor](https://github.com/johnpatrickwarren-oss/anchor) PROJECT-ROLES discipline, coordination artifacts live under each product repo's `coordination/` directory.
 
-## Audit-trail history (2026-05-15)
+## Audit-trail history (2026-05-15 → 2026-05-16)
 
-The four scoping artifacts in this directory were originally authored under a working assumption that the fleet-mode architecture would land as **Phase F + Phase G of DeploySignal main**. The Tessera-as-separate-product reframing landed mid-session (post-disposition, John 2026-05-15) and reclassifies them:
+Four scoping artifacts existed earlier in this directory under a working assumption that the fleet-mode architecture would land as **Phase F + Phase G of DeploySignal main**. The Tessera-as-separate-product reframing landed mid-session (John 2026-05-15) and superseded them. **Deleted 2026-05-16 post-John-disposition** (cleanup signal; PROJECT-CONTEXT.md captures the substantive history below; git history preserves the literal text at commits `884c08e`, `e4a956a`, `aa4fa97`):
 
-| Artifact | Original framing | Tessera-product framing (pending v0.3) |
+| Deleted artifact | Original framing | Resolution |
 |---|---|---|
-| `ARCHITECT-MEMO-fleet-mode-scoping-v0.1.md` | Phase F + G of DeploySignal | Tessera Phase 1 + 2 founding architecture |
-| `REVIEWER-REPORT-fleet-mode-scoping-v0.1.md` | Audit of v0.1 (single-Reviewer cold-context) | Audit preserved; product reframing is post-Reviewer scope shift |
-| `ARCHITECT-MEMO-fleet-mode-scoping-v0.2.md` | Phase F + G amendment post-Reviewer (10/10 findings addressed) | Tessera Phase 1 + 2 amendment (engine inherited from DeploySignal) |
-| `ARCHITECT-REPLY-fleet-mode-scoping-v0.1-DISPOSITION.md` | Architect disposition closing v0.1 → v0.2 cycle | Disposition preserved; phase-letter reframe handled at v0.3 |
+| `ARCHITECT-MEMO-fleet-mode-scoping-v0.1.md` | Phase F + G of DeploySignal | Substantively subsumed into `SCOPING-MEMO-v0.3.md` (standalone Tessera-product framing). |
+| `REVIEWER-REPORT-fleet-mode-scoping-v0.1.md` | Cold-context Reviewer audit of v0.1: 2 FAIL + 8 GAP + 6 PASS. F1 = missed Addition #25/#26 existing primitives; F2 = D4 correlational-not-causal stance conflict with v0.1's "causal attribution" framing of Extension 3 (c). | All findings addressed in `SCOPING-MEMO-v0.3.md` § 2.3 Extension 3 (builds on Addition #25/#26 explicitly; reframes (c) as event-conditional correlational attribution; A16 preserves D4); v0.3 § 8 item 10 captures the discipline-archive significance. |
+| `ARCHITECT-MEMO-fleet-mode-scoping-v0.2.md` | Phase F + G amendment post-Reviewer (10/10 findings addressed) | Substantively superseded by `SCOPING-MEMO-v0.3.md` standalone replacement (Q-J6 reframed as cross-project sequencing; Phase letters renumbered Tessera Phase 1 + 2; A17 added; G6 probability bands recalibrated). |
+| `ARCHITECT-REPLY-fleet-mode-scoping-v0.1-DISPOSITION.md` | Architect disposition closing v0.1 → v0.2 cycle. Memorial D state evolution: 20V/8C → 21V/8C; F1+F2 classified as 5th sub-instance of 8th CONFIRMATION class (MD-F6 sub-variant: file-opened-discipline-paired-with-candidate-set-enumeration). | Memorial D lineage continued in `ARCHITECT-REPLY-Q-01-DISPOSITION.md` § Memorial D state evolution (21V/8C → 22V/8C; 8th class extended to 6 sub-instances). Discipline-archive significance preserved across v0.3 + Q1 disposition. |
 
-The artifacts are **preserved as-is** for audit-trail integrity — the discipline-archive significance (Memorial D state 20V/8C → 21V/8C, MD-F6 candidate-set addition, Skill 14 retroactive cross-check observations, Skill 15 forward commitment, hybrid Reviewer pair-review commitment) all carry forward into Tessera regardless of the phase-letter framing.
+### Memorial D state lineage across this cycle
+
+Compressed history of Memorial D evolution during the 2026-05-15 → 2026-05-16 scoping cycle (full text in v0.3 + Q1 disposition):
+
+| Stamp | Cycle event | 8th CONFIRMATION class sub-instances |
+|---|---|---|
+| **20V/8C** | Pre-cycle (inherited from DeploySignal Phase-3.d.D close 2026-05-07) | 4 sub-instances (Q60 V1 LS-1 + Q60 LS-2 + Q64 Phase 4 + Q66 SLICE 1 LS-1 — all DeploySignal lineage) |
+| **21V/8C** | Post v0.1 SCOPING-MEMO → Reviewer F1 (missed Addition #25/#26) + F2 (D4 conflict) | +5th sub-instance: file-opened-discipline-paired-with-candidate-set-enumeration at SCOPE-PROPOSAL fidelity (MD-F6 sub-variant memorialized) |
+| **22V/8C** | Post Q1 spec v0.1 → Reviewer F1 (missed actual `CellDimension`/`CellConfidence` inline-union locations; cited typedefs from memory) | +6th sub-instance: MD-F6 sub-variant at SPEC fidelity (SECOND occurrence in same session; discipline-application-gap pattern is stickier than memorialization) |
+
+**Critical observation surfaced by this lineage:** memorializing MD-F6 between sub-instances 5 and 6 did NOT prevent recurrence — the second violation happened hours after the memorialization. Pattern is stickier than the memorial. **Structural fix (in scope per John 2026-05-16):** ANCHOR-PR-CANDIDATE — add mandatory `## Existing architectural surface (REVIEWER-ANCHOR)` section to anchor `templates/Q-NN-SPEC-TEMPLATE.md` (and to a new `templates/SCOPE-PROPOSAL-TEMPLATE.md`) that forces explicit file:line citation + verbatim snippet for every inherited reference. Memorial entries describe the discipline; template enforcement executes it.
+
+Substantive Reviewer findings + dispositions from the deleted-artifact cycle are addressed in the current canonical state — see `SCOPING-MEMO-v0.3.md` (substantive content of F1+F2+G1-G8 subsumed; full A1-A17 anti-scope; full MD-F1..MD-F6 candidate-set) + `ARCHITECT-REPLY-Q-01-DISPOSITION.md` (full Memorial D evolution table). The deleted-artifact files added no unique substantive content beyond what's preserved.
 
 ## Pending: Tessera v0.3 scoping memo
 

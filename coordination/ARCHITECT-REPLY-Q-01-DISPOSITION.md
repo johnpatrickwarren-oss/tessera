@@ -88,6 +88,8 @@ Q1 v0.2 ACs unchanged from v0.1 except AC-3 (G2 reword) and AC-7 (G3 broaden). A
 
 Architect output flows to TPM. TPM packages Q1 v0.2 + Q1-DISPOSITION + REVIEWER-REPORT-Q-01 + SCOPING-MEMO-v0.3 + ARCHITECT-REPLY-v0.3-PRE-DISPOSITION + project context (PROJECT-CONTEXT.md) for John's first review.
 
+(Note: the audit-trail predecessor files referenced by earlier drafts of this disposition — `ARCHITECT-MEMO-fleet-mode-scoping-v0.1.md` + `REVIEWER-REPORT-fleet-mode-scoping-v0.1.md` + `ARCHITECT-MEMO-fleet-mode-scoping-v0.2.md` + `ARCHITECT-REPLY-fleet-mode-scoping-v0.1-DISPOSITION.md` — were deleted 2026-05-16 per John cleanup disposition. Substantive findings and Memorial D state lineage preserved in PROJECT-CONTEXT.md + this disposition + SCOPING-MEMO-v0.3.)
+
 **John's first-review surface:**
 1. **SCOPING-MEMO-v0.3** — confirm Tessera-product framing + Phase 1 + 2 commitment.
 2. **ARCHITECT-REPLY-v0.3-PRE-DISPOSITION** — confirm/amend Q-J1..Q-J5 architect-pre-prediction picks; **DISPOSITION Q-J6** (escalated; highest-uncertainty strategic decision).
