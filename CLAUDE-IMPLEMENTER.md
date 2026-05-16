@@ -172,3 +172,28 @@ with a clear commit message.
 #   future operators who see unexplained failures on every test run. Detected R01:
 #   test/ville-preservation-per-profile.test.js shells out to tools/calibrate.js; 5 sub-tests
 #   fail with "Cannot find module"; no diagnostic or comment; REVIEWER MINOR-7.
+
+# REINFORCED 2026-05-16 — When a spec gives a two-branch conditional disposition (e.g.,
+#   "do A OR, if A is non-mechanical, do B instead"), both branches must be evaluated and
+#   one honored completely. When the actual state diverges from the spec's prediction, follow
+#   the spec's explicit directive for the divergence case — not the pseudocode written for
+#   the nominal case. "The spec pseudocode showed it this way" does not apply when the spec's
+#   own text explicitly redirects based on the real shape. Specifically: if spec note N says
+#   "if actual shape differs from prediction, adjust the test literal to satisfy the real shape
+#   rather than retaining `as any`," and the actual shape does differ, strip the cast and update
+#   the literal — or, if the strip is non-mechanical within the bounded budget, add the exact
+#   deferral comment the spec prescribed (not an implicit fallback to pseudocode). Detected R02:
+#   CellKey actual shape `Record<string, …>` diverged from spec prediction; Implementer retained
+#   `as any` citing "spec pseudocode" instead of following spec note 4's explicit divergence
+#   directive; deferral comment also omitted (REVIEWER MINOR-3).
+
+# REINFORCED 2026-05-16 — When updating a test as a mechanical consequence of a spec delta,
+#   restrict changes to the minimum delta required. Do not widen type assertions or casts
+#   beyond the spec's explicit instructions. Widening `as Pick<CompiledConfig, 'per_shard_cells'>`
+#   to `as CompiledConfig` suppresses tsc's required-field checks for the broader type's
+#   mandatory fields (version, compiler_version, compiled_at, baseline_ref, alpha_budget),
+#   masking future CompiledConfig shape regressions that the narrower form would have caught.
+#   If spec pseudocode shows a wider cast form but the existing code uses a narrower, more
+#   honest form, prefer the narrower form unless the spec explicitly justifies the widening.
+#   Detected R02: Delta 8 required PerShardCell shape change + n_samples; cast widening was
+#   incidental, not required by spec text (REVIEWER MINOR-4).
