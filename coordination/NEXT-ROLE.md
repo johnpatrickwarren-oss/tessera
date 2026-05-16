@@ -44,7 +44,7 @@ Pre-R04 baseline per R03 Reviewer-verified at HEAD `e698c20` (no code changes th
 - grep -n "^import" engine/per-shard/welford.ts → 0 matches (zero inherited imports; verified pre-commit)
 
 ## Chore commit attestation
-Attested SHA: (updated after chore commit below)
+Attested SHA: 2b7995b
 
 ## Routing notes
 - Tier: full (A2 + A4 + A7; see spec preamble and audit sidecar)
