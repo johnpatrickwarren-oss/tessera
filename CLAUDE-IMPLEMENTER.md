@@ -207,3 +207,15 @@ with a clear commit message.
 #   A Reviewer running the same commands independently will surface the discrepancy as a MINOR.
 #   Detected R03: Implementer attested "pass 16 / fail 0" for four R01/R02 test files; actual
 #   observed count is 15/0 (q01-vendoring-coverage = 3 tests); REVIEWER MINOR-4.
+
+# REINFORCED 2026-05-16 — When writing a MEMORIAL entry that names a specific tactical
+#   implementation choice (e.g., "selected top-level import for idiomatic consistency," "used
+#   form A over form B"), verify that stated choice against the committed artifact BEFORE
+#   finalizing the MEMORIAL entry and routing to Reviewer. Read the relevant file line or run
+#   a targeted grep to confirm the committed form matches the stated choice. A MEMORIAL entry
+#   describing a tactical choice that contradicts the committed code is an attestation failure
+#   even when the functional outcome is correct — the Reviewer's independent code-read will
+#   surface the discrepancy as a MINOR. The R03 MINOR-4 reinforcement covers count-form accuracy;
+#   this covers narrative-form tactical-choice accuracy. Detected R05: MEMORIAL stated "top-level
+#   import (selected for idiomatic consistency)"; committed code at test/q05:251 uses dynamic
+#   `await import(...)` (REVIEWER MINOR-3).

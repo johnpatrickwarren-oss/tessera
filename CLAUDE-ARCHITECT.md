@@ -142,3 +142,14 @@ All unresolved decisions → open questions in the spec.
 #   Reviewer will independently run the files and any discrepancy will surface as a MINOR. Detected
 #   R03: AC-14 stated q01-vendoring-coverage = 4 (actual = 3); total 16 (actual = 15); REVIEWER-
 #   REPORT-R02.md (read at spec time) contained 9/0 for those three files (REVIEWER MINOR-4).
+
+# REINFORCED 2026-05-16 — When writing the Component inventory, the AC-range claim in each row
+#   ("binds AC-N through AC-M + AC-19") MUST be cross-checked against (a) the per-file pseudocode
+#   docstring comment and (b) the P3 ten-axis Coverage row before grilling sign-off. If any of the
+#   three sites disagrees on the count, update the narrative before emitting. The cross-section
+#   consistency pass (which checks resolved-decision tokens and naming conventions across spec
+#   sections) is NOT a substitute for this explicit arithmetic cross-check. Detected R05: Component
+#   inventory:80 said "AC-1 through AC-11" when per-file pseudocode (line 321) and P3 Coverage
+#   (line 715) both said "AC-1 through AC-13." In-spec arithmetic drift caught only by Reviewer
+#   cold-read (REVIEWER MINOR-1). 2nd tessera occurrence of narrative-vs-pseudocode count drift
+#   (first: R03 MINOR-4).

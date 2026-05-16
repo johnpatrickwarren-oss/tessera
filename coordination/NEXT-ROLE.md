@@ -1,53 +1,35 @@
 CURRENT-ROUND: R05
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision — R06 Architect)
+STATUS: ROUND-COMPLETE
 
 ## Inputs for next role
 - Branch: main
-- Attestation SHA: 485ce36 (HEAD at chore commit: chore(R05): route to REVIEWER — NEXT-ROLE.md + MEMORIAL.md)
+- HEAD at Reviewer routing: same as Implementer attestation HEAD `8ad0fb2` (Reviewer did not modify code/test/spec/coordination files except this NEXT-ROLE.md update + appending MEMORIAL.md + writing REVIEWER-REPORT-R05.md).
 - GREEN commit SHA: 8d724de (feat(R05): GREEN — Welford-into-PerShardResidual composition (SLICE 2b3))
+- Reviewer report: coordination/reviews/REVIEWER-REPORT-R05.md (NEW)
 - Q-R05-SPEC.md: coordination/specs/Q-R05-SPEC.md
-- Audit sidecar (Reviewer MAY read per CLAUDE-REVIEWER.md): coordination/specs/Q-R05-SPEC-AUDIT.md
+- Audit sidecar: coordination/specs/Q-R05-SPEC-AUDIT.md
+- IMPLEMENTER attestation: prior NEXT-ROLE.md contents (now superseded by this Reviewer routing); see git history at SHA 8ad0fb2 for the Implementer attestation block.
 
-## Test result summary (IMPLEMENTER-observed, GREEN HEAD 8d724de)
+## Reviewer verdict summary
+- 19/19 ACs PASS (full Reviewer-run binding-command verification — typecheck exit 0; q05 13/0; pre-R05 regression 44/0; smoke 5/0; AC-19 greps all satisfied).
+- 0 CRITICAL + 0 MAJOR + 3 MINOR + 5 OBS.
+- TDD ordering verified (RED `43a5b00` precedes GREEN `8d724de`; RED-only test file diff confirmed).
+- Anti-scope clean (4 surfaces touched, all spec-prescribed).
+- Cold-review boundary held; audit sidecar consulted per CLAUDE-REVIEWER.md mandate.
 
-### q05 (AC-17):
-node --test test/q05-per-shard-runtime.test.js → pass 13 / fail 0
+## Findings inventory (for Memorial Updater accretion)
+- MINOR-1: spec-internal inconsistency — Q-R05-SPEC.md:80 Component inventory undercounts (says "AC-1 through AC-11" when actual file + spec lines 321/715 say "AC-1 through AC-13"). Class: R03 MINOR-4 recurrence (spec-prescription-vs-spec-prose drift). | ARCHITECT
+- MINOR-2: dead-weight imports — test/q05-per-shard-runtime.test.ts:13-15 imports WARM_START_THRESHOLD + STRICT_UPGRADE_THRESHOLD but neither is used in any executable expression; fixtures use hardcoded magic numbers 19/18/59. Class: test-hygiene. | IMPLEMENTER
+- MINOR-3: attestation-accuracy — coordination/MEMORIAL.md:515 IMPLEMENTER CONFIRMATION states AC-13 import "resolved as top-level" but actual code at test/q05-per-shard-runtime.test.ts:251 uses dynamic `await import(...)`. Class: R03 MINOR-4 recurrence in narrative form (Implementer attestation inconsistent with committed artifact). | IMPLEMENTER
+- OBS-1: vacuous welford_state fixtures at AC-3/8/9 (mean=[0,0], m2=[[0,0],[0,0]], sample=[0,0] — degenerate Welford update). Tier-transition tests bind n + confidence only, not mean/m2 correctness across transitions. | ARCHITECT/IMPLEMENTER (spec-pseudocode-as-shipped)
+- OBS-2: no test exercises baseline-refresh + dimensionality change together (AC-4 keeps d=2 across refresh). | ARCHITECT/IMPLEMENTER
+- OBS-3: welford_state read-back gap — only welfordMean exercised (AC-10); no welfordCovariance read-back. Same class as R04 OBS-1. | ARCHITECT (architect-pre-predicted)
+- OBS-4: AC-13 dynamic import is unusual style (spec permitted either form; implementer picked dynamic but attested top-level — see MINOR-3). | IMPLEMENTER
+- OBS-5: Implementer test-count aggregate "57 total" in MEMORIAL.md:519 is not spec-bound (AC-16 + AC-17 are independent counts). | IMPLEMENTER
 
-### Pre-R05 regression (AC-16 — OBSERVED counts):
-node --test test/q01-vendoring-coverage.test.js test/q01-no-at-pin-deltas.test.js test/q01-schema-additions.test.js test/q02-schema-extension.test.js test/q03-warm-start-runtime.test.js test/q04-welford-stats.test.js test/betting-e-process-class-dispatch.test.js → pass 44 / fail 0
-  - q01-vendoring-coverage: 3
-  - q01-no-at-pin-deltas: 1
-  - q01-schema-additions: 5
-  - q02-schema-extension: 6
-  - q03-warm-start-runtime: 13
-  - q04-welford-stats: 11
-  - betting-e-process smoke: 5
-  Total: 44 (matches pre-R05 baseline exactly; no regressions)
-
-### AC-18 (smoke regression):
-betting-e-process-class-dispatch.test.js → pass 5 / fail 0 (counted in 44 above)
-
-### AC-15 (typecheck):
-npm run typecheck → exit 0
-
-### AC-14 (TDD ordering):
-git log --oneline -- test/q05-per-shard-runtime.test.ts engine/per-shard/runtime.ts:
-  8d724de feat(R05): GREEN — Welford-into-PerShardResidual composition (SLICE 2b3)
-  43a5b00 test(R05): RED — add q05-per-shard-runtime.test.ts (AC-1 through AC-13 + AC-19)
-Two-commit RED→GREEN ordering confirmed.
-
-### AC-19 (welford.ts JSDoc literal greps):
-grep -c "Q-R03-SPEC-AUDIT.md" engine/per-shard/welford.ts → 0 (PASS)
-grep -c "engine/per-shard/runtime.ts" engine/per-shard/welford.ts → 2 (PASS)
-grep -c "updatePerShardResidual" engine/per-shard/welford.ts → 2 (PASS)
-
-## Round scope summary (for Reviewer orientation)
-R05 = Phase 1 SLICE 2b3 (composition + accumulator-strategy decision):
-- Delta 1: engine/types/config.ts — welford_state?: WelfordState optional field + import type + JSDoc update.
-- Delta 2: engine/per-shard/runtime.ts — NEW module exporting ExtendedSampleObservation + updatePerShardResidual.
-- Delta 3: engine/per-shard/welford.ts — JSDoc-only refresh (closes R04 OBS-5). NO function-body changes.
-- Delta 4: test/q05-per-shard-runtime.test.ts — NEW test file with 13 in-file tests (AC-1 through AC-13 + AC-19 comment).
+## Architect pre-prediction grading (recorded for Memorial Updater)
+- 7/9 verifiable predictions CORRECT; 1 MOSTLY-CORRECT (predicted findings hit; 2 unpredicted MINORs surfaced); 1 UNVERIFIABLE-FROM-ARTIFACT (Implementer Q-cycle wall-clock). 0 WRONG predictions.
 
 ## Escalation items
 (none)
