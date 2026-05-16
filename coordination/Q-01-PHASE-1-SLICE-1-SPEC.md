@@ -1,9 +1,10 @@
-# Topic 1 — Phase 1 SLICE 1: Engine Vendoring + Schema Additions
+# Topic 1 — Phase 1 SLICE 1: Engine Vendoring + Schema Additions (v0.2)
 
-_From: Architect (overnight autonomous run; authorized by John 2026-05-15)._
+_From: Architect (overnight autonomous run; authorized by John 2026-05-15; v0.2 amendment 2026-05-16 post-Reviewer-pass)._
 _To: Implementer (Mac Claude; TBD which session if parallel)._
 _Routed via: TPM (self-routing in single-session model)._
-_Date: 2026-05-15 (overnight)._
+_Date: 2026-05-16 (v0.2 amendment same-cycle post-Reviewer-pass)._
+_Version: v0.2 (amends v0.1 per REVIEWER-REPORT-Q-01-PHASE-1-SLICE-1.md — F1 type-state mismatch + G1-G5; Memorial D 21V/8C → 22V/8C). See § Amendments from v0.1 below._
 _Foundation: SCOPING-MEMO-v0.3 (`tessera/coordination/SCOPING-MEMO-v0.3.md`) + ARCHITECT-REPLY-v0.3-PRE-DISPOSITION (`tessera/coordination/ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md`; Q-J1..Q-J5 PICKED; Q-J6 ESCALATED) + engine modularity facts from originating context (`runs/benchmarks/tick-latency-baseline.json` measured 2026-04-20)._
 _Type: **full implementation brief (SPEC fidelity)** per anchor `templates/Q-NN-SPEC-TEMPLATE.md`. SLICE 1 of Tessera Phase 1; architectural-foundation-only._
 _Sequencing: Q1 is the entry point for Tessera Phase 1. Precedes Q2 (Phase 1 SLICE 2 — per-shard residual schema + warm-start cold-start mechanism + empirical P6 storage profile). **Gating on John's Q-J6 disposition** for implementation start; spec emit proceeds tonight under autonomy authority._
@@ -29,10 +30,10 @@ Three architectural primitives at play:
 
 2. **Tessera-side vendored target.** All files copied verbatim to `tessera/engine/*` preserving relative directory structure. Per-file headers added at top of each vendored file noting source path + SHA + sync policy + extract target (per v0.3 § 9 vendoring policy format).
 
-3. **Schema extension surface.** Three Tessera-specific additions land in `tessera/engine/types/config.ts` (the only file with SLICE 1 deltas):
-   - `'shard_id'` added to the `CellDimension` union (extends inherited `'hour_of_day' | 'day_of_week' | 'workload_class' | 'tenant_slice' | 'region' | 'pod_id'`).
-   - `per_shard_cells: Array<PerShardCell>` field added to `CompiledConfig` parallel to inherited `baseline_cells`. `PerShardCell` shape: `{ shard_id: string, residual: PerShardResidual }`; `PerShardResidual` is `{ mean_vector?: number[], covariance?: number[][], cell_confidence: CellConfidence }` — sparse-encoded with optional fields representing per-shard delta from fleet-aggregate. **Full `PerShardResidual` semantics are SLICE 2 scope**; SLICE 1 ships the type declaration only with optional fields, NOT runtime population logic.
-   - `'warm_start'` added to the `CellConfidence` union (extends inherited `'strict' | 'pooled' | 'aggregate' | 'low' | 'none'`).
+3. **Schema extension surface (v0.2 corrected per Reviewer F1; verified against `deploysignal/engine/types/config.ts` at SHA `5a72371`).** Three Tessera-specific additions land in `tessera/engine/types/config.ts` (the only file with SLICE 1 deltas). The inherited engine does NOT have explicit `CellDimension` or `CellConfidence` typedefs — these are inline-union literals on `BaselineCellsConfig.dimensions` and `BaselineCellEntry.confidence` respectively. SLICE 1 extends these inline unions in-place (architect-pick (α) per Reviewer F1 disposition; refactor-to-extract-typedefs deferred):
+   - **`'shard_id'`** added to the inline union at `BaselineCellsConfig.dimensions: Array<...>` (`deploysignal/engine/types/config.ts:421` at SHA `5a72371`). Inherited values: `'hour_of_day' | 'day_of_week' | 'workload_class' | 'tenant_slice' | 'tenant_tier' | 'region'`. Tessera extends with `'shard_id'` as 7th member.
+   - **`per_shard_cells?: PerShardCell[]`** as new OPTIONAL field on `CompiledConfig` (inherited `CompiledConfig` at `config.ts:69`; inherited `baseline_cells?: BaselineCellsConfig` is also optional at `config.ts:95` — Tessera's new field is parallel and similarly optional). `PerShardCell` shape: `{ shard_id: string, residual: PerShardResidual }`; `PerShardResidual` is `{ mean_vector?: number[], covariance?: number[][], confidence: 'strict' | 'pooled' | 'aggregate' | 'none' | 'warm_start' }` — sparse-encoded with optional fields representing per-shard delta from fleet-aggregate. **Full `PerShardResidual` runtime semantics are SLICE 2 scope**; SLICE 1 ships the type declaration only.
+   - **`'warm_start'`** added to the inline union at `BaselineCellEntry.confidence` (`config.ts:403`). Inherited values: `'strict' | 'pooled' | 'aggregate' | 'none'` (4 values — Reviewer F1 corrected v0.1's mistaken claim of 5 values). Tessera extends with `'warm_start'` as 5th member.
 
 The vendor-extract operation is implemented as a small shell script (`tessera/tools/vendor-from-deploysignal.sh`) that:
 - Takes a target source path (relative to `deploysignal/`) + target tessera path
@@ -162,7 +163,7 @@ _Authoritative record of files vendored from DeploySignal into Tessera with sour
 | ...remaining core + orchestration primitives... | | | | | |
 ```
 
-Full manifest enumerates 20-25 vendored files at SLICE 1 close.
+**Full manifest enumerates ~32 vendored files at SLICE 1 close (v0.2 corrected per G1):** 11 detector files (excluding `_q72-trace.ts` per SAS-7) + 5 family type files (`a.ts`..`e.ts`) + 5 core orchestration primitives (`core.ts`, `per-detector-resampler-mode.ts`, `topology-overlay.ts`, `signal-classes.ts`, `verdict-groups.ts`) + 9 type files (`verdict.ts`, `config.ts` with-deltas, `primitives.ts`, `metrics.ts`, `orchestration.ts`, `policy.ts`, `audit.ts`, `self-normalized-fallback.ts`, `index.ts`) + 2 vendored smoke-test files = 32 vendored files. Plus 1 vendoring script + 1 manifest + 3 new Tessera-side test files + 4 project-config files = ~40 total files-modified-or-created at SLICE 1 close.
 
 ### File: `tessera/package.json` (new)
 
@@ -227,39 +228,61 @@ Full manifest enumerates 20-25 vendored files at SLICE 1 close.
 }
 ```
 
-### File: `tessera/engine/types/config.ts` (vendored-with-deltas)
+### File: `tessera/engine/types/config.ts` (vendored-with-deltas) — v0.2 CORRECTED per Reviewer F1
 
 ```typescript
-// VENDORED FROM DeploySignal main@5a72371 — 2026-05-15
-// Source: deploysignal/engine/types/config.ts
+// VENDORED FROM DeploySignal main@5a72371 — 2026-05-16
+// Source: deploysignal/engine/types/config.ts (820 LOC)
 // Sync policy: vendored-with-deltas (Tessera Phase 1 SLICE 1)
 // Extract target: @johnpatrickwarren-oss/deploysignal-engine (Tessera Phase 2 close commitment)
 // DO NOT modify internals without ADR; deltas only at architecturally-anchored extension points.
 
-// ─── INHERITED ───
-// (all 820 LOC of deploysignal/engine/types/config.ts@5a72371 preserved verbatim)
+// ─── INHERITED VERBATIM ───
+// All 820 LOC of deploysignal/engine/types/config.ts@5a72371 preserved verbatim
+// EXCEPT for the three inline-union extensions at config.ts:421 + config.ts:403
+// and the one new optional field on CompiledConfig at config.ts:96 (immediately
+// after the inherited optional baseline_cells field at config.ts:95).
+//
+// The inherited engine uses inline-union literals on interface members; there
+// are no standalone CellDimension or CellConfidence typedefs. Tessera SLICE 1
+// extends these inline unions in-place (architect-pick (α) per Q1 v0.2 § Open
+// questions Q1.6 — refactor-to-extract-typedefs deferred).
 
 // ─── TESSERA SLICE 1 DELTAS ───
 
-// Delta 1: extend CellDimension union with 'shard_id'.
-export type CellDimension =
-  | 'hour_of_day'
-  | 'day_of_week'
-  | 'workload_class'
-  | 'tenant_slice'  // legacy; superseded by tenant_tier per Addition #23
-  | 'tenant_tier'
-  | 'region'
-  | 'pod_id'        // per Addition #12
-  | 'shard_id';     // ── NEW: Tessera SLICE 1; per-shard cell dimension
+// Delta 1 — extend BaselineCellsConfig.dimensions inline union with 'shard_id'.
+// Inherited at config.ts:421: dimensions: Array<'hour_of_day' | 'day_of_week' |
+//   'workload_class' | 'tenant_slice' | 'tenant_tier' | 'region'>
+// Tessera v0.2: append 'shard_id' as 7th member.
+export interface BaselineCellsConfig {
+  dimensions: Array<'hour_of_day' | 'day_of_week' | 'workload_class'
+    | 'tenant_slice' | 'tenant_tier' | 'region' | 'shard_id'>;  // ── 'shard_id' NEW
+  cells: BaselineCellEntry[];
+  aggregate_fallback: { /* unchanged */ };
+}
 
-// Delta 2: PerShardResidual + PerShardCell type declarations.
-// Full runtime semantics deferred to Tessera Phase 1 SLICE 2; SLICE 1 ships type
-// declarations only with optional fields representing per-shard delta from
-// fleet-aggregate baseline.
+// Delta 2 — extend BaselineCellEntry.confidence inline union with 'warm_start'.
+// Inherited at config.ts:403: confidence: 'strict' | 'pooled' | 'aggregate' | 'none'
+// Tessera v0.2: append 'warm_start' as 5th member.
+export interface BaselineCellEntry {
+  key: CellKey;
+  n_samples: number;
+  confidence: 'strict' | 'pooled' | 'aggregate' | 'none' | 'warm_start';  // ── 'warm_start' NEW
+  pooled_from?: CellKey[];
+  variance_inflated?: boolean;
+  family_A?: { per_signal: Record<string, FamilyAPerSignalParams> };
+  family_C?: FamilyCPerCell;
+  family_E?: ConformalParams;
+  family_D?: Record<string, FamilyDPerSignal>;
+}
+
+// Delta 3 — PerShardResidual + PerShardCell type declarations.
+// Full runtime semantics deferred to Tessera Phase 1 SLICE 2; SLICE 1 ships
+// type declarations only.
 export interface PerShardResidual {
-  mean_vector?: number[];        // Sparse: present only at strict-upgraded cells.
-  covariance?: number[][];       // Sparse: present only at strict-upgraded cells.
-  cell_confidence: CellConfidence;
+  mean_vector?: number[];   // Sparse: present only at strict-upgraded cells.
+  covariance?: number[][];  // Sparse: present only at strict-upgraded cells.
+  confidence: 'strict' | 'pooled' | 'aggregate' | 'none' | 'warm_start';
   // SLICE 2 will add: residual_seed_hash, per_shard_n_samples, etc.
 }
 
@@ -268,25 +291,22 @@ export interface PerShardCell {
   residual: PerShardResidual;
 }
 
-// Delta 3: extend CompiledConfig with per_shard_cells parallel to baseline_cells.
-// Optional at SLICE 1; runtime population logic at SLICE 2.
-declare module './config' {
-  interface CompiledConfig {
-    per_shard_cells?: PerShardCell[];
-  }
+// Delta 4 — add OPTIONAL per_shard_cells field on CompiledConfig.
+// Inherited CompiledConfig at config.ts:69 (820 LOC interface; baseline_cells
+// is the prior optional cell-related field at config.ts:95). Tessera adds
+// per_shard_cells immediately after for architectural-parallel positioning.
+export interface CompiledConfig {
+  /* ...all 820 LOC of inherited fields preserved verbatim... */
+  baseline_cells?: BaselineCellsConfig;  // inherited at config.ts:95
+  per_shard_cells?: PerShardCell[];      // ── NEW: Tessera SLICE 1 (parallel
+                                          //   to baseline_cells; optional like
+                                          //   baseline_cells; runtime population
+                                          //   logic in SLICE 2)
+  /* ...rest of inherited fields preserved verbatim... */
 }
-
-// Delta 4: extend CellConfidence union with 'warm_start'.
-export type CellConfidence =
-  | 'strict'
-  | 'pooled'
-  | 'aggregate'
-  | 'low'
-  | 'none'
-  | 'warm_start';  // ── NEW: Tessera SLICE 1; per-shard warm-start regime.
 ```
 
-(Note: pseudo-code above shows delta locations; actual implementation merges deltas into the existing union types rather than re-declaring. Implementer verifies tsc clean.)
+**Implementer note:** the pseudo-code above shows the four deltas as separate `export interface` re-declarations for clarity. The actual TypeScript implementation MERGES these deltas into the single existing inherited interface declarations (not separate re-exports). Tessera's `config.ts` is one file containing the inherited 820 LOC verbatim except where the four deltas above replace the corresponding lines (Delta 1 replaces line 421; Delta 2 replaces line 403; Deltas 3 + 4 are inserted at module-level + line 96 respectively). Implementer verifies tsc clean.
 
 ### File: `tessera/engine/detectors/*.ts` (12 files; all vendored-at-pin)
 
@@ -480,7 +500,7 @@ Per Q1.4 architect-pick: vendor at-pin for regression baseline. Runs against ven
 
 2. **AC-2: All 5 family type files vendored.** `a.ts`, `b.ts`, `c.ts`, `d.ts`, `e.ts` under `deploysignal/engine/types/families/` vendored at-pin. Verified by `q01-vendoring-coverage.test.ts`. Maps to: same test, expanded path list.
 
-3. **AC-3: Schema additions land in `tessera/engine/types/config.ts` without breaking inherited types.** `CellDimension` union extends with `'shard_id'`; `CellConfidence` union extends with `'warm_start'`; `CompiledConfig` gains optional `per_shard_cells` field; inherited fields preserved byte-identical via at-pin section. Verified by `q01-schema-additions.test.ts` (type-level) + tsc clean compile. Maps to: 4 test cases in `q01-schema-additions`.
+3. **AC-3 (v0.2 reworded per G2): Schema additions land additively in `tessera/engine/types/config.ts` without breaking inherited type contracts.** Specifically: (a) `BaselineCellsConfig.dimensions` inline union extended with `'shard_id'` as 7th member; (b) `BaselineCellEntry.confidence` inline union extended with `'warm_start'` as 5th member; (c) `PerShardResidual` + `PerShardCell` interfaces declared; (d) `CompiledConfig` gains optional `per_shard_cells?: PerShardCell[]` field parallel to inherited optional `baseline_cells?`. All inherited type definitions, union values, and optional/required modifiers preserved verbatim; only Tessera-specific additions are made. Verified by `q01-schema-additions.test.ts` (type-level) + tsc clean compile. Maps to: 5 test cases in `q01-schema-additions` (Delta 1, Delta 2, Delta 3 sparse, Delta 3 strict, Delta 4).
 
 4. **AC-4: Core + orchestration primitives vendored at-pin.** `engine/core.ts`, `engine/per-detector-resampler-mode.ts`, `engine/topology-overlay.ts`, `engine/signal-classes.ts`, `engine/types/verdict.ts`, `engine/verdict-groups.ts`, plus type files (`primitives.ts`, `metrics.ts`, `orchestration.ts`, `policy.ts`, `audit.ts`, `self-normalized-fallback.ts`, `index.ts`) vendored at-pin. NO Tessera deltas at SLICE 1 (per architectural-foundation-only scope). Verified by `q01-vendoring-coverage.test.ts` (header check) + `q01-no-detector-deltas.test.ts` byte-identity (extended to these files). Maps to: vendoring-coverage + no-deltas tests.
 
@@ -488,7 +508,7 @@ Per Q1.4 architect-pick: vendor at-pin for regression baseline. Runs against ven
 
 6. **AC-6: Tessera-side tsc clean compile via `tsconfig.test.json`.** `npm run typecheck` exits zero. Verified by Mac Claude at implementation time; CI commitment for future Tessera Phase 1 SLICE 2+ work.
 
-7. **AC-7: A12 byte-identity preservation across detector vendoring.** Every vendored detector file at `tessera/engine/detectors/*.ts` is byte-identical to source modulo the header block. Verified by `q01-no-detector-deltas.test.ts`. Maps to: that test's primary assertion.
+7. **AC-7 (v0.2 broadened per G3): A12 byte-identity preservation across ALL vendored-at-pin files (detectors + family types + core + orchestration + types except `config.ts`).** Every vendored-at-pin file under `tessera/engine/*` (excluding `tessera/engine/types/config.ts` which is vendored-with-deltas) is byte-identical to source modulo the header block. Verified by `q01-no-at-pin-deltas.test.ts` (broadened from v0.1's detector-only `q01-no-detector-deltas.test.ts`). Maps to: that test iterating the full vendored-at-pin path list.
 
 8. **AC-8: Vendoring script `tessera/tools/vendor-from-deploysignal.sh` lands and is idempotent.** Re-running the script against the same source + SHA produces no diff in vendored files (modulo `vendored` date stamps if re-pinning to new SHA). Verified at SLICE 1 close by Mac Claude empirical test (re-run script; `git diff` empty).
 
@@ -512,6 +532,7 @@ Per anchor `skills/06-anti-scope-ledger.md`. Specific named items NOT in scope a
 - **SAS-6: NO test-suite substrate harness at SLICE 1.** Inherited DeploySignal tests reference fixture data + compiled-config substrates that Tessera doesn't yet have. Adopting the full test substrate is SLICE 2-3 work. SLICE 1 only vendors the two smoke-test files per Q1.4.
 - **SAS-7: NO `_q72-trace.ts` vendoring at SLICE 1** (per Q1 OQ-3 architect-pre-prediction skip). DeploySignal-specific diagnostic; Tessera-side equivalent (if needed) is later-cycle work.
 - **SAS-8: NO `engine/agent.ts` vendoring at SLICE 1.** Addition #27 dormant; not needed for Phase 1 architecture.
+- **SAS-9 (v0.2 NEW per G4): NO Tessera-specific compiled-config JSON file at SLICE 1.** Schema declarations land at SLICE 1; actual compiled-config artifacts (parallel to inherited `deploysignal/runs/compiled-configs/v4-fusion-novelty.json` at SHA `5a72371`) are SLICE 2-3 scope when per-shard residual runtime population lands. Tempting absorption candidate: implementer might create a placeholder compiled-config to drive smoke-tests. Explicit anti-scope; smoke-tests at SLICE 1 use inherited DeploySignal compiled-configs unchanged (path-resolution relative to deploysignal/ reference, NOT a Tessera-side compiled-config copy).
 
 **Cross-references to inherited DeploySignal ANTI-SCOPE-LEDGER (verified preserved at v0.3 emit):**
 
@@ -528,7 +549,7 @@ Per anchor `skills/06-anti-scope-ledger.md`. Specific named items NOT in scope a
 ## Open questions (deferred to implementation-time empirical surface)
 
 1. **OQ-1:** Exact header format under prettier / eslint formatting. Architect-pre-prediction: standardized header block survives auto-formatting; if conflict, implementer halts and routes back with diagnostic. Verification at SLICE 1 close: re-running prettier on vendored files produces zero diff.
-2. **OQ-2:** Tessera's tsconfig path mappings cleanly resolve all imports. Architect-pre-prediction: yes, given DeploySignal's tsconfig structure is the inherited base. If tsc surfaces unresolved imports, implementer adjusts path mappings; minor cycle cost.
+2. **OQ-2 (v0.2 clarified per G5):** Tessera's tsconfig path mappings cleanly resolve all imports AND vendored-smoke-test imports (`tessera/test/betting-e-process-class-dispatch.test.ts` etc.) resolve correctly to vendored detectors via relative paths (`../engine/detectors/...`). Architect-pre-prediction: yes — vendored test files preserve their inherited relative import paths because Tessera's directory structure mirrors DeploySignal's (`test/` → `../engine/` works identically). If `@tessera/*` path aliases are added to `tsconfig.json` AND smoke-tests use those aliases (currently they use relative paths inherited at-pin), there may be conflict — implementer adjusts. Halt-and-route-back if smoke-tests fail to compile/run after path-mapping configuration; not a silent absorption.
 3. **OQ-3:** Skip `_q72-trace.ts` at SLICE 1 is the right call. Architect-pre-prediction: yes; it's DeploySignal-specific diagnostic. If implementer finds it's structurally required by another vendored file, halt and route back.
 4. **OQ-4:** Inherited `engine/types/audit.ts` AuditRecord shape sufficient for Tessera Phase 1+ audit needs. Architect-pre-prediction: yes at SLICE 1 (no Tessera-specific audit semantics yet); deferred to SLICE 2-3 where Tessera orchestrator lands.
 5. **OQ-5:** Manifest format granularity — per-file rows or grouped by directory? Architect-pre-prediction: per-file rows (one-row-per-vendored-file maximizes searchability and re-pin-policy clarity). Implementer adjusts if grouping is clearer in practice.
@@ -543,7 +564,7 @@ Per anchor `skills/08-architect-six-practices.md` (P3 ten-axis spot-check) + `sk
 
 - **P3.1 concrete-values:** Schema-extension prescriptions use specific identifiers (`'shard_id'`, `'warm_start'`, `per_shard_cells`); no abstract magic numbers. Inherited engine SHA `5a72371` cited specifically and verified.
 - **P3.2 coord-trail:** SCOPING-MEMO-v0.3 + PRE-DISPOSITION + PROJECT-CONTEXT.md grepped; no contradicting claims. v0.2 § Anti-scope clauses A1-A17 preserved.
-- **P3.3 file-opened:** `deploysignal/engine/detectors/*.ts` (12 files) + `deploysignal/engine/types/config.ts` + `deploysignal/engine/types/families/*.ts` (5 files) + `deploysignal/engine/topology-overlay.ts` + `deploysignal/engine/types/verdict.ts` opened at spec-drafting time; LOC counts verified by `wc -l`. Implementation-surface pseudo-code reflects actual file contents.
+- **P3.3 file-opened (v0.2 amendment — VIOLATION at v0.1; CONFIRMED at v0.2):** At v0.1 spec-drafting time, architect cited inherited `CellDimension` / `CellConfidence` typedefs + `'pod_id'` + `'low'` enum values from MEMORY (not from opening `config.ts`). Reviewer F1 caught the type-state mismatch. **At v0.2 amendment, architect EXPLICITLY opened `deploysignal/engine/types/config.ts` at SHA `5a72371`**: confirmed `CompiledConfig` interface at line 69; `baseline_cells?: BaselineCellsConfig` optional at line 95; `BaselineCellEntry.confidence` inline union `'strict' | 'pooled' | 'aggregate' | 'none'` at line 403 (4 values; NO `'low'`); `BaselineCellsConfig.dimensions` inline union at line 421 (6 values: `'hour_of_day' | 'day_of_week' | 'workload_class' | 'tenant_slice' | 'tenant_tier' | 'region'`; NO `'pod_id'`); no standalone `CellDimension` or `CellConfidence` typedefs exist. Schema-extension surface § Architectural mechanism + § Implementation surface > config.ts rewritten v0.2 to match. Memorial D state delta: 21V/8C → 22V/8C (5th sub-instance of 8th CONFIRMATION class, MD-F6 sub-variant, SECOND occurrence in this session — first was v0.1→v0.2 of SCOPING-MEMO).
 - **P3.4 function-bodies:** SLICE 1 is mechanical vendoring; no algorithmic function bodies to scrutinize. Function-body grep applicable at SLICE 2 (runtime per-shard residual population).
 - **P3.5 compiled-artifacts:** DeploySignal SHA `5a72371` is verified via `git -C deploysignal rev-parse main`; tessera SHA pin via VENDORING-MANIFEST.md.
 - **P3.6 input-pipeline-alignment:** No new input pipeline at SLICE 1 (engine is consumed; not generating new inputs).
@@ -675,8 +696,38 @@ How Q1 resolves drives Q2 (Phase 1 SLICE 2) pick:
 
 ---
 
-_Spec v0.1 authored: 2026-05-15 overnight under autonomy authority. Format: anchor `templates/Q-NN-SPEC-TEMPLATE.md` at full SPEC fidelity. Cross-references: SCOPING-MEMO-v0.3 + ARCHITECT-REPLY-v0.3-PRE-DISPOSITION + originating-context performance facts (`deploysignal/runs/benchmarks/tick-latency-baseline.json` measured 2026-04-20). Routing target: TPM packages for John; Mac Claude implementation gated on John's Q-J6 disposition AND first-review confirmation of Q-J1..Q-J5 PRE-DISPOSITION picks._
+---
 
-_Skill 14 + 15 pre-route gates: PASS. Architect grilling pass: 0 CRITICAL, 3 LIKELY-SURFACES, 5 PRE-EMPTABLE. Memorial D state delta: 0 (preserved at 21V/8C; no new violations/confirmations at spec-emit; future deltas at Mac Claude implementation + Reviewer audit time)._
+## Amendments from v0.1
 
-_Hybrid Reviewer pair-review-style at SLICE 1 close-walk per inherited Anchor commitment: NOT MANDATORY (architectural-foundation-only; empirical-evidence-load-bearing pair-review is SLICE 3 territory). Single-Reviewer cold-context audit at SLICE 1 close-walk sufficient._
+Per Reviewer pass on Q1 v0.1 (`REVIEWER-REPORT-Q-01-PHASE-1-SLICE-1.md` 2026-05-16): 1 FAIL + 5 GAP findings. v0.2 amendment applies fixes:
+
+| Finding | Class | Disposition | Sections amended |
+|---|---|---|---|
+| **F1** Inherited type-state mismatch | FAIL | **AMENDED — option α (in-place inline-union extension) PICKED.** Architect opened `deploysignal/engine/types/config.ts` at SHA `5a72371`; verified actual inherited types; rewrote § Architectural mechanism #3 schema-extension surface + § Implementation surface > config.ts deltas with concrete inherited-state references (line numbers cited). Memorial D state delta: 21V/8C → 22V/8C. | § Architectural mechanism #3; § Implementation surface > config.ts; AC-3 reworded; § P3.3 acknowledgment |
+| **G1** File-count undercount | GAP | AMENDED. Manifest claim "20-25 vendored files" → "~32 vendored files at SLICE 1 close" with breakdown. | § Implementation surface > VENDORING-MANIFEST claim |
+| **G2** AC-3 type-extension wording | GAP | AMENDED. AC-3 reworded from "byte-identical preserved" → "additively extended; inherited type definitions, union values, optional/required modifiers preserved verbatim." | AC-3 |
+| **G3** AC-7 scope | GAP | AMENDED. AC-7 broadened from detectors-only → all vendored-at-pin files (detectors + family types + core + orchestration + types except config.ts). Test file renamed `q01-no-detector-deltas` → `q01-no-at-pin-deltas`. | AC-7 |
+| **G4** Missing SAS for compiled-config JSON | GAP | AMENDED. SAS-9 added: "NO Tessera-specific compiled-config JSON file at SLICE 1." | § Anti-scope SAS-9 |
+| **G5** Vendored smoke-test path imports | GAP | AMENDED. OQ-2 clarified: vendored-smoke-test imports must resolve via inherited relative paths; halt-and-route-back if path-mapping configuration breaks resolution. | OQ-2 |
+
+**Memorial D state delta:** v0.1 → v0.2 increments by 1 V (single sub-instance classification per Q63 Q1 Suggestion 1 sub-instance accumulation discipline anchor). **8th CONFIRMATION class lineage extended to 6 sub-instances** post-v0.2-amendment:
+
+| # | Cycle | Mechanism variant |
+|---|---|---|
+| 1 | Q60 V1 LS-1 (DeploySignal) | input-data-structure-semantic mismatch |
+| 2 | Q60 LS-2 (DeploySignal) | LIKELY-SURFACES-prediction-validation multi-layer |
+| 3 | Q64 Phase 4 (DeploySignal) | calibration-substrate-rationale-option-(γ) anticipation |
+| 4 | Q66 SLICE 1 LS-1 (DeploySignal) | stationarity-assumption-violation-from-AR(1)-correlation |
+| 5 | v0.1 → v0.2 (Tessera SCOPING-MEMO) | file-opened-discipline-paired-with-candidate-set-enumeration at SCOPE-PROPOSAL fidelity (MD-F6 sub-variant) |
+| **6** | **v0.1 → v0.2 (Tessera Q1 spec)** | **file-opened-discipline-paired-with-candidate-set-enumeration at SPEC fidelity — second occurrence in same session; demonstrates the discipline-application-gap pattern is stickier than memorialization alone** |
+
+**Discipline-archive significance of TWO sub-instances within hours:** memorializing MD-F6 at v0.2 of SCOPING-MEMO did NOT prevent recurrence at Q1 spec-emit. Pattern is stickier than memorialization. **For Q2 (Phase 1 SLICE 2) spec drafting and all subsequent specs, architect must apply file-opened-discipline AS AN EXPLICIT CHECKLIST ITEM at brief-drafting time** — not as a mental note. Candidate Anchor-memorialization (post-stabilization-criterion): explicit checklist tooling at SPEC-emit gate.
+
+---
+
+_Spec v0.2 authored: 2026-05-16 (overnight same-cycle post-Reviewer-pass). Amends v0.1 per Reviewer findings F1 + G1-G5. Format: anchor `templates/Q-NN-SPEC-TEMPLATE.md` at full SPEC fidelity. Cross-references: SCOPING-MEMO-v0.3 + ARCHITECT-REPLY-v0.3-PRE-DISPOSITION + REVIEWER-REPORT-Q-01-PHASE-1-SLICE-1 + originating-context performance facts (`deploysignal/runs/benchmarks/tick-latency-baseline.json` measured 2026-04-20). Routing target: TPM packages for John; Mac Claude implementation gated on John's Q-J6 disposition AND first-review confirmation of Q-J1..Q-J5 PRE-DISPOSITION picks AND first-review confirmation of v0.2 amendments._
+
+_Skill 14 + 15 pre-route gates at v0.2: PASS (re-checked; type references corrected). Architect grilling pass at v0.2: 0 CRITICAL, 3 LIKELY-SURFACES (unchanged), 5 PRE-EMPTABLE (unchanged). Memorial D state at v0.2: **22V/8C** (was 21V/8C; +1 V for the file-opened-discipline violation; 8th CONFIRMATION class extended to 6 sub-instances)._
+
+_Hybrid Reviewer pair-review-style at SLICE 1 close-walk per inherited Anchor commitment: NOT MANDATORY (architectural-foundation-only; empirical-evidence-load-bearing pair-review is SLICE 3 territory). Single-Reviewer cold-context audit at SLICE 1 close-walk sufficient — demonstrated effective at v0.1 → Reviewer F1 catch._
