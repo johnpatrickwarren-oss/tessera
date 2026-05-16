@@ -92,3 +92,25 @@ All unresolved decisions → open questions in the spec.
 #   each Q-N pick, grep the remaining spec sections for any use of the alternative surface or a
 #   contradicting name. Detected R01: 3 uncaught contradictions produced REVIEWER MAJOR-5, MINOR-1,
 #   MINOR-2 and 2 additional silent Implementer absorptions.
+
+# REINFORCED 2026-05-16 — When spec pseudocode instantiates a named external type (e.g.,
+#   `key: CellKey`, `confidence: CellConfidence`, `const r: PerShardResidual = {...}`), open
+#   the source file where that type is DECLARED — not merely the file where it is used or
+#   re-exported — and read its exact definition before writing the pseudocode. "The type appears
+#   in config.ts" is not a substitute for opening the declaration-site file (e.g., primitives.ts).
+#   If the actual shape diverges from the spec's prediction, update pseudocode to reflect reality
+#   AND update any conditional directives that depend on the prediction. Add a "type-declaration-
+#   site check" to pre-emit grilling: for each named type instantiated in pseudocode, grep for
+#   its declaration site, open that file, record the actual definition. Detected R02: CellKey
+#   predicted as `Record<CellDimension, …>`; actual shape `Record<string, …>` at primitives.ts:44
+#   (not opened during spec authoring); cascaded to IMPLEMENTER retaining unnecessary `as any`
+#   cast because pseudocode showed it (REVIEWER MINOR-3 + OBS-3).
+
+# REINFORCED 2026-05-16 — When specifying file deletion commands, verify whether each named
+#   file is git-tracked before prescribing `git rm`. Check with `git ls-files <path>` (empty
+#   output means untracked). If track-state is uncertain, prescribe "git rm if tracked; rm -f
+#   if gitignored." Prescribing `git rm` for an untracked file causes the command to fail,
+#   forcing the Implementer to adapt — which may consume bounded budget or require judgment
+#   calls the spec should have pre-empted. Detected R02: ville-preservation .test.js was
+#   gitignored; spec prescribed `git rm` for both .ts and .js companions; Implementer correctly
+#   adapted but spec prescription was over-broad (REVIEWER OBS-2).
