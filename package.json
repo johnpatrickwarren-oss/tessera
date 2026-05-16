@@ -1,0 +1,24 @@
+{
+  "name": "@johnpatrickwarren-oss/tessera",
+  "version": "0.1.0-pre",
+  "description": "Statistically-rigorous behavioral observation for AI training/inference clusters",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "pretest": "tsc -p tsconfig.test.json",
+    "test": "node --test test/*.test.js",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "local-only-pre-v1"
+  }
+}
