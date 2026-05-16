@@ -421,6 +421,21 @@ Options: (i) DeploySignal Phase E → Tessera Phase 1 → Tessera Phase 2, (ii) 
 
 **This is the load-bearing strategic decision** and depends on John's pitch / market-positioning priorities which are downstream of architect's scope.
 
+### Q-J6 DISPOSITIONED 2026-05-16 by John: (iv) — Tessera takes priority; DeploySignal Phase E indefinitely deferred
+
+Rationale per John's disposition:
+- DeploySignal has no customer / market pressure to ship; DS is a technical artifact for resume building.
+- Parallel tracks unnecessary — without DS Phase E pressure, there's no second-track work to parallelize.
+- Tessera is a separate product using the same statistical engine at a different abstraction level (cluster behavioral observation vs deployment gating).
+
+Implication for project going forward:
+- All engineering capacity goes to Tessera Phase 1 → Phase 2 → engine extraction → public publication.
+- DeploySignal continues operational maintenance only (security patches; critical bug fixes); no Phase E roadmap commitment.
+- DeploySignal's role narrows to "validation case study + statistical-rigor anchor for Tessera's pitch" rather than "product with its own commercial roadmap."
+- Optional Phase 3 (DS-integration) considered post-Phase-2-close if market conditions warrant.
+
+Architect-pre-prediction calibration check (post-disposition): (iv) was 30% prior; John picked (iv). Prediction reasonable; not over-confident. (ii) was 35% prior and ranked higher; the difference between (ii) and (iv) is whether DS Phase E is "later" vs "indefinitely deferred" — John's signal that DS is "technical artifact for resume building" effectively converts (ii) → (iv) by removing the "we'll do DS Phase E eventually" implicit commitment.
+
 ---
 
 ## 6. Pre-route discipline application (architect-side)

@@ -87,7 +87,16 @@ On John's first review, any of these 5 can be amended; the SLICE 1 spec downstre
 
 ## Q-J6 — Cross-project sequencing relative to DeploySignal Phase E
 
-**Pick:** **NOT PRE-DISPOSITIONED — ESCALATED TO JOHN.**
+**DISPOSITIONED 2026-05-16 by John: option (iv) — Tessera takes priority; DeploySignal Phase E indefinitely deferred.**
+
+Architect-pre-prediction (escalated; declined to pick unilaterally) was correct to escalate. John's disposition reasoning:
+- No customer / market pressure on DeploySignal to ship (DS is a technical artifact for resume building).
+- Parallel tracks would have nothing meaningful to do on the DS side without Phase E pressure.
+- Tessera is a separate product using the same statistical engine at a different abstraction level (cluster behavioral observation, not deployment gating).
+
+Implication: all engineering capacity going forward focuses on Tessera. DeploySignal continues operational maintenance only.
+
+**Pick:** **NOT PRE-DISPOSITIONED — ESCALATED TO JOHN.** (Above disposition added 2026-05-16 post-escalation-resolution; preserved as audit-trail of the escalation that was correctly declined to architect-pre-prediction.)
 
 **Confidence: ARCHITECT CANNOT RELIABLY PRE-PREDICT** (probability bands span 15-35% across 4 options per v0.3 § 5 Q-J6 architect-pre-prediction).
 

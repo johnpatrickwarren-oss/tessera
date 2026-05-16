@@ -52,7 +52,11 @@ Post-anchor-PR-35-merge, Tessera SPEC-fidelity drafts (Q-R02-SPEC.md onward) MUS
 
 (Populated by Memorial Updater after each round close.)
 
-(none yet — R01 not yet closed)
+### Strategic dispositions
+
+- **CONFIRMATION 2026-05-16 (operator decision; Q-J6):** Q-J6 cross-project sequencing dispositioned to option (iv) — Tessera takes priority; DeploySignal Phase E indefinitely deferred. Rationale: no customer pressure on DS; DS is technical artifact for resume building; Tessera is separate product at different abstraction level. Implication: all engineering capacity to Tessera; DS in maintenance-only state; Phase 3 DS-integration is optional / market-dependent.
+
+(R01-and-beyond memorial entries populated by Memorial Updater after each round close.)
 
 ---
 

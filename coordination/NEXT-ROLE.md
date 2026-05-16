@@ -1,10 +1,27 @@
 CURRENT-ROUND: R01
 NEXT-ROLE: IMPLEMENTER
-STATUS: ESCALATE
+STATUS: READY
+
+## Operator decision (John 2026-05-16)
+
+**Q-J6 dispositioned: option (iv) — Tessera takes priority; DeploySignal Phase E indefinitely deferred.**
+
+Rationale (verbatim from John 2026-05-16 disposition):
+- No one is waiting for DeploySignal to ship; DS is a technical artifact for resume building.
+- Parallel tracks not needed (no concrete DS Phase E work to parallelize).
+- Tessera is a separate product using the same statistical engine to perform a different job at different abstraction levels.
+
+Implication: all engineering capacity for the foreseeable future goes to Tessera. DS continues operational maintenance only (security patches, critical bugs); no Phase E roadmap.
+
+**Q-J1..Q-J5 default-accepted** (no amendment requested at first review). Architect-pre-prediction picks per `ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md` stand as-is.
+
+**Q1 v0.2 default-accepted** (no amendment requested at first review).
+
+**Anchor PR #34 / #35 status:** unmerged at pipeline-fire time. Implementer uses `~/concord/anchor/feat/md-f6-existing-architectural-surface` directly if verify-citations.sh is needed; document the branch-dependency in R01 close-walk artifact. Both PRs are non-blocking for SLICE 1 implementation.
 
 ## Inputs for next role
 
-When STATUS becomes READY (after escalation resolution below), the Implementer reads:
+The Implementer reads:
 
 - `coordination/specs/Q-R01-SPEC.md` — full SPEC fidelity per anchor `templates/Q-NN-SPEC-TEMPLATE.md`. Vendor engine subset from DeploySignal main @ SHA `5a72371` + 3 schema additions (shard_id cell dimension; per_shard_cells field; warm_start confidence enum). 10 ACs; ~32 vendored files + 4 project-config files + 3 new test files; ~6h focused / 1-2 days wall-clock.
 - `coordination/reviews/REVIEWER-REPORT-R01-pre-implementation.md` — pre-implementation Reviewer audit of the spec (1 FAIL + 5 GAP all AMENDED at spec v0.2). No outstanding Reviewer findings against the spec.
@@ -15,21 +32,7 @@ When STATUS becomes READY (after escalation resolution below), the Implementer r
 
 ## Escalation items
 
-R01 IMPLEMENTER fire is **gated** on five conditions, three of which are John-actionable + two of which are anchor-PR-merge-actionable:
-
-### John-actionable
-
-1. **Q-J6 disposition required** (per `ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md` § Q-J6). Strategic cross-project sequencing between Tessera Phase 1+2 and DeploySignal Phase E. Architect cannot reliably pre-predict (probability bands span 15-35% across 4 options: (i) DS Phase E first / (ii) Tessera first / (iii) parallel tracks / (iv) DS Phase E indefinitely deferred). **Highest severity escalation; cannot proceed without John's call.**
-
-2. **Q-J1..Q-J5 confirmation or amendment** (per `ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md`). Architect pre-dispositioned with HIGH confidence × 4 + MEDIUM × 1 under overnight autonomy; John override surface explicit per Q-J. **Lower severity; if no amendment requested, default = picks confirmed.**
-
-3. **Q-R01-SPEC.md v0.2 acceptance** (per `ARCHITECT-REPLY-Q-01-DISPOSITION.md`). Architect amendments post Reviewer F1 + G1-G5 applied; John's review confirms or amends. **Lower severity; if no amendment requested, default = accepted.**
-
-### Anchor-PR-merge-actionable
-
-4. **Anchor PR #34** ([README install fix](https://github.com/johnpatrickwarren-oss/anchor/pull/34)) merge. Updates `claude mcp add superpowers` → `/plugin install superpowers@claude-plugins-official` in anchor README install instructions. Not load-bearing for R01 implementation; cosmetic for documentation discoverability.
-
-5. **Anchor PR #35** ([MD-F6 structural fix](https://github.com/johnpatrickwarren-oss/anchor/pull/35)) merge. Adds `## Existing architectural surface (REVIEWER-ANCHOR)` mandatory section to `templates/Q-NN-SPEC-TEMPLATE.md` + `integrations/superpowers-claude-code/scripts/verify-citations.sh` script. **Useful for R01 Implementer to verify citation evidence at Step 0** but not load-bearing — R01 Implementer can use the feature branch (`~/concord/anchor/feat/md-f6-existing-architectural-surface`) directly if PR unmerged at pipeline-run time; document branch-dependency in R01 close-walk artifact.
+(none — all 5 gating items resolved at John 2026-05-16 disposition above; STATUS flipped to READY)
 
 ## Routing notes
 
