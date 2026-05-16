@@ -1,39 +1,56 @@
-CURRENT-ROUND: R03
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R04
+NEXT-ROLE: REVIEWER
+STATUS: READY
 
 ## Inputs for next role
-- coordination/reviews/REVIEWER-REPORT-R03.md  (load-bearing — full report)
-- coordination/specs/Q-R03-SPEC.md  (for cross-reference)
-- coordination/MEMORIAL.md  (append CONFIRMATION/VIOLATION entries)
-
-## Reviewer verdict
-- CRITICAL: 0
-- MAJOR: 0
-- MINOR: 5 (AC-9 fixture insufficiency; AC-17/18/20 grep evidence patterns too loose; CellKey re-export spec error; AC-14 count arithmetic off-by-one; immutability claim unbound)
-- OBS: 5 (literal-union narrowing; reset-from-strict coverage gap; JSDoc value 80 + § P3.1 cross-ref; defensive `void`; halt-vs-adapt precedent)
-
-Routing rule applied: CRITICAL=0, MAJOR=0 → MERGE-READY.
-
-## Binding commands — Reviewer-independent re-execution at HEAD `e698c20`
-1. `npm run typecheck` → exit 0 ✓
-2. `npm test` → tests 31 / pass 31 / fail 0 ✓
-3. Per-file counts: q01-vendoring-coverage **3** (not 4 — see MINOR-4), q01-no-at-pin-deltas 1, q01-schema-additions 5, q02-schema-extension 6, q03-warm-start-runtime 11, betting-e-process 5. Total 31. ✓
-4. `grep -n "as any"` in q01/q02 files → 2 matches in comments only (MINOR-2; executable code clean) — see report.
-5. `grep -n "as CompiledConfig"` in q01 → 2 matches in comments only (MINOR-2; executable code clean).
-6. `git log` confirms genuine RED→GREEN ordering (`65a5a4a` → `dea1d7a` @ ~2 min apart).
-
-## Notable findings for Memorial-Updater attention
-- **MINOR-2**: Spec's grep verification patterns for AC-17/AC-18/AC-20 don't distinguish executable code from comments; literal AC commands fail while intent is satisfied. Architect-side spec hygiene reinforcement candidate.
-- **MINOR-3**: Spec at Q-R03-SPEC.md:85 claimed config.ts re-exports CellKey; actually it only imports CellKey privately. Second-cycle CellKey-class spec error (R02 OBS-3 was the first cycle). Architect file-opened discipline reinforcement candidate (extend to "re-export status verified at public-surface").
-- **MINOR-4**: Spec AC-14 count arithmetic was 16/0, actual is 15/0 (q01-vendoring-coverage has 3 tests not 4). Implementer's attestation at line 25/46 of pre-Reviewer NEXT-ROLE.md asserted 16/0 — count drift between spec and binding-command observation not surfaced. Implementer-side observation-grounding reinforcement candidate.
-- **TDD verification**: 6th consecutive Reviewer-side RED→GREEN cross-check; pattern now well-established.
+- /Users/johnwarren/concord/tessera/coordination/specs/Q-R04-SPEC.md (full spec — reviewer source-of-truth)
+- /Users/johnwarren/concord/tessera/coordination/specs/Q-R04-SPEC-AUDIT.md (architect audit sidecar — reviewer reads this; implementer did not)
+- /Users/johnwarren/concord/tessera/coordination/PRD.md (PRD AC-P2 reference)
+- Attested HEAD SHA: see "Binding command results" below
+- Existing source/test files: engine/per-shard/welford.ts (CREATED R04), test/q04-welford-stats.test.ts (CREATED R04), test/q03-warm-start-runtime.test.ts (CHANGED R04 — additive Delta 3a + 3b + 3c)
 
 ## Escalation items
 (none)
 
-## Cold-review boundary attestation
-Reviewer did NOT consult: coordination/specs/Q-R03-SPEC-AUDIT.md, coordination/diagnostics/ (none present for R03), coordination/logs/, .prompt-*.md, or R03 NEXT-ROLE.md / MEMORIAL.md prior to forming the verdict. Consulted: PRD.md (full), Q-R03-SPEC.md (full), source/test files at HEAD `e698c20`, tsconfig.{test,}.json, package.json, REVIEWER-REPORT-R02.md (lines 1-80 only, for AC-14 count baseline cross-check), ~/.claude/CROSS-PROJECT-MEMORIAL.md (Reviewer-section grep).
+## Binding command results (observed, not predicted)
 
-## Reviewer attestation SHA
-HEAD audited: `e698c20` (the chore-attestation commit on top of the Implementer's GREEN `dea1d7a`). All independent binding commands run at this SHA.
+Attested at: chore commit following GREEN commit `7796f29` (Implementer records chore SHA below after commit)
+
+**npm run typecheck** (tsc -p tsconfig.test.json --noEmit):
+- Exit code: 0
+- Output: clean (no errors, no warnings)
+
+**node --test test/q04-welford-stats.test.js** (R04 new q04 tests, AC-17):
+- pass 11 / fail 0
+- All 11 AC-1 through AC-11 tests pass
+
+**node --test test/q03-warm-start-runtime.test.js** (R03+R04 q03 tests, AC-12/AC-13):
+- pass 13 / fail 0
+- 11 original R03 tests + 2 new R04 tests (AC-12 strict-tier reset + AC-13 immutability)
+
+**node --test test/q01-vendoring-coverage.test.js test/q01-no-at-pin-deltas.test.js test/q01-schema-additions.test.js test/q02-schema-extension.test.js test/betting-e-process-class-dispatch.test.js** (AC-16 + AC-18):
+- pass 20 / fail 0
+- Observed per-file: q01-vendoring-coverage=3, q01-no-at-pin-deltas=1, q01-schema-additions=5, q02-schema-extension=6, smoke=5
+
+**Total observed: 13 + 20 + 11 = 44 tests; all green.**
+
+Pre-R04 baseline per R03 Reviewer-verified at HEAD `e698c20` (no code changes through `2160b7e`): 31 tests. Delta: +13 (q03 grows 11→13; q04 new at 11). Matches predicted.
+
+**TDD ordering (AC-14):**
+- RED commit: `4468b5e` — test/q04-welford-stats.test.ts alone; import from ../engine/per-shard/welford → TS2307 confirmed
+- GREEN commit: `7796f29` — engine/per-shard/welford.ts + test/q03-warm-start-runtime.test.ts Delta 3
+
+**Integration-point verification (spec § Integration points):**
+- grep -n "^import" engine/per-shard/welford.ts → 0 matches (zero inherited imports; verified pre-commit)
+
+## Chore commit attestation
+Attested SHA: (updated after chore commit below)
+
+## Routing notes
+- Tier: full (A2 + A4 + A7; see spec preamble and audit sidecar)
+- Three surfaces of change: 1 production CREATED (engine/per-shard/welford.ts) + 1 test CREATED (test/q04-welford-stats.test.ts) + 1 test CHANGED (test/q03-warm-start-runtime.test.ts — additive only, 2 new tests + 1 comment block)
+- Reviewer reads Q-R04-SPEC-AUDIT.md (Architect ceremony sidecar) — Implementer did not
+- R03 carry-forwards closed: MINOR-1 (AC-9 clarifying comment + AC-12 load-bearing complement), MINOR-5 (AC-13 immutability), OBS-2 (AC-12 strict-tier reset)
+- R03 carry-forwards NOT closed at R04 (deferred): MINOR-2 (architect reinforcement only), MINOR-3 (architect reinforcement only), MINOR-4 (discipline reinforcement only), OBS-1/3/4/5 (orthogonal; R04-SAS-21)
+- Welford module has ZERO inherited imports — verified by grep
+- No anti-scope violations: no modification to engine/types/config.ts, engine/per-shard/warm-start.ts, tsconfig*, package.json, inherited vendored files, factories.ts
