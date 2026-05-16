@@ -197,3 +197,13 @@ with a clear commit message.
 #   honest form, prefer the narrower form unless the spec explicitly justifies the widening.
 #   Detected R02: Delta 8 required PerShardCell shape change + n_samples; cast widening was
 #   incidental, not required by spec text (REVIEWER MINOR-4).
+
+# REINFORCED 2026-05-16 — When binding-command attestation includes a per-file test count
+#   (e.g., "node --test q01-vendoring + q01-no-at-pin + q01-schema + q02-schema → pass 16 / fail 0"),
+#   the count MUST be the value OBSERVED by running those exact commands — not the count stated
+#   by the spec. If the spec states "4 tests" and you observe "3 tests," report "3" and note the
+#   discrepancy: "observed 15 total; spec stated 16; q01-vendoring-coverage has 3 tests, not 4."
+#   Propagating the spec's predicted count as if it were an observed count is not an attestation.
+#   A Reviewer running the same commands independently will surface the discrepancy as a MINOR.
+#   Detected R03: Implementer attested "pass 16 / fail 0" for four R01/R02 test files; actual
+#   observed count is 15/0 (q01-vendoring-coverage = 3 tests); REVIEWER MINOR-4.
