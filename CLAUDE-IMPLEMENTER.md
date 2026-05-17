@@ -354,3 +354,38 @@ with a clear commit message.
 #   author. Detected tessera R16 MINOR-3: PR-F5-INVESTIGATION-R16.md:127 "Recommendation from
 #   R16: Option 2..." inside the α sub-section; spec § 4 forbade architectural disposition;
 #   sub-α lean is a soft violation caught by Reviewer as MINOR-3.
+# REINFORCED 2026-05-17 — When a grep-based correction-propagation pass identifies a file as a
+#   hit-bearing file, the enumeration must be done at SECTION level, not file level. After
+#   updating the section at the primary grep hit, read the full document to identify ALL other
+#   sections that carry forward-looking advice dependent on the claim's status — even if those
+#   sections do not contain the literal grep string. Updating one section of a multi-section
+#   document while leaving other sections with stale forward-looking advice creates internal
+#   inconsistency (§ 5 says "outstanding"; § 6 says "closed"). The correction-propagation pass
+#   is complete only when every section of a hit-bearing file has been checked for status-
+#   dependent advice and updated accordingly. Detected tessera R17 MINOR-1: grep identified
+#   PHASE-1-CLOSE-WALK.md as a hit; § 6 (TQ-1 sub-section) was updated; § 5 (outstanding-gaps
+#   TQ-1 entry at line 175) retained stale "(γ) investigation first" advice after TQ-1 was
+#   closed at § 6 with disposition (β). MEMORIAL:1628 asserted "All live claims updated" —
+#   overstatement caught by Reviewer as MINOR-1.
+# REINFORCED 2026-05-17 — When appending a new round's entries to MEMORIAL.md with a ---
+#   separator and ## ROUND — ROLE header, first READ FORWARD through the existing content to
+#   locate the terminal line of the PRIOR section (the last CONFIRMATION or VIOLATION entry
+#   tagged with the prior round and role). Insert the --- + ## NEW header + new entries AFTER
+#   that terminal line. Do NOT rely on appending "at the end of the file" if there is a
+#   pre-existing entry below the apparent write-cursor position — read the tail explicitly and
+#   confirm the final line is part of the prior round's block before writing. Appending the
+#   new --- + ## header before the prior section's last line causes structural misplacement
+#   where old-round entries appear inside the new-round section. Detected tessera R17 MINOR-2:
+#   R16 Memorial Updater role-boundary CONFIRMATION (tagged | R16 | MEMORIAL-UPDATER) landed
+#   physically after the ## R17 — Implementer header and after 7 R17 Implementer entries
+#   because the append inserted the R17 header before the pre-existing R16 last-line.
+# REINFORCED 2026-05-17 — When performing any in-passing cleanup of a file's docblock or
+#   comment section, apply a citation-completeness gate: for every bare filename cited in the
+#   docblock (e.g., "REVIEWER-REPORT-R10.md"), verify whether the canonical project-relative
+#   path is known (e.g., "coordination/reviews/REVIEWER-REPORT-R10.md"). If the canonical path
+#   differs from the bare filename, update the citation to the full canonical path as part of
+#   the in-passing pass. Bare filenames in source comments do not resolve for a reader who
+#   tries to navigate to the file. Detected tessera R17 MINOR-3: engine/per-shard/runtime.ts
+#   :17 and :24 cited REVIEWER-REPORT-R10.md and REVIEWER-REPORT-R14.md without the
+#   coordination/reviews/ prefix; R17 opened this file for R10 MINOR-1 docblock cleanup but
+#   the path issue was not observed and corrected in the same pass.

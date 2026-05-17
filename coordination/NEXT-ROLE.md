@@ -1,8 +1,74 @@
 CURRENT-ROUND: R17
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision — R18 ARCHITECT for Phase 2 SLICE 1)
+STATUS: ROUND-COMPLETE
 
-## Round scope — operator-set (do NOT auto-redirect)
+## R17 Reviewer outcome — 2026-05-17
+
+| Finding tier | Count |
+|---|---|
+| CRITICAL | 0 |
+| MAJOR    | 0 |
+| MINOR    | 3 |
+| OBS      | 4 |
+
+Routing per CLAUDE-COMMON.md: MAJOR or below → **STATUS: MERGE-READY**.
+
+Report: `coordination/reviews/REVIEWER-REPORT-R17.md`
+
+Reviewer-side binding verification at HEAD `e937d00`: typecheck exit 0; 171/0 across 18 files (matches Implementer attestation and R16 baseline). Anti-amend verification: `git diff 435bcdd HEAD -- src/ tests/ tools/ engine/ coordination/specs/ coordination/SCOPING-MEMO-v0.3.md coordination/PHASE-1-CLOSE-WALK.md` is empty.
+
+ACs: 10/10 PASS (3 PASS verdicts carry OBS-level nuance flagged in report).
+
+Findings summary:
+- MINOR-1: correction-propagation pass missed `PHASE-1-CLOSE-WALK.md:175` (§ 5 outstanding-gaps TQ-1 entry still contains stale "(γ) investigation" recommendation + "operator triages TQ-1 before Phase 2 launch" advice). Implementer MEMORIAL "All live claims updated" assertion overstates completeness.
+- MINOR-2: `MEMORIAL.md:1634` R16 role-boundary CONFIRMATION orphaned physically under R17 header (line tags preserve attribution; section structure misplaces R16 content under R17).
+- MINOR-3: `engine/per-shard/runtime.ts:17,24` cite bare `REVIEWER-REPORT-R10.md` / `REVIEWER-REPORT-R14.md` without `coordination/reviews/` path prefix; pre-existing but unaddressed by R17's "in-passing cleanup" of this file.
+- OBS-1/2/3/4: AC-R17-1(a) verbatim quotation lives in adjacent paragraph; PHASE-1-CLOSE-WALK § 1.2:49 historical narrative borderline; § 4.2 R-E1 historical-quote literal-string preserved; halt-condition site-counting interpretive flexibility.
+
+Operator next action: trigger Memorial Updater to record R17 outcomes; future-round Implementer addresses MINOR-1/MINOR-2/MINOR-3 in next in-passing cleanup window if desired.
+
+---
+
+## R17 Implementer close — attestation
+
+| Item | Result |
+|------|--------|
+| typecheck | exit 0 |
+| test/q01-vendoring-coverage.test.js | 3/0 |
+| test/q01-no-at-pin-deltas.test.js | 1/0 |
+| test/q01-schema-additions.test.js | 5/0 |
+| test/q02-schema-extension.test.js | 6/0 |
+| test/q03-warm-start-runtime.test.js | 13/0 |
+| test/q04-welford-stats.test.js | 11/0 |
+| test/q05-per-shard-runtime.test.js | 13/0 |
+| test/q06-baseline-pre-pass.test.js | 13/0 |
+| test/q07-fleet-correlated.test.js | 23/0 |
+| test/q10-per-shard-emission.test.js | 11/0 |
+| test/q11-hierarchical-e-value-combination.test.js | 18/0 |
+| test/q12-fleet-merged-detector-surfaces.test.js | 16/0 |
+| test/q13-e-bh-fdr.test.js | 14/0 |
+| test/q14-compiled-config-loader.test.js | 6/0 |
+| test/q14-mean-delta.test.js | 7/0 |
+| test/q14-pr-f5-storage.test.js | 4/0 |
+| test/q16-pr-f5-investigation.test.js | 2/0 |
+| test/betting-e-process-class-dispatch.test.js | 5/0 |
+| **Total** | **171/0** (identical to R16 baseline) |
+
+Attestation SHA: `435bcdd` (coordination chore commit)
+
+---
+
+## Inputs (artifacts the Memorial Updater should read)
+
+- `coordination/specs/Q-R17-SPEC.md` (Implementer self-spec; audit-tier round)
+- `coordination/reviews/REVIEWER-REPORT-R17.md` (this Reviewer report)
+- `coordination/MEMORIAL.md` (R17 Implementer + R17 Reviewer entries appended this round)
+- `coordination/diagnostics/` (verified empty for R17; no halt conditions triggered)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` (tessera-R17 additions to be written)
+
+---
+
+## R17 round scope (preserved for Memorial Updater context)
 
 **R17 = TQ-1 disposition (β) execution: pitch-revise + shard definition addition + TQ-1 closure + R10 MINOR-1 in-passing.** Audit tier per evening-overnight authority. First round of the post-Phase-1 evening chain (R17 → R18-R19 Phase 2 SLICE 1 → STOP).
 
