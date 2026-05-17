@@ -4,7 +4,7 @@ STATUS: READY
 
 ## Attestation (R14 — filled after chore commit)
 
-GREEN HEAD SHA: [SHA-A — to be filled after coordination chore commit]
+GREEN HEAD SHA: 965a260 (coordination chore; `git diff 965a260 HEAD -- engine/ test/ coordination/specs/` is empty)
 
 Binding commands (OBSERVED at GREEN HEAD `949b03c`):
 - `npm run typecheck` → exit 0
