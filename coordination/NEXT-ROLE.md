@@ -1,93 +1,152 @@
-CURRENT-ROUND: R09
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R10
+NEXT-ROLE: ARCHITECT
+STATUS: READY
 
-## Inputs for Memorial Updater
+## Round scope — operator-set (do NOT auto-redirect)
 
-- `coordination/specs/Q-R09-SPEC.md` — R09 self-spec (brainstorm + design + ACs + anti-scope)
-- `coordination/reviews/REVIEWER-REPORT-R09.md` — Reviewer report (0 CRITICAL / 1 MAJOR / 3 MINOR / 6 OBS); STATUS: MERGE-READY
-- `test/q07-fleet-correlated.test.ts` — 2 edits: AC-11 tightened; AC-15 n_ticks_contaminated binding added
-- `coordination/specs/Q-R08-SPEC.md` — § Mechanism primitive 11 corrected (empirical premise fix); MAJOR-1 documents 4 sibling surfaces left uncorrected (R10 disposition candidate)
+**R10 = Phase 1 SLICE 2b4: warm-start emission at strict tier + sparse-encoding-convention enforcement.**
 
-## Reviewer summary
+Returns to the SLICE 2b runtime series (R03/R04/R05/R08-amended) after the SLICE 4/5 baseline-curation arc (R06/R07/R08-amendment/R09). Two specific deferrals close in this round:
 
-- Routing: MERGE-READY (no CRITICAL).
-- 1 MAJOR: Q-R08-SPEC.md primitive-11 correction did not propagate to 4 sibling surfaces (preamble :24, cross-section table row 11 :94, "All 18 checks PASS" :103, Delta 11 final sentence :563, AC-15 spec text :592). Documentation consistency, not behavior. Recommended R10 audit-tier disposition.
-- 3 MINOR: test-message wording precision (:364); AC-R09-1 grep verifier too narrow; NEXT-ROLE.md attestation table omits HEAD-SHA per-row.
-- 6 OBS: TDD ordering verified; role boundaries clean; reinforcement assessment sound; audit-tier methodology validated; right-reasons audit surfaced MAJOR-1; approach γ judgment sound.
-- Reviewer-independent binding-command verification: 93/0 matches Implementer attestation exactly.
+1. **R05 anti-scope deferral:** `mean_vector` / `covariance` emission at strict tier. R05 spec § Anti-scope explicitly fenced these off (deferred to "R06+"; we redirected to baseline curation instead). The R05 close-state landed the Welford composition (`engine/per-shard/runtime.ts` `updatePerShardResidual`) with `welford_state?: WelfordState` on `PerShardResidual` but did NOT extract `mean_vector` / `covariance` from the accumulator into the output residual at strict-tier transitions.
 
-## Observed binding-command results (at GREEN HEAD `59f2084`)
+2. **R02 MINOR-2 carry-forward:** sparse-encoding-convention enforcement. The R02 sparse-encoding convention partitions per-shard output fields by confidence tier: `mean_vector` + `covariance` present at strict; `mean_delta` present at warm_start; nothing at none/pooled/aggregate. Currently the convention is documented in JSDoc but not type-enforced or runtime-asserted; R02 MINOR-2 has been carry-forward since R02.
 
-| File | OBSERVED pass | OBSERVED fail |
-|---|---|---|
-| q07-fleet-correlated | 23 | 0 |
-| q01-vendoring-coverage | 3 | 0 |
-| q01-no-at-pin-deltas | 1 | 0 |
-| q01-schema-additions | 5 | 0 |
-| q02-schema-extension | 6 | 0 |
-| q03-warm-start-runtime | 13 | 0 |
-| q04-welford-stats | 11 | 0 |
-| q05-per-shard-runtime | 13 | 0 |
-| q06-baseline-pre-pass | 13 | 0 |
-| betting-e-process smoke | 5 | 0 |
-| **Grand total** | **93** | **0** |
+R10 SHIPS:
+- Strict-tier emission logic: when `welford_state.n_samples >= STRICT_UPGRADE_THRESHOLD` AND tier transitions to `'strict'`, compute `mean_vector` from `welfordMean(welford_state)` and `covariance` from `welfordCovariance(welford_state)`; populate both fields on the returned PerShardResidual.
+- Sparse-encoding inverse-convention enforcement: at non-strict tiers, `mean_vector` and `covariance` MUST be `undefined` (or absent). Tests bind the inverse at all 4 non-strict tiers.
+- New ACs covering: positive presence at strict; negative absence at warm_start / none / pooled / aggregate; mean_vector dimensionality matches sample dimensionality; covariance is symmetric PSD of dimensionality d×d.
 
-`npm run typecheck` → exit 0.
+R10 does NOT ship (explicit anti-scope):
+- `mean_delta` computation (still deferred — requires BaselineCellEntry injection per R05's anti-scope; separate architectural concern).
+- Compiled-artifact JSON loader (R11+ candidate).
+- PR-F5 empirical storage profile measurement.
+- Any baseline-curation work (SLICE 4/5 closed; R11+ if additional curation surfaces).
+- Any modification to `tools/curate-baseline-pre-pass.ts` or `tools/curate-baseline-fleet-correlated.ts` (R06/R07/R08-amendment closed surfaces).
 
-q07 count remains 23 (no new tests added; AC-11 and AC-15 are existing tests modified).
+## Architectural pre-dispositions (preserved across rounds; load-bearing for R10)
 
-## AC verification results (Implementer-side)
+Per `coordination/ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md` (Q-J1..Q-J5):
+- Q-J1 hybrid Ville + e-BH — preserved
+- Q-J2 20-sample warm-start / 60-sample strict-upgrade — preserved; R10 emission triggers at strict transition (`n_samples >= 60`)
+- Q-J3 cascade at every layer — preserved
+- Q-J4, Q-J5 — preserved
 
-| AC | Status | Evidence |
-|---|---|---|
-| AC-R09-1 | PASS | `grep -c "produces zero contamination flags" Q-R08-SPEC.md` → 0; corrected claim with n_ticks_contaminated=6 present |
-| AC-R09-2 | PASS | `grep -n "n_ticks_contaminated.*6" test/q07-fleet-correlated.test.ts` → lines 361, 363; q07 23/0 |
-| AC-R09-3 | PASS | `grep -n "strictEqual(firedCount, 0)" test/q07-fleet-correlated.test.ts` → 0 matches; `firedCount <= 1` at line 291 |
-| AC-R09-4 | PASS | Q-R09-SPEC.md §2 Decision B documents the trace: AC-P1 is FPR-only; no detection-scope claim; no PRD amendment needed |
-| AC-R09-5 | PASS | `git diff 28fc4a1..HEAD --name-only` does NOT include CLAUDE-COMMON.md |
-| AC-R09-6 | PASS | Item 5 assessment below (this file) |
+Per `coordination/ARCHITECT-REPLY-BASELINE-CURATION-v0.2-PRE-DISPOSITION.md` (Q-JC1..Q-JC6 + Q-JC4a/b/c): irrelevant to R10 (baseline curation surfaces closed; R10 is per-shard runtime).
 
-## Item 5 — Reinforcement quality assessment
+## Active REINFORCED lines architect MUST apply (12 in ARCHITECT, 13 in IMPLEMENTER, 1 in COMMON)
 
-Reviewed all 7 R06+R07+R08 REINFORCED lines in CLAUDE-ARCHITECT.md (4 additions) and CLAUDE-IMPLEMENTER.md (3 additions).
+R10 Architect must specifically apply (these have all triggered in recent rounds):
+- **Cross-section consistency pass** (R02; standing) — every resolved decision token must appear consistently across sections.
+- **Type-declaration-site discipline** (R02) — open the file where each external type is DECLARED, not just used. `WelfordState` declared at `engine/per-shard/welford.ts`; `PerShardResidual` declared at `engine/types/config.ts` (the schema-extension surface from R02/R03); confidence tier union declared at `engine/types/config.ts`.
+- **Re-export-chain check** (R03) — verify whether each import is direct vs re-exported.
+- **Inherited-testimony empirical verification** (R08) — for any factual claim about prior-round behavior, run the relevant command/fixture and document OBSERVED output. Specifically: claims about R03/R04/R05 behavior (warm-start transitions; Welford accumulator state; composition function output) must be empirically verified, not inherited from prior spec text.
+- **Correction-propagation pass** (R09) — if R10 corrects any prior-round spec premise, enumerate all sibling/downstream sections in the affected spec.
+- **OBSERVED-binding scope** (R07) — must NOT be used unless deviation is PRNG-drift-class. Test bindings should be theory-derived where possible.
+- **Fixture-sizing exhaustive propagation** (R07) — when grilling catches a sizing issue for one AC, check sibling ACs with similar patterns.
+- **Component-inventory AC-range arithmetic cross-check** (R06) — narrative vs pseudocode count must match.
 
-**CLAUDE-ARCHITECT.md:**
+Implementer must specifically apply:
+- **Procedural halt-discipline** (R08) — spec premise failures require DIAGNOSTIC regardless of resolution clarity.
+- **Attestation-accuracy** (R03) — OBSERVED, not predicted.
+- **MEMORIAL tactical-choice verification** (R05) — narrative claims about committed code must be verified against the file.
 
-1. **R06** (Component-inventory AC-range cross-check): Well-written. Fires when narrative counts diverge from pseudocode. Specific violation cited with detection pattern.
-2. **R07 MAJOR-1** (fixture-sizing exhaustive propagation): Actionable trigger ("must be applied to ALL other ACs in the same spec that use any injection or single-window H₁ pattern"). Could optionally add: "When grilling catches AC-N's fixture needs X windows, iterate explicitly through all other H₁ ACs before proceeding." Functionally clear as-is; watch-list for future sharpening if recurrence observed.
-3. **R07 MAJOR-2** (OBSERVED-binding scope): Excellent. The "would a future FIX matching architect prediction FAIL this test?" trigger question is load-bearing and specific. Best-written reinforcement in the set.
-4. **R08 MAJOR-2** (inherited-testimony empirical verification): Clear rule. "Inherited from prior testimony is not verification" + "record the specific command run and observed output" are actionable.
+## Inputs for next role (load-bearing — READ ALL)
 
-**CLAUDE-IMPLEMENTER.md:**
+The R10 Architect MUST read:
 
-5. **R06** (extending hard-coded path list, update header counts): Specific violation pattern, well-targeted. Fires correctly.
-6. **R07 MINOR-1** (spec fixture deviation = borderline HALT): The operative question is excellent. "Changing the literal that is being ASSERTED requires Architect confirmation" is unambiguous.
-7. **R08 MAJOR-1** (spec-premise-failure HALT): "regardless of how unambiguous the correct revert appears" + three diagnostic requirements are concrete. The final sentence ("discipline is calibrated by auditability, not by resolution difficulty") is load-bearing.
+**Round scope:**
+- This `coordination/NEXT-ROLE.md` (you're reading it).
 
-**Watch-list recommendation for Memorial Updater**: all 7 lines are actionable. No sharpening required at this time. If R07 MAJOR-1 architect reinforcement recurs (another round where fixture-sizing reasoning isn't propagated to sibling ACs), the line could be sharpened with an explicit "iterate-all-sibling-H1-ACs" checklist marker.
+**SLICE 2b series prior-round artifacts (the runtime stack R10 extends):**
+- `coordination/specs/Q-R02-SPEC.md` — schema extensions including `PerShardResidual` shape and sparse-encoding convention (MINOR-2 origin).
+- `coordination/specs/Q-R03-SPEC.md` + `Q-R03-SPEC-AUDIT.md` — warm-start state machine; `residual_seed_hash` semantics.
+- `coordination/specs/Q-R04-SPEC.md` + `Q-R04-SPEC-AUDIT.md` — Welford pure-function module.
+- `coordination/specs/Q-R05-SPEC.md` + `Q-R05-SPEC-AUDIT.md` — Welford-into-PerShardResidual composition; explicitly defers emission to "R06+".
+- `coordination/reviews/REVIEWER-REPORT-R02.md` (MINOR-2 carry-forward context).
+- `coordination/reviews/REVIEWER-REPORT-R05.md` (watch list items 1-3; OBS-1/2/3).
 
-## Item 4 — CLAUDE-COMMON.md (Memorial Updater scope)
+**Production code (the surface R10 modifies):**
+- `engine/per-shard/runtime.ts` (R05 GREEN — composition function; R10 extends).
+- `engine/per-shard/welford.ts` (R04 GREEN — `welfordMean`, `welfordCovariance`; R10 consumes).
+- `engine/per-shard/warm-start.ts` (R03 GREEN — state machine; R10 may extend or compose).
+- `engine/types/config.ts` (R02 schema extensions for `PerShardResidual`; R10 may add to inline JSDoc enforcement).
 
-Per Q-R09-SPEC.md anti-scope R09-SAS-2 and NEXT-ROLE.md round scope note, CLAUDE-COMMON.md is Memorial Updater territory. The Implementer did NOT modify CLAUDE-COMMON.md. Memorial Updater should add the Item 4 REINFORCED line as prescribed in the original NEXT-ROLE.md Round scope § Item 4 (R05 silent-overwrite methodology entry).
+**Discipline memorials:**
+- `coordination/MEMORIAL.md` — R01–R09 entries.
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` — apply every "Reinforcement rules derived" entry.
 
-## Attestation
+**Tessera scoping context:**
+- `coordination/SCOPING-MEMO-v0.3.md` — § 3 Phase 1 boundary.
+- `coordination/PRD.md` — AC-P2 (warm-start cell_confidence + strict-upgrade preserves inherited single-instance behavior) is the load-bearing trace.
 
-ATTESTATION SHA: 640c8e8
+**Inherited engine surface at SHA `5a72371` (file-opened-discipline mandatory):**
+- `engine/types/families/c.ts` — Family C `FamilyCPerCell.mean_vector` + `covariance` declaration; matches what R10 emits at strict tier.
+- `engine/types/config.ts` — `BaselineCellEntry.confidence` union (5 values including R02-added `'warm_start'`).
 
-## Coordination chore sequence
+## Halt conditions for R10
 
-Per NEXT-ROLE.md R14 reinforcement:
-1. All binding commands run at GREEN HEAD `59f2084`; OBSERVED counts recorded above.
-2. Coordination artifacts written (this file + MEMORIAL.md append) without SHA field.
+- **Q-JC re-disposition:** if architectural brainstorm surfaces a Q-J or Q-JC re-disposition need, HALT — operator gate.
+- **Scope drift to compiled-artifact loader or mean_delta:** R10 is bounded to emission + sparse-encoding enforcement. Either pull is a HALT + scope question.
+- **Inherited testimony about R03/R04/R05 behavior:** verify empirically before writing into spec; silent inheritance is an R08 MAJOR-2-class violation.
+- **New OBSERVED-binding without "would future FIX matching prediction FAIL?" check:** R07 MAJOR-2 reinforcement.
+
+## Coordination chore sequence (R14 final revision; same as R06–R09)
+
+Per CROSS-PROJECT-MEMORIAL.md R14 reinforcement:
+1. Run all binding commands at GREEN; record OBSERVED counts (NOT pre-stated).
+2. Write all coordination artifacts WITHOUT SHA field.
 3. `git add` coordination artifacts.
-4. `git commit -m "chore(R09): coordination artifacts"` → SHA-A.
-5. Write SHA-A into this file's Attestation block.
-6. `git commit -m "chore(R09): record attestation SHA"` → SHA-B.
+4. `git commit -m "chore(R10): coordination artifacts"` → SHA-A.
+5. Write SHA-A into NEXT-ROLE.md's Attestation block.
+6. `git commit -m "chore(R10): record attestation SHA"` → SHA-B.
 7. Reviewer verifies: `git diff SHA-A HEAD -- src/ tests/ tools/ engine/ coordination/specs/` is empty.
 
-## Operator gate items preserved (NOT in R09 scope)
+## Pre-R10 baseline (INFORMATIONAL; report OBSERVED at GREEN per R03 MINOR-4)
 
-- OQ-1 / Q-JC1 calibrate.ts vendoring decision (architecturally-decisional; full-tier round candidate)
+Reviewer-verified at R09 HEAD `640c8e8`:
+- q07-fleet-correlated: 23/0
+- q06-baseline-pre-pass: 13/0
+- q01-vendoring-coverage: 3/0
+- q01-no-at-pin-deltas: 1/0
+- q01-schema-additions: 5/0
+- q02-schema-extension: 6/0
+- q03-warm-start-runtime: 13/0
+- q04-welford-stats: 11/0
+- q05-per-shard-runtime: 13/0
+- betting-e-process smoke: 5/0
+- **Total: 93/0**
+
+R10 expected at GREEN: prior 10 file counts unchanged + new q10 file (likely +6 to +10 ACs covering strict-tier emission + sparse-encoding inverse-convention). Implementer reports OBSERVED per file.
+
+## Routing
+
+```
+cd ~/concord/tessera
+./run-pipeline.sh --round R10 --tier full
+```
+
+`--tier full` per A3 (resolving deferred open questions from R02 + R05) + A2 (new architectural pattern — first runtime-emission surface at strict-tier transitions). Tier rubric does not justify a downshift.
+
+## Methodology improvements landed since R09
+
+**Anchor PRs #34 + #35 + #37 merged at canonical anchor 2026-05-17.** Tessera's `run-pipeline.sh` forward-synced from canonical at commit `7551da5` (PR #37 preflight state-machine: refuse-to-overwrite operator-prepared NEXT-ROLE.md by default; new `--reset-next-role` opt-in).
+
+Implication for R10 onward: the manual `CURRENT-ROUND: <round>` preparation trick we've used since the R05 silent-overwrite incident is no longer strictly required — but still recommended (it's how the file ends up matching CURRENT-ROUND on launch; the new preflight just refuses to overwrite if mismatch instead of clobbering). Pattern unchanged in practice.
+
+PR #35 (MD-F6 + verify-citations.sh) unblocks the audit-sidecar template follow-up PR; deferred to the R10-batch anchor contribution per the new every-5-rounds cadence.
+
+## Operator gate items preserved (NOT in R10 scope)
+
+- OQ-1 / Q-JC1 `tools/calibrate.ts` vendoring decision
 - OQ-R08-3 Phase 2 transient detector scheduling
-- Anchor PR #35 / #37 merge decisions
+- R09 MINOR-3 NEXT-ROLE.md attestation table format question
+- R10-batch anchor PR (cadence reminder fires at R10 close)
+
+## Update history
+
+| Date | Event |
+|---|---|
+| 2026-05-16 | R09 cleanup closed; R09 followup direct-fix landed; baseline curation arc complete. |
+| 2026-05-17 | Anchor PRs #34/#35/#37 merged; tessera forward-synced run-pipeline.sh. |
+| 2026-05-17 | R10 launched: return to SLICE 2b series; close R05 emission deferral + R02 MINOR-2. |
