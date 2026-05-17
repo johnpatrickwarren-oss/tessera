@@ -256,3 +256,17 @@ with a clear commit message.
 #   documented in NEXT-ROLE.md only; no DIAGNOSTIC file created; Implementer's own MEMORIAL
 #   entry incorrectly characterized this as "correct — spec-reality conflict with an empirically
 #   determinable answer does not require HALT."
+
+# REINFORCED 2026-05-16 — When verifying removal or correction of a wrong factual claim in a
+#   multi-section document, the AC verifier must (a) check for semantic paraphrases of the wrong
+#   claim — not only the literal exact-string occurrence at the primary correction site — and
+#   (b) enumerate ALL downstream sections that cite or derive from the corrected primitive and
+#   verify each is consistent with the correction. A literal-exact grep returning 0 does not
+#   constitute full-document consistency verification if the same wrong premise persists at
+#   sibling sections in different wording. Add a "correction propagation pass" to pre-emit
+#   grilling: after correcting a claim at the primary site, enumerate every other location in
+#   the same document that states the claim (or its downstream consequences) and verify each is
+#   updated. Detected tessera R09 MAJOR-1: Q-R08-SPEC.md primitive 11 corrected at line 74 but
+#   same false premise persisted at lines 24, 94, 103, 563, 592 in different phrasings; AC-R09-1
+#   verifier checked only the literal phrase "produces zero contamination flags"
+#   (REVIEWER MAJOR-1 + MINOR-2).
