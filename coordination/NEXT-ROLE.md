@@ -108,7 +108,7 @@ Per R12 coordination chore sequence step 5; per R09 MINOR-3 carry-forward (opera
 HEAD at spec emit: 58d6090
 RED commit SHA: 6c4b8b4
 GREEN commit SHA: 24276ee
-Coordination-artifacts commit SHA (SHA-A): <Implementer fills after chore commit>
+Coordination-artifacts commit SHA (SHA-A): f7960fb
 
 OBSERVED per-file test counts at GREEN:
   test/q01-vendoring-coverage.test.js:           3/0
