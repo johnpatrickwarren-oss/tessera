@@ -49,7 +49,7 @@ Per-extension ACs at the spec level (not at PRD level — Tessera's per-phase sp
 
 | Area | Requirement |
 |---|---|
-| Performance | Inherited per-tick latency baseline preserved at fleet scale: median 30 μs / p99 63 μs / max 194 μs per per-shard instance (per `deploysignal/runs/benchmarks/tick-latency-baseline.json` @ SHA `5a72371`); at N=1000 shards fleet-tick CPU budget ~30 ms total. Architect-pre-prediction: storage 1.2-1.5× single-instance footprint via sparse per-shard residual (PR-F5 empirical-validation at Phase 1 SLICE 2). |
+| Performance | Inherited per-tick latency baseline preserved at fleet scale: median 30 μs / p99 63 μs / max 194 μs per per-shard instance (per `deploysignal/runs/benchmarks/tick-latency-baseline.json` @ SHA `5a72371`); at N=1000 shards fleet-tick CPU budget ~30 ms total. Architect-pre-prediction: storage 1.2-1.5× single-instance footprint via sparse per-shard residual (PR-F5 empirical-validation at Phase 1 SLICE 2). **[R17 AMENDMENT: prediction empirically refuted — R14 PR-F5 measured 1237.7× at N=1000; ratio ≈ N; operator disposition (β) pitch-revise confirmed 2026-05-17. See `SCOPING-MEMO-v0.3.md` §§ 1.7, 1.8, 2.2, 4.2.]** |
 | Security | Inherited enterprise-infrastructure boundary preserved (no real customer cluster telemetry; synthetic-cluster substrate only at Phase 1 + 2). |
 | Reliability | Inherited Ville-bounded statistical guarantees preserved per Phase-3.d.D close (DeploySignal main @ SHA `5a72371` LEDGER:176/179 + PRESERVED-PERMANENT-POST-PHASE-D). |
 | Compatibility | Engine vendored at SHA `5a72371`; re-pin policy at every Tessera close-walk; extract-to-npm-package commitment at Phase 2 close. |

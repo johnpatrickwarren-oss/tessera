@@ -1,5 +1,5 @@
 CURRENT-ROUND: R17
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Round scope — operator-set (do NOT auto-redirect)

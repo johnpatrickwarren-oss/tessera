@@ -1,7 +1,7 @@
 # SCOPING-MEMO — Tessera v0.3 (Founding Architecture)
 
 _From: Architect. To: John (decision-routing). Routed via: TPM._
-_Date: 2026-05-15._
+_Date: 2026-05-15. Amended: 2026-05-17 (R17 — § 1.7 shard definition added; § 2.2 storage claim corrected; § 4.2 R-E1 updated). See § 1.8 Amendment history._
 _Type: **SCOPE-PROPOSAL v0.3** — standalone Tessera-product framing replacing v0.1 + v0.2 (which scoped the same architectural extensions under a DeploySignal-extension framing now superseded). Per anchor `templates/Q-NN-SPEC-TEMPLATE.md` frame at reduced fidelity._
 _Foundation: project-reframe disposition (John 2026-05-15, post-disposition same session); engine-vendoring strategy (vendor-first; extract-to-npm at Phase 2); DeploySignal engine state pinned at SHA `5a72371` (current main); anchor latest skills 13-15 + hybrid Reviewer design (commits `c2a24dc` + `9aec8d7`); audit-trail predecessors v0.1 + v0.2 of fleet-mode-scoping memo + Reviewer report + initial disposition deleted 2026-05-16 per John cleanup disposition (substantive content subsumed into this v0.3 + framing-history preserved in `PROJECT-CONTEXT.md`; literal text in git history at commits `884c08e`, `e4a956a`, `aa4fa97`)._
 _Sequencing: Tessera Phase 1 (per-shard infrastructure: Extensions 1 + 2 bundled) + Tessera Phase 2 (cross-shard correlation: Extension 3) — decoupled from DeploySignal's Phase E (production deployment hardening). See § 5 Q-J6._
@@ -90,6 +90,36 @@ The aggregated-references convention applies at SCOPE-PROPOSAL fidelity where ci
 
 ---
 
+### 1.7 Unit definition: shard = 1 GPU rank
+
+_Added R17 2026-05-17 — vocabulary gap surfaced during TQ-1 storage-claim discussion; storage claims in § 2.2 and § 4.2 use "shard" as a unit without defining it._
+
+**Canonical definition:** `1 shard = 1 GPU rank` per NVIDIA FSDP (Fully Sharded Data Parallel), tensor-parallelism, and pipeline-parallelism convention. Each GPU process/rank manages one shard of the model's parameters and activations. Sources: NVIDIA NeMo Framework Parallelisms documentation; NVIDIA Megatron-Core FSDP documentation.
+
+**Topology hierarchy (training context):**
+
+| Level | Shard count | Note |
+|---|---|---|
+| `gpu_shard` | 1 | 1 GPU rank; the atomic unit Tessera observes |
+| `dgx_node` | 8 | H100 DGX = 8 × H100 SXM GPUs |
+| `rack` | 32–128 | Varies by DGX count per rack (4–16 DGX per rack in typical configs) |
+| `scalable_unit` | 256 | NVIDIA NeMo "scalable unit" = 32 DGX H100 systems |
+| `superpod` | 1K–8K+ | One DGX SuperPOD (varies by generation and config) |
+
+Tessera's exemplar cluster (N=100-10000 per § 1 executive summary) spans `rack` to `superpod` scale.
+
+**Inference caveat:** Training uses canonical per-GPU shards with the above hierarchy. Inference may use coarser granularity — for large-model partition (e.g., a 70B model split across 8 GPUs serving one request), the "shard" may correspond to N>1 GPUs. Tessera's per-shard observation maps to per-GPU rank by default but the detector layer is granularity-agnostic: the per-shard residual schema (`shard_id`, `PerShardResidual`) imposes no topology assumption; the caller selects the granularity at fleet configuration time.
+
+---
+
+### 1.8 Amendment history
+
+| Date | Round | Change |
+|---|---|---|
+| 2026-05-17 | R17 | § 1.7 shard unit definition added (vocabulary gap). § 2.2 storage-footprint paragraph: Architect-pre-prediction 1.2-1.5× amended to reflect empirical N-scaling truth from R14 + R16. § 2.2 PR-F5 trigger: updated from future-tense to completed-result. § 4.2 R-E1 risk row: storage claim updated. Operator disposition: (β) pitch-revise confirmed. |
+
+---
+
 ## 2. Per-extension scope
 
 ### Extension 1 — α budget arithmetic at fleet scale
@@ -140,6 +170,8 @@ Justification: candidate (a) independent per-shard pays cold-start tax N times �
 - **Naive endpoint** (independent per-shard baselines, candidate (a) reference): N=10000 × cells=168 (`hour_of_day × day_of_week` per Addition #2 default at SHA `5a72371`) × (p² covariance matrix + p mean vector at p=15 signals) × 8 bytes/float = 10000 × 168 × 240 × 8 = **3.22 GB**. At full cell-matrix expansion with `tenant_tier` (×5 per Addition #23) + `workload_class` (×4 per Addition #2): 10000 × 3360 × 240 × 8 = **64.5 GB**.
 - **Hierarchical-encoding endpoint** (candidate (b) PICKED, sparse per-shard residual): fleet aggregate ≈ 1 × full-cell-matrix footprint (~6.5 MB at default 168 cells; ~130 MB at full expansion); per-shard residual rank-deficient at warm-start, full only at `strict`-upgraded cells. Architect-pre-prediction: at N=10000 with sparse residual encoding, total ≈ **1.2-1.5× single-instance footprint** (PR-F5 pair-review trigger condition); empirical P6 measurement at Tessera Phase 1 SLICE 2 validates. Failure mode: prediction wrong by >2× single-instance signals load-bearing acceptance failure.
 
+  > **[R17 AMENDMENT — 2026-05-17]** The 1.2-1.5× prediction above is empirically refuted. R14 measured **1237.7× overhead ratio** at d=10 (81.9 MB per-shard warm_start residual aggregate vs 67.9 KB fleet baseline, N=1000); R16 d-mismatch investigation confirmed ratio converges toward **≈ N** as d → ∞ (1006.5× at d=100), not toward 1.2-1.5×. The sparse-encoding reduction (81.1%) is real but applied to per-shard footprint, not to fleet-aggregate footprint — the structural lower bound on the ratio is ≈ N, not ≈ 1. Sources: `test/q14-pr-f5-storage.test.ts`; `coordination/PR-F5-INVESTIGATION-R16.md`. Operator disposition: **(β) pitch-revise** confirmed 2026-05-17 (Phase 2 proceeds; storage-compression candidates — diagonal-only Family C, cross-shard sharing — are Phase 2 SLICE 2+ roadmap items; see `coordination/PHASE-1-CLOSE-WALK.md` § 6). The naive endpoint math and the encoding architecture description above remain correct; only the 1.2-1.5× ratio claim is superseded.
+
 **Cross-reference inherited Q70 dispatch-table refactor:**
 
 - **Extends cleanly:** inherited Q70 dispatch-table refactor + self-normalized fallback module + schema additions (DeploySignal LEDGER Q70 SLICE 1). Tessera adds a new "fleet vs shard" dimension to the inherited dispatch table; module surface unchanged. The DeploySignal Q66 `.γ → .γ.b → .γ.c` iterative-refinement precedent applies — Tessera Phase 1 anticipated to follow the same iterative-refinement pattern at SLICE 1 → SLICE 2 → SLICE N.
@@ -159,7 +191,7 @@ Justification: candidate (a) independent per-shard pays cold-start tax N times �
 **Pair-review triggers:**
 
 - **PR-F4:** TRIGGERED on `min_samples_strict` re-derivation at fleet scale (60 → ~20 for warm-start; 60 preserved for strict-upgrade). External-source verification: empirical-Bayes shrinkage threshold derivation literature (Efron-Morris 1973 lineage; modern empirical-Bayes covariance shrinkage); empirical pair-review test on synthetic N=1000 shard cluster with deliberate per-shard mean-shift injection; architect concur. Load-bearing because the cold-start latency claim depends on this re-derivation.
-- **PR-F5:** TRIGGERED on storage footprint architect-pre-prediction (~1.2-1.5× single-instance encoding-not-storage). Empirical P6 profile measurement on N=1000 simulated shard cluster at Tessera Phase 1 SLICE 2. If the prediction is wrong by >2× the pitch claim shifts materially.
+- **PR-F5:** TRIGGERED on storage footprint architect-pre-prediction (~1.2-1.5× single-instance encoding-not-storage). **COMPLETED** at R14 (Phase 1 SLICE 2 carry-forward, 2026-05-17): 1237.7× at d=10; R16 d-mismatch investigation confirmed ratio ≈ N (1006.5× at d=100). Prediction wrong by ~800-1000×; load-bearing acceptance failure criterion triggered. Operator dispositioned (β) pitch-revise at R17; see [R17 AMENDMENT] block above.
 
 ---
 
@@ -355,7 +387,7 @@ These numbers materially strengthen R-E1 / R-E2 (storage + cold-start are not bl
 
 | Risk | Class | Mitigation surface |
 |---|---|---|
-| **R-E1** — Storage at scale. Naive endpoint: 3.22 GB at default 168 cells × N=10000; 64.5 GB at full cell-matrix expansion. Hierarchical-encoding endpoint: ~1.2-1.5× single-instance via sparse per-shard residual. Memory per instance ≈ tens of MB; at N=10000 this is hundreds of GB if independent per-instance baselines (intractable) vs 1.2-1.5× hierarchical-encoded (tractable). | P6 measurement; PR-F5 trigger. | Empirical P6 profile at Phase 1 SLICE 2 (N=1000 simulated). Pre-prediction failure (>2× single-instance) is a load-bearing acceptance failure. **Per-instance memory dominated by MMD RFF features D=256 + conformal calibration window** (inherited per-detector memory profile at SHA `5a72371`); fleet-scale memory math = per-instance × N with hierarchical-pooling reductions across cell-matrix shared subset. |
+| **R-E1** — Storage at scale. Naive endpoint: 3.22 GB at default 168 cells × N=10000; 64.5 GB at full cell-matrix expansion. **[R17 AMENDMENT]** Hierarchical-encoding endpoint: **≈N× single-instance** (empirically 1006–1237× at N=1000, d=10–100); sparse encoding reduces per-shard footprint 81% but does not reduce the fleet-aggregate storage ratio below ≈N. Memory per instance ≈ tens of MB; at N=10000 independent per-instance baselines ≈ hundreds of GB (intractable); hierarchical-encoded per-shard residual is linear-in-N (not sub-linear as originally predicted). Original v0.3 prediction was "~1.2-1.5× single-instance" — refuted by R14 PR-F5 + R16 investigation; see § 2.2 [R17 AMENDMENT] block. | P6 measurement; PR-F5 COMPLETED R14. **R16 d-mismatch investigation confirmed.** Operator: (β) pitch-revise. | R14 measured 1237.7× at N=1000, d=10; R16 confirmed ratio → ≈N as d→∞. Mitigation candidates (diagonal-only Family C variant; cross-shard sharing) deferred to Phase 2 SLICE 2+ per operator (β) disposition. Trigger: real-cluster footprint at target N operationally infeasible (>10K GPUs ≈ 800 MB+). |
 | **R-E2** — Cold-start latency at scale. Fleet adds shards faster than 60-sample warm-start absorbs. **CPU-not-bound:** at median 30 μs / p99 63 μs per-tick latency inherited, fleet-scale CPU at N=1000 is ~30 ms per fleet tick — driving warm-start sample accumulation is not CPU-blocked. | P1 derivation surface; PR-F4 lineage. | Warm-start at fleet-aggregate eliminates blocking; 20-sample threshold via PR-F4 derivation. Per-shard sample-accumulation rate is signal-rate-bound, not CPU-bound. |
 | **R-E3** — New ingestion surface coupling (deployment events + HardwareTopologySource impl) to cluster-management infrastructure. | Cross-cutting anti-scope candidate. | Synthetic-cluster substrate (Phase 2 SLICE 1-3) decouples Phase 2 architectural work from real cluster-management integration; real-cluster integration TAGGED-FUTURE post-Phase-2 (analogous to inherited DeploySignal Q60-class real-trace ingestion vs synthetic baseline). |
 | **R-E4** — Per-shard residual rank-deficient at warm-start; falling back to fleet-aggregate increases compute. | P6 measurement; coupling to inherited Q2.B.6 binary `shrinkage_alpha` decision. | Compute-budget envelope at warm-start window; architect-pre-prediction ~10-20% compute inflation during warm-start, returning to single-instance envelope post-strict-upgrade. |

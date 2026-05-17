@@ -256,27 +256,33 @@ Phase 2 SLICE 1 includes PSU/cooling-zone enum extensions and injected hardware 
 
 ### TQ-1 PR-F5 storage finding — Phase 2 activation impact
 
-**Context.** Per `OVERNIGHT-LOG-2026-05-17.md` :13-35, the R14 PR-F5 measurement surfaced a 1237.7× overhead ratio, contradicting the v0.3 § 2.2 prediction. The operator must choose a disposition before Phase 2 begins.
+**CLOSED WITH DISPOSITION (β) — confirmed by operator 2026-05-17 evening; executed at R17.**
+
+**Context.** Per `OVERNIGHT-LOG-2026-05-17.md` :13-35, the R14 PR-F5 measurement surfaced a 1237.7× overhead ratio, contradicting the v0.3 § 2.2 prediction. R16 d-mismatch investigation confirmed ratio converges to ≈N (1006.5× at d=100), ruling out the d-mismatch hypothesis. Operator triaged and dispositioned.
 
 **Disposition (α) — architecture-revising:**
 v0.3 § 2.2 claim is revised. A new SLICE (SLICE 5 or equivalent) is added to Phase 1 or Phase 2 SLICE 1 scope: deliver an additional compression mechanism (diagonal-only covariance? rank-reduced residual? aggressive null-encoding?). Phase 2 activation is **gated** until the storage overhead is within 2× of fleet baseline. Phase 2 SLICE 1 spec would not be emitted until SLICE 5 achieves target. This adds 2-5 Q-cycles before Phase 2.
 
-**Disposition (β) — pitch-revising:**
-v0.3 § 2.2 claim is amended to reflect the empirical truth: per-shard residual at N=1000 with K=168 cells × d=10 dimensions costs ~80 MB. The pitch claim is revised; the architectural truth is documented. Phase 2 activation proceeds; storage reduction is a Phase 2 goal but not an activation **gate**. Phase 2 SLICE 1 spec emitted without delay, but storage-compression scope added to Phase 2 SLICE 2+.
+**Disposition (β) — pitch-revising: OPERATOR CONFIRMED**
+v0.3 § 2.2 claim is amended to reflect the empirical truth: per-shard residual at N=1000 with K=168 cells × d=10 dimensions costs ~82 MB; ratio ≈ N. The pitch claim is revised; the architectural truth is documented. Phase 2 activation proceeds; storage reduction is a Phase 2 goal but not an activation **gate**. Phase 2 SLICE 1 spec emitted without delay; storage-compression scope added to Phase 2 SLICE 2+ roadmap (see storage-mitigation paths below).
 
-**Disposition (γ) — investigation-first:**
-R14 measurement methodology is re-verified before architectural conclusions. A narrow investigation round (or operator-self-investigation) confirms whether the measurement correctly exercises sparse encoding. If measurement is confirmed sound, operator chooses (α), (β), or (δ). Phase 2 activation is **blocked** until investigation completes. My recommendation per `OVERNIGHT-LOG-2026-05-17.md` :35.
+**Disposition (γ) — investigation-first:** Superseded — R16 investigation completed; measurement methodology verified sound (single-shard proxy confirmed against AC-R16 empirical tests). No further investigation required.
 
-**Disposition (δ) — defer to Phase 2:**
-PR-F5 architectural revision is deferred. Phase 2 cross-shard correlation may produce storage-compression opportunities (shared cluster-level baselines). Phase 2 activation proceeds with the bad pitch claim acknowledged as provisional. Not recommended because the v0.3 "load-bearing acceptance failure" criterion is formally triggered.
+**Disposition (δ) — defer to Phase 2:** Not selected.
 
-**Activation-gate vs entry-blocker classification:**
-- (α): TQ-1 is a Phase 2 **activation gate** — Phase 2 cannot start until storage resolved.
-- (β): TQ-1 is a **Phase 2 entry point** — Phase 2 starts; storage-compression is on the SLICE 2+ roadmap.
-- (γ): TQ-1 is an **investigation prerequisite** — blocks until resolved; then reclassifies.
-- (δ): TQ-1 is **deferred** — Phase 2 starts with acknowledged provisional claim.
+**R17 execution:** `SCOPING-MEMO-v0.3.md` §§ 1.7 (shard definition), 1.8 (amendment history), 2.2 (storage claim + PR-F5 trigger), and 4.2 R-E1 (risk row) all amended. `PRD.md` performance row annotated. See R17 commit (recorded in `OVERNIGHT-LOG-2026-05-17.md` TQ-1 entry).
 
-Section closes with v0.3 § 7 close-framing options reference (`SCOPING-MEMO-v0.3.md` :492-497). The Architect-recommended probability band at SCOPING-MEMO-v0.3.md emit time was: (a) clean close ~45%, (b) decline ~15%, (c) partial-activation ~25%, (d) memo-amend ~15%. R15 represents option (c) partial-activation (Phase 1 closed; Phase 2 TAGGED-FUTURE pending operator disposition). The operator's Phase 2 activation picks from the sub-options above; the Implementer does NOT pick.
+---
+
+**Phase 2 storage-mitigation paths (SLICE 2+ roadmap; NOT Phase 2 activation gates):**
+
+**Candidate 1 — Diagonal-only Family C covariance variant.**
+R16 Item 3 finding: at d=100, full covariance (d×d matrix) dominates the per-cell footprint. A diagonal-only variant (store d scalars instead of d² entries) would reduce ratio ~40× at d=100 (from 1006.5× to approximately 25×) — a tractable floor. Tradeoff: breaks Hotelling T² semantics for the Family C MMD betting-e-process (T² requires full covariance for the test statistic). Requires Architect-level pair-review (PR-F9 candidate) before activation. Implementation changes `PerShardResidual.welford_state` from `WelfordState` (d×d `m2`) to a diagonal variant; semantics impact requires Reviewer scrutiny on inherited Family C correctness. Trigger: real-cluster footprint at target N becoming operationally infeasible (>10K GPUs × default cell+signal configs ≈ 800 MB+ aggregate across fleet; shard definition: 1 shard = 1 GPU rank per `SCOPING-MEMO-v0.3.md` § 1.7).
+
+**Candidate 2 — Cross-shard sharing of common fleet baseline.**
+Under Extension 3 cross-shard correlation infrastructure (Phase 2), the fleet-aggregate portion of each per-shard baseline may be de-duplicated: instead of N copies of the same fleet prior, shards reference a single shared structure. In the current compiled-config schema, `per_shard_cells` stores full `PerShardResidual` per shard (including fleet-aggregate fallback fields). Phase 2 SLICE 2+ could restructure to store shared fleet prior once + per-shard deltas only. Reduction: eliminates N-1 copies of the fleet-prior portion; saves roughly fleet-baseline-size × (N-1) ≈ 67.9 KB × 999 ≈ 68 MB at N=1000. Tradeoff: requires schema migration + more complex deserialization. Trigger: same as Candidate 1.
+
+**Activation classification under (β):** Both candidates are Phase 2 SLICE 2+ roadmap items. Neither is a Phase 2 activation gate. Phase 2 SLICE 1 proceeds with the empirically-measured storage profile (≈N× per-shard, linear scaling confirmed by AC-R14-10). If real-cluster deployment at N > 1000 surfaces operational infeasibility, a future round activates one or both candidates via Architect-gated spec.
 
 ---
 

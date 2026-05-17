@@ -10,7 +10,19 @@ _Supersedes the 2026-05-16 overnight scope: no round budget; escalations log for
 
 _Escalation items accumulated overnight. Operator triages by severity + priority on return; each item has a recommended-action-but-not-acted-on._
 
-### TQ-1 — PR-F5 storage-overhead empirical finding contradicts v0.3 pitch claim (HIGH priority)
+### TQ-1 — PR-F5 storage-overhead empirical finding contradicts v0.3 pitch claim — **CLOSED WITH DISPOSITION (β)**
+
+**Disposition confirmed:** **(β) pitch-revise** — operator confirmed 2026-05-17 evening. R16 investigation completed (d-mismatch hypothesis refuted). R17 executed the amendments. **STATUS: CLOSED.**
+
+**R17 execution cross-references:**
+- `SCOPING-MEMO-v0.3.md` § 1.7 (shard unit definition added), § 1.8 (amendment history), § 2.2 (storage claim + PR-F5 trigger updated), § 4.2 R-E1 (risk row updated)
+- `coordination/PHASE-1-CLOSE-WALK.md` § 6 TQ-1 subsection (disposition confirmed + Phase 2 mitigation paths added)
+- `coordination/PRD.md` performance row (amendment note added)
+- R17 coordination commit SHA: _[recorded at R17 attestation]_
+
+---
+
+**Original entry (preserved for audit trail):**
 
 **Surfaced:** R14 Item 2 (PR-F5 measurement). **Severity:** load-bearing per v0.3 § 2.2 ("Failure mode: prediction wrong by >2× single-instance signals load-bearing acceptance failure" — empirical wrong by ~800-1000×).
 
@@ -23,7 +35,7 @@ _Escalation items accumulated overnight. Operator triages by severity + priority
 - Sparse reduction (none vs warm_start): 81.1% (AC-9 ≥50% threshold met — sparse encoding IS working)
 - Linear scaling: 1059.9 ≈ N=1000 ±10% (AC-10 met — scaling IS linear; the per-shard footprint is the issue)
 
-**Why this didn't HALT R14:** R14 spec authorized PR-F5 to "measure + bound OR document deviation with rationale." Implementer took the document-rationale path; Reviewer routed MERGE-READY. Per overnight authority, the work continued. **The architectural-claim revision is exactly what morning-triage is for.**
+**R16 d-mismatch investigation:** ratio converges toward ≈N=1000 as d→∞ (1006.5× at d=100). Prediction of 1.2-1.5× is structurally impossible at N=1000. Source: `coordination/PR-F5-INVESTIGATION-R16.md`.
 
 **Recommended dispositions (for John, by severity):**
 
@@ -32,7 +44,9 @@ _Escalation items accumulated overnight. Operator triages by severity + priority
 - **(γ) Investigation-first:** R14's measurement may have a methodology bug (e.g., counting bytes wrong; not actually exercising the sparse encoding correctly). Re-run with instrumented measurement before architectural revision.
 - **(δ) Defer:** Phase 2 cross-shard correlation may produce additional opportunities for storage compression (shared cluster-level baselines); revisit after Phase 2 SLICE 1.
 
-**My recommendation:** (γ) first — verify the measurement methodology before drawing architectural conclusions. If measurement is sound, then (β) is more honest than (α). (α) is a real engineering option but probably worth ~3-5 more rounds; (δ) defers the decision but keeps the bad pitch claim live.
+**My recommendation at triage time:** (γ) first — verify the measurement methodology before drawing architectural conclusions. If measurement is sound, then (β) is more honest than (α). (α) is a real engineering option but probably worth ~3-5 more rounds; (δ) defers the decision but keeps the bad pitch claim live.
+
+**Resolution:** R16 completed (γ) investigation; measurement confirmed sound. Operator selected (β). R17 executed.
 
 ### TQ-2 — anchor PR #38 still open (LOW priority; informational)
 
