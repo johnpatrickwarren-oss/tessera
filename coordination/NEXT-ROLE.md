@@ -1,95 +1,93 @@
 CURRENT-ROUND: R13
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
-## Round scope — operator-set (do NOT auto-redirect)
+## Inputs
 
-**R13 = Phase 1 SLICE 4: e-BH FDR operator surface** — the operator-facing interface that consumes per-shard e-values and produces "K shards flagged; expected falsely-flagged-shard count ≤ q·K" with empirical FDR control. Per Q-J1 hybrid disposition: R11+R12 ship the per-shard any-time Ville guarantee via hierarchical e-value combination AS formal guarantee; R13 ships the FDR-style fleet-level operator interface.
+- `coordination/specs/Q-R13-SPEC.md` (spec proper; Implementer cold-starts from this only).
+- `coordination/specs/Q-R13-SPEC-AUDIT.md` (audit sidecar; **Implementer SHALL NOT consult** per CLAUDE-IMPLEMENTER.md cold-implementation boundary; Reviewer reads both).
 
-Literature anchor: **Ren-Barber 2024** ("Derandomized novelty detection with FDR control via e-values"). Same lit-anchor / pair-review-novel-literature shape as R11's PR-F1 cycle but for FDR control instead of fleet-merge combination.
+## R13 scope (operator-set; do NOT redirect)
 
-R12 closed clean (perfect zero-violation shutout: 0 CRITICAL/MAJOR/MINOR/4 OBS; 16/16 ACs; 138/138 regression; 11-round 0-CRITICAL streak). The fleet-merge primitives (R11) + fleet-merged detector surfaces (R12) are shipped + validated; R13 builds on top.
+R13 = Phase 1 SLICE 4: **e-Benjamini-Hochberg FDR operator surface**. Ships:
 
-R13 SHIPS:
-- **e-BH procedure implementation** — Ren-Barber 2024 Algorithm 1 (or equivalent). Architect cites the specific theorem/algorithm reference; brainstorm enumerates ≥3 candidate implementations of e-BH (e.g., standard fixed-α, randomized e-BH, BY-style correction).
-- **Operator-facing API surface** — call signature likely `eBenjaminiHochberg(perShardEValues: number[], qLevel: number): number[]` returning the set of selected shard indices (architect's pick during brainstorm; signature documented).
-- **Default qLevel parameter** — architect picks via brainstorm with rejection rationale (candidate defaults: 0.05, 0.10, configurable-required). Documented in spec.
-- **PR-F2 evidence matrix** — synthetic N=100 shards; two H₀ scenarios: (i) iid H₀ (per-shard e-values independent), (ii) correlated-drift H₀ (per-shard e-values share a fleet-level mean shift). Both must show empirical FDR ≤ q (theory-derived; NOT OBSERVED-binding).
-- ACs covering: e-BH algorithm correctness (citation-traceable to Ren-Barber 2024); FDR control under iid H₀ at N=100; FDR control under correlated-drift H₀ at N=100; per-shard input invariance (anti-scope check — wrappers read-only); operator-facing API ergonomics (input/output shapes).
+- **`eBenjaminiHochberg(perShardEValues, qLevel) → { selected, K }`** at `engine/fleet/e-bh.ts` — Ren-Barber 2024 Algorithm 1 / Wang-Ramdas 2022 e-BH; family-agnostic stateless primitive; FDR ≤ q under arbitrary dependence between e-values.
+- **PR-F2 evidence matrix** at `test/q13-e-bh-fdr.test.ts` — N=100 shards × T=100 ticks × N_TRIALS=200; iid H₀ + correlated-drift H₀ (ρ²=0.5); both cells assert theory-derived Wilson upper bound `FDR_BOUND ≈ 0.09624` on empirical FDR.
+- **14 ACs** binding shape, validation, closed-form correctness, output ordering, tie-breaking, input invariance, FDR control, API ergonomics, TDD ordering, OBSERVED count attestation.
 
-R13 does NOT ship (explicit anti-scope):
-- **Any-time FDR analog** (Wang-Ramdas-Vovk 2022 e-process selection under FDR) — SLICE 4 is bounded to fixed-time e-BH per v0.3 § 3 + Q-J1 hybrid framing; any-time FDR is a future-SLICE candidate.
-- **Real-cluster trace integration** (Phase 1 boundary).
-- **Modification to R11 combine primitives** (`engine/fleet/combine.ts`).
-- **Modification to R12 fleet-merged detector surfaces** (`engine/fleet/detectors.ts`).
-- **Modification to per-shard runtime** (`engine/per-shard/*`).
-- **Modification to inherited engine internals**.
-- **SLICE 2 carry-forwards** (R14 bundle).
-- **Phase 2 work** (cross-shard correlation, hardware topology, deployment-event freeze hook).
-- **Chaining fleet-merge OUTPUT into e-BH input** — per Q-J1's hybrid framing the two layers are PARALLEL (Ville guarantee at fleet-merge layer; FDR interface at e-BH layer), NOT serial. If brainstorm surfaces a strong reason to chain them, that's a HALT + DIAGNOSTIC condition (operator-gate scope expansion).
+Architectural commitments (resolved by Architect per spec § Mechanism + audit sidecar D1-D14):
+- **R12 OQ-1 resolved:** e-BH consumes per-shard e-values (β); fleet-level e-BH (α) rejected.
+- **Q-J1 parallel-not-serial preserved:** R13 e-BH and R11/R12 fleet-merge are independent views over the same per-shard e-values; no chaining (R13-SAS-14).
+- **MD-F2:** fixed-time e-BH at R13; any-time analog deferred to future SLICE (R13-SAS-13).
+- **Default qLevel: NONE** — qLevel is a required positional parameter (R13-SAS-18).
+- **Family-agnostic primitive only** — no `eBenjaminiHochbergFamilyA/C` wrappers at R13 (R13-SAS-17).
+- **Standard fixed-α e-BH only** — no randomized variant (R13-SAS-15); no BY-style correction (R13-SAS-16).
 
-## Architectural question R13 brainstorm MUST resolve (R12 OQ-1)
+## Implementer responsibilities (cold-start from spec)
 
-R12 left this open as `R12 OQ-1`: does e-BH consume **fleet-level e-values** (R12 outputs) OR **per-shard e-values** (R12 inputs) as its source data?
+1. **Read inputs in order:**
+   - `coordination/PRD.md`
+   - `coordination/specs/Q-R13-SPEC.md` (spec proper; verbatim Delta 1 + Delta 2)
+   - `~/.claude/CROSS-PROJECT-MEMORIAL.md` "Reinforcement rules derived" sections (apply all 13 IMPL reinforcements per CLAUDE-IMPLEMENTER.md)
+   - `coordination/MEMORIAL.md` tail (R12 + R13 entries)
+   - **DO NOT** read `coordination/specs/Q-R13-SPEC-AUDIT.md` (cold-implementation boundary).
 
-Two candidate architectures:
-- **(α) Fleet-level e-BH:** e-BH operates over the M (small) fleet-level e-process values (one per detector family × combination primitive). Discovery cardinality = a small fixed set of fleet-level claims. Doesn't match the "K shards flagged" operator interface.
-- **(β) Per-shard e-BH:** e-BH operates over the N (large) per-shard e-values. Discovery cardinality = K shards (variable, FDR-controlled). **This matches the operator-facing target per v0.3 § 2.1 + Q-J1.**
+2. **TDD two-commit RED → GREEN sequence (11th consecutive Tessera application):**
+   - **RED:** Create `test/q13-e-bh-fdr.test.ts` verbatim from spec Delta 2. `npm run typecheck` MUST exit 1 with TS2307 on missing `../engine/fleet/e-bh` import. Commit message: `red(R13): q13 e-BH FDR test fixtures`.
+   - **GREEN:** Create `engine/fleet/e-bh.ts` verbatim from spec Delta 1. `npm run typecheck` MUST exit 0; `node --test test/q13-e-bh-fdr.test.js` MUST report 14/0; full regression `npm test` MUST report 152/0. Commit message: `feat(R13): GREEN — eBenjaminiHochberg + PR-F2 evidence matrix`.
 
-Architect-pre-prediction (per operator scope direction): **(β)**. The fleet-merge layer (R11+R12) provides the formal Ville-bound guarantee; the e-BH layer (R13) provides the operator-facing FDR interface; they are PARALLEL views of the same per-shard inputs, not serialized into a chain.
+3. **HALT conditions for R13 (per Q-R13-SPEC.md § Per-file pseudocode Implementer note 3):**
+   - **(a)** PR-F2 empirical FDR exceeds Wilson upper bound on EITHER cell (iid OR correlated). DIAGNOSTIC + escalate; do NOT silently OBSERVED-bind.
+   - **(b)** Spec/reality conflict on an inherited surface (e.g., `engine/detectors/betting-e-process.ts:150` signature differs from REVIEWER-ANCHOR row). DIAGNOSTIC + escalate.
+   - **(c)** q13 OBSERVED test count diverges from architect-predicted 14 (after verbatim Delta 2 copy). DIAGNOSTIC + escalate.
 
-If brainstorm surfaces a strong reason to deviate, HALT + DIAGNOSTIC; this question affects the architectural shape of the SLICE 4 deliverable.
+   R08 procedural-halt-discipline reinforcement applied: spec-vs-reality conflicts with an empirically determinable answer STILL require DIAGNOSTIC + escalate, NOT silent tactical resolution. Don't reproduce R08 MAJOR-1.
 
-## Architectural pre-dispositions
+4. **Attestation block** (this file, R13 Attestation section below) populated at GREEN per R03 MINOR-4 reinforcement (8th consecutive application): OBSERVED test counts (not pre-stated predictions); OBSERVED grep counts; OBSERVED FDR values; OBSERVED wall-clock; OBSERVED full-regression count.
 
-Per `coordination/ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md`:
-- **Q-J1 hybrid Ville + e-BH** — preserved; R13 is the e-BH layer.
-- **Q-J2 20-sample warm-start / 60-sample strict-upgrade** — preserved.
-- **Q-J3, Q-J4, Q-J5** — preserved.
+5. **MEMORIAL.md append**: implementer-discipline CONFIRMATIONs (or VIOLATIONs if any).
 
-R11/R12-derived: combine primitives + fleet-merged detector surfaces shipped; R13 may import for cross-reference but MUST NOT modify or depend on them in the e-BH critical path.
+## Architect pre-predictions (verifiable at GREEN)
 
-## Active REINFORCED lines architect MUST apply (14 ARCH + 13 IMPL + 1 COMMON)
+| Prediction | Confidence | Disposition |
+|---|---|---|
+| q13 OBSERVED test count = 14/0 | HIGH | Verbatim Delta 2 contains exactly 14 `test(...)` blocks |
+| Full regression OBSERVED count = 152/0 (prior 138 + new 14) | HIGH | Prior baseline confirmed at HEAD `2a3c177` (q01a 3 + q01b 1 + q01c 5 + q02 6 + q03 13 + q04 11 + q05 13 + q06 13 + q07 23 + q10 11 + q11 18 + q12 16 + betting-class-dispatch 5 = 138) |
+| PR-F2 iid empirical FDR OBSERVED in [0.005, 0.05] (well below Wilson bound 0.09624) | MEDIUM-HIGH | Theory says ≤ q=0.05; observed typically below |
+| PR-F2 correlated empirical FDR OBSERVED in [0.005, 0.06] (still below Wilson bound 0.09624) | MEDIUM | Wang-Ramdas 2022 Theorem 4.1 guarantees ≤ q under arbitrary dependence between e-values |
+| Both PR-F2 cells PASS Wilson bound | HIGH | If false: HALT condition (a) |
+| q13 wall-clock runtime ≤ 6s | MEDIUM-HIGH | PR-F2 simulator estimate per spec § P3 Cost |
+| Zero halt conditions for Implementer | HIGH | Verbatim-pseudocode spec leaves no architectural ambiguity |
+| TDD ordering: RED → GREEN as two distinct commits | HIGH | 11th consecutive application of R02-R12 pattern |
+| Reviewer findings: ≤ 1 MINOR / ≤ 5 OBS | MEDIUM | Based on R10-R12 trajectory; new external-source citations may elevate OBS count |
+| q11 + q12 unchanged at GREEN | HIGH | Empirically verified by Architect at HEAD `2a3c177` |
 
-R13 Architect applies all 14 ARCH reinforcements; particularly:
+## Active REINFORCED lines Implementer MUST apply (13 IMPL + 1 COMMON)
 
-- **Cross-section consistency pass** (R02; 9th consecutive standing application).
-- **Type-declaration-site discipline** (R02) — open declaration sites for any per-shard e-value type R13 consumes.
-- **Inherited-testimony empirical verification** (R08; anchor PR #38) — verify R11/R12 surfaces empirically by running q11 + q12 tests at HEAD before referencing them.
-- **Correction-propagation pass** (R09; anchor PR #38) — if R13 corrects any prior-round spec premise, enumerate all sibling/downstream sections.
-- **OBSERVED-binding scope** (R07; anchor PR #38) — use theory-derived bounds for FDR-control ACs; OBSERVED-binding for FDR-control would be self-confirming.
-- **Fixture-sizing exhaustive propagation** (R07).
-- **R11 citation-accuracy via sed -n extraction** (R11-derived; standing as of R12).
+R13 Implementer applies all 13 IMPL reinforcements per CLAUDE-IMPLEMENTER.md; particularly:
+- **Attestation-accuracy (R03 MINOR-4 + R05 MINOR-3 sub-variant):** OBSERVED, not predicted. Numeric AND narrative tactical-choice forms.
+- **Halt-discipline (R08 MAJOR-1):** spec premise failures require DIAGNOSTIC regardless of resolution clarity; don't reproduce the R08 self-justifying-MEMORIAL anti-pattern.
+- **TDD ordering (R02-R12 standing):** two-commit RED → GREEN; verifiable in `git log --oneline`.
+- **Verbatim spec copy:** Delta 1 + Delta 2 are complete file contents; copy without modification.
 
-R13 Implementer applies all 13 IMPL reinforcements; particularly:
-- **Procedural halt-discipline** (R08) — spec premise failures require DIAGNOSTIC regardless of resolution clarity.
-- **Attestation-accuracy** (R03) — OBSERVED, not predicted.
-- **MEMORIAL tactical-choice verification** (R05).
+## Halt conditions for R13 (per spec § Per-file pseudocode Implementer note 3 + this file Implementer responsibilities)
 
-## PR-F2 mandatory at SLICE 4 close
+- **(a)** PR-F2 empirical FDR exceeds Wilson upper bound 0.09624 on EITHER iid OR correlated cell.
+- **(b)** Spec/reality conflict on an inherited surface (REVIEWER-ANCHOR row drift).
+- **(c)** q13 test count divergence from architect-predicted 14.
+- **Spec/reality conflicts that have an empirically determinable answer STILL require DIAGNOSTIC** (R08 MAJOR-1 reinforcement; do not silently resolve).
 
-Per SCOPING-MEMO-v0.3 § 2.1 + § 6: **PR-F2 (e-BH FDR pair-review) is MANDATORY for R13 close.**
+## PR-F2 mandatory at R13 close (per SCOPING-MEMO-v0.3 + this round)
 
-R13 spec MUST include:
-1. **External-source verification:** Ren-Barber 2024 specific theorem/algorithm citation. Architect documents which result is being applied (e.g., e-BH preserves FDR ≤ q under independence + super-uniformity).
-2. **Brainstorm ≥3 distinct e-BH implementations with rejection rationale.** Candidates per v0.3: standard fixed-α e-BH; randomized e-BH; BY-style correction. Each requires FDR-preservation analysis.
-3. **MD-F2 documented:** any-time vs fixed-time FDR distinction. SLICE 4 ships fixed-time per v0.3. Any-time analog deferred. Document the deferral explicitly.
-4. **Evidence matrix specification:** synthetic N=100 shards; iid H₀ + correlated-drift H₀. Empirical FDR ≤ q in both. Theory-derived bounds, NOT OBSERVED-binding.
-5. **Architect grilling pass must answer:** "would a future implementation FIX matching the architect's prediction FAIL the FDR-control tests?" (anchor PR #38 OBSERVED-binding-scope check).
-
-If R13 spec ships without PR-F2 evidence matrix specification, that's a Reviewer-blocker.
-
-## Halt conditions for R13
-
-- **Chaining fleet-merge into e-BH:** if brainstorm picks (α) fleet-level e-BH OR proposes a chained architecture, HALT + DIAGNOSTIC. Q-J1's two-layer hybrid is the operator-set architecture; deviation is scope expansion.
-- **Any-time FDR analog scope expansion:** if brainstorm considers Wang-Ramdas-Vovk 2022 any-time analog, HALT — that's a future SLICE.
-- **Modification to R11/R12 surfaces:** anti-scope; HALT if R13 attempts.
-- **OBSERVED-binding for FDR-control ACs:** self-confirming; redesign against theory-derived bounds.
-- **MD-F2 silent absorption:** must explicitly document any-time-vs-fixed-time tradeoff in spec.
+- **External-source verification:** Ren-Barber 2024 Algorithm 1 cited in spec REVIEWER-ANCHOR external-source table. ✓
+- **Brainstorm ≥3 distinct e-BH implementations:** 4 candidates documented in audit sidecar § Brainstorm (A selected; B/C/Z rejected with rationale). ✓
+- **MD-F2 documented:** fixed-time at R13; any-time deferred. Documented at 3 sites (Mechanism primitive 4 + R13-SAS-13 + Delta 1 file-header). ✓
+- **Evidence matrix specification:** iid H₀ + correlated-drift H₀; theory-derived Wilson upper bound; NOT OBSERVED-binding. ✓
+- **Architect grilling pass:** "would a future implementation FIX matching the architect's prediction FAIL the FDR-control tests?" Architect verified NO; tests are right-reasons-safe. ✓
 
 ## Coordination chore sequence (R14 final revision; same as R06-R12)
 
-1. Run all binding commands at GREEN; record OBSERVED counts.
+1. Run all binding commands at GREEN; record OBSERVED counts in this file's Attestation block.
 2. Write coordination artifacts WITHOUT SHA field.
 3. `git add` coordination artifacts.
 4. `git commit -m "chore(R13): coordination artifacts"` → SHA-A.
@@ -97,34 +95,29 @@ If R13 spec ships without PR-F2 evidence matrix specification, that's a Reviewer
 6. `git commit -m "chore(R13): record attestation SHA"` → SHA-B.
 7. Reviewer verifies: `git diff SHA-A HEAD -- src/ tests/ tools/ engine/ coordination/specs/` is empty.
 
-## Pre-R13 baseline (INFORMATIONAL; report OBSERVED at GREEN per R03 MINOR-4)
-
-Reviewer-verified at R12 HEAD `d4bc0a2`:
-- test/q01-vendoring-coverage.test.js: 3/0
-- test/q01-no-at-pin-deltas.test.js: 1/0
-- test/q01-schema-additions.test.js: 5/0
-- test/q02-schema-extension.test.js: 6/0
-- test/q03-warm-start-runtime.test.js: 13/0
-- test/q04-welford-stats.test.js: 11/0
-- test/q05-per-shard-runtime.test.js: 13/0
-- test/q06-baseline-pre-pass.test.js: 13/0
-- test/q07-fleet-correlated.test.js: 23/0
-- test/q10-per-shard-emission.test.js: 11/0
-- test/q11-hierarchical-e-value-combination.test.js: 18/0
-- test/q12-fleet-merged-detector-surfaces.test.js: 16/0
-- test/betting-e-process-class-dispatch.test.js: 5/0
-- **Total: 138/0**
-
-R13 expected at GREEN: prior 13 file counts unchanged + new q13 file (likely +10 to +15 ACs covering: e-BH algorithm correctness; FDR control under iid H₀ + correlated-drift H₀; operator-facing API; per-shard input invariance). Implementer reports OBSERVED per file.
-
 ## Routing
 
 ```
 cd ~/concord/tessera
-./run-pipeline.sh --round R13 --tier full
+./run-pipeline.sh --round R13 --tier full --phase IMPLEMENTER
 ```
 
-`--tier full` per A1 (new external lit — Ren-Barber 2024) + A2 (new architectural pattern — first operator-facing FDR surface) + A5 (NFR ties — operator-facing FDR-q parameter is a stated guarantee).
+## Attestation (Implementer fills at GREEN)
+
+| Item | Predicted | OBSERVED at GREEN | Match |
+|---|---|---|---|
+| q13 test count | 14 / 0 | **14 / 0** | ✓ |
+| Full regression count | 152 / 0 | **152 / 0** | ✓ |
+| PR-F2 iid empirical FDR | ≤ 0.09624 (predicted ≈ 0.005-0.05) | **0.00500** | ✓ |
+| PR-F2 correlated empirical FDR | ≤ 0.09624 (predicted ≈ 0.005-0.06) | **0.00500** | ✓ |
+| q13 wall-clock | ≤ 6 s | **≈ 0.21 s** (duration_ms 206.797) | ✓ |
+| TDD ordering | RED → GREEN two commits | RED `4110daa`; GREEN `d54912d` | ✓ |
+| `grep -c "^export " engine/fleet/e-bh.ts` | 2 (interface + function) | **2** | ✓ |
+| `git ls-files engine/fleet/e-bh.ts` at GREEN | 1 line | **1 line** (engine/fleet/e-bh.ts) | ✓ |
+| Coordination chore step 7 (Reviewer-verifiable) | `git diff SHA-A HEAD -- engine/ test/ tools/ coordination/specs/` empty | _(Reviewer-side)_ | _(Reviewer verifies)_ |
+
+SHA-A (chore step 4): _(fill at chore step 5)_
+SHA-B (chore step 6): _(fill at chore step 6 close)_
 
 ## Operator gate items (preserved for morning triage)
 
@@ -134,10 +127,13 @@ cd ~/concord/tessera
 - **R09 MINOR-3** NEXT-ROLE.md attestation table format
 - **R10 MINOR-1** `engine/per-shard/runtime.ts` module-level docblock update
 - **R11 MINOR-1** `tick_post` variable-name nit
-- **R11 OBS-1/-2** spec citation drift (low priority)
+- **R11 OBS-1/-2** spec citation drift (low priority; closed at R12 first post-reinforcement application)
+- **R12 OQ-1** per-shard vs fleet-level e-BH input architecture → **RESOLVED in R13 spec § Mechanism primitive 3 + audit sidecar D3 (β per-shard selected)**
 - **R12 OQ-2** `fleetMergeFamilyAMixture` variant deferral
 - **R12 OQ-3** R13+ auto-selection hint propagation
 - **R12 OQ-4** Reviewer-facing strict-equality assertion form (architect picked: keep strict-equality)
+- **R12 OBS-1** Family-C q_running_phi_sum snapshot under-clone (R13 does not re-exercise; PR-F2 uses Family A only)
+- **R12 OBS-2/-3/-4** spec-documentation drift items (R13 not re-exercising)
 - **SLICE 2 carry-forwards** — R14 bundle (mean_delta + PR-F5 + compiled-artifact loader)
 
 ## Update history
@@ -146,3 +142,5 @@ cd ~/concord/tessera
 |---|---|
 | 2026-05-17 | R11 closed (SLICE 3 first slice); R12 launched + closed perfect-zero-violations (SLICE 3 second slice). |
 | 2026-05-17 | R13 launched under overnight authority: SLICE 4 e-BH FDR operator surface; PR-F2 pair-review mandatory at close. |
+| 2026-05-17 | R13 Architect spec emitted (Q-R13-SPEC.md + Q-R13-SPEC-AUDIT.md); 14 ACs; 21 R13-SAS clauses; STATUS: READY → IMPLEMENTER. |
+| 2026-05-17 | R13 Implementer complete. RED `4110daa` → GREEN `d54912d`. Full regression 152/0. PR-F2 iid FDR=0.005, correlated FDR=0.005 (both ≤ Wilson bound 0.09624). STATUS: READY → REVIEWER. |
