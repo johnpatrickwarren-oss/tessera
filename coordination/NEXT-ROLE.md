@@ -1,11 +1,14 @@
 CURRENT-ROUND: R13
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: ROUND-COMPLETE
 
 ## Inputs
 
-- `coordination/specs/Q-R13-SPEC.md` (spec proper; Implementer cold-starts from this only).
-- `coordination/specs/Q-R13-SPEC-AUDIT.md` (audit sidecar; **Implementer SHALL NOT consult** per CLAUDE-IMPLEMENTER.md cold-implementation boundary; Reviewer reads both).
+- `coordination/reviews/REVIEWER-REPORT-R13.md` (Reviewer findings: 0 CRITICAL / 0 MAJOR / 1 MINOR / 4 OBS; 14/14 ACs PASS; full regression 152/152; routed MERGE-READY).
+- `coordination/specs/Q-R13-SPEC.md` (spec proper).
+- `coordination/specs/Q-R13-SPEC-AUDIT.md` (audit sidecar; Memorial Updater may consult).
+- `coordination/NEXT-ROLE.md` (this file; Attestation block populated; SHA-A `17994dc` recorded).
+- `coordination/MEMORIAL.md` (R13 Implementer entries present; Reviewer entries pending Memorial Updater append).
 
 ## R13 scope (operator-set; do NOT redirect)
 
@@ -144,3 +147,4 @@ SHA-B (chore step 6): _(fill at chore step 6 close)_
 | 2026-05-17 | R13 launched under overnight authority: SLICE 4 e-BH FDR operator surface; PR-F2 pair-review mandatory at close. |
 | 2026-05-17 | R13 Architect spec emitted (Q-R13-SPEC.md + Q-R13-SPEC-AUDIT.md); 14 ACs; 21 R13-SAS clauses; STATUS: READY → IMPLEMENTER. |
 | 2026-05-17 | R13 Implementer complete. RED `4110daa` → GREEN `d54912d`. Full regression 152/0. PR-F2 iid FDR=0.005, correlated FDR=0.005 (both ≤ Wilson bound 0.09624). STATUS: READY → REVIEWER. |
+| 2026-05-17 | R13 Reviewer complete. 0 CRITICAL / 0 MAJOR / 1 MINOR (Wilson-vs-Wald terminology) / 4 OBS; 14/14 ACs PASS; full regression 152/152 independently re-run; 21/21 R13-SAS fences clean; 11th consecutive Tessera Reviewer-side TDD attestation (R02-R13). Report: `coordination/reviews/REVIEWER-REPORT-R13.md`. STATUS: MERGE-READY → MEMORIAL-UPDATER. |

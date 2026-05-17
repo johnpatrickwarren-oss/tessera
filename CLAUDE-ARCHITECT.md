@@ -236,3 +236,17 @@ All unresolved decisions → open questions in the spec.
 #   `engine/detectors/family-c-betting-e-process.ts:329 field fired: boolean` — actual type name is
 #   `FamilyCBettingEProcessState`, actual declaration file is `engine/types/families/c.ts:329`,
 #   actual content at the detector line 329 is an object-literal assignment).
+# REINFORCED 2026-05-17 — When citing a named statistical bound or confidence interval in spec
+#   Mechanism primitives or evidence-matrix sections (e.g., "Wilson upper bound", "Wald interval",
+#   "Hoeffding bound", "Bernstein bound", "Clopper-Pearson interval"), add an explicit
+#   statistical-term-to-formula cross-check step to pre-emit grilling: verify the formula written
+#   matches the named procedure, not just that the formula is a valid bound. The Wald 3σ
+#   normal-approximation (p ± 3·√(p(1−p)/n)) and the Wilson score interval
+#   ((p + z²/2n ± z·√(p(1−p)/n + z²/4n²)) / (1 + z²/n)) produce materially different formulas;
+#   using one's name for the other's formula creates documentation drift that statistically-literate
+#   readers must audit. Gate: for any spec section that writes a named statistical formula, verify
+#   the formula by looking it up in a reference source OR by deriving the name from the formula.
+#   "The formula is a valid bound" is not sufficient — the NAME must also match. Detected R13
+#   MINOR-1: spec Mechanism primitive 10 and test/q13-e-bh-fdr.test.ts:58-59 name the Wald 3σ
+#   formula "Wilson upper bound"; caught by Reviewer; terminology inherited unchallenged from
+#   R11+R12 PR-F1/PR-F2 vocabulary.
