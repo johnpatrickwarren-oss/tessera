@@ -49,7 +49,8 @@ Spec verification commands at GREEN:
   grep -c "^export " engine/types/fleet.ts → 1 (OBSERVED: 1)
   grep -c "^export " engine/fleet/combine.ts → 6 (OBSERVED: 6)
 
-Coordination chore SHA: [TO BE FILLED after chore commit]
+Coordination chore SHA: a0b6c92
+Attested HEAD at route-to-REVIEWER: a0b6c92 (= chore commit; no production changes after GREEN 5ae6c7d)
 
 ## Routing
 
