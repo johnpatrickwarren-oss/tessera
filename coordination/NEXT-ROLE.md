@@ -1,6 +1,58 @@
 CURRENT-ROUND: R16
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
+
+## R16 Implementer close — attestation
+
+| Item | Result |
+|------|--------|
+| typecheck | exit 0 |
+| test/q01-vendoring-coverage.test.js | 3/0 |
+| test/q01-no-at-pin-deltas.test.js | 1/0 |
+| test/q01-schema-additions.test.js | 5/0 |
+| test/q02-schema-extension.test.js | 6/0 |
+| test/q03-warm-start-runtime.test.js | 13/0 |
+| test/q04-welford-stats.test.js | 11/0 |
+| test/q05-per-shard-runtime.test.js | 13/0 |
+| test/q06-baseline-pre-pass.test.js | 13/0 |
+| test/q07-fleet-correlated.test.js | 23/0 |
+| test/q10-per-shard-emission.test.js | 11/0 |
+| test/q11-hierarchical-e-value-combination.test.js | 18/0 |
+| test/q12-fleet-merged-detector-surfaces.test.js | 16/0 |
+| test/q13-e-bh-fdr.test.js | 14/0 |
+| test/q14-compiled-config-loader.test.js | 6/0 |
+| test/q14-mean-delta.test.js | 7/0 |
+| test/q14-pr-f5-storage.test.js | **4/0** (was 3; +1 R16 AC-R16-1/2) |
+| test/q16-pr-f5-investigation.test.js | **2/0** (new) |
+| test/betting-e-process-class-dispatch.test.js | 5/0 |
+| **Total** | **171/0** (was 168) |
+
+Attestation SHA: _to be filled after coordination commit_
+
+## R16 Reviewer inputs
+
+- `coordination/specs/Q-R16-SPEC.md` — spec with brainstorm + design inline
+- `test/q14-pr-f5-storage.test.ts` — modified (4 tests; +1 AC-R16-1/2)
+- `test/q16-pr-f5-investigation.test.ts` — new (2 tests; AC-R16-3/4)
+- `coordination/PR-F5-INVESTIGATION-R16.md` — findings + operator options briefing
+
+## R16 TDD evidence
+
+- RED commit: `00a70f3` — q14 dimension test + q16 both with `assert.fail` placeholders; 168 pass / 3 fail
+- GREEN commit: `9ccbb61` — complete test implementations; 171 pass / 0 fail
+
+## Key findings (for operator decision)
+
+- d-mismatch hypothesis **REFUTED**: ratio at d=100 = 1006.5×, not 1.2-1.5×
+- Ratio converges toward N=1000 as d→∞ (not toward architect prediction)
+- welford_state **IS load-bearing**: cold-start without it resets accumulator (n=1)
+- Diagonal-only at d=100 would reduce ratio ~40× (to ~26×); still breaks Family C T² semantics
+- Structural conclusion: 1.2-1.5× is incompatible with N=1000 shards storing per-shard cells
+- Minimum achievable ratio for N=1000 with any per-shard encoding: ≈ N ≈ 1001
+
+## Operator decision pending (post-R16)
+
+TQ-1 disposition: (α) architecture-revise / (β) pitch-revise / (δ) defer
 
 ## Round scope — operator-set (do NOT auto-redirect)
 
