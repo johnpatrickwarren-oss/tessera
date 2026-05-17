@@ -207,3 +207,16 @@ All unresolved decisions → open questions in the spec.
 #   R07 Reviewer MINOR-3 without running the AC-15 fixture against production; Reviewer-probed:
 #   n_ticks_contaminated=6 (2 ticks × 3 runs; curatedLen=6 vs origLen=8); downstream caused
 #   MAJOR-1 halt-discipline violation when Delta 11 tightening failed empirically.
+
+# REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
+#   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include
+#   a "file-level documentation coverage check": (a) read the existing file-level docblock;
+#   (b) verify it still accurately describes the file's full exported surface and semantic
+#   responsibility after the proposed delta; (c) if the delta adds a new exported symbol or
+#   changes the module's scope, the spec must include a docblock update prescription in the delta.
+#   Silence on docblock updates is a spec gap (Architect-attributable), not an Implementer
+#   tactical choice — the Implementer will faithfully follow the prescribed delta and leave the
+#   header unchanged. Gate placement: add this as a checkpoint in the "Implementer can act without
+#   guessing" grilling step, evaluated per modified file. Detected tessera R10 MINOR-1:
+#   runtime.ts SLICE 2b3 header persisted after SLICE 2b4 emission was added via Delta 2; spec
+#   prescribed three sub-changes but no docblock update; Reviewer caught at runtime.ts:1-13.

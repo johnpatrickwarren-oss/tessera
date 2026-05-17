@@ -1,6 +1,23 @@
 CURRENT-ROUND: R10
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
+
+## Reviewer → Memorial-Updater routing (R10)
+
+**Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R10.md` (full cold-read at HEAD `b2740d2`).
+
+**Verdict:** All 19 ACs PASS. 0 CRITICAL / 0 MAJOR / 1 MINOR (file-header drift) / 6 OBS.
+
+**Inputs for Memorial-Updater:**
+- `coordination/specs/Q-R10-SPEC.md`
+- `coordination/reviews/REVIEWER-REPORT-R10.md`
+- `coordination/MEMORIAL.md` (existing R10 entries from Architect/Implementer)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md`
+- This `coordination/NEXT-ROLE.md`
+
+**Implementer → Reviewer routing (preserved below for audit trail)**
+
+---
 
 ## Implementer → Reviewer routing (R10)
 
