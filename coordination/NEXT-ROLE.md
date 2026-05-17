@@ -1,6 +1,50 @@
 CURRENT-ROUND: R07
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: REVIEWER
 STATUS: READY
+
+## Architect → Implementer routing (R07; 2026-05-16)
+
+Spec emitted: `coordination/specs/Q-R07-SPEC.md` (full spec; AC-1..AC-26; 2 file surfaces in component inventory). Audit sidecar: `coordination/specs/Q-R07-SPEC-AUDIT.md` (brainstorm rationale; 4 e-process formulations enumerated per PR-F8 mandate with 1 picked + 3 rejected; decision rationale per resolved decision D-R07-1..D-R07-11; architect pre-predictions; memorial sweep).
+
+Implementer inputs:
+- `coordination/specs/Q-R07-SPEC.md` (load-bearing; full spec)
+- (Do NOT read `coordination/specs/Q-R07-SPEC-AUDIT.md` per cold-start discipline)
+- R07-required source surfaces: `engine/types/config.ts` (BaselineBundle line 399, BaselineCurationDecisionId line 214 — D11/D12/D13 already in union from R06 Delta 1, BaselineCurationDecision line 227); `tools/calibrators/family-c.ts` + `tools/calibrators/_shared.ts` (R06-vendored; imports listed at spec Integration points #2 + #3); `engine/per-shard/warm-start.ts` line 74-75 (R03-shipped reset semantic — informational only; R07 does NOT modify per R07-SAS-1)
+
+Implementer chore sequence at GREEN close (R14 two-commit per NEXT-ROLE.md original directive):
+1. Run all binding commands at GREEN; record OBSERVED counts (NOT pre-stated from spec predictions).
+2. Write all coordination artifacts (NEXT-ROLE.md + MEMORIAL.md append + observed counts) WITHOUT SHA field.
+3. `git add` coordination artifacts.
+4. `git commit -m "chore(R07): coordination artifacts"` → SHA-A.
+5. Write SHA-A into NEXT-ROLE.md's Attestation block.
+6. `git commit -m "chore(R07): record attestation SHA"` → SHA-B (becomes HEAD).
+7. Reviewer verifies: `git diff SHA-A HEAD -- src/ tests/ tools/ engine/ coordination/specs/` is empty.
+
+Two HALT-bound items the Implementer MUST flag if spec ambiguity surfaces (per NEXT-ROLE.md halt-conditions carry-forward):
+- **Q-JC4b disjoint-data construction** (R07-SAS-17): if Implementer encounters ambiguity, halt + DIAGNOSTIC-R07-disjoint-data.md + STATUS: ESCALATE. Silent plug-in invalidates Ville bound = CRITICAL.
+- **Q-JC5 sentinel wire format** (R07-SAS-19): if Implementer encounters ambiguity, halt + DIAGNOSTIC-R07-sentinel-format.md + STATUS: ESCALATE.
+
+Architect-acknowledged spec-prediction items the Implementer may surface as TACTICAL FIXES (R06 OBS-1 precedent — architect spec-prediction error, not Implementer failure):
+- AC-8 / AC-12 / AC-13 / AC-16 OBSERVED fire counts and fire_window values may differ from architect predictions. AC binds OBSERVED at GREEN; Implementer reports.
+- Hand-trace at Implementer notes 5 + 6 are illustrative; the AC-8 + AC-12 + AC-13 fixtures use deterministic seeds whose observed counts depend on the precise PRNG path.
+
+## Implementer → Reviewer routing (R07; 2026-05-16)
+
+**GREEN commit SHA: `644b845`** (tools/curate-baseline-fleet-correlated.ts + test/q07-fleet-correlated.test.ts with tightened AC-12/AC-13 assertions)
+
+Binding command results at GREEN:
+- `npm run typecheck` → exit 0 (AC-22)
+- `node --test test/q07-fleet-correlated.test.js` → pass 21 / fail 0 (AC-23)
+- Pre-R07 tests: q01-vc=3, q01-no=1, q01-sa=5, q02-se=6, q03=13, q04=11, q05=13, q06=13, smoke=5 → total 70/0; no regressions (AC-24)
+- `grep -nE "^[^/*]*as any" tools/curate-baseline-fleet-correlated.ts` → 0 matches (AC-26)
+
+Spec-prediction errors (architect, not implementation failures — R06 OBS-1 precedent):
+- AC-12 OBSERVED: 0/30 fires (architect predicted 20-30). Single injection at w_inject=100 with 90 clean pre-injection windows → ons_lambda≈0 at injection → martingale property → zero wealth. AC-8 (direct runFleetCorrelatedEProcess fixture with 30 sustained-elevation windows) demonstrates detection.
+- AC-13 OBSERVED: 0/30 fires (architect predicted 0-15). Same root cause; weak p_alt=0.1 even less likely to fire.
+
+Tactical fix (AC-7 fixture): spec said xCounts=[2,3] (W=2) for K=2 training, but K=min(2,max(0,W-1))=1 for W=2. Used [2,3,0] (W=3) to get K=2 and p_base=0.025 as spec's formula requires. Noted in RED commit message.
+
+Attestation SHA: (populated in chore commit below)
 
 ## Round scope — operator-set (do NOT auto-redirect)
 
