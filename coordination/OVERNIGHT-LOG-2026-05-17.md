@@ -262,3 +262,39 @@ Per overnight authority [[project-overnight-authority-2026-05-17]]: R15 Phase 1 
 3. **Parked operator-gate items** — OQ-1 calibrate.ts; OQ-R08-3 transient detector; R09 MINOR-3 NEXT-ROLE format; R10 MINOR-1 docblock; R11/R12/R13/R14 MINORs + OBS
 
 Pipeline state: clean, working tree clean, repo HEAD at `6efa61e` (R15 Memorial Updater outputs).
+
+---
+
+## R17 — TQ-1 (β) disposition + shard definition + R10 MINOR-1 (autonomous; audit tier; evening session)
+
+**Completed:** 2026-05-17 12:50:02 (pipeline ~30 min wall-clock).
+**Verdict:** MERGE-READY · 0 CRITICAL · 0 MAJOR · 3 MINOR · 4 OBS · 10/10 ACs PASS · 171/0 tests (unchanged from R16 baseline).
+**Streak:** 15-round 0-CRITICAL extended (R02-R17).
+**Commits:** `435bcdd` (chore SHA-A; TQ-1 β + shard definition + MINOR-1 docblock) → `e937d00` (SHA-recording SHA-B) → `b94e731` (Memorial Updater).
+**Reinforcements:** +6 IMPL (now 17 ARCH + 23 IMPL + 1 COMMON + 1 REVIEWER).
+
+### TQ-1 closed: (β) pitch-revise landed
+
+✅ **SCOPING-MEMO-v0.3 § 2.2 storage-claim revised** — 1.2-1.5× replaced with N-scaling truth + provenance to R14 + R16 evidence.
+✅ **Shard definition added** — `1 shard = 1 GPU rank` per NVIDIA FSDP / TP / PP convention with topology hierarchy + inference caveat.
+✅ **PHASE-1-CLOSE-WALK.md Phase 2 TAGGED-FUTURE** — storage-mitigation paths added (diagonal-only Family C; cross-shard sharing under Extension 3).
+✅ **TQ-1 closure in morning triage queue** — disposition (β) confirmed; cross-references landed.
+✅ **R10 MINOR-1 in-passing** — `engine/per-shard/runtime.ts` docblock updated for R10 + R14 contributions.
+
+### Three R17 MINORs (routine; not morning-triage-escalation)
+
+- **MINOR-1**: correction-propagation pass missed `PHASE-1-CLOSE-WALK.md:175` (§ 5 still contains stale "(γ) investigation" recommendation). Tactical cleanup deferrable to next in-passing window.
+- **MINOR-2**: `MEMORIAL.md:1634` R16 role-boundary CONFIRMATION orphaned under R17 header (line tags preserve attribution; section structure misplaces).
+- **MINOR-3**: `engine/per-shard/runtime.ts:17,24` bare `REVIEWER-REPORT-*.md` cites without `coordination/reviews/` path prefix (pre-existing; R17 docblock cleanup didn't address).
+
+All three are documentation-consistency, not load-bearing. Future-round in-passing cleanup window will address.
+
+### R18 decision (autonomous within evening-overnight authority)
+
+**R18 = Phase 2 SLICE 1** per PHASE-1-CLOSE-WALK.md:250 "1-cycle interpretation":
+- TopologyNode.kind extension: `'rack' | 'gpu_shard'` (minimum-viable subset of full v0.3 § 2.3 list)
+- TopologyEdge.relationship extension: `'contains'` (hierarchical only; peer semantics deferred)
+- VerdictGroup scope extension: `cluster_event_id` field addition
+- v9X fixture: single-rack cluster with N=10-20 shards
+
+Full tier per A2 (new architectural pattern — first Phase 2 work) + A4 (novel data model — TopologyNode.kind union extension).
