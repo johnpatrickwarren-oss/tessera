@@ -71,7 +71,7 @@ R06 GREEN expected: previous 8 file counts unchanged + q06 = 13 / 0 → **Total:
 **Branch:** main  
 **RED commit:** `9271ea3` (test/q06-baseline-pre-pass.test.ts only; npm run typecheck → TS2307)  
 **GREEN commit:** `377fbb3` (all 8 deltas: config.ts Delta 1 + vendor script Delta 2 + q01-vc Delta 3 + q01-no Delta 4 + Delta 7a/b/c 3 vendored tools files + pre-pass.ts Delta 5 + manifest Delta 6)  
-**Attestation SHA:** _(see below — populated by coordination-chore commit)_
+**Attestation SHA:** `3e1c7fc` (coordination-artifacts commit; SHA-B = SHA-recording commit to follow)
 
 ### OBSERVED binding-command outputs (per R03 MINOR-4 + R14 discipline — NOT pre-stated)
 
