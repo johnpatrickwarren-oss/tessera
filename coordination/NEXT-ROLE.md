@@ -1,6 +1,17 @@
 CURRENT-ROUND: R12
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
+
+## Reviewer routing (R12)
+
+- Reviewer report: `coordination/reviews/REVIEWER-REPORT-R12.md`
+- Verdict: **0 CRITICAL / 0 MAJOR / 0 MINOR / 4 OBS**; 16/16 ACs PASS; 138/138 full regression; 18/18 R12-SAS clauses clean; TDD ordering verified (RED `6c4b8b4` → GREEN `24276ee`; 10th consecutive tessera round).
+- Reviewer ran 7 binding commands independently at HEAD `d4bc0a2`; all match Implementer attestation.
+- OBS items (none load-bearing at R12; tracked for future-round consideration):
+  - OBS-1: AC-7 Family-C snapshot under-clones optional `q_running_phi_sum` (fixture-design observation; not load-bearing because wrapper reads only `state.log_S_t`)
+  - OBS-2: AC-9 binds structurally-equivalent ergonomic-redundancy contract (intentional per Mechanism primitive 8)
+  - OBS-3: AC-14/AC-15 `console.log` cosmetic noise (preserves R11 evidence-matrix convention)
+  - OBS-4: Spec § Integration points point 6 lists `type FleetMergeOutput` as a q12 import that the actual file omits (spec documentation drift; Implementer correctly omitted unused import)
 
 ## Round scope (operator-set; preserved verbatim from prior NEXT-ROLE.md)
 
