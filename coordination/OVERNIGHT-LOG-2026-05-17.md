@@ -10,6 +10,29 @@ _Supersedes the 2026-05-16 overnight scope: no round budget; escalations log for
 
 _Escalation items accumulated overnight. Operator triages by severity + priority on return; each item has a recommended-action-but-not-acted-on._
 
+### TQ-3 — R18 ESCALATE: q01-no-at-pin-deltas byte-identity conflict on verdict.ts (HIGH priority; chain BLOCKED)
+
+**Surfaced:** R18 IMPLEMENTER halt-and-route-back 2026-05-17 evening. **Severity:** chain-blocking; R19 cannot launch until dispositioned.
+
+**The conflict:** R18 spec ships VerdictGroup `cluster_event_id?: string` additive field at `engine/types/verdict.ts`. The pre-existing test `test/q01-no-at-pin-deltas.test.ts` includes `engine/types/verdict.ts` in its `AT_PIN_FILES` byte-identity check — and R18's deltas correctly break that check (180/1, not 181/0).
+
+R18 spec § 6 anti-scope explicitly fenced prior-round test file modification: *"Existing 18 test files preserved verbatim per pre-R18 baseline | spec-internal HALT"*. The Implementer correctly hit this fence + wrote `coordination/diagnostics/DIAGNOSTIC-R18-no-at-pin-deltas-verdict.md` + set STATUS: ESCALATE rather than silently fix.
+
+**Bounded question (operator pick A or B):**
+
+- **(A) Approve targeted exception** — update `q01-no-at-pin-deltas.test.ts` AT_PIN_FILES list to remove `engine/types/verdict.ts` (analogous to R01's existing config.ts treatment — config.ts is vendored-with-deltas and excluded from AT_PIN_FILES) + update `VENDORING-MANIFEST.md` row for verdict.ts to `vendored-with-deltas`. Implementer re-runs to GREEN at 181/0; chain proceeds; R19 launches.
+- **(B) Accept 1-test regression** — Reviewer audits as MAJOR/MINOR; Implementer completes with 180/1 and the test stays broken indefinitely.
+
+**My recommendation: (A).** Direct precedent from R01 (config.ts is vendored-with-deltas and was removed from the AT_PIN_FILES check at R01 close). The R18 spec's anti-scope was over-broad — the implementer is correct that ANY vendored-with-deltas file needs the same treatment by construction. The fix is one-line in the test + one-row in the manifest, matches established pattern, and is fully revertable.
+
+**Why not (B):** breaks Tessera's "all tests passing" invariant; leaves a permanent broken test; future rounds inherit the wrong state; bad precedent for "we accept regression when anti-scope is wrong."
+
+**Per evening-overnight authority, I am NOT auto-dispositioning** — the operator-prepared instruction "save escalations for review in the morning" applies. The chain stops at R18 ESCALATE; R19 does not launch. One-line operator confirmation in the morning unblocks.
+
+**Cost of waiting:** R19 launch delayed until morning. The chain budget (R17-R21) was 5 rounds; we used R17 + halted-R18 ≈ 2. Plenty of margin if operator dispositions promptly.
+
+---
+
 ### TQ-1 — PR-F5 storage-overhead empirical finding contradicts v0.3 pitch claim — **CLOSED WITH DISPOSITION (β)**
 
 **Disposition confirmed:** **(β) pitch-revise** — operator confirmed 2026-05-17 evening. R16 investigation completed (d-mismatch hypothesis refuted). R17 executed the amendments. **STATUS: CLOSED.**
@@ -298,3 +321,53 @@ All three are documentation-consistency, not load-bearing. Future-round in-passi
 - v9X fixture: single-rack cluster with N=10-20 shards
 
 Full tier per A2 (new architectural pattern — first Phase 2 work) + A4 (novel data model — TopologyNode.kind union extension).
+
+---
+
+## R18 — Phase 2 SLICE 1: ESCALATE on q01-no-at-pin-deltas vs verdict.ts deltas (autonomous; chain stopped)
+
+**Status:** ESCALATE 2026-05-17 13:20:37 (Implementer halt-and-route-back).
+**Pipeline stages run:** Architect (12 min, completed) → Implementer (11 min, ESCALATED before GREEN).
+**Pipeline stages NOT run:** Reviewer + Memorial Updater (correctly skipped per halt-discipline; round did not reach MERGE-READY).
+**Commits:** `c9827a9` (RED — q18 placeholders) → `dd21cb5` (chore ESCALATE — DIAGNOSTIC + NEXT-ROLE.md update).
+
+### What the Architect produced (good)
+
+- `coordination/specs/Q-R18-SPEC.md` (+ audit sidecar) — spec for the 1-cycle Phase 2 SLICE 1 interpretation
+- Anti-scope explicitly forbade prior-round test file modification (correct anti-scope discipline)
+- AC-R18-12 explicitly required the Implementer to HALT if total test count diverged from 181 (correct halt-discipline plumbing)
+
+### What the Implementer encountered (correct halt)
+
+- Applied R18 deltas to `engine/types/verdict.ts` (4 additive changes for VerdictGroup `cluster_event_id?: string` + TopologyNode.kind + TopologyEdge.relationship)
+- `q01-no-at-pin-deltas.test.ts` failed because verdict.ts is in AT_PIN_FILES byte-identity check → 180/1 not 181/0
+- Anti-scope forbids modifying the q01 test → halt-and-route-back
+- Wrote DIAGNOSTIC-R18-no-at-pin-deltas-verdict.md with bounded question (A vs B) + analysis
+- Set STATUS: ESCALATE
+
+This is **textbook halt-discipline** — the Implementer did exactly what the methodology specifies when spec anti-scope and AC pass-state are in tension.
+
+### Why I am NOT auto-dispositioning
+
+Per evening-overnight authority [[project-overnight-authority-2026-05-17-evening]]:
+> "Save escalations for review in the morning, at which point we review severity and priority and decide what to do."
+
+Even though Option A has strong R01 precedent (config.ts is vendored-with-deltas + excluded from AT_PIN_FILES + treated exactly the same way), the architectural decision to amend R18's anti-scope is operator-class. I documented the recommendation in TQ-3 with bounded options + reasoning + cost-of-waiting; operator dispositions in the morning.
+
+### Chain state
+
+- **R18 BLOCKED on ESCALATE** until operator disposition
+- **R19 not launched** (chain hits ESCALATE not MERGE-READY)
+- **R17 + halted-R18 ≈ 2 of ~5 round budget used** — margin for R18 disposition + R19 + close after operator return
+- **Working tree clean** at `dd21cb5`
+
+### What operator can pre-write (optional time-saver)
+
+If operator picks (A) in the morning, the fix is mechanical:
+1. Update `test/q01-no-at-pin-deltas.test.ts` AT_PIN_FILES list — remove `'engine/types/verdict.ts'`
+2. Update `coordination/VENDORING-MANIFEST.md` row for `engine/types/verdict.ts` — `vendored-at-pin` → `vendored-with-deltas` + note R18 additive deltas
+3. Re-run `npm test` to confirm 181/0
+4. Update NEXT-ROLE.md to STATUS: READY routing to REVIEWER
+
+Or operator authorizes me to do this and I execute on confirmation.
+
