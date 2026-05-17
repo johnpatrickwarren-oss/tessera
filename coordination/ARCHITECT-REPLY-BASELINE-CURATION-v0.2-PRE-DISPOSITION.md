@@ -177,3 +177,41 @@ SLICE 5 scope (R06): Stage 2b FCP-1 + Stage 3b warm-start eligibility tagging + 
 ---
 
 _Disposition artifact authored 2026-05-16. All 9 Q-JC picks confirmed by John in this session. Mirrors v0.3 PRE-DISPOSITION format. SLICE 4 Architect-role round unblocked; SLICE 5 follows on SLICE 4 close. Architect-pre-prediction risk reduced via operator review (caught the K%-threshold framing error at v0.1 → v0.2 cost of ~10 minutes vs multi-round SLICE 5 fix cycle)._
+
+---
+
+## Q-JC4 scope narrowing (2026-05-16, operator-confirmed under authority-expansion)
+
+_Append authored: 2026-05-16. Records the operator-confirmed (B)+(D) disposition surfaced at R07 close. Does NOT re-disposition Q-JC4 framework (sequential e-process formulation stands). Records the SCOPE CLAIM narrowing applied at the v0.3 memo bump._
+
+### Empirical PR-F8 evidence at R07 close
+
+R07 PR-F8 evidence matrix demonstrated:
+
+- **AC-8** (sustained 30-window injection at X_w=N=100): FCP-1 fires reliably; fire_window ∈ [3, 25] across deterministic-seed simulation. Sustained-event detection capability EMPIRICALLY DEMONSTRATED.
+- **AC-12** (single-window injection at p_alt=0.5, w_inject=100, W=200): firedCount = 0/30 trials. Architect predicted 20-30. Single-window detection capability EMPIRICALLY NOT DEMONSTRATED.
+- **AC-13** (single-window injection at p_alt=0.1, w_inject=100, W=200): firedCount = 0/30 trials. Architect predicted 0-15. Single-window detection capability EMPIRICALLY NOT DEMONSTRATED.
+
+Root cause of AC-12/AC-13 zero-power: the betting-adaptive e-process's martingale property means at the FIRST test window post-injection, log_S is unchanged regardless of F_w (since ons_lambda=0 from clean training prior). The 99 post-injection clean windows then fail to accumulate sufficient wealth to cross log(1/α_fleet) ≈ 6.908. FCP-1's sequential design requires ACCUMULATION across many windows of elevation — which is the canonical sustained-event profile, not the transient-spike profile.
+
+### Operator-confirmed disposition under 2026-05-16 authority-expansion
+
+Per `coordination/OVERNIGHT-LOG-2026-05-16.md` "Authority expansion (2026-05-16, post-R07 escalation)" entry: in overnight mode, the assistant continues based on its own recommendations without seeking approval. The (B)+(D) recommendation was: redesign AC-12/13 fixtures as FPR-under-perturbation tests + add new sustained-injection ACs (Option B) AND narrow the FCP-1 scope claim in the scoping memo to document the sustained-event-only capability (Option D). Operator-confirmed by authority-expansion grant; recorded here as the disposition record.
+
+### What changed
+
+- **FCP-1 detection scope CLAIM**: now documents sustained fleet events only (multi-window elevation). Transient single-window contamination is out of scope for SLICE 5; Phase 2+ candidate.
+- **Q-JC4 framework**: UNCHANGED. Sequential betting-adaptive e-process per the original (β) disposition stands.
+- **Q-JC4a / Q-JC4b / Q-JC4c / Q-JC5 / Q-JC1 / Q-JC2 / Q-JC3 / Q-JC6**: UNCHANGED.
+
+### Where the narrowing is documented
+
+- `coordination/SCOPING-MEMO-BASELINE-CURATION-v0.3.md` § 1.1 Detection scope (NEW v0.3 sub-section).
+- `coordination/SCOPING-MEMO-BASELINE-CURATION-v0.3.md` § 2 Stage 2b prose (sustained-event scope paragraph appended).
+- `coordination/specs/Q-R08-SPEC.md` (this round's spec) — § Mechanism primitive 1 + § Anti-scope R08-SAS-2.
+
+### Future-cycle trigger
+
+If real GPU-cluster operational evidence surfaces demand for transient-single-window fleet-event detection (e.g., a recurring cluster-wide measurement glitch that lasts exactly one window), Phase 2+ may add a SECOND detector tuned for that case. Candidate formulations per Reviewer's Option C from REVIEWER-REPORT-R07.md: GROW mixture e-process; static-λ formulation that has buildup-independent power. Each would fire its own PR-F-N pair-review trigger as a separate algorithmic addition.
+
+---
