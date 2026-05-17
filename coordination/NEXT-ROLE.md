@@ -1,14 +1,16 @@
 CURRENT-ROUND: R15
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: ROUND-COMPLETE
 Inputs:
+  - coordination/reviews/REVIEWER-REPORT-R15.md (Reviewer cold-audit 2026-05-17; 0 CRITICAL / 0 MAJOR / 3 MINOR / 3 OBS; 20/20 ACs PASS; 14-round 0-CRITICAL streak R02-R15)
   - coordination/specs/Q-R15-SPEC.md (Architect-emitted 2026-05-17; 507 lines; 20 ACs; 16 R15-SAS clauses; 6 halt conditions)
   - coordination/specs/Q-R15-SPEC-AUDIT.md (Architect-side ceremony sidecar; brainstorm + design + 13-gate pre-emit grilling; Reviewer cold-read excludes this file)
+  - coordination/PHASE-1-CLOSE-WALK.md (R15 Deliverable 1 — Phase 1 close synthesis artifact; § 0-7)
   - coordination/NEXT-ROLE.md (this file; R15 round scope at lines 5-156 unchanged)
   - coordination/SCOPING-MEMO-v0.3.md (§ 3 Phase 1 close walk row; § 9 Engine vendoring policy + Re-pinning policy)
   - coordination/OVERNIGHT-LOG-2026-05-17.md (Morning triage queue at top — TQ-1 + TQ-2)
-  - coordination/MEMORIAL.md (§ Inherited active Memorials :13 — 22V/8C inherited; § Tessera-specific Memorial state lineage :22-34)
-  - coordination/VENDORING-MANIFEST.md (41 manifest rows; 40 currently on disk; 1 REMOVED-AT-R02)
+  - coordination/MEMORIAL.md (§ Inherited active Memorials :13 — 22V/8C inherited; § Tessera-specific Memorial state lineage :22-34; § Phase 1 close — Memorial D state stamp :1425; § R15 — Implementer :1524)
+  - coordination/VENDORING-MANIFEST.md (41 manifest rows; 40 currently on disk; 1 REMOVED-AT-R02; verification log appended at :52)
 
 ## Round scope — operator-set (do NOT auto-redirect; FINAL round of overnight chain — HARD STOP after R15)
 
