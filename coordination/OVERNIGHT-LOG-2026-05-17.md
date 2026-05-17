@@ -18,7 +18,7 @@ _Escalation items accumulated overnight. Operator triages by severity + priority
 - `SCOPING-MEMO-v0.3.md` § 1.7 (shard unit definition added), § 1.8 (amendment history), § 2.2 (storage claim + PR-F5 trigger updated), § 4.2 R-E1 (risk row updated)
 - `coordination/PHASE-1-CLOSE-WALK.md` § 6 TQ-1 subsection (disposition confirmed + Phase 2 mitigation paths added)
 - `coordination/PRD.md` performance row (amendment note added)
-- R17 coordination commit SHA: _[recorded at R17 attestation]_
+- R17 coordination commit SHA: `435bcdd`
 
 ---
 

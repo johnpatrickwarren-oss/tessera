@@ -142,9 +142,16 @@ cd ~/concord/tessera
 - **R09 MINOR-3** NEXT-ROLE.md attestation table format
 - **R11/R12/R13/R14/R15/R16 MINORs + OBS** non-load-bearing
 
+## R17 Attestation
+
+**SHA-A (coordination chore):** `435bcdd`
+**Observed test counts at GREEN:** 171/0 across 18 files (all counts identical to R16 baseline).
+**Reviewer verification command:** `git diff 435bcdd HEAD -- src/ tests/ tools/ engine/ coordination/specs/ coordination/SCOPING-MEMO-v0.3.md coordination/PHASE-1-CLOSE-WALK.md`
+
 ## Update history
 
 | Date | Event |
 |---|---|
 | 2026-05-17 | R16 closed: TQ-1 (γ) investigation complete; d-mismatch hypothesis refuted; (β) pitch-revise becomes natural disposition. NVIDIA documentation research confirmed `1 shard = 1 GPU` as canonical convention. |
 | 2026-05-17 | Operator dispositioned (β) on TQ-1 + authorized evening overnight chain with Phase 2 entry permitted. R17 launched. |
+| 2026-05-17 | R17 completed: TQ-1 closed with (β) pitch-revise; shard definition added; PHASE-1-CLOSE-WALK updated; R10 MINOR-1 docblock resolved. Routing to REVIEWER. |
