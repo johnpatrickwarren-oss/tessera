@@ -27,7 +27,7 @@ STATUS: READY
 | test/betting-e-process-class-dispatch.test.js | 5/0 |
 | **Total** | **171/0** (was 168) |
 
-Attestation SHA: _to be filled after coordination commit_
+Attestation SHA: ef47759
 
 ## R16 Reviewer inputs
 
