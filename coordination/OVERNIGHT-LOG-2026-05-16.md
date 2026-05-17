@@ -155,3 +155,83 @@ Architect tier: full (the scope amendment + spec redesign is architectural dispo
 In-passing items R08 may close (Architect's call; not load-bearing):
 - R06 MINOR-1 carry-forward: `config.ts:228` stale JSDoc "(D1-D10)" — should be "(D1-D13)" after R06 Delta 1.
 - R07 MINOR-2/3/4 watch-list items — fixture-level closures.
+
+---
+
+## R08 — SLICE 5 amendment + R07 MAJORs closure via (B)+(D) (autonomous under expanded authority)
+
+**Completed:** 2026-05-16 (pipeline ~45 min wall-clock).
+**Verdict:** MERGE-READY · 0 CRITICAL · **2 MAJOR** (NEW — see below) · 4 MINOR · 5 OBS · 29 PASS + 2 PARTIAL (AC-15, AC-25).
+**Binding commands:** 93/0 grand total; typecheck exit 0.
+**Commits:** `f99e54c` (RED — AC-12/13 redesign + AC-27/28 add + R07 MINOR-2/4 close) → `4ba5e9e` (GREEN — v0.3 memo + pre-disposition append + config.ts JSDoc fix) → `f27ad25` (chore SHA-A) → `24f945e` (SHA-recording SHA-B) → `695f917` (Memorial Updater).
+
+### What landed (the substantive (B)+(D) work)
+
+✅ **(D) Scope amendment landed** — `coordination/SCOPING-MEMO-BASELINE-CURATION-v0.3.md` (32 KB; appends § 1.1 "Detection scope (v0.3 narrowing)" with clear sustained-vs-transient rationale, R07 PR-F8 empirical reference, Phase 2+ candidate framing).
+
+✅ **(B) Fixture redesign landed** — AC-12/13 repurposed as FPR-under-transient tests (Type-I error checks for benign single-window perturbation); new AC-27/28 added with sustained injection per AC-8 pattern + theory-derived bounds (NOT OBSERVED-binding). MAJOR-2 self-confirming gap closed.
+
+✅ **Pre-disposition append landed** — `ARCHITECT-REPLY-BASELINE-CURATION-v0.2-PRE-DISPOSITION.md` Q-JC4 record gets a small append documenting the scope narrowing.
+
+✅ **R07 MINOR-2/4 closed in-passing** — AC-5/6 unused `xw` tuple element; AC-16 ambiguous comment.
+
+✅ **R06 MINOR-1 closed in-passing** — `engine/types/config.ts:228` stale JSDoc "(D1-D10)" updated to "(D1-D13)".
+
+### New MAJORs surfaced (R09 work, not blocking R08 close)
+
+**MAJOR-1 (Implementer halt-discipline):** Delta 11 tightened AC-15 from `<= origLen` to `=== origLen`. Test failed empirically (`curatedLen=6, origLen=8` — MCD flags 2 ticks per run on the clean alternating-pattern fixture). Implementer correctly reverted to `<= origLen` but did NOT write a DIAGNOSTIC or set STATUS: ESCALATE. Procedural-audit gap: even with unambiguous correct resolution, a spec premise that fails empirically is a HALT condition requiring DIAGNOSTIC. New reinforcement landed in CLAUDE-IMPLEMENTER.md.
+
+**MAJOR-2 (Architect pre-emit-grilling):** Architect's spec § Mechanism primitive 11 stated "MCD on the clean alternating-pattern signal series produces zero contamination flags" as load-bearing premise, INHERITED from R07 Reviewer's MINOR-3 testimony without independent empirical verification. Premise was wrong (n_ticks_contaminated=6). Cause of MAJOR-1 downstream. New reinforcement landed in CLAUDE-ARCHITECT.md: "When a load-bearing spec premise is inherited from a prior Reviewer's or Architect's claim, independently verify before emitting."
+
+### Why I am STOPPING (per cost-discipline budget)
+
+R06 + R07 + R08 = **3 of 3 autonomous rounds budget consumed**. The authority-expansion relaxed the Q-JC re-disposition limit but did NOT raise the round budget. R09 awaits John's return regardless of R08 outcome.
+
+The two MAJORs surfaced at R08 are real but routine — they're tactical/procedural lessons that:
+1. Captured 2 new REINFORCED lines (CLAUDE-ARCHITECT.md = 12; CLAUDE-IMPLEMENTER.md = 12). Both still well under the 30-line consolidation threshold.
+2. Produced a clear watch list for R09 (re-run AC-15 fixture empirically; fix spec premise to `n_ticks_contaminated=6`; write correct AC-15 tightening that matches empirical behavior).
+3. Did NOT block R08 merge; substantive (B)+(D) work is committed.
+
+### REINFORCED counts at overnight-mode-close
+
+| File | REINFORCED | Δ overnight |
+|---|---|---|
+| CLAUDE-COMMON.md | 0 | 0 |
+| CLAUDE-ARCHITECT.md | 12 | +5 (R06 +2, R07 +2, R08 +1) |
+| CLAUDE-IMPLEMENTER.md | 12 | +3 (R06 +1, R07 +1, R08 +1) |
+| CLAUDE-REVIEWER.md | 0 | 0 |
+| CLAUDE-MEMORIAL.md | 0 | 0 |
+
+All well under 30-line consolidation threshold. No consolidation action needed.
+
+### Summary table — overnight progress
+
+| Round | Scope | Verdict | Tier-rubric | Key surface event |
+|---|---|---|---|---|
+| R06 | SLICE 4 baseline curation toolchain + Stage 2a screening | MERGE-READY · 0/0/4/4 · 22/22 ACs · 70/0 | full | Q-JC1 narrowed by Architect (OQ-1 for John) |
+| R07 | SLICE 5 FCP-1 + Stage 3b + PR-F8 | MERGE-READY · 0/**2 MAJOR**/4/4 · 26/26 ACs · 91/0 | full | PR-F8 surfaced FCP-1 single-window power gap |
+| R08 | SLICE 5 amendment via (B)+(D) | MERGE-READY · 0/**2 MAJOR**/4/5 · 29 PASS + 2 PARTIAL · 93/0 | full | v0.3 scope amendment + AC redesign; 2 procedural MAJORs surfaced as R09 watch list |
+
+### What I did NOT do (preserved escalation territory)
+
+- ❌ Did NOT touch anchor PR #35 or #37 (both still open)
+- ❌ Did NOT consider Option C (algorithmic redesign) — would require operator gate per R07 escalation framing; constrained to (B)+(D) by my own R07-disposition recommendation
+- ❌ Did NOT touch cross-project repos (DeploySignal, my-first-build, ArchFolio)
+- ❌ Did NOT escalate R08 MAJORs to halt — they're routine watch-list items; substantive R08 work is committed
+- ❌ Did NOT launch R09 — budget exhausted per cost discipline
+
+### Recommendation for John's return
+
+**R09 = audit-tier follow-up bundling R08 watch list items 1-3.** Specifically:
+1. Run AC-15 fixture empirically against production code; record actual `n_ticks_contaminated`.
+2. Fix spec premise: "MCD on clean alternating-pattern produces `n_ticks_contaminated=6` (2 ticks × 3 runs)".
+3. Write the correct AC-15 tightening that matches empirical behavior. The bound `<= origLen` is currently correct; redesign could change to `=== origLen - actual_drop_count` or leave as is depending on empirical analysis.
+
+This is squarely tactical follow-up (S4 in the tier rubric) — audit tier (Implementer writes thin spec; Reviewer cold audit; Memorial captures).
+
+Other R09 candidates (operator's choice):
+- Continue SLICE 2b series — R05's deferred mean_vector/covariance emission at strict tier + R02 MINOR-2 sparse-encoding-convention enforcement. Full tier; new architectural work.
+- OQ-R08-1: AC-11 H₀ FPR tightening from `=== 0` to `<= 1`. Solo tier (single-line test change).
+- OQ-R08-2: PRD AC-P1 prose narrowing to match v0.3 memo. Solo tier (documentation).
+
+R09 recommendation: bundle the R08 watch list (audit tier) THEN return to SLICE 2b4 (full tier). The watch list is small and load-bearing for any future round touching AC-15; deferring it leaves R09's spec premise broken.
