@@ -1,70 +1,73 @@
 CURRENT-ROUND: R08
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
-## Round scope — operator-set via expanded autonomous authority (do NOT auto-redirect)
+## Implementer routing block
 
-**R08 = SLICE 5 amendment + R07 MAJOR-1/MAJOR-2 closure via Option (B)+(D).**
+**Two-commit RED → GREEN used (preferred path per spec AC-25 note).**
+- RED commit `f99e54c`: q07 test changes only — Deltas 3, 4, 5, 6, 7, 10, 12.
+- GREEN commit `4ba5e9e`: Delta 9 (config.ts JSDoc) + Delta 1 (v0.3 scoping memo) + Delta 2 (pre-disposition append).
 
-This round is **NOT** a Q-JC4 re-disposition (the sequential e-process formulation stands; framework is correct for the realistic threat model). It IS:
+**OBSERVED counts at GREEN `4ba5e9e`:**
+- q07-fleet-correlated: 23 / 0
+- q06-baseline-pre-pass: 13 / 0
+- q01-vendoring-coverage: 3 / 0
+- q01-no-at-pin-deltas: 1 / 0
+- q01-schema-additions: 5 / 0
+- q02-schema-extension: 6 / 0
+- q03-warm-start-runtime: 13 / 0
+- q04-welford-stats: 11 / 0
+- q05-per-shard-runtime: 13 / 0
+- betting-e-process smoke: 5 / 0
+- **Grand total: 93 / 0**
+- typecheck (`node_modules/.bin/tsc -p tsconfig.test.json`): exit 0
 
-1. **Scope narrowing of the FCP-1 claim** (Option D from R07 Reviewer's watch list): amend `coordination/SCOPING-MEMO-BASELINE-CURATION-v0.2.md` § 1 Executive summary to document FCP-1 as detecting **sustained fleet events** (the realistic threat model: deploy/firmware-push/cooling-failure all span many windows). Transient single-window contamination is explicitly out of scope for SLICE 5; future-cycle candidate if real production traces surface demand. The amended memo becomes `coordination/SCOPING-MEMO-BASELINE-CURATION-v0.3.md` (or appends an amendment section to v0.2; Architect's call).
+**Spot-check ACs (verified at GREEN):**
+- AC-29: `grep -n "D1-D10" engine/types/config.ts` → 0 matches; `grep -n "D1-D13"` → found at line 228. ✓
+- AC-30: `coordination/SCOPING-MEMO-BASELINE-CURATION-v0.3.md` exists ✓; "Q-JC4 scope narrowing" section found in pre-disposition file ✓.
+- AC-31: `grep -c "assert.ok(firedCount" test/q07-fleet-correlated.test.ts` → 4 matches (AC-12, AC-13, AC-27, AC-28). ✓
 
-2. **Spec fixture redesign closing R07 MAJOR-1 + MAJOR-2** (Option B from R07 Reviewer's watch list):
-   - **Preserve** R07's AC-12/13 single-window injection tests, **repurposed** as FPR-under-perturbation tests (Type-I error checks; assert `firedCount` low or zero under benign single-window perturbation). This is meaningful: a benign single-window measurement spike SHOULD NOT trigger FCP-1; testing this directly is a valid Type-I error check, not a self-confirming binding.
-   - **Add** new ACs with sustained injection per AC-8 pattern (numbering at Architect's discretion — AC-12.5/13.5, AC-27/28, or renumber). Assert nonzero expected fire count derived from theoretical power calculation (NOT OBSERVED-binding). Closes MAJOR-2 self-confirming gap.
-   - The redesigned bindings must NOT use the OBSERVED-binding disposition for the new sustained-injection ACs; that disposition is now scoped to PRNG-drift-class only per the R07 Memorial Updater reinforcement.
+**Delta 11 NOT applied — R07 MINOR-3 remains open.**
 
-3. **Update the pre-disposition** (`coordination/ARCHITECT-REPLY-BASELINE-CURATION-v0.2-PRE-DISPOSITION.md`) with a small append: Q-JC4 scope-narrowing recorded as "operator-confirmed via authority-expansion 2026-05-16; FCP-1 detects sustained fleet events; transient single-window contamination is Phase 2+ candidate."
+Spec Delta 11 prescribed tightening the AC-15 assertion from `assert.ok(curated.length <= origLen)` to `assert.strictEqual(curated.length, origLen)`, citing R07 Reviewer's claim that MCD produces zero contamination flags on the clean fleet fixture. After applying the tightening, the test failed: `AssertionError: run 0: clean fleet should preserve full length; curated=6, original=8`. MCD DOES flag 2 ticks (Stage 2a contamination on the clean fixture). The spec's factual premise was wrong. Reverted to `<= origLen`. This is within tactical autonomy — production behavior empirically determines the correct assertion; no design decision involved. R07 MINOR-3 (AC-15 `<=` → `===`) is carried forward for a future cycle with corrected fixture.
 
-In-passing items R08 MAY close (Architect's discretion; not load-bearing for the round):
-- **R06 MINOR-1 carry-forward:** `engine/types/config.ts:228` stale JSDoc "(D1-D10)" — should be "(D1-D13)" after R06 Delta 1 extended the union. Small one-line fix.
-- **R07 MINOR-2/3/4 watch-list items:** AC-5/6 unused `xw` tuple element; AC-15 `<=` vs `===`; AC-16 ambiguous comment. Fixture-level closures.
+**Production algorithm preserved bit-identical.** `tools/curate-baseline-fleet-correlated.ts` was not modified.
 
-## Q-JC4 framework PRESERVED (not re-dispositioned)
+## Attestation
 
-Per `ARCHITECT-REPLY-BASELINE-CURATION-v0.2-PRE-DISPOSITION.md`, Q-JC4's sequential e-process formulation stands:
-- `e_w = L(X_w | Binomial(N, p_alt)) / L(X_w | Binomial(N, p_base))` — preserved
-- Ville bound at `α_fleet` — preserved
-- Q-JC4a betting-adaptive `p_alt` — preserved
-- Q-JC4b Bayesian shrinkage `p_base` with disjoint-data constraint — preserved
-- Q-JC4c separate-pipe from Q-J1 e-BH — preserved
-- Q-JC5 R03 `residual_seed_hash` reuse — preserved
+```
+SHA-A (coordination chore commit): [TO BE FILLED]
+```
 
-The R07 PR-F8 evidence demonstrated the algorithm has power against sustained events (AC-8: 30-window injection) but not against single-window events (AC-12/13: 0/30 fires). R08 addresses this by narrowing the FCP-1 claim to match the algorithm's actual capability AND redesigning the failed-prediction ACs to test what the algorithm actually does.
+## Inputs (load-bearing — Reviewer reads these)
 
-## Inputs for next role (load-bearing — READ ALL)
+- `coordination/specs/Q-R08-SPEC.md` (full) — the spec; use for AC tracing.
+- `coordination/specs/Q-R08-SPEC-AUDIT.md` (full) — Architect audit sidecar; use for cross-section consistency claims.
+- `test/q07-fleet-correlated.test.ts` (GREEN HEAD) — primary modified test file.
+- `engine/types/config.ts` (line 228) — Delta 9 target.
+- `coordination/SCOPING-MEMO-BASELINE-CURATION-v0.3.md` (full) — Delta 1 target.
+- `coordination/ARCHITECT-REPLY-BASELINE-CURATION-v0.2-PRE-DISPOSITION.md` (full) — Delta 2 append target.
 
-The R08 Architect MUST read these before brainstorming:
+## Round scope summary (Reviewer background)
 
-**Operator-set scope artifacts (this round's disposition):**
-- This `coordination/NEXT-ROLE.md` (you're reading it).
-- `coordination/OVERNIGHT-LOG-2026-05-16.md` — "R07 — Phase 1 SLICE 5 FCP-1" entry + "Authority expansion" entry. Captures the Option (B)+(D) recommendation that became R08's authorized scope.
+**R08 = Phase 1 SLICE 5 amendment + R07 MAJOR-1/MAJOR-2 closure via Option (B) + Option (D).**
 
-**R07 artifacts (the round being amended):**
-- `coordination/specs/Q-R07-SPEC.md` + `coordination/specs/Q-R07-SPEC-AUDIT.md` — full R07 spec + audit sidecar (full brainstorm of 5 e-process formulations).
-- `coordination/reviews/REVIEWER-REPORT-R07.md` — Reviewer findings including the 4 fix-options (Option B + D = R08 scope; Options A and C explicitly rejected).
-- `coordination/logs/ROUND-R07-SUMMARY.md` — Memorial Updater summary; root-cause analysis of MAJOR-1/MAJOR-2.
-- `tools/curate-baseline-fleet-correlated.ts` (R07 GREEN) — FCP-1 implementation; algorithm preserved.
-- `test/q07-fleet-correlated.test.ts` (R07 GREEN) — current test file; R08 modifies AC-12/13 + adds new sustained-injection ACs.
+- **Option (D)**: scope-narrow FCP-1 claim to sustained fleet events. Bump SCOPING-MEMO-BASELINE-CURATION-v0.2 → v0.3 (new file). Append "Q-JC4 scope narrowing (2026-05-16)" section to pre-disposition file.
+- **Option (B)**: redesign AC-12/13 as FPR-under-transient-perturbation tests (`<= 1`); add AC-27 (sustained strong; `>= 25` theory-derived) + AC-28 (sustained weak; `>= 15` theory-derived). NO new OBSERVED-binding — all new ACs use theory-derived bounds or scope-claim bindings with inline right-reasons checks.
+- **In-passing carry-forward MINOR closures** (operator-authorized; Architect's discretion exercised AFFIRMATIVELY): R06 MINOR-1 (config.ts:228 JSDoc); R07 MINOR-2 (AC-5/6 unused `xw`); R07 MINOR-3 (AC-15 length `<=` → `===`); R07 MINOR-4 (AC-16 comment).
 
-**Scoping artifacts (R08 amends):**
-- `coordination/SCOPING-MEMO-BASELINE-CURATION-v0.2.md` — § 1 Executive summary is the amendment target. R08 produces either v0.3 OR appends an amendment section to v0.2.
-- `coordination/ARCHITECT-REPLY-BASELINE-CURATION-v0.2-PRE-DISPOSITION.md` — Q-JC4 disposition gets a small append recording the scope narrowing.
+**Production algorithm UNMODIFIED** at R08 per Q-JC4 framework preservation (operator-set HALT R08-SAS-2). `tools/curate-baseline-fleet-correlated.ts` is preserved bit-identical.
 
-**Discipline memorials:**
-- `coordination/MEMORIAL.md` — R01–R07 entries; R07 entries include the OBSERVED-binding scope reinforcement.
-- `~/.claude/CROSS-PROJECT-MEMORIAL.md` — R09 self-confirming pattern (directly relevant to R07 MAJOR-2 closure); R14 stale-SHA two-commit sequence.
+## Halt conditions (operator-set; from prior NEXT-ROLE.md + R07 reinforcements)
 
-## Halt conditions for R08
+1. **Q-JC4 framework re-disposition**: if Implementer encounters apparent need to modify `tools/curate-baseline-fleet-correlated.ts` algorithm, HALT and write `DIAGNOSTIC-R08-q-jc4-redisposition.md` + STATUS: ESCALATE. R08-SAS-1 + R08-SAS-2 fence this.
+2. **New OBSERVED-binding without right-reasons check**: if at GREEN, AC-27 OBSERVED firedCount < 25 OR AC-28 OBSERVED firedCount < 15, applying the R06 OBS-1 tactical-fix tightening protocol requires INLINE right-reasons check documenting "would a future FIX matching architect prediction FAIL the tightened test?" — if YES, do not tighten; instead HALT and write `DIAGNOSTIC-R08-ac<N>-bound.md` + STATUS: ESCALATE. R07 MAJOR-2 reinforcement is standing.
+3. **Anti-scope expansion beyond the 4 R08-modified surfaces**: any apparent need to modify a fifth file (other than coordination artifacts — NEXT-ROLE.md / MEMORIAL.md / Q-R08-SPEC*.md) → HALT + DIAGNOSTIC + ESCALATE.
 
-- **Sequential e-process formulation drift:** if Architect's brainstorm considers re-disposition of Q-JC4 (Option C algorithmic redesign), HALT — this is operator-gate territory per R07 escalation framing; Option C requires PR-F10 pair-review trigger + new SLICE 6+ scope. R08 is constrained to (B)+(D) by operator disposition.
-- **New OBSERVED-binding without right-reasons check:** if any new AC in R08 uses OBSERVED-binding disposition, the spec MUST include the "would a future FIX matching the prediction FAIL this test?" check inline (R07 MAJOR-2 reinforcement now standing).
-
-## Coordination chore sequence (R14 final revision — same as R06/R07)
+## Coordination chore sequence (R14 — same as R06/R07)
 
 1. Run all binding commands at GREEN; record OBSERVED counts (NOT pre-stated).
-2. Write all coordination artifacts (NEXT-ROLE.md + MEMORIAL.md append + observed counts) WITHOUT SHA field.
+2. Write all coordination artifacts (NEXT-ROLE.md attestation + MEMORIAL.md append + observed counts) WITHOUT SHA field.
 3. `git add` coordination artifacts.
 4. `git commit -m "chore(R08): coordination artifacts"` → SHA-A.
 5. Write SHA-A into NEXT-ROLE.md's Attestation block.
@@ -72,6 +75,8 @@ The R08 Architect MUST read these before brainstorming:
 7. Reviewer verifies: `git diff SHA-A HEAD -- src/ tests/ tools/ engine/ coordination/specs/` is empty.
 
 Do NOT use `--amend`. Do NOT collapse the two commits.
+
+**Note on R08 TDD ordering (AC-25)**: R08 is the FIRST Tessera round without behavior-changing production code. The preferred path is two-commit RED → GREEN (RED modifies q07 test file only with Deltas 3/4/5/6/7/10/11/12 — all 23 q07 tests should pass at RED because the algorithm is preserved; GREEN lands Delta 1 v0.3 memo + Delta 2 pre-disposition append + Delta 9 config.ts JSDoc). Single-commit landing is acceptable; if elected, document the deviation here.
 
 ## Pre-R08 baseline (INFORMATIONAL; do NOT pre-state at GREEN per R03 MINOR-4)
 
@@ -88,32 +93,43 @@ Reviewer-verified at R07 HEAD `fd7e3a6`:
 - betting-e-process smoke: 5/0
 - **Total: 91/0**
 
-R08 expected: prior 10 file counts unchanged + AC-12/13 redesign (still in q07; count may change) + new sustained-injection ACs added (still in q07; count likely +2 to +4). Implementer reports OBSERVED counts per file at GREEN.
+R08 expected post-GREEN: q07 = 21 + 2 (AC-27 + AC-28) = 23; all other counts unchanged. **Post-R08 expected total: 93/0**. Implementer reports OBSERVED counts per file at GREEN.
+
+## Architect close-state
+
+**Architect spec emit at HEAD `8ca5e42`.** Spec `Q-R08-SPEC.md` + audit sidecar `Q-R08-SPEC-AUDIT.md` written. 18-row cross-section consistency pass executed; all PASS. 20-row standing-reinforcement audit applied (including R07's two LOAD-BEARING reinforcements: fixture-sizing propagation + OBSERVED-binding scope). All 4 file modifications + 1 file creation enumerated in § Component inventory with concrete pseudocode for each Delta. Pre-emit grilling caught zero issues (clean grilling pass at first re-read). Memorial entries written for R08 architect-side disciplines.
 
 ## Routing
+
+Implementer reads `coordination/specs/Q-R08-SPEC.md` (full) + the README-pointer files above; implements 12 Deltas across 4 file surfaces (1 created + 3 modified); runs binding commands at GREEN; reports OBSERVED counts; routes to REVIEWER.
 
 ```
 cd ~/concord/tessera
 ./run-pipeline.sh --round R08 --tier full
 ```
 
-`--tier full` per A3 (resolving open question — the R07 MAJORs) + A5 (critical NFR ties — FCP-1's scope claim).
+(`--tier full` per A3 + A5; operator-set per the parent NEXT-ROLE.md that launched R08.)
 
 ## R06+R07+R08 = full autonomous-round budget (3 of 3)
 
-This is the third and final autonomous round under the 2026-05-16 cost-discipline budget. After R08 closes (regardless of outcome), I STOP and wait for John's return.
+This is the third and final autonomous round under the 2026-05-16 cost-discipline budget. After R08 closes (regardless of outcome), the assistant STOPS and waits for John's return.
 
 ## Operator gate items (preserved for John's return — not blocking R08)
 
-1. **OQ-1 / Q-JC1 narrowing (from R06):** does R09+ proceed with `tools/calibrate.ts` vendoring as a dedicated round, OR does R06 Stage 3a's structural-typing compatibility suffice? Architect-pre-prediction: structural-typing suffices for Phase 1.
-2. **R05 methodology gap not captured by R06 Memorial Updater.** Worth a small follow-up if CLAUDE-COMMON.md should gain the reinforcement.
-3. **Anchor PR #37** (preflight preserve operator-prepared NEXT-ROLE.md): still open.
-4. **Anchor PR #35** (MD-F6 + verify-citations.sh): still open.
+1. **OQ-R08-1 (NEW at R08)**: should AC-11 (H₀ FPR) be loosened from `assert.strictEqual(firedCount, 0)` to `assert.ok(firedCount <= 1)` (or similar)? R07 Reviewer's MAJOR-2 noted strict-equality is "tighter than Ville bound guarantee." R08 operator-set scope did NOT include AC-11; fenced at R08-SAS-17.
+2. **OQ-R08-2 (NEW at R08)**: should the v0.3 narrowing be reflected in a PRD AC-P1 prose narrowing? Architect-pre-prediction: not needed (PRD is intentionally thin).
+3. **OQ-R08-3 (NEW at R08)**: when (if ever) should Phase 2 add a transient-single-window detector? Architect-pre-prediction: only on real GPU-cluster operational demand.
+4. **OQ-1 / Q-JC1 narrowing (from R06)**: does R09+ proceed with `tools/calibrate.ts` vendoring as a dedicated round, OR does R06 Stage 3a's structural-typing compatibility suffice?
+5. **R05 methodology gap not captured by R06 Memorial Updater** — still open.
+6. **Anchor PR #37** (preflight preserve operator-prepared NEXT-ROLE.md) — still open.
+7. **Anchor PR #35** (MD-F6 + verify-citations.sh) — still open.
 
 ## Update history (continued)
 
 | Date | Event |
 |---|---|
 | 2026-05-16 | R07 closed Reviewer-MERGE-READY with 2 MAJORs (PR-F8 power-gap + self-confirming tests); autonomous mode escalated. |
-| 2026-05-16 | John expanded autonomous authority: continue per my recommendations without approval; R07 MAJORs become R08 work under (B)+(D) disposition. |
+| 2026-05-16 | John expanded autonomous authority: continue per assistant's recommendations without approval; R07 MAJORs become R08 work under (B)+(D) disposition. |
 | 2026-05-16 | R08 launched under expanded authority (third and final round under the cost-discipline budget). |
+| 2026-05-16 | R08 Architect spec emit at HEAD `8ca5e42`. Q-R08-SPEC.md + Q-R08-SPEC-AUDIT.md authored. Routing to IMPLEMENTER. |
+| 2026-05-16 | R08 Implementer complete. RED `f99e54c` + GREEN `4ba5e9e`. 23/0 q07; 93/0 grand total; typecheck clean. Delta 11 reverted (spec premise factually wrong). Routing to REVIEWER. |
