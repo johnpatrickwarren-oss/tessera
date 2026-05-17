@@ -185,23 +185,25 @@ test('R10 AC-9 — updatePerShardResidual: cold-start walk of 60 samples [1,0] y
 });
 
 // ─── R10 AC-10 — stale-spread strip: malformed warm_start input with leftover mean_vector → output strips them ─
-test('R10 AC-10 — projectTierGatedOutputs strips stale mean_vector / covariance from a malformed warm_start input', () => {
+// R14 update: mean_delta now also stripped when no baselineCell provided (R14 closes R10 SAS-4 "R11+ scope").
+test('R10 AC-10 — projectTierGatedOutputs strips stale mean_vector / covariance / mean_delta from a malformed warm_start input (no baselineCell)', () => {
   const malformed = makePerShardResidual({
     n_samples: 25,
     confidence: 'warm_start',
     welford_state: { n: 25, mean: [1, 2], m2: [[24, 0], [0, 24]] },
     mean_vector: [99, 99],         // stale — convention says these should NOT be present at warm_start.
     covariance: [[99, 99], [99, 99]],  // stale
-    mean_delta: [0.5, 0.6],         // R10 carries this through untouched (R11+ scope).
+    mean_delta: [0.5, 0.6],         // stale — R14 strips this; replaces with fresh computation from baselineCell.
   });
-  const projected = projectTierGatedOutputs(malformed);
+  const projected = projectTierGatedOutputs(malformed);  // no baselineCell → mean_delta cannot be computed
   // Stale mean_vector + covariance stripped (keys absent on output).
   assert.strictEqual(projected.mean_vector, undefined);
   assert.strictEqual(projected.covariance, undefined);
   assert.strictEqual('mean_vector' in projected, false);
   assert.strictEqual('covariance' in projected, false);
-  // mean_delta carried through unchanged (R10 anti-scope R10-SAS-4).
-  assert.deepStrictEqual(projected.mean_delta, [0.5, 0.6]);
+  // R14: mean_delta also absent when no baselineCell (fresh computation replaces passthrough).
+  assert.strictEqual(projected.mean_delta, undefined);
+  assert.strictEqual('mean_delta' in projected, false);
 });
 
 // ─── R10 AC-11 — defensive copy: mutating returned mean_vector does not affect welford_state.mean ─
