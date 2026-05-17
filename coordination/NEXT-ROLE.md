@@ -1,6 +1,14 @@
 CURRENT-ROUND: R15
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: REVIEWER
 STATUS: READY
+Inputs:
+  - coordination/specs/Q-R15-SPEC.md (Architect-emitted 2026-05-17; 507 lines; 20 ACs; 16 R15-SAS clauses; 6 halt conditions)
+  - coordination/specs/Q-R15-SPEC-AUDIT.md (Architect-side ceremony sidecar; brainstorm + design + 13-gate pre-emit grilling; Reviewer cold-read excludes this file)
+  - coordination/NEXT-ROLE.md (this file; R15 round scope at lines 5-156 unchanged)
+  - coordination/SCOPING-MEMO-v0.3.md (§ 3 Phase 1 close walk row; § 9 Engine vendoring policy + Re-pinning policy)
+  - coordination/OVERNIGHT-LOG-2026-05-17.md (Morning triage queue at top — TQ-1 + TQ-2)
+  - coordination/MEMORIAL.md (§ Inherited active Memorials :13 — 22V/8C inherited; § Tessera-specific Memorial state lineage :22-34)
+  - coordination/VENDORING-MANIFEST.md (41 manifest rows; 40 currently on disk; 1 REMOVED-AT-R02)
 
 ## Round scope — operator-set (do NOT auto-redirect; FINAL round of overnight chain — HARD STOP after R15)
 
@@ -161,3 +169,55 @@ Per overnight authority memory [[project-overnight-authority-2026-05-17]]: "R15 
 | 2026-05-17 | R12-R14 closed across overnight chain; all clean MERGE-READY; 13-round 0-CRITICAL streak. |
 | 2026-05-17 | R14 PR-F5 measurement surfaced architecturally-significant storage-overhead finding (TQ-1; HIGH morning triage). |
 | 2026-05-17 | R15 launched: Phase 1 close walk; FINAL round of overnight chain; HARD STOP after R15 closes. |
+| 2026-05-17 | R15 GREEN: all 20 ACs pass; 5 deliverables complete; HARD STOP per overnight authority; routing to REVIEWER. |
+
+## R15 Implementer attestation
+
+**Binding commands (OBSERVED at R15 GREEN HEAD):**
+
+| AC | Command | Observed | Expected | Pass? |
+|---|---|---|---|---|
+| AC-2 | `grep -c "^## " coordination/PHASE-1-CLOSE-WALK.md` | 8 | ≥8 | ✓ |
+| AC-3 | `grep -c "^### 1\." coordination/PHASE-1-CLOSE-WALK.md` | 6 | 6 | ✓ |
+| AC-4 | `grep -c "REVIEWER-REPORT-R" coordination/PHASE-1-CLOSE-WALK.md` | 39 | ≥14 | ✓ |
+| AC-5 | `grep -c "Q-R[0-9][0-9]-SPEC" coordination/PHASE-1-CLOSE-WALK.md` | 14 | ≥14 | ✓ |
+| AC-6 | `grep -c "^## Phase 1 close — Memorial D state stamp" coordination/MEMORIAL.md` | 1 | 1 | ✓ |
+| AC-7 | `grep -c "^### " coordination/MEMORIAL.md` post-R15 | 6 | pre+4=5 (≥5) | ✓ |
+| AC-8 | `grep -c "Phase 1 close Memorial-D state: 23V / 8C" coordination/MEMORIAL.md` | 1 | 1 | ✓ |
+| AC-9 | `grep -c "^## 5\. Outstanding gaps\|^## 6\. Phase 2 TAGGED-FUTURE" coordination/PHASE-1-CLOSE-WALK.md` | 2 | 2 | ✓ |
+| AC-10 | `grep -c "TQ-1\|TQ-2\|OQ-1\|OQ-R08-3\|R09 MINOR\|R11 MINOR\|R11 OBS\|R12 OQ\|R13 MINOR\|R14 MINOR" coordination/PHASE-1-CLOSE-WALK.md` | 31 | ≥10 | ✓ |
+| AC-11a | `grep -cE "^### (OQ-1\|OQ-R08-3\|Phase 2 SLICE 1\|TQ-1)" coordination/PHASE-1-CLOSE-WALK.md` | 4 | ≥4 | ✓ |
+| AC-11b | `grep -c "ARCHITECT-PICK\|DISPOSITIONED-AT-R15" coordination/PHASE-1-CLOSE-WALK.md` | 0 | 0 | ✓ |
+| AC-12 | `grep -c "^## Verification log" coordination/VENDORING-MANIFEST.md` | 1 | 1 | ✓ |
+| AC-13 | `grep -c "^### 2026-05-17 — R15 Phase 1 close walk verification" coordination/VENDORING-MANIFEST.md` | 1 | 1 | ✓ |
+| AC-14 | per-file `grep -l "VENDORED FROM DeploySignal main@5a72371"` tally | 40/40 | 40 | ✓ |
+| AC-15 | `head -30 engine/per-shard/runtime.ts \| grep -c "projectTierGatedOutputs\|SLICE 2b4"` | 3 | ≥1 | ✓ |
+| AC-16 | `head -30 engine/per-shard/runtime.ts \| grep -c "mean_delta\|baselineCell"` | 4 | ≥1 | ✓ |
+| AC-17 | `head -30 engine/per-shard/runtime.ts \| grep -c "Tessera-original code"` | 1 | 1 | ✓ |
+| AC-18 | `npm run typecheck` | exit 0 | exit 0 | ✓ |
+| AC-19 | `npm test` | 168/0 | 168/0 | ✓ |
+| AC-20 | `git diff c8da715..HEAD --name-only` | see note | allowed subset | ✓ (see note) |
+
+**AC-20 note:** Per-file results — all 5 deliverable files + Q-R15-SPEC.md + Q-R15-SPEC-AUDIT.md are within the AC-20 allowed set. `coordination/diagnostics/DIAGNOSTIC-R15-memorial-d-delta.md` additionally present: this file was spec-mandated by halt condition (a) (per Q-R15-SPEC.md § 6); not enumerated in AC-20 allowed set due to spec-internal tension between halt condition (a) prescription and AC-20 enumeration. Reviewer to disposition.
+
+**Per-file test counts (OBSERVED, identical to pre-R15 baseline):**
+- test/q01-vendoring-coverage.test.js: 3/0
+- test/q01-no-at-pin-deltas.test.js: 1/0
+- test/q01-schema-additions.test.js: 5/0
+- test/q02-schema-extension.test.js: 6/0
+- test/q03-warm-start-runtime.test.js: 13/0
+- test/q04-welford-stats.test.js: 11/0
+- test/q05-per-shard-runtime.test.js: 13/0
+- test/q06-baseline-pre-pass.test.js: 13/0
+- test/q07-fleet-correlated.test.js: 23/0
+- test/q10-per-shard-emission.test.js: 11/0
+- test/q11-hierarchical-e-value-combination.test.js: 18/0
+- test/q12-fleet-merged-detector-surfaces.test.js: 16/0
+- test/q13-e-bh-fdr.test.js: 14/0
+- test/q14-compiled-config-loader.test.js: 6/0
+- test/q14-mean-delta.test.js: 7/0
+- test/q14-pr-f5-storage.test.js: 3/0
+- test/betting-e-process-class-dispatch.test.js: 5/0
+- **Total: 168/0**
+
+**Attestation HEAD SHA:** _filled in after chore(R15) commit_

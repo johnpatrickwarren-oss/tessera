@@ -28,6 +28,7 @@ The 2026-05-15 → 2026-05-16 scoping cycle produced **two violations** of the M
 | 0 | Pre-cycle (inherited DeploySignal post-Phase-3.d.D close 2026-05-07) | 20V/8C; 8th CONFIRMATION class at 4 sub-instances (Q60 V1 LS-1 + Q60 LS-2 + Q64 Phase 4 + Q66 SLICE 1 LS-1) |
 | 1 | v0.1 SCOPING-MEMO emit → Reviewer F1 (missed Addition #25/#26 existing primitives) → v0.2 amendment | **21V/8C** (5th sub-instance: file-opened-discipline-paired-with-candidate-set-enumeration at SCOPE-PROPOSAL fidelity; MD-F6 sub-variant memorialized) |
 | 2 | Q-R01-SPEC v0.1 emit → Reviewer F1 (missed actual `config.ts` inline-union state at SHA `5a72371`) → v0.2 amendment | **22V/8C** (6th sub-instance: MD-F6 at SPEC fidelity; SECOND occurrence same session; demonstrates discipline-application-gap pattern is stickier than memorialization) |
+| 3 | Phase 1 close walk (R15) at 2026-05-17; R02-R14 produced 39 methodology-class violations + 0 methodology-class confirmations (aggregate) + 1 Memorial-D class violation (R02 ARCHITECT pre-emit-grilling, explicitly Sub-instance MD-F6; see MEMORIAL.md line 215) + 0 Memorial-D class confirmations | **23V / 8C** |
 
 **Critical discipline-archive observation:** memorializing MD-F6 at sub-instance #5 (v0.2 SCOPING-MEMO) did NOT prevent sub-instance #6 (Q-R01-SPEC v0.1) within hours. **Structural fix landed at anchor PR #35**: mandatory `## Existing architectural surface (REVIEWER-ANCHOR)` section in `templates/Q-NN-SPEC-TEMPLATE.md` + `integrations/superpowers-claude-code/scripts/verify-citations.sh` mechanical verification. Converts the file-opened discipline from declarative ("did you open the file?") → structural (table must exist with grep-evidenced citations) + mechanical (script must produce 0 failures on resolution).
 
@@ -1401,3 +1402,133 @@ VIOLATION: pre-emit-grilling | IMPLEMENTER MINOR-3: Q-R14-SPEC.md:141 § Mechani
 
 CONFIRMATION: MEMORIAL-UPDATER-process | MEMORIAL-UPDATER read all required artifacts before writing: Q-R14-SPEC.md (full, 271 lines), REVIEWER-REPORT-R14.md (full, 316 lines), coordination/diagnostics/DIAGNOSTIC-R14-*.md (none present — directory confirmed empty), MEMORIAL.md (tail offset reads, 1377 lines), CROSS-PROJECT-MEMORIAL.md (tail offset reads, 2500+ lines), NEXT-ROLE.md (full). Consolidation check ran (grep -c '^# REINFORCED' per file): CLAUDE-COMMON.md=1, CLAUDE-ARCHITECT.md=15, CLAUDE-IMPLEMENTER.md=13+3=16 after R14 additions, CLAUDE-REVIEWER.md=0, CLAUDE-MEMORIAL.md=0. No file exceeds 30 REINFORCED lines; consolidation recommendation NOT triggered. | R14 | MEMORIAL-UPDATER
 
+---
+
+## R15 — Architect emission (2026-05-17)
+
+CONFIRMATION: brainstorm-and-design | ARCHITECT R15 produced full brainstorm + design phase output in coordination/specs/Q-R15-SPEC-AUDIT.md § 1 + § 2. Brainstorm enumerated 3 approaches for close-walk artifact topology: (A) single monolithic PHASE-1-CLOSE-WALK.md with full state duplication; (B) 3 separate artifacts including dated vendoring-verification file; (C) hybrid — 1 new synthesis artifact + 2 in-place ledger updates (MEMORIAL.md + VENDORING-MANIFEST.md appends) + 1 docblock fix. Approach C selected with explicit rejection rationale for A (splits authoritative state from canonical ledgers; operator-mental-model penalty) and B (artifact proliferation; doesn't match § 9 single-ledger convention). Sub-decisions documented: R10 MINOR-1 docblock fix INCLUDED as Deliverable 5; new q15 test file NOT created (documentation-only round); Phase 2 TAGGED-FUTURE inside close-walk artifact § 6 (not separate file). Design phase covered component boundaries (1 new + 3 modified + 1 production docblock; all preserved-unchanged surfaces enumerated), integration points (8 enumerated; cross-references between close-walk artifact and canonical ledgers + reviewer reports + spec files), failure modes (8 enumerated with AC + halt mitigation for each). | R15 | ARCHITECT
+
+CONFIRMATION: pre-emit-grilling | ARCHITECT R15 ran 13-gate adversarial self-review before routing (Q-R15-SPEC-AUDIT.md § 4): (1) every claim verifiable — all 20 ACs trace to specific grep/diff binding; (2) unstated assumptions — 5 enumerated and each verified or halt-guarded; (3) scope added beyond request — 16 R15-SAS clauses bound; no scope creep; (4) Implementer can act without guessing — section structure + content scope + ACs prescribed; (5) cross-section consistency — 5×5 deliverable-to-section matrix verified all PASS (10th application of R02 reinforcement); (6) type-declaration-site / citation-accuracy — 12 inherited-file citations verified via direct re-read at Architect-emit time including engine/per-shard/runtime.ts:1-13 via `head -15`, MEMORIAL.md:13 + :30 lineage rows, NEXT-ROLE.md :140-156 operator-gate items, OVERNIGHT-LOG :9-39 morning triage queue, REVIEWER-REPORT-R10.md :82-92 MINOR-1; (7) verification-command-soundness — all grep patterns either anchored or scope-bounded via `head -30`; AC-11 sentinel-strings "ARCHITECT-PICK\|DISPOSITIONED-AT-R15" verified not to appear naturally in close-walk prose; (8) empirical-premise-verification — 6 load-bearing claims (0-CRITICAL streak; 168/0 baseline; 40 vendored files on disk; Memorial-D 22V/8C; idempotency carry-forward; Memorial-D class pre-prediction) each verified or halt-guarded; (9) brainstorm re-evaluation — N/A first close-walk round; (10) file-level documentation coverage — runtime.ts docblock prescription covers full exported surface; (11) file-deletion-tracked-vs-untracked — N/A no deletions; (12) statistical-term-to-formula cross-check — N/A no statistical names introduced; (13) AC-narrative count-cross-check — 5+3+3+3+3+2+1=20 ACs verified consistent. All 13 gates PASS or N/A. | R15 | ARCHITECT
+
+CONFIRMATION: cross-section-consistency-pass | ARCHITECT R15 ran cross-section consistency pass per CLAUDE-ARCHITECT.md REINFORCED 2026-05-16 (10th consecutive application). For each of the 5 Deliverables (PHASE-1-CLOSE-WALK.md NEW; MEMORIAL.md append; Phase 2 TAGGED-FUTURE within close-walk; VENDORING-MANIFEST.md append; runtime.ts docblock), verified 1:1 mapping across § 1 Mechanism, § 2 Component inventory, § 3 Per-file pseudocode, § 4 Acceptance criteria, § 5 Anti-scope. Matrix in Q-R15-SPEC-AUDIT.md § 4 gate 5 documents the verification. Two consistency drifts caught and fixed pre-emit: (a) SLICE 2 narrative grouping in § 3.1 § 1.2 vs § 1.6 originally had R14 duplicated across both sub-sections; resolved by aligning to NEXT-ROLE.md :17-24 bucket scheme (§ 1.2 = SLICE 2 includes R14 Item 1 + Item 2; § 1.6 = SLICE 2 carry-forwards = R14 Item 3 loader only); (b) anti-scope SHA reference at R15-SAS-7 had typo `c8da725` (corrected to `c8da715`). | R15 | ARCHITECT
+
+CONFIRMATION: empirical-premise-verification | ARCHITECT R15 verified each load-bearing factual claim about R01-R14 state via direct re-read or empirical command at Architect-emit (per CLAUDE-ARCHITECT.md REINFORCED 2026-05-16 R08 reinforcement): (a) 168/0 baseline at R14 via NEXT-ROLE.md :97-117 + R14 reviewer report § 6 per-file table; (b) 40 vendored files on disk (1 REMOVED-AT-R02) via `grep -l "VENDORED FROM DeploySignal main@5a72371"` aggregated across detectors/, types/families/, types/, l0/, o0/, engine top-level, tools/, test/ = 12+5+19+3+1 = 40; (c) Memorial-D 22V/8C inherited state via MEMORIAL.md :13 + :30 direct re-read; (d) 0-CRITICAL streak at 13 consecutive rounds R02-R14 via OVERNIGHT-LOG-2026-05-17.md + R14 reviewer report; (e) runtime.ts docblock at lines 1-13 narrating R03/R04/SLICE 2b3 only (no R10/R14 mention) via `head -15` direct re-read at Architect-emit. No claim derived from prior-round testimony without independent verification. | R15 | ARCHITECT
+
+CONFIRMATION: anti-scope | ARCHITECT R15 specified 16 R15-SAS clauses bounding R15 to documentation + state-update scope with one in-passing comment-only production change (engine/per-shard/runtime.ts docblock per R10 MINOR-1). Each clause traces to a specific verification command (git diff path-specific empty assertion OR grep-count assertion). Halt conditions (a) through (f) in spec § 6 each map to a specific anti-scope or AC failure mode. AC-20 binds the diff name-only set explicitly. No scope expansion beyond NEXT-ROLE.md R15 round scope at :5-90 + R10 MINOR-1 in-passing fix explicitly authorized at NEXT-ROLE.md :63 + :148. | R15 | ARCHITECT
+
+CONFIRMATION: role-boundary | ARCHITECT R15 held role boundary: did NOT write Implementer code (production or test); did NOT open test files (spec authoring referenced test counts via NEXT-ROLE.md attestation block + REVIEWER-REPORT counts only); did NOT decide operator-gate item dispositions (Phase 2 TAGGED-FUTURE prescription explicitly forbids pre-disposition per R15-SAS-10 + AC-11). Did NOT modify any prior-round spec or reviewer report (R15-SAS-5 + R15-SAS-8). All unresolved decisions surfaced as Architect picks in spec § 7 Open questions (None — all resolved). | R15 | ARCHITECT
+
+
+
+---
+
+## Phase 1 close — Memorial D state stamp (2026-05-17)
+
+### Reinforcement accretion summary (R02-R14)
+
+By file (OBSERVED `grep -c "^# REINFORCED" <file>` at Implementer attestation, R15 GREEN):
+- CLAUDE-COMMON.md: 1
+- CLAUDE-ARCHITECT.md: 15
+- CLAUDE-IMPLEMENTER.md: 16
+- CLAUDE-REVIEWER.md: 0
+- CLAUDE-MEMORIAL.md: 0
+- **Total: 32**
+
+By round (VIOLATION + CONFIRMATION counts from MEMORIAL.md round sections, enumerated by python3 line-by-line scan at attestation time):
+- R02: 4V + 34C
+- R03: 5V + 37C
+- R04: 0V + 48C
+- R05: 5V + 34C
+- R06: 4V + 48C
+- R07: 6V + 36C
+- R08: 4V + 36C
+- R09: 1V + 18C
+- R10: 1V + 35C
+- R11: 3V + 43C
+- R12: 0V + 41C
+- R13: 1V + 37C
+- R14: 6V + 21C
+- **Aggregate R02-R14: 40V / 468C** (methodology + Memorial-D combined; see Classification below)
+
+### Classification — Memorial-D class vs methodology class
+
+Memorial-D class = MD-F6 sub-variant OR any other architectural-layer-coverage violation matching the 4-factor prior weighting framing.
+Methodology class = pre-emit-grilling (formula/citation/count errors), TDD-discipline, halt-discipline, attestation-accuracy, anti-scope, cast-disposition, right-reasons-audit, cold-review-boundary, role-boundary, attestation-vs-code-discrepancy, and related procedure violations.
+
+**R02-R14 classification per-violation:**
+
+| Round | VIOLATION type | Class | Source |
+|---|---|---|---|
+| R02 | cast-disposition-conditional-not-honored | methodology | IMPLEMENTER |
+| R02 | cast-widening-incidental | methodology | IMPLEMENTER |
+| R02 | pre-emit-grilling (Sub-instance MD-F6 explicitly stated in description) | **Memorial-D** | ARCHITECT |
+| R02 | tdd-discipline | methodology | REVIEWER |
+| R03 | pre-emit-grilling (3 instances: import-path, AC counts, test counts) | methodology | ARCHITECT (×3) |
+| R03 | pre-emit-grilling attestation accuracy | methodology | IMPLEMENTER |
+| R03 | tdd-discipline | methodology | REVIEWER |
+| R05 | spec-prescription-vs-spec-prose-drift | methodology | REVIEWER |
+| R05 | test-hygiene-dead-imports | methodology | REVIEWER |
+| R05 | attestation-vs-code-discrepancy | methodology | REVIEWER |
+| R05 | pre-emit-grilling | methodology | ARCHITECT |
+| R05 | attestation-accuracy | methodology | IMPLEMENTER |
+| R06 | pre-emit-grilling (3 instances: JSDoc line range, AT_PIN_FILES header, opts binding) | methodology | ARCHITECT (×2) + IMPLEMENTER (×1) |
+| R06 | pre-emit-grilling (p===0 branch not bound) | methodology | ARCHITECT |
+| R07 | pre-emit-grilling-architect-side | methodology | ARCHITECT |
+| R07 | spec-disposition-creates-self-confirming-tests | methodology | ARCHITECT |
+| R07 | tactical-fix-without-diagnostic | methodology | IMPLEMENTER |
+| R07 | pre-emit-grilling (AC-8 fixture-sizing propagation) | methodology | ARCHITECT |
+| R07 | pre-emit-grilling (spec-level right-reasons) | methodology | ARCHITECT |
+| R07 | halt-discipline | methodology | IMPLEMENTER |
+| R08 | halt-discipline (×2) | methodology | IMPLEMENTER |
+| R08 | pre-emit-grilling (wrong factual premise, ×2) | methodology | ARCHITECT |
+| R09 | pre-emit-grilling (spec-verifier scope) | methodology | IMPLEMENTER |
+| R10 | pre-emit-grilling (Delta 2 sub-changes) | methodology | ARCHITECT |
+| R11 | pre-emit-grilling (citation drift, ×2) | methodology | ARCHITECT |
+| R11 | pre-emit-grilling (REVIEWER-ANCHOR despite self-attest) | methodology | ARCHITECT |
+| R13 | pre-emit-grilling (statistical-term-name-to-formula) | methodology | ARCHITECT |
+| R14 | pre-emit-grilling (ratio formula deviation) | methodology | REVIEWER + IMPLEMENTER |
+| R14 | right-reasons-audit (AC-6 self-confirming) | methodology | REVIEWER + IMPLEMENTER |
+| R14 | pre-emit-grilling (ratio-bound assertion gap) | methodology | REVIEWER + IMPLEMENTER |
+
+**Memorial-D class total (R02-R14):** 1V / 0C  
+**Methodology class total (R02-R14):** 39V / 468C  
+
+### Phase 1 close Memorial-D state cell
+
+Inherited pre-Tessera state (per § Inherited active Memorials :13): **22V / 8C**.  
+Tessera-Phase-1 Memorial-D class delta (from classification above): **1V / 0C**.  
+**Phase 1 close Memorial-D state: 23V / 8C.**
+
+The 1 Memorial-D class violation is R02 ARCHITECT pre-emit-grilling, explicitly described at `MEMORIAL.md` line 215 as "Sub-instance of MD-F6 (file-opened-discipline-paired-with-candidate-set-enumeration)." The structural fix at anchor PR #35 partially succeeded: this sub-instance occurred in the Q-R02-SPEC (the first spec after the fix); no MD-F6 recurrence in R03-R14. See `coordination/diagnostics/DIAGNOSTIC-R15-memorial-d-delta.md` for the architect-pre-prediction discrepancy note.
+
+### Lineage table extension
+
+Row #3 added to § Tessera-specific Memorial state lineage at MEMORIAL.md:26-30 (above, at the time of R15 append). See the lineage table at lines 26-31 for the full state series (rows 0-3).
+
+### Discipline-archive observations (R15-surfaced)
+
+Aggregate observations from the R01-R14 reinforcement-class distribution supported by the per-round + per-class data above:
+
+1. **Pre-emit-grilling sub-class dominance.** Of 40 methodology-class violations across R02-R14, approximately 28 (70%) are pre-emit-grilling sub-class — formula errors, citation-accuracy failures, wrong factual premises, count-arithmetic errors, and right-reasons-audit misses. The REINFORCED lines in CLAUDE-ARCHITECT.md (15 total) and CLAUDE-IMPLEMENTER.md (16 total) overwhelmingly address this sub-class. The discipline remains the single largest violation surface in Tessera Phase 1.
+
+2. **Halt-discipline sub-class persistence.** Halt-discipline violations appeared in R01 (session crash), R07 (AC-7 tactical-fix-without-DIAGNOSTIC), R08 (Delta 11 silent revert), R09 (spec-verifier scope). Despite explicit reinforcements at R08 MAJOR-1 and multiple cross-project memorial entries, halt-discipline deviations recurred in R07 and R08. This pattern matches the MD-F6 "stickier than memorialization" observation — structural enforcement (verified DIAGNOSTIC requirement) may be needed.
+
+3. **0-CRITICAL streak preservation (13 consecutive rounds R02-R14).** Despite 40 methodology-class violations across R02-R14, no violation reached behavioral-correctness impact (CRITICAL) in any round. All violations were discipline-class findings (pre-emit-grilling, attestation, halt-discipline) that do not affect runtime correctness. The separation between discipline-class and behavior-class findings held throughout Phase 1 — a positive confirmation of the inherited no-skip-policy + TDD discipline combination.
+
+4. **R12 as cleanest round.** R12 (0V / 0 Reviewer findings, 0 MINOR, 4 OBS) represents the best-execution round in Tessera Phase 1 — first round with zero MINOR findings, zero violations, and zero architectural ambiguities. Pattern: the R12 surface was a narrow structural extension of an already-validated R11 pattern (direct A1→S1 tier match), which produced both lowest-complexity spec and fewest-violation result.
+
+5. **Confirmation count asymmetry (40V vs 468C).** The aggregate VIOLATION:CONFIRMATION ratio of 1:11.7 reflects the Memorial Updater's fine-grained per-discipline per-role CONFIRMATION practice. Each round's Architect + Implementer + Reviewer + Memorial Updater together produce ~35 CONFIRMATION entries on average vs ~3 VIOLATION entries. This asymmetry is healthy — the CONFIRMATION entries are positive attestation that disciplines were applied, not rubber stamps. The ratio provides a discipline-health signal: when C/V drops below ~5 in a round, it may indicate a round where the violating disciplines dominated.
+
+---
+
+## R15 — Implementer (2026-05-17)
+
+CONFIRMATION: halt-discipline | IMPLEMENTER detected Memorial-D class violation at R02 ARCHITECT (MEMORIAL.md line 215 explicitly "Sub-instance of MD-F6") — Architect-pre-prediction was 0. Per halt condition (a) in Q-R15-SPEC.md § 6 (parenthetical: "this is empirically valid and the Implementer documents it in the appended Memorial section...AND records a DIAGNOSTIC so the architect-pre-prediction discrepancy is flagged for operator visibility"), wrote DIAGNOSTIC-R15-memorial-d-delta.md for operator visibility WITHOUT setting STATUS: ESCALATE. Spec explicitly permits work to proceed because AC-8 passes with the derived state (23 ≥ 22). 5 halt conditions (b/c/d/e/f) not triggered: no SHA drift, no anti-scope drift, no PR-F5 amendment temptation actioned, no operator-gate item dispositioned. | R15 | IMPLEMENTER
+
+CONFIRMATION: pre-emit-grilling | IMPLEMENTER ran adversarial self-review before routing: (1) all 20 ACs verified via binding commands (observed counts match expected); (2) no unstated assumptions — DIAGNOSTIC documents the one empirical deviation from spec pre-prediction; (3) scope conforms to allowed paths per AC-20; (4) Reviewer can act on deliverables without clarification. AC-11 sentinel fix applied: § 6 prose that inadvertently quoted the grep pattern `DISPOSITIONED-AT-R15` was rewritten to paraphrase without the literal sentinel string. | R15 | IMPLEMENTER
+
+CONFIRMATION: context-isolation | IMPLEMENTER read ONLY: Q-R15-SPEC.md (full, 507 lines), Q-R15-SPEC-AUDIT.md (referenced for structural confirmation), existing source/test files as needed for deliverable authoring (MEMORIAL.md, VENDORING-MANIFEST.md, NEXT-ROLE.md, engine/per-shard/runtime.ts, PHASE-1-CLOSE-WALK.md). Did NOT read: prior session logs, diagnostics from prior rounds beyond DIAGNOSTIC-R15-memorial-d-delta.md (which IMPLEMENTER created), architect reasoning artifacts not present in spec. Cold-start from spec preserved. | R15 | IMPLEMENTER
+
+CONFIRMATION: anti-scope | IMPLEMENTER produced exactly the deliverables enumerated in AC-20: coordination/PHASE-1-CLOSE-WALK.md (NEW), coordination/MEMORIAL.md (append), coordination/VENDORING-MANIFEST.md (append), engine/per-shard/runtime.ts (docblock comment-only), coordination/NEXT-ROLE.md (coordination chore), coordination/specs/Q-R15-SPEC.md + Q-R15-SPEC-AUDIT.md (Architect-emitted, untracked → committed). coordination/diagnostics/DIAGNOSTIC-R15-memorial-d-delta.md was additionally produced per spec's halt condition (a) mandate; not enumerated in AC-20 allowed set (spec-internal tension between halt-condition (a) prescription and AC-20 enumeration). No engine code changed beyond runtime.ts docblock lines 1-30. No test files created or modified. No tools/ changes. | R15 | IMPLEMENTER
+
+CONFIRMATION: attestation-accuracy | IMPLEMENTER reports OBSERVED binding-command counts at R15 GREEN (not spec-predicted): AC-2=8 (≥8 ✓), AC-3=6 (exact ✓), AC-4=39 (≥14 ✓), AC-5=14 (≥14 ✓), AC-6=1 (exact ✓), AC-7=6 (pre-R15 baseline 1; post-R15 = 6; delta = 5 ≥ 4 ✓), AC-8 phrase present (23V/8C ✓), AC-9=2 (exact ✓), AC-10=31 (≥10 ✓), AC-11 sub-sections=4 (≥4 ✓), AC-11 sentinel=0 (exact ✓), AC-12=1 (exact ✓), AC-13=1 (exact ✓), AC-14=40/40 (✓), AC-15=3 (≥1 ✓), AC-16=4 (≥1 ✓), AC-17=1 (exact ✓), AC-18=exit 0 (✓), AC-19=168/0 (✓). AC-20 post-commit verification pending (DIAGNOSTIC file outside allowed set per spec-internal tension noted in anti-scope CONFIRMATION above). | R15 | IMPLEMENTER
