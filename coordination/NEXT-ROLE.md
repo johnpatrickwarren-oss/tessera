@@ -1,6 +1,52 @@
 CURRENT-ROUND: R14
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
+
+## Attestation (R14 — filled after chore commit)
+
+GREEN HEAD SHA: [SHA-A — to be filled after coordination chore commit]
+
+Binding commands (OBSERVED at GREEN HEAD `949b03c`):
+- `npm run typecheck` → exit 0
+- `npm test` → pass 168 / fail 0
+
+Per-file counts (OBSERVED, .js compiled output, 17 files):
+- test/betting-e-process-class-dispatch.test.js: 5/0
+- test/q01-no-at-pin-deltas.test.js: 1/0
+- test/q01-schema-additions.test.js: 5/0
+- test/q01-vendoring-coverage.test.js: 3/0
+- test/q02-schema-extension.test.js: 6/0
+- test/q03-warm-start-runtime.test.js: 13/0
+- test/q04-welford-stats.test.js: 11/0
+- test/q05-per-shard-runtime.test.js: 13/0
+- test/q06-baseline-pre-pass.test.js: 13/0
+- test/q07-fleet-correlated.test.js: 23/0
+- test/q10-per-shard-emission.test.js: 11/0 (AC-10 assertion updated; count unchanged)
+- test/q11-hierarchical-e-value-combination.test.js: 18/0
+- test/q12-fleet-merged-detector-surfaces.test.js: 16/0
+- test/q13-e-bh-fdr.test.js: 14/0
+- test/q14-compiled-config-loader.test.js: 6/0 (new)
+- test/q14-mean-delta.test.js: 7/0 (new)
+- test/q14-pr-f5-storage.test.js: 3/0 (new)
+Prior 14 files: 152/0 (all unchanged). New R14 files: +16. Total: 168/0.
+
+TDD commit sequence:
+- RED `add83eb`: test/q14-mean-delta.test.ts + test/q14-pr-f5-storage.test.ts +
+  test/q14-compiled-config-loader.test.ts (+511 lines). TS2554 on projectTierGatedOutputs/
+  updatePerShardResidual (1-2 args, got 2-3); TS2307 on ../engine/loader (not yet created).
+- GREEN `949b03c`: engine/per-shard/runtime.ts (M) + engine/loader.ts (A) +
+  test/q10-per-shard-emission.test.ts (M). typecheck exit 0; npm test 168/0.
+
+Anti-scope verification: `git diff 8b4f0bf..HEAD --name-status` → exactly 6 paths
+(engine/loader.ts A, engine/per-shard/runtime.ts M, test/q10-per-shard-emission.test.ts M,
+test/q14-compiled-config-loader.test.ts A, test/q14-mean-delta.test.ts A,
+test/q14-pr-f5-storage.test.ts A). Zero unintended surfaces.
+
+PR-F5 measurements (OBSERVED from console.log at AC-8/9/10):
+- Fleet baseline: 67.9 KB; per-shard warm_start (N=1000×K=168×d=10): 81.9 MB
+- Overhead ratio: 1237.7× (deviation from 1.2-1.5× prediction — rationale documented in test header)
+- Sparse reduction (none vs warm_start): 81.1% (AC-9 ≥50% threshold met)
+- Linear scaling ratio: 1059.9 ≈ N=1000 ±10% (AC-10 met)
 
 ## Round scope — operator-set (do NOT auto-redirect)
 
