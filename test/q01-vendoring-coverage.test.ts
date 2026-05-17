@@ -54,6 +54,10 @@ const VENDORED_AT_PIN_PATHS: string[] = [
   'engine/o0/reversibility-translator.ts',
   // config.ts vendored-with-deltas also gets a header
   'engine/types/config.ts',
+  // Tessera SLICE 4 (R06) — baseline curation toolchain
+  'tools/curate-baseline-pipeline.ts',
+  'tools/calibrators/_shared.ts',
+  'tools/calibrators/family-c.ts',
 ];
 
 test('Q1 AC-1/AC-2/AC-4 — every vendored file has the required header format', async () => {
@@ -85,7 +89,7 @@ test('Q1 AC-5 — VENDORING-MANIFEST.md enumerates all vendored files with sync 
     'manifest missing config.ts entry with vendored-with-deltas policy',
   );
   // Every row must include the pinned SHA
-  const rows = manifest.split('\n').filter(l => l.includes('engine/'));
+  const rows = manifest.split('\n').filter(l => l.startsWith('|') && (l.includes('| engine/') || l.includes('| tools/')));
   for (const row of rows) {
     assert.ok(row.includes(EXPECTED_SHA), `manifest row missing SHA: ${row}`);
   }
