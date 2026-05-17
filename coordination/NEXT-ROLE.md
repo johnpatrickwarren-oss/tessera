@@ -116,7 +116,7 @@ cd ~/concord/tessera
 | `git ls-files engine/fleet/e-bh.ts` at GREEN | 1 line | **1 line** (engine/fleet/e-bh.ts) | ✓ |
 | Coordination chore step 7 (Reviewer-verifiable) | `git diff SHA-A HEAD -- engine/ test/ tools/ coordination/specs/` empty | _(Reviewer-side)_ | _(Reviewer verifies)_ |
 
-SHA-A (chore step 4): _(fill at chore step 5)_
+SHA-A (chore step 4): `17994dc`
 SHA-B (chore step 6): _(fill at chore step 6 close)_
 
 ## Operator gate items (preserved for morning triage)
