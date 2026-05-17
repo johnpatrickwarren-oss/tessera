@@ -1,7 +1,38 @@
 CURRENT-ROUND: R11
-NEXT-ROLE: REVIEWER
-STATUS: READY
-Inputs: main branch, HEAD 5ae6c7d (GREEN commit)
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
+Inputs:
+  - main branch, HEAD dc486a7 (post-coordination)
+  - coordination/reviews/REVIEWER-REPORT-R11.md (this round; 0 CRITICAL / 0 MAJOR / 1 MINOR / 6 OBS)
+  - coordination/specs/Q-R11-SPEC.md (spec)
+  - coordination/MEMORIAL.md (CONFIRMATION/VIOLATION accretion)
+  - ~/.claude/CROSS-PROJECT-MEMORIAL.md (tessera section)
+
+## Reviewer outcome (R11)
+
+- **0 CRITICAL / 0 MAJOR / 1 MINOR / 6 OBS** — see `coordination/reviews/REVIEWER-REPORT-R11.md`.
+- All 18 q11 ACs PASS; full suite 122 / 122 / 0 fail (Reviewer-verified).
+- TDD ordering independently verified: RED `ee1ee1c` → GREEN `5ae6c7d` (9th consecutive Tessera Reviewer-side TDD verification).
+- Anti-scope: all 20 R11-SAS fences PASS (`git diff 56e77f1..HEAD --name-only` matches Component inventory exactly).
+- 0-CRITICAL streak extends to R02–R11 (10 consecutive rounds).
+- MINOR-1: `tick_post` variable-name nit at `engine/fleet/combine.ts:131` (non-blocking).
+- OBS-1/-2: Architect-side spec citation drift (2 line-number/file-path errors in REVIEWER-ANCHOR + Mechanism primitive 7; no Implementer impact). Flagged for future spec-cleanup pass.
+- OBS-3: Reviewer-accepted OQ-5 status-quo (AC-14 REPORTING-only form is sound).
+- OBS-4/-5/-6: corner-case observations; no code action required.
+
+Architect pre-predictions vs OBSERVED (per audit sidecar § 4):
+  1. All 18 ACs PASS — CONFIRMED.
+  2. PoE-iid/AoE-iid/AoE-corr ≤ Wilson bound — CONFIRMED (all 0.000).
+  3. PoE-corr in [0.05, 0.30], median 0.10-0.15 — MISS (OBSERVED 0.40; higher than predicted; correct DIRECTION).
+  4. Runtime ≤ 15s — CONFIRMED (Reviewer-side ≈ 0.45s).
+  5. Pre-R11 counts unchanged — CONFIRMED.
+  6. 0 CRITICAL + 0 MAJOR — CONFIRMED.
+  7. TDD ordering preserved — CONFIRMED.
+  8. ≤ 2 MINORs — CONFIRMED (1 MINOR).
+  9. No HALT — CONFIRMED.
+  10. 20/20 cross-section verified — CONFIRMED.
+  11. OQ-5 accepted without disposition request — CONFIRMED (Reviewer accepted status-quo (c) with three-reason rationale).
+  12. ≥ 1 OBS on α_fleet=0.01 decoupling — NOT FIRED (Reviewer flagged different OBS classes; the α-decoupling itself was not surfaced as a finding — the spec's decoupling rationale was Reviewer-accepted implicitly).
 
 ## Attestation block (R11 Implementer; per R03 MINOR-4 reinforcement)
 
