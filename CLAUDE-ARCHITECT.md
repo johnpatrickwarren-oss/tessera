@@ -191,3 +191,19 @@ All unresolved decisions → open questions in the spec.
 #   sufficient signal, or explicitly scope-document the limitation. Do not delegate this check to
 #   the Reviewer's right-reasons audit — catch it at the spec layer before routing to Implementer.
 #   Detected tessera R07 MAJOR-2.
+
+# REINFORCED 2026-05-16 — When a load-bearing spec premise is inherited from a prior Reviewer's or
+#   Architect's claim (e.g., "R07 Reviewer MINOR-3 stated MCD produces zero contamination flags on
+#   the clean alternating-pattern fixture"), independently verify the premise by running the relevant
+#   fixture or command against production code before emitting the spec. "Inherited from prior
+#   testimony" is not verification. A wrong premise at the spec layer forces the Implementer into a
+#   halt-decision that could have been pre-empted at the spec layer — if the spec had been correct,
+#   no halt would have been needed. Add an "empirical premise verification" step to pre-emit
+#   grilling: for each load-bearing factual claim about production behavior that derives from prior
+#   round testimony (not your own direct code-read or command-run), record the specific command run
+#   and the observed output before marking the assumption "PASS." "Verified by own observation" and
+#   "inherited from prior testimony" are not equivalent grilling verdicts. Detected tessera R08
+#   MAJOR-2: premise "MCD produces zero flags on clean alternating-pattern fixture" inherited from
+#   R07 Reviewer MINOR-3 without running the AC-15 fixture against production; Reviewer-probed:
+#   n_ticks_contaminated=6 (2 ticks × 3 runs; curatedLen=6 vs origLen=8); downstream caused
+#   MAJOR-1 halt-discipline violation when Delta 11 tightening failed empirically.
