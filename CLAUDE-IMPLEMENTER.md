@@ -316,3 +316,41 @@ with a clear commit message.
 #   undermine the artifact's usefulness as a historical record. Detected tessera R15 MINOR-2:
 #   MEMORIAL.md lineage row #3 substituted `0` for methodology-class confirmations; body at
 #   MEMORIAL.md:1494 reads "39V / 468C"; caught by Reviewer as MINOR-2.
+# REINFORCED 2026-05-17 — When building a measurement-proxy helper that cross-references an
+#   established baseline test, do a field-by-field input-construction comparison before writing
+#   findings. List every field set in the proxy helper; list every field set in the reference
+#   helper; identify all present-in-one-absent-in-other divergences (e.g., optional fields like
+#   `last_observed_at`, distributional differences like `shard_id` value range). For each
+#   divergence, estimate its byte impact and disclose it in the findings doc. A "within X%
+#   match" claim that results from two compensating biases is not methodological alignment and
+#   the Reviewer will find the structural explanation. Grilling gate: for any measurement proxy
+#   that cites agreement with a reference, verify the helper inputs are field-equivalent to the
+#   reference before writing the agreement claim. Detected tessera R16 MINOR-1: proxy at
+#   test/q14-pr-f5-storage.test.ts:200-218 added `last_observed_at` (absent from AC-8:55-71)
+#   and fixed `shard_id='shard-0'` (AC-8 uses 'shard-0'..'shard-999'); 0.4% match between proxy
+#   and AC-8 was accidental compensation of two biases; findings doc PR-F5-INVESTIGATION-R16.md
+#   stated the match without disclosing the compensating-bias structure.
+# REINFORCED 2026-05-17 — When an AC parenthetical says "Verifies [production function/path X]",
+#   the test MUST import and call that production function — not a functionally-equivalent
+#   substrate. If the production path is a thin pass-through (e.g., loadCompiledConfig calls
+#   JSON.parse), the test still MUST call the production path, because future changes to that
+#   path could add non-trivial behavior not covered by the substrate call. If testing via a
+#   substrate is the intended scope, rewrite the AC parenthetical to name the substrate
+#   explicitly ("Verifies the JSON layer; loadCompiledConfig path coverage deferred"). Grilling
+#   gate: for every AC parenthetical that names a specific production module or function, verify
+#   the test file imports and calls it directly before signing PASS on grilling. Detected
+#   tessera R16 MINOR-2: AC-R16-3 parenthetical said "Verifies...loadCompiledConfig" but
+#   test/q16-pr-f5-investigation.test.ts:31 calls JSON.parse(JSON.stringify(...)) directly;
+#   loadCompiledConfig never imported or called; future loader change would be undetected.
+# REINFORCED 2026-05-17 — When spec anti-scope says "framings only" or "operator picks
+#   disposition" or "R-round does NOT pick the disposition", a findings document MUST NOT
+#   contain language like "Recommendation from R-round: Option X is the least invasive." Even
+#   a sub-option recommendation (which flavor of option α, not whether α vs β vs δ) exceeds
+#   neutral framings and is a soft anti-scope violation. The correct form: present all
+#   sub-options with evidence ("Option α sub-variants: (1)... (2) sparse encoding by tier...
+#   (3)... — tradeoffs: ...") without ranking them. Grilling gate: for any findings document
+#   produced under a "framings-only" anti-scope, grep for "recommend" (case-insensitive) and
+#   verify each occurrence attributes a recommendation to external evidence, not to the R-round
+#   author. Detected tessera R16 MINOR-3: PR-F5-INVESTIGATION-R16.md:127 "Recommendation from
+#   R16: Option 2..." inside the α sub-section; spec § 4 forbade architectural disposition;
+#   sub-α lean is a soft violation caught by Reviewer as MINOR-3.

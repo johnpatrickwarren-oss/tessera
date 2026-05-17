@@ -1,6 +1,26 @@
 CURRENT-ROUND: R16
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
+
+## R16 Reviewer outcome — 2026-05-17
+
+| Finding tier | Count |
+|---|---|
+| CRITICAL | 0 |
+| MAJOR    | 0 |
+| MINOR    | 3 |
+| OBS      | 4 |
+
+Routing per CLAUDE-COMMON.md: MAJOR or below → **STATUS: MERGE-READY**.
+
+Report: `coordination/reviews/REVIEWER-REPORT-R16.md`
+
+Reviewer-side binding verification at HEAD `7a7d596`: typecheck exit 0; 171/0 tests across 18 files. Confirmed against R16 Implementer attestation (also 171/0).
+
+Operator next action: pick TQ-1 disposition (α architecture-revise / β pitch-revise / δ defer) per `coordination/PR-F5-INVESTIGATION-R16.md` § Item 4, informed by:
+- MINOR-1: single-shard proxy methodology delta vs AC-8 reference (compensating biases produce the cited 0.4% match)
+- MINOR-3: findings doc § Item 4 (α) contains a "Recommendation from R16: Option 2" sub-α lean; tone is recommendation, spec said framings
+- OBS-1: diagonal-only 26× ratio at d=100 is an asymmetric estimate (per-shard diagonalized, fleet covariance not); symmetric application would not improve the ratio
 
 ## R16 Implementer close — attestation
 
