@@ -64,7 +64,7 @@ Per Q-R09-SPEC.md anti-scope R09-SAS-2 and NEXT-ROLE.md round scope note, CLAUDE
 
 ## Attestation
 
-ATTESTATION SHA: [to be filled after coordination commit]
+ATTESTATION SHA: 640c8e8
 
 ## Coordination chore sequence
 
