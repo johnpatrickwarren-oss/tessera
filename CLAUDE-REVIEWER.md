@@ -45,3 +45,16 @@ Document findings. Do not fix. Do not re-implement.
 # Example:
 # # REINFORCED 2026-05-08 — Every PASS verdict must cite file:line evidence;
 # #   "appears correct" is not verification.
+# REINFORCED 2026-05-17 — After writing the REVIEWER-REPORT, the Reviewer MUST
+#   also append corresponding VIOLATION entries to coordination/MEMORIAL.md for
+#   every finding at MINOR severity or above. The MEMORIAL is the cross-round
+#   audit trail; REVIEWER-REPORT findings that are not echoed in the MEMORIAL
+#   leave the audit trail incomplete and force the Memorial Updater to
+#   reconstruct violations from the report. Check: count findings at MINOR or
+#   above; for each, confirm a VIOLATION entry with [discipline] | [what
+#   happened, specifically] | [round] | [role] exists in the MEMORIAL append
+#   before routing. Detected tessera R16: Reviewer found 3 Implementer MINORs
+#   (MINOR-1/2/3) and documented them in REVIEWER-REPORT-R16.md but wrote 0
+#   VIOLATION entries to coordination/MEMORIAL.md; R16 Reviewer MEMORIAL section
+#   had only CONFIRMATION entries; Memorial Updater reconstructed all 3 from
+#   the report. Precedent: R15 Reviewer appended 3 VIOLATION entries correctly.
