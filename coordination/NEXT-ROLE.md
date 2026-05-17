@@ -1,159 +1,102 @@
-CURRENT-ROUND: R16
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
-
-## R16 Reviewer outcome — 2026-05-17
-
-| Finding tier | Count |
-|---|---|
-| CRITICAL | 0 |
-| MAJOR    | 0 |
-| MINOR    | 3 |
-| OBS      | 4 |
-
-Routing per CLAUDE-COMMON.md: MAJOR or below → **STATUS: MERGE-READY**.
-
-Report: `coordination/reviews/REVIEWER-REPORT-R16.md`
-
-Reviewer-side binding verification at HEAD `7a7d596`: typecheck exit 0; 171/0 tests across 18 files. Confirmed against R16 Implementer attestation (also 171/0).
-
-Operator next action: pick TQ-1 disposition (α architecture-revise / β pitch-revise / δ defer) per `coordination/PR-F5-INVESTIGATION-R16.md` § Item 4, informed by:
-- MINOR-1: single-shard proxy methodology delta vs AC-8 reference (compensating biases produce the cited 0.4% match)
-- MINOR-3: findings doc § Item 4 (α) contains a "Recommendation from R16: Option 2" sub-α lean; tone is recommendation, spec said framings
-- OBS-1: diagonal-only 26× ratio at d=100 is an asymmetric estimate (per-shard diagonalized, fleet covariance not); symmetric application would not improve the ratio
-
-## R16 Implementer close — attestation
-
-| Item | Result |
-|------|--------|
-| typecheck | exit 0 |
-| test/q01-vendoring-coverage.test.js | 3/0 |
-| test/q01-no-at-pin-deltas.test.js | 1/0 |
-| test/q01-schema-additions.test.js | 5/0 |
-| test/q02-schema-extension.test.js | 6/0 |
-| test/q03-warm-start-runtime.test.js | 13/0 |
-| test/q04-welford-stats.test.js | 11/0 |
-| test/q05-per-shard-runtime.test.js | 13/0 |
-| test/q06-baseline-pre-pass.test.js | 13/0 |
-| test/q07-fleet-correlated.test.js | 23/0 |
-| test/q10-per-shard-emission.test.js | 11/0 |
-| test/q11-hierarchical-e-value-combination.test.js | 18/0 |
-| test/q12-fleet-merged-detector-surfaces.test.js | 16/0 |
-| test/q13-e-bh-fdr.test.js | 14/0 |
-| test/q14-compiled-config-loader.test.js | 6/0 |
-| test/q14-mean-delta.test.js | 7/0 |
-| test/q14-pr-f5-storage.test.js | **4/0** (was 3; +1 R16 AC-R16-1/2) |
-| test/q16-pr-f5-investigation.test.js | **2/0** (new) |
-| test/betting-e-process-class-dispatch.test.js | 5/0 |
-| **Total** | **171/0** (was 168) |
-
-Attestation SHA: ef47759
-
-## R16 Reviewer inputs
-
-- `coordination/specs/Q-R16-SPEC.md` — spec with brainstorm + design inline
-- `test/q14-pr-f5-storage.test.ts` — modified (4 tests; +1 AC-R16-1/2)
-- `test/q16-pr-f5-investigation.test.ts` — new (2 tests; AC-R16-3/4)
-- `coordination/PR-F5-INVESTIGATION-R16.md` — findings + operator options briefing
-
-## R16 TDD evidence
-
-- RED commit: `00a70f3` — q14 dimension test + q16 both with `assert.fail` placeholders; 168 pass / 3 fail
-- GREEN commit: `9ccbb61` — complete test implementations; 171 pass / 0 fail
-
-## Key findings (for operator decision)
-
-- d-mismatch hypothesis **REFUTED**: ratio at d=100 = 1006.5×, not 1.2-1.5×
-- Ratio converges toward N=1000 as d→∞ (not toward architect prediction)
-- welford_state **IS load-bearing**: cold-start without it resets accumulator (n=1)
-- Diagonal-only at d=100 would reduce ratio ~40× (to ~26×); still breaks Family C T² semantics
-- Structural conclusion: 1.2-1.5× is incompatible with N=1000 shards storing per-shard cells
-- Minimum achievable ratio for N=1000 with any per-shard encoding: ≈ N ≈ 1001
-
-## Operator decision pending (post-R16)
-
-TQ-1 disposition: (α) architecture-revise / (β) pitch-revise / (δ) defer
+CURRENT-ROUND: R17
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 
 ## Round scope — operator-set (do NOT auto-redirect)
 
-**R16 = TQ-1 (γ) investigation round.** Verify the PR-F5 measurement methodology before any architectural revision. R14's own Implementer documented a candidate methodology gap in the test header at `test/q14-pr-f5-storage.test.ts:18-25`:
+**R17 = TQ-1 disposition (β) execution: pitch-revise + shard definition addition + TQ-1 closure + R10 MINOR-1 in-passing.** Audit tier per evening-overnight authority. First round of the post-Phase-1 evening chain (R17 → R18-R19 Phase 2 SLICE 1 → STOP).
 
-> "prediction assumed high-d (d≈50+) fleet baseline with proportionally larger family_C covariance matrices. At d=10, per-shard welford_state (n + mean[10] + m2[10×10] = 111 fields) dominates the fleet baseline per cell."
+R16 investigation refuted the d-mismatch hypothesis: at d=100 the ratio is 1006.5× (not 1.2-1.5×); ratio converges to N as d→∞; welford_state is load-bearing for persistence; diagonal-only would help marginally but breaks Family C T² semantics. Conclusion: 1.2-1.5× is structurally incompatible with N-shard per-shard observation. Operator dispositioned (β) pitch-revise.
 
-R16 verifies this lead, extends the analysis to surface additional measurement-dependent factors, and produces a findings document that lets the operator (John) make an informed architectural disposition (α architecture-revise / β pitch-revise / δ defer).
+R17 also addresses a vocabulary gap surfaced during TQ-1 discussion: the project never defined "1 shard = ? GPUs" explicitly. NVIDIA FSDP / tensor-parallelism / pipeline-parallelism documentation unambiguously uses `shard = 1 GPU`. Tessera's PRD US-01 ("shard 47 has a bad GPU") implicitly matches this. R17 makes it explicit so the storage-claim revision lands with a precise unit.
 
-**R16 does NOT pick the architectural disposition.** It produces evidence + options. Operator decides on completion.
+## Five items in scope
 
-## Scope items
+### Item 1 — SCOPING-MEMO-v0.3 § 2.2 storage-claim revision
 
-### Item 1 — Re-measure at multiple d values
+Replace the predicted `1.2-1.5× single-instance footprint` claim with the empirically-validated N-scaling truth:
 
-R14 measured at d=10 only. Architect-pre-prediction (v0.3 § 2.2) implicitly assumed higher dimensionality. R16 SHIPS:
-- Parameterized re-measurement at d ∈ {10, 25, 50, 100} (or operator-tuned set) with N=1000 × K=168
-- Document the dimension-dependence of the overhead ratio
-- Determine: does the ratio approach 1.2-1.5× at higher d (confirming the d-mismatch hypothesis), or stays >100× regardless (refuting it)?
+- The current text in v0.3 § 2.2 predicts: *"at N=10000 with sparse residual encoding, total ≈ 1.2-1.5× single-instance footprint."*
+- The corrected text should document: per-shard observation is per-shard storage; storage scales linearly with N (≈N × single-instance baseline); R16 PR-F5-INVESTIGATION confirms this at multiple d values; mitigation paths (diagonal-only Family C variant; cross-shard sharing in Phase 2) deferred as candidates if real-cluster footprint at target N becomes operationally infeasible.
+- Provenance note: cite R16 investigation + R14 PR-F5 measurement; preserve historical context.
 
-### Item 2 — Welford-state persistence requirement investigation
+Memo version bump to v0.4 (or in-place amendment with §1.x revision note; Implementer's brainstorm picks).
 
-R14's measurement includes `welford_state` (n + mean[d] + m2[d×d]) in the per-shard JSON serialization. **Open question**: does runtime actually require welford_state to be persisted in the compiled-config artifact, or can warm-start residuals rebuild it from observation history on cold-start?
+### Item 2 — Shard definition addition
 
-R16 SHIPS:
-- Trace `welford_state` usage in `engine/per-shard/runtime.ts` + `engine/per-shard/warm-start.ts` (consumed by which call paths?)
-- Determine whether warm-start cold-start can reconstruct welford_state from observation history, OR whether welford_state is load-bearing for compiled-config persistence
-- If welford_state is NOT persistence-required: storage estimate drops dramatically (just n + mean[d] per cell, no m2[d×d])
+Add a new sub-section to SCOPING-MEMO-v0.3 (location: § 1 or new § 1.1; Implementer's brainstorm picks) defining:
 
-### Item 3 — Diagonal-only covariance feasibility check
+- `1 shard = 1 GPU rank` per NVIDIA FSDP / tensor-parallelism / pipeline-parallelism convention
+- Cite NVIDIA's NeMo Framework Parallelisms documentation and Megatron-Core FSDP documentation
+- Topology hierarchy: `gpu_shard < dgx_node (8 shards) < rack (32-128 shards) < scalable_unit (256 shards) < superpod (1K-8K+ shards)`
+- Inference caveat: training uses canonical per-GPU shard; inference may use coarser granularity (e.g., serving worker per N>1 GPUs for large-model partition) — Tessera's per-shard observation maps to per-GPU by default but is granularity-agnostic at the detector layer
 
-Inherited engine Family C supports `'mcd' | 'mrcd' | 'ledoit_wolf'` covariance estimators. Architect-pre-prediction footnote (v0.3 § 2.2): "diagonal-only optimization deferrable to Phase 1 SLICE 3+ if PR-F5 evidence justifies."
+This addresses an oversight in v0.3: the storage-claim discussion (Item 1) needs a precise unit-of-storage to be operationally meaningful.
 
-R16 SHIPS:
-- Storage estimate IF welford_state's m2 were diagonal-only (d fields instead of d×d)
-- Architectural feasibility note: would diagonal-only break the Family C Hotelling T² semantics? (Likely yes; needs Architect investigation in a future round; R16 just documents the estimate)
+### Item 3 — PHASE-1-CLOSE-WALK.md Phase 2 TAGGED-FUTURE update
 
-### Item 4 — Findings document
+Add storage-mitigation paths to the Phase 2 TAGGED-FUTURE activation criteria section:
 
-`coordination/PR-F5-INVESTIGATION-R16.md` (new) — synthesizes Items 1-3 into a structured architectural-options briefing for operator. Each option from the morning triage queue (α architecture-revise / β pitch-revise / δ defer) gets a "decision under R16 findings" framing:
+- Phase 2 candidate: diagonal-only Family C covariance variant (R16 Item 3 finding: would reduce ratio ~40× at d=100 but breaks Hotelling T² semantics — needs Architect-level pair-review)
+- Phase 2 candidate: cross-shard sharing of common patterns (under Extension 3 cross-shard correlation infrastructure)
+- Trigger: real-cluster footprint at target N becoming operationally infeasible (>10K GPUs with default cell+signal configs ≈ 800 MB+; investigate when concrete demand surfaces)
 
-- **(α) architecture-revise:** which specific revision (welford_state non-persistence? diagonal-only? rank-reduced?) is supported by R16 evidence?
-- **(β) pitch-revise:** updated empirical claim per d-dimension table
-- **(γ-prime) investigation-complete:** R16 closes (γ); operator picks (α) or (β); R16 doesn't pre-dispose
-- **(δ) defer:** still available; R16 informs the deferral framing
+### Item 4 — TQ-1 closure in OVERNIGHT-LOG-2026-05-17.md morning triage queue
+
+Update the TQ-1 entry in `coordination/OVERNIGHT-LOG-2026-05-17.md` morning triage queue:
+- Mark disposition: **(β) pitch-revise** confirmed by operator 2026-05-17 evening
+- Cross-reference: R17 commit SHA + v0.3 memo amendment file path + PHASE-1-CLOSE-WALK.md update line range
+- Keep entry visible (don't delete) — closed-with-disposition state for audit trail
+
+### Item 5 — R10 MINOR-1 in-passing cleanup
+
+`engine/per-shard/runtime.ts` file-level docblock still says "Tessera SLICE 2b3: per-shard runtime composition" — needs to mention R10 `projectTierGatedOutputs` + R14 mean_delta injection contributions. One-paragraph docblock update. Apply in-passing if Implementer's brainstorm naturally encounters; not blocking if it doesn't fit cleanly.
 
 ## Tier and audit-tier specifics
 
-**Tier: audit.** S4 (tactical follow-up to R14) + S2 (R14 spec + test code describe the work). No A-factors fire genuinely (this is investigation, not architecture-design — operator picks architecture later). Implementer self-specs + executes; Reviewer cold-audits the investigation methodology + findings document; Memorial Updater records.
+**Tier: audit** per operator pre-approval. S4 (tactical follow-up to R14/R16) + S2 (R16 findings document describes Items 1-4 directly).
 
-**Split condition:** if Item 2 (welford-state persistence investigation) surfaces a genuine architectural ambiguity (e.g., "warm-start cold-start was never specified at compiled-config-persistence layer"), HALT + DIAGNOSTIC. Operator-gate decision; do not silently disposition.
+Implementer self-specs + executes; Reviewer cold-audits; Memorial Updater records.
 
-## Active REINFORCED lines Implementer MUST apply (17 IMPL + 1 COMMON)
+**Split condition:** if Item 2 (shard definition) surfaces unexpected architectural debate (e.g., inference granularity needs more than a caveat — needs a formal model), HALT + DIAGNOSTIC + log to morning triage queue. Operator-gate decision; do not silently pick.
 
-R16 Implementer applies all 17 IMPL reinforcements per CLAUDE-IMPLEMENTER.md; particularly:
+## Active REINFORCED lines Implementer MUST apply (17 IMPL + 1 COMMON + 1 REVIEWER)
 
-- **Procedural halt-discipline (R08 MAJOR-1):** if Item 2 surfaces architectural ambiguity, HALT + DIAGNOSTIC.
-- **Attestation-accuracy (R03 MINOR-4):** OBSERVED measurement values per d; not predicted.
-- **Inherited-testimony empirical verification (R08 MAJOR-2):** verify R14's commentary by running the actual test fixture; don't summarize from the comment text.
-- **Correction-propagation pass (R09 MAJOR-1):** if R16 corrects R14's framing, enumerate sibling sites (PHASE-1-CLOSE-WALK.md if it cites the 1237.7× number; OVERNIGHT-LOG-2026-05-17.md TQ-1 entry; v0.3 § 2.2 if amendment recommended).
+R17 Implementer applies all 17 IMPL reinforcements per CLAUDE-IMPLEMENTER.md; particularly:
 
-## Halt conditions for R16
+- **Procedural halt-discipline (R08 MAJOR-1):** if spec premise failures or architectural ambiguity surfaces, HALT + DIAGNOSTIC.
+- **Attestation-accuracy (R03 MINOR-4 + R05 MINOR-3):** OBSERVED counts AND narrative tactical-choice forms.
+- **Inherited-testimony empirical verification (R08 MAJOR-2):** for any claim about R14/R16 behavior, verify by reading the actual file/test; don't summarize from prior NEXT-ROLE.md or REVIEWER-REPORT.
+- **Correction-propagation pass (R09 MAJOR-1):** Item 1 (memo amendment) MUST enumerate all sibling sites that cite the old 1.2-1.5× claim. Likely sites:
+  - SCOPING-MEMO-v0.3 § 2.2 (primary)
+  - PHASE-1-CLOSE-WALK.md (any reference)
+  - SCOPING-MEMO-BASELINE-CURATION-v0.2/v0.3 if they cite the storage prediction
+  - Any spec or audit-sidecar that cites the prediction (q14 spec; q14 test header)
+  - OVERNIGHT-LOG-2026-05-17.md TQ-1 entry
 
-- **Welford-state persistence architectural ambiguity:** Item 2 may surface that warm-start cold-start semantics were never specified at the compiled-config-persistence layer. HALT + DIAGNOSTIC; document the architectural question for operator gate.
-- **Item 3 diagonal-only would break Family C semantics in a way R16 can't assess:** OK to document as "Architect investigation required in a future round" without HALT; this is the expected R16 finding.
-- **Measurement at high d produces unrealistic values (memory exhaustion at d=100):** HALT + DIAGNOSTIC; document the d-ceiling.
-- **R14 test code modification needed to instrument:** if so, MODIFY test/q14-pr-f5-storage.test.ts (in-scope per Item 1) AND log the modification clearly in the findings document.
+R17 Reviewer applies the new R16-derived reinforcement:
+- **Reviewer MEMORIAL.md violation entries** (R16): for any finding at MINOR severity or above, ALSO append a corresponding VIOLATION entry to coordination/MEMORIAL.md (don't leave audit trail to Memorial Updater reconstruction).
 
-## Coordination chore sequence (R14 final revision; same as R06-R15)
+## Halt conditions for R17
+
+- **Memo amendment scope expansion:** if Item 1 surfaces additional architectural revisions beyond pitch-claim correction (e.g., v0.3 § 2.2 has more empirically-wrong predictions), HALT + DIAGNOSTIC; log additions to morning triage queue.
+- **Shard definition architectural debate:** if Item 2 surfaces a formal model question (inference granularity model; training-vs-inference shard divergence), HALT + DIAGNOSTIC.
+- **Correction-propagation surface count > 5:** if Item 1's sibling-site enumeration finds >5 sites needing update, HALT + DIAGNOSTIC; log for operator confirmation on scope.
+- **R10 MINOR-1 docblock revision touches more than the file header:** if the docblock update requires substantive in-body documentation changes, defer to a future round; stay in-passing only.
+
+## Coordination chore sequence (R14 final revision; same as R06-R16)
 
 1. Run all binding commands at GREEN; record OBSERVED counts.
 2. Write coordination artifacts WITHOUT SHA field.
 3. `git add` coordination artifacts.
-4. `git commit -m "chore(R16): coordination artifacts"` → SHA-A.
+4. `git commit -m "chore(R17): coordination artifacts"` → SHA-A.
 5. Write SHA-A into NEXT-ROLE.md's Attestation block.
-6. `git commit -m "chore(R16): record attestation SHA"` → SHA-B.
-7. Reviewer verifies: `git diff SHA-A HEAD -- src/ tests/ tools/ engine/ coordination/specs/` is empty.
+6. `git commit -m "chore(R17): record attestation SHA"` → SHA-B.
+7. Reviewer verifies: `git diff SHA-A HEAD -- src/ tests/ tools/ engine/ coordination/specs/ coordination/SCOPING-MEMO-v0.3.md coordination/PHASE-1-CLOSE-WALK.md` is empty.
 
-## Pre-R16 baseline (INFORMATIONAL; report OBSERVED at GREEN per R03 MINOR-4)
+## Pre-R17 baseline (INFORMATIONAL; report OBSERVED at GREEN per R03 MINOR-4)
 
-Reviewer-verified at R15 HEAD `0f3508b`:
+Reviewer-verified at R16 HEAD `7a7d596`:
 - test/q01-vendoring-coverage.test.js: 3/0
 - test/q01-no-at-pin-deltas.test.js: 1/0
 - test/q01-schema-additions.test.js: 5/0
@@ -169,35 +112,39 @@ Reviewer-verified at R15 HEAD `0f3508b`:
 - test/q13-e-bh-fdr.test.js: 14/0
 - test/q14-compiled-config-loader.test.js: 6/0
 - test/q14-mean-delta.test.js: 7/0
-- test/q14-pr-f5-storage.test.js: 3/0
+- test/q14-pr-f5-storage.test.js: 4/0
+- test/q16-pr-f5-investigation.test.js: 2/0
 - test/betting-e-process-class-dispatch.test.js: 5/0
-- **Total: 168/0**
+- **Total: 171/0**
 
-R16 expected at GREEN: prior 17 file counts may change at q14-pr-f5-storage if Item 1 modifies the test (parameterized re-measurement). New q16 file possible (investigation-specific tests). Findings document `coordination/PR-F5-INVESTIGATION-R16.md` lands at GREEN.
+R17 expected at GREEN: prior 18 file counts UNCHANGED (documentation round; no production code changes beyond R10 MINOR-1 docblock). No new test file expected. Implementer reports OBSERVED per file.
 
 ## Routing
 
 ```
 cd ~/concord/tessera
-./run-pipeline.sh --round R16 --tier audit
+./run-pipeline.sh --round R17 --tier audit
 ```
 
-`--tier audit` per S4 + S2 + investigation-not-architecture framing.
+`--tier audit` per operator pre-approval.
 
-## Operator gate items (preserved)
+## Post-R17 chain (per evening-overnight authority)
 
-- **PR #38 review/merge** (anchor; operator owns)
-- **TQ-1** — currently being investigated via R16 (γ); resolves to (α) or (β) post-R16
-- **TQ-2** — anchor PR #38 (LOW)
-- **OQ-1 / Q-JC1** `tools/calibrate.ts` vendoring decision
-- **OQ-R08-3** Phase 2 transient detector scheduling
+- **R18 = Phase 2 SLICE 1** architect spec + RED + GREEN (enum extensions + VerdictGroup scope contract + v9X fixture). Full tier per A2 (new architectural pattern — first Phase 2 work) + A4 (novel data model — TopologyNode.kind extension).
+- **R19 = Phase 2 SLICE 1 close** (refinement if needed; consolidation if SLICE 1 needs 2 cycles per v0.3 § 3). Full tier.
+- **STOP at R19** for operator review of Phase 2 entry milestone. ~5-round budget honored (R17-R21 max).
+
+## Operator gate items (preserved for morning triage)
+
+- **PR #38** anchor (operator-owned)
+- **OQ-1 / Q-JC1** `tools/calibrate.ts` vendoring (parked per operator confirmation; Phase 2 SLICE 1 doesn't need it)
+- **OQ-R08-3** Phase 2 transient detector scheduling (parked)
 - **R09 MINOR-3** NEXT-ROLE.md attestation table format
-- **R10 MINOR-1** `engine/per-shard/runtime.ts` module-level docblock
-- **R11/R12/R13/R14/R15 MINORs + OBS** non-load-bearing
+- **R11/R12/R13/R14/R15/R16 MINORs + OBS** non-load-bearing
 
 ## Update history
 
 | Date | Event |
 |---|---|
-| 2026-05-17 | Phase 1 closed at R15; HARD STOP for operator review. |
-| 2026-05-17 | John dispositioned TQ-1 → (γ) investigation-first. R16 launched as audit-tier investigation round. |
+| 2026-05-17 | R16 closed: TQ-1 (γ) investigation complete; d-mismatch hypothesis refuted; (β) pitch-revise becomes natural disposition. NVIDIA documentation research confirmed `1 shard = 1 GPU` as canonical convention. |
+| 2026-05-17 | Operator dispositioned (β) on TQ-1 + authorized evening overnight chain with Phase 2 entry permitted. R17 launched. |
