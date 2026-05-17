@@ -169,3 +169,25 @@ All unresolved decisions → open questions in the spec.
 #   default; no AC needed"). Omitting a sibling field from AC coverage without documentation is a
 #   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
 #   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
+
+# REINFORCED 2026-05-16 — When grilling catches that an e-process or statistical-detector AC's
+#   fixture needs N windows of accumulation to cross a detection threshold (e.g., log(1/α)≈6.908
+#   at ons_lambda=0.5 requires ≈18 windows), the same accumulation-requirement reasoning MUST be
+#   applied to ALL other ACs in the same spec that use any injection or single-window H₁ pattern.
+#   The question "does this fixture accumulate enough signal to demonstrate the AC's stated
+#   intent?" must be asked exhaustively for every empirical e-process AC, not just the first one
+#   that surfaces the analysis. Catching and fixing AC-8 without propagating to AC-12/AC-13 is an
+#   incomplete grilling pass. Detected tessera R07 MAJOR-1: AC-8 correctly revised (10→30
+#   windows) but AC-12/AC-13 left at single-window injection → 0/30 fires on both H₁ scenarios.
+
+# REINFORCED 2026-05-16 — OBSERVED-binding disposition (AC binds the OBSERVED value from running
+#   production) is scoped to PRNG-drift-class prediction errors (OBSERVED and PREDICTED differ by
+#   a small integer within natural PRNG variation). It must NOT be applied when OBSERVED and
+#   PREDICTED diverge by an order of magnitude (e.g., predicted 20-30 fires, observed 0), because
+#   at that scale it produces a structurally self-confirming test: a future implementation FIX
+#   matching the prediction FAILS; a future bug preserving the wrong value PASSES. Before applying
+#   OBSERVED-binding, the pre-emit grilling must ask: "would a future implementation FIX that
+#   matched the architect's prediction FAIL this test?" If yes: redesign the fixture to accumulate
+#   sufficient signal, or explicitly scope-document the limitation. Do not delegate this check to
+#   the Reviewer's right-reasons audit — catch it at the spec layer before routing to Implementer.
+#   Detected tessera R07 MAJOR-2.

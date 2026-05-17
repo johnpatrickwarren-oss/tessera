@@ -227,3 +227,15 @@ with a clear commit message.
 #   arithmetic to detect the discrepancy. Detected R06: AT_PIN_FILES extended from 31 to 38
 #   entries (added 3 new tools + corrected 4 compilation deps); header at lines 7-9 still said
 #   "31 files (compilation deps 2)" (REVIEWER MINOR-2).
+
+# REINFORCED 2026-05-16 — When a spec fixture deviation changes a literal fixture value in a test
+#   assertion (e.g., xCounts from [2,3] → [2,3,0]) rather than merely binding an OBSERVED output
+#   count, treat it as a borderline HALT condition even if the explicit HALT-condition list does
+#   not enumerate it. The operative question: "am I making a substantive judgment about what the
+#   correct fixture SHOULD be, rather than just recording what production PRODUCES?" If yes, this
+#   crosses from "tactical fix" into "spec-ambiguity HALT" territory — write DIAGNOSTIC-RNN-
+#   [topic].md + STATUS: ESCALATE so the Architect can confirm the fixture correction. Silent
+#   inline fix + comment is acceptable only when the deviation is purely observational (e.g.,
+#   OBSERVED fire_window===21 when predicted 20). Changing the literal that is being ASSERTED
+#   requires Architect confirmation. Detected tessera R07 MINOR-1: AC-7 xCounts [2,3]→[2,3,0]
+#   tactical fix; Implementer judgment correct but DIAGNOSTIC would have been cleaner.
