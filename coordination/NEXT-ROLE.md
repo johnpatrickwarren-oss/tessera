@@ -220,4 +220,4 @@ Per overnight authority memory [[project-overnight-authority-2026-05-17]]: "R15 
 - test/betting-e-process-class-dispatch.test.js: 5/0
 - **Total: 168/0**
 
-**Attestation HEAD SHA:** _filled in after chore(R15) commit_
+**Attestation HEAD SHA:** `a2fd499`
