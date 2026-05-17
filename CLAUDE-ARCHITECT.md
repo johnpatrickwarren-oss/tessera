@@ -220,3 +220,19 @@ All unresolved decisions → open questions in the spec.
 #   guessing" grilling step, evaluated per modified file. Detected tessera R10 MINOR-1:
 #   runtime.ts SLICE 2b3 header persisted after SLICE 2b4 emission was added via Delta 2; spec
 #   prescribed three sub-changes but no docblock update; Reviewer caught at runtime.ts:1-13.
+# REINFORCED 2026-05-17 — When a REVIEWER-ANCHOR table row or Mechanism primitive cites a
+#   specific line range (e.g., `:43`, `:297-334`, `:329`) for a type or field declaration,
+#   extract those exact lines from the file using `sed -n 'N,Mp' <path>` at spec-emit time and
+#   paste them verbatim into the row or snippet. Do NOT reconstruct the cited content from memory
+#   or from reading surrounding context — a JSDoc paragraph at lines 43-44 is indistinguishable
+#   from a field declaration at line 47 when recalled from memory; only extracting those specific
+#   lines reveals the distinction. This check is distinct from "opened the file" (R02 reinforcement)
+#   and "verified the re-export chain" (R03 reinforcement): it applies after the file is open, at
+#   the specific sub-line being cited. Gate: for each REVIEWER-ANCHOR row containing a specific
+#   line-number reference, run `sed -n 'N,Mp' <file>` and verify the output matches the snippet
+#   in the table. Also verify the cited TYPE NAME is the exact identifier at that location (not a
+#   sibling type from the same file). Detected R11: OBS-1 (`M_t` cited at line 43, actual line 47;
+#   JSDoc occupies lines 43-44); OBS-2 (Mechanism primitive 7 cites `BettingEProcessState` +
+#   `engine/detectors/family-c-betting-e-process.ts:329 field fired: boolean` — actual type name is
+#   `FamilyCBettingEProcessState`, actual declaration file is `engine/types/families/c.ts:329`,
+#   actual content at the detector line 329 is an object-literal assignment).
