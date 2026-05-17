@@ -44,7 +44,7 @@ Spec-prediction errors (architect, not implementation failures — R06 OBS-1 pre
 
 Tactical fix (AC-7 fixture): spec said xCounts=[2,3] (W=2) for K=2 training, but K=min(2,max(0,W-1))=1 for W=2. Used [2,3,0] (W=3) to get K=2 and p_base=0.025 as spec's formula requires. Noted in RED commit message.
 
-Attestation SHA: (populated in chore commit below)
+Attestation SHA: `ddbe4a3` (chore(R07): coordination artifacts — HEAD at Reviewer routing)
 
 ## Round scope — operator-set (do NOT auto-redirect)
 
