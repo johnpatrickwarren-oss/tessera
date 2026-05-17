@@ -103,3 +103,36 @@ _(round entries appended below as events fire)_
 ### R13 decision (autonomous within pre-approved chain)
 
 **R13 = SLICE 4** (e-BH FDR operator surface; Ren-Barber 2024; PR-F2 pair-review mandatory). Per overnight authority and pre-approved chain.
+
+---
+
+## R13 — SLICE 4: e-BH FDR operator surface (autonomous)
+
+**Completed:** 2026-05-17 02:17:54 (pipeline ~30 min wall-clock).
+**Verdict:** MERGE-READY · 0 CRITICAL · 0 MAJOR · 1 MINOR · 4 OBS · 14/14 ACs PASS · **152/152 full regression**.
+**Streak:** 12-round 0-CRITICAL extended (R02-R13); 11th consecutive TDD-verified round.
+**Commits:** `4110daa` (RED) → `d54912d` (GREEN) → `17994dc` (chore SHA-A) → `26bc2bd` (SHA-recording SHA-B) → `c92831a` (Memorial Updater).
+**Reinforcements:** +1 ARCH (now 15 ARCH + 13 IMPL + 1 COMMON).
+
+### Substantive R13 work landed
+
+✅ **`engine/fleet/e-bh.ts` (NEW)** — `eBenjaminiHochberg(perShardEValues, qLevel) → { selected, K }`. Ren-Barber 2024 Algorithm 1 / Wang-Ramdas 2022; family-agnostic stateless primitive; FDR ≤ q under arbitrary dependence between e-values.
+✅ **`test/q13-e-bh-fdr.test.ts` (NEW)** — 14 ACs including PR-F2 evidence matrix (N=100 shards × T=100 ticks × N_TRIALS=200; iid H₀ + correlated-drift H₀ at ρ²=0.5; Wilson upper bound 0.09624 on empirical FDR; both cells PASS).
+✅ **R12 OQ-1 resolved** — e-BH consumes per-shard e-values (β); fleet-level e-BH (α) rejected. Matches autonomous pre-prediction.
+✅ **Q-J1 hybrid two-layer architecture preserved** — R11/R12 fleet-merge is the Ville-bound layer; R13 e-BH is the FDR-interface layer; parallel-not-serial. No chaining (R13-SAS-14).
+✅ **MD-F2 explicitly documented** at 3 sites — fixed-time at R13; any-time analog deferred to future SLICE per Wang-Ramdas-Vovk 2022.
+
+### Architectural decisions resolved at R13
+
+- qLevel: required positional parameter (no default; R13-SAS-18)
+- Family-agnostic primitive only (no Family-A/C wrappers; R13-SAS-17)
+- Standard fixed-α e-BH only (no randomized variant; R13-SAS-15)
+- No BY-style correction (R13-SAS-16)
+
+### Findings (non-load-bearing; tracked for future-round consideration)
+
+- 1 MINOR + 4 OBS — neither blocks merge nor surfaces architectural concern. Specific findings in `coordination/reviews/REVIEWER-REPORT-R13.md`. New ARCH reinforcement landed (now 15 total) — likely related to the MINOR's discipline class.
+
+### R14 decision (autonomous within pre-approved chain)
+
+**R14 = SLICE 2 carry-forwards bundle** — `mean_delta` + PR-F5 storage profile + compiled-artifact JSON loader. Audit tier per overnight pre-approval. May split mid-round if PR-F5 substrate-build expands scope (Implementer halt-and-DIAGNOSTIC if needed; logged for morning if so).
