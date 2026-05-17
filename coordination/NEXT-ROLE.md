@@ -4,7 +4,7 @@ STATUS: READY
 
 ## Implementer → Reviewer routing (R10)
 
-**Attestation SHA:** (written after coordination chore commit)
+**Attestation SHA:** `839583e` (chore(R10): coordination artifacts commit)
 
 **Test results (OBSERVED — per R03 MINOR-4 reinforcement):**
 
