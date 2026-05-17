@@ -203,3 +203,48 @@ Zero unintended surfaces. Anti-scope verified by Reviewer via `git diff 8b4f0bf.
 **R15 = Phase 1 close walk.** ADR walk + Memorial D state evolution stamp + Tessera Phase 2 TAGGED-FUTURE activation criterion + vendored-at-pin SHA verification. Per overnight pre-approval and the v0.3 § 3 SLICE close-walk template. Full tier (architectural-assessment + multi-deliverable retrospective; A3 + A6 fire).
 
 **After R15: HARD STOP** per overnight authority. Phase 1 close milestone deserves operator review before any Phase 2 work begins. Morning triage queue at top of this log captures the items waiting for John's eyes; TQ-1 (PR-F5 finding) is HIGH priority.
+
+---
+
+## R15 — Phase 1 close walk (autonomous; FINAL round of overnight chain)
+
+**Completed:** 2026-05-17 04:06:45 (pipeline ~47 min wall-clock; full tier).
+**Verdict:** MERGE-READY · 0 CRITICAL · 0 MAJOR · 3 MINOR · 3 OBS · 20/20 ACs PASS.
+**Streak:** **14-round 0-CRITICAL extended (R02-R15)** — clean Phase 1 close.
+**Commits:** `a2fd499` (chore SHA-A; Phase 1 close walk deliverables) → `0f3508b` (SHA-recording SHA-B) → `6efa61e` (Memorial Updater).
+**Reinforcements:** +2 ARCH + 1 IMPL (now **17 ARCH + 17 IMPL + 1 COMMON**).
+
+### Deliverables landed
+
+✅ **Deliverable 1 — `coordination/PHASE-1-CLOSE-WALK.md` (34 KB; NEW)** — synthesizes all R01-R14 work into a Phase-1 architectural-assessment retrospective. Walks each deliverable (SLICE 1 vendor; SLICE 2 per-shard machinery; baseline curation track; SLICE 3 hierarchical e-value layer; SLICE 4 e-BH FDR; SLICE 2 carry-forwards). Each with scope summary; ACs satisfied; outstanding gaps; cross-references.
+✅ **Deliverable 2 — Memorial D state stamp evolution** — `coordination/MEMORIAL.md` updated with Phase 1 close cell; Tessera-Phase-1 delta tallied (reinforcement additions across R02-R14; cross-project memorial entries; tessera-specific vs cross-project carry-forwards classified).
+✅ **Deliverable 3 — Phase 2 TAGGED-FUTURE activation criteria** — documented in PHASE-1-CLOSE-WALK; each parked operator-gate item has a "Phase 2 activation under disposition X / Y / Z" framing. R15 spec did NOT auto-disposition; operator-gate items remain in your court.
+✅ **Deliverable 4 — Vendored-at-pin SHA verification** — 40-of-41 manifest rows verified (1 REMOVED-AT-R02 per ville-preservation removal); no drift detected; verification log appended to `coordination/VENDORING-MANIFEST.md:52`. No auto-re-pin per operator-gate constraint.
+
+### Findings (non-load-bearing per overnight protocol)
+
+- 3 MINOR + 3 OBS (specific items in `coordination/reviews/REVIEWER-REPORT-R15.md`); +2 ARCH + 1 IMPL reinforcement additions captured the discipline lessons.
+
+### Overnight chain summary
+
+Five rounds completed across overnight (R11 → R15 inclusive of R11 close at session-start):
+
+| Round | Scope | Tier | Verdict | Tests | Wall-clock |
+|---|---|---|---|---|---|
+| R11 | SLICE 3 first slice (hierarchical e-value primitives + PR-F1) | full | MERGE-READY · 0/0/1/6 · 18/18 ACs | 122/0 | (closed pre-overnight) |
+| R12 | SLICE 3 second slice (fleet-merged Family A + C surfaces) | full | MERGE-READY · 0/0/0/4 · 16/16 ACs (perfect shutout) | 138/0 | ~30 min |
+| R13 | SLICE 4 (e-BH FDR; PR-F2) | full | MERGE-READY · 0/0/1/4 · 14/14 ACs | 152/0 | ~30 min |
+| R14 | SLICE 2 carry-forwards bundle (mean_delta + PR-F5 + loader) | audit | MERGE-READY · 0/0/3/3 · 18/18 ACs | 168/0 | ~30 min |
+| R15 | Phase 1 close walk | full | MERGE-READY · 0/0/3/3 · 20/20 ACs | 168/0 | ~47 min |
+
+**Aggregate**: 0 CRITICAL · 0 MAJOR · 8 MINOR · 20 OBS across 5 rounds; +3 ARCH + 4 IMPL reinforcements (now 17/17/0/0/0 + 1 COMMON). 14-round 0-CRITICAL streak (R02-R15). All binding commands green at every round close. TDD discipline preserved at all 5 rounds.
+
+### Hard stop
+
+Per overnight authority [[project-overnight-authority-2026-05-17]]: R15 Phase 1 close walk completes → operator-review stop condition. NO R16 launched. Operator returns to:
+
+1. **Morning triage queue at top of this log** — TQ-1 (HIGH: PR-F5 storage-overhead finding); TQ-2 (LOW: anchor PR #38)
+2. **`coordination/PHASE-1-CLOSE-WALK.md`** — Phase 1 retrospective; Phase 2 TAGGED-FUTURE activation framing
+3. **Parked operator-gate items** — OQ-1 calibrate.ts; OQ-R08-3 transient detector; R09 MINOR-3 NEXT-ROLE format; R10 MINOR-1 docblock; R11/R12/R13/R14 MINORs + OBS
+
+Pipeline state: clean, working tree clean, repo HEAD at `6efa61e` (R15 Memorial Updater outputs).
