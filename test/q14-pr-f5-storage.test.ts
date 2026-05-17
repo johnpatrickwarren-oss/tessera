@@ -172,7 +172,86 @@ test('R14 AC-10 — per-shard bytes scale linearly with N (ratio per-shard/singl
 });
 
 // ─── R16 AC-R16-1/2 — dimension-dependence table: overhead ratio at d ∈ {10,25,50,100} ──
-// RED: placeholder — d-parameterized measurement not yet implemented.
+// Single-shard proxy approach: measure K fleet cells + K single-shard cells at each d,
+// then extrapolate N=1000 per-shard total as N_SHARDS × singleShardBytes.
+// Rationale: AC-10 verified linear scaling (ratio 1059.9 vs expected 1000, ~6% deviation);
+// single-shard proxy consistent across all d values (shard_id='shard-0' fixed).
 test('R16 AC-R16-1/2 — d-parameterized overhead: ratio at d ∈ {10,25,50,100}', () => {
-  assert.fail('RED: d-parameterized measurement not yet implemented');
+  const K = K_CELLS;
+  const N = N_SHARDS;
+  const DIMS = [10, 25, 50, 100] as const;
+
+  /** Build K fleet cells with d-dimensional family_C (mean_vector[d] + covariance[d×d]). */
+  function buildFleetBaselineAtD(d: number): ReturnType<typeof buildFleetBaseline>  {
+    const meanVector = Array.from({ length: d }, (_, i) => i * 0.1);
+    const covariance = Array.from({ length: d }, (_, i) =>
+      Array.from({ length: d }, (_, j) => (i === j ? 1.0 : 0.0)),
+    );
+    return Array.from({ length: K }, (_, k) => ({
+      key: makeCellKey({ hour_of_day: k % 24 }),
+      n_samples: 1000,
+      confidence: 'strict' as const,
+      family_C: { mean_vector: meanVector, covariance },
+    }));
+  }
+
+  /** Build K single-shard cells with d-dimensional welford_state (mean[d] + m2[d×d]).
+   *  Uses shard_id='shard-0' (fixed) for consistent extrapolation across all d values. */
+  function buildSingleShardCellsAtD(d: number): PerShardCell[] {
+    const mean = Array.from({ length: d }, (_, i) => i * 0.2);
+    const m2 = Array.from({ length: d }, (_, i) =>
+      Array.from({ length: d }, (_, j) => (i === j ? 2.0 : 0.0)),
+    );
+    return Array.from({ length: K }, (_, k) =>
+      makePerShardCell({
+        shard_id: 'shard-0',
+        key: makeCellKey({ hour_of_day: k % 24 }),
+        residual: makePerShardResidual({
+          n_samples: 25,
+          confidence: 'warm_start',
+          residual_seed_hash: 'sha:baseline-v1',
+          last_observed_at: 1000000,
+          welford_state: { n: 25, mean, m2 },
+        }),
+      }),
+    );
+  }
+
+  type Row = { d: number; fleetBytes: number; singleShardBytes: number; ratio: number };
+  const rows: Row[] = [];
+
+  for (const d of DIMS) {
+    const fleetBytes = JSON.stringify(buildFleetBaselineAtD(d)).length;
+    const singleShardBytes = JSON.stringify(buildSingleShardCellsAtD(d)).length;
+    const ratio = (fleetBytes + N * singleShardBytes) / fleetBytes;
+    rows.push({ d, fleetBytes, singleShardBytes, ratio });
+  }
+
+  // Print dimension-dependence table for Reviewer + operator
+  console.log('\n[R16 PR-F5] Dimension-dependence table (single-shard proxy, N=1000 extrapolation):');
+  console.log(`${'d'.padStart(5)} | ${'fleet KB'.padStart(10)} | ${'1-shard KB'.padStart(11)} | ${'ratio (×)'.padStart(10)}`);
+  console.log(`${'-'.repeat(5)}-+-${'-'.repeat(10)}-+-${'-'.repeat(11)}-+-${'-'.repeat(10)}`);
+  for (const { d, fleetBytes, singleShardBytes, ratio } of rows) {
+    console.log(
+      `${String(d).padStart(5)} | ${(fleetBytes / 1024).toFixed(1).padStart(10)} | ${(singleShardBytes / 1024).toFixed(1).padStart(11)} | ${ratio.toFixed(1).padStart(10)}`,
+    );
+  }
+  console.log(`\n[R16 PR-F5] d-mismatch hypothesis: does ratio approach 1.2-1.5× at high d?`);
+  console.log(`[R16 PR-F5] Answer: ratio at d=100 = ${rows[3].ratio.toFixed(1)}× — hypothesis REFUTED.`);
+
+  // AC-R16-1: All ratios ≥ 500 (refutes d-mismatch hypothesis: target was 1.2-1.5×)
+  for (const { d, ratio } of rows) {
+    assert.ok(
+      ratio >= 500,
+      `d=${d}: ratio ${ratio.toFixed(1)}× < 500× — d-mismatch hypothesis NOT refuted at d=${d}`,
+    );
+  }
+
+  // AC-R16-2: Ratio strictly decreases as d increases (d-dependence direction)
+  for (let i = 1; i < rows.length; i++) {
+    assert.ok(
+      rows[i].ratio < rows[i - 1].ratio,
+      `Monotone decrease violated: ratio(d=${rows[i].d})=${rows[i].ratio.toFixed(1)}× ≥ ratio(d=${rows[i - 1].d})=${rows[i - 1].ratio.toFixed(1)}×`,
+    );
+  }
 });
