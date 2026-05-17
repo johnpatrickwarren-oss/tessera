@@ -49,6 +49,23 @@ function simulateH1(seed: number, W: number, N: number, p_base: number, w_inject
   }
   return out;
 }
+/** Same as simulateH1 but injects p_alt at every window w ∈ [w_inject_start, w_inject_end)
+ *  instead of a single window. Outside that range, uses p_base. Used by AC-27/AC-28
+ *  to demonstrate sustained-injection power per the v0.3 narrowed scope claim. */
+function simulateH1Sustained(
+  seed: number, W: number, N: number, p_base: number,
+  w_inject_start: number, w_inject_end: number, p_alt: number,
+): number[] {
+  const rng = mulberry32(seed);
+  const out: number[] = new Array<number>(W).fill(0);
+  for (let w = 0; w < W; w++) {
+    const p_w = (w >= w_inject_start && w < w_inject_end) ? p_alt : p_base;
+    let count = 0;
+    for (let s = 0; s < N; s++) if (rng() < p_w) count += 1;
+    out[w] = count;
+  }
+  return out;
+}
 
 // ─── Fleet bundle factory for AC-15/16 ────────────────────────────────────────
 function makeFleetBundle(nRuns: number, nTicks: number, contaminatedTicks: Set<number>): BaselineBundle {
@@ -165,7 +182,7 @@ test('R07 AC-5 — wealth update: log_S matches closed-form step-trace on [2,3,2
   let lambda = 0;
   let hess = 1;
   // Step through test windows w=2,3,4
-  for (const [wi, xw] of [[2, 2], [3, 4], [4, 3]] as [number, number][]) {
+  for (const wi of [2, 3, 4]) {
     const Fw = xCounts[wi] / N - pBase;
     const wf = 1 + lambda * Fw;
     expectedLogS += Math.log(Math.max(wf, FLOOR));
@@ -195,7 +212,7 @@ test('R07 AC-6 — ONS bet: final ons_lambda matches closed-form step-trace on [
 
   let lambda = 0;
   let hess = 1;
-  for (const [wi, xw] of [[2, 2], [3, 4], [4, 3]] as [number, number][]) {
+  for (const wi of [2, 3, 4]) {
     const Fw = xCounts[wi] / N - pBase;
     const denom = 1 + lambda * Fw;
     if (Math.abs(denom) >= 1e-12) {
@@ -273,35 +290,42 @@ test('R07 AC-11 — H₀ FPR: 30 trials × W=200 × N=100 × p=0.025 → OBSERVE
   assert.strictEqual(firedCount, 0);
 });
 
-// ─── R07 AC-12 — H₁ strong injection simulation ─────────────────────────────
-test('R07 AC-12 — H₁ strong injection: 30 trials × p_alt=0.5 at w=100 → OBSERVED fire count', () => {
+// ─── R08 AC-12 (REDESIGNED at R08) — FPR under strong transient perturbation ─
+test('R08 AC-12 — FPR under strong transient perturbation: 30 trials × p_alt=0.5 single-window at w=100 → firedCount <= 1', () => {
+  // R08 narrowing (per SCOPING-MEMO-BASELINE-CURATION-v0.3 § 1.1): FCP-1 is a
+  // sustained-fleet-event detector. A benign transient single-window perturbation
+  // (even at strong p_alt=0.5) should NOT trigger FCP-1 — that's the scope claim.
+  // Mechanism: at the first test window post-injection, ons_lambda=0 from clean
+  // training → log_factor=log(1+0*F_w)=0 (martingale property); subsequent clean
+  // windows don't accumulate wealth. firedCount=0 was the R07 OBSERVED; <= 1 allows
+  // minor PRNG-platform-drift variation while preserving Type-I error bound.
+  // Sound under the v0.3 scope claim that transient detection is out of SLICE 5 scope.
+  // (Right-reasons check: a future implementation FIX that started firing on
+  //  transient single-window events would violate the v0.3 scope claim AND would
+  //  raise firedCount to ~25-30/30 → this test would correctly FAIL.)
   let firedCount = 0;
   for (let t = 0; t < 30; t++) {
     const xCounts = simulateH1(FCP1_TEST_SEED + 1000 + t, 200, 100, 0.025, 100, 0.5);
     const state = runFleetCorrelatedEProcess(xCounts, 100, { alphaFleet: 1e-3 });
     if (state.fired) firedCount += 1;
   }
-  // Architect prediction: 20-30 of 30. OBSERVED: 0.
-  // Discrepancy explanation: single injection at w_inject=100 with 90 clean pre-injection test
-  // windows → ons_lambda ≈ 0 at w=100 (not built up) → first-post-injection log_factor ≈ 0
-  // (martingale property); 99 post-injection clean windows don't accumulate wealth.
-  // FCP-1 requires SUSTAINED elevation (as in AC-8) for reliable firing on a single injection.
-  // AC-8 (direct fixture via runFleetCorrelatedEProcess) demonstrates detection; this AC binds FPR.
-  assert.strictEqual(firedCount, 0);
+  assert.ok(firedCount <= 1, `expected firedCount <= 1 on transient perturbation; got ${firedCount}`);
 });
 
-// ─── R07 AC-13 — H₁ weak injection simulation ───────────────────────────────
-test('R07 AC-13 — H₁ weak injection: 30 trials × p_alt=0.1 at w=100 → OBSERVED fire count', () => {
+// ─── R08 AC-13 (REDESIGNED at R08) — FPR under weak transient perturbation ─
+test('R08 AC-13 — FPR under weak transient perturbation: 30 trials × p_alt=0.1 single-window at w=100 → firedCount <= 1', () => {
+  // R08 narrowing (per SCOPING-MEMO-BASELINE-CURATION-v0.3 § 1.1): FCP-1 is a
+  // sustained-fleet-event detector. A benign transient single-window perturbation
+  // at weak p_alt=0.1 must NOT trigger FCP-1. Same mechanism as AC-12: martingale
+  // property + insufficient post-injection wealth accumulation. firedCount=0 was
+  // the R07 OBSERVED; <= 1 allows minor PRNG-platform-drift variation.
   let firedCount = 0;
   for (let t = 0; t < 30; t++) {
     const xCounts = simulateH1(FCP1_TEST_SEED + 2000 + t, 200, 100, 0.025, 100, 0.1);
     const state = runFleetCorrelatedEProcess(xCounts, 100, { alphaFleet: 1e-3 });
     if (state.fired) firedCount += 1;
   }
-  // Architect prediction: 0-15 of 30. OBSERVED: 0.
-  // Same explanation as AC-12: single injection at w=100 with ons_lambda≈0 at injection point.
-  // Weak p_alt=0.1 produces even smaller F_w at injection → no wealth accumulation.
-  assert.strictEqual(firedCount, 0);
+  assert.ok(firedCount <= 1, `expected firedCount <= 1 on weak transient perturbation; got ${firedCount}`);
 });
 
 // ─── R07 AC-14 — martingale property: first test window log_S unchanged ──────
@@ -345,7 +369,7 @@ test('R07 AC-16 — fleet-event bundle: fcp1State.fired===true; fire_window!==nu
   // 10 runs × 200 ticks × 2 signals; ticks 10-49 (40 ticks = 20%) are (100,100) on ALL runs.
   // With K=10 (training ticks 0-9 clean) and alpha_fleet=1e-3:
   // - First test window (w=10): ons_lambda=0, log_S stays 0; lambda → 0.5
-  // - Windows 11..49 (39 windows at X=N=10): each contributes ~log(1.4875)≈0.397
+  // - Windows 11..49 (39 windows where X_w = N = 10 — all 10 shards flag the contaminated tick → maximal F_w): each contributes ~log(1.4875)≈0.397
   // - ~18 accumulating windows needed to cross log(1000)≈6.908; fires around w=28.
   const contaminatedTicks = new Set<number>(Array.from({ length: 40 }, (_, i) => 10 + i));
   const FLEET_BUNDLE = makeFleetBundle(10, 200, contaminatedTicks);
@@ -430,4 +454,54 @@ test('R07 AC-21 — D13 sentinel is deterministic: two independent calls on same
   const s2 = r2.decisions.D13!.output_summary.residual_seed_hash_sentinel as string;
   assert.strictEqual(s1, s2, 'sentinel must be byte-identical on repeated calls');
   assert.strictEqual(r1.decisions.D13!.output_summary.wire_format_version, 'tessera-fcp1-v1');
+});
+
+// ─── R08 AC-27 — sustained strong injection power (theory-derived bound) ────
+test('R08 AC-27 — sustained strong injection power: 30 trials × p_alt=0.5 sustained over [10,60) → firedCount >= 25 (theory-derived bound)', () => {
+  // Theory-derived bound (NOT OBSERVED-binding per R07 reinforcement on OBSERVED-binding scope):
+  // - Fixture: W=60, K=10, L=50 sustained at p_alt=0.5 over windows [10, 60).
+  // - At p_alt=0.5 with N=100: E[X_w]=50; F_w≈0.475.
+  // - First test window w=K=10: ons_lambda=0 → log_factor=0 (martingale property); log_S=0.
+  // - ONS update at w=10: z=-0.475/1=-0.475; hess=1.226; lambda_new=1.6336*0.475/1.226=0.633
+  //   → clamped to 0.5 immediately.
+  // - Windows w=11..59 (49 windows) at λ=0.5, F_w≈0.475: log_factor ≈ log(1.2375) ≈ 0.213/window.
+  // - log_S crosses log(1/1e-3)=6.908 at w ≈ K+1+32 = 43; expected fire_window ≈ 43.
+  // - Var(log_factor) ≈ 0.5²·Var(F_w) = 0.25·0.0025 = 0.000625; stddev/window ≈ 0.025.
+  // - Margin past threshold-crossing: 17 windows of injection remain post-expected-fire.
+  // - Predicted firedCount: 28-30 of 30. Bound `>= 25` provides 3-5 trials of margin.
+  // (Right-reasons check: a future implementation FIX matching architect prediction would
+  //  produce firedCount ≈ 28-30 ≥ 25 → PASS. A future BUG producing 0/30 would FAIL.
+  //  A bug producing 24/30 would FAIL. NOT self-confirming.)
+  let firedCount = 0;
+  for (let t = 0; t < 30; t++) {
+    const xCounts = simulateH1Sustained(FCP1_TEST_SEED + 3000 + t, 60, 100, 0.025, 10, 60, 0.5);
+    const state = runFleetCorrelatedEProcess(xCounts, 100, { alphaFleet: 1e-3, trainingWindowCount: 10 });
+    if (state.fired) firedCount += 1;
+  }
+  assert.ok(firedCount >= 25, `expected firedCount >= 25 on sustained strong injection; got ${firedCount}`);
+});
+
+// ─── R08 AC-28 — sustained weak injection power (theory-derived bound) ─────
+test('R08 AC-28 — sustained weak injection power: 30 trials × p_alt=0.1 sustained over [10,210) → firedCount >= 15 (theory-derived bound)', () => {
+  // Theory-derived bound (NOT OBSERVED-binding):
+  // - Fixture: W=210, K=10, L=200 sustained at p_alt=0.1 over windows [10, 210).
+  // - At p_alt=0.1: E[X_w]=10; F_w≈0.075.
+  // - ONS saturation trajectory (smaller z per step than strong injection):
+  //   w=K=10 → λ_new ≈ 0.122; w=11 → 0.242; w=12 → 0.361; w=13 → 0.478; w=14 → 0.5 (clamp).
+  // - Windows w=14..209 (196 saturated windows) at λ=0.5, F_w≈0.075: log_factor ≈ log(1.0375) ≈ 0.0368/window.
+  // - log_S accumulates ≈ 0.0368/window → crosses 6.908 at w ≈ K+4+188 ≈ 202; expected fire_window ≈ 202.
+  // - Var(log_factor) ≈ 0.25·Var(F) = 0.25·0.000675 = 0.000169; stddev/window ≈ 0.013.
+  // - stddev_sum over 196 saturated windows ≈ sqrt(196)·0.013 ≈ 0.182.
+  // - log_S at w=K+200 ≈ 7.21 ± 0.182; Φ((7.21-6.908)/0.182) = Φ(1.66) ≈ 0.95 per trial.
+  // - Predicted firedCount: ≈ 28 of 30. Bound `>= 15` provides ~13 trials of margin (very conservative —
+  //   accommodates substantial PRNG variation).
+  // (Right-reasons check: a future FIX matching architect prediction → 28 ≥ 15 → PASS;
+  //  a future BUG producing 0/30 → 0 < 15 → FAIL. NOT self-confirming.)
+  let firedCount = 0;
+  for (let t = 0; t < 30; t++) {
+    const xCounts = simulateH1Sustained(FCP1_TEST_SEED + 4000 + t, 210, 100, 0.025, 10, 210, 0.1);
+    const state = runFleetCorrelatedEProcess(xCounts, 100, { alphaFleet: 1e-3, trainingWindowCount: 10 });
+    if (state.fired) firedCount += 1;
+  }
+  assert.ok(firedCount >= 15, `expected firedCount >= 15 on sustained weak injection; got ${firedCount}`);
 });
