@@ -36,7 +36,7 @@ Spec Delta 11 prescribed tightening the AC-15 assertion from `assert.ok(curated.
 ## Attestation
 
 ```
-SHA-A (coordination chore commit): [TO BE FILLED]
+SHA-A (coordination chore commit): f27ad25
 ```
 
 ## Inputs (load-bearing — Reviewer reads these)
