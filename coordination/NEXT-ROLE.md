@@ -1,147 +1,102 @@
-CURRENT-ROUND: R14
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R15
+NEXT-ROLE: ARCHITECT
+STATUS: READY
 
-## Inputs (R14 Reviewer outputs)
+## Round scope — operator-set (do NOT auto-redirect; FINAL round of overnight chain — HARD STOP after R15)
 
-- `coordination/reviews/REVIEWER-REPORT-R14.md` — full cold-read audit, 18/18 ACs PASS, 0 CRITICAL + 0 MAJOR + 3 MINOR + 3 OBS.
-- Reviewer-run binding commands at HEAD `c8da715` (GREEN `949b03c`): typecheck exit 0; per-file `node --test` 168/0 (matches attestation).
-- Anti-scope verified: 9 R14-SAS clauses each empty-diff or content-checked.
-- TDD ordering verified: RED `add83eb` → GREEN `949b03c` two-commit sequence.
-- Attestation SHA verified: `git diff 965a260 HEAD -- engine/ test/ coordination/specs/ tools/` empty.
+**R15 = Phase 1 close walk.** Per v0.3 § 3 SLICE close-walk template + overnight pre-approved chain. Produces the Phase 1 close artifact synthesizing all R01-R14 work into an architectural-assessment retrospective, updates Memorial D state, documents Phase 2 TAGGED-FUTURE activation criteria, and verifies vendored-at-pin SHA integrity.
 
-## Attestation (R14 — filled after chore commit)
+**This is the final round of the overnight chain. After R15 closes (regardless of outcome), the overnight protocol HARD STOPS for operator review.**
 
-GREEN HEAD SHA: 965a260 (coordination chore; `git diff 965a260 HEAD -- engine/ test/ coordination/specs/` is empty)
+## R15 deliverables (spec must surface all four)
 
-Binding commands (OBSERVED at GREEN HEAD `949b03c`):
-- `npm run typecheck` → exit 0
-- `npm test` → pass 168 / fail 0
+### Deliverable 1 — Phase 1 close-walk artifact
 
-Per-file counts (OBSERVED, .js compiled output, 17 files):
-- test/betting-e-process-class-dispatch.test.js: 5/0
-- test/q01-no-at-pin-deltas.test.js: 1/0
-- test/q01-schema-additions.test.js: 5/0
-- test/q01-vendoring-coverage.test.js: 3/0
-- test/q02-schema-extension.test.js: 6/0
-- test/q03-warm-start-runtime.test.js: 13/0
-- test/q04-welford-stats.test.js: 11/0
-- test/q05-per-shard-runtime.test.js: 13/0
-- test/q06-baseline-pre-pass.test.js: 13/0
-- test/q07-fleet-correlated.test.js: 23/0
-- test/q10-per-shard-emission.test.js: 11/0 (AC-10 assertion updated; count unchanged)
-- test/q11-hierarchical-e-value-combination.test.js: 18/0
-- test/q12-fleet-merged-detector-surfaces.test.js: 16/0
-- test/q13-e-bh-fdr.test.js: 14/0
-- test/q14-compiled-config-loader.test.js: 6/0 (new)
-- test/q14-mean-delta.test.js: 7/0 (new)
-- test/q14-pr-f5-storage.test.js: 3/0 (new)
-Prior 14 files: 152/0 (all unchanged). New R14 files: +16. Total: 168/0.
+New file `coordination/PHASE-1-CLOSE-WALK.md` (or similar; architect's call on filename) walking each Phase 1 deliverable:
 
-TDD commit sequence:
-- RED `add83eb`: test/q14-mean-delta.test.ts + test/q14-pr-f5-storage.test.ts +
-  test/q14-compiled-config-loader.test.ts (+511 lines). TS2554 on projectTierGatedOutputs/
-  updatePerShardResidual (1-2 args, got 2-3); TS2307 on ../engine/loader (not yet created).
-- GREEN `949b03c`: engine/per-shard/runtime.ts (M) + engine/loader.ts (A) +
-  test/q10-per-shard-emission.test.ts (M). typecheck exit 0; npm test 168/0.
+- **SLICE 1** (R01) — engine vendoring at SHA `5a72371`; schema additions (shard_id; per_shard_cells; warm_start)
+- **SLICE 2** (R02 schema + R03 warm-start state machine + R04 Welford module + R05 composition + R10 strict-tier emission + R14 mean_delta) — per-shard residual machinery complete
+- **Baseline curation track** (R06 toolchain + Stage 2a + R07 FCP-1 + Stage 3b + R08 amendment + R09 cleanup) — Tessera-native FCP-1 sustained-event detector; SCOPING-MEMO-BASELINE-CURATION-v0.3 documents scope
+- **SLICE 3** (R11 hierarchical e-value primitives + PR-F1 + R12 fleet-merged detector surfaces) — Ville-bound-preserving fleet-merge layer per Q-J1 hybrid
+- **SLICE 4** (R13 e-BH FDR operator surface + PR-F2) — operator-facing FDR-interface layer per Q-J1 hybrid
+- **SLICE 2 carry-forwards** (R14 compiled-artifact JSON loader) — runtime can load CompiledConfig from disk
 
-Anti-scope verification: `git diff 8b4f0bf..HEAD --name-status` → exactly 6 paths
-(engine/loader.ts A, engine/per-shard/runtime.ts M, test/q10-per-shard-emission.test.ts M,
-test/q14-compiled-config-loader.test.ts A, test/q14-mean-delta.test.ts A,
-test/q14-pr-f5-storage.test.ts A). Zero unintended surfaces.
+Each deliverable: scope summary; ACs satisfied; outstanding gaps (if any); cross-references to spec + reviewer-report + commit SHAs.
 
-PR-F5 measurements (OBSERVED from console.log at AC-8/9/10):
-- Fleet baseline: 67.9 KB; per-shard warm_start (N=1000×K=168×d=10): 81.9 MB
-- Overhead ratio: 1237.7× (deviation from 1.2-1.5× prediction — rationale documented in test header)
-- Sparse reduction (none vs warm_start): 81.1% (AC-9 ≥50% threshold met)
-- Linear scaling ratio: 1059.9 ≈ N=1000 ±10% (AC-10 met)
+### Deliverable 2 — Memorial D state stamp evolution
 
-## Round scope — operator-set (do NOT auto-redirect)
+Updates `coordination/MEMORIAL.md` Memorial-D state cell to reflect the end-of-Phase-1 state. Per inherited convention: Memorial-D state at Phase 1 close = (inherited 22V/8C pre-Tessera) + (Tessera-Phase-1 deltas across R01-R14). Architect tallies the Tessera-Phase-1 delta:
 
-**R14 = SLICE 2 carry-forwards bundle** — audit-tier cleanup round bundling three deferred items from R02/R05/R10. Per overnight pre-approved chain.
+- Memorial reinforcement additions across R02-R14: enumerate by round + class
+- New cross-project memorial entries via Memorial Updater stages: enumerate
+- Tessera-specific discipline maturations vs. cross-project carry-forwards: classify
 
-**Three items in scope:**
+### Deliverable 3 — Phase 2 TAGGED-FUTURE activation criteria
 
-### Item 1 — `mean_delta` computation at warm-start tier
+Per v0.3 § 7 topic close framing: documents what would trigger Phase 2 activation. Per the current operator-gate items:
 
-Closes R05 anti-scope deferral. R05 spec § Anti-scope explicitly fenced `mean_delta` computation as "requires BaselineCellEntry injection — separate architectural concern" + deferred to "R06+." R10 spec re-fenced as anti-scope (R10-SAS-4). Now in-scope.
+- **OQ-1 / Q-JC1 disposition** — does `tools/calibrate.ts` get vendored as a dedicated round (Phase 1 SLICE 6+ candidate) OR does R06 Stage 3a's structural-typing compatibility suffice for Phase 1 close + defer calibrate.ts to Phase 2?
+- **OQ-R08-3 Phase 2 transient detector** — schedule decision
+- **Phase 2 SLICE 1 scope per v0.3 § 2.3** — Extension 3 cross-shard correlation layer (TopologyNode/Edge enum extensions; VerdictGroup scope extension; synthetic-cluster substrate v9X-class fixture)
+- **TQ-1 from morning triage queue** — PR-F5 storage-overhead finding; architect documents whether this is Phase 2 activation gate (architect-revising disposition) or Phase 2 entry blocker
 
-`mean_delta` is the per-shard residual mean's delta from the fleet-aggregate mean. Per the schema (R02 Delta 5/6/7/8), `PerShardResidual.mean_delta?: number[]` is OPTIONAL and "present only at confidence === 'warm_start'" (R02 spec; sparse-encoding convention).
+R15 spec does NOT auto-disposition these — they remain operator-gate items for John's morning triage. R15 documents what Phase 2 activation would LOOK like under each operator disposition.
 
-R14 Item 1 SHIPS:
-- Computation logic: at warm-start tier, compute `mean_delta = welfordMean(welford_state) - baselineMean(baselineCell)` where `baselineCell` is the inherited `BaselineCellEntry` for the same `(cell_key)`.
-- BaselineCellEntry injection mechanism — pass the relevant baseline cell to `updatePerShardResidual` (R05 composition function) or `projectTierGatedOutputs` (R10 emission helper); architect's call on the cleanest injection point.
-- ACs covering: presence at warm_start; correct delta math; absence at non-warm_start tiers (sparse-encoding inverse-convention enforcement extended).
+### Deliverable 4 — Vendored-at-pin SHA verification
 
-### Item 2 — PR-F5 empirical storage profile measurement at N=1000 synthetic cluster
+Per v0.3 § 3 Phase 1 close walk: "Per-file vendored-from-DeploySignal headers verified current at SHA `5a72371` or re-pinned to current DeploySignal main at close."
 
-Closes the v0.3 § 2.2 SLICE 2 commitment. Architect-pre-prediction (v0.3): "at N=10000 with sparse residual encoding, total ≈ 1.2-1.5× single-instance footprint." Failure mode: prediction wrong by >2× → load-bearing acceptance failure.
+R15 SHIPS:
+- Run a verification pass on all vendored-at-pin files (engine/detectors/* + engine/types/families/* + engine/types/* + engine/per-detector-resampler-mode.ts + engine/topology-overlay.ts + engine/signal-classes.ts + engine/verdict-groups.ts + the R06-vendored tools/*)
+- Confirm each VENDORED-FROM header matches the actual file SHA at DeploySignal `5a72371`
+- Document any drift; either re-pin (operator-gate decision; document and defer) OR confirm current SHA is canonical
+- Verify `tools/vendor-from-deploysignal.sh` script is idempotent at re-run (R01 AC-8 carried forward)
 
-R14 Item 2 SHIPS:
-- Empirical measurement of compiled-config storage footprint at synthetic cluster N=1000 (lighter than v0.3's N=10000 prediction, but enough data points to extrapolate). If N=1000 substrate doesn't exist, **first sub-task is substrate-build** — Implementer halt-and-DIAGNOSTIC if scope expansion warranted (per overnight authority, log + continue per Implementer's judgment).
-- Measurement script / test asserting storage ratio (per-shard residual ÷ fleet-aggregate) stays within architect-pre-prediction bounds OR documenting deviation with rationale.
-- AC covering: storage ratio measured + bound.
+R15 does NOT auto-re-pin — re-pinning to current DeploySignal main is an operator-side decision (cross-project sequencing implication; would require fresh re-vendor of all 38 files). R15 documents the verification result + defers re-pin to operator.
 
-### Item 3 — Compiled-artifact JSON loader
+## R15 does NOT ship (explicit anti-scope)
 
-Closes the R10 anti-scope deferral ("Compiled-artifact JSON loader — R11+ candidate").
+- **Phase 2 work** — Phase 2 SLICE 1 (TopologyNode/Edge extensions; cross-shard correlation) is deferred to post-operator-return.
+- **PR-F5 architectural revision** — TQ-1 in morning triage queue; R15 documents but does NOT disposition.
+- **Re-pin of vendored-at-pin SHA** — verification only; re-pin requires operator gate.
+- **calibrate.ts vendoring** — OQ-1 stays parked.
+- **Any new production code** — close-walk is documentation + state-update; no GREEN code change beyond minor in-passing docblock updates (e.g., R10 MINOR-1 — `engine/per-shard/runtime.ts` module-level docblock could close in-passing).
 
-R14 Item 3 SHIPS:
-- Loader for the CompiledConfig JSON artifact (per the inherited DeploySignal compiled-config format extended by R02 Delta 4 + R10 Delta 2 schema additions). Read JSON → produce a typed `CompiledConfig` object that the runtime can consume.
-- Validation: required-field presence checks; schema-version compatibility.
-- ACs covering: round-trip serialization (write JSON → read JSON → identical structure); validation rejects malformed input; loads R10-emission-shape CompiledConfig.
+## Active REINFORCED lines architect MUST apply (15 ARCH + 16 IMPL + 1 COMMON)
 
-## Tier and audit-tier specifics
+R15 Architect applies all 15 ARCH reinforcements; particularly:
 
-**Tier: audit** per overnight pre-approval. Implementer self-specs + executes; Reviewer cold-audits; Memorial Updater records. No separate Architect role.
+- **Cross-section consistency pass** (R02; 10th consecutive standing application) — applied to the close-walk artifact's section coherence
+- **Inherited-testimony empirical verification** (R08; anchor PR #38) — for every claim about R01-R14 round outcomes, cite the specific Reviewer-report file:line or commit SHA; don't summarize from memory
+- **Correction-propagation pass** (R09; anchor PR #38) — if R15 corrects any prior-round spec premise (e.g., PR-F5 storage prediction), propagate the correction to all sibling sites (v0.3 § 2.2; any spec that cites the 1.2-1.5× number)
+- **R11 citation-accuracy via sed -n extraction** — file:line citations must be verified
+- **JSDoc-scope grep** (R06) — if R15 touches engine/per-shard/runtime.ts docblock per R10 MINOR-1, grep all sibling docblock sites
 
-Tier rubric verdict at audit-tier emit:
-- S4 (tactical follow-up to prior rounds): applies to all three items
-- S2 (prior round artifacts describe the work): applies (R05 + R10 specs document the deferred work)
-- All-A-factors-false: borderline; A2 (new architectural pattern — compiled-artifact JSON loader is genuinely new) arguably fires. **Operator pre-disposition: audit tier with explicit split-condition** if A2 weight exceeds tactical-follow-up framing.
+R15 Implementer applies all 16 IMPL reinforcements; particularly:
+- **Procedural halt-discipline** (R08 MAJOR-1) — if vendored-at-pin SHA verification surfaces drift, HALT + DIAGNOSTIC; don't silently re-pin
+- **Attestation-accuracy** (R03) — OBSERVED file SHAs, not predicted
 
-**Split condition:** if Implementer's self-spec brainstorm surfaces that one or more items requires full-tier architectural work (e.g., compiled-artifact loader needs decisions about JSON schema versioning that aren't in spec; OR PR-F5 substrate-build itself is substantial), HALT and:
-- Document the architectural question in a DIAGNOSTIC
-- Log to morning triage queue
-- Continue R14 with the items that genuinely fit audit-tier
-- Split items into R14a / R14b OR defer to R15 close-walk
+## Halt conditions for R15
 
-This is operator-authorized via overnight authority "may split if PR-F5 substrate-build needs its own round."
+- **Vendored-at-pin SHA drift surfaces:** HALT + DIAGNOSTIC; document drift, do NOT silently re-pin (operator gate)
+- **PR-F5 architectural-revision pull:** the close-walk artifact may be tempted to disposition TQ-1; HALT + log the temptation in the close-walk artifact's "Open for operator" section. Do NOT auto-disposition.
+- **Phase 2 activation criteria require operator input:** document candidate criteria; do NOT pick.
+- **Memorial D state stamp accounting drift:** if the Tessera-Phase-1 delta can't be tallied unambiguously (e.g., overlapping reinforcement attribution), HALT + DIAGNOSTIC; do not estimate.
+- **OPERATOR-PROTECTED ITEMS:** all morning-triage-queue items + parked operator-gate items remain operator-gate; R15 documents context but does NOT decide.
 
-## Active REINFORCED lines Implementer MUST apply (13 IMPL + 1 COMMON)
-
-R14 Implementer applies all 13 IMPL reinforcements per CLAUDE-IMPLEMENTER.md; particularly:
-
-- **Procedural halt-discipline (R08 MAJOR-1):** spec premise failures require DIAGNOSTIC regardless of resolution clarity.
-- **Attestation-accuracy (R03 MINOR-4 + R05 MINOR-3):** OBSERVED counts AND narrative tactical-choice forms; report what was committed, not what was planned.
-- **MEMORIAL tactical-choice verification (R05):** narrative claims about committed code must be verified against the file.
-- **Correction-propagation pass (R09 MAJOR-1):** applies to Implementer too if any spec edit corrects a prior premise.
-- **Inherited-testimony empirical verification (R08 MAJOR-2):** for any factual claim about R02/R05/R10 behavior or schema, run the relevant command/fixture; document OBSERVED output.
-
-Audit-tier self-spec includes: Brainstorm phase (≥3 approaches per item with rejection rationale; especially for compiled-artifact loader JSON-schema choice); Design phase (component boundaries + integration points); Execute phase (RED → GREEN TDD per round).
-
-## Halt conditions for R14
-
-- **Architectural decision surfaces that exceeds audit-tier brainstorm scope:** HALT + DIAGNOSTIC + log to morning triage queue.
-- **PR-F5 substrate-build expands scope materially:** split per operator pre-authorization.
-- **mean_delta architecture surfaces a baselineCell injection question that isn't decidable in audit-tier:** HALT + DIAGNOSTIC.
-- **Compiled-artifact JSON-schema versioning decision:** if it's load-bearing for downstream consumers, HALT + DIAGNOSTIC.
-- **Spec/reality conflicts (R08 reinforcement):** DIAGNOSTIC required regardless of resolution clarity.
-- **R10/R12/R13 surface modification:** anti-scope; HALT if R14 attempts.
-
-## Coordination chore sequence (R14 final revision; same as R06-R13)
+## Coordination chore sequence (R14 final revision; same as R06-R14)
 
 1. Run all binding commands at GREEN; record OBSERVED counts.
 2. Write coordination artifacts WITHOUT SHA field.
 3. `git add` coordination artifacts.
-4. `git commit -m "chore(R14): coordination artifacts"` → SHA-A.
+4. `git commit -m "chore(R15): coordination artifacts"` → SHA-A.
 5. Write SHA-A into NEXT-ROLE.md's Attestation block.
-6. `git commit -m "chore(R14): record attestation SHA"` → SHA-B.
+6. `git commit -m "chore(R15): record attestation SHA"` → SHA-B.
 7. Reviewer verifies: `git diff SHA-A HEAD -- src/ tests/ tools/ engine/ coordination/specs/` is empty.
 
-## Pre-R14 baseline (INFORMATIONAL; report OBSERVED at GREEN per R03 MINOR-4)
+## Pre-R15 baseline (INFORMATIONAL; report OBSERVED at GREEN per R03 MINOR-4)
 
-Reviewer-verified at R13 HEAD `26bc2bd`:
+Reviewer-verified at R14 HEAD `c8da715`:
 - test/q01-vendoring-coverage.test.js: 3/0
 - test/q01-no-at-pin-deltas.test.js: 1/0
 - test/q01-schema-additions.test.js: 5/0
@@ -155,38 +110,54 @@ Reviewer-verified at R13 HEAD `26bc2bd`:
 - test/q11-hierarchical-e-value-combination.test.js: 18/0
 - test/q12-fleet-merged-detector-surfaces.test.js: 16/0
 - test/q13-e-bh-fdr.test.js: 14/0
+- test/q14-compiled-config-loader.test.js: 6/0
+- test/q14-mean-delta.test.js: 7/0
+- test/q14-pr-f5-storage.test.js: 3/0
 - test/betting-e-process-class-dispatch.test.js: 5/0
-- **Total: 152/0**
+- **Total: 168/0**
 
-R14 expected at GREEN: prior 14 file counts unchanged + new q14 file (likely +8 to +15 ACs covering the three items; potentially split if PR-F5 substrate-build expands scope). Implementer reports OBSERVED per file.
+R15 expected at GREEN: prior 17 file counts UNCHANGED (close-walk is documentation; no new production code beyond optional in-passing docblock fixes). New q15 file likely NOT created (documentation-only round). Implementer reports OBSERVED per file.
 
 ## Routing
 
 ```
 cd ~/concord/tessera
-./run-pipeline.sh --round R14 --tier audit
+./run-pipeline.sh --round R15 --tier full
 ```
 
-`--tier audit` per operator pre-approval. Implementer + Reviewer + Memorial Updater only; no separate Architect role.
+`--tier full` per A3 (resolving multiple Phase-1 open items at architectural-assessment scope) + A6 (large blast radius — close-walk synthesis touches every R01-R14 deliverable).
 
-## Operator gate items (preserved for morning triage)
+## After R15 — HARD STOP
 
+Per overnight authority memory [[project-overnight-authority-2026-05-17]]: "R15 Phase 1 close walk completes (planned milestone)" is the explicit stop condition. Operator returns; reads `coordination/OVERNIGHT-LOG-2026-05-17.md` (morning triage queue at top); reviews `coordination/PHASE-1-CLOSE-WALK.md` produced by R15; dispositions:
+
+- TQ-1 PR-F5 storage-overhead finding (HIGH priority morning-triage item)
+- TQ-2 anchor PR #38 review/merge decision
+- Phase 2 activation timing
+- Vendored-at-pin SHA re-pin (or hold)
+- Any other operator-gate items accumulated overnight
+
+## Operator gate items (preserved for morning triage; R15 will inherit + add to)
+
+- **Morning triage queue TQ-1** — PR-F5 storage-overhead finding (HIGH priority)
+- **Morning triage queue TQ-2** — anchor PR #38 review/merge (LOW priority informational)
 - **PR #38 review/merge** (anchor; operator owns)
 - **OQ-1 / Q-JC1** `tools/calibrate.ts` vendoring decision
 - **OQ-R08-3** Phase 2 transient detector scheduling
 - **R09 MINOR-3** NEXT-ROLE.md attestation table format
-- **R10 MINOR-1** `engine/per-shard/runtime.ts` module-level docblock update
+- **R10 MINOR-1** `engine/per-shard/runtime.ts` module-level docblock (may close in-passing at R15)
 - **R11 MINOR-1** `tick_post` variable-name nit
-- **R11 OBS-1/-2** spec citation drift (low priority)
+- **R11 OBS-1/-2** spec citation drift
 - **R12 OQ-2** `fleetMergeFamilyAMixture` variant deferral
 - **R12 OQ-3** R13+ auto-selection hint propagation
-- **R12 OQ-4** Reviewer-facing strict-equality assertion form (architect picked: keep strict-equality)
-- **R13 MINOR + 4 OBS** (specific findings in REVIEWER-REPORT-R13.md; non-load-bearing per overnight protocol)
+- **R12 OQ-4** strict-equality assertion form (architect picked: keep)
+- **R13 MINOR + 4 OBS** non-load-bearing
+- **R14 MINORs + OBS** — to be enumerated in R15 close-walk artifact
 
 ## Update history
 
 | Date | Event |
 |---|---|
-| 2026-05-17 | R12 closed (perfect zero-violation shutout); R13 closed clean (e-BH FDR operator surface; PR-F2 evidence matrix passed both cells). |
-| 2026-05-17 | R14 launched under overnight authority: SLICE 2 carry-forwards bundle (mean_delta + PR-F5 + compiled-artifact loader) at audit tier with split-condition. |
-| 2026-05-17 | R14 closed: 18/18 ACs PASS; 0 CRITICAL / 0 MAJOR / 3 MINOR / 3 OBS; 168/168 tests; TDD clean (12th consecutive); anti-scope clean. Memorial Updater recorded all findings; 3 reinforcements added to CLAUDE-IMPLEMENTER.md; ROUND-R14-SUMMARY.md written. |
+| 2026-05-17 | R12-R14 closed across overnight chain; all clean MERGE-READY; 13-round 0-CRITICAL streak. |
+| 2026-05-17 | R14 PR-F5 measurement surfaced architecturally-significant storage-overhead finding (TQ-1; HIGH morning triage). |
+| 2026-05-17 | R15 launched: Phase 1 close walk; FINAL round of overnight chain; HARD STOP after R15 closes. |
