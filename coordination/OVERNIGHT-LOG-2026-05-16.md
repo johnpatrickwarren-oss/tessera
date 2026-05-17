@@ -122,3 +122,36 @@ Stopping at 2 instead of using the full 3 because the substantive architectural 
 - **R08 under (A)**: similar to (B) but doesn't add the scoping amendment. ~20 min.
 - **R08 under (C)**: full-tier; new pair-review-novel-literature work for the GROW mixture or static-λ formulation. ~60 min + opens a new R09 for spec emission.
 - **R08 under (D) only**: minimal scoping-only round; doesn't fix the self-confirming tests (still need (A) or (B)).
+
+---
+
+## Authority expansion (2026-05-16, post-R07 escalation)
+
+John clarified that in overnight mode, I should continue based on my recommendations without seeking approval. The previous hard limit "Re-disposition of any Q-JC when PR-F8/PR-F9 evidence contradicts the architect-pre-prediction → escalate" is RELAXED to "Re-disposition with clear recommendation documented in NEXT-ROLE.md and this log."
+
+What stays escalation: CRITICAL findings; BLOCKED-unfixable; public repo state; new memos for unauthorized directions; cross-project work; anything that would invalidate prior Reviewer-attested SHAs without operator awareness.
+
+The cost-discipline 3-round budget still applies (R06+R07 used 2; R08 = third and final under this budget).
+
+Acting under expanded authority for R08 NOW: launching R08 = SLICE 5 amendment + R07-MAJORs closure per my (B)+(D) recommendation.
+
+## R08 disposition (autonomous under expanded authority)
+
+**R08 = Phase 1 SLICE 5 amendment + R07 MAJOR-1/MAJOR-2 closure via Option (B)+(D).**
+
+Per autonomous recommendation:
+- **(D)** Scope amendment to SCOPING-MEMO-BASELINE-CURATION-v0.2 § 1 Executive summary: document FCP-1 as detecting sustained fleet events (the realistic threat model). Transient single-window contamination explicitly out of scope for SLICE 5. Memo becomes v0.3.
+- **(B)** Spec fixture redesign:
+  - AC-12/13: preserved as single-window FPR-under-perturbation tests (Type-I error check; assert firedCount LOW or zero under benign single-window perturbation)
+  - Add AC-12.5/13.5 (or renumbered): sustained injection per AC-8 pattern (assert nonzero expected fire count derived from theoretical power, not OBSERVED-binding)
+  - Also closes MAJOR-2 self-confirming-test gap via the redesigned bindings
+
+Q-JC4 is NOT re-dispositioned — the sequential e-process formulation stands. What changes is the SCOPE CLAIM (Option D) and the TEST BINDINGS (Option B). The framework choice from the pre-disposition is preserved.
+
+Pre-disposition document (`ARCHITECT-REPLY-BASELINE-CURATION-v0.2-PRE-DISPOSITION.md`) gets a small append: Q-JC4 scope narrowing recorded as "operator-confirmed via authority-expansion 2026-05-16; FCP-1 detects sustained fleet events; transient single-window contamination is Phase 2+ candidate."
+
+Architect tier: full (the scope amendment + spec redesign is architectural disposition, not tactical follow-up).
+
+In-passing items R08 may close (Architect's call; not load-bearing):
+- R06 MINOR-1 carry-forward: `config.ts:228` stale JSDoc "(D1-D10)" — should be "(D1-D13)" after R06 Delta 1.
+- R07 MINOR-2/3/4 watch-list items — fixture-level closures.
