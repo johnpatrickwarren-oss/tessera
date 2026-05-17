@@ -1,12 +1,21 @@
 CURRENT-ROUND: R09
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 
-## Inputs for Reviewer
+## Inputs for Memorial Updater
 
 - `coordination/specs/Q-R09-SPEC.md` — R09 self-spec (brainstorm + design + ACs + anti-scope)
+- `coordination/reviews/REVIEWER-REPORT-R09.md` — Reviewer report (0 CRITICAL / 1 MAJOR / 3 MINOR / 6 OBS); STATUS: MERGE-READY
 - `test/q07-fleet-correlated.test.ts` — 2 edits: AC-11 tightened; AC-15 n_ticks_contaminated binding added
-- `coordination/specs/Q-R08-SPEC.md` — § Mechanism primitive 11 corrected (empirical premise fix)
+- `coordination/specs/Q-R08-SPEC.md` — § Mechanism primitive 11 corrected (empirical premise fix); MAJOR-1 documents 4 sibling surfaces left uncorrected (R10 disposition candidate)
+
+## Reviewer summary
+
+- Routing: MERGE-READY (no CRITICAL).
+- 1 MAJOR: Q-R08-SPEC.md primitive-11 correction did not propagate to 4 sibling surfaces (preamble :24, cross-section table row 11 :94, "All 18 checks PASS" :103, Delta 11 final sentence :563, AC-15 spec text :592). Documentation consistency, not behavior. Recommended R10 audit-tier disposition.
+- 3 MINOR: test-message wording precision (:364); AC-R09-1 grep verifier too narrow; NEXT-ROLE.md attestation table omits HEAD-SHA per-row.
+- 6 OBS: TDD ordering verified; role boundaries clean; reinforcement assessment sound; audit-tier methodology validated; right-reasons audit surfaced MAJOR-1; approach γ judgment sound.
+- Reviewer-independent binding-command verification: 93/0 matches Implementer attestation exactly.
 
 ## Observed binding-command results (at GREEN HEAD `59f2084`)
 

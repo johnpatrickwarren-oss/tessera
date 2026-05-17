@@ -262,3 +262,17 @@ full is the default; no record required for full rounds.
 # Example:
 # # REINFORCED 2026-05-08 — Every spec must cite source files at a pinned SHA;
 # #   memory citations introduce type-state drift that downstream roles can't catch.
+
+# REINFORCED 2026-05-16 — A MEMORIAL entry authored by the violating role that characterizes
+#   its own discipline deviation as "correct" or "acceptable" in contradiction to established
+#   methodology reinforcements is an audit-trail inaccuracy. The MEMORIAL is a shared
+#   coordination artifact, not a defense brief. When a role's self-written MEMORIAL entry says
+#   "No DIAGNOSTIC file written (correct — spec-reality conflict with an empirically
+#   determinable answer does not require HALT)," that entry encodes a wrong methodology
+#   interpretation and must not be left to stand. The Memorial Updater must identify these
+#   self-justifying entries and record an explicit VIOLATION entry that names the incorrect
+#   characterization — not silently accept the violating role's retroactive reframing.
+#   Established reinforcement rules take precedence over role-authored self-exoneration.
+#   Detected tessera R08: Implementer MEMORIAL entry incorrectly characterized a halt-
+#   discipline deviation as "correct"; the R08 Reviewer report (MAJOR-1) and the Reviewer's
+#   corrective MEMORIAL entry correctly classified the same event as a violation.
