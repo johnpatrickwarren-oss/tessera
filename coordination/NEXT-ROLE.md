@@ -1,6 +1,17 @@
 CURRENT-ROUND: R06
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
+
+## R06 REVIEWER routing
+
+**Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R06.md`
+**Verdict:** 0 CRITICAL, 0 MAJOR, 4 MINOR, 4 OBS → **MERGE-READY**.
+**Audit-HEAD:** `0689681` (SHA-recording commit; coordination-artifacts SHA-A = `3e1c7fc`; GREEN = `377fbb3`; RED = `9271ea3`).
+**Binding commands independently re-run by Reviewer:** typecheck → exit 0; q06 → 13/0; q01-vc → 3/0; q01-no → 1/0; pre-R06 aggregate (q01-sa + q02-se + q03 + q04 + q05 + smoke) → 53/0; total 70/0. AC-22 grep → 0 matches.
+**Findings summary:** MINOR-1 stale JSDoc at config.ts:228 (D1-D10 reference post-Delta-1); MINOR-2 stale header count at q01-no-at-pin-deltas.test.ts:7-9 (says "31 files (compilation deps 2)" — actual is 38 files with 6 compilation deps + 3 new tools); MINOR-3 no AC binds opts.mcdSeed override; MINOR-4 no AC binds p===0 early-return; OBS-1 well-disclosed tactical manifest filter fix; OBS-2 R14 two-commit discipline preserved; OBS-3 TDD ordering verified in git log; OBS-4 zero anti-scope file modifications.
+
+## Original R06 routing context (preserved for MEMORIAL-UPDATER)
+
 
 ## Round scope (Architect-confirmed)
 

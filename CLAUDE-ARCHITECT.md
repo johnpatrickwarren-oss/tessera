@@ -153,3 +153,19 @@ All unresolved decisions → open questions in the spec.
 #   (line 715) both said "AC-1 through AC-13." In-spec arithmetic drift caught only by Reviewer
 #   cold-read (REVIEWER MINOR-1). 2nd tessera occurrence of narrative-vs-pseudocode count drift
 #   (first: R03 MINOR-4).
+
+# REINFORCED 2026-05-16 — When a delta prescription says "update the JSDoc at lines X–Y," the
+#   grilling scope-audit MUST include `grep -n "<stale_text>" <file>` to find ALL instances of
+#   that stale content in the file before finalizing the line-range. A delta that prescribes a
+#   single-site JSDoc update without checking for secondary occurrences will leave stale text at
+#   sibling sites (e.g., the in-interface comment block vs the standalone JSDoc block). Detected
+#   R06: Delta 1 prescribed lines 207-213 only; secondary JSDoc at config.ts:228 still referenced
+#   "(D1-D10)" after union extended to D1-D13 (REVIEWER MINOR-1).
+
+# REINFORCED 2026-05-16 — When a public API surface declares multiple optional parameters in an
+#   opts/options interface, the AC-coverage pass during grilling MUST enumerate ALL declared fields
+#   and verify each has either (a) a binding AC or (b) an explicit documented rationale for
+#   non-binding (e.g., "mcdSeed is a test-reproducibility knob; operational callers use the
+#   default; no AC needed"). Omitting a sibling field from AC coverage without documentation is a
+#   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
+#   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
