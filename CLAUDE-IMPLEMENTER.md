@@ -239,3 +239,20 @@ with a clear commit message.
 #   OBSERVED fire_window===21 when predicted 20). Changing the literal that is being ASSERTED
 #   requires Architect confirmation. Detected tessera R07 MINOR-1: AC-7 xCounts [2,3]→[2,3,0]
 #   tactical fix; Implementer judgment correct but DIAGNOSTIC would have been cleaner.
+
+# REINFORCED 2026-05-16 — A spec premise that fails empirical testing (e.g., applying a spec-
+#   prescribed assertion tightening causes the test to fail with unexpected values) is a spec-
+#   internal factual error — a HALT condition requiring DIAGNOSTIC-RNN-[topic].md + STATUS:
+#   ESCALATE, regardless of how unambiguous the correct revert appears. The diagnostic must
+#   document: (1) spec's exact factual claim (quoted); (2) the empirical evidence (test output,
+#   exact values); (3) resolution options (revert / update fixture / escalate with corrected
+#   premise). "The correct answer is obvious so I can just revert" does not bypass the procedure
+#   — auditability requires the deviation to be surfaced as a DIAGNOSTIC file, not buried in
+#   NEXT-ROLE.md. A MEMORIAL entry rationalizing the omission as "no design decision involved,
+#   so no DIAGNOSTIC needed" encodes the incorrect methodology interpretation and will be
+#   corrected by the Memorial Updater. The discipline is calibrated by auditability, not by
+#   resolution difficulty. Detected tessera R08 MAJOR-1: Delta 11 reverted after empirical
+#   failure (curatedLen=6 vs origLen=8 on clean alternating-pattern fixture); deviation
+#   documented in NEXT-ROLE.md only; no DIAGNOSTIC file created; Implementer's own MEMORIAL
+#   entry incorrectly characterized this as "correct — spec-reality conflict with an empirically
+#   determinable answer does not require HALT."

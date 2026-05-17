@@ -1,8 +1,25 @@
 CURRENT-ROUND: R08
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 
-## Implementer routing block
+## Reviewer routing block (R08)
+
+Cold-review complete at GREEN HEAD `4ba5e9e` (coordination HEAD `24f945e`). Report: `coordination/reviews/REVIEWER-REPORT-R08.md`.
+
+**Verdict**: STATUS: MERGE-READY with two MAJOR discipline-class findings.
+- Zero CRITICAL findings.
+- 29 of 31 ACs PASS; 2 PARTIAL (AC-15 + AC-25) downstream of MAJOR-1.
+- Production algorithm preserved bit-identical per R08-SAS-1 + R08-SAS-2.
+- Tests: 93/0 grand total at GREEN. Typecheck: exit 0.
+- Anti-scope: clean (zero R08-SAS violations).
+
+**MAJOR findings (queued for Memorial Updater + R09 Architect)**:
+- **MAJOR-1** (Implementer halt-discipline): Delta 11 reverted silently after empirical test failure; no DIAGNOSTIC, no STATUS: ESCALATE. Per cross-project memorial halt-discipline standing reinforcement, documenting deviation in NEXT-ROLE.md is not a substitute for a DIAGNOSTIC file.
+- **MAJOR-2** (Architect pre-emit grilling miss): Spec § Mechanism primitive 11 + Cross-section consistency row 11 + Per-file pseudocode Delta 11 contain a factually wrong load-bearing claim ("MCD produces zero flags on clean alternating-pattern fixture"); Reviewer-probed: D11 `n_ticks_contaminated=6` (2 ticks × 3 runs).
+
+R09 Architect must (a) run AC-15 fixture against production before specifying further AC-15 disposition; (b) fix the spec premise; (c) write the correct AC-15 tightening.
+
+## Implementer routing block (R08 — superseded by Reviewer routing above)
 
 **Two-commit RED → GREEN used (preferred path per spec AC-25 note).**
 - RED commit `f99e54c`: q07 test changes only — Deltas 3, 4, 5, 6, 7, 10, 12.
@@ -39,8 +56,9 @@ Spec Delta 11 prescribed tightening the AC-15 assertion from `assert.ok(curated.
 SHA-A (coordination chore commit): f27ad25
 ```
 
-## Inputs (load-bearing — Reviewer reads these)
+## Inputs (load-bearing — Reviewer / Memorial Updater reads these)
 
+- `coordination/reviews/REVIEWER-REPORT-R08.md` — **THIS REVIEWER'S REPORT (R08)**; primary input for Memorial Updater.
 - `coordination/specs/Q-R08-SPEC.md` (full) — the spec; use for AC tracing.
 - `coordination/specs/Q-R08-SPEC-AUDIT.md` (full) — Architect audit sidecar; use for cross-section consistency claims.
 - `test/q07-fleet-correlated.test.ts` (GREEN HEAD) — primary modified test file.
