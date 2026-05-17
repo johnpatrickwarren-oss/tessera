@@ -1,6 +1,17 @@
 CURRENT-ROUND: R18
-NEXT-ROLE: ARCHITECT
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ESCALATE
+Inputs: coordination/specs/Q-R18-SPEC.md (+ coordination/specs/Q-R18-SPEC-AUDIT.md sidecar; Architect ceremony, optional read for Implementer)
+
+## Escalation items
+
+- coordination/diagnostics/DIAGNOSTIC-R18-no-at-pin-deltas-verdict.md
+
+**Bounded question:** `q01-no-at-pin-deltas.test.ts` includes `engine/types/verdict.ts` in its byte-identity AT_PIN_FILES list; the R18 deltas to verdict.ts break that test (observed 180/1, not 181/0). Anti-scope prohibits modifying prior-round test files. The config.ts precedent (remove from AT_PIN_FILES + update VENDORING-MANIFEST.md row to `vendored-with-deltas`) resolves this cleanly (Option A in DIAGNOSTIC). Option B accepts the regression and proceeds with 180/1.
+
+**Which disposition?**
+- Option A: Approve targeted exception — update q01-no-at-pin-deltas.test.ts + VENDORING-MANIFEST.md (analogous to config.ts); Implementer re-runs to GREEN at 181/0.
+- Option B: Accept 1-test regression; Reviewer audits as MAJOR/MINOR; Implementer completes with 180/1.
 
 ## Round scope — operator-set (do NOT auto-redirect)
 
