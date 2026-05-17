@@ -1,6 +1,28 @@
 CURRENT-ROUND: R07
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
+
+## Reviewer → Memorial-Updater routing (R07; 2026-05-16)
+
+Reviewer report: `coordination/reviews/REVIEWER-REPORT-R07.md`
+
+Verdict: **26 PASS / 0 FAIL / 0 PARTIAL** across AC-1..AC-26 (all binding commands run by Reviewer).
+
+Findings: **0 CRITICAL / 2 MAJOR / 4 MINOR / 4 OBS** — see report for details.
+
+- MAJOR-1 — PR-F8 evidence matrix demonstrates ZERO empirical power on H₁ scenarios (AC-12 strong injection p_alt=0.5: 0/30 fires; AC-13 weak injection p_alt=0.1: 0/30 fires). Architect predicted 20-30 (AC-12) and 0-15 (AC-13). Root cause: single-window injection at w=100 doesn't accumulate ONS λ buildup → martingale property → no wealth. AC-8 demonstrates power against SUSTAINED elevation (30 windows). PR-F8 power-curve mandate per `coordination/NEXT-ROLE.md:101` empirically unmet. SPEC-design issue + algorithmic gap; not an Implementer failure.
+- MAJOR-2 — AC-11/12/13 functionally self-confirming (CROSS-PROJECT-MEMORIAL R09 pattern). Tests assert `firedCount === 0` where `0` is the OBSERVED value from running production. Future implementation FIX that produces nonzero power would FAIL these tests. Spec-authorized OBSERVED-binding (R06 OBS-1 precedent) was designed for narrow PRNG-drift cases, not order-of-magnitude prediction mismatches.
+- MINOR-1: AC-7 spec fixture deviation (Implementer tactical-fixed from `[2,3]` → `[2,3,0]` to preserve K=2 intent; documented inline; ideally would have HALTed + DIAGNOSTIC).
+- MINOR-2: AC-5/6 destructured `xw` tuple element unused.
+- MINOR-3: AC-15 length assertion uses `<=` instead of `===` (allows silent over-trimming).
+- MINOR-4: AC-16 comment "X=N=10" ambiguous.
+- OBS-1..OBS-4: wire-format collision edge case; `skipped_no_signals` not exposed in D11; `Math.min(...spread)` cost concern; Implementer "AC-12 binds FPR" reinterpretation comment.
+
+Routing rationale per CLAUDE-REVIEWER.md: `MAJOR or below → STATUS: MERGE-READY`. All 26 ACs technically pass per the spec's literal disposition. MAJOR findings warrant Memorial entries + future-round attention but do not block R07 merge.
+
+Cold-review boundary disclosure: Reviewer did NOT load `coordination/specs/Q-R07-SPEC-AUDIT.md` despite CLAUDE-REVIEWER.md listing it as load-bearing — strict-interpretation of "no logs / no diagnostics" to preserve adversarial independence on architect rationale. Operator may direct re-review with sidecar loaded if this affects MAJOR/MINOR dispositions.
+
+
 
 ## Architect → Implementer routing (R07; 2026-05-16)
 
