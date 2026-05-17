@@ -270,3 +270,38 @@ with a clear commit message.
 #   same false premise persisted at lines 24, 94, 103, 563, 592 in different phrasings; AC-R09-1
 #   verifier checked only the literal phrase "produces zero contamination flags"
 #   (REVIEWER MAJOR-1 + MINOR-2).
+
+# REINFORCED 2026-05-17 — When spec § Mechanism defines a quantitative formula by name (e.g.,
+#   `ratio = perShardCells_bytes / fleetBaseline_bytes`), pre-emit grilling MUST include a
+#   "formula vs implementation" cross-check: verify the test code implements the exact named
+#   formula OR explicitly documents the deviation and its rationale in the test. A formula
+#   reframing that is "defensible as a natural reading" but not acknowledged as a divergence
+#   from the spec § Mechanism named formula is a grilling failure. Gate: for every measurement-
+#   binding AC, compare spec § Mechanism's named formula expression to the test's arithmetic
+#   expression character-by-character before signing PASS on grilling. A +1 offset like
+#   (fleet+perShard)/fleet vs perShard/fleet is definitionally distinct even when the magnitude
+#   difference is rounding noise. Detected tessera R14 MINOR-1: test used
+#   (fleet+perShard)/fleet vs spec's perShard/fleet without acknowledging divergence.
+
+# REINFORCED 2026-05-17 — When an AC test computes its expected value via a production helper
+#   that the implementation calls internally (e.g., `expected = welfordMean(state).map(...)`
+#   where the implementation also calls `welfordMean(state)` internally), flag the self-
+#   confirming pattern in the AC. Require that at least one AC in the same behavioral cluster
+#   binds a LITERAL hand-traced expected value independent of the production helper. If a
+#   sibling AC already provides the literal binding, document the dependency explicitly (e.g.,
+#   "AC-N's literal [x,y] catches sign flip; AC-M relies on AC-N for directional correctness").
+#   Do not leave the dependency implicit — an audit that checks only AC-M in isolation will
+#   miss the self-confirming weakness. Detected tessera R14 MINOR-2: AC-6 expectedDelta used
+#   welfordMean on both sides; AC-1 literal [1,1] mitigated but dependency was undocumented.
+
+# REINFORCED 2026-05-17 — When spec § Mechanism specifies a quantitative bound for an AC (e.g.,
+#   "ratio ≤ 200... OR deviation documented if exceeded"), taking the deviation-documented path
+#   does NOT exempt the test from including a regression-line assertion. The test MUST include
+#   at least one bound assertion calibrated to the OBSERVED magnitude (e.g., `ratio < 5000` at
+#   an observed 1237.7×), not only an absolute byte-count guard on the raw measurement. Omitting
+#   all ratio-based assertions leaves future regressions undetected even when the spec "OR"
+#   clause is satisfied narratively. Gate: for any AC where spec § Mechanism states a numeric
+#   bound, verify a corresponding assertion at-or-near that bound or at the OBSERVED-magnitude
+#   regression line exists in the test before signing PASS on grilling. Detected tessera R14
+#   MINOR-3: no ratio bound assertion despite spec "ratio ≤ 200 OR deviation documented" clause;
+#   only `perShardBytes < 500_000_000` absolute guard asserted.
