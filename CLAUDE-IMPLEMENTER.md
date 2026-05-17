@@ -305,3 +305,14 @@ with a clear commit message.
 #   regression line exists in the test before signing PASS on grilling. Detected tessera R14
 #   MINOR-3: no ratio bound assertion despite spec "ratio ≤ 200 OR deviation documented" clause;
 #   only `perShardBytes < 500_000_000` absolute guard asserted.
+# REINFORCED 2026-05-17 — When filling a spec-template `<placeholder>` inside a structured
+#   output table (e.g., a lineage table row whose description references a count derived in a
+#   body section of the same file), transcribe the body's ACTUAL computed count, not a simpler
+#   stand-in. Gate before emitting any artifact with spec-template substitutions: locate the
+#   body section that computes each substituted value; confirm the table substitution matches the
+#   computed result exactly. A table that says `0` where the body says `468` is an internal
+#   inconsistency detectable by cross-reading two sections of the same file — the Reviewer WILL
+#   catch it. The AC-bound state-cell may still be correct, but lineage-row inconsistencies
+#   undermine the artifact's usefulness as a historical record. Detected tessera R15 MINOR-2:
+#   MEMORIAL.md lineage row #3 substituted `0` for methodology-class confirmations; body at
+#   MEMORIAL.md:1494 reads "39V / 468C"; caught by Reviewer as MINOR-2.

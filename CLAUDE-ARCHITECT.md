@@ -250,3 +250,29 @@ All unresolved decisions → open questions in the spec.
 #   MINOR-1: spec Mechanism primitive 10 and test/q13-e-bh-fdr.test.ts:58-59 name the Wald 3σ
 #   formula "Wilson upper bound"; caught by Reviewer; terminology inherited unchallenged from
 #   R11+R12 PR-F1/PR-F2 vocabulary.
+# REINFORCED 2026-05-17 — When specifying an anti-scope git-diff baseline for an AC (e.g.,
+#   `git diff <SHA>..HEAD --name-only`), use the SHA of the last commit immediately before
+#   the current round's work began, NOT the prior round's attestation HEAD. Memorial-Updater
+#   commits and operator-prep commits may land between the prior attestation HEAD and the first
+#   Implementer commit; those paths inflate the diff beyond the allowed-set and create false
+#   anti-scope violations. Gate at spec-emit: run `git log --oneline <prior-attestation>..HEAD`
+#   and verify every commit in that window belongs to the current round; if not, advance the
+#   baseline to the post-prep commit. Additionally: if the spec's halt conditions mandate creation
+#   of a specific file type (e.g., `coordination/diagnostics/DIAGNOSTIC-RNN-*.md`), that path
+#   MUST appear in the anti-scope AC's allowed-set, OR the halt condition must not mandate a
+#   separate file. An allowed-set that omits a file the spec itself mandates is a spec-internal
+#   contradiction the Implementer cannot resolve without a judgement call. Detected tessera R15
+#   MINOR-1: baseline `c8da715` did not account for R14 Memorial-Updater commit `3a1b7d0` and
+#   operator-prep commit `67b7b0a`; DIAGNOSTIC mandated by § 6(a) but absent from AC-20 allowed-set.
+# REINFORCED 2026-05-17 — When a spec contains prescriptions that trigger on the same condition
+#   (e.g., "if ≥1 MD-violation then AC-8 says HALT" AND "if ≥1 MD-violation then § 6(a) says
+#   proceed-with-DIAGNOSTIC"), resolve the contradiction before routing to Implementer. Gate at
+#   pre-emit grilling: scan every (halt-condition trigger, AC consequence) pair and verify no
+#   two prescriptions prescribe conflicting actions for the same trigger state. Fix: pick ONE
+#   rule (HALT → STATUS: ESCALATE, OR proceed-with-DIAGNOSTIC only) and apply it consistently
+#   in both the AC text and the halt-condition body — they must agree. An Implementer forced to
+#   choose the "more permissive" or "more defensible" reading is encountering a spec defect;
+#   any downstream consequence of the forced choice is Architect-attributable. Detected tessera
+#   R15 MINOR-3: AC-8 prescribed HALT when ≥1 Memorial-D violation derived; § 6(a) parenthetical
+#   prescribed proceed-with-DIAGNOSTIC for the same trigger; Implementer chose the parenthetical;
+#   spec-internal contradiction caught by Reviewer as MINOR-3.
