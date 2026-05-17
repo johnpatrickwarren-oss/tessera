@@ -361,7 +361,7 @@ test('R07 AC-15 — clean fleet 3-run bundle: fcp1State.fired===false; D12 fire_
   // n_ticks_contaminated=6 (2 ticks × 3 runs; origLen=8/run, curatedLen=6/run).
   // This binding documents the MCD's actual Stage-2a behavior on the clean alternating-pattern fixture.
   assert.strictEqual(result.decisions.D11!.output_summary.n_ticks_contaminated, 6,
-    'MCD flags 2 ticks per run on clean-fleet-v1 fixture: n_ticks_contaminated must be 6');
+    'MCD flags 2 ticks per run × 3 runs = 6 total contaminated ticks on clean-fleet-v1 fixture (empirically verified at R09; correcting R08 spec premise that claimed zero flags)');
   // Stage 2b does NOT fire: curated bundle runs are shorter only due to Stage 2a (MCD), not Stage 2b (FCP-1 drop).
   for (let i = 0; i < 3; i++) {
     const origLen = bundle.runs[i].signal_series.a.length;
