@@ -1,4 +1,4 @@
-// test/q14-pr-f5-storage.test.ts — R14 AC-8 through AC-10.
+// test/q14-pr-f5-storage.test.ts — R14 AC-8 through AC-10; R16 AC-R16-1/2.
 //
 // PR-F5 empirical storage profile measurement at synthetic N=1000 cluster.
 // Measures JSON serialization footprint of per_shard_cells vs fleet-aggregate
@@ -16,6 +16,10 @@
 // shard welford_state (n + mean[10] + m2[10×10] = 111 fields) dominates the fleet
 // baseline per cell. Architect pre-prediction footnote: "diagonal-only optimization
 // deferrable to Phase 1 SLICE 3+ if PR-F5 evidence justifies."
+//
+// R16 (AC-R16-1/2): d-parameterized re-measurement at d ∈ {10, 25, 50, 100}.
+// Uses single-shard proxy + N extrapolation (safe for all d; avoids OOM at d=100).
+// Tests the d-mismatch hypothesis: does the ratio approach 1.2-1.5× at high d?
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -165,4 +169,10 @@ test('R14 AC-10 — per-shard bytes scale linearly with N (ratio per-shard/singl
   console.log(`[PR-F5] Single-shard bytes: ${(singleShardBytes / 1024).toFixed(1)} KB`);
   console.log(`[PR-F5] ${N_SHARDS}-shard bytes: ${(allShardsBytes / 1024 / 1024).toFixed(1)} MB`);
   console.log(`[PR-F5] Scaling ratio: ${ratio.toFixed(1)} (expected ${N_SHARDS})`);
+});
+
+// ─── R16 AC-R16-1/2 — dimension-dependence table: overhead ratio at d ∈ {10,25,50,100} ──
+// RED: placeholder — d-parameterized measurement not yet implemented.
+test('R16 AC-R16-1/2 — d-parameterized overhead: ratio at d ∈ {10,25,50,100}', () => {
+  assert.fail('RED: d-parameterized measurement not yet implemented');
 });
