@@ -1,6 +1,84 @@
 CURRENT-ROUND: R10
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: REVIEWER
 STATUS: READY
+
+## Implementer → Reviewer routing (R10)
+
+**Attestation SHA:** (written after coordination chore commit)
+
+**Test results (OBSERVED — per R03 MINOR-4 reinforcement):**
+
+q10-per-shard-emission (new):
+  node --test test/q10-per-shard-emission.test.js → pass 11 / fail 0
+
+Pre-R10 baseline (10 files, all unchanged):
+  q01-vendoring-coverage: 3/0
+  q01-no-at-pin-deltas: 1/0
+  q01-schema-additions: 5/0
+  q02-schema-extension: 6/0
+  q03-warm-start-runtime: 13/0
+  q04-welford-stats: 11/0
+  q05-per-shard-runtime: 13/0
+  q06-baseline-pre-pass: 13/0
+  q07-fleet-correlated: 23/0
+  betting-e-process smoke: 5/0
+  Total: 93/0 (unchanged from R09 baseline)
+
+Grand total at GREEN: 104/0 (93 + 11)
+
+npm run typecheck: exit 0 (both RED and GREEN states confirmed)
+
+**RED commit:** f8243e9 — adds test/q10-per-shard-emission.test.ts only; tsc exits 1 with TS2305 (no exported member projectTierGatedOutputs).
+**GREEN commit:** fdaf0cb — modifies engine/per-shard/runtime.ts (Delta 2a/2b/2c) + engine/types/config.ts (Delta 1 JSDoc).
+
+**TDD discipline applied:** RED commit created and verified (tsc TS2305 confirmed) before GREEN implementation. Two-commit sequence per spec Implementer note 4 + AC-15.
+
+**AC-17 grep evidence (OBSERVED):**
+  grep -c "export function projectTierGatedOutputs" engine/per-shard/runtime.ts → 1
+  grep -c "welfordMean" engine/per-shard/runtime.ts → 3 (import + 2 JSDoc references + callsite; ≥ 2 ✓)
+  grep -c "welfordCovariance" engine/per-shard/runtime.ts → 5 (import + JSDoc + callsites; ≥ 2 ✓)
+
+**AC-19 grep evidence (OBSERVED):**
+  grep -c "R10 (SLICE 2b4) emission contract" engine/types/config.ts → 1 ✓
+  grep -c "projectTierGatedOutputs" engine/types/config.ts → 1 ✓
+  grep -c "Full runtime population semantics deferred to SLICE 2b" engine/types/config.ts → 0 ✓ (old text removed)
+
+**Halts:** None. No diagnostic files written. All spec/reality matches were tactical (no architectural decisions required).
+
+**Anti-scope fences honored:** welford.ts unchanged (R10-SAS-2), warm-start.ts unchanged (R10-SAS-3), mean_delta untouched (R10-SAS-4/5), no new files under engine/per-shard/ (R10-SAS-9), no schema type changes (R10-SAS-1).
+
+## Architect → Implementer routing (R10)
+
+**Spec:** `coordination/specs/Q-R10-SPEC.md` (full; read in full before any code).
+**Audit sidecar:** `coordination/specs/Q-R10-SPEC-AUDIT.md` (brainstorm rationale, decision rationale, pre-route discipline application, architect pre-predictions, R05 OQ-2 brainstorm re-evaluation, Q-R10 → Q-R11 sequencing). Implementer reads only the spec proper for the implementation; sidecar is for Memorial Updater + Reviewer reference.
+
+**Pre-R10 baseline (Architect-empirically-verified at HEAD `640c8e8` AND re-verified at HEAD `4869f65` at R10 spec-emit time via `node --test`):**
+- q01-vendoring-coverage: 3/0
+- q01-no-at-pin-deltas: 1/0
+- q01-schema-additions: 5/0
+- q02-schema-extension: 6/0
+- q03-warm-start-runtime: 13/0
+- q04-welford-stats: 11/0
+- q05-per-shard-runtime: 13/0
+- q06-baseline-pre-pass: 13/0
+- q07-fleet-correlated: 23/0
+- betting-e-process smoke: 5/0
+- **Total: 93/0**
+
+Architect verified `npm run typecheck` exit 0 at HEAD `4869f65` at spec-emit time.
+
+**R10 expected at GREEN:** prior 10 file counts unchanged + new q10 file at 11/0 (structurally pre-determined per spec AC-14). Total: 104/0.
+
+**Implementer action sequence:**
+1. Read `coordination/specs/Q-R10-SPEC.md` in full.
+2. RED commit: create `test/q10-per-shard-emission.test.ts` per spec § Per-file pseudocode Delta 3. Verify `npm run typecheck` fails at TS2305 (no exported member `projectTierGatedOutputs`) per Implementer note 4.
+3. GREEN commit: apply Delta 1 (config.ts JSDoc) + Delta 2 (runtime.ts emission helper + integration) per spec § Per-file pseudocode. Verify `npm run typecheck` exit 0 AND `node --test test/q10-per-shard-emission.test.js` pass 11 / fail 0.
+4. Re-run all 10 pre-R10 test files; verify counts unchanged (AC-13). Report OBSERVED counts (NOT pre-stated) per R03 MINOR-4 reinforcement.
+5. Coordination chore sequence per R14 (below).
+
+**HALT discipline (R08 MAJOR-1 reinforcement, active):** Any spec premise that fails empirically requires DIAGNOSTIC + HALT, regardless of resolution clarity. The "resolution is obvious" exception is NOT in play — always write DIAGNOSTIC first.
+
+**Attestation accuracy (R03 + R05 MINOR-3 reinforcements, active):** Report OBSERVED test counts; never claim a tactical choice (e.g., import form) that diverges from the committed code.
 
 ## Round scope — operator-set (do NOT auto-redirect)
 
