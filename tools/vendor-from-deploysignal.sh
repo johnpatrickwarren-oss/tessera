@@ -60,10 +60,10 @@ if [[ ! -f "$source_abs" ]]; then
   exit 1
 fi
 
-# Sandbox: target must be under engine/ or test/
+# Sandbox: target must be under engine/ or test/ or tools/ (tools/ added at R06 for baseline curation toolchain vendoring)
 case "$target_path" in
-  engine/*|test/*) ;;
-  *) echo "ERROR: Target must be under engine/ or test/: ${target_path}" >&2; exit 1 ;;
+  engine/*|test/*|tools/*) ;;
+  *) echo "ERROR: Target must be under engine/ or test/ or tools/: ${target_path}" >&2; exit 1 ;;
 esac
 
 # Create target directory if needed

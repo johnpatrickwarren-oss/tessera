@@ -66,6 +66,10 @@ const AT_PIN_FILES: Array<{ tessera: string; source: string }> = [
   { tessera: 'engine/o0/lifecycle-events.ts',                      source: 'engine/o0/lifecycle-events.ts' },
   { tessera: 'engine/o0/reversibility-source.ts',                  source: 'engine/o0/reversibility-source.ts' },
   { tessera: 'engine/o0/reversibility-translator.ts',              source: 'engine/o0/reversibility-translator.ts' },
+  // Tessera SLICE 4 (R06) — baseline curation toolchain
+  { tessera: 'tools/curate-baseline-pipeline.ts',                  source: 'tools/curate-baseline-pipeline.ts' },
+  { tessera: 'tools/calibrators/_shared.ts',                       source: 'tools/calibrators/_shared.ts' },
+  { tessera: 'tools/calibrators/family-c.ts',                      source: 'tools/calibrators/family-c.ts' },
 ];
 
 test('Q1 AC-7 — every vendored-at-pin file is byte-identical to source modulo header', async () => {
