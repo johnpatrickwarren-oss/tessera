@@ -219,3 +219,11 @@ with a clear commit message.
 #   this covers narrative-form tactical-choice accuracy. Detected R05: MEMORIAL stated "top-level
 #   import (selected for idiomatic consistency)"; committed code at test/q05:251 uses dynamic
 #   `await import(...)` (REVIEWER MINOR-3).
+
+# REINFORCED 2026-05-16 — When extending a hard-coded path list (AT_PIN_FILES,
+#   VENDORED_AT_PIN_PATHS, or any similar enumeration), update ALL header comment claims that
+#   state counts ("31 files", "compilation deps (2)") in the same commit. The stale comment
+#   is a self-describing verification claim — leaving it stale forces the Reviewer to do manual
+#   arithmetic to detect the discrepancy. Detected R06: AT_PIN_FILES extended from 31 to 38
+#   entries (added 3 new tools + corrected 4 compilation deps); header at lines 7-9 still said
+#   "31 files (compilation deps 2)" (REVIEWER MINOR-2).
