@@ -1,6 +1,38 @@
 CURRENT-ROUND: R21
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: REVIEWER
 STATUS: READY
+Inputs: coordination/specs/Q-R21-SPEC.md (+ Q-R21-SPEC-AUDIT.md sidecar);
+        REVIEWER-REPORT-R21.md target;
+        Implementer attestation: see attestation block below
+
+## Implementer attestation (chore-A)
+
+- GREEN SHA: 78fa38b (feat(R21): GREEN — fleet-merge consumer layer)
+- RED SHA: 4274d9f (test(R21-RED): q21 fleet-verdict-consumer stubs)
+- MERGE-READY chore-A SHA: TBD (substituted in chore-B per spec § 4.5-4.6)
+- `npx tsc --noEmit` → exit 0 (AC-R21-9 PASS)
+- `node --test test/*.test.js` → tests 200 / pass 200 / fail 0 (AC-R21-10 PASS)
+- Per-file OBSERVED counts:
+    betting-e-process-class-dispatch: 5
+    q01-no-at-pin-deltas: 1, q01-schema-additions: 5, q01-vendoring-coverage: 3
+    q02-schema-extension: 6, q03-warm-start-runtime: 13, q04-welford-stats: 11
+    q05-per-shard-runtime: 13, q06-baseline-pre-pass: 13, q07-fleet-correlated: 23
+    q10-per-shard-emission: 11, q11-hierarchical-e-value-combination: 18
+    q12-fleet-merged-detector-surfaces: 16, q13-e-bh-fdr: 14
+    q14-compiled-config-loader: 6, q14-mean-delta: 7, q14-pr-f5-storage: 4
+    q16-pr-f5-investigation: 2, q18-phase2-slice1-topology-substrate: 10
+    q20-verdict-grouper-cluster-event-scope: 11
+    q21-fleet-verdict-consumer: 8 (NEW — GREEN commit)
+    Total: 200 / 0 (baseline 192 + 8 new)
+- AC-R21-1 PASS: ingest_results.length===N (test/q21:35)
+- AC-R21-2 PASS: cluster_event_id propagated to all shards (test/q21:53)
+- AC-R21-3 PASS: absent cluster_event_id → legacy mode (test/q21:74)
+- AC-R21-4 PASS: empty per_shard_verdicts → [], no throw (test/q21:89)
+- AC-R21-5 PASS: terminal=true closes all groups (test/q21:100)
+- AC-R21-6 PASS: index-order preservation (test/q21:118)
+- AC-R21-7 PASS: rollup 3 distinct groups for 3 deploys (test/q21:133)
+- AC-R21-8 PASS: empty-string query short-circuits to [] (test/q21:152)
+- AC-R21-11: added in chore-B with chore-A SHA substituted
 
 ## Round-scope directive
 
