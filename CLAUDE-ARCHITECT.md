@@ -367,3 +367,15 @@ All unresolved decisions → open questions in the spec.
 #   which AC is in the 'nearest' branch." Detected tessera R25 MINOR-2 (counter-arm
 #   `?? 64` default at counter-rate-transform.ts:119 unbound; gauge AC-R25-2 returns at
 #   line 107-115 before reaching line 119; all counter ACs explicitly pass counter_width).
+# REINFORCED 2026-05-18 — The § 5.3 acknowledged-gap section must enumerate EVERY branch
+#   in the implementation that lacks a binding AC, not just the branches the Architect is
+#   actively aware of during spec-write. When spec pseudocode (§ 4.x) includes a guard or
+#   reject branch that enforces an out-of-scope input (e.g., multi-bracket hostlist rejection
+#   at slurm-source.ts:164-166), and that branch does not appear in the § 1.6 F-table and
+#   is not bound by any listed AC, it MUST be added to § 5.3 with non-load-bearing rationale
+#   + a note on what mutation would produce (silently malformed output rather than test
+#   failure). The Implementer is faithful to the pseudocode; the coverage-acknowledgment gap
+#   belongs to the Architect. Procedure: after completing the § 1.6 F-table, scan § 4.1
+#   pseudocode for every `if`/`throw`/`return` guard; for each, either map it to a F-table
+#   entry or add it to § 5.3 as acknowledged-not-bound. Detected tessera R28 OBS-1
+#   (multi-bracket branch at slurm-source.ts:164-166 absent from § 1.6 F-table and § 5.3).
