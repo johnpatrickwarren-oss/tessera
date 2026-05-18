@@ -70,8 +70,8 @@ Target AC count: 12-16 (slightly more than WU-00 because of PR-F6 4-cell matrix 
 Same set as WU-00 cluster — cross-project rules + Tessera-local CLAUDE-*.md REINFORCEMENTS + Coordinator-level cluster-fragment discipline.
 
 **Additionally for this cluster:**
-- **PR-F6 hybrid Reviewer mandate** per SCOPING-MEMO § 2.3: at this cluster's Reviewer stage, run hybrid Reviewer (Opus + Sonnet + Merger per `run-pipeline.sh:1079-1115` `dispatch_hybrid_reviewer`). This is the FIRST tessera invocation of hybrid Reviewer; preserve the Opus-Sonnet complementary-bias pattern documented in `coordination/EVAL-SONNET-REVIEWER-2026-05-15.md`.
-- **External literature citation discipline:** every external citation (Meta H100 SDC; MS/Google postmortems) must include URL + retrieval date + verbatim quote (architect-side responsibility; reviewer audits).
+- **PR-F6 evidence-package mandate** per SCOPING-MEMO § 2.3 + § 3 SLICE 3.C row: this cluster PRODUCES the 4-cell PR-F6 evidence matrix + external literature citation package + sparse-topology degradation evidence. The PR-F6 **hybrid Reviewer audit** itself fires at **SLICE 3 close** (WU-05), not at this cluster — per SCOPING-MEMO § 3 SLICE 3.C row final sentence "**Hybrid Reviewer pair-review-style at SLICE 3 close.**" This cluster runs standard full-tier Reviewer (Opus); the hybrid pass at WU-05 close-walk re-audits this cluster's evidence package + WU-00's L0-contract surface as the consolidated SLICE 3 deliverable. (Hybrid Reviewer is implemented at `run-pipeline.sh:1079-1115` `dispatch_hybrid_reviewer`; canonically fires at audit-tier rounds — WU-05 close-walk is audit-tier per WAVE-PLAN-02 Step 6.)
+- **External literature citation discipline:** every external citation (Meta H100 SDC; MS/Google postmortems) must include URL + retrieval date + verbatim quote (architect-side responsibility; reviewer audits). The hybrid Reviewer at WU-05 re-validates citation evidence under both Opus + Sonnet readings.
 
 ## Cluster context (where this WU sits)
 
@@ -82,11 +82,11 @@ Same set as WU-00 cluster — cross-project rules + Tessera-local CLAUDE-*.md RE
 - No other Wave-2+ WU depends on this WU directly.
 
 **Wave gate criteria** (Coordinator runs at Wave 1 close):
-- Reviewer report (hybrid: Opus + Sonnet + Merger) MERGE-READY
+- Reviewer report (standard full-tier Reviewer at this cluster — Opus) MERGE-READY
 - 0 CRITICAL findings
-- All 4 PR-F6 cells PASS
+- All 4 PR-F6 cells PASS (evidence package complete; hybrid Reviewer audit deferred to WU-05 SLICE 3 close-walk per SCOPING-MEMO § 3 SLICE 3.C row)
 - `correlational_not_causal: true` wire-format invariant preserved (asserted at wire boundary)
-- External literature citation evidence package complete (URLs + retrieval dates + verbatim quotes)
+- External literature citation evidence package complete (URLs + retrieval dates + verbatim quotes; re-audited at WU-05 hybrid Reviewer pass)
 - LS-4 sparse-topology degradation handled gracefully (or ESCALATED with bounded question if BFS body modification proves load-bearing)
 
 ## Halt conditions for this cluster (escalate to Coordinator)
