@@ -367,3 +367,26 @@ All unresolved decisions → open questions in the spec.
 #   which AC is in the 'nearest' branch." Detected tessera R25 MINOR-2 (counter-arm
 #   `?? 64` default at counter-rate-transform.ts:119 unbound; gauge AC-R25-2 returns at
 #   line 107-115 before reaching line 119; all counter ACs explicitly pass counter_width).
+# REINFORCED 2026-05-18 — When spec § 9.x grilling sweep notes "pattern also matches
+#   comments / JSDoc" for an AC that guards a critical invariant, the grilling must complete
+#   a discriminability check — not merely note the ambiguity. Specifically: ask "would the
+#   assertion still PASS if only the comment/JSDoc occurrence is present and the
+#   type-declaration occurrence is removed?" If yes, the assertion is non-discriminating and
+#   must be strengthened (regex with line anchoring, specific line-range read, etc.) before
+#   the spec is emitted. A note that says "intentional, since the literal is in the type
+#   declaration body" without validating that the assertion CAN distinguish the two
+#   occurrences is an incomplete grilling gate. Detected tessera R30 MINOR-1 (spec § 9.2 R03
+#   sweep noted comment-match for AC-R30-15 and characterized it as intentional but did not
+#   compute that `verdict.includes(...)` would pass even with engine/types/verdict.ts:289
+#   removed while :272 JSDoc is preserved; Reviewer cold-caught this).
+# REINFORCED 2026-05-18 — When spec § 9.x R06 opts-coverage sweep claims "all opts fields
+#   covered" for a constructor with a multi-level fallback chain (`a ?? b ?? c`), trace the
+#   coverage through the FULL data flow — including the values returned by any function called
+#   in the constructor body before the chain is evaluated. If that function always provides a
+#   defined non-nullable value for field `b`, then the third operand `c` is structurally dead
+#   and the "covered" claim is inaccurate for that operand. The sweep must ask: "under what
+#   actual inputs does each `??` operand fire?" — not merely list the opts fields syntactically.
+#   Detected tessera R30 MINOR-2 (spec § 9.2 R06 claim "all opts fields covered" for
+#   NvlinkTopologySource constructor did not trace that parseNvlinkStatus always defaults
+#   snapshot.source_id/source_version; constructor third-operand is dead code; AC-R30-9(c)
+#   passes via parser default, not the constructor branch the spec claimed was covered).
