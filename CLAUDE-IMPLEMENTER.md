@@ -566,3 +566,23 @@ with a clear commit message.
 #   leave them in silent disagreement. Detected tessera R26 MINOR-2 (earliest/latest_event_ts
 #   aggregation at common-mode-attribution.ts:186-191 iterates all touches rather than
 #   per-distinct-member as the module docstring and spec §3.1 both prescribe).
+# REINFORCED 2026-05-18 — When an AC literal's Then column specifies equality (e.g.,
+#   "metadata.host equal to the source host name", "value is exactly Y"), the bound test
+#   MUST use strict-equality (`assert.strictEqual(actual, expected)`) — NOT a structural
+#   check (`typeof x === 'string' && x.length > 0`, `includes('x')`, truthy). Gate: before
+#   committing chore-A, for each AC, read the Then column word-for-word and apply the
+#   mutation test: "if production returned a different-but-structurally-valid value (e.g., a
+#   non-empty wrong string), would my assertion still pass?" If yes, strengthen to equality.
+#   Detected tessera R29 MINOR-1 (AC-R29-6 non-empty-string check instead of equality to
+#   source host name). Third Wave 2 cluster occurrence: R28 MINOR-1, R30 MINOR-1, R29 MINOR-1.
+# REINFORCED 2026-05-18 — Deviations from spec § 3.2 binding-command call signatures are NOT
+#   covered by the § 7.2 TACTICAL AUTONOMY clause (which applies only to § 3.1 algorithm
+#   idioms). When the installed runtime (e.g., Node.js v25) requires a change to the
+#   prescribed execFileSync options (e.g., adding env: subEnv to strip recursive-test-
+#   detection vars), make the deviation visible to cold readers via either: (a) a DIAGNOSTIC-
+#   Rxx-<topic>.md file explaining the environment mismatch + the workaround, or (b) at
+#   minimum an inline code comment cross-referencing spec § 3.2 and explaining why the
+#   prescribed form does not work in the current runtime. Recording only in MEMORIAL is
+#   insufficient — a cold reader of spec + source alone cannot surface the deviation.
+#   Detected tessera R29 MINOR-3 (env: subEnv strip for Node.js v25 documented only in
+#   MEMORIAL, not in DIAGNOSTIC or code comment).
