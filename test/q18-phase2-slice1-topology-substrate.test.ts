@@ -151,6 +151,13 @@ test('AC-R18-10: Anti-scope — git diff b640c6c..HEAD --name-only ⊆ allowed-s
     'coordination/specs/Q-R18-SPEC-AUDIT.md',
     'coordination/NEXT-ROLE.md',
     'coordination/MEMORIAL.md',
+    // Operator-side artifacts added during R18 ESCALATE → Option A unblock cycle:
+    'coordination/OVERNIGHT-LOG-2026-05-17.md',
+    'coordination/diagnostics/DIAGNOSTIC-R18-no-at-pin-deltas-verdict.md',
+    // Option A fix (operator dispositioned the ESCALATE bounded question):
+    'test/q01-no-at-pin-deltas.test.ts',
+    'test/q01-no-at-pin-deltas.test.js',
+    'coordination/VENDORING-MANIFEST.md',
   ]);
   const diff = execSync('git diff b640c6c..HEAD --name-only', { encoding: 'utf-8' });
   const touched = diff.split('\n').filter((p) => p.length > 0);
