@@ -266,3 +266,39 @@ test('AC-R29-12 / node --test count binding-command — pre-R29 files yield 243/
   assert.strictEqual(parseInt(passMatch[1], 10), 241, `expected pass=241, got ${passMatch[1]}`);
   assert.strictEqual(parseInt(failMatch[1], 10), 2, `expected fail=2, got ${failMatch[1]}`);
 });
+
+// AC-R29-13: Anti-scope forward-protection (chore-B)
+// Per R20/R21/R22/R23/R25/R26 precedent. Uses execFileSync (NOT execSync) per R26 MINOR-1 reinforcement.
+test('AC-R29-13: anti-scope forward-protection (chore-B)', () => {
+  const CHORE_A_SHA = '778cff8';
+
+  const ALLOWED_SET = new Set([
+    'coordination/specs/Q-R29-SPEC.md',
+    'coordination/specs/Q-R29-SPEC-AUDIT.md',
+    'coordination/NEXT-ROLE.md',
+    'coordination/MEMORIAL.md',
+    'engine/topology/k8s-source.ts',
+    'test/q29-k8s-adapter.test.ts',
+    'test/_substrate/k8s-nodelist-fixture-full.json',
+    'test/_substrate/k8s-nodelist-fixture-sparse-no-region.json',
+    'test/_substrate/k8s-nodelist-fixture-sparse-no-gpu.json',
+    'test/_substrate/k8s-nodelist-fixture-empty.json',
+  ]);
+  // Conditional DIAGNOSTIC carve-out per spec § 2.5 + R25 MAJOR-2 reinforcement.
+  const DIAGNOSTIC_REGEX = /^coordination\/diagnostics\/DIAGNOSTIC-R29-.+\.md$/;
+
+  const diffOutput = execFileSync(
+    'git',
+    ['diff', `${CHORE_A_SHA}..HEAD`, '--name-only'],
+    { encoding: 'utf8' },
+  );
+
+  const paths = diffOutput.split('\n').filter((p) => p.length > 0);
+  const violations = paths.filter((p) => !ALLOWED_SET.has(p) && !DIAGNOSTIC_REGEX.test(p));
+
+  assert.strictEqual(
+    violations.length,
+    0,
+    `post-chore-A modification outside allowed-set: ${violations.join(', ')}`,
+  );
+});
