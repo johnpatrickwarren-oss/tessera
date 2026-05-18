@@ -1,5 +1,5 @@
 CURRENT-ROUND: R22
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Round-scope directive
@@ -109,3 +109,55 @@ R22 is audit-tier; most decisions are inherited. The Architect's S2 spec should 
 | HEAD | `e23e260` (R21 Memorial Updater outputs) |
 | Test count | 201 / 0 |
 | CLAUDE-IMPLEMENTER.md | 35 lines (consolidation flag) |
+
+---
+
+## R22 Implementer attestation (chore-A)
+
+**Binding commands (OBSERVED):**
+- `npx tsc -p tsconfig.test.json` → exit 0 (AC-R22-6)
+- `node --test test/*.test.js` → tests 203 / pass 203 / fail 0 (AC-R22-7)
+
+**Per-AC citations (test() declaration lines, verified by grep):**
+
+| AC | File:Line | Disposition |
+|---|---|---|
+| AC-R22-1 | `coordination/PHASE-2-SLICE-2-CLOSE-WALK.md` | doc created; 6-section structure present |
+| AC-R22-2 | `test/q20-verdict-grouper-cluster-event-scope.test.ts:4-6` | header corrected — AC-R20-12 reclassified as runtime test |
+| AC-R22-3 | `test/q21-fleet-verdict-consumer.test.ts:195` | dedup-guard structural binding added |
+| AC-R22-4 | `test/q21-fleet-verdict-consumer.test.ts:225` | short-circuit structural binding added |
+| AC-R22-5 | `test/q01-no-at-pin-deltas.test.ts:8` | stale formula corrected to 36 files |
+| AC-R22-6 | binding command | `npx tsc -p tsconfig.test.json` → exit 0 |
+| AC-R22-7 | binding command | `node --test test/*.test.js` → 203/0 |
+| AC-R22-8 | `test/q21-fleet-verdict-consumer.test.ts` (chore-B) | SHA-pinned anti-scope diff; chore-A SHA substituted at chore-B |
+
+**Per-file OBSERVED test counts (baseline 201 → post-R22 203):**
+
+| File | Pass |
+|---|---|
+| betting-e-process-class-dispatch.test.js | 5 |
+| q01-no-at-pin-deltas.test.js | 1 |
+| q01-schema-additions.test.js | 5 |
+| q01-vendoring-coverage.test.js | 3 |
+| q02-schema-extension.test.js | 6 |
+| q03-warm-start-runtime.test.js | 13 |
+| q04-welford-stats.test.js | 11 |
+| q05-per-shard-runtime.test.js | 13 |
+| q06-baseline-pre-pass.test.js | 13 |
+| q07-fleet-correlated.test.js | 23 |
+| q10-per-shard-emission.test.js | 11 |
+| q11-hierarchical-e-value-combination.test.js | 18 |
+| q12-fleet-merged-detector-surfaces.test.js | 16 |
+| q13-e-bh-fdr.test.js | 14 |
+| q14-compiled-config-loader.test.js | 6 |
+| q14-mean-delta.test.js | 7 |
+| q14-pr-f5-storage.test.js | 4 |
+| q16-pr-f5-investigation.test.js | 2 |
+| q18-phase2-slice1-topology-substrate.test.js | 10 |
+| q20-verdict-grouper-cluster-event-scope.test.js | 11 |
+| q21-fleet-verdict-consumer.test.js | 11 |
+| **Total** | **203** |
+
+Delta: +2 (q21: 9 → 11; AC-R22-3 at :195, AC-R22-4 at :225).
+
+**Chore-A SHA:** see git log after this commit; AC-R22-8 test substitutes it at chore-B time.
