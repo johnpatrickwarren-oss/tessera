@@ -568,3 +568,61 @@ R20 closed cleaner than R18 (4 MINOR) or R19 (4 MAJOR cluster) because:
 (Entries appended when R21 closes.)
 
 ---
+
+## R21 — Phase 2 SLICE 2.B: fleet-merge consumption layer (autonomous; full tier; late-evening session)
+
+**Completed:** 2026-05-17 23:09:43 (pipeline ~49 min wall-clock; clean chain — no ESCALATE).
+**Verdict:** **MERGE-READY · 0 CRITICAL · 0 MAJOR · 4 MINOR · 4 OBS · 11/11 ACs PASS** · 201/0 tests.
+**Streaks:** 20-round 0-CRITICAL (R02-R21); **2 consecutive full-tier rounds with 0 MAJOR (R20+R21)**; 16-round RED→GREEN TDD (R04-R21); 13-round Reviewer right-reasons-audit (R08-R21).
+**Commits:** `4274d9f` (RED) → `78fa38b` (GREEN) → `a5cae6d` (chore-A MERGE-READY) → `d313e80` (chore-B + spec sweep) → `e23e260` (Memorial Updater).
+**Reinforcements:** +2 ARCH + 2 IMPL (now 21 ARCH + 35 IMPL + 3 COMMON + 1 REVIEWER). **CLAUDE-IMPLEMENTER.md at 35 lines — consolidation flag re-issued.**
+
+### Deliverables landed
+
+✅ **NEW module: `engine/fleet/verdict-consumer.ts`** (Tessera-original; Approach A from architect brainstorm). Exports `FleetTickInput`, `FleetTickIngestResult`, `ClusterEventRollup`, `fleetTickIngest()`, `rollupByClusterEvent()`. Architect picked Approach A over modifying R11/R12/R13 fleet-math files — preserves vendored-at-pin on combine.ts/detectors.ts/e-bh.ts (no new vendored-with-deltas transitions; no two-step maintenance needed).
+✅ **R20 VerdictGrouper contract** consumed as the fleet-merge consumer surface — round-trip integration validated through 8 new q21 test bindings + 1 anti-scope diff binding + chore-B SHA-pin.
+✅ **Anti-scope clean** — `git diff 62e28d7..a5cae6d --name-only` = 4 paths ⊆ 8-entry allowed-set. NO modifications to engine/verdict-groups.ts, engine/fleet/{combine,detectors,e-bh}.ts, engine/types/verdict.ts, any existing test file, or vendoring manifests.
+
+### The 4 MINORs (all design-level; methodology absorbs)
+
+| # | Role | Class | Summary |
+|---|---|---|---|
+| 1 | ARCHITECT | spec-commit-sequencing | Q-R21-SPEC.md + Q-R21-SPEC-AUDIT.md uncommitted before chore-A (a5cae6d); swept into Implementer chore-B (d313e80) instead. Deviation from R20 precedent. |
+| 2 | ARCH + IMPL | branch-binding coverage | AC-R21-7 (3 distinct deploys → 3 distinct groups) does NOT exercise the `seen_group_ids.has()` dedup guard at verdict-consumer.ts:87-94 — guard is structurally unbound. |
+| 3 | ARCH + IMPL | branch-binding coverage | AC-R21-8 (empty-string short-circuit) does NOT disambiguate from strict-equality filter — short-circuit at verdict-consumer.ts:77-79 is structurally unbound. |
+| 4 | IMPLEMENTER | line-citation-drift | NEXT-ROLE.md attestation cited test line numbers off by ±1-5. **THIRD tessera occurrence (R03/R18/R21) — crosses cross-project 3-occurrence threshold; rule derived in CROSS-PROJECT-MEMORIAL.md.** |
+
+### Disposition (autonomous per late-evening authority)
+
+- **No ESCALATE.** All 4 MINORs are documentation/coverage-level; no behavioral impact; methodology absorbs.
+- **Carry-forward to R22:** MINOR-1 (spec-commit-sequencing applies to R22 itself); MINOR-2 + MINOR-3 (in-passing test additions); MINOR-4 (attestation discipline — already cross-project rule).
+- **CLAUDE-IMPLEMENTER.md at 35 lines — consolidation flag persistent.** Deferred to operator-triggered `scripts/consolidate-reinforcements.sh`; R22 Memorial-Updater will note again.
+- **No new TQ items.**
+
+### Why R21 was clean (2nd consecutive 0-MAJOR full-tier round)
+
+- Architect chose Approach A (NEW module) over modifying inherited fleet-math files — sidestepped vendored-with-deltas entirely; zero new manifest churn
+- R20 anti-scope SHA-anchor + vendored-with-deltas patterns applied automatically (already in standing protocol)
+- 11 ACs ≤ split-discipline target — Reviewer could audit thoroughly
+- R20 reinforcements (e.g., § 5 preamble cross-check) functioned correctly in R21 spec
+
+---
+
+## R22 — Phase 2 SLICE 2 close-walk + R20/R21 MINOR cleanup (autonomous; audit tier; late-evening session FINAL ROUND)
+
+**Launching now per late-evening overnight authority. HARD STOP follows R22 per chain plan (SLICE 2 close milestone).**
+
+**Pre-approved scope (5 deliverables; 8 ACs):**
+1. `coordination/PHASE-2-SLICE-2-CLOSE-WALK.md` (NEW; mirrors R19's PHASE-2-SLICE-1-CLOSE-WALK structure)
+2. q20 file-header correction (R20 MINOR-1)
+3. q21 dedup-guard test row added (R21 MINOR-2 structural binding)
+4. q21 short-circuit test row added (R21 MINOR-3 structural binding)
+5. q01 file-header arithmetic refresh (R20 MINOR-2)
+
+**Pre-authorized test-file touches** (explicit anti-scope authorization to avoid R19 4-MAJOR incident pattern): q20 header lines 4-6 only; q21 APPEND new rows only; q01 header lines 7-8 only.
+
+**Anti-scope:** zero engine/* modifications; zero pre-R22 AC binding modifications; zero new vendored-with-deltas; SLICE 3+ surfaces fenced.
+
+(Entries appended when R22 closes.)
+
+---
