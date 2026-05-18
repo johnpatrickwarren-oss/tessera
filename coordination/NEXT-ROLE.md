@@ -1,74 +1,84 @@
-CURRENT-ROUND: R19
-NEXT-ROLE: OPERATOR (Phase 2 SLICE 1 milestone reached; awaiting John's review)
-STATUS: PHASE-2-SLICE-1-CLOSED — evening-overnight chain complete; HARD STOP
+CURRENT-ROUND: R20
+NEXT-ROLE: ARCHITECT
+STATUS: READY
 
-## Read this first (in order)
+## Round-scope directive
 
-1. **`coordination/OVERNIGHT-LOG-2026-05-17.md`** — full evening chronology. **Morning triage queue at top** has TQ-4 (MEDIUM — R19 4-MAJOR discipline event). TQ-1/TQ-3 closed earlier; TQ-2 still LOW.
-2. **`coordination/PHASE-2-SLICE-1-CLOSE-WALK.md`** (15 KB; R19 Deliverable 1) — Phase 2 SLICE 1 architectural-assessment retrospective; Phase 2 SLICE 2 entry framing under each operator disposition.
-3. **`coordination/reviews/REVIEWER-REPORT-R19.md`** for full depth on the 4-MAJOR cluster (single originating cause: Implementer anti-scope violation on test/q18 modification).
+**R20 = Phase 2 SLICE 2 — first round.**
 
-## Evening-overnight chain summary
+SLICE 2 scope per `coordination/SCOPING-MEMO-v0.3.md` § 2.3 row "Phase 2 SLICE 2" (2-3 Q-cycle estimate; this is round 1 of that estimate):
 
-Three rounds completed: R17 + R18 + R19. **17-round 0-CRITICAL streak (R02-R19)** preserved.
+> Outer aggregator extending vendored L3b VerdictGroup aggregator with cluster_event_id scope. Fleet-merge consumption layer. Per-shard verdict aggregation contract with `cluster_event_id` propagation. **VerdictGroup scope re-architecture cost dominates this slice.**
 
-| Round | Scope | Verdict |
-|---|---|---|
-| R17 | TQ-1 (β) pitch-revise + shard definition + R10 MINOR-1 | MERGE-READY 0/0/3/4 · 10/10 ACs · 171/0 |
-| R18 | Phase 2 SLICE 1 (ESCALATE → operator A → unblock → MERGE-READY) | MERGE-READY 0/0/4/5 · 12/12 ACs · 181/0 |
-| R19 | Phase 2 SLICE 1 close-walk + R18 MINOR cleanup | MERGE-READY (rule) 0/**4**/4/4 · 9 ACs · 181/0 |
+R18 (Phase 2 SLICE 1) landed the type-layer substrate: `VerdictGroup.cluster_event_id?: string` is in place but **non-load-bearing**. R20 SLICE 2 makes it load-bearing.
 
-**Aggregate:** 0 CRITICAL · 4 MAJOR · 11 MINOR · 13 OBS across 3 rounds.
+The R20 spec should identify which SLICE 2 sub-goals fit in one round vs which deferred to R21 / R22. Recommendation: scope re-architecture of the aggregation contract is the dominant cost; consider splitting fleet-merge consumption layer to a later slice round if R20 spec scope exceeds ~12 ACs.
 
-## TQ-4 needs your eyes (the meta-event of R19)
+**Tier: full.** Architect MUST run pre-emit grilling + cross-section consistency pass + OBSERVED-binding scope. Justification: A4 (novel data-model semantics for composite cluster-event scope) + A6 (blast-radius on `engine/verdict-groups.ts` consumers — every existing inherited consumer of VerdictGroup grouping).
 
-R19 Implementer modified `test/q18-phase2-slice1-topology-substrate.test.ts:145` — explicitly R19 anti-scope target — to pin AC-R18-10's diff range to R18 MERGE-READY SHA `9012faa` instead of HEAD. The change is **architecturally correct** (without it, AC-R18-10 would false-fail every subsequent round because the diff range grows). But the **process was wrong** (anti-scope said don't touch; R08 reinforcement says HALT + DIAGNOSTIC for spec-internal factual errors regardless of resolution clarity).
+## Inputs for next role (Architect)
 
-The methodology caught it: 4 MAJORs surfaced (anti-scope + halt-discipline + test-value regression + MEMORIAL self-exoneration); +4 IMPL + +2 COMMON reinforcements landed. The Reviewer's discipline detection worked exactly as designed.
+**Read in order:**
 
-**My recommendation (in OVERNIGHT-LOG TQ-4):** (α) + (γ) — accept the fix (reverting causes more harm than the violation); capture lessons (already done by Memorial Updater); retroactively note in PHASE-2-SLICE-1-CLOSE-WALK or v0.3 amendment that future SLICE specs should anchor anti-scope diff-range checks to round-final-SHA, not HEAD.
+1. **`coordination/PRD.md`** — thin PRD; FR-E3a (cross-shard correlation outer aggregator), US-01, AC-P4.
+2. **`coordination/SCOPING-MEMO-v0.3.md`** — canonical scope. Specifically:
+   - § 2.3 Phase 2 Extension 3 — full scope of cluster_event_id semantics
+   - § 2.3 "VerdictGroup scope re-architecture" sub-section (around line 221) — the four bullets on what re-scoping touches
+   - § 3 Q-cycle estimate table — SLICE 2 row (line 345)
+   - § 9 vendoring policy (relevant if `engine/verdict-groups.ts` needs deltas)
+   - R17 [R17 AMENDMENT] storage-ratio refutation context (§ 2.2)
+3. **`coordination/PHASE-2-SLICE-1-CLOSE-WALK.md`** — close-walk of R18.
+   - § 2 ESCALATE-and-unblock pattern + vendored-with-deltas two-step maintenance pattern
+   - § 2 "Companion pattern — anti-scope diff-range SHA anchoring" (TQ-4 (γ) operator disposition)
+   - § 3 Phase 2 SLICE 2 entry framing
+4. **`coordination/specs/Q-R18-SPEC.md`** + **`coordination/specs/Q-R18-SPEC-AUDIT.md`** — R18 spec for vendoring-with-deltas precedent and ESCALATE-handling template.
+5. **`engine/verdict-groups.ts`** — inherited L3b aggregator (THE extension target). Vendored-at-pin. Currently scoped `(deploy_id, window_start_ts)`. Note Addition #25 D2 (late-arrival semantics) + D5 (group_id format) clauses — preservation walk required.
+6. **`engine/types/verdict.ts`** — vendored-with-deltas. R18 added `VerdictGroup.cluster_event_id?` at line 201-209. Confirm field exists; do not modify other fields.
+7. **`test/_substrate/v9X-cluster.ts`** — R18 substrate. Architect does NOT modify; SLICE 2 may consume.
+8. **`coordination/VENDORING-MANIFEST.md`** — current vendoring policy table; `engine/verdict-groups.ts` currently `vendored-at-pin`. Architect spec must determine whether R20 transitions it to `vendored-with-deltas` (apply two-step maintenance pattern from PHASE-2-SLICE-1-CLOSE-WALK § 2 upfront if so).
+9. **`coordination/OVERNIGHT-LOG-2026-05-17.md`** — most-recent operator dispositions (TQ-1 β, TQ-3 A, TQ-4 α+γ).
 
-## Phase 2 SLICE 1 closed
+## Anti-scope (R20 hard limits)
 
-| Element | Status |
+- **A12 — NO modification of inherited L3b aggregator internals** beyond architecturally-anchored extension points. If scope re-architecture requires touching `engine/verdict-groups.ts`, transition to `vendored-with-deltas` and apply the two-step maintenance pattern (manifest + AT_PIN_FILES) UPFRONT per PHASE-2-SLICE-1-CLOSE-WALK § 2. Spec failure-mode analysis MUST enumerate every q01-* test that asserts byte-identity on touched files.
+- **NO `HardwareTopologySource` concrete impl** — that's SLICE 3 (R21+).
+- **NO deployment-event-feed ingestion** — that's SLICE 4.
+- **NO Addition #25 D2 reversal** (late-arrival semantics): inherited late-arrival → `late_arrival_verdicts` + `verdict_group_updated` event must be preserved. Spec must address: how do late arrivals classify under cluster-event scope (mismatched `cluster_event_id` → drop? new group? attached as "cross-event late arrival"?).
+- **NO Addition #25 D5 reversal** beyond minimum: the inherited `group-{deploy_id}-{window_start_ts}` format may be extended (e.g., `group-{cluster_event_id}-{deploy_id}-{window_start_ts}` or scoped variant), but the factory pattern + format-string discipline must be preserved.
+- **NO modification of v9X fixture** (`test/_substrate/v9X-cluster.ts`) — R18 substrate is frozen for SLICE 2-4 consumers.
+- **NO modification of fleet-merge layer** (`engine/fleet/combine.ts`, `engine/fleet/detectors.ts`, `engine/fleet/e-bh.ts` from R11/R12/R13) — SLICE 2 is consumer-only on these surfaces.
+- **NO Addition #26 D4 reversal** — `correlational_not_causal: true` wire-format invariant preserved.
+
+## Architectural questions for Architect's brainstorm phase
+
+The Architect's brainstorm + recommendation should resolve at minimum:
+
+1. **Cluster-event-id origination point.** Does `cluster_event_id` flow in via (a) parameter on ingest()? (b) per-call context object? (c) field on the incoming FusedVerdict? (d) aggregator config? Implication: SLICE 4 event-feed ingestion will be the producer; SLICE 2 contract design constrains SLICE 4's surface.
+2. **group_id format under cluster-event scope.** Composite `group-{cluster_event_id}-{deploy_id}-{window_start_ts}` OR scoped `group-{cluster_event_id}-{window_start_ts}` with deploy_id moved to group metadata, OR conditional (use cluster_event_id when present, fall back to deploy_id-only inherited format)? Trade-off: backward compat with inherited consumers vs single canonical format.
+3. **Multi-deploy-per-event semantics.** A single `cluster_event_id` can span multiple `deploy_id`s per scope-memo § 2.2 line 204. How does the aggregator accumulate FusedVerdicts from different deploy_ids into one cluster-event group? Keying rule + window boundary handling.
+4. **Backward-compat path.** SLICE 1 made `cluster_event_id?` optional. SLICE 2 question: does it become required in the consumer contract, or does an absent value preserve inherited deploy_id-only scope (legacy mode coexisting with cluster-event mode)? Affects all existing inherited consumers.
+5. **Late-arrival classification under cluster-event scope** (Addition #25 D2 preservation). Specifically: a late-arriving verdict carrying cluster_event_id X arriving when the most-recently-closed group had cluster_event_id Y — drop? new group? attached as cross-event late arrival? Spec must pick one.
+6. **Fleet-merge consumption layer split decision.** Spec scope: include fleet-merge consumer wiring in R20 (likely 12+ ACs), or scope R20 to aggregator-contract-only and defer fleet-merge consumption to R21? Recommend the split if R20 ACs > 12.
+
+## Escalation items
+
+(none active)
+
+## Routing notes
+
+- Operator authorized "go slice 2" 2026-05-17 evening. Overnight authority `project_overnight_authority_2026_05_17_evening.md` remains active; chain authority extends to SLICE 2.
+- Anti-scope diff-range checks (`AC-R20-N: git diff <start-sha>..<end> --name-only ⊆ allowed-set`) MUST anchor `<end>` to round-MERGE-READY-SHA, NOT to HEAD, per PHASE-2-SLICE-1-CLOSE-WALK § 2 companion pattern (TQ-4 γ disposition). The Architect spec should include this anchor pattern explicitly in any anti-scope AC it writes.
+- If R20 spec scope determines `engine/verdict-groups.ts` needs deltas, spec MUST include manifest + AT_PIN_FILES maintenance steps in component inventory upfront (avoids R18-style ESCALATE on routine vendoring-with-deltas bookkeeping).
+
+## Phase 2 SLICE 2 readiness state
+
+| Element | State |
 |---|---|
-| R18 production work (verdict.ts deltas + v9X fixture + q18 12 ACs) | ✅ MERGE-READY |
-| Option A unblock pattern documented | ✅ R19 close-walk § 2 |
-| Phase 2 SLICE 2 entry framing | ✅ R19 close-walk § 3 |
-| R18 MINOR cleanup | ✅ R19 § 4 disposition table |
-| Memorial state stamp | ✅ R19 close-walk § 5 |
-| Vendored-with-deltas pattern documented for future SLICEs | ✅ R19 close-walk § 2 |
-
-**Tessera-product headline still works at Phase 1 close** (Q-J1 hybrid: Ville-bound at fleet-merge layer + e-BH at operator surface). **Phase 2 SLICE 1 (topology substrate) added cleanly** — enum extensions + VerdictGroup scope extension + v9X fixture. Phase 2 SLICE 2 entry is well-framed; operator picks when ready.
-
-## REINFORCED state at Phase 2 SLICE 1 close
-
-| File | Count | Delta vs evening-start |
-|---|---|---|
-| CLAUDE-COMMON.md | 3 | +2 (R19 cross-role MAJOR lessons) |
-| CLAUDE-ARCHITECT.md | 18 | +3 (R17 +0, R18 +1, R19 +2) |
-| CLAUDE-IMPLEMENTER.md | 30 | +7 (R17 +3, R18 +3, R19 +4 — TQ-4 cluster) |
-| CLAUDE-REVIEWER.md | 1 | unchanged |
-| CLAUDE-MEMORIAL.md | 0 | unchanged |
-
-The R19 IMPLEMENTER reinforcement spike (+4 in one round) reflects the 4-MAJOR cluster captured by Memorial Updater. All entries are well under the 30-line consolidation threshold (CLAUDE-IMPLEMENTER.md at exactly 30 — could be a consolidation candidate next round if it goes over).
-
-## What I did NOT do (preserved hard limits)
-
-- ❌ Touched anchor PR #38 (operator-owned)
-- ❌ Auto-dispositioned TQ-4 (Reviewer routed MERGE-READY; chain proceeded; but the architectural disposition of the 4 MAJORs belongs to operator)
-- ❌ Proceeded to Phase 2 SLICE 2 (HARD STOP at SLICE 1 milestone per chain)
-- ❌ Cross-project work
-- ❌ New GitHub PRs
-- ❌ Dispositioned any parked operator-gate item
-
-## Resume protocol
-
-Reply with TQ-4 disposition (e.g., "go α+γ on TQ-4 per recommendation" or override) and any chain direction (PR #38 review; Phase 2 SLICE 2 launch; operator-gate triage; cleanup round; or wait). I prep and execute.
-
-## Update history
-
-| Date | Event |
-|---|---|
-| 2026-05-17 | R17-R19 evening-overnight chain complete; Phase 2 SLICE 1 closed at R19. |
-| 2026-05-17 | HARD STOP per evening-overnight authority + chain plan. Awaiting operator. |
+| `VerdictGroup.cluster_event_id?` field exists | ✅ (R18, `engine/types/verdict.ts:201-209`) |
+| v9X fixture exists | ✅ (R18, `test/_substrate/v9X-cluster.ts`) |
+| `TopologyNode.kind`/`Edge.relationship` extensions | ✅ (R18) |
+| Inherited L3b aggregator unmodified at extension points | ✅ (`engine/verdict-groups.ts`, vendored-at-pin) |
+| Fleet-merge layer available for consumption | ✅ (R11/R12/R13: combine/detectors/e-bh) |
+| 0-CRITICAL streak | 17 rounds (R02-R19) |
+| Working tree clean | ✅ |
+| HEAD | `d58d887` (R19 TQ-4 disposition; Phase 2 SLICE 1 closed) |
