@@ -3,13 +3,13 @@ NEXT-ROLE: REVIEWER
 STATUS: READY
 Inputs: coordination/specs/Q-R21-SPEC.md (+ Q-R21-SPEC-AUDIT.md sidecar);
         REVIEWER-REPORT-R21.md target;
-        Implementer attestation: see attestation block below
+        Implementer attestation: a5cae6d (MERGE-READY chore-A)
 
 ## Implementer attestation (chore-A)
 
 - GREEN SHA: 78fa38b (feat(R21): GREEN — fleet-merge consumer layer)
 - RED SHA: 4274d9f (test(R21-RED): q21 fleet-verdict-consumer stubs)
-- MERGE-READY chore-A SHA: TBD (substituted in chore-B per spec § 4.5-4.6)
+- MERGE-READY chore-A SHA: a5cae6d
 - `npx tsc --noEmit` → exit 0 (AC-R21-9 PASS)
 - `node --test test/*.test.js` → tests 200 / pass 200 / fail 0 (AC-R21-10 PASS)
 - Per-file OBSERVED counts:
