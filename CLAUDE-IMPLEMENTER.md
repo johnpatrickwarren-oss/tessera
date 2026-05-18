@@ -419,3 +419,39 @@ with a clear commit message.
 #   VENDORING-MANIFEST.md and add a spec-amendment note. Detected tessera R18 MINOR-1:
 #   AC-R18-10 allowed-set expanded 10→15 without spec amendment; 2 entries (q01 test file,
 #   VENDORING-MANIFEST.md) were originally spec-anti-scoped.
+# REINFORCED 2026-05-17 — Anti-scope is absolute for test/ directory paths. When a binding-
+#   command run produces a failing test whose passing fix requires modifying a file the spec's
+#   § 4 anti-scope clause explicitly names (e.g., "Modification to any file under engine/,
+#   test/, tools/, or src/"), HALT condition (b) fires. Tactical autonomy (lines 39-57 of
+#   this file) authorizes: import paths, locator collisions, type-cast placement, layout
+#   shims, version-drift fixes, syntactic adjustments. It does NOT authorize: modifying a
+#   test file to suppress a failing assertion, even when the change is a single-string edit.
+#   The authorization boundary is qualitative (what kind of change), not quantitative (how
+#   many lines). Path: HALT → DIAGNOSTIC → ESCALATE with operator-bounded options. Detected
+#   tessera R19 MAJOR-1.
+# REINFORCED 2026-05-17 — HALT condition (b) is triggered by the existence of a spec/reality
+#   conflict that requires anti-scope modification, not by the difficulty or apparent triviality
+#   of the fix. When the test suite produces a failing test and the simplest passing fix would
+#   touch any file in the spec's anti-scope list, HALT immediately: write DIAGNOSTIC-RNN-
+#   [topic].md, set STATUS: ESCALATE, formulate operator-bounded options (at minimum: (A)
+#   amend spec anti-scope + proceed, (B) rewrite test to stay within anti-scope while
+#   preserving forward protection, (C) defer to cleanup round). Do not proceed unilaterally.
+#   Do not classify a unilateral anti-scope modification as a CONFIRMATION in MEMORIAL.md.
+#   Detected tessera R19 MAJOR-2.
+# REINFORCED 2026-05-17 — Changing a test assertion's boundary parameter (e.g., git-diff range
+#   endpoint from dynamic `HEAD` to a pinned SHA) is never a coverage-neutral change. A test
+#   comparing two fixed historical SHAs unconditionally PASSes; a test comparing against
+#   current HEAD fails when future commits violate the assertion. Pinning converts forward
+#   protection into a frozen historical check. Describe this accurately: "This modification
+#   removes forward protection for post-PIN commits." The framing "it makes the test MORE
+#   accurate" for a coverage-reducing change is an audit-trail inaccuracy and will be
+#   reclassified as a VIOLATION by the Memorial Updater. Detected tessera R19 MAJOR-3.
+# REINFORCED 2026-05-17 — MEMORIAL entries must not use carve-out modifiers to embed discipline
+#   violations inside CONFIRMATION headers (e.g., "No X modified outside the Y fix to Z").
+#   The carve-out modifier is the violation, not an exception to it. If a file outside the
+#   spec's component inventory was modified, the entry for that discipline is a VIOLATION, not
+#   a CONFIRMATION. Similarly, admitting "One spec/reality mismatch encountered" then writing
+#   CONFIRMATION and "No HALT needed" is self-exoneration under CLAUDE-COMMON.md REINFORCED
+#   2026-05-16 — the Memorial Updater is required to reclassify it. Write the MEMORIAL entry
+#   as a VIOLATION and describe what you did and why; the Memorial Updater will evaluate
+#   whether an exception was warranted. Detected tessera R19 MAJOR-4.
