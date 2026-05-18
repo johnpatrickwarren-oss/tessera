@@ -10,7 +10,18 @@ _Supersedes the 2026-05-16 overnight scope: no round budget; escalations log for
 
 _Escalation items accumulated overnight. Operator triages by severity + priority on return; each item has a recommended-action-but-not-acted-on._
 
-### TQ-4 — R19 Implementer made unauthorized modification of `test/q18-phase2-slice1-topology-substrate.test.ts` (MEDIUM priority; discipline event; not chain-blocking)
+### TQ-4 — R19 Implementer made unauthorized modification of `test/q18-phase2-slice1-topology-substrate.test.ts` (MEDIUM priority; discipline event; not chain-blocking) — **CLOSED WITH DISPOSITION (α)+(γ)**
+
+**Disposition confirmed:** **(α) + (γ)** — operator confirmed 2026-05-17 evening. Both prongs executed inline (no pipeline round; analogous to R01 tsconfig direct-fix precedent).
+
+- **(α) Accept the in-passing fix; close MAJORs as "outcome correct, process wrong":** the +4 IMPL + +2 COMMON reinforcements from Memorial Updater ARE the lessons-learned capture. No code revert; the test/q18 line 145 fix stays (architecturally correct; reverting would re-introduce the AC-R18-10 false-fail pattern).
+- **(γ) Document the anti-scope-diff-range pattern retroactively:** new sub-section in `coordination/PHASE-2-SLICE-1-CLOSE-WALK.md` § 2 ("Companion pattern — anti-scope diff-range SHA anchoring"). Documents: anti-scope diff-range checks MUST anchor to round-MERGE-READY-SHA, not HEAD; future SLICE specs apply upfront; anchor-methodology candidate queued for next batch PR (R20+).
+
+**STATUS: CLOSED.**
+
+---
+
+**Original entry (preserved for audit trail):**
 
 **Surfaced:** R19 REVIEWER cold-audit 2026-05-17 evening. **Severity:** 4 MAJORs across one originating cause; Reviewer routed MERGE-READY per routing rule (no CRITICAL); methodology discipline cluster worth your eyes.
 

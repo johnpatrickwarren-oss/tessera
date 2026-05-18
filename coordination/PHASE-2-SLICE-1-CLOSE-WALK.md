@@ -68,6 +68,28 @@ Future SLICEs that touch vendored files should **pre-handle** this pattern: the 
 
 See `REVIEWER-REPORT-R18.md` OBS-2 (spec failure-mode analysis missed `q01-no-at-pin-deltas`) and MEMORIAL-UPDATER R18 entry for the new REINFORCED line appended to `CLAUDE-ARCHITECT.md`.
 
+### Companion pattern — anti-scope diff-range SHA anchoring (TQ-4; operator-dispositioned 2026-05-17 (α)+(γ))
+
+R19 surfaced a second close-walk-worthy pattern: **anti-scope diff-range checks (`AC-N` assertions of the form `git diff <start-sha>..<end> --name-only ⊆ allowed-set`) MUST anchor the `<end>` to the round's MERGE-READY SHA, NOT to `HEAD`.**
+
+**Why:** an anti-scope check anchored to `HEAD` will false-fail every subsequent round, because each new round (and especially each round's Memorial Updater outputs to `CLAUDE-*.md` + chore commits) extends the diff range with files that weren't in the original round's allowed-set. The check stops measuring "what this round touched" and starts measuring "what every subsequent round has touched too."
+
+**Origin of the lesson (TQ-4 / R19 4-MAJOR cluster):**
+- R18 spec AC-R18-10 used `git diff b640c6c..HEAD --name-only` as its anti-scope check.
+- R19 Implementer touched `test/q18-phase2-slice1-topology-substrate.test.ts:145` (explicit R19 anti-scope target) to pin the assertion from `..HEAD` to `..9012faa` (R18 MERGE-READY SHA). The CHANGE was architecturally correct; the PROCESS was wrong (anti-scope violation + halt-discipline failure per R08 reinforcement).
+- Operator dispositioned (α) accept the fix + (γ) document the pattern. The lesson lives here so future SLICE specs apply it upfront.
+
+**Implication for future SLICE specs:**
+
+When writing an anti-scope diff-range AC:
+- **Use SHA-pinned end-bounds, not HEAD.** Spec template form: `git diff <round-start-SHA>..<round-MERGE-READY-SHA> --name-only ⊆ allowed-set`.
+- Either:
+  - (a) The Implementer fills in the MERGE-READY SHA at GREEN attestation time (this matches the R14 two-commit attestation discipline naturally — the MERGE-READY SHA is the chore-coord SHA-A), OR
+  - (b) The Architect bounds to a known anchor SHA (e.g., the spec-emit commit) and explicitly excludes coordination/* + CLAUDE-*.md from the allowed-set so subsequent Memorial Updater outputs don't false-fail.
+- (a) is preferred — anchors to the round's own work; doesn't require predicting which sibling files might land.
+
+**Anchor-methodology candidate:** when a non-Tessera consumer encounters the same pattern, this becomes a candidate addition to `templates/Q-NN-SPEC-TEMPLATE.md` or `skills/01-pre-emit-grilling.md`. Queued for the next anchor batch PR (R20+ window per [[project-anchor-pr-cadence]]).
+
 ---
 
 ## § 3 Phase 2 SLICE 2 entry framing
