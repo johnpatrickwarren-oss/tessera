@@ -20,7 +20,7 @@ STATUS: READY
 ## Implementer attestation
 
 ### Chore-A SHA
-- CHORE-A-SHA: <to be recorded after chore-A commit>
+- CHORE-A-SHA: 778cff8
 
 ### Binding-command results at chore-A (per spec § 9.1 empirical baseline)
 
