@@ -8,11 +8,11 @@ STATUS: READY
 
 This is the test of MR-1 (the methodology round that vendored the Coordinator role + 5 templates + pipeline integration + cluster-scopes scaffold). Operator's intent: use anchor's Coordinator to decide whether SLICE 3.B (HardwareTopologySource ingestion adapters: Slurm + K8s + NVLink) should fan out into parallel clusters or proceed sequentially. Same evaluation applied to SLICE 3.C, SLICE 3 close-walk, SLICE 4, and Phase 2 close.
 
-The Coordinator emits a WAVE-PLAN-01.md decomposing the remaining Phase 2 work. The wave plan MAY legitimately recommend all single-cluster waves — that's a valid outcome meaning the existing single-pipeline mode is the right fit. The Coordinator does NOT force fan-out; it surfaces where fan-out is naturally available per D1-D5 dependency tests and where it isn't.
+The Coordinator emits a WAVE-PLAN-01.md decomposing the remaining Phase 2 work. **Operator preference: PREFER fan-out when D1-D5 tests show clean independence; do NOT force fan-out when scope is genuinely sequential.** If two or more WUs in a candidate wave have no D1 shared-output / no D2 AC-reference / no D5-strict write-conflict edges between them, the wave plan should dispatch them as parallel clusters — don't collapse to a single cluster out of conservatism. Conversely, when D-tests prove dependence across every pair, recommend single-cluster waves with explicit reasoning (which D-test fired; what collapsed the candidates).
 
 After the Coordinator emits the plan, operator reviews:
-- If plan recommends single-cluster waves → operator runs standard `./run-pipeline.sh --round R24 --tier full` for SLICE 3.B (or whichever round is up next)
-- If plan recommends ≥2 clusters in any wave → operator invokes `scripts/multi-track-cluster-setup.sh` per cluster + dispatches per wave plan
+- If plan recommends fan-out in any wave → operator invokes `scripts/multi-track-cluster-setup.sh` per cluster + dispatches per wave plan (this is the preferred outcome where the scope allows)
+- If plan recommends single-cluster waves with explicit dependency-blocked reasoning → operator runs standard `./run-pipeline.sh --round R24 --tier full` for SLICE 3.B (or whichever round is up next)
 
 **Tier (Coordinator-mode invocation):** N/A — Coordinator runs solo (no Architect/Implementer/Reviewer for the wave-plan emission itself). Each cluster the wave plan dispatches will receive its own tier classification per `CLAUDE-COMMON.md` rubric + the Coordinator's prior.
 
