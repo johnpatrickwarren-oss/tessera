@@ -1,0 +1,6 @@
+GPU 0: NVIDIA A100-SXM4-80GB (UUID: GPU-eeee)
+	 Link 0: 25.000 GB/s  Active
+	 Link 1: 25.000 GB/s  Active
+GPU 1: NVIDIA A100-SXM4-80GB (UUID: GPU-ffff)
+	 Link 0: 25.000 GB/s  Active
+	 Link 1: 25.000 GB/s  Active
