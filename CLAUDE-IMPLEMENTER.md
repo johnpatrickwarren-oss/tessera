@@ -622,3 +622,47 @@ with a clear commit message.
 #   constructor engine/topology/nvlink-source.ts:133-134: third-operand `?? 'nvlink_topology_source'`
 #   / `?? 'nvlink-1'` unreachable because parseNvlinkStatus always defaults snapshot.source_id /
 #   source_version at :108-109; TopologySnapshot.source_id typed `string`, never undefined).
+# REINFORCED 2026-05-18 — When inserting content into a canonical coordination document that
+#   contains a markdown bullet list (e.g., SCOPING-MEMO anti-scope constraint lists), inserting
+#   an h2 or h3 heading inside the list TERMINATES the list at that point. Markdown renderers
+#   cannot recover: the preceding list items form one list, the heading becomes an independent
+#   subsection, and the subsequent list items render as a new orphaned list with no preamble.
+#   After any edit to a canonical document containing bullet lists, re-read a 30-line window
+#   around the insertion point and verify: (a) the preceding list item retains its full
+#   rationale paragraph adjacent to its entry; (b) no orphaned rationale text appears after
+#   the new content; (c) the new content is unambiguously attached to the correct section.
+#   Do not rely on string-match ACs to catch placement defects — they are structurally blind
+#   to insertion context. Detected tessera R32 MAJOR-1 (SCOPING-MEMO-v0.3.md:267: `### Vendor
+#   fungibility` heading inserted inside A12–A17 list severing A14 rationale).
+# REINFORCED 2026-05-18 — When a cross-project rule is derived from prior-round violations
+#   and committed in a close-walk or gate document (e.g., PHASE-2-SLICE-3-CLOSE-WALK.md
+#   § 5.N), immediately apply the rule as a self-audit check to all ACs in the CURRENT ROUND's
+#   test suite before committing chore-A. The derivation and the self-audit must happen in
+#   the same chore-A staging gate — not sequentially across rounds. Procedure: for each newly
+#   derived assertion-coverage rule, grep the current test file for the weak patterns the rule
+#   prohibits (e.g., `content.includes(`, `.length > 0`, `typeof x ===`) and apply the
+#   mutation test to every match. "I derived the rule and therefore understood it" is not a
+#   substitute for applying it; rule-derivation-without-self-application is a worse violation
+#   than naive omission. Detected tessera R32 MAJOR-2 (4 AC instances of `includes(...)` in
+#   test/q32-slice3-close-walk.test.ts violate the `implementer-spec-test-assertion-coverage`
+#   rule derived and committed in PHASE-2-SLICE-3-CLOSE-WALK.md §5.3 in the same round).
+# REINFORCED 2026-05-18 — When amending a spec AC row that has an existing `Then` clause
+#   that will be superseded by the amendment, mark the original claim as superseded BEFORE
+#   appending the new claim. Use `~~strikethrough~~` on the original sentence, or prepend the
+#   new text with `[R{N}-amended: the following supersedes the prior claim]`. Leaving both
+#   the original and the amendment in the same table cell creates two mutually contradictory
+#   assertions that string-match ACs (checking only presence of the new text) cannot detect.
+#   Contradictory rows weaken the spec's authority as a source of truth for future rounds.
+#   Detected tessera R32 MINOR-2 (Q-R26-SPEC.md:552 AC-R26-14 retains "exit code is 0" and
+#   R32-appended "exit code is 2" in the same table cell with no disambiguation marker).
+# REINFORCED 2026-05-18 — When the spec mandates a multi-cell evidence matrix for a
+#   Reviewer-verified deliverable (e.g., a 4-cell PR-F6 test matrix per SCOPING-MEMO §3 Row
+#   SLICE 3.C), the self-spec in audit-tier MUST create a Reviewer-verified AC for every
+#   mandated cell OR add an explicit out-of-scope disposition note with an evidence pointer
+#   for each omitted cell. "Cell N tested at the Implementer stage and noted PASS in the
+#   close-walk" is NOT a substitute for "Cell N is Reviewer-verified" when the mandate
+#   specifies Reviewer verification. Gate: before committing chore-A, for each Reviewer-
+#   verified mandate in the spec, count the mandated cells and count the Reviewer-verified
+#   ACs; if the counts differ, add the missing ACs or add explicit disposition text.
+#   Detected tessera R32 MINOR-4 (AC-R32-23/24/25 cover PR-F6 Cells 1/2/3; Cell 4 absent
+#   despite SCOPING-MEMO §3 Row SLICE 3.C mandating a 4-cell matrix).
