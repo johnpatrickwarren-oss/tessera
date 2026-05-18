@@ -1,6 +1,6 @@
 // test/q30-nvlink-adapter.test.ts — Phase 2 SLICE 3.B WU-03 bindings (R30).
 //
-// Binds AC-R30-1 through AC-R30-15 (runtime) per Q-R30-SPEC.md § 5.
+// Binds AC-R30-1 through AC-R30-15 (runtime; AC-R30-15 uses /m regex on type-decl) per Q-R30-SPEC.md § 5.
 // AC-R30-16 (typecheck) and AC-R30-17 (test count) are binding-command
 // attestations reported by the Implementer at GREEN; not runtime-bound.
 // AC-R30-18 (anti-scope diff) is a runtime test added at chore-B with the
@@ -199,10 +199,14 @@ test('AC-R30-14: transformPair with counter_width omitted routes makeResetPair t
 });
 
 // AC-R30-15: A16 — engine/types/verdict.ts retains `correlational_not_causal: true` literal
+// R30 MINOR-1 fix: use line-anchored regex with /m flag (not plain includes()) to avoid
+// matching JSDoc backtick occurrences; guards the type-declaration body specifically.
 test('AC-R30-15: A16 preservation — verdict.ts retains correlational_not_causal: true literal', () => {
   const verdict = readFileSync('engine/types/verdict.ts', 'utf8');
-  assert.ok(verdict.includes('correlational_not_causal: true'),
-    'verdict.ts retains correlational_not_causal: true literal per Addition #26 D4');
+  assert.ok(
+    /^\s*correlational_not_causal:\s*true\s*;/m.test(verdict),
+    'verdict.ts retains correlational_not_causal: true in type-declaration body per Addition #26 D4',
+  );
 });
 
 // AC-R30-18: anti-scope diff at chore-A SHA ⊆ allowed-set

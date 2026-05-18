@@ -253,6 +253,7 @@ test('AC-R32-19: round-start-to-chore-A diff path-set ⊆ R32 allowed-set', () =
     'engine/topology/nvlink-source.ts',
     'coordination/NEXT-ROLE.md',
     'coordination/MEMORIAL.md',
+    'coordination/PRD.md', // R32 spec amendment: wu-05 scope Deliverable 2 item 5 (vendor-fungibility US-01)
   ]);
   const DIAGNOSTIC_REGEX = /^coordination\/diagnostics\/DIAGNOSTIC-R32-.+\.md$/;
   const diffOutput = execFileSync('git', ['diff', `${BASELINE_SHA}..${CHORE_A_SHA}`, '--name-only'], {
@@ -283,6 +284,7 @@ test('AC-R32-20: chore-A-to-HEAD diff ⊆ R32 allowed-set + carve-outs (forward-
     'engine/topology/nvlink-source.ts',
     'coordination/NEXT-ROLE.md',
     'coordination/MEMORIAL.md',
+    'coordination/PRD.md', // R32 spec amendment: wu-05 scope Deliverable 2 item 5 (vendor-fungibility US-01)
   ]);
   // Forward-coverage carve-outs per spec § 4 + anti-scope-allowed-set-forward-coverage rule
   const REVIEWER_REPORT_REGEX = /^coordination\/reviews\/REVIEWER-REPORT-R\d+\.md$/;

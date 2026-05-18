@@ -9,7 +9,7 @@
 //   AC-R28-6   comment + blank-line tolerance
 //   AC-R28-7   kind/relationship literal invariant across all emitted snapshot
 //   AC-R28-8   parse-error throws (4 sub-cases: empty SwitchName, duplicate, malformed range, unclosed bracket)
-//   AC-R28-9   empty input → empty snapshot (no throw); default fetchedAtTs branch
+//   AC-R28-9   empty input → empty snapshot (no throw); default fetchedAtTs branch; R32: asserts source_id + source_version
 //   AC-R28-10  TopologySource interface conformance + default id/version/fetchedAtTs fallback
 //   AC-R28-11  TopologyEnricher integration preserves correlational_not_causal: true
 //   AC-R28-12  anti-scope diff round-start..chore-A ⊆ allowed-set [ADDED AT CHORE-B WITH CHORE_A_SHA SUBSTITUTED]
@@ -160,6 +160,9 @@ test('AC-R28-9: empty or whitespace-only input produces empty snapshot (no throw
   assert.deepEqual(snap1.nodes, []);
   assert.deepEqual(snap1.edges, []);
   assert.equal(snap1.fetched_at_ts, META.fetchedAtTs);
+  // R28 MINOR-1 fix: assert source_id and source_version per spec § 5.2
+  assert.strictEqual(snap1.source_id, META.sourceId);
+  assert.strictEqual(snap1.source_version, META.sourceVersion);
   const snap2 = parseSlurmTopologyConf('  \n\n   \t\n', META);
   assert.deepEqual(snap2.nodes, []);
   assert.deepEqual(snap2.edges, []);

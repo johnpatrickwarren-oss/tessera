@@ -244,7 +244,7 @@ test('Candidate ordering determinism and kind-filter narrowing', () => {
 // Chore-A SHA `9b78a19` committed as string constant. Any post-chore-A
 // modification outside the 7-path allowed-set causes this test to fail.
 test('AC-R26-16: anti-scope forward-protection (chore-B)', () => {
-  const { execSync } = require('node:child_process') as typeof import('node:child_process');
+  const { execFileSync } = require('node:child_process') as typeof import('node:child_process');
   const CHORE_A_SHA = '9b78a19';
   const ALLOWED_SET = new Set([
     'engine/topology/common-mode-attribution.ts',
@@ -255,7 +255,7 @@ test('AC-R26-16: anti-scope forward-protection (chore-B)', () => {
     'coordination/NEXT-ROLE.md',
     'coordination/MEMORIAL.md',
   ]);
-  const out = execSync(`git diff ${CHORE_A_SHA}..HEAD --name-only`, { encoding: 'utf8' });
+  const out = execFileSync('git', ['diff', `${CHORE_A_SHA}..HEAD`, '--name-only'], { encoding: 'utf8' });
   const files = out.trim().split('\n').filter((f) => f.length > 0);
   for (const f of files) {
     assert.ok(ALLOWED_SET.has(f), `post-chore-A modification outside allowed-set: ${f}`);
