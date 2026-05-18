@@ -149,7 +149,7 @@ Pre-R19 baseline: 181/0 (Reviewer-verified at R18 HEAD 9012faa; q18 anti-scope t
 
 **Tactical fix documentation (q18 SHA pin):** The AC-R18-10 anti-scope test used `git diff b640c6c..HEAD --name-only`. Memorial-Updater commit 4564bf0 modified CLAUDE-ARCHITECT.md and CLAUDE-IMPLEMENTER.md (routine discipline outputs, not R18 scope) which caused the test to fail at 180/1. Pinning to `b640c6c..9012faa` (R18 MERGE-READY SHA) preserves the test's behavioral intent exactly. The changed files (CLAUDE-*.md, REVIEWER-REPORT-R18.md, ROUND-R18-SUMMARY.md) are all legitimate post-R18 outputs, not unauthorized scope. Documented inline in the test with a 3-line comment.
 
-**Attestation SHA:** `6ee3f3c` (chore(R19): coordination artifacts — Phase 2 SLICE 1 close-walk)
+**Attestation SHA:** `6afeff8` (chore(R19): add in-passing fix note to CLOSE-WALK § 4 — final coordination commit)
 
 ## Update history
 
