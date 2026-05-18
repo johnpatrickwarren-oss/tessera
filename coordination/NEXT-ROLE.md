@@ -1,114 +1,107 @@
-CURRENT-ROUND: R33
-NEXT-ROLE: OPERATOR (Wave 4 dispatch authorization review; overnight-mode auto-proceeds)
-STATUS: WAVE-GATE-READY
+CURRENT-ROUND: R34
+NEXT-ROLE: ARCHITECT
+STATUS: READY
 
-## Wave 3 gate verdict + SLICE 4 decomposition (R33 Coordinator outputs)
+## Round-scope directive (R34 — Wave 4 / WU-06 SLICE 4 event-conditional attribution)
 
-**Wave 3 gate verdict: ADVANCE.** WU-05 SLICE 3 close-walk (R32) MERGE-READY at main HEAD `c503edb`. 0 CRITICAL / 2 MAJOR (documentation/audit-trail; not behavioral) / 4 MINOR / 7 OBS per Hybrid Reviewer (Opus + Sonnet + Merger). SLICE 3 MILESTONE achieved with 2 carry-forward MAJORs dispositioned ADVANCE-with-pre-flag.
+**R34 = Wave 4 single-cluster dispatch: WU-06 SLICE 4 event-conditional attribution; full tier.**
 
-**Original SLICE 3 milestone HARD STOP LIFTED** per operator authority extension 2026-05-18 mid-afternoon ("do not stop at R33, keep moving forward"). **NEW HARD STOP: Phase 2 close milestone (Wave 5 gate; R38+ area; 2-4 rounds out).**
+Per WAVE-PLAN-03 Step 3 Judgment call 1: D1 HIGH chains across sub-candidates (event-feed → attribution → freeze-hook) forbid clean fan-out; sequential single-cluster is correct decomposition. Per WAVE-GATE-03 § Wave 4 dispatch routing: this cluster runs in main worktree (no `multi-track-cluster-setup.sh`).
 
-### R33 Coordinator deliverables emitted
+After this cluster + Coordinator Wave 4 gate (R35) + Wave 5 dispatch (WU-07 Phase 2 close-walk; HYBRID_REVIEWER=true) + Wave 5 gate (R37+): **HARD STOP at Phase 2 close milestone** per extended overnight authority [[project-overnight-authority-2026-05-18-morning]].
 
-1. ✅ `coordination/WAVE-GATE-03.md` — Wave 3 gate aggregating WU-05 R32 + SLICE 3 milestone stamp + Rule 5 cross-project derivation + pre-flags to Wave 4.
-2. ✅ `coordination/WAVE-PLAN-03.md` (NEW v3 extension) — SLICE 4 decomposition: WU-06 single-cluster sequential per Step 3 Judgment call 1 (D1 HIGH chains forbid clean fan-out across 06a/06b/06c sub-candidates) + Wave 5 carry-forward.
-3. ✅ 6 CLUSTER-HANDOFF-3 artifacts emitted:
-   - `coordination/CLUSTER-HANDOFF-3-WU05-WU06.md` (D2/convention edge; carries SLICE 4 entry-framing supplement because R32 close-walk § 3 abbreviated)
-   - `coordination/CLUSTER-HANDOFF-3-WU04-WU06.md` (**D1 HIGH** — event-conditional attribution extends MD-F4 architectural pattern; A16 binding-precedent table REQUIRED for WU-06 to match)
-   - `coordination/CLUSTER-HANDOFF-3-WU00-WU06.md` (D2 MEDIUM — L0 contract interface-only conditional dependency)
-   - `coordination/CLUSTER-HANDOFF-3-WU01-WU06.md` (D2 MEDIUM — SLURM adapter interface-only)
-   - `coordination/CLUSTER-HANDOFF-3-WU02-WU06.md` (D2 MEDIUM — K8S adapter interface-only)
-   - `coordination/CLUSTER-HANDOFF-3-WU03-WU06.md` (D2 MEDIUM — NVLINK adapter interface-only; R-E7 MITIGATED corroboration)
-4. ✅ `coordination/COORDINATOR-MEMORIAL.md` appends:
-   - 6 confirmations (dependency-edge-classification, cross-cluster-handoff-completeness, pre-emit-grilling, wave-gate-failure-handling, fan-out-vs-sequential-judgment, coordinator-versioning-discipline) + 0 violations
-   - 2 friction-surface observations (hybrid-reviewer-coverage-split + audit-tier-pre-emit-grilling-gap)
-   - 1 NEW cross-project rule (Rule 5 `rule-derivation-without-self-application`) + Rules 1-4 status notes
-   - Update history row for Wave 3 gate
-   - New section under "Reinforcement rules derived" for `rule-derivation-without-self-application`
-   - 3 new cross-project emerging-patterns entries (sustained asymmetric edge confidence + in-cluster sequential decomposition + hybrid-Reviewer coverage-split + audit-tier grilling gap)
-5. ✅ `coordination/NEXT-ROLE.md` (this file) updated to STATUS: WAVE-GATE-READY.
+## OQ defaults applied (per overnight authority + Coordinator recommendations)
 
-### Cross-project Rule 5 NEWLY DERIVED at this gate
+All 3 new OQs from WAVE-PLAN-03 take Coordinator-recommended defaults:
+- **OQ-W3-1 = A** — `engine/events/event-feed.ts` single-file
+- **OQ-W3-2 = A** — vendored-with-deltas on Phase 1 freeze-hook substrate
+- **OQ-W3-3 = B** — SCOPING-MEMO MAJOR-1 surgery DEFERRED to WU-07 close-walk (cleaner scope-bounding)
 
-**`rule-derivation-without-self-application`** (sub-class of `implementer-spec-test-assertion-coverage` Rule 3). Trigger: R32 MAJOR-2 single-round 4-instance threshold (AC-R32-2/7/13/14 all violate the rule R32 itself derived at PHASE-2-SLICE-3-CLOSE-WALK § 5.3). Canonical text already landed at CROSS-PROJECT-MEMORIAL.md tail by R32 Memorial-Updater. WAVE-PLAN-03 Wave 4 dispatch routing instructs WU-06 Architect to perform explicit self-audit at spec-emit time (grep + mutation test) — first procedural application of Rule 5 at the dispatch layer.
+OQ-W3-4 (event-feed schema closed-set vs extensible) is Architect's Brainstorm-phase call.
 
-## Inputs for next role (Operator — Wave 4 dispatch authorization review)
+Architect MAY override any default at spec-emit time IF Brainstorm surfaces structural reason; document override rationale in spec preamble.
+
+## Inputs for next role (Architect)
 
 **Read in order:**
 
-1. **`coordination/WAVE-GATE-03.md`** — Wave 3 gate verdict + SLICE 3 milestone stamp + pre-flags to Wave 4.
-2. **`coordination/WAVE-PLAN-03.md`** — SLICE 4 decomposition + Wave 4 dispatch authorization + 3 NEW OQs surfaced for operator answer.
-3. **`coordination/CLUSTER-HANDOFF-3-WU05-WU06.md`** — Carries the SLICE 4 entry-framing supplement (load-bearing because R32 close-walk § 3 abbreviated entry framing).
-4. **`coordination/CLUSTER-HANDOFF-3-WU04-WU06.md`** — A16 binding-precedent table (HIGHEST RELEVANCE for WU-06; event-conditional attribution is highest-risk D4 reversal surface across all of Tessera).
-5. **Remaining 4 CLUSTER-HANDOFF-3 artifacts** (interface-only edges; short-form).
-6. **`coordination/COORDINATOR-MEMORIAL.md`** — Wave 3 gate appends + Rule 5 derivation.
+1. **`coordination/cluster-scopes/wave-4/wu-06-event-conditional-attribution.md`** — full scope block with 4 architectural surfaces + cross-project rule application + halt conditions. **Primary scope artifact.**
+2. **`coordination/CLUSTER-HANDOFF-3-WU04-WU06.md`** — **HIGHEST RELEVANCE** — A16 binding-precedent table. Event-conditional attribution is highest-risk D4 reversal surface across all of Tessera.
+3. **`coordination/CLUSTER-HANDOFF-3-WU05-WU06.md`** — SLICE 4 entry-framing supplement (R32 close-walk § 3 abbreviated; this handoff carries the framing).
+4. **`coordination/CLUSTER-HANDOFF-3-WU{00,01,02,03}-WU06.md`** — 4 interface-only D2 MEDIUM edges.
+5. **`coordination/WAVE-GATE-03.md`** — § Pre-flags (5 dispatch pre-flags) + Rule 5 derivation + R32 carry-forward routing.
+6. **`coordination/WAVE-PLAN-03.md`** — § Step 6 tier classification + § Open questions.
+7. **`coordination/SCOPING-MEMO-v0.3.md`** — § 2.3 Extension 3 (c) event-conditional correlational attribution + § 3 SLICE 4 row + § 4.2 R-S3/R-S5 + § 4.4 PR-F7 mandate + § 2.3 [R32 AMENDMENT] vendor-fungibility block (recently landed).
+8. **`coordination/PRD.md`** — FR-E3c + AC-P4.
+9. **`coordination/PHASE-2-SLICE-3-CLOSE-WALK.md`** — § 3 SLICE 4 entry framing (abbreviated; complemented by WU-05 handoff).
+10. **`/Users/johnwarren/.claude/CROSS-PROJECT-MEMORIAL.md`** — **5 cross-project rules now active** (Rule 5 NEWLY DERIVED at R33 gate): apply UPFRONT.
 
-## Open questions for operator (from WAVE-PLAN-03 § Open questions)
+**Wave 1+2+3 deliverables to reference (READ-ONLY):**
+- `engine/l0/counter-rate-transform.ts` (R25)
+- `engine/topology/{common-mode-attribution,slurm-source,k8s-source,nvlink-source}.ts` (R26/R28/R29/R30)
+- `engine/verdict-groups.ts` (R20) + `engine/fleet/verdict-consumer.ts` (R21)
+- `engine/types/verdict.ts` (vendored-with-deltas across R18+R20+R23)
+- Inherited Phase 1 substrate at `engine/baseline-cells.ts` or equivalent (Architect verifies exact path at session entry per empirical-premise-verification reinforcement; OQ-W3-2 default A = vendored-with-deltas on this file)
 
-**Not blocking for Wave 4 dispatch** (Coordinator defaults apply if no answer; Architect spec-time discretion):
+## Four architectural surfaces (per scope block)
 
-- **OQ-W3-1** (event-feed file layout): single-file `engine/events/event-feed.ts` (Recommended A; matches WU-00 + WU-04 single-file convention) vs subdirectory expansion (B). Default A.
-- **OQ-W3-2** (freeze-hook coupling scope): vendored-with-deltas on inherited Phase 1 substrate (Recommended A; matches R20 + R32 precedent) vs Tessera-original wrapper (B). Default A.
-- **OQ-W3-3** (SCOPING-MEMO MAJOR-1 surgery timing): WU-06 opportunistic vs WU-07 close-walk (Recommended B; cleaner scope-bounding). Default B.
+1. **Deployment-event-feed ingestion** — NEW Tessera-original substrate at `engine/events/event-feed.ts`
+2. **Event-conditional correlational attribution layer** — NEW Tessera-original at `engine/events/event-conditional-attribution.ts`
+3. **Phase 1 freeze-hook activation coupling** — vendored-with-deltas on inherited Phase 1 substrate (two-step maintenance UPFRONT)
+4. **PR-F7 4-cell evidence matrix** — produced here; hybrid Reviewer audits at WU-07 (NOT here)
 
-**Carry-forward; not blocking:**
+## Apply all 5 cross-project rules UPFRONT
 
-- **OQ-W1-2** (WU-07 tier; carries from v1+v2): audit + HYBRID_REVIEWER=true (Recommended A; R32 empirically validated) vs full (B). Default A. Operator answers before Wave 5 dispatch.
-- **OQ-W1-4** (calibrate.ts vendoring; still parked).
-- **OQ-W1-5** (Phase 2 transient detector scheduling; still parked).
-- **OQ-W3-4** (forward-looking; surfaces during WU-06): event-feed schema closed-set vs extensible — Architect's brainstorm-phase call.
+1. `false-compliance-attestation` — actual binding-command results verbatim.
+2. `architect-branch-binding-coverage` — trace data-flow not just syntax.
+3. `implementer-spec-test-assertion-coverage` — every Then-column field asserted one-for-one.
+4. `anti-scope-allowed-set-forward-coverage` — `^coordination\/reviews\/REVIEWER-REPORT-R34\.md$` + `^coordination\/MEMORIAL\.md$` regex carve-outs.
+5. **`rule-derivation-without-self-application` (R33 gate; NEW)** — **Architect performs explicit self-audit at spec-emit time**: grep test pseudocode for `content.includes(`, `.length > 0`, `typeof x ===`, `assert.ok(` patterns; apply mutation test to each (could production return different-but-structurally-valid value and still pass?); record inline in spec § 9-class sweep. **First procedural application of Rule 5 at dispatch layer per WAVE-GATE-03 routing.**
 
-## Wave 4 dispatch authorization
+## Anti-scope (R34 hard limits — see scope block § Anti-scope for full enumeration)
 
-Wave 4 cluster authorized for dispatch:
+Headline:
+- A12 (engine internals frozen; vendored-with-deltas only at OQ-W3-2 freeze-hook extension)
+- A10 (hardware diagnosis fenced; event-feed ingests *deployment* events not hardware-fault signals)
+- A11 (synthetic only — NO live deployment-pipeline endpoints)
+- **A16 — Addition #26 D4 `correlational_not_causal: true` PRESERVED at every event-conditional emit site. HIGHEST RELEVANCE.** Regex-anchored + JSON-round-trip.
+- A13 (rule-based + statistical only; NO ML)
+- NO SCOPING-MEMO MAJOR-1 surgery (WU-07 close-walk per OQ-W3-3 = B)
+- NO PR-F7 hybrid Reviewer here (fires at WU-07)
+- NO R32 carry-forward closures (WU-07 punch list per `STAGED-FOR-PHASE-2-CLOSE.md` Item 2) EXCEPT R26 MINOR-2 deferred impl alignment IF FusedVerdict → FiredShardEvent adapter consumer site ships in WU-06
 
-| Cluster | Work unit | Tier (Coordinator prior) | Dispatch routing |
-|---|---|---|---|
-| CL-04-A | WU-06 SLICE 4 (event-feed ingestion + event-conditional correlational attribution + Phase 1 freeze-hook coupling + PR-F7 evidence) | **full** (A1+A2+A4+A6+PR-F7 per WAVE-PLAN-03 Step 6) | `scripts/run-pipeline.sh --tier full` from main worktree `~/concord/tessera` (single-cluster; NOT `--coordinator`; no `multi-track-cluster-setup.sh`) |
+## Halt conditions
 
-**Pre-dispatch operator actions (overnight-mode auto-proceed):**
+Per scope block:
+1. A16 D4 reversal surface emerges — HALT + DIAGNOSTIC + ESCALATE (highest priority).
+2. Freeze-hook coupling needs inherited substrate modification beyond vendored-with-deltas — A12; route back.
+3. PR-F7 external literature insufficient — surface as OQ.
+4. Binding-command contradicts AC literal — HALT (false-compliance-attestation).
+5. Event-conditional structural false-positive class unfixable by AC tuning — route back.
+6. Rule 5 self-application sweep identifies non-discriminating AC unstrengthenable without scope expansion — HALT for operator decision.
 
-1. (Optional) Answer OQ-W3-1 / OQ-W3-2 / OQ-W3-3.
-2. (Recommended) Author per-cluster scope block at `coordination/cluster-scopes/wave-4/wu-06-event-conditional-attribution.md` referencing the 6 CLUSTER-HANDOFF-3 artifacts + WAVE-GATE-03 § Pre-flags table + WAVE-PLAN-03 § Step 6 tier classification.
-3. Run `scripts/run-pipeline.sh --tier full` from main worktree.
+## Escalation items
 
-**Headline pre-flags from Wave 3 gate** (per WAVE-GATE-03 § Pre-flags table):
+(none active)
 
-- **A16 wire-format binding REQUIRED** at every event-conditional attribution emit site (HIGHEST RELEVANCE — event-conditional attribution is highest-risk D4 reversal surface). Match WU-04 + R32 binding precedent: regex with /m anchor + JSON-serialized round-trip.
-- **Rule 5 self-application gate at spec-emit time**: WU-06 Architect greps test file for `content.includes(`, `.length > 0`, `typeof x ===`, `assert.ok(` for equality-AC bindings; applies mutation test to each match; records inline in spec § 9-class sweep.
-- **Main-worktree baseline at session entry:** at HEAD `c503edb`, expected `tests=305 / pass=299 / fail=6`. Architect empirically verifies; do NOT cite cross-round attestations.
-- **`tsc` exit code:** `npx tsc -p tsconfig.test.json` exits 0 (better than historical pre-flag exit=2). Encode actual exit code (false-compliance-attestation rule).
-- **R26 MINOR-2 deferred impl alignment**: Architect's call — include in WU-06 IF spec ships `FusedVerdict → FiredShardEvent` adapter consumer site; else carry forward to WU-07.
-- **R32 carry-forwards to WU-07 punch list** (not WU-06 scope unless opportunistic): SCOPING-MEMO MAJOR-1 structural surgery; 4 weak ACs strengthening; execSync carry-forward at q25 + q30.
-- **Hybrid Reviewer NOT at WU-06** (standard full-tier Opus Reviewer); hybrid pass concentrated at WU-07 Phase 2 close-walk per SCOPING-MEMO § 3.
+## Routing notes
 
-## Post-Wave-4 routing notes
+- Per extended overnight authority full chain through Phase 2 close. WU-06 close + Wave 4 gate (R35) → Wave 5 dispatch (WU-07; audit + hybrid Reviewer) → Wave 5 gate (R37+) = HARD STOP.
+- R26 MINOR-2 deferred impl alignment is Architect's call (if FusedVerdict → FiredShardEvent adapter consumer site ships in WU-06, close here; else carry to WU-07).
 
-After Wave 4 cluster CL-04-A reaches MERGE-READY:
-
-1. Next Coordinator invocation (R34 or successor) aggregates WU-06 Reviewer report + emits `coordination/WAVE-GATE-04.md`.
-2. Authors `coordination/CLUSTER-HANDOFF-4-WU06-WU07.md` (D1 HIGH; Phase 2 close-walk reads SLICE 4 deliverables + PR-F7 evidence + freeze-hook activation state).
-3. Authorizes Wave 5 dispatch: CL-05-A WU-07 Phase 2 close-walk; audit-tier + HYBRID_REVIEWER=true.
-4. Wave 5 gate authorizes Phase 2 close milestone → **HARD STOP per extended overnight authority 2026-05-18 mid-afternoon**.
-
-## State at R33 close
+## State at R34 entry
 
 | Element | State |
 |---|---|
-| WU-05 R32 SLICE 3 close-walk | ✅ MERGE-READY c503edb; merged into main |
-| Hybrid Reviewer (Opus + Sonnet + Merger) | ✅ executed; coverage split confirmed as pattern |
-| Vendor-fungibility amendment | ✅ landed IN-PLACE in SCOPING-MEMO-v0.3.md (R32; substantive content intact; structural placement broken per MAJOR-1; surgery deferred) |
-| PHASE-2-SLICE-3-CLOSE-WALK.md | ✅ emitted at R32 (§ 3 SLICE 4 entry framing abbreviated; supplement in CLUSTER-HANDOFF-3-WU05-WU06) |
-| REVIEWER-REPORT-R32.md (hybrid: Opus+Sonnet+Merger) | ✅ emitted |
-| WAVE-GATE-03.md | ✅ emitted at R33 |
-| WAVE-PLAN-03.md | ✅ emitted at R33 (NEW v3 extension; resolves WAVE-PLAN-02 OQ-W1-3 SLICE 4 decomposition deferral) |
-| 6 CLUSTER-HANDOFF-3 artifacts | ✅ emitted at R33 (WU-05 → WU-06 convention; WU-00/01/02/03 D2 MEDIUM cross-wave; WU-04 D1 HIGH cross-wave) |
-| COORDINATOR-MEMORIAL.md | ✅ Wave 3 gate appends landed (6 confirmations + 2 observations + Rule 5 derivation + emerging-patterns updates) |
-| 0-CRITICAL streak | 32 consecutive rounds |
-| 0-MAJOR streak | broken at R32 (Hybrid Reviewer caught 2 MAJORs that audit-tier warm self-review missed — methodology absorption, not regression) |
+| Wave 1+2+3 deliverables | ✅ all merged + close-walked at R32 |
+| WAVE-GATE-03 + WAVE-PLAN-03 + 6 CLUSTER-HANDOFF-3 | ✅ emitted at R33 |
+| 5 cross-project rules active | ✅ all in CROSS-PROJECT-MEMORIAL.md (Rule 5 NEW at R33 gate) |
+| Vendor-fungibility amendment | ✅ landed IN-PLACE in SCOPING-MEMO-v0.3 at R32 |
+| 0-CRITICAL streak | 30+ rounds |
+| 0-MAJOR streak | broken at R32 (audit-tier hybrid Reviewer surfaced 2 MAJOR; methodology absorbed) |
 | Working tree | clean |
-| HEAD | `c503edb` (R32 Memorial-Updater outputs) |
-| Cross-project rules at end of R33 | 5 total (Rules 1-5; Rule 5 NEWLY DERIVED this round) |
-| Wave 4 readiness | AUTHORIZED — overnight-mode auto-proceeds |
-| Phase 2 close (new HARD STOP) | ~R36-R38 area (1-3 rounds out) |
-| SLICE 3 MILESTONE | ✅ ACHIEVED with carry-forward MAJORs |
+| HEAD | `2c35fb6` (R33 Coordinator outputs) |
+| Main-worktree baseline | tests=305/pass=299/fail=6; tsc exit 0 (per WAVE-GATE-03 pre-flag — Architect verifies empirically at session entry) |
+| CLAUDE-IMPLEMENTER.md | 51 lines (MR-2 consolidation staged for Phase 2 close per `STAGED-FOR-PHASE-2-CLOSE.md` Item 1) |
+| Wave 5 (Phase 2 close-walk) readiness | conditional on Wave 4 gate ADVANCE |
+| NEW HARD STOP | Phase 2 close milestone (Wave 5 gate; R37+ area) |

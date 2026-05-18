@@ -96,3 +96,16 @@ When Tessera ages past ~6 months, oldest R01-R10 reinforcements may have been su
 - Commit C — pass 3 (CLAUDE-COMMON.md promotions; multi-file touch)
 
 ## When more items get staged for Phase 2 close, append below as Item 2, Item 3, etc.
+
+---
+
+## Item 2 — R32 carry-forward punch list (per WAVE-GATE-03 Pre-flags + OQ-W3-3 default B)
+
+**Per WAVE-GATE-03 § Pre-flags table + OQ-W3-3 default B** (SCOPING-MEMO MAJOR-1 surgery deferred to WU-07 close-walk for cleaner scope-bounding), the following R32 carry-forward items land at WU-07 (Phase 2 close-walk):
+
+1. **SCOPING-MEMO MAJOR-1 structural surgery** (from R32 hybrid Reviewer) — specific spec amendment required; details in `coordination/reviews/REVIEWER-REPORT-R32.md` § MAJOR-1.
+2. **4 weak ACs strengthening** (from R32 OBS surfaces) — per `coordination/PHASE-2-SLICE-3-CLOSE-WALK.md` § 4 carry-forward inventory.
+3. **execSync carry-forward** at `test/q25-l0-contract.test.ts:216` and `test/q30-nvlink-adapter.test.ts:230` — both use `execSync` for git diff calls; R26 MINOR-1 reinforcement mandates `execFileSync`. WU-07 close-walk should pre-authorize touches at these specific lines.
+4. **R26 MINOR-2 PARTIALLY-CLOSED deferral** — common-mode-attribution.ts impl alignment (Option A: distinct-member-shard iteration) deferred at R32 OBS-4 to WU-06 consumer context. If WU-06 ships FusedVerdict → FiredShardEvent adapter site (Architect's call), MINOR-2 closes there; else WU-07 closes it.
+
+WU-07 Architect reads this file as part of close-walk scope authoring.
