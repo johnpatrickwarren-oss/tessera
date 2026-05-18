@@ -13,6 +13,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { VerdictGrouper } from '../engine/verdict-groups';
 import type { FusedVerdict } from '../engine/types/verdict';
 
@@ -177,6 +178,29 @@ test('AC-R20-9: legacy-mode D2 regression coverage (window-elapsed, terminal, fl
     assert.strictEqual(r2.late_arrival, true, '(d) late-arrival within grace should be true');
     assert.strictEqual(r2.attributed_group.group_id, 'group-deploy-A-1000');
     assert.strictEqual(r2.attributed_group.late_arrival_verdicts.length, 1);
+  }
+});
+
+// Pinned to R20 chore-A SHA 23a497e (not HEAD) so post-R20 commits (Memorial-Updater
+// outputs, CLAUDE-*.md reinforcements, etc.) do not cause false failures.
+test('AC-R20-12: Anti-scope — git diff cecd677..23a497e --name-only ⊆ allowed-set', () => {
+  const allowed = new Set([
+    'engine/verdict-groups.ts',
+    'engine/verdict-groups.js',
+    'coordination/VENDORING-MANIFEST.md',
+    'test/q01-no-at-pin-deltas.test.ts',
+    'test/q01-no-at-pin-deltas.test.js',
+    'test/q20-verdict-grouper-cluster-event-scope.test.ts',
+    'test/q20-verdict-grouper-cluster-event-scope.test.js',
+    'coordination/specs/Q-R20-SPEC.md',
+    'coordination/specs/Q-R20-SPEC-AUDIT.md',
+    'coordination/NEXT-ROLE.md',
+    'coordination/MEMORIAL.md',
+  ]);
+  const diff = execSync('git diff cecd677..23a497e --name-only', { encoding: 'utf-8' });
+  const touched = diff.split('\n').filter((p) => p.length > 0);
+  for (const p of touched) {
+    assert.ok(allowed.has(p), `Unexpected file in R20 diff vs cecd677: ${p}`);
   }
 });
 
