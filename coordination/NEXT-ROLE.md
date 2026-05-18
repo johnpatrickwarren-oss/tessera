@@ -1,110 +1,84 @@
 CURRENT-ROUND: R24
-NEXT-ROLE: COORDINATOR
-STATUS: READY
+NEXT-ROLE: OPERATOR (wave-plan review)
+STATUS: WAVE-PLAN-READY
 
-## Round-scope directive
+## Round-scope directive (R24 — Coordinator emission complete)
 
-**R24 (Coordinator-mode invocation) = first use of vendored Coordinator role for SLICE 3.B and beyond planning.**
+**R24 Coordinator invocation complete.** Wave plan emitted at `coordination/WAVE-PLAN-01.md` decomposing remaining Phase 2 work (post-R23) into 7 work units across 4 waves. Wave 1 is a recommended **4-cluster fan-out** (3 ingestion adapters + 1 MD-F4 empirical validation cluster); Waves 2/3/4 are single-cluster (SLICE 3 close-walk → SLICE 4 → Phase 2 close-walk).
 
-This is the test of MR-1 (the methodology round that vendored the Coordinator role + 5 templates + pipeline integration + cluster-scopes scaffold). Operator's intent: use anchor's Coordinator to decide whether SLICE 3.B (HardwareTopologySource ingestion adapters: Slurm + K8s + NVLink) should fan out into parallel clusters or proceed sequentially. Same evaluation applied to SLICE 3.C, SLICE 3 close-walk, SLICE 4, and Phase 2 close.
+## Inputs for next role (Operator — wave-plan review)
 
-The Coordinator emits a WAVE-PLAN-01.md decomposing the remaining Phase 2 work. **Operator preference: PREFER fan-out when D1-D5 tests show clean independence; do NOT force fan-out when scope is genuinely sequential.** If two or more WUs in a candidate wave have no D1 shared-output / no D2 AC-reference / no D5-strict write-conflict edges between them, the wave plan should dispatch them as parallel clusters — don't collapse to a single cluster out of conservatism. Conversely, when D-tests prove dependence across every pair, recommend single-cluster waves with explicit reasoning (which D-test fired; what collapsed the candidates).
+**Primary review artifact:**
+1. **`coordination/WAVE-PLAN-01.md`** — full DAG + wave sequencing + tier classifications + 6 open questions
 
-After the Coordinator emits the plan, operator reviews:
-- If plan recommends fan-out in any wave → operator invokes `scripts/multi-track-cluster-setup.sh` per cluster + dispatches per wave plan (this is the preferred outcome where the scope allows)
-- If plan recommends single-cluster waves with explicit dependency-blocked reasoning → operator runs standard `./run-pipeline.sh --round R24 --tier full` for SLICE 3.B (or whichever round is up next)
+**Supporting artifacts:**
+2. **`coordination/COORDINATOR-MEMORIAL.md`** (NEW) — first Coordinator memorial; pre-Wave-1 confirmations + cross-project pattern watch-list
+3. **`coordination/PRD.md`** + **`coordination/SCOPING-MEMO-v0.3.md`** § 2.3 + § 3 (source of WU decomposition)
+4. **`coordination/PHASE-2-SLICE-2-CLOSE-WALK.md`** § 3 (SLICE 3 entry framing the Coordinator decomposed against)
 
-**Tier (Coordinator-mode invocation):** N/A — Coordinator runs solo (no Architect/Implementer/Reviewer for the wave-plan emission itself). Each cluster the wave plan dispatches will receive its own tier classification per `CLAUDE-COMMON.md` rubric + the Coordinator's prior.
+## Coordinator's headline finding
 
-**Authority:** Operator authorized "let's move forward with slice 3" + MR-1 vendoring authorization ("I want anchor to be used to decide whether or not it makes sense to scale out implementers, and if we run into problems with it, to continue to optimize anchor"). MR-1 closed structurally at HEAD `7890b36`; this is the first Coordinator dispatch.
+**Wave 1 fan-out is recommended (4 parallel clusters).** D1/D2/D5 dependency tests fire zero edges between WU-01/02/03/04. D4 file-tree contention is resolvable via parallel-class architecture (see OQ-W1-1 — load-bearing operator decision).
 
-## Inputs for next role (Coordinator)
+## Open questions (operator gates before Wave 1 dispatch)
 
-**Read in order:**
+**Blocking (Wave 1 cannot dispatch until answered):**
 
-1. **`CLAUDE-COMMON.md`** + **`CLAUDE-COORDINATOR.md`** — your role discipline (loaded as system prompt; for reference if needed).
-2. **`coordination/PRD.md`** — FR-E3a (R20+R21 ✅), **FR-E3b (HardwareTopologySource — SLICE 3 in flight, R23 ✅ scaffold)**, **FR-E3c (event-conditional attribution — SLICE 4 pending)**, AC-P4.
-3. **`coordination/SCOPING-MEMO-v0.3.md`** — canonical scope; especially:
-   - § 2.3 Phase 2 Extension 3 — full scope of FR-E3a/b/c
-   - § 3 Q-cycle table — Phase 2 SLICE 3 row (line 346, 3-4 cycles); SLICE 4 row (event-conditional attribution); Phase 2 close
-   - § 4.2 R-E3 (synthetic-cluster substrate decouples Phase 2 from real-cluster integration — applies to SLICE 3.B adapters)
-4. **`coordination/PHASE-2-SLICE-2-CLOSE-WALK.md`** § 3 — explicit SLICE 3 entry framing + open questions (OQ-1, OQ-R08-3, LS-4) + hybrid-Reviewer mandate at SLICE 3 close.
-5. **`coordination/specs/Q-R23-SPEC.md`** + **`coordination/reviews/REVIEWER-REPORT-R23.md`** + **`coordination/logs/ROUND-R23-SUMMARY.md`** — R23 SLICE 3.A scaffold outcome (HardwareTopologySource + v9Y fixture + type-union extensions; 0/0/3/3; 217/0 tests).
-6. **`engine/hardware-topology-source.ts`** + **`test/_substrate/v9Y-multi-rack-cluster.ts`** — R23 deliverables; the contract surface SLICE 3.B ingestion adapters will consume.
-7. **`engine/topology-overlay.ts`** — inherited interfaces (`TopologySource` line 50-55; `StaticTopologySource` line 83-101; `OtelServiceGraphV1` line 111-180; BFS line 257+).
-8. **`templates/WAVE-PLAN-TEMPLATE.md`** — your primary deliverable scaffold. Fill EVERY section.
-9. **`templates/README.md`** — Tessera-local path-reference adaptation table.
-10. **`/Users/johnwarren/.claude/CROSS-PROJECT-MEMORIAL.md`** — cross-project rules; apply "Reinforcement rules derived" sections.
+- **OQ-W1-1** — Adapter file-layout convention. Option A: Coordinator pre-declares parallel-class (recommended; mirrors `engine/topology-overlay.ts:83-160`). Option B: defer to cluster Architects (latent drift risk; mitigation in WU-05 close-walk).
 
-## Scope of work units to decompose
+**Non-blocking (defaults apply if no answer):**
 
-The Coordinator should extract candidate work units from the PRD/SCOPING-MEMO covering at minimum:
+- **OQ-W1-2** — WU-07 (Phase 2 close-walk) tier classification: audit (default; close-walk pattern) vs full (treats Hybrid Reviewer pair-review as architecturally novel).
+- **OQ-W1-3** — SLICE 4 decomposition timing: defer to follow-up Coordinator invocation post-WU-05 (recommended) vs pre-decompose now (violates Step 1 discipline).
 
-**Remaining Phase 2 work (post-R23):**
-- **SLICE 3.B (ingestion adapters)** — three candidate WUs:
-  - SLURM-ADAPTER: parse Slurm topology format → TopologySnapshot
-  - K8S-ADAPTER: parse K8s node-label API → TopologySnapshot
-  - NVLINK-ADAPTER: parse NVIDIA NVLink-topology output → TopologySnapshot
-- **SLICE 3.C (empirical validation)** — likely single WU:
-  - MD-F4 / PR-F6 hybrid Reviewer / common-mode failure-injection test on v9Y
-- **SLICE 3 close-walk** — single WU (audit tier; mirrors R19/R22 pattern)
-- **SLICE 4 (event-conditional attribution)** — TBD work units per FR-E3c; possibly fan-out candidates if event-feed has multiple producer types (firmware/deploy/config)
-- **Phase 2 close-walk** — single WU; hybrid Reviewer fires per SCOPING-MEMO § 4.4
+**Forward-looking (may surface mid-Wave-1):**
 
-**The Coordinator's headline question for the operator:** which of these fan out into parallel clusters, and which are sequential? Each decision must trace to D1-D5 tests.
+- **OQ-W1-6** — LS-4 sparse-topology degradation: WU-04 cluster Architect may need inherited BFS body modification at `engine/topology-overlay.ts`. If load-bearing, escalates to Coordinator wave-plan-v2 emission.
 
-## Anti-scope (Coordinator hard limits)
+**Carry-forward (still parked; not blocking):**
 
-- **NO modification of engine/* files** — Coordinator does not write code.
-- **NO modification of test/* files** — Coordinator does not write tests.
-- **NO drafting of cluster-level specs** — that's the per-cluster Architect's job after dispatch.
-- **NO modifying NEXT-ROLE.md in any cluster worktree** — wave plan is the dispatch artifact, not direct NEXT-ROLE.md updates per cluster.
-- **NO pre-resolving operator OQs by assumption** — surface as `## Open questions for operator` at end of WAVE-PLAN-01.md.
-- **NO inventing work units not traceable to PRD or SCOPING-MEMO** — extraction per CLAUDE-COORDINATOR.md §DAG Step 1.
+- **OQ-W1-4** — OQ-1 (Q-JC1) `tools/calibrate.ts` vendoring (parked from Phase 1 close-walk)
+- **OQ-W1-5** — OQ-R08-3 Phase 2 transient detector scheduling (parked)
 
-## Expected deliverables
+## Operator action items
 
-1. **`coordination/WAVE-PLAN-01.md`** — primary output. Fill all sections of `templates/WAVE-PLAN-TEMPLATE.md`:
-   - Plan summary (1-3 sentences; total WUs; total waves; foundations)
-   - PRD provenance (PRD source + version + anti-scope referenced)
-   - Step 1: deterministic work unit extraction (table with WU IDs, source PRD ref, ACs, anti-scope, file tree scope)
-   - Step 2: dependency edge identification (table with D1-D5 test that fired; confidence; reasoning)
-   - Step 3: Claude judgment calls (if any; format per template)
-   - Step 4: DAG validation checks (cycle / island / foundation)
-   - Step 5: wave sequencing (table with wave # / WUs / rationale)
-   - Step 6: tier classifications (table with WU / Coordinator tier / matched criteria)
-   - Cluster handoff inventory (forward-looking; one row per directed edge)
-   - Pre-emit grilling checklist (6 items per template; check all)
-   - Open questions for operator (if any)
-   - Wave 1 dispatch authorization (READY or HOLD)
-2. **`coordination/COORDINATOR-MEMORIAL.md`** (NEW; initialize from `templates/COORDINATOR-MEMORIAL-TEMPLATE.md` since this is first Coordinator invocation in this project).
-3. **`coordination/NEXT-ROLE.md`** update at end:
-   - `NEXT-ROLE: OPERATOR (wave-plan review)`
-   - `STATUS: WAVE-PLAN-READY`
-   - `Inputs: coordination/WAVE-PLAN-01.md`
+1. Read `coordination/WAVE-PLAN-01.md` in full (Plan summary → Steps 1-6 → Open questions → Wave 1 dispatch authorization).
+2. **Answer OQ-W1-1** (mandatory before Wave 1 dispatch). OQ-W1-2 and OQ-W1-3 are non-blocking; Coordinator defaults apply otherwise.
+3. (Optional) Author per-cluster scope blocks at `coordination/cluster-scopes/wave-1/wu-01-slurm-adapter.md`, `wu-02-k8s-adapter.md`, `wu-03-nvlink-adapter.md`, `wu-04-md-f4-common-mode.md` per `coordination/cluster-scopes/README.md` layout. Coordinator did NOT author these in R24 — they were not enumerated in the R24 expected deliverables list. Operator may author directly OR re-invoke Coordinator for a focused scope-block-authoring pass.
+4. Wave 1 dispatch (after OQ-W1-1 is answered + scope blocks exist):
+   - 4 invocations of `scripts/multi-track-cluster-setup.sh` (one per cluster) with the `--scope <PATH>` flag pointing at each cluster-scope file.
+   - Inside each cluster worktree, run `scripts/run-pipeline.sh --tier full`.
+5. After all four Wave 1 clusters reach MERGE-READY: re-invoke Coordinator for Wave 1 gate (merges per-cluster MEMORIAL fragments, writes `coordination/WAVE-GATE-01.md`, authorizes Wave 2).
 
-Auto-commit happens via `commit_coordinator_outputs` on clean completion (MR-1B added this hook).
+## Tier (R24 Coordinator-mode invocation)
 
-## Escalation items
+N/A — Coordinator ran solo (no Architect/Implementer/Reviewer for the wave-plan emission itself). Each Wave 1 cluster carries its own tier classification per WAVE-PLAN-01.md Step 6.
 
-(none active; all SLICE 2 carry-forwards closed at R22)
+## Authority
 
-## Routing notes
+Operator authorized "let's move forward with slice 3" + MR-1 vendoring authorization. MR-1 closed structurally at HEAD `7890b36`; this R24 invocation was the first Coordinator dispatch and emitted WAVE-PLAN-01.md cleanly (zero halt conditions; zero violations; OQs surfaced rather than auto-resolved per role boundary).
 
-- No overnight authority active. Operator returns after Coordinator emits the wave plan; reviews; decides on cluster fan-out vs sequential R24 execution.
-- The Coordinator's decision is a recommendation; operator's choice governs.
-- If wave plan recommends single-cluster waves, operator subsequently runs `./run-pipeline.sh --round R24 --tier full` for SLICE 3.B (per the Architect's R23 split decision identifying R24 as the deferred ingestion-adapters round).
-- If wave plan recommends ≥2 clusters in Wave 1, operator follows multi-track dispatch protocol per `scripts/multi-track-cluster-setup.sh`.
-
-## State at R24 entry
+## State at R24 close
 
 | Element | State |
 |---|---|
-| MR-1 methodology vendoring | ✅ HEAD `7890b36` (templates + CLAUDE-COORDINATOR + pipeline + scaffold) |
-| R23 SLICE 3.A scaffold | ✅ HEAD `528b5b9` (HardwareTopologySource + v9Y fixture + type-union extensions; 0/0/3/3; 217/0 tests) |
-| 0-CRITICAL streak | 22 rounds (R02-R23) |
-| 0-MAJOR streak | 4 rounds (R20-R23) |
-| Working tree clean | ✅ |
-| HEAD | `7890b36` (MR-1C scaffold commit) |
-| Test count | 217 / 0 |
-| Phase 2 SLICE 3 completion estimate | ~3-4 rounds (R24-R27?) per SCOPING-MEMO § 3 |
+| MR-1 methodology vendoring | ✅ HEAD `7890b36` |
+| R24 Coordinator invocation | ✅ WAVE-PLAN-01.md emitted; COORDINATOR-MEMORIAL.md initialized |
+| Phase 2 SLICE 3.A scaffold | ✅ HEAD `f8dde4b` (R23 MERGE-READY) |
+| Wave plan version | v1 (initial decomposition) |
+| WUs decomposed | 7 (WU-01 through WU-07) |
+| Waves planned | 4 (Wave 1: 4-cluster fan-out; Waves 2/3/4: single-cluster) |
+| Open questions surfaced | 3 new (OQ-W1-1/2/3); 1 forward-looking (OQ-W1-6); 2 carry-forward (OQ-W1-4/5) |
+| HEAD at R24 close | (pending commit_coordinator_outputs hook) |
+
+## Routing notes
+
+- No overnight authority active. Operator returns; reviews wave plan; answers OQ-W1-1; dispatches Wave 1 (multi-track) or re-invokes Coordinator for scope-block authoring first.
+- Coordinator's recommendations are recommendations; operator's choice governs.
+- If operator selects OQ-W1-1 Option A (parallel-class — recommended): standard 4-cluster fan-out dispatch.
+- If operator selects OQ-W1-1 Option B (defer to cluster Architects): Wave 1 still 4-cluster fan-out, but WU-05 close-walk scope expands to include convention-drift audit.
+- If operator deems the entire plan infeasible (e.g., wants different decomposition or different fan-out judgment): re-invoke Coordinator with operator-supplied directive amendment; Coordinator emits WAVE-PLAN-02.md.
+
+## Auto-commit
+
+`commit_coordinator_outputs` hook (added at MR-1B) commits coordinator artifacts (WAVE-PLAN-01.md, COORDINATOR-MEMORIAL.md, NEXT-ROLE.md) on clean completion.
