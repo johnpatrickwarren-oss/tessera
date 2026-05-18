@@ -129,6 +129,19 @@ The pipeline surfaces this and pauses. You do not proceed unilaterally.
 # Each tier-down is a real safety trade. audit drops the Architect's cold-eye
 # spec discipline; solo also drops the Reviewer's cold-eye audit. The cost
 # savings come at the cost of pre-merge bug-catching surface.
+#
+# MULTI-CLUSTER MODE (orthogonal to tier dial; OPT-IN). When PRD scope contains
+# work units that are genuinely independent, the operator can invoke
+# `run-pipeline.sh --coordinator` to produce a wave plan that decomposes the
+# work across parallel clusters (worktrees). Each cluster then runs its own
+# tier-scaled pipeline (solo/audit/full per cluster) against its work unit.
+# Wave plans, cluster handoffs, wave gates, and Coordinator memorial are
+# governed by CLAUDE-COORDINATOR.md (loaded only in --coordinator mode).
+# Multi-cluster overhead is real — the Coordinator role pays for itself only
+# when ≥2 clusters can dispatch concurrently in at least one wave. For
+# linear-dependency scope (most Tessera Phase 1/2 slices to date), the wave
+# plan correctly recommends single-cluster waves and standard single-pipeline
+# execution proceeds.
 
 ## How to pick a tier (60-second decision tree)
 

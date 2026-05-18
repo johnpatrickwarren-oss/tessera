@@ -19,12 +19,20 @@
 #   CLAUDE-IMPLEMENTER.md  Implementer role block + Implementer reinforcements.
 #   CLAUDE-REVIEWER.md     Reviewer role block + Reviewer reinforcements.
 #   CLAUDE-MEMORIAL.md     Memorial Updater role block + Memorial reinforcements.
+#   CLAUDE-COORDINATOR.md  Coordinator role block + Coordinator reinforcements.
+#                          OPT-IN per project; loaded only in --coordinator mode
+#                          (multi-cluster wave planning). The four-role pipeline
+#                          does NOT load this file. See MR-1 vendoring 2026-05-18.
 #   coordination/.role-stamp  (gitignored) per-invocation role identity.
 #
 # The pipeline (run-pipeline.sh) concatenates CLAUDE-COMMON.md + the matching
 # CLAUDE-<ROLE>.md + .role-stamp as the system prompt for each role session.
 # That keeps the cacheable prefix byte-identical across worktrees while halving
 # per-session prompt weight versus loading a monolithic CLAUDE.md.
+#
+# Multi-cluster execution (--coordinator mode + multi-track scripts) is
+# documented in CLAUDE-COORDINATOR.md and templates/README.md. Single-cluster
+# (Mode 2) execution is the default and does not load Coordinator content.
 #
 # Memorial Updater appends REINFORCED lines to the role file matching the
 # violating role (or CLAUDE-COMMON.md for cross-role lessons). Do not delete
@@ -43,6 +51,10 @@
 # When you're working at the operator level (deciding which round to run,
 # resolving an escalation, reviewing outputs), the universal disciplines in
 # CLAUDE-COMMON.md are usually sufficient.
+# When you are acting as the Coordinator (multi-cluster wave planning):
+# read CLAUDE-COMMON.md + CLAUDE-COORDINATOR.md (only). The Coordinator
+# does not read other CLAUDE-<ROLE>.md files; cluster-internal disciplines
+# load in cluster sessions, not in the Coordinator session.
 
 # ── PROJECT CONTEXT ───────────────────────────────────────────────────────────
 # Tessera is the per-shard observation layer derived from DeploySignal's
