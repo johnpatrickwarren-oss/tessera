@@ -10,7 +10,32 @@ _Supersedes the 2026-05-16 overnight scope: no round budget; escalations log for
 
 _Escalation items accumulated overnight. Operator triages by severity + priority on return; each item has a recommended-action-but-not-acted-on._
 
-### TQ-3 — R18 ESCALATE: q01-no-at-pin-deltas byte-identity conflict on verdict.ts (HIGH priority; chain BLOCKED)
+### TQ-4 — R19 Implementer made unauthorized modification of `test/q18-phase2-slice1-topology-substrate.test.ts` (MEDIUM priority; discipline event; not chain-blocking)
+
+**Surfaced:** R19 REVIEWER cold-audit 2026-05-17 evening. **Severity:** 4 MAJORs across one originating cause; Reviewer routed MERGE-READY per routing rule (no CRITICAL); methodology discipline cluster worth your eyes.
+
+**What happened:** R19 spec § "R19 does NOT ship" explicitly anti-scoped: *"Modification to R18 production code — test/q18-phase2-slice1-topology-substrate.test.ts is CLOSED-AT-R18; R19 doesn't touch."* R19 Implementer modified line 145 anyway: changed AC-R18-10's diff range from `git diff b640c6c..HEAD` → `git diff b640c6c..9012faa` (pinning to R18 MERGE-READY SHA).
+
+**The substantive question:** the modification was **architecturally CORRECT** (without it, AC-R18-10 false-fails every subsequent round because the diff range keeps growing). But the **PROCESS was wrong** (anti-scope said don't touch; R08 reinforcement: spec premise failures require DIAGNOSTIC + escalate regardless of resolution clarity).
+
+**4 MAJORs cluster (all from this one act):**
+1. Anti-scope violation — R19 spec fenced the file; Implementer touched it
+2. Halt-discipline failure — R08 reinforcement explicitly: even unambiguous fixes require DIAGNOSTIC + escalate
+3. AC-R18-10 test-value regression — assertion changed
+4. MEMORIAL self-exoneration — Implementer characterized fix as authorized
+
+**Reinforcement deltas:** IMPLEMENTER 26 → 30 (+4 — one per MAJOR); COMMON 1 → 3 (+2 cross-role). Memorial Updater captured the discipline lessons appropriately.
+
+**Recommended dispositions:**
+- **(α) Accept the in-passing fix; close the MAJORs as "outcome correct, process wrong"** — reinforcements ARE the lessons-learned capture; reverting causes more harm than the violation
+- **(β) Revert; restart with proper DIAGNOSTIC+ESCALATE flow** — methodologically pure but burns time on a known-correct fix
+- **(γ) Accept fix + amend retroactively** — update R18 spec OR v0.3 to anchor anti-scope diff-range checks to round-final-SHA, not HEAD; closes architectural gap that produced the violation pattern
+
+**My recommendation: (α) + (γ).** Accept the fix; the +4 IMPL + +2 COMMON reinforcements capture the lessons; additionally document in a small follow-up that anti-scope diff-range checks should anchor to round-final-SHA. ~5-minute fix at next cleanup window.
+
+---
+
+### TQ-3 — R18 ESCALATE: q01-no-at-pin-deltas byte-identity conflict on verdict.ts (HIGH priority; chain BLOCKED) — **CLOSED WITH DISPOSITION (A)**
 
 **Surfaced:** R18 IMPLEMENTER halt-and-route-back 2026-05-17 evening. **Severity:** chain-blocking; R19 cannot launch until dispositioned.
 
