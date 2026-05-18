@@ -1,6 +1,45 @@
 CURRENT-ROUND: R25
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
+
+## Implementer attestation (chore-A — resumed from ESCALATE-R25-01)
+
+**GREEN commit SHA:** c78374d
+**Attestation SHA (chore-A):** substituted below after chore-A commit.
+
+**AC-R25-13 (typecheck):** `npx tsc -p tsconfig.test.json` → EXIT 0. No diagnostics emitted.
+
+**AC-R25-14 (test count at chore-A SHA):** `node --test test/*.test.js` →
+  tests=229, pass=228, fail=1
+  - 1 fail: q01 AC-7 — pre-existing environmental failure (cluster worktree
+    lacks ../deploysignal sibling repository; confirmed not-a-halt per operator
+    disposition in NEXT-ROLE.md "Operator decision" section).
+  - 228 R25-relevant tests pass (217 baseline + 12 new q25 tests at chore-A).
+  - Per operator: "228 R25-relevant pass + 1 pre-existing fail = MERGE-READY
+    with documented pre-existing." AC-R25-14 spec prediction was 229/229/0;
+    actual is 229/228/1 due to pre-existing environmental fail; reconciliation
+    documented and confirmed by operator.
+
+**Per-AC line citations** (grep -n "^test(" test/q25-l0-contract.test.ts at GREEN SHA):
+  - AC-R25-1:  test/q25-l0-contract.test.ts:33
+  - AC-R25-2:  test/q25-l0-contract.test.ts:47
+  - AC-R25-3:  test/q25-l0-contract.test.ts:59
+  - AC-R25-4:  test/q25-l0-contract.test.ts:72
+  - AC-R25-5:  test/q25-l0-contract.test.ts:84
+  - AC-R25-6:  test/q25-l0-contract.test.ts:95
+  - AC-R25-7:  test/q25-l0-contract.test.ts:106
+  - AC-R25-8:  test/q25-l0-contract.test.ts:124
+  - AC-R25-9:  test/q25-l0-contract.test.ts:133
+  - AC-R25-10: test/q25-l0-contract.test.ts:141
+  - AC-R25-11: test/q25-l0-contract.test.ts:148
+  - AC-R25-12: test/q25-l0-contract.test.ts:155
+
+**Commit sequence completed:**
+  - RED:     2f2552e — test(R25-RED): q25-l0-contract stubs
+  - HALT:    4f405c0 — escalate(R25): HALT — AC-R25-12 tolerance
+  - DISP:    f7be96c — R25 ESCALATE-R25-01 disposition: Option A
+  - GREEN:   c78374d — feat(R25): L0 contract — AC-R25-12 GREEN (Option A tolerances)
+  - chore-A: <CHORE-A-SHA> — this commit
 
 ## Operator decision (2026-05-18 — overnight authority auto-Option-A disposition)
 
