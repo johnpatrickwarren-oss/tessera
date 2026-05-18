@@ -1,6 +1,6 @@
 CURRENT-ROUND: R25
-NEXT-ROLE: IMPLEMENTER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ESCALATE
 
 ## Inputs for next role
 - coordination/specs/Q-R25-SPEC.md
@@ -71,7 +71,23 @@ Anti-scope diff baseline SHA: `ada602b` (R25 round-start). AC-R25-15 SHA-pinned 
 
 ## Escalation items
 
-(none — all PRD/spec ambiguities resolved at Architect time; no Open Questions per spec § 7)
+### ESCALATE-R25-01: AC-R25-12 tolerance contradiction (§ 1.8 vs § 4.3/§ 5.1) + empirically failing premise
+
+**Diagnostic file:** `coordination/diagnostics/DIAGNOSTIC-R25-ac12-tolerance.md`
+
+**Summary:** The spec prescribes `Math.abs(snap.mean - 10) < 1e-9` in § 4.3 and § 5.1 with the claim "exact arithmetic on synthetic data." This premise fails empirically: float64 arithmetic for the 1.2s interval produces `|mean - 10| ≈ 1.2e-7`, not < 1e-9. The spec also has an internal contradiction: § 1.8 prescribes `mean < 0.001` and `slopeNorm < 0.01` (which both pass). The implementation is correct; the test tolerance in § 4.3/§ 5.1 is wrong.
+
+**Bounded question for operator:**
+
+- **Option A:** Use § 1.8 tolerances — change assertion to `mean < 0.001` and `slopeNorm < 0.01`. Passes empirically; counterfactual discriminator preserved (wrong implementation mean ≈ 11.8 >> 0.001). Recommended.
+- **Option B:** Use empirical intermediate tolerances — `mean < 1e-6`, `slopeNorm < 1e-9`. Tighter than A, both pass.
+- **Option C:** Change the generator intervals to float64-exact values ([1.0, 1.25, 1.5, ...]) so `mean` is exactly 10. This modifies the generator and test scenario.
+
+**State of work at HALT:** RED commit landed (`2f2552e`). Production files created (engine/l0/counter-rate-transform.ts, test/_substrate/synthetic-counter-generator.ts) but NOT committed — GREEN commit in progress. 11 of 12 AC-R25 tests pass; AC-R25-12 fails due to this tolerance issue. After operator resolution, Implementer resumes with the operator-directed tolerance and completes the GREEN commit.
+
+**Pre-existing environmental note:** The cluster worktree (`../deploysignal` not at expected sibling path) causes q01 AC-7 to fail. This produces baseline 217/216/1 (not 217/0 as spec claimed). This pre-existing failure is unrelated to R25 and unresolvable within R25 scope. The Implementer will report OBSERVED test counts (228 pass, 1 fail pre-existing) at chore-A. Operator should confirm this interpretation or direct otherwise.
+
+**Recommended operator action:** Direct Option A or B via this NEXT-ROLE.md "Operator decision" section; Implementer resumes from HALT and completes GREEN commit.
 
 ## Routing notes
 
