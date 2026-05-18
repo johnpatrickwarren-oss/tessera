@@ -1,99 +1,81 @@
-CURRENT-ROUND: R24
-NEXT-ROLE: OPERATOR (wave-plan-v2 review)
-STATUS: WAVE-PLAN-READY
+CURRENT-ROUND: R25
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 
-## Round-scope directive (R24 — operator review of WAVE-PLAN-02)
+## Inputs for next role
+- coordination/specs/Q-R25-SPEC.md
+- coordination/specs/Q-R25-SPEC-AUDIT.md
+- coordination/PRD.md (cluster scope block, lines 4-117)
+- coordination/SCOPING-MEMO-v0.3.md § 2.3 Extension 3 (b) L0-contract sub-extension + MR-1 AMENDMENT block (lines 219-256)
 
-**R24 Coordinator re-invocation emitted WAVE-PLAN-02.md** (clean; 2-cluster Wave 1 fan-out + 3-cluster Wave 2 fan-out; 5 waves total). WAVE-PLAN-01.md preserved on disk per Coordinator versioning discipline.
+## Round-scope directive (R25 — Implementer)
 
-**Plan shape (v2):**
+Implement Q-R25-SPEC.md verbatim. Three new code files (all Tessera-original):
 
-| Wave | Cluster count | Work units | Tier (Coordinator prior) |
-|---|---|---|---|
-| 1 | 2 (parallel) | WU-00 L0-CONTRACT (NEW; SLICE 3.B foundation) + WU-04 MD-F4 + PR-F6 | full + full |
-| 2 | 3 (parallel) | WU-01 SLURM + WU-02 K8S + WU-03 NVLINK adapters | full + full + full |
-| 3 | 1 | WU-05 SLICE 3 close-walk | audit |
-| 4 | 1 | WU-06 SLICE 4 event-conditional attribution | full |
-| 5 | 1 | WU-07 Phase 2 close-walk | audit (OQ-W1-2 carry-forward) |
+1. `engine/l0/counter-rate-transform.ts` — primary L0-contract module (pure-function `transformPair` + four types + four exported constants). See spec § 4.1 for pseudocode.
+2. `test/_substrate/synthetic-counter-generator.ts` — five exported factories (`makeCleanPair`, `makeMissedScrapePair`, `makeWrap32Pair`, `makeResetPair`, `makeVariableIntervalSequence`). See spec § 4.2 for pseudocode.
+3. `test/q25-l0-contract.test.ts` — 12 GREEN tests (AC-R25-1 through AC-R25-12), plus AC-R25-15 added at chore-B. See spec § 4.3 for pseudocode.
 
-**What changed v1 → v2:**
+**TDD discipline (R23 IMPL MINOR-1 reinforcement):** separate RED commit BEFORE GREEN. RED commit creates the q25 test file with `assert.fail` placeholders + imports that intentionally fail typecheck (because the L0 module + substrate do not yet exist). GREEN commit adds the production files + real test bodies. Do NOT combine into one feat commit.
 
-1. **NEW WU-00 L0-CONTRACT** (full-tier; SLICE 3.B foundation per SCOPING-MEMO MR-1 amendment Extension 3 (b) + § 3 SLICE 3.A.5 row + § 4.2 R-E7 row).
-2. **D1/D2 edges added** from WU-00 to adapters (asymmetric: D1 HIGH → NVLINK; D2 MEDIUM → SLURM/K8S per Step 3 Judgment call 1).
-3. **Wave 1 re-shaped** from v1's 4-cluster (adapters + MD-F4) to v2's 2-cluster (WU-00 + MD-F4). MD-F4 placement in Wave 1 (not Wave 2 with adapters) per Step 3 Judgment call 2 — preserves operator fan-out preference + lands PR-F6 evidence parallel to L0-contract.
-4. **Wave 2 introduced** as 3-cluster adapter fan-out (was v1's Wave 1).
-5. **Total waves grew from 4 → 5** (cost of L0-contract precondition; surfaced honestly in plan summary).
+**Commit sequence:**
 
-## Operator review action items (in dispatch-order priority)
+1. `test(R25-RED): q25-l0-contract stubs — AC-R25-1..12 pending` (RED — test file with placeholders + imports; `npx tsc -p tsconfig.test.json` produces TS2307 errors on the missing imports; commit this state as the RED audit-trail artifact)
+2. `feat(R25): L0 contract — counter-rate-transform + synthetic counter generator + AC-R25-1..12 GREEN` (GREEN — production files + real test bodies; all 12 ACs PASS; typecheck exit 0; test count = 229)
+3. `chore(R25): route to REVIEWER — coordination artifacts (chore-A)` (NEXT-ROLE.md routing block update with attestation; MEMORIAL.md Implementer ceremony section append; per-AC line citations verified by `grep -n "^test(" test/q25-l0-contract.test.ts` BEFORE commit per R21 line-citation rule)
+4. `chore(R25-B): AC-R25-15 anti-scope test + chore-A SHA <SHA> substituted` (append AC-R25-15 test() block to q25 file with chore-A SHA from step 3 substituted into BASELINE_SHA → CHORE_A_SHA literal)
 
-**BLOCKING for Wave 1 dispatch:**
+**Halt conditions** (per spec § 7.1 — HALT → DIAGNOSTIC + STATUS: ESCALATE; never silent in-line resolution; never test-mutation):
 
-1. **Answer OQ-W2-1** (L0-contract module location) — Coordinator default A applies if no answer. Options:
-   - **A (Recommended):** `engine/l0/counter-rate-transform.ts` — matches existing `engine/l0/schema-continuity.ts` neighbor convention.
-   - **B:** `engine/l0/contract.ts` — closer to "L0 contract" terminology in SCOPING-MEMO.
-   - **C:** `engine/l0/transform/index.ts` + subdirectory — anticipates per-source transforms.
+- (a) Typecheck fails at GREEN → DIAGNOSTIC-R25-typecheck.md
+- (b) Baseline test count differs from 217 → DIAGNOSTIC-R25-baseline-drift.md (likely operator-prep commit between R23 close and R25 entry the spec didn't anticipate)
+- (c) Any AC scenario produces output conflicting with spec prescription → DIAGNOSTIC-R25-ac-mismatch.md (DO NOT modify test to match observed — R19 MAJOR-3 self-confirming pattern)
+- (d) Spec files uncommitted at chore-A time → Architect-attributable defect (R21 ARCH MINOR-1); HALT
+- (e) Anti-scope file modification surfaces during binding-command runs → DIAGNOSTIC-R25-antiscope-collision.md (R19 MAJOR-1/2 — no silent test-mutation)
 
-**NOT BLOCKING for Wave 1; defer until Wave 1 → 2 gate:**
+**Anti-scope (per spec § 6) — non-exhaustive headline:**
 
-2. **Answer OQ-W1-1** (adapter file-layout convention; carry-forward from v1) — Coordinator default A (parallel-class) applies if no answer.
+- `engine/l0/schema-continuity.ts` body frozen (A12; READ-ONLY consumer of `SchemaDescriptor.semantic_type` at `:44`)
+- `engine/core.ts` body frozen (A12; TrendBuffer used as-is at AC-R25-12 integration test)
+- `engine/verdict-groups.ts` frozen (R20)
+- `engine/fleet/verdict-consumer.ts` frozen (R21)
+- `engine/hardware-topology-source.ts` frozen (R23)
+- `engine/topology-overlay.ts` vendored-at-pin (not modified)
+- `engine/types/verdict.ts` no R25 deltas (vendored-with-deltas at R18+R23 only)
+- All pre-R25 test files frozen (q01..q23 q-* suite)
+- `test/_substrate/v9X-cluster.ts` and `v9Y-multi-rack-cluster.ts` frozen (R18 + R23)
+- `coordination/VENDORING-MANIFEST.md` no modification (counter-rate-transform.ts is Tessera-original)
+- `coordination/SCOPING-MEMO-v0.3.md` and `coordination/PRD.md` no modification
 
-**NOT BLOCKING; defaults sufficient:**
+**Allowed-set (7 entries; per spec § 3):**
 
-3. **OQ-W1-2** (WU-07 tier classification) — default audit.
-4. **OQ-W1-3** (SLICE 4 decomposition timing) — default: defer to follow-up Coordinator invocation after WU-05.
-5. **OQ-W1-4 / OQ-W1-5** (carry-forward parked items: calibrate.ts vendoring; Phase 2 transient detector scheduling) — orthogonal.
-6. **OQ-W1-6** (forward-looking: WU-04 LS-4 sparse-topology) — surfaces during WU-04 cluster; operator should expect potential mid-Wave-1 escalation.
+1. engine/l0/counter-rate-transform.ts
+2. test/_substrate/synthetic-counter-generator.ts
+3. test/q25-l0-contract.test.ts
+4. coordination/specs/Q-R25-SPEC.md
+5. coordination/specs/Q-R25-SPEC-AUDIT.md
+6. coordination/NEXT-ROLE.md
+7. coordination/MEMORIAL.md
 
-## Wave 1 dispatch protocol (post-OQ-W2-1)
+Anti-scope diff baseline SHA: `ada602b` (R25 round-start). AC-R25-15 SHA-pinned end-bound = chore-A SHA (substituted by Implementer at chore-B time per § 4.6 pseudocode).
 
-Per WAVE-PLAN-02.md § Wave 1 dispatch authorization:
+**Reinforcements applied at Architect time (already swept; Implementer carries forward):**
 
-1. (Recommended) Author per-cluster scope blocks at `coordination/cluster-scopes/wave-1/wu-00-l0-contract.md` and `coordination/cluster-scopes/wave-1/wu-04-md-f4-common-mode.md`.
-2. Invoke `scripts/multi-track-cluster-setup.sh` once per Wave-1 cluster (2 invocations: branch `r24-l0-contract`, branch `r24-md-f4-common-mode`).
-3. Cd into each worktree; run `scripts/run-pipeline.sh --tier full` (2 pipeline runs; can be staggered or simultaneous).
-
-## Inputs for operator review
-
-Read in order:
-
-1. **`coordination/WAVE-PLAN-02.md`** — current wave plan (this round's primary Coordinator deliverable).
-2. **`coordination/WAVE-PLAN-01.md`** — v1 for diff reference; what changed is documented in v2's version-history table.
-3. **`coordination/COORDINATOR-MEMORIAL.md`** — Coordinator-level CONFIRMATION/VIOLATION entries for this re-invocation (appended; not overwritten).
-4. **`coordination/SCOPING-MEMO-v0.3.md`** §§ 2.3 (Extension 3 (b) MR-1 amendment block lines 219-228, 254-256), 3 (SLICE 3.A.5 row line 364), 4.2 (R-E7 row line 416) — the amendment surface that drove v2.
-
-## Anti-scope (Coordinator hard limits — observed)
-
-- ✅ No engine/* modification (Coordinator emitted no code).
-- ✅ No test/* modification.
-- ✅ No drafting of cluster-level specs (per-cluster Architect's job post-dispatch).
-- ✅ No modification of NEXT-ROLE.md in cluster worktrees (none exist yet).
-- ✅ No pre-resolution of OQs by Coordinator assumption — OQ-W2-1 surfaced to operator; OQ-W1-1 through OQ-W1-6 carried forward.
-- ✅ No invention of WUs not traceable to PRD/SCOPING-MEMO — WU-00 traces to MR-1 amendment surface.
-
-Auto-commit via `commit_coordinator_outputs` hook on clean completion.
+- Spec-commit-sequencing (R21 ARCH MINOR-1): spec files committed in commit `4d9783b` BEFORE this routing-block commit ✓
+- Branch-binding coverage (R21 MINOR-2/3): all 10 enumerated branches in transformPair have ≥ 1 binding AC (spec § 4.1)
+- Count-AC SHA-anchoring (R22 IMPL MINOR-1): AC-R25-14 explicitly anchored to chore-A SHA (spec § 5.1)
+- TDD separate-RED (R23 IMPL MINOR-1): prescribed above (commit sequence step 1)
+- .gitignore-aware allowed-set (R23 MINOR-2): 7-entry allowed-set audited — all `.ts` or `.md`; no `.js` phantoms (spec § 9.7)
+- Narrative-vs-prescription cross-check (R20 MINOR-1): § 5 preamble classifications match § 4.x prescriptions (spec § 9.6)
+- Line-citation discipline (R03/R18/R21): grep test() declarations before chore-A attestation
 
 ## Escalation items
 
-(none active; all OQs are operator-decidable rather than blocking escalations)
+(none — all PRD/spec ambiguities resolved at Architect time; no Open Questions per spec § 7)
 
 ## Routing notes
 
-- WAVE-PLAN-02.md is READY-TO-DISPATCH conditional on OQ-W2-1 (with Coordinator default A available if operator defers).
-- If operator accepts the plan as-is: proceed to Wave 1 dispatch protocol above.
-- If operator surfaces architectural concerns about the plan: Coordinator re-invocation produces WAVE-PLAN-03.md.
-- If operator wants to merge WU-00 into WU-03 (NVLINK) cluster (collapsing the L0-contract into NVLINK's spec): that's a v3 amendment requiring re-invocation; do not collapse silently — the Coordinator placed WU-00 as a separate WU because the operator-amended SCOPING-MEMO carved it as a SLICE 3.A.5 row distinct from SLICE 3.B.
-
-## State at v2 emission
-
-| Element | State |
-|---|---|
-| MR-1 methodology vendoring | ✅ HEAD `7890b36` |
-| SCOPING-MEMO MR-1 amendment (L0 contract) | ✅ HEAD `4a4869e` |
-| R23 SLICE 3.A scaffold | ✅ HEAD `f8dde4b` |
-| R24 Coordinator first invocation (WAVE-PLAN-01) | ✅ HEAD `ffdba44` |
-| R24 Coordinator re-invocation NEXT-ROLE refresh | ✅ HEAD `65ddb8a` |
-| R24 Coordinator WAVE-PLAN-02 emit | ✅ (pending current commit) |
-| 0-CRITICAL streak | 22 rounds (R02-R23) |
-| 0-MAJOR streak | 4 rounds (R20-R23) |
-| Working tree | will be clean after this commit |
-| Test count | 217 / 0 |
+- Architect two-commit sequence completed: (1) `4d9783b spec(R25)` + (2) this routing commit
+- Spec total: 15 ACs across 6 invariants + substrate + integration + typecheck/count + anti-scope
+- Expected Implementer test growth: +12 at chore-A (217 → 229); +1 at chore-B (229 → 230)
+- Full-tier round (A1 + A2 + A4 fire per PRD tier verdict): Architect → Implementer → Reviewer → Memorial-Updater
