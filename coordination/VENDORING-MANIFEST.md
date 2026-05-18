@@ -25,7 +25,7 @@ _Maintained by `tools/vendor-from-deploysignal.sh`. Re-pin via `PINNED_SHA=<new-
 | engine/per-detector-resampler-mode.ts | engine/per-detector-resampler-mode.ts | 5a72371 | vendored-at-pin | 2026-05-16 | |
 | engine/topology-overlay.ts | engine/topology-overlay.ts | 5a72371 | vendored-at-pin | 2026-05-16 | |
 | engine/signal-classes.ts | engine/signal-classes.ts | 5a72371 | vendored-at-pin | 2026-05-16 | |
-| engine/verdict-groups.ts | engine/verdict-groups.ts | 5a72371 | vendored-at-pin | 2026-05-16 | |
+| engine/verdict-groups.ts | engine/verdict-groups.ts | 5a72371 | vendored-with-deltas | 2026-05-17 | R20 Phase 2 SLICE 2.A deltas: VerdictGrouper.ingest opts.cluster_event_id; openByGroupKey tuple-keying; conditional group_id format; tuple-match late-arrival lookup. Additive per-call opts + additive internal keying (preserves Addition #25 D2 + D5; legacy mode unchanged when cluster_event_id absent). |
 | engine/types/verdict.ts | engine/types/verdict.ts | 5a72371 | vendored-with-deltas | 2026-05-17 | R18 Phase 2 SLICE 1 deltas: VerdictGroup `cluster_event_id?: string` (Phase 2 outer-aggregator hook); TopologyNode.kind union extends with `\| 'gpu_shard' \| 'rack'`; TopologyEdge.relationship union extends with `\| 'contains'`. Additive optional field + additive union members (preserves Addition #25 D2/D5 + Addition #26 D4). |
 | engine/types/primitives.ts | engine/types/primitives.ts | 5a72371 | vendored-at-pin | 2026-05-16 | |
 | engine/types/metrics.ts | engine/types/metrics.ts | 5a72371 | vendored-at-pin | 2026-05-16 | |
