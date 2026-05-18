@@ -5,7 +5,7 @@
 // provenance header block prepended by the vendoring script.
 //
 // Scope: detectors (11) + family types (5) + core orchestration (4) +
-// type files at-pin (8 excl config.ts) + compilation deps (2) = 30 files.
+// type files at-pin (7 excl config.ts, verdict.ts) + compilation deps (6) + SLICE 4 tools (3) = 36 files.
 // config.ts is vendored-with-deltas and is EXCLUDED from this check.
 // verdict-groups.ts excluded — vendored-with-deltas at R20 (cluster_event_id scope keying + composite group_id).
 

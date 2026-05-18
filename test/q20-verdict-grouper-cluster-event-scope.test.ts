@@ -1,9 +1,9 @@
 // test/q20-verdict-grouper-cluster-event-scope.test.ts — Phase 2 SLICE 2.A bindings (R20).
 //
 // Binds AC-R20-1 through AC-R20-9 + AC-R20-15 (runtime) per Q-R20-SPEC.md § 5.
-// AC-R20-10 (manifest row), AC-R20-11 (AT_PIN_FILES), AC-R20-12 (anti-scope diff),
-// AC-R20-13 (typecheck), AC-R20-14 (full suite count) are binding-command attestations
-// reported by the Implementer at GREEN.
+// AC-R20-10 (manifest row), AC-R20-11 (AT_PIN_FILES), AC-R20-13 (typecheck),
+// AC-R20-14 (full suite count) are binding-command attestations reported by the
+// Implementer at GREEN. AC-R20-12 (anti-scope diff) is a runtime test per § 4.7.
 //
 // Covers: VerdictGrouper.ingest opts.cluster_event_id; openByGroupKey tuple-keying;
 // conditional group_id format (composite vs inherited); openGroupForDeploy optional
