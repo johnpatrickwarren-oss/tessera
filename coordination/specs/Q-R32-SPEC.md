@@ -98,7 +98,7 @@ Produce the Phase 2 SLICE 3 milestone deliverables: (1) the SLICE 3 close-walk d
 
 **Round-start SHA (diff lower bound):** `45242f2`
 
-**Allowed-set (15 entries):**
+**Allowed-set (16 entries):**
 
 1. `coordination/specs/Q-R32-SPEC.md`
 2. `test/q32-slice3-close-walk.test.ts`
@@ -115,6 +115,7 @@ Produce the Phase 2 SLICE 3 milestone deliverables: (1) the SLICE 3 close-walk d
 13. `engine/topology/nvlink-source.ts`
 14. `coordination/NEXT-ROLE.md`
 15. `coordination/MEMORIAL.md`
+16. `coordination/PRD.md` (**R32 spec amendment**: omitted from initial spec but authorized by wu-05 scope Deliverable 2 item 5 "PRD US-01 wording generalization"; added during execution in audit-tier Architect+Implementer capacity)
 
 **Conditional 16th entry:** `coordination/diagnostics/DIAGNOSTIC-R32-<topic>.md` (IFF a HALT fires mid-round per halt-discipline).
 

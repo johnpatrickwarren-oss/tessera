@@ -1,6 +1,6 @@
 // test/q29-k8s-adapter.test.ts — Phase 2 SLICE 3.B (R29) WU-02 K8s adapter.
 //
-// Runtime tests binding AC-R29-1..12 (chore-A); AC-R29-13 appended at chore-B.
+// Runtime tests binding AC-R29-1..12 (chore-A); AC-R29-13 appended at chore-B (carve-outs: DIAGNOSTIC, REVIEWER-REPORT).
 // Tessera-original test (NOT vendored from DeploySignal).
 
 import { test } from 'node:test';
@@ -126,10 +126,9 @@ test('AC-R29-6 / metadata preservation — instance_type, region, gpu_product, h
 
   for (const gpu of snap.nodes.filter((n) => n.kind === 'gpu_shard')) {
     assert.strictEqual(gpu.metadata?.gpu_product, 'A100-SXM4-40GB', `gpu ${gpu.id} missing gpu_product`);
-    assert.ok(
-      typeof gpu.metadata?.host === 'string' && gpu.metadata.host.length > 0,
-      `gpu ${gpu.id} missing host metadata`,
-    );
+    // R29 MINOR-1 fix: use strictEqual (not truthy length-check) per REINFORCED 2026-05-18
+    const expectedHost = gpu.id.split(':')[1]; // gpu:{name}:{index} → name
+    assert.strictEqual(gpu.metadata?.host, expectedHost, `gpu ${gpu.id} host must equal node name`);
   }
 
   for (const zone of snap.nodes.filter((n) => n.kind === 'cooling_zone')) {
@@ -241,6 +240,9 @@ test('AC-R29-12 / node --test count binding-command — pre-R29 files yield 243/
     .filter((f) => f.endsWith('.test.js') && f !== 'q29-k8s-adapter.test.js')
     .map((f) => resolve(testDir, f));
 
+  // spec § 3.2 deviation: env strip required for Node.js v25 recursive-test-detection
+  // (REINFORCED 2026-05-18; prescribed execFileSync form in spec § 3.2 does not include env
+  // strip; this deviation documented here per R29 MINOR-3 fix).
   // Strip NODE_TEST_CONTEXT + NODE_TEST_WORKER_ID to prevent Node.js v25's
   // recursive-test-detection from silently skipping the subprocess run.
   const subEnv = Object.fromEntries(
@@ -286,6 +288,8 @@ test('AC-R29-13: anti-scope forward-protection (chore-B)', () => {
   ]);
   // Conditional DIAGNOSTIC carve-out per spec § 2.5 + R25 MAJOR-2 reinforcement.
   const DIAGNOSTIC_REGEX = /^coordination\/diagnostics\/DIAGNOSTIC-R29-.+\.md$/;
+  // R29 MINOR-2 fix: also carve out REVIEWER-REPORT files (added post-chore-A by hybrid Reviewer).
+  const REVIEWER_REPORT_REGEX = /^coordination\/reviews\/REVIEWER-REPORT-.+\.md$/;
 
   const diffOutput = execFileSync(
     'git',
@@ -294,7 +298,9 @@ test('AC-R29-13: anti-scope forward-protection (chore-B)', () => {
   );
 
   const paths = diffOutput.split('\n').filter((p) => p.length > 0);
-  const violations = paths.filter((p) => !ALLOWED_SET.has(p) && !DIAGNOSTIC_REGEX.test(p));
+  const violations = paths.filter(
+    (p) => !ALLOWED_SET.has(p) && !DIAGNOSTIC_REGEX.test(p) && !REVIEWER_REPORT_REGEX.test(p),
+  );
 
   assert.strictEqual(
     violations.length,

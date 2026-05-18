@@ -110,6 +110,8 @@ Tessera's exemplar cluster (N=100-10000 per § 1 executive summary) spans `rack`
 
 **Inference caveat:** Training uses canonical per-GPU shards with the above hierarchy. Inference may use coarser granularity — for large-model partition (e.g., a 70B model split across 8 GPUs serving one request), the "shard" may correspond to N>1 GPUs. Tessera's per-shard observation maps to per-GPU rank by default but the detector layer is granularity-agnostic: the per-shard residual schema (`shard_id`, `PerShardResidual`) imposes no topology assumption; the caller selects the granularity at fleet configuration time.
 
+**Vendor-neutrality (R32 AMENDMENT — 2026-05-18):** The above hierarchy uses NVIDIA terminology because the launch market is NVIDIA-first, but the `1 shard = 1 accelerator rank` definition generalizes across vendor stacks: Google TPU pod slice = 1 TPU chip per rank; AWS Trainium = 1 NeuronCore per rank; AMD ROCm = 1 GPU per rank (same convention as NVIDIA). The granularity-agnostic per-shard detector layer accommodates all vendor conventions; the caller declares granularity at fleet configuration time. Vendor adapter implementations (`engine/topology/<vendor>-source.ts`) map vendor-specific topology identifiers to the abstract `gpu_shard` / `rack` / `psu` / `cooling_zone` kind vocabulary.
+
 ---
 
 ### 1.8 Amendment history
@@ -118,6 +120,7 @@ Tessera's exemplar cluster (N=100-10000 per § 1 executive summary) spans `rack`
 |---|---|---|
 | 2026-05-17 | R17 | § 1.7 shard unit definition added (vocabulary gap). § 2.2 storage-footprint paragraph: Architect-pre-prediction 1.2-1.5× amended to reflect empirical N-scaling truth from R14 + R16. § 2.2 PR-F5 trigger: updated from future-tense to completed-result. § 4.2 R-E1 risk row: storage claim updated. Operator disposition: (β) pitch-revise confirmed. |
 | 2026-05-18 | MR-1 / R24-prep | § 2.3 A10 clarification block added: A10 anti-scope ("NO hardware-diagnostic territory") clarified to fence hardware *diagnosis* WITHOUT fencing measurement-domain L0 preprocessing. New "L0 contract for Tessera" sub-extension added to § 2.3 Extension 3 (b) — proposed-invariants enumeration (rate-domain output; scrape interval as first-class input; missed-scrape-then-catchup detection; DCGM 32-bit wraparound handling; metadata propagation). Contract framing chosen over preprocessing-operation enumeration to bound the work cleanly without modifying inherited engine internals (A12 preserved). § 3 new Q-cycle row "Phase 2 SLICE 3.A.5 — L0 contract" added (1-2 cycles; SLICE 3.B precondition). § 4.2 new R-E7 risk row: missed-scrape-catchup spike + DCGM 32-bit counter wrap. Operator-raised concern 2026-05-18 morning with three sharpening details (missed-scrape-catchup dynamic, scrape interval as first-class TrendBuffer input, DCGM 32-bit wrap); operator-authorized amendment same session ("OK to draft and authorized to address the concerns I raised in the best path you can recommend"). |
+| 2026-05-18 | R32 (SLICE 3 close-walk) | **Vendor-fungibility amendment** (operator-staged mid-Wave-2, authorized at SLICE 3 close): § 2.3 A10 language generalized from NVIDIA-specific ("DCGM / NVML ... NVIDIA-stack scope") to vendor-neutral ("Vendor-stack diagnostic tooling ... for future accelerator vendors"). New "Vendor fungibility" subsection added to § 2.3 Extension 3 with surface-by-surface fungibility table + TAGGED-FUTURE entries for AMD / Google TPU / AWS Trainium / Inferentia adapters. § 1.7 vendor-neutrality note added (TPU / Trainium / AMD rank convention). PRD.md US-01 "bad GPU" generalized to "bad accelerator". A10 fundamental intent unchanged: hardware diagnosis fenced; measurement-domain preprocessing in-scope. |
 
 ---
 
@@ -249,7 +252,9 @@ Tessera Phase 2 SLICE 2 cost is dominated by this re-scoping, not by the aggrega
 
 **Anti-scope:**
 
-- **A10: NO hardware-diagnostic territory.** DCGM / NVML integration, per-GPU hardware-fault attribution are NVIDIA-stack scope; Tessera consumes resulting signals as inputs (the inherited MFU / HBM / collective signals per `deploysignal/ARCHITECTURE.md` detectors at SHA `5a72371`), does NOT generate them. Per inherited TPM pre-route grilling discipline.
+- **A10: NO hardware-diagnostic territory.** Vendor-stack diagnostic tooling (DCGM/NVML for NVIDIA; ROCm-SMI for AMD; Neuron SDK for AWS Trainium; TPU runtime libraries for Google TPU; equivalent for future accelerator vendors) is out of scope for Tessera. Tessera consumes the resulting telemetry as inputs via vendor-specific adapters implementing the `TopologySource` interface + the L0 contract surface for counter-typed metrics; it does NOT generate or interpret hardware-fault diagnostics. Per inherited TPM pre-route grilling discipline.
+
+  > **[R32 AMENDMENT — 2026-05-18]** Generalized from original NVIDIA-specific wording ("DCGM / NVML integration, per-GPU hardware-fault attribution are NVIDIA-stack scope") to vendor-neutral language covering the full accelerator vendor landscape. The launch market is NVIDIA-first but the architectural lock-in is at adapter/enum boundaries only (see vendor-fungibility analysis below). A10's fundamental intent is unchanged: hardware *diagnosis* fenced; measurement-domain L0 preprocessing in-scope (per MR-1 AMENDMENT carve-out preserved).
 
   > **[MR-1 AMENDMENT — 2026-05-18]** A10 fences hardware *diagnosis* (DCGM signal generation; per-GPU fault attribution; NVIDIA-stack tooling) but explicitly does NOT fence **measurement-domain L0 preprocessing** of counter-typed inputs. The distinction: counter→rate transformation is a measurement-semantics operation (given cumulative counter value at t and t-Δt, compute rate), not a hardware-fault diagnosis. DCGM and similar telemetry sources expose many cumulative counters (NVLink TX bytes, memory bandwidth, SM activity counters) that must be transformed at L0 before downstream consumption; pushing raw counter values into the inherited `TrendBuffer` (`engine/core.ts:27-100`) produces monotonic positive `slopeNorm` that's essentially the long-run mean rate — completely insensitive to rate dynamics. Tessera's L0 schema layer (`engine/l0/schema-continuity.ts:44`) already classifies `semantic_type: counter | gauge | ratio | latency_quantile | categorical_rate` for schema-hash invariance; the transformation policy is the missing companion.
   >
@@ -257,7 +262,28 @@ Tessera Phase 2 SLICE 2 cost is dominated by this re-scoping, not by the aggrega
 - **A11: NO live customer cluster telemetry.** Inherited enterprise-infrastructure boundary preserved; Tessera fleet-mode topology + event-feed validated against synthetic-cluster substrate.
 - **A12: NO modification to per-shard Family A-E detector internals.** Extension 3 is an OUTER aggregator + attribution layer; vendored detector code unchanged.
 - **A13: NO ML-based attribution model.** Extension 3 is rule-based + statistical; conflicts with inherited calibrated-confidence honest-broker stance (NORTH-STAR Addition #11 at SHA `5a72371`).
-- **A14: NO modification to per-shard verdict shape.** Inherited verdict shape preserved; fleet-level output is NEW shape layered on top (parallel to inherited Addition #12 per-pod precedent).
+- **A14: NO modification to per-shard verdict shape.**
+
+### Vendor fungibility
+
+> **[R32 AMENDMENT — 2026-05-18]** Added at SLICE 3 close-walk per operator request (staged 2026-05-18 mid-Wave-2). Origin question: "We've made considerations for nvidia architecture, but is the way metrics are processed from the hardware by tessera fungible to AWS or GCP?"
+
+The Tessera methodology is fungible at every load-bearing surface. The NVIDIA-first implementation reflects the launch market, not architectural lock-in.
+
+| Surface | Fungibility | Vendor-specificity |
+|---|---|---|
+| Per-shard detector layer (`engine/detectors/*`, TrendBuffer) | Vendor-agnostic | None — "shard" is caller-declared |
+| Fleet-merge (R11/R12/R13: combine, detectors, e-BH) | Vendor-agnostic | None — operates on per-shard verdicts |
+| VerdictGroup + cluster_event_id scope (R20/R21) | Vendor-agnostic | None — operator-level event abstraction |
+| L0 contract (R25 WU-00) | Vendor-agnostic | Triggers on `semantic_type === 'counter'`, not vendor; 32-bit wrap math is vendor-neutral |
+| `TopologySource` interface (Addition #26 inherited) | Vendor-agnostic abstract | None — implementations are vendor-specific |
+| BFS-on-undirected attribution (R26 WU-04) | Vendor-agnostic | None — operates on abstract graph |
+| Common-mode attribution (R26) | Vendor-agnostic | None — topology claim |
+| `TopologyEdge.relationship` enum | NVIDIA-flavored, extensible | `'nvlink_peer'` literal (R23); extensions for `'xgmi_peer'` / `'neuron_link_peer'` / `'tpu_ici_peer'` straightforward |
+| `TopologyNode.kind` enum | NVIDIA-flavored, extensible | `'gpu_shard'` literal (R18); extensions for `'tpu_shard'` / `'trainium_chip'` straightforward |
+| WU-03 NVLink adapter | NVIDIA-only | Parallel-class — future `rocm-source.ts` / `tpu-source.ts` / `trainium-source.ts` slot in beside it |
+
+**TAGGED-FUTURE (Phase 3+) vendor adapters:** AMD (ROCm + Infinity Fabric / XGMI `xgmi_peer`), Google TPU (ICI `tpu_ici_peer`), AWS Trainium (Neuron Link `neuron_link_peer`), AWS Inferentia, future accelerator vendors. Each follows the WU-03 NVLink pattern: new parallel-class file at `engine/topology/<vendor>-source.ts`; new `TopologyEdge.relationship` enum literal; new vendor-specific test substrate; consumes L0 contract by interface. No modification to inherited engine internals (A12 preserved). Inherited verdict shape preserved; fleet-level output is NEW shape layered on top (parallel to inherited Addition #12 per-pod precedent).
 - **A15: NO multi-region / cross-cluster federation.** Tessera is intra-cluster (one DC, one cluster, N shards). Cross-cluster federation (multi-DC, hierarchical fleet aggregator over multiple clusters) is a natural absorption candidate explicitly deferred — operational surface is different (network partition + clock-skew + cluster-federation-protocol concerns intra-cluster doesn't have). Phase 3+ candidate.
 - **A16: NO Addition #26 D4 reversal.** Inherited Addition #26 D4 `correlational_not_causal: true` wire-format constraint preserved at Tessera; Extension 3 (c) framed as event-conditional correlational attribution. Reopening D4 deferred indefinitely — no Tessera Phase 2 sub-track for ADR reversal. If a future cycle needs causal-attribution semantics (post-Phase 2), it gets a separate ADR proposal subject to John disposition.
 - **A17 (NEW at v0.3 — Tessera-specific):** NO DeploySignal-integration scope at Phase 1 + Phase 2. Tessera "perhaps provides data back to DeploySignal correlation level" is a Phase 3+ commitment per John disposition 2026-05-15; Tessera Phase 1 + 2 ship standalone with no cross-product integration scope. Tempting at Phase 2 close walk; explicitly deferred.

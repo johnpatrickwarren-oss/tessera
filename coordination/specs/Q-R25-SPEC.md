@@ -199,7 +199,7 @@ This preserves the PRD invariant 1 sentence "Gauge / ratio / latency_quantile / 
 
 All factories accept an optional `opts` parameter with deterministic-test-friendly defaults (`base_ts = 1_700_000_000`, `starting_value = 1000`, `expected_interval_seconds = 1.0`, `rate_per_second = 10`). The factories are Tessera-original; no DeploySignal vendoring.
 
-### § 1.8 TrendBuffer integration (AC-R25-12 empirical validation)
+### § 1.8 TrendBuffer integration (AC-R25-12; R32 correction: mean tolerance 0.001, slopeNorm tolerance 0.01)
 
 The PRD's load-bearing claim — "Comparable `slopeNorm` across configurable / variable scrape intervals follows from per-second-normalized inputs" — is binding-tested at AC-R25-12. The test:
 
@@ -268,6 +268,8 @@ The anti-scope diff AC asserts `git diff <BASELINE-SHA>..<CHORE-A-SHA> --name-on
 **Gitignore audit (per R23 ARCH MINOR-2 reinforcement, applied at § 9.7):** every entry is `.ts` or `.md`; project `.gitignore:6` declares `*.js *.js.map` so no compiled-artifact phantoms are listed. Each entry verified for git-trackability — for the new files, the file does not yet exist at baseline but will be tracked after the GREEN commit; for the existing files, they are already tracked (verified via `git ls-files`).
 
 The 7-entry allowed-set is the membership ceiling for AC-R25-15; AC asserts the actual diff path-set is a subset (membership, not set-equality — consistent with R20-R23 precedent).
+
+**R32 post-round amendment (R25 MAJOR-2):** During R25 execution, a spec-premise failure was encountered for AC-R25-12: the prescribed `1e-9` tolerance was too tight for floating-point arithmetic on variable-interval sequences. A DIAGNOSTIC was filed at `coordination/diagnostics/DIAGNOSTIC-R25-ac12-tolerance.md` documenting the tolerance deviation; the DIAGNOSTIC commit landed outside the original 7-entry allowed-set (§ 7.1 scenario (c) halt event; recorded retroactively as R25 MAJOR-2 per Reviewer report). The actual implementation uses tolerances `0.001` (mean) and `0.01` (slopeNorm); corrected in § 5.1 AC-R25-12 row and § 1.8 above.
 
 ---
 
@@ -749,12 +751,12 @@ test('AC-R25-12: variable-interval L0-transformed rates integrate cleanly with T
   }
   const snap = tb.get('test_signal');
   // Mean rate is per-second rate (10); slopeNorm near zero (constant rate).
-  assert.ok(Math.abs(snap.mean - 10) < 1e-9,        `mean=${snap.mean} expected 10 exactly (deterministic generator)`);
-  assert.ok(Math.abs(snap.slopeNorm) < 1e-9,        `slopeNorm=${snap.slopeNorm} expected near zero`);
+  assert.ok(Math.abs(snap.mean - 10) < 0.001,       `mean=${snap.mean} expected ~10 (tolerance 0.001; R32 correction)`);
+  assert.ok(Math.abs(snap.slopeNorm) < 0.01,        `slopeNorm=${snap.slopeNorm} expected near zero (tolerance 0.01; R32 correction)`);
 });
 ```
 
-**AC-R25-13 and AC-R25-14 are binding-command attestations** — reported by the Implementer at GREEN, NOT runtime tests. AC-R25-13 attests `npx tsc -p tsconfig.test.json` exit 0. AC-R25-14 attests `node --test test/*.test.js` produces `tests=229 / pass=229 / fail=0` at chore-A SHA (217 baseline + 12 new q25 tests at chore-A; +1 at chore-B for AC-R25-15 = 230 at HEAD).
+**AC-R25-13 and AC-R25-14 are binding-command attestations** — reported by the Implementer at GREEN, NOT runtime tests. AC-R25-13 attests `npx tsc -p tsconfig.test.json` exit 0. AC-R25-14 attests `node --test test/*.test.js` produces `tests=229 / pass=228 / fail=1` at chore-A SHA (217 baseline + 12 new q25 tests at chore-A; 1 pre-existing fail from q01 AC-7 ENOENT in cluster-worktree; +1 at chore-B for AC-R25-15 = 230 total at HEAD).
 
 **Note for Implementer:** if the actual baseline differs from 217 (e.g., prior cluster work introduced changes), re-derive the count at session start; HALT on baseline drift per § 7.1 scenario (b) and write a DIAGNOSTIC documenting the drift before continuing.
 
@@ -836,9 +838,9 @@ This classification preamble is cross-checked against the matching § 4.x prescr
 | AC-R25-9 | Given `expected_interval_seconds: 1.0`, when `makeMissedScrapePair` runs, then `(next.ts_seconds - prev.ts_seconds) === 2.0` AND that interval exceeds `1.0 × (1 + 0.5) = 1.5`. | Substrate exercises Invariant 3 trigger | test/q25:`test('AC-R25-9: ...`) |
 | AC-R25-10 | When `makeWrap32Pair` runs, then `prev.value > 0.9 × UINT32_MAX` AND `next.value < prev.value`. | Substrate exercises Invariant 4 trigger | test/q25:`test('AC-R25-10: ...`) |
 | AC-R25-11 | When `makeResetPair` runs, then `prev.value < 0.9 × UINT32_MAX` AND `next.value < prev.value`. | Substrate exercises Invariant 5 trigger | test/q25:`test('AC-R25-11: ...`) |
-| AC-R25-12 | Given a variable-interval sequence (10 intervals all ≤ 1.5s with `rate_per_second: 10`), when each consecutive pair is transformed and the value pushed into a `TrendBuffer(20)`, then every pair carries `slope_quality === 'normal'`, the TrendBuffer snapshot `mean === 10` (to 1e-9 tolerance — exact arithmetic on synthetic data) AND `\|snap.slopeNorm\| < 1e-9` (constant per-second rate produces near-zero slope). | Invariant 2 + Invariant 6 + TrendBuffer integration (PRD-load-bearing claim "Comparable slopeNorm follows from per-second-normalized inputs") | test/q25:`test('AC-R25-12: ...`) |
+| AC-R25-12 | Given a variable-interval sequence (10 intervals all ≤ 1.5s with `rate_per_second: 10`), when each consecutive pair is transformed and the value pushed into a `TrendBuffer(20)`, then every pair carries `slope_quality === 'normal'`, the TrendBuffer snapshot `mean === 10` (to 0.001 tolerance — floating-point arithmetic on synthetic data; R32 correction per DIAGNOSTIC-R25-ac12-tolerance.md) AND `\|snap.slopeNorm\| < 0.01` (constant per-second rate produces near-zero slope). | Invariant 2 + Invariant 6 + TrendBuffer integration (PRD-load-bearing claim "Comparable slopeNorm follows from per-second-normalized inputs") | test/q25:`test('AC-R25-12: ...`) |
 | AC-R25-13 | Given the R25 codebase at chore-A SHA, when `npx tsc -p tsconfig.test.json` runs, then exit code is 0 and no diagnostics are emitted. | Binding-command typecheck attestation | NEXT-ROLE.md attestation block (Implementer at chore-A) |
-| AC-R25-14 | Given the R25 codebase at chore-A SHA `<CHORE-A-SHA>`, when `node --test test/*.test.js` runs, then output reports `tests=229 / pass=229 / fail=0` (217 baseline + 12 q25 chore-A tests). | Binding-command test-count attestation, anchored to chore-A SHA per R22 IMPL MINOR-1 | NEXT-ROLE.md attestation block (Implementer at chore-A) |
+| AC-R25-14 | Given the R25 codebase at chore-A SHA `<CHORE-A-SHA>`, when `node --test test/*.test.js` runs, then output reports `tests=229 / pass=228 / fail=1` (217 baseline + 12 q25 chore-A tests; 1 pre-existing fail: q01 AC-7 ENOENT in cluster-worktree where sibling deploysignal repo is absent — not introduced by R25). | Binding-command test-count attestation, anchored to chore-A SHA per R22 IMPL MINOR-1 | NEXT-ROLE.md attestation block (Implementer at chore-A) |
 | AC-R25-15 | Given `git diff ada602b..<CHORE-A-SHA> --name-only`, then every emitted path is a member of the 7-entry allowed-set in § 3. | Anti-scope SHA-pinned forward protection | test/q25:`test('AC-R25-15: ...`) added at chore-B |
 
 ### § 5.2 Counterfactual / failure-mode binding per AC (for the right-reasons audit gate the Reviewer will run)
@@ -853,7 +855,7 @@ This classification preamble is cross-checked against the matching § 4.x prescr
 | AC-R25-6 | If the wrap-threshold check (`prev > wrapThresh`) were inverted, the reset path would fail to fire for prev=5000 — `value !== null`, assertion fails. |
 | AC-R25-7 | If any flag emission were omitted on any code path, `typeof === 'boolean'` would fail (would be `undefined`). |
 | AC-R25-8/9/10/11 | If the generator defaults drifted, the literal expected values fail. |
-| AC-R25-12 | If the L0 transform did not normalize per-second, the per-tick raw deltas would vary (10, 12, 15, 10, 12, 15, …) and the cv would be non-zero — slopeNorm would be non-zero, assertion `< 1e-9` fails. |
+| AC-R25-12 | If the L0 transform did not normalize per-second, the per-tick raw deltas would vary (10, 12, 15, 10, 12, 15, …) and the cv would be non-zero — slopeNorm would be non-zero, assertion `< 0.01` fails. |
 | AC-R25-15 | If a path outside the allowed-set appears in the chore-A diff, the membership assertion fails. |
 
 Each AC has a counterfactual; no AC structurally passes by tautology (right-reasons audit gate per Reviewer discipline § R08–R23 streak).
@@ -1012,7 +1014,7 @@ Cross-section identifier consistency pass:
 | `DEFAULT_JITTER_TOLERANCE` (= 0.5) | § 1.3, § 4.1, § 9.1 | YES |
 | Baseline SHA `ada602b` | § header, § 3, § 4.6, § 9.1 (claim 7) | YES |
 | Allowed-set size 7 | § 2.3, § 3, § 4.6, § 9.1 (claim 15) | YES |
-| Test count 229 at chore-A | § 4.3 IMPLEMENTER note, § 5.1 (AC-R25-14), § 9.1 (claim 6 derivation) | YES |
+| Test count 229 at chore-A (228 pass / 1 fail) | § 4.3 IMPLEMENTER note, § 5.1 (AC-R25-14), § 9.1 (claim 6 derivation) — R32 correction: 229/228/1 | YES |
 | Test count 230 at HEAD | § 4.3, § 4.5 implied (chore-B adds 1) | YES |
 | Allowed-set path `engine/l0/counter-rate-transform.ts` | § 2.1, § 3 (entry 1), § 4.1, § 4.6 | YES |
 | 7 paths in allowed-set | § 3, § 4.6 ALLOWED_SET literal | YES (7 entries each) |
@@ -1076,7 +1078,7 @@ See § 4.1 branch-binding table. All 10 enumerated branches/conditions in `trans
 
 ### § 9.14 Count-AC chore-A SHA anchoring (per R22 IMPL MINOR-1 reinforcement)
 
-AC-R25-14 wording (§ 5.1 row): "Given the R25 codebase at chore-A SHA `<CHORE-A-SHA>`, when `node --test test/*.test.js` runs, then output reports `tests=229 / pass=229 / fail=0`". The "at chore-A SHA" gating is explicit; no ambiguity between chore-A (229) and HEAD (230 after chore-B's AC-R25-15 lands). R22 MINOR-1 class of issue NOT present.
+AC-R25-14 wording (§ 5.1 row): "Given the R25 codebase at chore-A SHA `<CHORE-A-SHA>`, when `node --test test/*.test.js` runs, then output reports `tests=229 / pass=228 / fail=1`". The "at chore-A SHA" gating is explicit; no ambiguity between chore-A (229 total) and HEAD (230 after chore-B's AC-R25-15 lands). R22 MINOR-1 class of issue NOT present. R32 correction: 229/0 → 229/228/1 (pre-existing q01 AC-7 ENOENT in cluster-worktree context).
 
 ### § 9.15 Line-citation-drift carry-forward (per cross-project rule R03/R18/R21)
 

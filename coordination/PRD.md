@@ -349,7 +349,7 @@ Full project framing: see [`SCOPING-MEMO-v0.3.md`](./SCOPING-MEMO-v0.3.md) § 1 
 
 ## User stories
 
-US-01: As a cluster oncall, I want per-shard fault attribution that distinguishes "shard 47 has a bad GPU" from "all shards drift because of a fleet event" so that I can route to the right remediation (hardware swap vs deploy rollback vs config rollback) without triaging N independent alerts.
+US-01: As a cluster oncall, I want per-shard fault attribution that distinguishes "shard 47 has a bad accelerator" from "all shards drift because of a fleet event" so that I can route to the right remediation (hardware swap vs deploy rollback vs config rollback) without triaging N independent alerts.
 
 US-02: As an AI infrastructure operator, I want topology-aware common-mode failure attribution (rack-localized PSU events; cooling-zone failures; NVLink-peer correlation) so that physical-substrate failures surface at the topology level rather than via shard-by-shard inspection.
 

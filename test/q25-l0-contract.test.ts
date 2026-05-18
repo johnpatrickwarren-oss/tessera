@@ -174,6 +174,24 @@ test('AC-R25-12: variable-interval L0-transformed rates integrate cleanly with T
   assert.ok(Math.abs(snap.slopeNorm) < 0.01,   `slopeNorm=${snap.slopeNorm} expected near zero (tol 0.01)`);
 });
 
+// R25 MINOR-3: gauge metric on missed-scrape-shaped interval — slope_quality propagation
+// This AC closes the R25 MINOR-3 gap: a gauge metric uses missed_scrape_inferred path
+// when the interval exceeds expected × (1 + jitter), demonstrating that the degraded
+// flag applies to gauge as well as counter semantics.
+test('R25 MINOR-3: gauge metric on missed-scrape interval emits degraded slope_quality + missed_scrape_inferred', () => {
+  const { prev, next } = makeMissedScrapePair({ expected_interval_seconds: 1.0 });
+  const gaugeMeta: CounterMetadata = { semantic_type: 'gauge' };
+  const out = transformPair(prev, next, gaugeMeta, { expected_scrape_interval_seconds: 1.0 });
+  // Gauge pass-through: value = next.value (not delta/elapsed)
+  assert.strictEqual(out.value, next.value, 'gauge value must be next.value pass-through');
+  // Missed-scrape interval (2.0s > 1.5s = 1.0 × (1+0.5)) triggers degraded flag on gauge too
+  assert.strictEqual(out.slope_quality, 'degraded', 'R25 MINOR-3: gauge on missed-scrape interval must emit degraded');
+  assert.strictEqual(out.missed_scrape_inferred, true, 'R25 MINOR-3: gauge on missed-scrape interval must set missed_scrape_inferred');
+  // Gauge-specific: no wraparound or reset
+  assert.strictEqual(out.wraparound_handled, false, 'gauge: no wraparound');
+  assert.strictEqual(out.reset_detected, false, 'gauge: no reset');
+});
+
 // AC-R25-15: anti-scope diff at chore-A SHA ⊆ allowed-set
 // Spec § 3 lists 7 entries; 8th entry added here: the DIAGNOSTIC file committed
 // in the HALT commit (4f405c0) as a prescribed artifact of halt-discipline
