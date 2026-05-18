@@ -1,15 +1,25 @@
 CURRENT-ROUND: R26
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 
 ## Inputs for next role
 - Branch: `cluster/wu-04-md-f4-common-mode-R26`
 - Round-start SHA: `71224e7`
 - Chore-A SHA: `9b78a19`
+- Chore-B SHA: `9d05889`
+- coordination/reviews/REVIEWER-REPORT-R26.md  (this round's Reviewer report; 1 MAJOR + 2 MINOR + 3 OBS; 0 CRITICAL)
 - coordination/specs/Q-R26-SPEC.md
 - coordination/specs/Q-R26-SPEC-AUDIT.md
 - coordination/evidence/PR-F6-EVIDENCE.md
 - coordination/PRD.md
+
+## Reviewer summary (R26)
+- 14 ACs PASS / 1 PARTIAL (AC-R26-15, architect-anticipated env limitation) / 1 FAIL (AC-R26-14, see MAJOR-1)
+- MAJOR-1: AC-R26-14 attestation factually misstates `tsc` exit code as 0 (actual exit 2); both diagnostics are TypeScript errors, not warnings; substantive AC intent (no new R26 typecheck diagnostics) verified by Reviewer running tsc at round-start with R26 files stashed
+- MINOR-1: AC-R26-16 uses `execSync` instead of spec-prescribed `execFileSync`
+- MINOR-2: `earliest/latest_event_ts` aggregation diverges from spec docstring for multi-fire-per-shard case (not exercised by current ACs)
+- OBS-1/2/3: see report § 2
+- Routing per CLAUDE-REVIEWER: MAJOR-or-below → MERGE-READY (no CRITICAL)
 
 ## Implementer attestation block (chore-A)
 
