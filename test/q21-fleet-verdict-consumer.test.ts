@@ -32,40 +32,137 @@ function makeVerdict(deploy_ref: string, tick: number, firing = false): FusedVer
 
 // AC-R21-1: shape + N-correspondence
 test('AC-R21-1: fleetTickIngest returns FleetTickIngestResult with ingest_results.length === N', () => {
-  assert.fail('RED: AC-R21-1 pending');
+  const grouper = new VerdictGrouper();
+  const input: FleetTickInput = {
+    per_shard_verdicts: [
+      makeVerdict('deploy-A', 1),
+      makeVerdict('deploy-B', 1),
+      makeVerdict('deploy-C', 1),
+    ],
+    ts_seconds: 1700000000,
+    cluster_event_id: 'evt-X',
+  };
+  const out = fleetTickIngest(input, grouper);
+  assert.strictEqual(out.ingest_results.length, 3);
+  for (const r of out.ingest_results) {
+    assert.ok(r.attributed_group !== null && r.attributed_group !== undefined);
+  }
 });
 
 // AC-R21-2: cluster_event_id propagation
 test('AC-R21-2: cluster_event_id propagated to every per-shard ingest call', () => {
-  assert.fail('RED: AC-R21-2 pending');
+  const grouper = new VerdictGrouper();
+  const input: FleetTickInput = {
+    per_shard_verdicts: [
+      makeVerdict('deploy-A', 1),
+      makeVerdict('deploy-B', 1),
+      makeVerdict('deploy-C', 1),
+    ],
+    ts_seconds: 1700000000,
+    cluster_event_id: 'evt-X',
+  };
+  const out = fleetTickIngest(input, grouper);
+  for (const r of out.ingest_results) {
+    assert.strictEqual(r.attributed_group.cluster_event_id, 'evt-X');
+    // Composite group_id format per R20 § 2.2
+    assert.ok(r.attributed_group.group_id.startsWith('group-evt-X-'));
+  }
 });
 
 // AC-R21-3: legacy mode (absent cluster_event_id)
 test('AC-R21-3: absent cluster_event_id → legacy mode (undefined cluster_event_id; inherited group_id format)', () => {
-  assert.fail('RED: AC-R21-3 pending');
+  const grouper = new VerdictGrouper();
+  const input: FleetTickInput = {
+    per_shard_verdicts: [makeVerdict('deploy-A', 1)],
+    ts_seconds: 1700000000,
+  };
+  const out = fleetTickIngest(input, grouper);
+  assert.strictEqual(out.ingest_results[0].attributed_group.cluster_event_id, undefined);
+  assert.strictEqual(out.ingest_results[0].attributed_group.group_id, 'group-deploy-A-1700000000');
 });
 
 // AC-R21-4: empty input
 test('AC-R21-4: empty per_shard_verdicts → empty ingest_results, no throw', () => {
-  assert.fail('RED: AC-R21-4 pending');
+  const grouper = new VerdictGrouper();
+  const input: FleetTickInput = {
+    per_shard_verdicts: [],
+    ts_seconds: 1700000000,
+    cluster_event_id: 'evt-X',
+  };
+  const out = fleetTickIngest(input, grouper);
+  assert.deepStrictEqual(out.ingest_results, []);
 });
 
 // AC-R21-5: terminal flag propagation
 test('AC-R21-5: input.terminal=true closes every per-shard attributed_group on the same tick', () => {
-  assert.fail('RED: AC-R21-5 pending');
+  const grouper = new VerdictGrouper();
+  const input: FleetTickInput = {
+    per_shard_verdicts: [
+      makeVerdict('deploy-A', 1, true),
+      makeVerdict('deploy-B', 1, true),
+    ],
+    ts_seconds: 1700000000,
+    cluster_event_id: 'evt-X',
+    terminal: true,
+  };
+  const out = fleetTickIngest(input, grouper);
+  // Per R20 § 2.1: terminal=true triggers terminal_verdict close on the same call;
+  // attributed_group.closed === true post-ingest (non-late-arrival branch).
+  for (const r of out.ingest_results) {
+    assert.strictEqual(r.attributed_group.closed, true);
+    assert.notStrictEqual(r.closed, null);
+  }
 });
 
 // AC-R21-6: per-shard order preserved
 test('AC-R21-6: ingest_results[i] corresponds to per_shard_verdicts[i] (index-order preservation)', () => {
-  assert.fail('RED: AC-R21-6 pending');
+  const grouper = new VerdictGrouper();
+  const deploys = ['deploy-A', 'deploy-B', 'deploy-C'];
+  const input: FleetTickInput = {
+    per_shard_verdicts: deploys.map((d, i) => makeVerdict(d, i + 1)),
+    ts_seconds: 1700000000,
+    cluster_event_id: 'evt-X',
+  };
+  const out = fleetTickIngest(input, grouper);
+  for (let i = 0; i < deploys.length; i++) {
+    assert.strictEqual(out.ingest_results[i].attributed_group.deploy_id, deploys[i]);
+  }
 });
 
 // AC-R21-7: rollup — distinct VerdictGroups under shared cluster_event_id
 test('AC-R21-7: rollupByClusterEvent returns N distinct VerdictGroups for N distinct deploys under one cluster_event_id', () => {
-  assert.fail('RED: AC-R21-7 pending');
+  const grouper = new VerdictGrouper();
+  const input: FleetTickInput = {
+    per_shard_verdicts: [
+      makeVerdict('deploy-A', 1),
+      makeVerdict('deploy-B', 1),
+      makeVerdict('deploy-C', 1),
+    ],
+    ts_seconds: 1700000000,
+    cluster_event_id: 'evt-X',
+  };
+  const out = fleetTickIngest(input, grouper);
+  const rollup: ClusterEventRollup = rollupByClusterEvent(out.ingest_results, 'evt-X');
+  assert.strictEqual(rollup.groups.length, 3);
+  assert.strictEqual(rollup.deploy_ids.length, 3);
+  assert.deepStrictEqual([...rollup.deploy_ids].sort(), ['deploy-A', 'deploy-B', 'deploy-C']);
+  // Distinct group_ids (R20 § 2.3 multi-deploy-per-event keying)
+  const group_ids = rollup.groups.map(g => g.group_id);
+  assert.strictEqual(new Set(group_ids).size, 3);
 });
 
 // AC-R21-8: rollup — empty-string query → no match
 test('AC-R21-8: rollupByClusterEvent("") short-circuits to no-match (empty-string ≡ absent per R20 § 2.6)', () => {
-  assert.fail('RED: AC-R21-8 pending');
+  const grouper = new VerdictGrouper();
+  const input: FleetTickInput = {
+    per_shard_verdicts: [makeVerdict('deploy-A', 1)],
+    ts_seconds: 1700000000,
+    // No cluster_event_id → legacy mode → attributed_group.cluster_event_id === undefined
+  };
+  const out = fleetTickIngest(input, grouper);
+  const rollup = rollupByClusterEvent(out.ingest_results, '');
+  assert.deepStrictEqual(rollup.groups, []);
+  assert.deepStrictEqual(rollup.deploy_ids, []);
 });
+
+// AC-R21-11 is added in chore-B per spec § 4.6 with substituted MERGE-READY SHA.
