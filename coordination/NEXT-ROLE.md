@@ -1,6 +1,6 @@
 CURRENT-ROUND: R32
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: COORDINATOR (operator decision — HARD STOP at SLICE 3 milestone per overnight authority)
+STATUS: ROUND-COMPLETE
 
 ## Round-scope directive (R32 — Wave 3 / WU-05 SLICE 3 close-walk)
 
