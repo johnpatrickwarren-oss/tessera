@@ -139,7 +139,10 @@ test('AC-R18-9: All 40 vendored files retain SHA pin 5a72371 in first-line heade
   }
 });
 
-test('AC-R18-10: Anti-scope — git diff b640c6c..HEAD --name-only ⊆ allowed-set', () => {
+// Pinned to R18 MERGE-READY SHA 9012faa (not HEAD) so Memorial-Updater outputs
+// (CLAUDE-ARCHITECT.md, CLAUDE-IMPLEMENTER.md, REVIEWER-REPORT-R18.md, etc.) which
+// land in commits after 9012faa do not cause false failures. Pinned at R19 in-passing.
+test('AC-R18-10: Anti-scope — git diff b640c6c..9012faa --name-only ⊆ allowed-set', () => {
   const allowed = new Set([
     'engine/types/verdict.ts',
     'engine/types/verdict.js',
@@ -159,7 +162,7 @@ test('AC-R18-10: Anti-scope — git diff b640c6c..HEAD --name-only ⊆ allowed-s
     'test/q01-no-at-pin-deltas.test.js',
     'coordination/VENDORING-MANIFEST.md',
   ]);
-  const diff = execSync('git diff b640c6c..HEAD --name-only', { encoding: 'utf-8' });
+  const diff = execSync('git diff b640c6c..9012faa --name-only', { encoding: 'utf-8' });
   const touched = diff.split('\n').filter((p) => p.length > 0);
   for (const p of touched) {
     assert.ok(allowed.has(p), `Unexpected file in R18 diff vs b640c6c: ${p}`);
