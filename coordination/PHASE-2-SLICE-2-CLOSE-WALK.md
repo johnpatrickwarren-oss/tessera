@@ -220,7 +220,8 @@ For the full per-round violation/confirmation tally: `coordination/MEMORIAL.md` 
   - `ad12f46` — spec: Q-R22-SPEC.md
   - `1fe3aa2` — feat(R22): PHASE-2-SLICE-2-CLOSE-WALK.md + q20 header fix + q21 structural tests + q01 arithmetic fix
   - `480fc43` — chore(R22): route to REVIEWER (chore-A)
-  - `<CHORE-B-SHA>` — chore(R22-B): AC-R22-8 anti-scope runtime test + chore-A SHA substituted
+  - `44d7145` — chore(R22-B): AC-R22-8 anti-scope runtime test + chore-A SHA substituted
+  - `a1afc24` — chore(R22-B2): NEXT-ROLE attestation post-chore-B count note
 - **Active outstanding items (preserved from SLICE 1 close-walk):**
   - OQ-1 / Q-JC1: calibrate.ts vendoring — still parked
   - OQ-R08-3: Phase 2 transient detector scheduling — still parked
