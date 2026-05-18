@@ -1,97 +1,88 @@
 CURRENT-ROUND: R31
-NEXT-ROLE: COORDINATOR
-STATUS: READY
+NEXT-ROLE: OPERATOR (Wave 3 dispatch authorization review)
+STATUS: WAVE-GATE-READY
 
-## Round-scope directive (R31 — Wave 2 gate)
+## Round-scope directive (R31 — Wave 2 gate complete)
 
-**R31 = Coordinator wave-gate invocation aggregating Wave 2 outcomes (3-cluster adapter fan-out: WU-01 Slurm + WU-02 K8s + WU-03 NVLink).** All three clusters MERGE-READY; all three merged into main; this gate emits `WAVE-GATE-02.md` + Wave 3 dispatch authorization + the 5 forward-looking CLUSTER-HANDOFF-2 artifacts to WU-05 SLICE 3 close-walk.
+**R31 = Coordinator Wave 2 gate invocation aggregating Wave 2 outcomes (3-cluster adapter fan-out: WU-01 Slurm + WU-02 K8s + WU-03 NVLink) completed.** All three clusters MERGE-READY; all three merged into main; this gate emitted `WAVE-GATE-02.md` + 5 forward-looking `CLUSTER-HANDOFF-2-*.md` artifacts + Coordinator-memorial appends. Wave 3 dispatch (WU-05 SLICE 3 close-walk; audit-tier; HYBRID_REVIEWER=true) is the next step pending operator review of the gate.
 
-## Wave 2 cluster verdicts (all MERGE-READY; aggregate 0 CRITICAL / 0 MAJOR)
+## Wave 2 gate verdict (summary)
 
-| Cluster | Round | Worktree HEAD | Reviewer verdict | Notable |
-|---|---|---|---|---|
-| WU-01 SLURM-ADAPTER | R28 | `d432947` | MERGE-READY 0C / 0MAJ / 2 MIN / 4 OBS | Branch-binding-coverage cross-project 3rd occurrence — composite reinforcement rule derived in CROSS-PROJECT-MEMORIAL |
-| WU-02 K8S-ADAPTER | R29 | `d1f8c9b` | MERGE-READY 0C / 0MAJ / 3 MIN | New tactical-deviation-transparency sub-class surfaced (R29 MINOR-3: Node.js v25 env-strip documented only in MEMORIAL); R26 anti-scope-allowed-set pattern recurred at R29 MINOR-2 |
-| WU-03 NVLINK-ADAPTER | R30 | `b613549` | MERGE-READY 0C / 0MAJ / 2 MIN / 4 OBS | R26 MAJOR-1 false-compliance-attestation reinforcement WORKED — `tsc` exit 2 attested verbatim. TDD restored. L0 contract surface validated stable for D1 HIGH consumption — no L0 gap surfaced. R-E7 mitigation evidence package shipped (32-bit wrap + missed-scrape + variable-interval + reset-vs-wrap ACs all bound). |
+**ADVANCE** — 0 CRITICAL / 0 MAJOR / 7 MINOR aggregate across Wave 2. All 7 MINORs classified as test/spec-discipline drift and pre-flagged to WU-05 close-walk via 5 CLUSTER-HANDOFF-2 artifacts. 0-MAJOR streak now 7 rounds (R20-R23, R25, R28-R30); 0-CRITICAL streak 27+ rounds.
 
-**Aggregate Wave 2:** 0 CRITICAL / 0 MAJOR / 7 MINOR. All in "log + continue" bucket per overnight authority.
+| Cluster | Round | Worktree HEAD | Reviewer verdict |
+|---|---|---|---|
+| WU-01 SLURM-ADAPTER | R28 | `d432947` | MERGE-READY 0C / 0MAJ / 2 MIN / 4 OBS |
+| WU-02 K8S-ADAPTER | R29 | `d1f8c9b` | MERGE-READY 0C / 0MAJ / 3 MIN |
+| WU-03 NVLINK-ADAPTER | R30 | `b613549` | MERGE-READY 0C / 0MAJ / 2 MIN / 4 OBS |
 
-**New cross-project rules derived this overnight session (now 3 total):**
-1. R26 derived: `false-compliance-attestation` halt-discipline sub-class (3-occurrence threshold crossed at Wave 1)
-2. R28/R29/R30 derived: branch-binding-coverage at Architect side composite reinforcement rule (3-occurrence threshold crossed at Wave 2)
-3. R28/R30/R29 derived: Implementer spec-test-assertion-coverage (3-occurrence threshold crossed at Wave 2)
+Main HEAD post-Wave-2 merge: `56ee259`. Wave 2 baseline tag `pre-wave-2-merge` preserved.
 
-**Coordinator should also consider declaring (4th):** Wave 2 surfaces an emerging anti-scope-allowed-set-forward-coverage class — R26 MINOR-1 + R29 MINOR-2 + (latent R25 MAJOR-2 allowed-set drift) form a 3rd cross-project occurrence. Coordinator's call at gate time.
+## Cross-project reinforcement rules derived at this gate
 
-## Methodology friction surfaces to capture in COORDINATOR-MEMORIAL
+4 rules surfaced; 1 validated, 3 newly derived. Coordinator records draft text in `coordination/COORDINATOR-MEMORIAL.md`; canonical landing in `~/.claude/CROSS-PROJECT-MEMORIAL.md` is an operator-level backflow item.
 
-Add to the 5 surfaces already captured at Wave 1 gate:
+1. **Rule 1 (`false-compliance-attestation`)** — DERIVED at Wave 1; VALIDATED at Wave 2 (zero false-compliance attestations across R28/R29/R30).
+2. **Rule 2 (`architect-branch-binding-coverage`)** — NEWLY DERIVED at Wave 2. Occurrences: R28 OBS-1/2/3 + R29 OBS-2/3 + R30 MINOR-2 (sharpening case: syntactic-vs-data-flow distinction).
+3. **Rule 3 (`implementer-spec-test-assertion-coverage`)** — NEWLY DERIVED at Wave 2. Occurrences: R28 MINOR-1 + R29 MINOR-1 + R30 MINOR-1.
+4. **Rule 4 (`anti-scope-allowed-set-forward-coverage`)** — NEWLY DERIVED at Wave 2 (Coordinator's discretionary 4th derivation). Occurrences: R25 MAJOR-2 + R26 MINOR-1 + R29 MINOR-2.
 
-6. **Implementer spec-test-assertion-coverage** crossed cross-project 3+ threshold across Wave 2 (R28 + R30 + R29). Composite rule already added per Memorial-Updater outputs. Coordinator-level observation: the cross-cluster pattern suggests AC enumeration discipline at the spec-write phase isn't sufficient; consider adding a "for each AC, every Then-column field is asserted one-for-one in the test" item to the standard pre-emit grilling protocol.
-7. **Architect branch-binding-coverage** crossed cross-project 3+ threshold across Wave 2 (R28 + R30 + R29). Composite rule added. Coordinator-level observation: the syntactic vs data-flow distinction matters — the R30 MINOR-2 case showed that "all opts fields covered" syntactic claim missed that parseNvlinkStatus defaults the upstream field.
-8. **Anti-scope-allowed-set-forward-coverage** (R26 MINOR-1 + R29 MINOR-2 + arguably R25 MAJOR-2) — Architects need to anticipate post-chore-A coordination-artifact commits (REVIEWER-REPORT, Memorial-Updater appends). Standard regex carve-outs needed in spec.
+## Deliverables emitted (Coordinator at this gate)
 
-## Inputs for next role (Coordinator at wave gate)
+1. **`coordination/WAVE-GATE-02.md`** — Wave 2 gate artifact per `templates/WAVE-GATE-TEMPLATE.md`.
+2. **5 CLUSTER-HANDOFF-2 artifacts** for D1 HIGH edges feeding WU-05 SLICE 3 close-walk:
+   - `coordination/CLUSTER-HANDOFF-2-WU00-WU05.md` (L0 contract → close-walk audit; 6 R25 carry-forward items enumerated)
+   - `coordination/CLUSTER-HANDOFF-2-WU01-WU05.md` (Slurm adapter → close-walk; R28 MINOR-1 carry-forward)
+   - `coordination/CLUSTER-HANDOFF-2-WU02-WU05.md` (K8s adapter → close-walk; 3 R29 MINORs carry-forward, incl. Rule 4 derivation site)
+   - `coordination/CLUSTER-HANDOFF-2-WU03-WU05.md` (NVLink adapter + R-E7 evidence → close-walk; Hybrid Reviewer audits this)
+   - `coordination/CLUSTER-HANDOFF-2-WU04-WU05.md` (MD-F4 + PR-F6 evidence → close-walk; Hybrid Reviewer also audits this — Wave-1→Wave-3 cross-wave edge authored at Wave-2 gate per timing convention)
+3. **`coordination/COORDINATOR-MEMORIAL.md`** — 6 confirmations + 0 violations + 4 friction-surface observations appended (Wave 2 gate section) + 4 cross-project rule derivations recorded.
+4. **`coordination/NEXT-ROLE.md`** (this file) — route to operator review.
 
-**Read in order:**
+## Operator review checklist (before authorizing Wave 3 dispatch)
 
-1. **`CLAUDE-COMMON.md`** + **`CLAUDE-COORDINATOR.md`** — role discipline.
-2. **`coordination/WAVE-PLAN-02.md`** — plan being gated.
-3. **`coordination/WAVE-GATE-01.md`** — prior gate; informs handoff propagation pattern.
-4. **`coordination/reviews/REVIEWER-REPORT-R28.md`** + **`-R29.md`** + **`-R30.md`** — verdicts to aggregate.
-5. **`coordination/logs/ROUND-R28-SUMMARY.md`** + **`-R29-SUMMARY.md`** + **`-R30-SUMMARY.md`** — round summaries.
-6. **`coordination/MEMORIAL.md`** R28 + R29 + R30 sections (merged).
-7. **`engine/topology/{slurm,k8s,nvlink}-source.ts`** — Wave 2 adapter deliverables; the 3 vendor-specific TopologySource impls.
-8. **`coordination/STAGED-FOR-WU-05-SCOPE.md`** — Item 1: vendor-fungibility SCOPING-MEMO amendment to land at WU-05.
-9. **`coordination/COORDINATOR-MEMORIAL.md`** — append-only; Wave 1 gate entries + new Wave 2 gate entries to land.
-10. **`templates/WAVE-GATE-TEMPLATE.md`** + **`templates/CLUSTER-HANDOFF-TEMPLATE.md`** — scaffolds.
+1. **Read `coordination/WAVE-GATE-02.md`** end-to-end — confirms the gate verdict + dispositioning logic + pre-flag inventory.
+2. **Skim the 5 `CLUSTER-HANDOFF-2-*.md` artifacts** — confirm each handoff content is honest about what each Wave-2 deliverable produced vs what WU-05 close-walk must close.
+3. **Review the 4 derived cross-project rules** (in WAVE-GATE-02 § Cross-project reinforcement rules + COORDINATOR-MEMORIAL § Cross-project reinforcement rules derived at Wave 2 gate). Confirm:
+   - Rule 2 draft text matches operator's interpretation of `architect-branch-binding-coverage`
+   - Rule 3 draft text matches operator's interpretation of `implementer-spec-test-assertion-coverage`
+   - Rule 4 derivation decision (Coordinator chose to derive 4th rule per NEXT-ROLE R31-entry "Coordinator should also consider declaring [4th]") — operator confirms or directs reclassification
+4. **Confirm vendor-fungibility SCOPING-MEMO amendment** (per `coordination/STAGED-FOR-WU-05-SCOPE.md` Item 1) carries forward into WU-05 cluster scope block authoring.
+5. **Decide CLAUDE-IMPLEMENTER.md consolidation timing.** 44 lines (5th consecutive round above 30-line threshold). Operator may opt to run `scripts/consolidate-reinforcements.sh` between R31 and R32, or defer to a future round.
 
-## Expected deliverables
+## Wave 3 dispatch routing (after operator review clears the gate)
 
-1. **`coordination/WAVE-GATE-02.md`** (NEW; per template).
-2. **5 forward-looking `CLUSTER-HANDOFF-2-*.md` artifacts** for the D1 HIGH edges feeding WU-05 SLICE 3 close-walk:
-   - `CLUSTER-HANDOFF-2-WU00-WU05.md` (L0 contract → close-walk audit)
-   - `CLUSTER-HANDOFF-2-WU01-WU05.md` (Slurm adapter → close-walk)
-   - `CLUSTER-HANDOFF-2-WU02-WU05.md` (K8s adapter → close-walk)
-   - `CLUSTER-HANDOFF-2-WU03-WU05.md` (NVLink adapter + R-E7 mitigation evidence → close-walk; hybrid Reviewer audits this)
-   - `CLUSTER-HANDOFF-2-WU04-WU05.md` (MD-F4 + PR-F6 evidence → close-walk; hybrid Reviewer also audits this as the consolidated SLICE 3 deliverable)
-3. **`coordination/COORDINATOR-MEMORIAL.md`** appends (3 new friction surfaces + Wave 2 gate confirmations + cross-project rule note).
-4. **`coordination/NEXT-ROLE.md`** update at end: `NEXT-ROLE: OPERATOR (Wave 3 dispatch authorization review)` / `STATUS: WAVE-GATE-READY`.
+Per `WAVE-GATE-02.md` § Wave 3 dispatch authorization:
 
-## Coordinator decisions to make at this gate
+- **Single cluster:** WU-05 SLICE 3 close-walk (CL-03-A)
+- **Tier:** audit (Coordinator prior; close-walk audit-tier mirrors R19/R22 precedent per WAVE-PLAN-02 Step 6)
+- **Hybrid Reviewer:** YES (`HYBRID_REVIEWER=true` per SCOPING-MEMO § 3 SLICE 3.C row)
+- **Worktree:** main (`~/concord/tessera`); no `multi-track-cluster-setup.sh` required
+- **Pipeline:** `scripts/run-pipeline.sh --tier audit HYBRID_REVIEWER=true` (or equivalent env-var invocation)
+- **Inputs (Architect reads in order):** 5 CLUSTER-HANDOFF-2 artifacts + `coordination/STAGED-FOR-WU-05-SCOPE.md` Item 1 (vendor-fungibility amendment) + this WAVE-GATE-02 pre-flag table + R26 MINOR-2 forward-flag for SLICE 4 punch list
+- **HARD STOP:** at SLICE 3 milestone per overnight authority 2026-05-18 LATE-MORNING. Operator decides whether Wave 4 (WU-06 SLICE 4 entry) dispatches in a subsequent session.
 
-1. **All 7 Wave 2 MINORs:** ADVANCE; pre-flag to WU-05 close-walk (already specified in Wave 2 cluster scope blocks' "carry-forward watch items" sections).
-2. **3 derived cross-project reinforcement rules**: acknowledge in WAVE-GATE-02.md.
-3. **4th candidate** (anti-scope-allowed-set-forward-coverage): Coordinator decides whether to formally derive at this gate or carry forward as observation.
-4. **Forward to WU-05 SLICE 3 close-walk via staged artifact:** vendor-fungibility SCOPING-MEMO amendment per `coordination/STAGED-FOR-WU-05-SCOPE.md` Item 1 — confirm carry-forward.
-5. **CLAUDE-IMPLEMENTER.md at 44 lines** (5th consecutive round above 30) — pre-flag for operator-triggered consolidation.
-
-## Anti-scope (Coordinator hard limits — unchanged)
-
-- NO modification of engine/* or test/* files
-- NO drafting of WU-05 cluster spec
-- NO modifying cluster-worktree NEXT-ROLE.md files
-- NO pre-resolving operator OQs by assumption
-- NO new WUs not in WAVE-PLAN-02
-- NO Wave 3 dispatch via Coordinator-session direct action
-
-## Routing notes
-
-- Per overnight authority, after Coordinator emits Wave 2 gate authorizing Wave 3, the overnight-mode workflow proceeds to Wave 3 dispatch (single-cluster: WU-05 SLICE 3 close-walk; audit-tier; HYBRID_REVIEWER=true per SCOPING-MEMO § 3 SLICE 3.C row).
-- WU-05 cluster scope block authoring picks up the vendor-fungibility amendment per task #22 + `STAGED-FOR-WU-05-SCOPE.md`.
-
-## State at R31 entry
+## State at R31 close
 
 | Element | State |
 |---|---|
-| WU-01 SLURM R28 | ✅ MERGE-READY d432947; merged |
-| WU-02 K8S R29 | ✅ MERGE-READY d1f8c9b; merged |
-| WU-03 NVLINK R30 | ✅ MERGE-READY b613549; merged |
-| Wave 2 merge baseline tag | `pre-wave-2-merge` |
+| Wave 2 verdict | ADVANCE (0C / 0MAJ / 7 MIN; all pre-flagged to WU-05) |
+| WAVE-GATE-02.md | ✅ emitted |
+| 5 CLUSTER-HANDOFF-2 artifacts | ✅ emitted |
+| COORDINATOR-MEMORIAL appends | ✅ landed (6 conf / 0 viol / 4 obs / 4 rule derivations) |
 | 0-CRITICAL streak | 27+ rounds |
 | 0-MAJOR streak | 7 rounds (R20-R23, R25, R28, R29, R30) |
-| Working tree | clean |
-| HEAD | `56ee259` (Wave 2 merge complete) |
-| Methodology friction surfaces captured | 8 (5 Wave 1 + 3 Wave 2) |
-| New cross-project rules derived this session | 3 |
-| Wave 3 readiness | conditional on Coordinator ADVANCE |
+| Working tree | clean (Coordinator emitted only new artifacts; no engine/test modifications) |
+| HEAD | `56ee259` (Wave 2 merge complete; Coordinator artifacts staged but not committed) |
+| Methodology friction surfaces captured | 8 (5 Wave 1 + 3 Wave 2) + 5 Wave-2 observations |
+| Cross-project rules derived this session | 4 total at Wave 2 gate (1 validated, 3 newly derived) |
+| Wave 3 readiness | conditional on operator review clearing the gate |
+
+## Anti-scope (Coordinator hard limits — preserved)
+
+- NO modification of engine/* or test/* files (this session emitted only `coordination/*` artifacts; verified)
+- NO drafting of WU-05 cluster spec (Architect's job at Wave 3 dispatch)
+- NO modifying cluster-worktree NEXT-ROLE.md files (none; Wave 2 clusters merged)
+- NO pre-resolving operator OQs by assumption (none surfaced this gate)
+- NO new WUs not in WAVE-PLAN-02 (WAVE-PLAN-02 v2 remains the current plan; no v3 needed)
+- NO Wave 3 dispatch via Coordinator-session direct action (operator authorizes)
