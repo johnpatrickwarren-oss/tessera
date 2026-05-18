@@ -52,7 +52,7 @@ AC-R28-12 (anti-scope diff forward-protection) is added at chore-B in a separate
 **Round-start SHA:** `ad024af`
 **Architect spec commit:** `8f7e797` (Q-R28-SPEC.md + Q-R28-SPEC-AUDIT.md)
 **RED commit:** `7783a89` (test stubs + fixtures; slurm-source.ts not yet present)
-**Chore-A SHA:** [committed immediately after this NEXT-ROLE.md update; SHA recorded here after commit]
+**Chore-A SHA:** `6e5cc691bd6027056948e10179700bc99d16917a`
 
 **Anti-scope check:** No files outside Q-R28-SPEC § 3.2 allowed-set were modified. Specifically:
 - `engine/topology-overlay.ts` NOT modified (BFS body read-only; halt condition #1 did not fire)

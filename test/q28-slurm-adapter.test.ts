@@ -228,9 +228,9 @@ test('AC-R28-11: SlurmTopologySource through TopologyEnricher produces candidate
 });
 
 // ── AC-R28-12: anti-scope diff round-start..chore-A ⊆ allowed-set ────
-// ADDED AT CHORE-B: chore-A SHA = <CHORE_A_SHA> (placeholder → RED; substituted below → GREEN).
+// ADDED AT CHORE-B: chore-A SHA = 6e5cc691bd6027056948e10179700bc99d16917a (placeholder → RED; substituted below → GREEN).
 // Round-start SHA: ad024af (verified at Architect session entry).
-test('AC-R28-12: git diff ad024af..<CHORE_A_SHA> --name-only ⊆ allowed-set', () => {
+test('AC-R28-12: git diff ad024af..6e5cc691bd6027056948e10179700bc99d16917a --name-only ⊆ allowed-set', () => {
   const { execFileSync } = require('node:child_process');
   const allowedExact = new Set([
     'engine/topology/slurm-source.ts',
@@ -244,7 +244,7 @@ test('AC-R28-12: git diff ad024af..<CHORE_A_SHA> --name-only ⊆ allowed-set', (
   ]);
   const allowedGlob = (p: string) =>
     p.startsWith('coordination/diagnostics/DIAGNOSTIC-R28-') && p.endsWith('.md');
-  const output = execFileSync('git', ['diff', 'ad024af..<CHORE_A_SHA>', '--name-only'], { encoding: 'utf8' });
+  const output = execFileSync('git', ['diff', 'ad024af..6e5cc691bd6027056948e10179700bc99d16917a', '--name-only'], { encoding: 'utf8' });
   const paths = output.trim().split('\n').filter(Boolean);
   for (const p of paths) {
     assert.ok(allowedExact.has(p) || allowedGlob(p), `path outside allowed-set: ${p}`);
