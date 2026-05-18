@@ -276,3 +276,21 @@ full is the default; no record required for full rounds.
 #   Detected tessera R08: Implementer MEMORIAL entry incorrectly characterized a halt-
 #   discipline deviation as "correct"; the R08 Reviewer report (MAJOR-1) and the Reviewer's
 #   corrective MEMORIAL entry correctly classified the same event as a violation.
+# REINFORCED 2026-05-17 — The coordination-chore-sequence verification step ("Reviewer
+#   verifies: git diff SHA-A HEAD -- src/ tests/ tools/ engine/ ...") structurally cannot
+#   catch anti-scope violations that occur inside SHA-A (the chore commit itself), because
+#   SHA-A is the lower bound of the diff. The correct completeness gate is a round-start-to-
+#   HEAD diff: "git diff ROUND-START-SHA HEAD --name-only -- src/ test/ engine/ tools/"
+#   (note: project uses `test/` singular; the template's `tests/` typo silently skips the
+#   real test directory). Add this as a supplementary check at chore-sequence step 7. The
+#   existing post-coordination-commit check only catches modifications AFTER SHA-A. Detected
+#   tessera R19 MINOR-3.
+# REINFORCED 2026-05-17 — Audit-tier promotion-mid-round rule (§ "Promotion mid-round"):
+#   when an audit-tier round's binding-command run surfaces a test-file failure whose passing
+#   fix requires modifying an anti-scoped file, this IS a halt-condition for spec promotion.
+#   The Implementer MUST HALT, write a DIAGNOSTIC that includes "recommend promotion to full
+#   tier" as one of the bounded options, and set STATUS: ESCALATE. The risk: in audit-tier
+#   self-spec rounds, the Implementer can breach their own anti-scope clause with no in-
+#   session check — the Reviewer is the only post-hoc gate. Promotion-to-full ensures an
+#   Architect reviews the spec amendment before the anti-scope modification is applied.
+#   Detected tessera R19 OBS-4 / MAJOR-2.
