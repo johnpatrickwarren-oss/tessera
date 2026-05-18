@@ -50,8 +50,9 @@ const AT_PIN_FILES: Array<{ tessera: string; source: string }> = [
   { tessera: 'engine/topology-overlay.ts',                         source: 'engine/topology-overlay.ts' },
   { tessera: 'engine/signal-classes.ts',                           source: 'engine/signal-classes.ts' },
   { tessera: 'engine/verdict-groups.ts',                           source: 'engine/verdict-groups.ts' },
-  // Type files (at-pin; 8 files; config.ts excluded — vendored-with-deltas)
-  { tessera: 'engine/types/verdict.ts',                            source: 'engine/types/verdict.ts' },
+  // Type files (at-pin; 7 files; config.ts excluded — vendored-with-deltas at R01;
+  //                                verdict.ts excluded — vendored-with-deltas at R18 for
+  //                                cluster_event_id + TopologyNode.kind + TopologyEdge.relationship)
   { tessera: 'engine/types/primitives.ts',                         source: 'engine/types/primitives.ts' },
   { tessera: 'engine/types/metrics.ts',                            source: 'engine/types/metrics.ts' },
   { tessera: 'engine/types/orchestration.ts',                      source: 'engine/types/orchestration.ts' },
