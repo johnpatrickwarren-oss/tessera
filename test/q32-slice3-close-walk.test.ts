@@ -236,7 +236,7 @@ test('AC-R32-18: REVIEWER-REPORT-R32.md has 0 CRITICAL findings', () => {
 // ── AC-R32-19: Anti-scope diff — round-start to chore-A ⊆ allowed-set ────────
 test('AC-R32-19: round-start-to-chore-A diff path-set ⊆ R32 allowed-set', () => {
   const BASELINE_SHA = '45242f2'; // R32 round-start
-  const CHORE_A_SHA = '<CHORE_A_SHA>'; // substituted at chore-A
+  const CHORE_A_SHA = '6466940'; // substituted at chore-A
   const ALLOWED_SET = new Set([
     'coordination/specs/Q-R32-SPEC.md',
     'test/q32-slice3-close-walk.test.ts',
@@ -267,7 +267,7 @@ test('AC-R32-19: round-start-to-chore-A diff path-set ⊆ R32 allowed-set', () =
 
 // ── AC-R32-20: Forward-protection (chore-B) — chore-A to HEAD ⊆ allowed-set ─
 test('AC-R32-20: chore-A-to-HEAD diff ⊆ R32 allowed-set + carve-outs (forward-protection)', () => {
-  const CHORE_A_SHA = '<CHORE_A_SHA>'; // substituted at chore-A
+  const CHORE_A_SHA = '6466940'; // substituted at chore-A
   const ALLOWED_SET = new Set([
     'coordination/specs/Q-R32-SPEC.md',
     'test/q32-slice3-close-walk.test.ts',
