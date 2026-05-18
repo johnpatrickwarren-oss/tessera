@@ -305,6 +305,16 @@ All unresolved decisions → open questions in the spec.
 #   write spec → commit spec artifacts → write NEXT-ROLE.md routing block. Add as Architect
 #   pre-emit grilling step: "confirm all spec artifacts (Q-RNN-SPEC.md, Q-RNN-SPEC-AUDIT.md)
 #   are committed before writing NEXT-ROLE.md." Detected tessera R21 MINOR-1.
+# REINFORCED 2026-05-18 — When spec § Commit-inventory (§ 2.7) or § Anti-scope-allowed-set
+#   (§ 3) lists compiled artifact paths (e.g., `.js` outputs from `tsc`), verify against
+#   `.gitignore` and `git ls-files` before routing. A `.gitignore: *.js` rule makes these
+#   paths structurally unreachable from `git diff --name-only`; listing them inflates the
+#   allowed-set with phantom entries that can never appear in any diff. Add to § 9.7
+#   empirical-premise-verification: "are all listed artifact paths git-trackable per
+#   .gitignore?" (Run: `git ls-files <path>` — if no output, the path is gitignored.)
+#   R23's 13-entry allowed-set contained 4 `.js` paths that returned nothing from
+#   `git ls-files`; AC-R23-15 passed only because it asserts membership (not set-equality).
+#   Detected tessera R23 MINOR-2.
 # REINFORCED 2026-05-17 — When spec § 1 enumerates failure modes for a function, every named
 #   failure mode must be independently exercised by at least one AC scenario. A failure mode
 #   enumerated in the spec but absent from the AC table leaves the guard implementing it
