@@ -168,6 +168,8 @@ test('AC-R25-12: variable-interval L0-transformed rates integrate cleanly with T
   }
   const snap = tb.get('test_signal');
   // Mean rate is per-second rate (10); slopeNorm near zero (constant rate).
-  assert.ok(Math.abs(snap.mean - 10) < 1e-9,   `mean=${snap.mean} expected 10 exactly (deterministic generator)`);
-  assert.ok(Math.abs(snap.slopeNorm) < 1e-9,   `slopeNorm=${snap.slopeNorm} expected near zero`);
+  // Tolerances per operator Option A (ESCALATE-R25-01): § 1.8 values (0.001 / 0.01).
+  // § 4.3/§ 5.1 1e-9 was empirically infeasible (float64 1.2 not exact; |mean-10| ≈ 1.2e-7).
+  assert.ok(Math.abs(snap.mean - 10) < 0.001,  `mean=${snap.mean} expected ≈10 (tol 0.001)`);
+  assert.ok(Math.abs(snap.slopeNorm) < 0.01,   `slopeNorm=${snap.slopeNorm} expected near zero (tol 0.01)`);
 });
