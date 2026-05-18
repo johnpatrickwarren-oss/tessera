@@ -566,3 +566,15 @@ with a clear commit message.
 #   leave them in silent disagreement. Detected tessera R26 MINOR-2 (earliest/latest_event_ts
 #   aggregation at common-mode-attribution.ts:186-191 iterates all touches rather than
 #   per-distinct-member as the module docstring and spec §3.1 both prescribe).
+# REINFORCED 2026-05-18 — When implementing AC test assertions, assert ALL fields that the
+#   spec AC text explicitly lists, not just the fields that feel load-bearing or that are
+#   exercised by other ACs. If spec § 5.2 AC-RNN-X says "the snapshot has nodes: [], edges:
+#   [], fetched_at_ts: META.fetchedAtTs, source_id: META.sourceId, source_version:
+#   META.sourceVersion", the test must assert all 5 fields — even if source_id and
+#   source_version are covered by another AC on a different code path. The risk: a future
+#   refactor may short-circuit the branch under test (e.g., empty-input early return) and
+#   drop fields; the only guard is the AC's own assertions, not sibling-AC coverage on a
+#   different path. Procedure: for each AC in spec § 5.2, count the asserted fields in the
+#   spec text and match them one-for-one in the test assertion block. Detected tessera R28
+#   MINOR-1 (AC-R28-9 test at test/q28-slurm-adapter.test.ts:158-166 omits source_id and
+#   source_version assertions that spec § 5.2 line 764 explicitly requires).
