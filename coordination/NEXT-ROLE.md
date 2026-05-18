@@ -1,9 +1,23 @@
 CURRENT-ROUND: R21
-NEXT-ROLE: REVIEWER
-STATUS: READY
-Inputs: coordination/specs/Q-R21-SPEC.md (+ Q-R21-SPEC-AUDIT.md sidecar);
-        REVIEWER-REPORT-R21.md target;
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: ROUND-COMPLETE
+Inputs: coordination/reviews/REVIEWER-REPORT-R21.md;
         Implementer attestation: a5cae6d (MERGE-READY chore-A)
+
+## Reviewer attestation
+
+- Report: coordination/reviews/REVIEWER-REPORT-R21.md
+- 11/11 ACs PASS (3 with MINOR caveats: AC-R21-7, AC-R21-8, AC-R21-11)
+- Findings: 0 CRITICAL / 0 MAJOR / 4 MINOR / 4 OBS
+- Cold-verified binding commands:
+    - `npx tsc --noEmit` → exit 0 (AC-R21-9)
+    - `node --test test/*.test.js` → tests 201 / pass 201 / fail 0 (AC-R21-10)
+- Cold-verified anti-scope:
+    - `git diff 62e28d7..a5cae6d --name-only` → 4 paths ⊆ allowed-set (AC-R21-11)
+    - `git diff 62e28d7..HEAD --name-only` → 6 paths ⊆ allowed-set (round-start completeness gate)
+- Right-reasons audit: 3 tests (AC-R21-2, AC-R21-6, AC-R21-11) — none self-confirming
+- 13th consecutive Tessera Reviewer right-reasons audit (R08–R21)
+- 20-round 0-CRITICAL streak (R02–R21)
 
 ## Implementer attestation (chore-A)
 

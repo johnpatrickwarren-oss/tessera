@@ -480,3 +480,17 @@ with a clear commit message.
 #   information is present and arguably clearer. If you believe an alternative placement is
 #   strictly better, document the deviation and its rationale in NEXT-ROLE.md rather than
 #   silently redirecting. Detected tessera R20 MINOR-3.
+# REINFORCED 2026-05-17 — When implementing a spec-prescribed guard for a distinct failure mode
+#   (e.g., dedup-by-group_id, short-circuit on empty string), write a structural test that would
+#   FAIL if the guard were removed. If the existing AC scenario passes through the guard without
+#   ever triggering it, add a dedicated test variant that explicitly exercises the guard path. A
+#   guard structurally unbound by every test is indistinguishable from dead code. Detected
+#   tessera R21 MINOR-2 (dedup guard: seen_group_ids.has() never true in AC-R21-7 scenario)
+#   and MINOR-3 (empty-string short-circuit: undefined!=='' suffices to return [] without it).
+# REINFORCED 2026-05-17 — When recording observed test line citations in attestation artifacts
+#   (NEXT-ROLE.md, MEMORIAL.md), pin each citation to the exact line of the test() declaration,
+#   not the first assertion in the test body. Count from the file's HEAD to the `test(` keyword.
+#   Off-by-1 to off-by-5 drift has appeared at R03, R18, and R21; each instance reduces
+#   reviewer verifiability. Confirm citations by grep or offset-read before committing chore-A.
+#   Detected tessera R21 MINOR-4 (AC-R21-1 cited :35 vs actual :34; AC-R21-3 :74 vs :73;
+#   AC-R21-4 :89 vs :85; AC-R21-5 :100 vs :97; AC-R21-8 :152 vs :155).
