@@ -226,3 +226,27 @@ test('AC-R28-11: SlurmTopologySource through TopologyEnricher produces candidate
     assert.equal(c.correlational_not_causal, true, `candidate ${c.node_id} dropped correlational_not_causal label`);
   }
 });
+
+// ── AC-R28-12: anti-scope diff round-start..chore-A ⊆ allowed-set ────
+// ADDED AT CHORE-B: chore-A SHA = <CHORE_A_SHA> (placeholder → RED; substituted below → GREEN).
+// Round-start SHA: ad024af (verified at Architect session entry).
+test('AC-R28-12: git diff ad024af..<CHORE_A_SHA> --name-only ⊆ allowed-set', () => {
+  const { execFileSync } = require('node:child_process');
+  const allowedExact = new Set([
+    'engine/topology/slurm-source.ts',
+    'test/q28-slurm-adapter.test.ts',
+    'test/_substrate/slurm-fixture-canonical.conf',
+    'test/_substrate/slurm-fixture-hierarchical.conf',
+    'test/_substrate/slurm-fixture-sparse.conf',
+    'coordination/specs/Q-R28-SPEC.md',
+    'coordination/specs/Q-R28-SPEC-AUDIT.md',
+    'coordination/NEXT-ROLE.md',
+  ]);
+  const allowedGlob = (p: string) =>
+    p.startsWith('coordination/diagnostics/DIAGNOSTIC-R28-') && p.endsWith('.md');
+  const output = execFileSync('git', ['diff', 'ad024af..<CHORE_A_SHA>', '--name-only'], { encoding: 'utf8' });
+  const paths = output.trim().split('\n').filter(Boolean);
+  for (const p of paths) {
+    assert.ok(allowedExact.has(p) || allowedGlob(p), `path outside allowed-set: ${p}`);
+  }
+});
