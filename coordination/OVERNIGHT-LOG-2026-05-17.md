@@ -491,3 +491,80 @@ Operator returns to:
 - **TQ-1 (CLOSED)** — earlier session
 - **TQ-2 (LOW)** — anchor PR #38
 - All parked operator-gate items unchanged
+
+---
+
+## Late-evening session opens (THIRD overnight authority — 2026-05-17 LATE EVENING)
+
+Operator dispositioned TQ-4 as (α)+(γ) and said "go slice 2" — I launched R20 (Phase 2 SLICE 2 round 1). Mid-R20 (Reviewer launching), operator added: "I'm headed to bed, continue with subsequent rounds, following your recommendations until morning."
+
+**Authority memory:** [[project-overnight-authority-2026-05-17-late-evening]] — supersedes the evening-session SLICE-1-hard-stop. Chain authorized through SLICE 2 close (R20 → R21 → R22? → R23 close-walk → HARD STOP at SLICE 2 milestone). SLICE 3 entry requires operator return.
+
+**Pre-approved decisions defaults:**
+- ESCALATE with bounded clean disposition (R18-style Option A pattern) → apply + log + continue
+- ESCALATE with no clean disposition → log + HALT for operator
+- CRITICAL → HALT
+- MAJOR/MINOR/4-MAJOR-cluster → log + continue (R19 precedent: methodology absorbs)
+- Hard limits preserved (anchor PR #38; no cross-project; no new GH PRs; no tag/release; no `--no-verify`/`--amend`; OQ-1 + OQ-R08-3 stay parked)
+
+---
+
+## R20 — Phase 2 SLICE 2.A: VerdictGrouper cluster_event_id scope keying (autonomous; full tier; late-evening session)
+
+**Completed:** 2026-05-17 22:20:38 (pipeline ~46 min wall-clock; clean chain — no ESCALATE).
+**Verdict:** **MERGE-READY · 0 CRITICAL · 0 MAJOR · 3 MINOR · 3 OBS · 15/15 ACs PASS** (1 PASS-WITH-OBS for AC-R20-8 sub-case thinness) · 192/0 tests.
+**Streak:** **19-round 0-CRITICAL extended (R02-R20). First tessera full-tier round with 0 MAJOR findings.**
+**Commits:** `222a856` (RED placeholders) → `cf9ddce` (GREEN production deltas + 10-test q20) → `23a497e` (chore-A coordination + MERGE-READY-SHA) → `7eb3a63` (chore-B attestation SHA + AC-R20-12 anti-scope diff test) → `4925ff6` (Memorial Updater outputs).
+**Reinforcements:** +1 ARCH + 3 IMPL (now 19 ARCH + 33 IMPL + 3 COMMON + 1 REVIEWER). **CLAUDE-IMPLEMENTER.md at 33 lines — consolidation recommended, deferred to SLICE 2 close-walk.**
+
+### Deliverables landed
+
+✅ **`engine/verdict-groups.ts`** — Vendored-with-deltas transition. VerdictGrouper internal scope re-architecture: `cluster_event_id` ingest opts; `cluster_event_id|deploy_id` composite keying when cluster_event_id present; legacy `deploy_id`-only mode preserved when absent; group_id format extension to `group-{cluster_event_id}-{deploy_id}-{window_start_ts}` (composite) or inherited `group-{deploy_id}-{window_start_ts}` (legacy); late-arrival semantics under cluster-event scope (Addition #25 D2 preserved + extended).
+✅ **`test/q20-…test.ts`** — 11 ACs runtime-bound (q20 test count = 11; AC-R20-1 through AC-R20-9 + AC-R20-12 + AC-R20-15).
+✅ **`coordination/VENDORING-MANIFEST.md`** — `engine/verdict-groups.ts` row → `vendored-with-deltas` with R20 notes (two-step maintenance pattern applied UPFRONT per PHASE-2-SLICE-1-CLOSE-WALK § 2).
+✅ **`test/q01-no-at-pin-deltas.test.ts`** — `engine/verdict-groups.ts` removed from AT_PIN_FILES list per two-step pattern.
+✅ **R20 SLICE-2 split decision** — fleet-merge consumption layer deferred to R21 per architect's split recommendation (kept R20 at 15 ACs; avoids spec bloat).
+
+### The 3 documentation MINORs (no behavioral impact)
+
+| # | Role | Class | Summary |
+|---|---|---|---|
+| 1 | ARCHITECT | pre-emit-grilling | Spec § 5 preamble classified AC-R20-12 as "binding-command attestation" while spec § 4.7 prescribes it as runtime test. 16-token cross-section pass missed prose-classification-vs-structural-prescription mismatch. |
+| 2 | IMPLEMENTER | pre-emit-grilling | chore-B added AC-R20-12 as runtime test; q20 file header (lines 4-6) still classifies it as binding-command attestation. No header-refresh pass at chore-B. |
+| 3 | IMPLEMENTER | pre-emit-grilling | `test/q01-no-at-pin-deltas.test.ts:7-8` stale arithmetic — full-formula re-verification was needed when decrementing one addend; targeted edit inherited R06/R18 drift. |
+| 4 | IMPLEMENTER | spec-fidelity | Spec § 4.4 prescribed inline parenthetical at "core orchestration (4)" line; Implementer placed equivalent text at line 10. No AC binding the placement. |
+
+(Reviewer counted 3; Memorial Updater split IMPL into 3 separate REINFORCED lines.)
+
+### Disposition (autonomous per late-evening authority)
+
+- **No ESCALATE** — all findings documentation-level MINORs with no behavioral impact; methodology absorbs as designed.
+- **Carry-forward to R21+:** OBS-1 (AC-R20-8 (c)/(d) thin coverage); MINOR-1 (q20 file header); MINOR-2 (q01 stale arithmetic — R21 IS planned-touch since R21 will transition fleet/* file(s) to vendored-with-deltas, so MUST apply full-formula re-verification per R20 IMPL MINOR-2 reinforcement).
+- **CLAUDE-IMPLEMENTER.md consolidation deferred** to SLICE 2 close-walk (R22 or R23). Threshold exceeded (33 > 30) but not urgent; recent reinforcements still load-bearing.
+- **No new TQ items.**
+
+### Why R20 was clean
+
+R20 closed cleaner than R18 (4 MINOR) or R19 (4 MAJOR cluster) because:
+- Architect applied R18 vendored-with-deltas + R19 anti-scope SHA-anchor patterns UPFRONT in spec
+- 11-gate grilling + 14-claim empirical-verification + 3-consumer assertion-surface enumeration all worked
+- Split-decision discipline kept R20 ACs ≤ 15 — Reviewer could audit thoroughly
+- Architect's brainstorm (Approach A vs B vs C with documented rejection rationale) gave Reviewer clear constraint genealogy
+
+---
+
+## R21 — Phase 2 SLICE 2.B: fleet-merge consumption layer (autonomous; full tier; late-evening session)
+
+**Launching now per late-evening overnight authority. SLICE-2-split-deferred sub-goal.**
+
+**Pre-approved scope:** wire engine/fleet/* (combine.ts/detectors.ts/e-bh.ts) to consume R20 VerdictGrouper contract and propagate cluster_event_id through the fleet-merge → outer aggregator interface.
+
+**Pre-approved anti-scope (per R21 NEXT-ROLE.md):** NO engine/verdict-groups.ts modification (R20 deliverable frozen); NO type-layer changes (R18 frozen); NO HardwareTopologySource (SLICE 3); NO deployment-event-feed (SLICE 4); NO detector internals (A12).
+
+**Architect questions queued:** producer surface for cluster_event_id at fleet-merge; rollup semantics; fleet-tick scope vs per-verdict scope; e-BH interaction; backward-compat; test fixture choice (v9X reuse vs v9Y new).
+
+**Watch items applied from R20:** OBS-1 (sub-case coverage tightening if related code touched); MINOR-2 (full-formula re-verification on q01-no-at-pin-deltas if fleet/* file gains deltas — likely planned touch).
+
+(Entries appended when R21 closes.)
+
+---
