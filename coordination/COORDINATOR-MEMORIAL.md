@@ -50,6 +50,24 @@ CONFIRMATION: `pre-emit-grilling` | All 6 grilling checklist items addressed inl
 
 ---
 
+### Pre-Wave-1 (WAVE-PLAN-02 emission, 2026-05-18) — Coordinator re-invocation after SCOPING-MEMO MR-1 amendment
+
+CONFIRMATION: `dag-construction-discipline` | Step 1 deterministic extraction added exactly +1 WU (WU-00 L0-CONTRACT) traceable to a specific SCOPING-MEMO MR-1 amendment surface (Extension 3 (b) sub-extension lines 219-228 + § 3 SLICE 3.A.5 row line 364 + § 4.2 R-E7 line 416). No WUs invented beyond the amendment. v1's 7 WUs preserved with identical numbering for diff readability. | WAVE-PLAN-02 emit | Coordinator
+
+CONFIRMATION: `dependency-edge-classification` | Recorded asymmetric edge confidence honestly: WU-00 → WU-03 (NVLINK) D1 HIGH because NVLink 32-bit error counters directly exercise WU-00's wrap-handling path per § 4.2 R-E7; WU-00 → WU-01 (SLURM) and WU-00 → WU-02 (K8S) D2 MEDIUM because Slurm/K8s topology formats are not counter-typed and the dependency is interface-only. Resisted temptation to record uniform D1 HIGH despite NEXT-ROLE.md framing suggesting uniformity — Step 3 Judgment call 1 documents the rationale. Operationally identical wave placement (all three adapters in Wave 2 after WU-00) but recorded dependency strength preserves accuracy for future cycle reference. | WAVE-PLAN-02 emit | Coordinator
+
+CONFIRMATION: `claude-judgment-threshold` | Two new Step 3 judgment calls (1: D1/D2 asymmetry across adapter edges; 2: MD-F4 placement Wave 1 vs Wave 2) plus carry-forward of v1's judgment calls 3 (parallel-class convention) and 4 (Wave 3/4 sequencing). Each new call logged with bounded options + reasoning. Did not resolve operator-decidable OQ-W2-1 (L0-contract module location) by Coordinator fiat — surfaced as operator OQ with Coordinator-default recommendation. | WAVE-PLAN-02 emit | Coordinator
+
+CONFIRMATION: `fan-out-vs-sequential-judgment` | Resisted collapsing MD-F4 into a single-cluster Wave 2 with adapters when MD-F4 is structurally independent of WU-00 (zero D-test edges). Placed MD-F4 in Wave 1 with WU-00 as a clean 2-cluster fan-out per operator R24 directive ("do not collapse them into a single cluster for convenience or out of conservatism — if independence is clean, fan out"). Total wave count grew from 4 (v1) to 5 (v2) because WU-00 is a genuine precondition for adapters per operator-amended SCOPING-MEMO; surfaced this +1 wave cost honestly in plan summary as the price of the amendment rather than collapsing WU-00 into the adapter clusters (which would re-invite per-adapter counter-handling drift the L0-contract carve-out exists to prevent). | WAVE-PLAN-02 emit | Coordinator
+
+CONFIRMATION: `pre-emit-grilling` | All 6 grilling checklist items addressed inline in WAVE-PLAN-02.md (not kept internal); 5 adversarial review notes added beyond the checklist (WU-00 file-layout OQ vs concurrent-drift; BFS body modification risk carry-forward; WU-00 reset-vs-wrap ambiguity; Wave 2 dependency on potentially-unstable WU-00 contract; +1 wave cost honesty). | WAVE-PLAN-02 emit | Coordinator
+
+CONFIRMATION: `coordinator-versioning-discipline` | WAVE-PLAN-01.md preserved on disk per CLAUDE-COORDINATOR.md §Coordinator artifacts ("Versioned per revision; do not edit in place"). WAVE-PLAN-02.md is a sibling, not a replacement. Version history table at end of v2 documents what changed from v1 → v2. | WAVE-PLAN-02 emit | Coordinator
+
+(No violations at this re-invocation.)
+
+---
+
 ## Reinforcement rules derived
 
 When a discipline accumulates **3+ violations** across waves (or across projects, when tracked at the cross-project layer), the Coordinator derives a sharpening rule. Derived rules become part of the Coordinator's standing discipline.
@@ -84,9 +102,12 @@ When a pattern recurs across **two or more projects**, escalate from project-loc
 
 - **MR-1 vendoring → first Coordinator invocation success pattern.** Tessera is the first non-anchor project to vendor the Coordinator role (MR-1 closed at HEAD `7890b36`). WAVE-PLAN-01 emission worked cleanly (zero halt conditions; OQs surfaced rather than auto-resolved); pattern candidate for promotion to canonical anchor `skills/12-coordinator-role.md` if a second project's first Coordinator invocation also produces clean wave plan without prior empirical context. First observed: WAVE-PLAN-01 emit (Tessera, 2026-05-18).
 - **Adapter-fan-out enabling parallel-class architecture pre-declaration.** WAVE-PLAN-01 OQ-W1-1 surfaced "Coordinator pre-declares parallel-class architecture" as the load-bearing decision for clean fan-out across N concurrent ingestion-adapter clusters. If a second project hits the same pattern (Coordinator preserving fan-out by pre-declaring class-layout convention), candidate for promotion to a new discipline section in `skills/12-coordinator-role.md` §Cluster handoff inventory or §Common pitfalls. First observed: WAVE-PLAN-01 emit (Tessera, 2026-05-18).
+- **PRD amendment mid-Coordinator-cycle → wave-plan revision pattern.** WAVE-PLAN-02 emission occurred same session as v1 (~hours apart) because operator raised an architectural concern (L0 counter-semantic preprocessing) after v1 emit; SCOPING-MEMO MR-1 amendment landed; Coordinator re-invoked for v2. Pattern worked cleanly: v1 preserved on disk; v2 incremented version + added new WU per amendment + recorded what changed in version history table. No need to overwrite v1; downstream consumers (operator review; Wave 1 dispatcher) read v2 as the current plan. Candidate for promotion if a second project hits the same mid-cycle-amendment pattern. First observed: WAVE-PLAN-02 emit (Tessera, 2026-05-18).
+- **Asymmetric D1/D2 edge confidence within a single Step-2 fan-out group.** WAVE-PLAN-02 Step 3 Judgment call 1 recorded WU-00 → WU-03 as D1 HIGH (NVLINK exercises wrap-handling path) but WU-00 → WU-01/02 as D2 MEDIUM (SLURM/K8S have only interface dependency, no counter ingestion). This is the first Tessera Coordinator-level case of asymmetric confidence within edges to a single "fan-out" target group. The deterministic-D-test framework's distinction between D1 (output ownership) and D2 (AC reference) made the asymmetry recordable. Pattern candidate for cross-project promotion: when an upstream WU's surface has variable consumption depth across downstream WUs, record edges asymmetrically rather than uniformly. First observed: WAVE-PLAN-02 emit (Tessera, 2026-05-18).
 
 ---
 
 ## Update history
 
-- **2026-05-18:** Memorial initialized at first Coordinator invocation (Tessera R24); WAVE-PLAN-01.md emitted; zero pre-Wave-1 violations.
+- **2026-05-18 (early):** Memorial initialized at first Coordinator invocation (Tessera R24); WAVE-PLAN-01.md emitted; zero pre-Wave-1 violations.
+- **2026-05-18 (later same day):** Coordinator re-invoked for WAVE-PLAN-02 after SCOPING-MEMO MR-1 amendment added L0-contract sub-extension; v1 preserved on disk; v2 emitted; zero pre-Wave-1 violations at re-invocation.
