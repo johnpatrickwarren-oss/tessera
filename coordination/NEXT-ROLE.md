@@ -1,5 +1,5 @@
 CURRENT-ROUND: R32
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Round-scope directive (R32 — Wave 3 / WU-05 SLICE 3 close-walk)
@@ -90,6 +90,66 @@ Per scope block § Anti-scope:
 - Per overnight authority full SLICE 3 chain authorization. WU-05 close + Coordinator R33 Wave 3 gate = HARD STOP at SLICE 3 milestone.
 - Wave 3 gate (R33; Coordinator invocation post-WU-05) authors WAVE-GATE-03.md + SLICE 3 milestone stamp + morning hand-off log section in OVERNIGHT-LOG.
 - After R33 HARD STOP: operator returns; reviews vendor-fungibility amendment for approval; decides SLICE 4 entry timing.
+
+## Implementer chore-A attestation (R32)
+
+**GREEN commit SHA:** `8e465cb`
+**chore-A commit SHA:** `<CHORE_A_SHA>` (substituted after this NEXT-ROLE commit lands)
+
+### Binding-command attestation
+
+| Command | Result |
+|---|---|
+| `npx tsc -p tsconfig.test.json` | Exit code: **0** (no diagnostics) |
+| `node --test test/*.test.js` (full suite) | `tests=305 / pass=297 / fail=8` |
+
+### Per-file observed counts (R32-modified files)
+
+| File | tests | pass | fail | Notes |
+|---|---|---|---|---|
+| `test/q32-slice3-close-walk.test.js` | 20 | 16 | 4 | AC-R32-17/18 (pre-Reviewer); AC-R32-19/20 (pre-CHORE_A_SHA sub) |
+| `test/q25-l0-contract.test.js` | 14 | 14 | 0 | +1 R25 MINOR-3 gauge test |
+| `test/q28-slurm-adapter.test.js` | 12 | 12 | 0 | AC-R28-9 source_id/version added |
+| `test/q29-k8s-adapter.test.js` | 13 | 10 | 3 | Pre-existing: AC-R29-11/12/13 (unchanged) |
+| `test/q30-nvlink-adapter.test.js` | 16 | 16 | 0 | AC-R30-15 /m regex |
+| `test/q-md-f4-common-mode-injection.test.js` | 13 | 12 | 1 | Pre-existing: AC-R26-16 (unchanged) |
+
+**Arithmetic:** pre-R32 baseline 284/280/4 + 20 new q32 tests + 1 new q25 R25-MINOR-3 = **305 total**. Passes: 280+17=297; Fails: 4+4=8 (4 pre-existing + 4 new pre-Reviewer). ✓
+
+### Per-AC line citations (q32 test, `test(` declarations)
+
+Per R03/R18/R21 reinforcement: citations are `test(` declaration lines, verified via
+`grep -n "^test(" test/q32-slice3-close-walk.test.js` at GREEN SHA.
+
+| AC | Line |
+|---|---|
+| AC-R32-1 | :27 |
+| AC-R32-2 | :37 |
+| AC-R32-3 | :49 |
+| AC-R32-4 | :60 |
+| AC-R32-5 | :69 |
+| AC-R32-6 | :79 |
+| AC-R32-7 | :88 |
+| AC-R32-8 | :99 |
+| AC-R32-9 | :111 |
+| AC-R32-10 | :122 |
+| AC-R32-11 | :134 |
+| AC-R32-12 | :144 |
+| AC-R32-13 | :160 |
+| AC-R32-14 | :172 |
+| AC-R32-15 | :187 |
+| AC-R32-16 | :205 |
+| AC-R32-17 | :219 (RED — Reviewer stage) |
+| AC-R32-18 | :225 (RED — Reviewer stage) |
+| AC-R32-19 | :237 (RED — CHORE_A_SHA pending) |
+| AC-R32-20 | :269 (RED — CHORE_A_SHA pending) |
+
+### R32 spec amendment note (anti-scope deviation)
+
+`coordination/PRD.md` was added as entry 16 to Q-R32-SPEC.md § 4 allowed-set during execution.
+Authorization: wu-05 scope Deliverable 2 item 5 ("PRD US-01 wording generalization") explicitly
+authorizes the `bad GPU → accelerator` edit. In audit-tier, Implementer wears Architect hat;
+spec amended retroactively per established audit-tier protocol.
 
 ## State at R32 entry
 
