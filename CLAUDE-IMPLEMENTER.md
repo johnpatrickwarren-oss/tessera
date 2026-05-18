@@ -455,3 +455,28 @@ with a clear commit message.
 #   2026-05-16 — the Memorial Updater is required to reclassify it. Write the MEMORIAL entry
 #   as a VIOLATION and describe what you did and why; the Memorial Updater will evaluate
 #   whether an exception was warranted. Detected tessera R19 MAJOR-4.
+# REINFORCED 2026-05-17 — When a chore commit adds a new test to an existing test file (e.g.,
+#   AC-R20-12 runtime test added at chore-B commit 7eb3a63), re-read the file's header comment
+#   block before committing to verify that the header's classification claims for each AC remain
+#   accurate. A header calling AC-R20-12 a "binding-command attestation reported by the
+#   Implementer at GREEN" while the same file contains it as a runtime test at line 186 is a
+#   documentation-consistency violation attributable to the chore commit's missing file-header
+#   accuracy pass. Include this as a pre-chore-B grilling step: open the test file's header
+#   lines, read each attestation-type or classification claim, and verify each still describes
+#   the current file body accurately. Detected tessera R20 MINOR-1.
+# REINFORCED 2026-05-17 — When spec § 4.x prescribes updating a specific arithmetic expression
+#   in a file-header summary (e.g., decrementing one addend in q01-no-at-pin-deltas.test.ts:7),
+#   re-read the FULL summary formula at the targeted line — all addends and the total — and
+#   verify each addend against the actual list/array it describes. Applying only the prescribed
+#   single-value change while inheriting stale adjacent values from prior rounds produces
+#   cumulative arithmetic drift (R06 SLICE 4 tool entries, R18 verdict.ts exclusion both left
+#   stale). Full-formula re-verification step: whenever any addend is updated, recount every
+#   other addend against its source array and verify the total. Detected tessera R20 MINOR-2.
+# REINFORCED 2026-05-17 — When spec § 4.x prescribes adding an inline parenthetical at a
+#   specific named line (e.g., "add a parenthetical note '(verdict-groups.ts excluded at R20)'
+#   at the core orchestration (4) line"), implement at the prescribed location unless the AC
+#   explicitly permits alternative placement. Placing equivalent text at a different location
+#   (e.g., top-of-file comment) is a spec-prescription-fidelity deviation even when the
+#   information is present and arguably clearer. If you believe an alternative placement is
+#   strictly better, document the deviation and its rationale in NEXT-ROLE.md rather than
+#   silently redirecting. Detected tessera R20 MINOR-3.

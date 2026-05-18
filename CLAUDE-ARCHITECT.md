@@ -288,3 +288,13 @@ All unresolved decisions → open questions in the spec.
 #   BEFORE routing — do not leave this as an ESCALATE condition for the Implementer to discover
 #   at GREEN. Detected tessera R18 OBS-2: Architect failure-mode 5 identified q01-vendoring-
 #   coverage but missed q01-no-at-pin-deltas; ESCALATE cycle with operator disposition required.
+# REINFORCED 2026-05-17 — When spec § 5 (AC-table section) contains a preamble paragraph that
+#   classifies specific ACs by attestation type (e.g., "AC-R20-12 ... is a binding-command
+#   attestation reported by the Implementer at GREEN"), add an explicit grilling step: for each
+#   named AC in the classification, verify the claim against the matching § 4.x implementation
+#   prescription. An AC classified as a "binding-command attestation" in § 5 but prescribed as
+#   a committed runtime test in § 4.7 (forward-protection pattern) is a spec-internal
+#   contradiction that the 16-token cross-section consistency pass does not catch — it targets
+#   identifier/format tokens, not narrative-classification-vs-structural-prescription mismatches
+#   at section boundaries. Add to grilling: "for each § 5 preamble attestation-type claim, open
+#   the matching § 4.x prescription and verify the classification matches." Detected R20 MINOR-1.
