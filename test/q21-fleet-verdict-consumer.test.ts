@@ -185,3 +185,55 @@ test('AC-R21-11: git diff baseline..chore-A only contains allowed-set paths', ()
     assert.ok(allowed.has(p), `unexpected path in R21 diff: ${p}`);
   }
 });
+
+// AC-R22-3: dedup-guard structural binding (R22 Deliverable 3)
+// Two verdicts with the same deploy_ref under the same cluster_event_id produce two
+// IngestResults attributed to the SAME VerdictGroup (same composite key → same group_id).
+// rollupByClusterEvent MUST deduplicate to groups.length === 1 (seen_group_ids guard fires).
+// Failure mode: removing seen_group_ids.has() guard at engine/fleet/verdict-consumer.ts:87-94
+//   → rollup.groups.length === 2 (both results push; assertion fails).
+test('AC-R22-3: rollupByClusterEvent deduplicates when multiple results share the same group_id', () => {
+  const grouper = new VerdictGrouper();
+  const input: FleetTickInput = {
+    per_shard_verdicts: [
+      makeVerdict('deploy-A', 1),
+      makeVerdict('deploy-A', 1),  // same deploy_ref → same composite key → same VerdictGroup
+    ],
+    ts_seconds: 1700000000,
+    cluster_event_id: 'evt-X',
+  };
+  const out = fleetTickIngest(input, grouper);
+  // Both results attributed to the same VerdictGroup (same group_id)
+  assert.strictEqual(
+    out.ingest_results[0].attributed_group.group_id,
+    out.ingest_results[1].attributed_group.group_id,
+  );
+  // dedup guard fires on 2nd result → rollup has 1 group, not 2
+  const rollup: ClusterEventRollup = rollupByClusterEvent(out.ingest_results, 'evt-X');
+  assert.strictEqual(rollup.groups.length, 1);
+  assert.strictEqual(rollup.deploy_ids.length, 1);
+});
+
+// AC-R22-4: short-circuit structural disambiguation (R22 Deliverable 4)
+// Passing cluster_event_id: '' to fleetTickIngest stores '' raw on VerdictGroup at
+// engine/verdict-groups.ts:183 (R20 § 2.6 truthy-collapse: falsy '' treated as absent for
+// group_id format but stored verbatim as cluster_event_id field value).
+// rollupByClusterEvent('', results) MUST short-circuit at verdict-consumer.ts:77-79
+// returning [] — not merely coincidentally empty via strict-equality filter.
+// Failure mode: removing short-circuit lines 77-79 → g.cluster_event_id !== '' is false
+//   for the '' group → group IS pushed → rollup.groups.length === 1 (assertion fails).
+test("AC-R22-4: rollupByClusterEvent('') short-circuits even when groups have cluster_event_id === ''", () => {
+  const grouper = new VerdictGrouper();
+  const input: FleetTickInput = {
+    per_shard_verdicts: [makeVerdict('deploy-A', 1)],
+    ts_seconds: 1700000000,
+    cluster_event_id: '',  // stored raw as '' on VerdictGroup (R20 § 2.6)
+  };
+  const out = fleetTickIngest(input, grouper);
+  // Verify '' is stored raw — not coerced to undefined (test would be vacuous otherwise)
+  assert.strictEqual(out.ingest_results[0].attributed_group.cluster_event_id, '');
+  // Short-circuit must return [] even though strict-equality would match the '' group
+  const rollup = rollupByClusterEvent(out.ingest_results, '');
+  assert.deepStrictEqual(rollup.groups, []);
+  assert.deepStrictEqual(rollup.deploy_ids, []);
+});
