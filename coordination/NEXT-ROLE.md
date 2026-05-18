@@ -1,6 +1,8 @@
 CURRENT-ROUND: R20
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: REVIEWER
 STATUS: READY
+Inputs: main branch, 191 pass / 0 fail (GREEN SHA cf9ddce; chore-A SHA below)
+Attested chore-A SHA: <CHORE-A-SHA> (substituted by chore-B per § 4.6 step 3)
 
 ## Round-scope directive
 
