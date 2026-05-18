@@ -39,7 +39,7 @@ STATUS: READY
   - HALT:    4f405c0 — escalate(R25): HALT — AC-R25-12 tolerance
   - DISP:    f7be96c — R25 ESCALATE-R25-01 disposition: Option A
   - GREEN:   c78374d — feat(R25): L0 contract — AC-R25-12 GREEN (Option A tolerances)
-  - chore-A: <CHORE-A-SHA> — this commit
+  - chore-A: e6ff18a — chore(R25): route to REVIEWER
 
 ## Operator decision (2026-05-18 — overnight authority auto-Option-A disposition)
 
