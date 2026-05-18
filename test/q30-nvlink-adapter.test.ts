@@ -211,7 +211,7 @@ test('AC-R30-15: A16 preservation — verdict.ts retains correlational_not_causa
 // DIAGNOSTIC path as a 9th allowed-set entry per spec § 3 conditional clause.
 test('AC-R30-18: round-start-to-chore-A diff path-set ⊆ R30 allowed-set', () => {
   const BASELINE_SHA = '5bb427c';     // R30 routing commit (round-start)
-  const CHORE_A_SHA  = '<INJECTED-AT-CHORE-B>';
+  const CHORE_A_SHA  = '82d1e5a355cf9a30ab58f515078bc89e655ab05d';
   const ALLOWED_SET = new Set<string>([
     'engine/topology/nvlink-source.ts',
     'test/q30-nvlink-adapter.test.ts',
