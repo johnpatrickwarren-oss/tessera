@@ -371,3 +371,43 @@ If operator picks (A) in the morning, the fix is mechanical:
 
 Or operator authorizes me to do this and I execute on confirmation.
 
+
+---
+
+## R18 — Phase 2 SLICE 1 (ESCALATE → operator (A) → unblock → REVIEWER MERGE-READY)
+
+**Final status:** MERGE-READY · 0 CRITICAL · 0 MAJOR · 4 MINOR · 5 OBS · 12/12 R18 ACs PASS · 181/181 full regression.
+**Cycle:** RED `c9827a9` → GREEN-with-anti-scope-conflict `dd21cb5` → chore-overnight-stop `88ec2d5` → operator (A) → unblock `5aa8cf0` → route `9012faa` → Reviewer + Memorial `4564bf0`.
+**Reinforcements:** +1 ARCH + 3 IMPL (now 18 ARCH + 26 IMPL + 1 COMMON + 1 REVIEWER).
+
+### Substantive Phase 2 SLICE 1 work landed
+
+✅ **`engine/types/verdict.ts` deltas** (additive; preserves Addition #25 D2/D5 + Addition #26 D4):
+  - `VerdictGroup.cluster_event_id?: string` (Phase 2 outer-aggregator hook)
+  - `TopologyNode.kind` union extends with `| 'gpu_shard' | 'rack'`
+  - `TopologyEdge.relationship` union extends with `| 'contains'`
+
+✅ **`test/_substrate/v9X-cluster.ts` (NEW)** — single-rack synthetic cluster fixture; `makeV9XSingleRackCluster({ nShards })` default 1 rack + 10 gpu_shards + 10 contains edges; `computeSnapshotHash` deterministic
+✅ **`test/q18-phase2-slice1-topology-substrate.test.ts` (NEW)** — 12 ACs binding type-extensions + v9X fixture + Addition #25/#26 preservation + anti-scope allowed-set
+
+### ESCALATE-and-unblock cycle (this was the meta-event)
+
+R18 Implementer **correctly halted** when spec § 6 anti-scope (no prior-round test mod) conflicted with AC-R18-12 (test count must be 181). Wrote DIAGNOSTIC + ESCALATED. Operator returned ~30 min later; dispositioned **(A)** per R01 config.ts precedent. Unblock landed cleanly (5aa8cf0). Reviewer audited the post-unblock state (4 MINORs surfaced; all routine).
+
+**Methodology event of note:** this was Tessera's first ESCALATE-and-unblock-in-overnight-mode cycle. Halt-discipline worked as designed; operator triage worked as designed; the chain resumed cleanly. The ESCALATE didn't waste R18's Architect work or Implementer's GREEN deltas — the unblock was a 3-file surgical fix + Reviewer audit.
+
+### R18 MINORs (routine; carried to morning triage if you want them visible)
+
+- 4 MINOR + 5 OBS specifics in `coordination/reviews/REVIEWER-REPORT-R18.md`; none load-bearing; all eligible for next in-passing cleanup window.
+
+### R19 decision (autonomous within evening-overnight chain)
+
+**R19 = Phase 2 SLICE 1 close-walk + R18 MINOR in-passing cleanup.** Audit tier per S4 + S2 framing.
+
+Per R15 PHASE-1-CLOSE-WALK.md precedent, a small `coordination/PHASE-2-SLICE-1-CLOSE-WALK.md` artifact synthesizes:
+- SLICE 1 deliverables (R18 substantive work)
+- Option A unblock pattern documentation (for future Phase 2 SLICEs that touch vendored files)
+- Phase 2 SLICE 2 entry framing (HardwareTopologySource concrete impl per v0.3 § 3)
+- R18 MINORs disposition (cleanup-deferred OR closed-in-passing)
+
+**After R19: HARD STOP** per evening-overnight authority. Phase 2 SLICE 1 milestone.
