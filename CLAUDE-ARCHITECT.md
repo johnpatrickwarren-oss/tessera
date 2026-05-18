@@ -379,3 +379,14 @@ All unresolved decisions → open questions in the spec.
 #   pseudocode for every `if`/`throw`/`return` guard; for each, either map it to a F-table
 #   entry or add it to § 5.3 as acknowledged-not-bound. Detected tessera R28 OBS-1
 #   (multi-bracket branch at slurm-source.ts:164-166 absent from § 1.6 F-table and § 5.3).
+# REINFORCED 2026-05-18 — Spec § 2.5 ALLOWED_SET and the AC-Rxx-13 forward-protection
+#   literal must include ALL coordination artifacts that post-chore-A roles will commit —
+#   not only round-scope Implementer deliverables. Always include or cover with a regex
+#   carve-out: (1) coordination/reviews/REVIEWER-REPORT-Rxx.md (Reviewer writes this after
+#   chore-A); (2) coordination/MEMORIAL.md is already in the standard 10-entry set. Add a
+#   regex carve-out for the reviews directory alongside the existing diagnostics carve-out:
+#   `^coordination\/reviews\/REVIEWER-REPORT-R\d+\.md$`. Failure to include these paths
+#   causes AC-Rxx-13 to fail post-Reviewer-commit, adding a new entry to the "pre-existing
+#   environmental failures" baseline for subsequent rounds — same class as AC-R26-16.
+#   Detected tessera R29 MINOR-2; pattern also observable at R26 (Memorial-Updater wrote to
+#   CLAUDE-ARCHITECT.md outside the R26 ALLOWED_SET).

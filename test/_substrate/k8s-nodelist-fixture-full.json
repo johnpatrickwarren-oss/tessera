@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "metadata": {
+        "name": "host-01",
+        "labels": {
+          "topology.kubernetes.io/zone": "zone-A",
+          "topology.kubernetes.io/region": "region-X",
+          "node.kubernetes.io/instance-type": "p4d.24xlarge",
+          "nvidia.com/gpu.count": "8",
+          "nvidia.com/gpu.product": "A100-SXM4-40GB"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "name": "host-02",
+        "labels": {
+          "topology.kubernetes.io/zone": "zone-A",
+          "topology.kubernetes.io/region": "region-X",
+          "node.kubernetes.io/instance-type": "p4d.24xlarge",
+          "nvidia.com/gpu.count": "8",
+          "nvidia.com/gpu.product": "A100-SXM4-40GB"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "name": "host-03",
+        "labels": {
+          "topology.kubernetes.io/zone": "zone-B",
+          "topology.kubernetes.io/region": "region-X",
+          "node.kubernetes.io/instance-type": "p4d.24xlarge",
+          "nvidia.com/gpu.count": "8",
+          "nvidia.com/gpu.product": "A100-SXM4-40GB"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "name": "host-04",
+        "labels": {
+          "topology.kubernetes.io/zone": "zone-B",
+          "topology.kubernetes.io/region": "region-X",
+          "node.kubernetes.io/instance-type": "p4d.24xlarge",
+          "nvidia.com/gpu.count": "8",
+          "nvidia.com/gpu.product": "A100-SXM4-40GB"
+        }
+      }
+    }
+  ]
+}
