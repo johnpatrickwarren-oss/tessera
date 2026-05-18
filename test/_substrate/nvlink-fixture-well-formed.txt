@@ -1,0 +1,16 @@
+GPU 0: NVIDIA A100-SXM4-80GB (UUID: GPU-aaaa)
+	 Link 0: 25.000 GB/s  Peer GPU 1
+	 Link 1: 25.000 GB/s  Peer GPU 2
+	 Link 2: 25.000 GB/s  Peer GPU 3
+GPU 1: NVIDIA A100-SXM4-80GB (UUID: GPU-bbbb)
+	 Link 0: 25.000 GB/s  Peer GPU 0
+	 Link 1: 25.000 GB/s  Peer GPU 2
+	 Link 2: 25.000 GB/s  Peer GPU 3
+GPU 2: NVIDIA A100-SXM4-80GB (UUID: GPU-cccc)
+	 Link 0: 25.000 GB/s  Peer GPU 0
+	 Link 1: 25.000 GB/s  Peer GPU 1
+	 Link 2: 25.000 GB/s  Peer GPU 3
+GPU 3: NVIDIA A100-SXM4-80GB (UUID: GPU-dddd)
+	 Link 0: 25.000 GB/s  Peer GPU 0
+	 Link 1: 25.000 GB/s  Peer GPU 1
+	 Link 2: 25.000 GB/s  Peer GPU 2
