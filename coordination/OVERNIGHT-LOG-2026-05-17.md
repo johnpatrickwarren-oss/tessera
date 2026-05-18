@@ -756,3 +756,52 @@ Reply with one of:
 - Override / redirect → I do that instead
 
 ---
+
+## Morning 2026-05-18 — operator returned + R23 + MR-1 (methodology round)
+
+**Operator: "let's move forward with slice 3"** → I launched R23 (Phase 2 SLICE 3.A — HardwareTopologySource scaffold). R23 completed clean: 0/0/3/3, 15/15 ACs, 217/0 tests, 22-round 0-CRITICAL streak. Architect chose split: R23 scaffold (type-layer enum + HardwareTopologySource + v9Y fixture); R24 = ingestion adapters (deferred Slurm/K8s/NVLink); R25 = MD-F4 + common-mode + hybrid Reviewer; R26 = SLICE 3 close-walk.
+
+**Operator surfaced a structural question:** "are we parallelizing the implementers in this project? That is a feature of anchor, and I'm looking for if we have used it, and if not, why not." Investigation revealed a real gap:
+
+- Tessera HAS the multi-track plumbing (`scripts/anchor-wave-init.sh`, `multi-track-cluster-setup.sh`, `multi-track-verify-wave-merge.sh`) — landed in the Mode 2 retrofit at `e84a7c8`
+- Tessera was MISSING `CLAUDE-COORDINATOR.md` role-discipline file, the 5 wave-planning templates, the cluster-scopes scaffold, and the pipeline COORDINATOR dispatch case
+- Result: anchor's parallel-Implementer capability (the Coordinator + cluster + wave model — anchor PRs #20-#27) was structurally unusable in Tessera
+
+**Operator authorized methodology round MR-1** to close the gap: "I agree with your recommendation, let's proceed on it when R23 wraps up. I want anchor to be used to decide whether or not it makes sense to scale out implementers, and if we run into problems with it, to continue to optimize anchor."
+
+### MR-1 deliverables landed (4 commits, operator-driven; no pipeline — Coordinator role didn't exist yet to spec it; R01/R17 manual-fix precedent)
+
+| Commit | Scope |
+|---|---|
+| `0218ad1` MR-1A | Vendor 5 anchor templates verbatim → `templates/`; vendor `anchor/skills/12-coordinator-role.md` → `CLAUDE-COORDINATOR.md` (adapted to per-role-file format + path-reference rewrites for Tessera-local equivalents); restructure `VENDORING-MANIFEST.md` with new "Anchor methodology vendoring (MR-1)" section pinned at anchor SHA `d27ac4e` |
+| `64ea709` MR-1B | Wire Coordinator into `run-pipeline.sh`: `MODEL_COORDINATOR=opus`, `BUDGET_COORDINATOR=80`, `--coordinator` flag override, `get_model`/`get_budget`/`role_claude_file` mapping, `build_coordinator_prompt` function, `commit_coordinator_outputs` auto-commit hook. Update `CLAUDE.md` interactive loader + `CLAUDE-COMMON.md` tier rubric to acknowledge multi-cluster mode. Verified: `bash -n` syntax OK, `--help` shows `--coordinator`, preflight refuses NEXT-ROLE.md overwrite (PR #37 protection working) |
+| `7890b36` MR-1C | Run `scripts/anchor-wave-init.sh --apply` → scaffold `coordination/cluster-scopes/` with README. Verified `.gitignore` already has 3 multi-track patterns from `e84a7c8` retrofit |
+| (this commit) MR-1D | OVERNIGHT-LOG entry + NEXT-ROLE.md route to Coordinator for R24 invocation against SLICE 3.B/3.C/4 + Phase 2 close work-unit decomposition |
+
+### Why operator-driven (not pipelined)
+
+MR-1 itself is methodology vendoring — copying files + adapting headers + wiring `run-pipeline.sh`. Doing this through the existing 4-role pipeline would have been circular (Architect specs the very file that adds a new role; Implementer modifies the pipeline that runs Implementer). R01 tsconfig + R17 amendments + R22 close-walk precedents all show direct operator-driven commits are appropriate for structural fixes that don't require novel design decisions.
+
+### Anchor canonical backflow
+
+The 5 templates are vendored VERBATIM and `CLAUDE-COORDINATOR.md`'s body is verbatim below the per-role-file header — both intentionally to enable canonical-PR backflow via unified diff against anchor source. If Tessera's Coordinator use surfaces refinements ("if we run into problems with it, to continue to optimize anchor"), each refinement is a clean diff against anchor's canonical file.
+
+### R24 Coordinator invocation queued
+
+`NEXT-ROLE.md` is now at `CURRENT-ROUND: R24 / NEXT-ROLE: COORDINATOR / STATUS: READY`. Operator can invoke via:
+
+    ./run-pipeline.sh --coordinator --round R24
+
+Coordinator's job (per `CLAUDE-COORDINATOR.md` §DAG construction + the round-scope directive in NEXT-ROLE.md):
+1. Read PRD + SCOPING-MEMO + close-walks + R23 outputs
+2. Extract candidate work units from remaining Phase 2 scope (SLICE 3.B/3.C/close-walk + SLICE 4 + Phase 2 close)
+3. Apply D1-D5 dependency tests; build DAG; validate (no cycles; foundations)
+4. Sequence into waves with ≤5 clusters per wave
+5. Classify each WU's tier (solo/audit/full)
+6. Emit `coordination/WAVE-PLAN-01.md` recommending cluster-vs-sequential per wave
+7. Initialize `coordination/COORDINATOR-MEMORIAL.md`
+8. Auto-commit on clean completion
+
+**The Coordinator MAY legitimately recommend all single-cluster waves.** That's a valid outcome meaning multi-cluster doesn't help for this scope. Operator decides; either way the methodology gap is closed and the capability is available for SLICE 4 / Phase 3 if/when fan-out fits.
+
+---

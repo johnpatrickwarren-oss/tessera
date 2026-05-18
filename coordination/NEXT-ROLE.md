@@ -1,163 +1,110 @@
-CURRENT-ROUND: R23
-NEXT-ROLE: (operator decision — R24 Architect for SLICE 3.B ingestion adapters)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R24
+NEXT-ROLE: COORDINATOR
+STATUS: READY
 
-## Reviewer report (R23)
+## Round-scope directive
 
-- `coordination/reviews/REVIEWER-REPORT-R23.md`
-- Verdict: 15 / 15 ACs PASS; 0 CRITICAL; 0 MAJOR; 3 MINOR (TDD audit-trail gap; spec § 2.7 / § 3 `.js` inventory; AC-R23-12 column-index comment); 3 OBS.
-- Independent binding-command execution: `npx tsc -p tsconfig.test.json` exit 0; `node --test test/*.test.js` at HEAD → 217/0; at chore-A `d2286b2` (post `.js` regen) → 216/0; `git diff 2946b13..d2286b2 --name-only` → 9 paths ⊆ 13-entry allowed-set.
-- VIOLATION + CONFIRMATION entries appended to `coordination/MEMORIAL.md` per CLAUDE-COMMON.md REINFORCED 2026-05-17.
-- Carry-forward reinforcement candidates for Memorial-Updater: (1) CLAUDE-IMPLEMENTER.md — RED commit prefix for combined test+impl commits (MINOR-1; broke 16-round R04–R21 RED→GREEN streak); (2) CLAUDE-ARCHITECT.md — verify `.gitignore` for `.js` artifacts in spec commit-inventory / allowed-set (MINOR-2).
+**R24 (Coordinator-mode invocation) = first use of vendored Coordinator role for SLICE 3.B and beyond planning.**
 
----
+This is the test of MR-1 (the methodology round that vendored the Coordinator role + 5 templates + pipeline integration + cluster-scopes scaffold). Operator's intent: use anchor's Coordinator to decide whether SLICE 3.B (HardwareTopologySource ingestion adapters: Slurm + K8s + NVLink) should fan out into parallel clusters or proceed sequentially. Same evaluation applied to SLICE 3.C, SLICE 3 close-walk, SLICE 4, and Phase 2 close.
 
-## (HISTORICAL — Implementer routing block, preserved for Memorial-Updater audit)
+The Coordinator emits a WAVE-PLAN-01.md decomposing the remaining Phase 2 work. The wave plan MAY legitimately recommend all single-cluster waves — that's a valid outcome meaning the existing single-pipeline mode is the right fit. The Coordinator does NOT force fan-out; it surfaces where fan-out is naturally available per D1-D5 dependency tests and where it isn't.
 
-## Inputs for next role (Implementer)
+After the Coordinator emits the plan, operator reviews:
+- If plan recommends single-cluster waves → operator runs standard `./run-pipeline.sh --round R24 --tier full` for SLICE 3.B (or whichever round is up next)
+- If plan recommends ≥2 clusters in any wave → operator invokes `scripts/multi-track-cluster-setup.sh` per cluster + dispatches per wave plan
+
+**Tier (Coordinator-mode invocation):** N/A — Coordinator runs solo (no Architect/Implementer/Reviewer for the wave-plan emission itself). Each cluster the wave plan dispatches will receive its own tier classification per `CLAUDE-COMMON.md` rubric + the Coordinator's prior.
+
+**Authority:** Operator authorized "let's move forward with slice 3" + MR-1 vendoring authorization ("I want anchor to be used to decide whether or not it makes sense to scale out implementers, and if we run into problems with it, to continue to optimize anchor"). MR-1 closed structurally at HEAD `7890b36`; this is the first Coordinator dispatch.
+
+## Inputs for next role (Coordinator)
 
 **Read in order:**
 
-1. **`coordination/specs/Q-R23-SPEC.md`** — full spec; § 0 brainstorm, § 1 design, § 2 mechanism (deltas + class + fixture exact enumeration), § 3 component inventory + allowed-set, § 4 pseudocode policy, § 5 acceptance criteria (15 ACs; preamble classifies AC-R23-13/14 as binding-command attestations and AC-R23-15 as chore-B runtime test), § 6 anti-scope, § 7 open questions + halt-condition pre-anticipation, § 8 P3 verification, § 9 grilling output (17 gates PASS).
-2. **`coordination/specs/Q-R23-SPEC-AUDIT.md`** — sidecar (P3 verification log; cold-start inputs consulted; pre-route discipline application log; Architect pre-prediction; decision rationale; MEMORIAL ceremony preview).
-3. **`coordination/PHASE-2-SLICE-2-CLOSE-WALK.md`** — § 3 SLICE 3 entry framing; carry-forward watch items.
-4. **`coordination/NEXT-ROLE.md`** (this file) — for the round-scope directive history below and the anti-scope hard limits.
-5. **`coordination/SCOPING-MEMO-v0.3.md`** — § 2.3 Phase 2 Extension 3 (line 198+); § 3 SLICE 3 row (line 346).
-6. **Engine read-only references:** `engine/topology-overlay.ts:50-55` (TopologySource interface), `:69-78` (computeSnapshotHash), `:83-101` (StaticTopologySource template), `:262-285` (BFS, bidirectional at 265-267); `engine/types/verdict.ts:236` (TopologyNode.kind), `:246` (TopologyEdge.relationship), `:251-260` (TopologySnapshot), `:280` (correlational_not_causal: true).
-7. **Test pattern precedents:** `test/q18-phase2-slice1-topology-substrate.test.ts` (R18 test pattern; AC preamble; manifest 40-file cross-check; anti-scope diff format), `test/_substrate/v9X-cluster.ts` (R18 fixture naming convention).
-8. **`/Users/johnwarren/.claude/CROSS-PROJECT-MEMORIAL.md`** — cross-project rules (R21 line-citation-drift rule active; chore-A attestations cite exact `test()` declaration line numbers).
+1. **`CLAUDE-COMMON.md`** + **`CLAUDE-COORDINATOR.md`** — your role discipline (loaded as system prompt; for reference if needed).
+2. **`coordination/PRD.md`** — FR-E3a (R20+R21 ✅), **FR-E3b (HardwareTopologySource — SLICE 3 in flight, R23 ✅ scaffold)**, **FR-E3c (event-conditional attribution — SLICE 4 pending)**, AC-P4.
+3. **`coordination/SCOPING-MEMO-v0.3.md`** — canonical scope; especially:
+   - § 2.3 Phase 2 Extension 3 — full scope of FR-E3a/b/c
+   - § 3 Q-cycle table — Phase 2 SLICE 3 row (line 346, 3-4 cycles); SLICE 4 row (event-conditional attribution); Phase 2 close
+   - § 4.2 R-E3 (synthetic-cluster substrate decouples Phase 2 from real-cluster integration — applies to SLICE 3.B adapters)
+4. **`coordination/PHASE-2-SLICE-2-CLOSE-WALK.md`** § 3 — explicit SLICE 3 entry framing + open questions (OQ-1, OQ-R08-3, LS-4) + hybrid-Reviewer mandate at SLICE 3 close.
+5. **`coordination/specs/Q-R23-SPEC.md`** + **`coordination/reviews/REVIEWER-REPORT-R23.md`** + **`coordination/logs/ROUND-R23-SUMMARY.md`** — R23 SLICE 3.A scaffold outcome (HardwareTopologySource + v9Y fixture + type-union extensions; 0/0/3/3; 217/0 tests).
+6. **`engine/hardware-topology-source.ts`** + **`test/_substrate/v9Y-multi-rack-cluster.ts`** — R23 deliverables; the contract surface SLICE 3.B ingestion adapters will consume.
+7. **`engine/topology-overlay.ts`** — inherited interfaces (`TopologySource` line 50-55; `StaticTopologySource` line 83-101; `OtelServiceGraphV1` line 111-180; BFS line 257+).
+8. **`templates/WAVE-PLAN-TEMPLATE.md`** — your primary deliverable scaffold. Fill EVERY section.
+9. **`templates/README.md`** — Tessera-local path-reference adaptation table.
+10. **`/Users/johnwarren/.claude/CROSS-PROJECT-MEMORIAL.md`** — cross-project rules; apply "Reinforcement rules derived" sections.
 
-## Implementer-side commit ordering (per spec § 2.7)
+## Scope of work units to decompose
 
-1. **Commit B (implementation):**
-   - `engine/types/verdict.ts` (TopologyNode.kind extension at line 236; TopologyEdge.relationship extension at line 246; file-level docblock R23 amendment at lines 6-16 per spec § 2.1 Delta 3)
-   - `engine/types/verdict.js` (compiled output)
-   - `engine/hardware-topology-source.ts` (NEW Tessera-original; class per spec § 2.2)
-   - `engine/hardware-topology-source.js` (compiled output)
-   - `test/_substrate/v9Y-multi-rack-cluster.ts` (NEW Tessera-original; fixture per spec § 2.3 + § 2.4 exact enumeration)
-   - `test/_substrate/v9Y-multi-rack-cluster.js` (compiled output)
-   - `test/q23-hardware-topology-source.test.ts` (NEW; 12 runtime tests per spec § 2.6 + § 5 AC-R23-1 through AC-R23-12)
-   - `test/q23-hardware-topology-source.test.js` (compiled output)
-   - `coordination/VENDORING-MANIFEST.md` (row 29 notes-column update per spec § 2.5)
+The Coordinator should extract candidate work units from the PRD/SCOPING-MEMO covering at minimum:
 
-2. **Commit C (chore-A):**
-   - `coordination/NEXT-ROLE.md` (this file; routing block update to NEXT-ROLE: REVIEWER + STATUS: READY + attestation block recording chore-A SHA + per-AC test() line citations grep-verified per cross-project line-citation-drift rule)
-   - `coordination/MEMORIAL.md` (Implementer ceremony append)
+**Remaining Phase 2 work (post-R23):**
+- **SLICE 3.B (ingestion adapters)** — three candidate WUs:
+  - SLURM-ADAPTER: parse Slurm topology format → TopologySnapshot
+  - K8S-ADAPTER: parse K8s node-label API → TopologySnapshot
+  - NVLINK-ADAPTER: parse NVIDIA NVLink-topology output → TopologySnapshot
+- **SLICE 3.C (empirical validation)** — likely single WU:
+  - MD-F4 / PR-F6 hybrid Reviewer / common-mode failure-injection test on v9Y
+- **SLICE 3 close-walk** — single WU (audit tier; mirrors R19/R22 pattern)
+- **SLICE 4 (event-conditional attribution)** — TBD work units per FR-E3c; possibly fan-out candidates if event-feed has multiple producer types (firmware/deploy/config)
+- **Phase 2 close-walk** — single WU; hybrid Reviewer fires per SCOPING-MEMO § 4.4
 
-3. **Commit D (chore-B):**
-   - `test/q23-hardware-topology-source.test.ts` — AC-R23-15 anti-scope runtime test appended; baseline `2946b13` and chore-A SHA literal substituted into the test's diff baseline (TQ-4 γ end-bound pattern).
-   - `test/q23-hardware-topology-source.test.js` (compiled output)
+**The Coordinator's headline question for the operator:** which of these fan out into parallel clusters, and which are sequential? Each decision must trace to D1-D5 tests.
 
-## Anti-scope (R23 hard limits — per spec § 6)
+## Anti-scope (Coordinator hard limits)
 
-- **NO modification of `engine/topology-overlay.ts`** — inherited BFS already bidirectional; class consumed via type-import + computeSnapshotHash delegation only; topology-overlay.ts stays vendored-at-pin (A12).
-- **NO modification of `engine/verdict-groups.ts`** (R20 frozen).
-- **NO modification of `engine/fleet/verdict-consumer.ts`** (R21 frozen).
-- **NO modification of `test/_substrate/v9X-cluster.ts`** (R18 frozen; v9Y is parallel new fixture).
-- **NO modification of any pre-R23 test file** (q01-/q18-/q20-/q21-/q22- + betting-e-process-class-dispatch).
-- **NO modification of `engine/types/verdict.ts` outside the three deltas in spec § 2.1.**
-- **NO deployment-event-feed ingestion** (SLICE 4).
-- **NO MD-F4 / common-mode injection / PR-F6 hybrid Reviewer** (SLICE 3.C — R25).
-- **NO real-cluster integration / ingestion adapters** (SLICE 3.B — R24).
-- **NO Addition #25 D2/D5 reversal**; **NO Addition #26 D1/D4/D5 reversal**.
-- **NO new HardwareTopologySource subclass at R23** (R24 decides expansion).
-- **NO parametrization of `makeV9YMultiRackCluster`** at R23 (R25 if needed).
-- **NO CLAUDE-IMPLEMENTER.md consolidation** (operator-triggered).
+- **NO modification of engine/* files** — Coordinator does not write code.
+- **NO modification of test/* files** — Coordinator does not write tests.
+- **NO drafting of cluster-level specs** — that's the per-cluster Architect's job after dispatch.
+- **NO modifying NEXT-ROLE.md in any cluster worktree** — wave plan is the dispatch artifact, not direct NEXT-ROLE.md updates per cluster.
+- **NO pre-resolving operator OQs by assumption** — surface as `## Open questions for operator` at end of WAVE-PLAN-01.md.
+- **NO inventing work units not traceable to PRD or SCOPING-MEMO** — extraction per CLAUDE-COORDINATOR.md §DAG Step 1.
 
-## Halt-condition pre-anticipation (from spec § 7.1)
+## Expected deliverables
 
-If any of the following occur during Implementer work, refer to spec § 7.1 for the prescribed response:
-- (a) RED-first test for `'psu'` / `'cooling_zone'` / `'nvlink_peer'` literal acceptance fails after applying the union deltas → continue RED→GREEN; not a HALT.
-- (b) `fetchSnapshot()` identity test fails because of accidental clone → fix per spec § 2.2; not a HALT.
-- (c) Test count at chore-A != 216 because a pre-R23 test broke under union extension → DIAGNOSTIC + ESCALATE.
-- (d) Typecheck fails on the new class or fixture → fix at Implementer-time; not a HALT.
-- (e) `computeSnapshotHash` non-deterministic on v9Y under new literal → DIAGNOSTIC + ESCALATE (very unlikely).
-- (f) Any path lands outside the 13-entry allowed-set → DIAGNOSTIC + ESCALATE (operator may amend allowed-set, mirroring R18 precedent).
+1. **`coordination/WAVE-PLAN-01.md`** — primary output. Fill all sections of `templates/WAVE-PLAN-TEMPLATE.md`:
+   - Plan summary (1-3 sentences; total WUs; total waves; foundations)
+   - PRD provenance (PRD source + version + anti-scope referenced)
+   - Step 1: deterministic work unit extraction (table with WU IDs, source PRD ref, ACs, anti-scope, file tree scope)
+   - Step 2: dependency edge identification (table with D1-D5 test that fired; confidence; reasoning)
+   - Step 3: Claude judgment calls (if any; format per template)
+   - Step 4: DAG validation checks (cycle / island / foundation)
+   - Step 5: wave sequencing (table with wave # / WUs / rationale)
+   - Step 6: tier classifications (table with WU / Coordinator tier / matched criteria)
+   - Cluster handoff inventory (forward-looking; one row per directed edge)
+   - Pre-emit grilling checklist (6 items per template; check all)
+   - Open questions for operator (if any)
+   - Wave 1 dispatch authorization (READY or HOLD)
+2. **`coordination/COORDINATOR-MEMORIAL.md`** (NEW; initialize from `templates/COORDINATOR-MEMORIAL-TEMPLATE.md` since this is first Coordinator invocation in this project).
+3. **`coordination/NEXT-ROLE.md`** update at end:
+   - `NEXT-ROLE: OPERATOR (wave-plan review)`
+   - `STATUS: WAVE-PLAN-READY`
+   - `Inputs: coordination/WAVE-PLAN-01.md`
 
-## Architect attestation (R23 spec routing)
-
-- Spec artifacts committed in own commit BEFORE this NEXT-ROLE.md update per R21 ARCH MINOR-1 reinforcement. Spec-commit SHA: `dc5f2fb` (run `git log --oneline -3` to verify).
-- HEAD at spec commit: `dc5f2fb` (= R23-prep baseline `2946b13` + spec commit).
-- 17-gate grilling applied per spec § 9 (verifiable-claims, unstated-assumptions, scope-creep, Implementer-actionability, verification-command-soundness, spec-internal-contradiction, empirical-premise-verification, vendored-with-deltas pre-trace, file-level documentation coverage, cross-section identifier consistency, halt-discipline coverage, memorial-self-exoneration guard, branch-binding coverage gate, count-AC chore-A SHA anchoring, cross-project line-citation-drift carry-forward, Reviewer-clarifying-questions check, final pre-route gate — all PASS).
-- 14 load-bearing claims empirically verified by direct file-open at session start (per spec § 9.7 table); only test count = 204 is testimonial (Implementer re-measures per § 7.1 scenario (c)).
-- Vendored-with-deltas pre-trace: 3 consumer tests of `engine/types/verdict.ts` enumerated; all UNAFFECTED by R23 enum-extension (q01-no-at-pin-deltas excludes verdict.ts; q01-vendoring-coverage header check preserves; q18 extends-not-breaks). No ESCALATE risk anticipated.
-- Branch-binding coverage: id + version fallback chains each bound to AC-R23-5 + AC-R23-6 sub-cases (a)/(b)/(c).
-- Count-AC AC-R23-14 anchored to MERGE-READY chore-A SHA `d2286b2` for Implementer-time substitution per R22 IMPL MINOR-1 reinforcement.
-
-## Round-scope directive (preserved from operator R23 launch — historical reference)
-
-**R23 = Phase 2 SLICE 3 — first round (HardwareTopologySource concrete impl).**
-
-SLICE 3 scope per `coordination/SCOPING-MEMO-v0.3.md` § 3 line 346 (3-4 Q-cycle estimate; this is round 1). Architect-confirmed split: R23 = scaffold + type-layer; R24 = ingestion adapters; R25 = MD-F4 + common-mode injection + PR-F6 hybrid Reviewer; R26 = SLICE 3 close-walk.
-
-Maps to **PRD FR-E3b** (cross-shard correlation: topology-aware spatial attribution; HardwareTopologySource impl against Addition #26 TopologySource interface) · **US-02** (topology-aware common-mode failure attribution).
-
-**Tier: full.** A1 (new dependency surface) + A2 (new architectural pattern) + A4 (novel data model PSU/cooling-zone node kinds + nvlink_peer edge semantics).
-
-**Hybrid Reviewer NOT scheduled for R23** (fires at SLICE 3.C close per close-walk § 3 line 165 — R25).
-
-## Routing notes
-
-- Anti-scope diff (AC-R23-15) anchored to baseline SHA `2946b13` (R23-prep) per TQ-4 γ pattern + R15 MINOR-1 reinforcement.
-- Spec artifacts (`Q-R23-SPEC.md` + `Q-R23-SPEC-AUDIT.md`) committed at `dc5f2fb` BEFORE this routing update per R21 ARCH MINOR-1.
-- Hybrid Reviewer NOT scheduled for R23 (fires at SLICE 3.C close).
-- Operator authorized "let's move forward with slice 3" on 2026-05-18 morning; single-round authorization (no overnight chain authority active).
-
-## Carry-forward watch items from SLICE 2
-
-| From | Item | R23 disposition |
-|---|---|---|
-| R20 OBS-1 | AC-R20-8 sub-case (c)/(d) thin coverage in q20 | Carry-forward; q20 frozen at R23 |
-| R21 MINOR-4 / cross-project | line-citation drift rule | R23 chore-A NEXT-ROLE.md attestations cite exact `test()` line via grep-verification (Implementer-time discipline) |
-| R22 MINOR-1 | count-AC chore-A SHA anchoring | Reinforcement applied: AC-R23-14 anchored explicitly |
-| Persistent | CLAUDE-IMPLEMENTER.md at 36 REINFORCED lines | Consolidation deferred to operator-triggered run; not R23 blocker |
+Auto-commit happens via `commit_coordinator_outputs` on clean completion (MR-1B added this hook).
 
 ## Escalation items
 
-(none active)
+(none active; all SLICE 2 carry-forwards closed at R22)
 
----
+## Routing notes
 
-## Implementer attestation (R23 chore-A)
+- No overnight authority active. Operator returns after Coordinator emits the wave plan; reviews; decides on cluster fan-out vs sequential R24 execution.
+- The Coordinator's decision is a recommendation; operator's choice governs.
+- If wave plan recommends single-cluster waves, operator subsequently runs `./run-pipeline.sh --round R24 --tier full` for SLICE 3.B (per the Architect's R23 split decision identifying R24 as the deferred ingestion-adapters round).
+- If wave plan recommends ≥2 clusters in Wave 1, operator follows multi-track dispatch protocol per `scripts/multi-track-cluster-setup.sh`.
 
-**Routing:** NEXT-ROLE: REVIEWER | STATUS: READY
+## State at R24 entry
 
-**Chore-A SHA:** `d2286b2` ← substituted at chore-B per TQ-4 γ pattern
-
-**Binding commands at chore-A SHA:**
-- `npx tsc -p tsconfig.test.json` → exit code 0 (AC-R23-13 PASS)
-- `node --test test/*.test.js` → tests 216 / pass 216 / fail 0 (AC-R23-14 PASS; baseline 204 + 12 new)
-
-**Per-AC test() line citations (grep-verified against committed test file):**
-| AC | test() declaration line | Label |
-|---|---|---|
-| AC-R23-1 | :25 | psu and cooling_zone are accepted as TopologyNode.kind |
-| AC-R23-2 | :33 | nvlink_peer is accepted as TopologyEdge.relationship |
-| AC-R23-3 | :39 | VENDORING-MANIFEST.md verdict.ts row contains psu, cooling_zone, nvlink_peer |
-| AC-R23-4 | :49 | HardwareTopologySource implements TopologySource interface |
-| AC-R23-5 | :61 | HardwareTopologySource id fallback chain |
-| AC-R23-6 | :80 | HardwareTopologySource version fallback chain |
-| AC-R23-7 | :99 | fetchSnapshot returns identity-equal snapshot; snapshotHash delegates to computeSnapshotHash |
-| AC-R23-8 | :110 | makeV9YMultiRackCluster default topology matches spec |
-| AC-R23-9 | :125 | computeSnapshotHash is deterministic on v9Y fixture |
-| AC-R23-10 | :134 | engine/verdict-groups.ts preserves Addition #25 D5 group_id format |
-| AC-R23-11 | :140 | engine/types/verdict.ts preserves Addition #26 D4 correlational_not_causal: true |
-| AC-R23-12 | :146 | vendored .ts file count === 40 and each has SHA-pin header |
-
-**AC-R23-13** (typecheck): binding-command attestation — `npx tsc -p tsconfig.test.json` exits 0 at chore-A SHA.
-
-**AC-R23-14** (test count): binding-command attestation — `node --test test/*.test.js` at chore-A SHA `d2286b2` reports tests=216 / pass=216 / fail=0.
-
-**AC-R23-15** (anti-scope diff): runtime test added at chore-B; chore-A SHA substituted at chore-B time per TQ-4 γ pattern.
-
-**Halt-condition log:** No halts triggered. All 6 pre-anticipated scenarios from spec § 7.1 observed at nominal (non-halt) state:
-- (a) RED-first verified: TS2307 on missing modules + TS2322 on absent union literals; transitioned to GREEN after applying spec-prescribed deltas.
-- (b) fetchSnapshot identity test: passed; implementation returns `this.snapshot` directly per spec § 2.2.
-- (c) Pre-R23 test suite at GREEN: 204 pre-R23 tests all pass; no pre-R23 test touched.
-- (d) Typecheck passed: exit 0 at GREEN commit.
-- (e) computeSnapshotHash determinism on v9Y: AC-R23-9 PASS.
-- (f) Diff path-set: 9 paths in diff (without .js gitignored artifacts), all within allowed-set.
-
-**Anti-scope diff check (pre-chore-A):** `git diff 2946b13..2288c49 --name-only` = 9 paths; all in § 3 allowed-set (13 entries; .js gitignored per project convention).
-
-**Tactical fix note:** Spec § 2.7 lists `.js` compiled outputs in Commit B. These are gitignored by project convention (`.gitignore: *.js`); they were never committed in prior rounds. `.js` files generated by `npx tsc -p tsconfig.test.json` and present on disk; not tracked in git. Not a halt condition per spec TACTICAL AUTONOMY clause.
+| Element | State |
+|---|---|
+| MR-1 methodology vendoring | ✅ HEAD `7890b36` (templates + CLAUDE-COORDINATOR + pipeline + scaffold) |
+| R23 SLICE 3.A scaffold | ✅ HEAD `528b5b9` (HardwareTopologySource + v9Y fixture + type-union extensions; 0/0/3/3; 217/0 tests) |
+| 0-CRITICAL streak | 22 rounds (R02-R23) |
+| 0-MAJOR streak | 4 rounds (R20-R23) |
+| Working tree clean | ✅ |
+| HEAD | `7890b36` (MR-1C scaffold commit) |
+| Test count | 217 / 0 |
+| Phase 2 SLICE 3 completion estimate | ~3-4 rounds (R24-R27?) per SCOPING-MEMO § 3 |
