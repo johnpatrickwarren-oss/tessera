@@ -276,3 +276,15 @@ All unresolved decisions → open questions in the spec.
 #   R15 MINOR-3: AC-8 prescribed HALT when ≥1 Memorial-D violation derived; § 6(a) parenthetical
 #   prescribed proceed-with-DIAGNOSTIC for the same trigger; Implementer chose the parenthetical;
 #   spec-internal contradiction caught by Reviewer as MINOR-3.
+# REINFORCED 2026-05-17 — For every planned delta to a vendored file, enumerate ALL existing
+#   tests that open or read that file and trace each test's FULL assertion surface against the
+#   planned delta. A first-line SHA-pin check (e.g., q01-vendoring-coverage) and a full-body
+#   byte-identity check modulo N header lines (e.g., q01-no-at-pin-deltas) are DISTINCT
+#   assertion surfaces on the same file; failure-mode analysis that considers only one misses
+#   the other. Pre-empt by: (1) greping for every test file that imports or readFileSync the
+#   modified vendored file; (2) reading what each such test asserts about the file's content;
+#   (3) if any test performs a body-level comparison (not just first-line), pre-disposition the
+#   manifest row (vendored-at-pin → vendored-with-deltas) and the AT_PIN_FILES list in the spec
+#   BEFORE routing — do not leave this as an ESCALATE condition for the Implementer to discover
+#   at GREEN. Detected tessera R18 OBS-2: Architect failure-mode 5 identified q01-vendoring-
+#   coverage but missed q01-no-at-pin-deltas; ESCALATE cycle with operator disposition required.

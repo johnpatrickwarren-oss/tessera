@@ -1,19 +1,14 @@
 CURRENT-ROUND: R18
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 
-## Inputs (Reviewer cold-read)
+## Inputs (Memorial-Updater)
 
-- `coordination/specs/Q-R18-SPEC.md` — full spec for Phase 2 SLICE 1 (1-cycle interpretation per PHASE-1-CLOSE-WALK.md:250)
-- `coordination/diagnostics/DIAGNOSTIC-R18-no-at-pin-deltas-verdict.md` — DIAGNOSTIC from Implementer ESCALATE event; included for full audit trail of the R18 ESCALATE → operator Option A disposition → unblock cycle
-- R18 GREEN files (committed across multiple commits in the R18 cycle):
-  - `engine/types/verdict.ts` (deltas: cluster_event_id + TopologyNode.kind + TopologyEdge.relationship)
-  - `test/_substrate/v9X-cluster.ts` (v9X fixture)
-  - `test/q18-phase2-slice1-topology-substrate.test.ts` (12 ACs)
-- R18 Option A unblock files (operator dispositioned 2026-05-17 evening):
-  - `test/q01-no-at-pin-deltas.test.ts` (AT_PIN_FILES list — remove verdict.ts)
-  - `coordination/VENDORING-MANIFEST.md` (verdict.ts row — vendored-with-deltas)
-- DO NOT read `coordination/specs/Q-R18-SPEC-AUDIT.md` per CLAUDE-REVIEWER.md cold-implementation boundary (audit sidecar is Architect ceremony — optional)
+- `coordination/reviews/REVIEWER-REPORT-R18.md` — Reviewer report (0 CRITICAL + 0 MAJOR + 4 MINOR + 5 OBS; MERGE-READY)
+- `coordination/specs/Q-R18-SPEC.md` (+ Q-R18-SPEC-AUDIT.md sidecar)
+- `coordination/MEMORIAL.md` R18 sections to accrete onto
+- R18 Implementer + operator unblock commits: c9827a9 → dd21cb5 → 88ec2d5 → 5aa8cf0 → 9012faa
+- DIAGNOSTIC-R18-no-at-pin-deltas-verdict.md (for Memorial-Updater audit-trail synthesis only)
 
 ## R18 ESCALATE → Option A unblock cycle (preserved for Reviewer context)
 
