@@ -298,3 +298,18 @@ All unresolved decisions → open questions in the spec.
 #   identifier/format tokens, not narrative-classification-vs-structural-prescription mismatches
 #   at section boundaries. Add to grilling: "for each § 5 preamble attestation-type claim, open
 #   the matching § 4.x prescription and verify the classification matches." Detected R20 MINOR-1.
+# REINFORCED 2026-05-17 — Spec files (Q-RNN-SPEC.md, Q-RNN-SPEC-AUDIT.md) must be committed
+#   BEFORE the Implementer's chore-A commit. The Architect's NEXT-ROLE.md routing block triggers
+#   chore-A; if spec artifacts are uncommitted at that point, they fall outside the chore-A SHA
+#   boundary and appear as untracked files in the Reviewer's anti-scope check. Correct order:
+#   write spec → commit spec artifacts → write NEXT-ROLE.md routing block. Add as Architect
+#   pre-emit grilling step: "confirm all spec artifacts (Q-RNN-SPEC.md, Q-RNN-SPEC-AUDIT.md)
+#   are committed before writing NEXT-ROLE.md." Detected tessera R21 MINOR-1.
+# REINFORCED 2026-05-17 — When spec § 1 enumerates failure modes for a function, every named
+#   failure mode must be independently exercised by at least one AC scenario. A failure mode
+#   enumerated in the spec but absent from the AC table leaves the guard implementing it
+#   structurally unbound — removing it would not affect any test outcome. Add a branch-binding
+#   coverage pass to § 5 grilling: "for each failure mode in § 1, identify the AC row that
+#   exercises it; if no row exercises it, add one." Detected tessera R21 MINOR-2 (dedup-by-
+#   group_id guard at verdict-consumer.ts:87-94) and MINOR-3 (empty-string short-circuit at
+#   verdict-consumer.ts:77-79). Both guards were spec-prescribed; neither had a regression test.
