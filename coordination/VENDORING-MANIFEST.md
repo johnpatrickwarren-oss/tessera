@@ -1,7 +1,9 @@
 # Vendoring Manifest
 
-_Authoritative record of files vendored from DeploySignal into Tessera with source SHA + sync policy._
-_Maintained by `tools/vendor-from-deploysignal.sh`. Re-pin via `PINNED_SHA=<new-sha> ./tools/vendor-from-deploysignal.sh ...` per SCOPING-MEMO-v0.3 § 9 re-pinning policy._
+_Authoritative record of files vendored from DeploySignal **and from anchor methodology canonical** into Tessera with source SHA + sync policy._
+_DeploySignal engine files maintained by `tools/vendor-from-deploysignal.sh`. Anchor methodology files vendored manually per MR-1 (methodology round). Re-pin via `PINNED_SHA=<new-sha> ./tools/vendor-from-deploysignal.sh ...` per SCOPING-MEMO-v0.3 § 9 re-pinning policy (engine files); anchor methodology re-pin per operator decision (no automated script yet)._
+
+## DeploySignal engine vendoring
 
 | Target (tessera/) | Source (deploysignal/) | SHA | Sync policy | Vendored | Notes |
 |---|---|---|---|---|---|
@@ -46,6 +48,26 @@ _Maintained by `tools/vendor-from-deploysignal.sh`. Re-pin via `PINNED_SHA=<new-
 | tools/curate-baseline-pipeline.ts | tools/curate-baseline-pipeline.ts | 5a72371 | vendored-at-pin | 2026-05-16 | Tessera SLICE 4 (R06) audit-emission orchestrator; imports from already-vendored engine/types/config.ts only |
 | tools/calibrators/_shared.ts | tools/calibrators/_shared.ts | 5a72371 | vendored-at-pin | 2026-05-16 | Tessera SLICE 4 (R06) numerical primitives (mulberry32 / gaussian / choleskyLocal); compilation-dep leaf for family-c.ts |
 | tools/calibrators/family-c.ts | tools/calibrators/family-c.ts | 5a72371 | vendored-at-pin | 2026-05-16 | Tessera SLICE 4 (R06) MCD/MRCD/Ledoit-Wolf calibrators; consumed by tools/curate-baseline-pre-pass.ts |
+
+---
+
+## Anchor methodology vendoring (MR-1 — 2026-05-18)
+
+_Anchor canonical methodology files vendored verbatim to enable the Coordinator role + multi-cluster execution. Source: `~/concord/anchor/` at SHA pinned below. Re-pin per operator decision when anchor canonical evolves; refresh is mechanical (file-level copy + header re-write)._
+
+| Target (tessera/) | Source (anchor/) | SHA | Sync policy | Vendored | Notes |
+|---|---|---|---|---|---|
+| CLAUDE-COORDINATOR.md | skills/12-coordinator-role.md | d27ac4e | vendored-with-deltas | 2026-05-18 | MR-1 vendoring. Adapted to per-role-file format (header + role-active-when + REINFORCEMENTS section); path-references rewritten to Tessera-local equivalents (see file's "Tessera path-reference adaptations" header table); migration-arbitration section preserved verbatim for canonical-PR backflow even though Tessera lacks a schema-migration surface. |
+| templates/WAVE-PLAN-TEMPLATE.md | templates/WAVE-PLAN-TEMPLATE.md | d27ac4e | vendored-at-pin | 2026-05-18 | MR-1 vendoring. Verbatim copy; anchor-relative path references preserved (per `templates/README.md` Tessera-local pointer table). |
+| templates/CLUSTER-HANDOFF-TEMPLATE.md | templates/CLUSTER-HANDOFF-TEMPLATE.md | d27ac4e | vendored-at-pin | 2026-05-18 | MR-1 vendoring. Verbatim copy. |
+| templates/WAVE-GATE-TEMPLATE.md | templates/WAVE-GATE-TEMPLATE.md | d27ac4e | vendored-at-pin | 2026-05-18 | MR-1 vendoring. Verbatim copy. |
+| templates/COORDINATOR-MEMORIAL-TEMPLATE.md | templates/COORDINATOR-MEMORIAL-TEMPLATE.md | d27ac4e | vendored-at-pin | 2026-05-18 | MR-1 vendoring. Verbatim copy. |
+| templates/PROJECT-ROLES-TEMPLATE.md | templates/PROJECT-ROLES-TEMPLATE.md | d27ac4e | vendored-at-pin | 2026-05-18 | MR-1 vendoring. Verbatim copy. |
+| templates/README.md | (none — Tessera-original) | n/a | tessera-original | 2026-05-18 | MR-1 vendoring. Tessera-local pointer table mapping anchor-relative references to project-root equivalents. |
+
+**Why vendored:** The Mode 2 retrofit at commit `e84a7c8` brought across the multi-track scripts (`scripts/anchor-wave-init.sh`, `scripts/multi-track-cluster-setup.sh`, `scripts/multi-track-verify-wave-merge.sh`) but not the role-discipline file or templates the scripts reference. Result: plumbing without discipline; multi-track infrastructure was structurally unusable. MR-1 closes the gap so the Coordinator can produce wave plans against R24+ scope and the scripts can dispatch against them.
+
+**Sync policy notes:** `vendored-at-pin` for the templates (verbatim copies; re-vendor via `cp` when anchor canonical updates). `vendored-with-deltas` for `CLAUDE-COORDINATOR.md` (header adaptation + path-reference rewrites for Tessera-local equivalents; the body is verbatim from anchor skill text below the header — preserved this way to enable canonical-PR backflow via unified diff against the anchor source).
 
 ---
 
