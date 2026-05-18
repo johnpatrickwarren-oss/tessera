@@ -1,46 +1,74 @@
 CURRENT-ROUND: R29
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Inputs for next role
 - coordination/specs/Q-R29-SPEC.md (Architect commit A: 4d44ef7; 833 lines)
+- coordination/specs/Q-R29-SPEC-AUDIT.md (audit sidecar; same commit)
 - coordination/CLUSTER-HANDOFF-1-WU00-WU02.md (Wave 1 → Wave 2 interface contract)
 - coordination/PRD.md (cluster scope WU-02 K8S-ADAPTER block)
+- Branch: cluster/wu-02-k8s-adapter-R29
 
 ## Architect spec-commit sequence (R21 ARCH MINOR-1)
 - Architect-commit-A: 4d44ef7 (spec + audit sidecar; landed BEFORE this routing block)
-- Architect-commit-B: this commit (NEXT-ROLE.md routing + MEMORIAL.md ceremony append)
+- Architect-commit-B: 201a583 (NEXT-ROLE.md routing + MEMORIAL.md ceremony append)
 
 ## Round-start SHA (R15 reinforcement; R29 baseline for anti-scope checks)
-- ROUND-START-SHA: e714703 (commit immediately before Architect work began; "R29 routing: cluster wu-02-k8s-adapter")
+- ROUND-START-SHA: e714703 (commit immediately before Architect work began)
 - Implementer's anti-scope round-start-to-chore-A diff baseline is e714703
 
-## Empirical baseline at session start (R25 MINOR-1 / R26 MAJOR-1 reinforcements)
-- node --test --test-reporter=tap test/*.test.js → tests=243 / pass=241 / fail=2 / skipped=0
-- The 2 failures are pre-existing environmental:
-  - q01-no-at-pin-deltas AC-7: ENOENT '../deploysignal/engine/detectors/_linalg.ts' (DS sibling absent in cluster worktree)
-  - q-md-f4 AC-R26-16: "post-chore-A modification outside allowed-set: CLAUDE-ARCHITECT.md" (R26 forward-protection over-scoped to post-R26 Memorial-Updater accretion; pre-existing across this cluster's main-derived branch)
-- npx tsc -p tsconfig.test.json → exit 2; diagnostics {TS2688 (`@types/node` missing), TS5107 (moduleResolution=node10 deprecation)} — both pre-existing infra
-- Encoded throughout spec (NOT inherited from CLUSTER-HANDOFF prediction of 230/229/1, which was empirically refuted at session start)
+## Implementer attestation
 
-## Implementer commit sequence prescription (spec § 2.7 + R23 TDD)
-1. RED commit: test/q29-k8s-adapter.test.ts stub bodies (assert.fail or imports from not-yet-created module); production file engine/topology/k8s-source.ts NOT yet created; substrate fixture JSON files NOT yet created (or empty stubs). All 12 new tests fail; pre-existing 2 env failures unchanged.
-2. GREEN commit (= chore-A): full engine/topology/k8s-source.ts + 4 substrate fixture JSON files + complete bodies for AC-R29-1..12 in q29 test file + this round's NEXT-ROLE.md attestation block + MEMORIAL.md Implementer ceremony append. All 12 new tests pass; 243 → 255 / 241 → 253 / 2 unchanged. Chore-A SHA = this commit.
-3. chore-B commit: append AC-R29-13 forward-protection runtime test to q29 file with the actual chore-A SHA substituted as literal. Uses execFileSync (NOT execSync per R26 MINOR-1).
+### Chore-A SHA
+- CHORE-A-SHA: <to be recorded after chore-A commit>
 
-## Halt conditions (spec § 7.1; each prescribes DIAGNOSTIC + ESCALATE, NOT silent reframe)
-- (a) tsc emits diagnostic codes other than {TS2688, TS5107} OR exits non-2 at chore-A
-- (b) filtered node --test on pre-R29 files at chore-A reports counts other than 243/241/2
-- (c) Any AC-R29-1..10 produces output conflicting with spec § 4.2 Then text
-- (d) Spec files missing from round-start-to-chore-A diff range
-- (e) Any file outside 10-entry allowed-set (+DIAGNOSTIC regex) appears in round-start-to-chore-A diff
-- (f) TopologyNode.kind / TopologyEdge.relationship literal needed beyond existing union (PRD halt #2)
-- (g) engine/topology-overlay.ts body modification appears load-bearing (PRD halt #1)
+### Binding-command results at chore-A (per spec § 9.1 empirical baseline)
 
-Per CROSS-PROJECT-MEMORIAL.md REINFORCED 2026-05-18 (R26 false-compliance-attestation derived rule): do NOT reframe failing binding-command output as compliance. The AC literals encode actual environment reality (tsc exit 2 + 2 pre-existing failures); any drift from that reality is HALT, not absorb-and-attest.
+**tsc (AC-R29-11):**
+- `npx tsc -p tsconfig.test.json` → EXIT=2; diagnostics exactly {TS2688, TS5107}
+- No R29-introduced diagnostic codes. Pre-existing infra issues unchanged.
+
+**node --test filtered pre-R29 (AC-R29-12):**
+- Pre-R29 files only (excluding q29-k8s-adapter.test.js), 24 files
+- Observed: tests=243 / pass=241 / fail=2 / skipped=0
+- The 2 failures: q01-no-at-pin-deltas AC-7 (ENOENT ../deploysignal) + q-md-f4 AC-R26-16 (R26 forward-protection pre-existing env failure)
+- Matches spec AC-R29-12 literal exactly — no drift
+
+**Full suite at chore-A:**
+- All 12 new tests pass; tests=255 / pass=253 / fail=2 (spec § 9.13 G1 prediction of 255/253/2 confirmed)
+
+### Per-file test line citations (compiled .js, per R03/R18/R21 MINOR-4 reinforcement)
+- AC-R29-1: test/q29-k8s-adapter.test.js:21
+- AC-R29-2: test/q29-k8s-adapter.test.js:32
+- AC-R29-3: test/q29-k8s-adapter.test.js:45
+- AC-R29-4: test/q29-k8s-adapter.test.js:63
+- AC-R29-5: test/q29-k8s-adapter.test.js:79
+- AC-R29-6: test/q29-k8s-adapter.test.js:95
+- AC-R29-7: test/q29-k8s-adapter.test.js:112
+- AC-R29-8: test/q29-k8s-adapter.test.js:127
+- AC-R29-9: test/q29-k8s-adapter.test.js:142
+- AC-R29-10: test/q29-k8s-adapter.test.js:156
+- AC-R29-11: test/q29-k8s-adapter.test.js:163
+- AC-R29-12: test/q29-k8s-adapter.test.js:183
+
+### Tactical adjustments made (spec § 7.2; Implementer judgment)
+- AC-R29-11 (tsc binding-command): execFileSync on 'npx' with ['tsc', ...] — matches spec prescription verbatim. No divergence.
+- AC-R29-12 (node --test binding-command): Added `env: subEnv` to strip `NODE_TEST_CONTEXT` and `NODE_TEST_WORKER_ID` from subprocess environment. Node.js v25.9.0 propagates these vars to child processes, causing recursive-test-detection and silent subprocess skip (exit 0, empty output). Stripping these vars is a version-drift fix (analogous to "spec API signature outdated for installed version"). Spec § 7.2 authorizes this as a tactical adjustment. The REQUIREMENT (assert 243/241/2 on pre-R29 files) is satisfied; the MECHANISM is adapted for Node.js v25. No halt condition fires: this is not an observable-behavior change, scope change, or system-boundary change — it's a subprocess-env fix needed to make the spec's prescribed approach work in the current runtime.
+- Fixture loading: `JSON.parse(readFileSync(..., 'utf8'))` pattern (alternative to require.resolve; both permitted per spec § 7.2).
+- Test titles: match AC identifiers verbatim (AC-R29-N / <description>).
+- `__dirname`-relative paths for fixtures and k8s-source.ts in AC-R29-10 (analogous to spec's `require.resolve` suggestion).
+
+### Halt conditions checked (spec § 7.1)
+- (a) tsc regression: NOT FIRED — exit 2, only {TS2688, TS5107} at chore-A.
+- (b) baseline drift: NOT FIRED — pre-R29 filtered count = 243/241/2 exactly.
+- (c) AC scenario conflict: NOT FIRED — all 12 new tests pass at chore-A.
+- (d) Spec files uncommitted: NOT FIRED — Q-R29-SPEC.md + Q-R29-SPEC-AUDIT.md in commit 4d44ef7 (within round-start-to-chore-A range).
+- (e) Anti-scope file: NOT FIRED — only allowed-set paths modified (verified by pre-commit diff).
+- (f) New kind/relationship literal needed: NOT FIRED — Approach A1 (existing literals only) implemented exactly as specified.
+- (g) topology-overlay.ts body modification: NOT FIRED — imported as read-only; no body modifications.
 
 ## Escalation items
-(none — no open architectural questions; all 5 architectural sub-decisions resolved in spec § 1)
+(none — all 7 halt scenarios passed; no architectural decisions deferred to operator)
 
 ## Routing notes
-(none)
+chore-B: Append AC-R29-13 forward-protection runtime test to test/q29-k8s-adapter.test.ts with literal CHORE_A_SHA substituted. Per spec § 2.7 + § 3.2 AC-R29-13.
