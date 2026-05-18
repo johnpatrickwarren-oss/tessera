@@ -389,3 +389,33 @@ with a clear commit message.
 #   :17 and :24 cited REVIEWER-REPORT-R10.md and REVIEWER-REPORT-R14.md without the
 #   coordination/reviews/ prefix; R17 opened this file for R10 MINOR-1 docblock cleanup but
 #   the path issue was not observed and corrected in the same pass.
+# REINFORCED 2026-05-17 — MEMORIAL completeness: the MEMORIAL accretion rule (CLAUDE-COMMON.md
+#   "Memorial accretion") requires BOTH CONFIRMATION and VIOLATION entries after every role
+#   session. For the Implementer this means: before routing, write a CONFIRMATION entry for each
+#   discipline that fired correctly (TDD RED ordering, ESCALATE application, operator-disposition
+#   adherence, post-unblock binding-command re-run, role-boundary, anti-scope). A MEMORIAL
+#   section with only VIOLATION entries and no CONFIRMATION entries is incomplete — it leaves
+#   the audit trail asymmetric and forces the Memorial Updater to reconstruct confirmations from
+#   commit history rather than from the session record. Write CONFIRMATIONs before routing.
+#   Detected tessera R18 MINOR-4: Implementer MEMORIAL (lines 1704-1706) had 1 VIOLATION + 0
+#   CONFIRMATION entries; backfilled by Memorial-Updater from commit history.
+# REINFORCED 2026-05-17 — OBSERVED test count reporting: per-file OBSERVED counts are REQUIRED
+#   in NEXT-ROLE.md (R03 MINOR-4 standing rule). Additionally, verify the aggregate arithmetic
+#   by summing the per-file counts — do NOT derive the baseline or delta from memory or prior-
+#   round NEXT-ROLE.md text. Specifically: (1) run `node --test test/*.test.js 2>&1` and
+#   capture per-file pass counts; (2) sum them to obtain the actual baseline; (3) compare
+#   against the per-file total from the current run; (4) record both the per-file table and the
+#   arithmetic in NEXT-ROLE.md. A narrative claiming "168/0 pre-R18; +13 from q18 12 ACs" when
+#   the actual values are "171/0 pre-R18; +10 from q18" contradicts the spec's own cited
+#   arithmetic and is internally inconsistent. Detected tessera R18 MINOR-2 + MINOR-3.
+# REINFORCED 2026-05-17 — Operator-dispositioned unblock bookkeeping: when an ESCALATE cycle
+#   results in the operator permitting modification of files that were spec-anti-scoped, add an
+#   Amendments note to the spec (or at minimum to NEXT-ROLE.md) that names: (a) which files
+#   were originally anti-scoped; (b) the operator disposition that makes their modification
+#   permissible; (c) the rationale for the AC-RNN-10 allowed-set expansion. Editing the
+#   allowed-set in the test body without a paper trail in the spec leaves the expansion
+#   unexplained to future readers and surfaces as a Reviewer MINOR. For vendored files
+#   transitioning from 'vendored-at-pin' to 'vendored-with-deltas', simultaneously update
+#   VENDORING-MANIFEST.md and add a spec-amendment note. Detected tessera R18 MINOR-1:
+#   AC-R18-10 allowed-set expanded 10→15 without spec amendment; 2 entries (q01 test file,
+#   VENDORING-MANIFEST.md) were originally spec-anti-scoped.
