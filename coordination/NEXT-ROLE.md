@@ -7,7 +7,7 @@ STATUS: READY
 - coordination/specs/Q-R30-SPEC-AUDIT.md (Architect ceremony sidecar — Reviewer reads this)
 - Branch: cluster/wu-03-nvlink-adapter-R30
 - Chore-A commit (implementation): `82d1e5a355cf9a30ab58f515078bc89e655ab05d`
-- Chore-B commit (SHA injection + coordination chore): to be set after this chore commit
+- Chore-B commit (SHA injection + coordination chore): `6a1edc9a6245d22616ab33fe2748c1be31b65dfc`
 
 ## Attestation — AC-R30-16 (typecheck)
 
