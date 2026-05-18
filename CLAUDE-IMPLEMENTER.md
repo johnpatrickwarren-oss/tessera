@@ -504,3 +504,13 @@ with a clear commit message.
 #   forward-protection pattern?" Contrast: AC-R22-8 correctly uses explicit SHA range
 #   `f7111c9..480fc43`; the same precision must be applied to any co-located count AC.
 #   Detected tessera R22 MINOR-1.
+# REINFORCED 2026-05-18 — When new production code and new tests are committed together in the
+#   same round, prefix with a separate RED commit (assert.fail stubs OR real test bodies that
+#   compile but FAIL) before writing any implementation, so git history independently confirms
+#   RED→GREEN ordering. R20 (RED commit 222a856) and R21 (RED commit 4274d9f) established this
+#   as the audit-trail anchor. R23 broke the 16-round R04–R21 streak: `2288c49` combined tests
+#   (167 lines / 12 tests) + production code in one atomic feat commit. The Implementer's
+#   MEMORIAL entry testimonially claimed RED-first via `npx tsc` errors, but git history cannot
+#   independently confirm. The RED commit does not need to be complex — a stub file with
+#   `throw new Error('not implemented')` or bare imports that fail to resolve is sufficient;
+#   the purpose is a git-verifiable RED-state record. Detected tessera R23 MINOR-1.
