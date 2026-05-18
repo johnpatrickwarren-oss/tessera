@@ -718,4 +718,27 @@ All 7 grilling gates PASS. Spec is ready to route.
 
 ---
 
+---
+
+## Amendments (post-Reviewer)
+
+### Amendment R18-A1 — AC-R18-10 allowed-set expansion (R18 MINOR-1 disposition)
+
+**Background.** Spec § 4.3 prescribed a 10-entry AC-R18-10 allowed-set. At implementation time, the `q01-no-at-pin-deltas.test.js` byte-identity check failed when Deltas 1-3 modified the `engine/types/verdict.ts` body (see `coordination/diagnostics/DIAGNOSTIC-R18-no-at-pin-deltas-verdict.md`). Anti-scope prohibited modifying the q01 test file unilaterally.
+
+**Operator disposition.** Option A dispositioned at commit `5aa8cf0`: approve targeted exception to update `test/q01-no-at-pin-deltas.test.js` AT_PIN_FILES list and `coordination/VENDORING-MANIFEST.md` row status, analogous to the R01 `engine/types/config.ts` vendored-with-deltas precedent.
+
+**Amendment to AC-R18-10 allowed-set.** The 10-entry list in spec § 4.3 is superseded by the 15-entry list in `test/q18-phase2-slice1-topology-substrate.test.ts:143-161`. The 5 added entries are:
+1. `coordination/OVERNIGHT-LOG-2026-05-17.md` — operator triage log written during ESCALATE cycle
+2. `coordination/diagnostics/DIAGNOSTIC-R18-no-at-pin-deltas-verdict.md` — DIAGNOSTIC written at ESCALATE
+3. `test/q01-no-at-pin-deltas.test.ts` — AT_PIN_FILES update (Option A); was spec § 6 anti-scope, became permissible via operator disposition
+4. `test/q01-no-at-pin-deltas.test.js` — compiled companion (gitignored; consistent with policy)
+5. `coordination/VENDORING-MANIFEST.md` — manifest row update (Option A); was spec § 3 "UNCHANGED", became permissible via operator disposition
+
+All 5 entries are documented in the Implementer unblock commit message at `5aa8cf0`. The AC-R18-10 contract (all changed files are within the allowed-set) remains binding at the expanded boundary.
+
+**Surfaced by:** `coordination/reviews/REVIEWER-REPORT-R18.md` MINOR-1.
+
+---
+
 _End of Q-R18-SPEC.md._

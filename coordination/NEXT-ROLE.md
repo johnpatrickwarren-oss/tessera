@@ -1,5 +1,5 @@
 CURRENT-ROUND: R19
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Round scope — operator-set (do NOT auto-redirect)
@@ -108,9 +108,53 @@ Per evening-overnight authority [[project-overnight-authority-2026-05-17-evening
 - **OQ-R08-3** Phase 2 transient detector scheduling (parked)
 - R09-R18 misc MINORs (non-load-bearing; deferrable)
 
+## R19 Implementer Attestation
+
+**Binding commands at GREEN (per Coordination chore sequence step 1):**
+
+- `npx tsc --noEmit` → exit 0
+- `node --test test/*.test.js` → pass 181 / fail 0
+
+**Per-file OBSERVED counts (R03 MINOR-4 reinforcement):**
+
+| File | Pass |
+|---|---|
+| betting-e-process-class-dispatch.test.js | 5 |
+| q01-no-at-pin-deltas.test.js | 1 |
+| q01-schema-additions.test.js | 5 |
+| q01-vendoring-coverage.test.js | 3 |
+| q02-schema-extension.test.js | 6 |
+| q03-warm-start-runtime.test.js | 13 |
+| q04-welford-stats.test.js | 11 |
+| q05-per-shard-runtime.test.js | 13 |
+| q06-baseline-pre-pass.test.js | 13 |
+| q07-fleet-correlated.test.js | 23 |
+| q10-per-shard-emission.test.js | 11 |
+| q11-hierarchical-e-value-combination.test.js | 18 |
+| q12-fleet-merged-detector-surfaces.test.js | 16 |
+| q13-e-bh-fdr.test.js | 14 |
+| q14-compiled-config-loader.test.js | 6 |
+| q14-mean-delta.test.js | 7 |
+| q14-pr-f5-storage.test.js | 4 |
+| q16-pr-f5-investigation.test.js | 2 |
+| q18-phase2-slice1-topology-substrate.test.js | 10 |
+| **Total** | **181** |
+
+Pre-R19 baseline: 181/0 (Reviewer-verified at R18 HEAD 9012faa; q18 anti-scope test pinned to 9012faa at R19 in-passing — see PHASE-2-SLICE-1-CLOSE-WALK.md § 4 for disposition).
+
+**R19 deliverables:**
+1. `coordination/PHASE-2-SLICE-1-CLOSE-WALK.md` — created
+2. `coordination/specs/Q-R18-SPEC.md` — Amendments block added (MINOR-1 in-passing close)
+3. `test/q18-phase2-slice1-topology-substrate.test.ts/.js` — AC-R18-10 pinned to 9012faa (tactical: HEAD-based diff broke after Memorial-Updater commit 4564bf0 added CLAUDE files)
+
+**Tactical fix documentation (q18 SHA pin):** The AC-R18-10 anti-scope test used `git diff b640c6c..HEAD --name-only`. Memorial-Updater commit 4564bf0 modified CLAUDE-ARCHITECT.md and CLAUDE-IMPLEMENTER.md (routine discipline outputs, not R18 scope) which caused the test to fail at 180/1. Pinning to `b640c6c..9012faa` (R18 MERGE-READY SHA) preserves the test's behavioral intent exactly. The changed files (CLAUDE-*.md, REVIEWER-REPORT-R18.md, ROUND-R18-SUMMARY.md) are all legitimate post-R18 outputs, not unauthorized scope. Documented inline in the test with a 3-line comment.
+
+**Attestation SHA:** [set after chore commit — see Coordination chore sequence]
+
 ## Update history
 
 | Date | Event |
 |---|---|
 | 2026-05-17 | R18 closed MERGE-READY post-Option-A-unblock; Phase 2 SLICE 1 substantive work landed. |
 | 2026-05-17 | R19 launched: Phase 2 SLICE 1 close-walk + R18 MINOR in-passing cleanup; FINAL round of evening-overnight chain. |
+| 2026-05-17 | R19 complete: PHASE-2-SLICE-1-CLOSE-WALK.md created; R18 MINOR-1 closed in-passing; routing to REVIEWER. |

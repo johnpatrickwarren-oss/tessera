@@ -1750,3 +1750,19 @@ VIOLATION: pre-emit-grilling | Architect failure-mode analysis (Q-R18-SPEC.md §
 CONFIRMATION: NEXT-ROLE-instruction-watch | REVIEWER-REPORT-R18.md OBS-3 documents that coordination/NEXT-ROLE.md:16 says "DO NOT read Q-R18-SPEC-AUDIT.md per CLAUDE-REVIEWER.md cold-implementation boundary (optional)" — this contradicts CLAUDE-REVIEWER.md system-prompt directive that the sidecar is "load-bearing for your audit." The instruction was in the operator-authored sections of NEXT-ROLE.md preserved byte-identical by the Architect (spec § 4.5). The R18 Reviewer correctly applied the system-prompt over the NEXT-ROLE.md instruction and read the sidecar. Flagged for R19 template cleanup: remove the "DO NOT read" instruction from NEXT-ROLE.md before routing to Reviewer, so it does not induce a future Reviewer to skip a load-bearing input. | R18 | MEMORIAL-UPDATER
 
 CONFIRMATION: memorial-accretion | Reviewer R18 applied the R16/R17-derived reinforcement (CLAUDE-REVIEWER.md REINFORCED 2026-05-17) correctly — appended 4 VIOLATION entries (MINOR-1 through MINOR-4, all Implementer-attributable) to coordination/MEMORIAL.md before routing. Reviewer MEMORIAL section contained complete CONFIRMATION + VIOLATION set. Implementer MEMORIAL section (1 VIOLATION, 0 CONFIRMATION) was reconstructed by Memorial-Updater from commit history per this round's role. 3 REINFORCED lines appended to CLAUDE-IMPLEMENTER.md. 1 REINFORCED line appended to CLAUDE-ARCHITECT.md. ROUND-R18-SUMMARY.md written. NEXT-ROLE.md STATUS updated to ROUND-COMPLETE. | R18 | MEMORIAL-UPDATER
+
+---
+
+## R19 — Implementer (2026-05-17)
+
+CONFIRMATION: spec-authorship | Implementer authored Q-R19-SPEC.md with all required sections: brainstorm (3 approaches evaluated; Approach A selected with documented rejection of B + C), design sketch (component inventory + integration points + failure modes), goal, mechanism, 9 ACs in Given/When/Then form, anti-scope, open questions (none). Pre-emit grilling completed inline in spec: 7 gates checked; all PASS. | R19 | IMPLEMENTER
+
+CONFIRMATION: anti-scope | No engine/, test/*, tools/, or src/ files modified outside the tactical SHA-pin fix to test/q18-phase2-slice1-topology-substrate.test.ts. Deliverables are documentation-only: PHASE-2-SLICE-1-CLOSE-WALK.md (new), Q-R18-SPEC.md § Amendments (appended), NEXT-ROLE.md routing update. | R19 | IMPLEMENTER
+
+CONFIRMATION: tdd-discipline | No production code or new tests in this round. R19 is documentation-only; TDD ordering discipline is N/A. | R19 | IMPLEMENTER
+
+CONFIRMATION: halt-discipline | One spec/reality mismatch encountered (q18 AC-R18-10 anti-scope test failing due to Memorial-Updater commit 4564bf0 adding CLAUDE-*.md files to the HEAD-based git diff). Assessed as tactical fix per autonomy clause: test used `HEAD` instead of a pinned R18 MERGE-READY SHA; pinning to `9012faa` preserves the test's behavioral intent exactly without changing assertions or allowed-set. Change documented in 3-line inline comment in the test + in NEXT-ROLE.md tactical-fix block. No HALT needed — the fix has no observable behavioral difference; it makes the test MORE accurate. | R19 | IMPLEMENTER
+
+CONFIRMATION: binding-commands | npx tsc --noEmit → exit 0; node --test test/*.test.js → 181/0 (per-file counts recorded in NEXT-ROLE.md attestation block). Pre-R19 baseline preserved (no new test files; AC count 181 = 181). | R19 | IMPLEMENTER
+
+CONFIRMATION: role-boundary | Implementer produced spec + implementation only; zero review artifacts written. Framing in CLOSE-WALK § 3 is descriptive (SLICE 2 scope per SCOPING-MEMO-v0.3.md) without picking dispositions for parked items (OQ-1/Q-JC1, OQ-R08-3). | R19 | IMPLEMENTER
