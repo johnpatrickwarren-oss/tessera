@@ -5,7 +5,7 @@ STATUS: READY
 ## Inputs for next role
 - Branch: `cluster/wu-04-md-f4-common-mode-R26`
 - Round-start SHA: `71224e7`
-- Chore-A SHA: `<CHORE-A-SHA>` (see attestation block below — substituted after chore-A commit lands)
+- Chore-A SHA: `9b78a19`
 - coordination/specs/Q-R26-SPEC.md
 - coordination/specs/Q-R26-SPEC-AUDIT.md
 - coordination/evidence/PR-F6-EVIDENCE.md
@@ -14,7 +14,7 @@ STATUS: READY
 ## Implementer attestation block (chore-A)
 
 ### AC-R26-13: Anti-scope diff
-Command: `git diff 71224e7..<CHORE-A-SHA> --name-only`
+Command: `git diff 71224e7..9b78a19 --name-only`
 Result (verified by Implementer before chore-A commit):
 ```
 coordination/MEMORIAL.md
@@ -47,8 +47,8 @@ Per-file breakdown for R26 new test file:
 
 ### AC-R26-16: Chore-B forward-protection
 Test `AC-R26-16: anti-scope forward-protection` added at chore-B.
-Chore-A SHA literal substituted into the test string constant.
-Chore-A SHA: will be the commit SHA resulting from this chore-A commit.
+Chore-A SHA `9b78a19` committed as string constant into the test.
+Diff range: `9b78a19..HEAD` — any post-chore-A modification outside the 7-path allowed-set causes test failure.
 
 ## Test line citations (test() declarations in test/q-md-f4-common-mode-injection.test.ts)
 Per spec § 5.3 / R03+R18+R21 reinforcement — line numbers verified via grep:

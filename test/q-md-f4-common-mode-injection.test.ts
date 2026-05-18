@@ -239,3 +239,25 @@ test('Candidate ordering determinism and kind-filter narrowing', () => {
   assert.strictEqual(result_b.candidates.length, 1);
   assert.strictEqual(result_b.candidates[0].shared_node_id, 'psu-0');
 });
+
+// AC-R26-16: Anti-scope forward-protection (chore-B runtime test).
+// Chore-A SHA `9b78a19` committed as string constant. Any post-chore-A
+// modification outside the 7-path allowed-set causes this test to fail.
+test('AC-R26-16: anti-scope forward-protection (chore-B)', () => {
+  const { execSync } = require('node:child_process') as typeof import('node:child_process');
+  const CHORE_A_SHA = '9b78a19';
+  const ALLOWED_SET = new Set([
+    'engine/topology/common-mode-attribution.ts',
+    'test/q-md-f4-common-mode-injection.test.ts',
+    'coordination/evidence/PR-F6-EVIDENCE.md',
+    'coordination/specs/Q-R26-SPEC.md',
+    'coordination/specs/Q-R26-SPEC-AUDIT.md',
+    'coordination/NEXT-ROLE.md',
+    'coordination/MEMORIAL.md',
+  ]);
+  const out = execSync(`git diff ${CHORE_A_SHA}..HEAD --name-only`, { encoding: 'utf8' });
+  const files = out.trim().split('\n').filter((f) => f.length > 0);
+  for (const f of files) {
+    assert.ok(ALLOWED_SET.has(f), `post-chore-A modification outside allowed-set: ${f}`);
+  }
+});
