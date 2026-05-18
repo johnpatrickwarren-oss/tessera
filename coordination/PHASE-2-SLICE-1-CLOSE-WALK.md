@@ -121,6 +121,10 @@ NEXT-ROLE.md:33 claimed "168/0 pre-R18; +13 from q18 12 ACs." Correct values per
 **Disposition: deferred to Memorial-Updater (R19)**  
 The R18 Implementer MEMORIAL section contained 1 VIOLATION and 0 CONFIRMATION entries. The R18 MEMORIAL-UPDATER reconstructed the missing CONFIRMATION entries from commit history (per MEMORIAL.md § R18 MEMORIAL-UPDATER section). The backfill is complete. No action for the R19 Implementer; the Memorial-Updater handled the gap in its role.
 
+### Additional in-passing fix — q18 AC-R18-10 anti-scope test SHA pin
+
+Not a REVIEWER-surfaced MINOR, but discovered during R19 execution. The AC-R18-10 test used `git diff b640c6c..HEAD --name-only`; the Memorial-Updater commit `4564bf0` added `CLAUDE-ARCHITECT.md` and `CLAUDE-IMPLEMENTER.md` to the diff, causing the test to fail at 180/1 (not 181/0). Tactical fix: pinned to `b640c6c..9012faa` (R18 MERGE-READY SHA) — the CLAUDE files are routine discipline outputs, not R18 scope. See `NEXT-ROLE.md` attestation block for full tactical-fix documentation. Commit `6ee3f3c`.
+
 ---
 
 ## § 5 Memorial state stamp — REINFORCED counts at Phase 2 SLICE 1 close
