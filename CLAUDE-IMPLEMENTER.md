@@ -494,3 +494,13 @@ with a clear commit message.
 #   reviewer verifiability. Confirm citations by grep or offset-read before committing chore-A.
 #   Detected tessera R21 MINOR-4 (AC-R21-1 cited :35 vs actual :34; AC-R21-3 :74 vs :73;
 #   AC-R21-4 :89 vs :85; AC-R21-5 :100 vs :97; AC-R21-8 :152 vs :155).
+# REINFORCED 2026-05-17 — In audit-tier specs that include both a test-count AC (e.g.,
+#   "pass count = N after [round] implementation commits") AND a chore-B forward-protection
+#   runtime test, anchor the count AC to "at chore-A SHA <SHA>, pass count = N" rather than
+#   to a relative phrase like "after [round] implementation commits." Chore-B adds one test
+#   (+1), making the count literal stale at MERGE-READY HEAD while the SHA-pinned-binding
+#   convention (established R20 AC-R20-14, reinforced R21 AC-R21-10) preserves AC substance.
+#   Add an explicit grilling gate: "does this count AC need SHA-anchoring given the chore-B
+#   forward-protection pattern?" Contrast: AC-R22-8 correctly uses explicit SHA range
+#   `f7111c9..480fc43`; the same precision must be applied to any co-located count AC.
+#   Detected tessera R22 MINOR-1.

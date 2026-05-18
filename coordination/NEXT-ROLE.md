@@ -1,6 +1,51 @@
 CURRENT-ROUND: R22
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR (SLICE 3 entry decision)
+STATUS: ROUND-COMPLETE
+
+## Reviewer routing (R22 close)
+
+- **Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R22.md` (0 CRIT / 0 MAJOR / 1 MINOR / 4 OBS).
+- **MERGE-READY at HEAD:** `373b841` (post chore-B3).
+- **Reviewer cold-run binding-command outputs (verification):** `npx tsc -p tsconfig.test.json` → exit 0; `node --test test/*.test.js` → 204 / 204 / 0.
+- **Anti-scope completeness gate (round-start-to-HEAD diff):** `git diff f7111c9..HEAD --name-only` → 7 paths, all in pre-authorized scope; no engine/, _substrate/, tools/ touches.
+- **MINOR-1:** AC-R22-7 spec literal "= 203" does not hold at HEAD (204); SHA-pinned-binding convention from R20/R21 preserved; suggested forward-fix: future audit-tier specs should anchor count ACs to chore-A SHA explicitly.
+- **OBS-1:** Close-walk § 4 disposition table omits R21 OBS-2 (which AC-R22-4 materially closes); audit-traceability improvement opportunity.
+- **OBS-2:** Close-walk § 1 test-count cell (203) matches chore-A but not HEAD (204); convention disclosed at header line 10.
+- **OBS-3:** AC-R22-3 binds both `seen_group_ids` AND `seen_deploy_ids` guards — stronger than spec § 3 prescribes (positive observation).
+- **OBS-4:** Close-walk § 6 commit chain cannot list its own enclosing commit `373b841` (chicken-and-egg; established convention).
+
+## Memorial-Updater inputs
+
+1. `coordination/specs/Q-R22-SPEC.md`
+2. `coordination/reviews/REVIEWER-REPORT-R22.md`
+3. `coordination/MEMORIAL.md` (R22 sections)
+4. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Memorial-Updater section)
+5. This file (`coordination/NEXT-ROLE.md`)
+6. `coordination/PHASE-2-SLICE-2-CLOSE-WALK.md` (for SLICE 2 close memorial state stamp)
+7. `CLAUDE-COMMON.md` + `CLAUDE-ARCHITECT.md` + `CLAUDE-IMPLEMENTER.md` + `CLAUDE-REVIEWER.md` + `CLAUDE-MEMORIAL.md` (for REINFORCED line counts + appends)
+
+## Operator note — HARD STOP
+
+Late-evening overnight authority chain end per [[project-overnight-authority-2026-05-17-late-evening]]. R22 was the chain's final round. After Memorial-Updater completes the R22 ceremony, **STATUS: ROUND-COMPLETE → operator return**. SLICE 3 entry (HardwareTopologySource concrete impl per FR-E3b) requires operator return + new authority chain.
+
+---
+
+## Reviewer pre-attestation block (preserved for Memorial-Updater)
+
+**Binding commands (cold-run by Reviewer at HEAD `373b841`):**
+- `npx tsc -p tsconfig.test.json` → exit 0 (AC-R22-6 verified)
+- `node --test test/*.test.js` → tests 204 / pass 204 / fail 0 (AC-R22-7 at chore-A: 203/0; +1 at chore-B AC-R22-8 = 204/0 at HEAD)
+- `git diff f7111c9..480fc43 --name-only` → 7 paths ⊆ AC-R22-8 allowed-set (AC-R22-8 verified)
+- `git diff f7111c9..HEAD --name-only` → 7 paths, all in pre-authorized R22 scope (anti-scope completeness gate)
+- `grep -c "^# REINFORCED" CLAUDE-*.md` → COMMON:3, ARCH:21, IMPL:35, REVIEWER:1, MEMORIAL:0 = 60 (close-walk § 5 verified)
+
+---
+
+## Original Implementer attestation (preserved below for audit trail)
+
+CURRENT-ROUND: R22 (original)
+NEXT-ROLE: REVIEWER (now superseded — Reviewer routed to MEMORIAL-UPDATER)
+STATUS: READY (now superseded — STATUS: MERGE-READY)
 
 ## Round-scope directive
 
