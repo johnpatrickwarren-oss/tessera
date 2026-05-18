@@ -626,3 +626,133 @@ R20 closed cleaner than R18 (4 MINOR) or R19 (4 MAJOR cluster) because:
 (Entries appended when R22 closes.)
 
 ---
+
+## R22 — Phase 2 SLICE 2 close-walk + R20/R21 MINOR cleanup (autonomous; audit tier; FINAL ROUND of late-evening chain)
+
+**Completed:** 2026-05-17 23:53:49 (pipeline ~37 min wall-clock; clean chain — no ESCALATE).
+**Verdict:** **MERGE-READY · 0 CRITICAL · 0 MAJOR · 1 MINOR · 4 OBS · 8/8 ACs PASS** · 204/204/0 tests.
+**Streaks:** **21-round 0-CRITICAL (R02-R22)**; 14th right-reasons audit; 21st pre-emit grilling; 20th cold-review-boundary application; 16-round RED→GREEN TDD (R04-R22 — close-walk-round q22 stubs preserved TDD shape even on audit-tier carry-forwards).
+**Commits:** `ad12f46` (spec — R21 ARCH MINOR-1 fixed: spec in its own commit BEFORE chore-A ✅) → `1fe3aa2` (GREEN feat) → `480fc43` (chore-A coordination MERGE-READY) → `44d7145` (chore-B AC-R22-8 + chore-A SHA substituted) → `a1afc24` (chore-B2 attestation post-chore-B count note) → `373b841` (chore-B3 close-walk SHA substituted) → `8e4218e` (Memorial Updater).
+**Reinforcements:** +1 IMPL (now 21 ARCH + 36 IMPL + 3 COMMON + 1 REVIEWER). **CLAUDE-IMPLEMENTER.md trajectory R20=33 → R21=35 → R22=36 lines; consolidation flag persistent.**
+
+### Deliverables landed (all 5 in pre-approved scope)
+
+✅ **`coordination/PHASE-2-SLICE-2-CLOSE-WALK.md`** (NEW; mirrors PHASE-2-SLICE-1-CLOSE-WALK.md § 1-§ 6 structure).
+✅ **q20 file-header correction** (R20 MINOR-1 closed).
+✅ **q21 dedup-guard structural test row** (R21 MINOR-2 closed; AC-R22-3 binds BOTH `seen_group_ids` AND `seen_deploy_ids` — stronger than spec; positive OBS-3).
+✅ **q21 short-circuit disambiguation test row** (R21 MINOR-3 closed; AC-R22-4).
+✅ **q01 file-header arithmetic refresh** (R20 MINOR-2 closed).
+
+### The 1 MINOR (chore-B test-count convention)
+
+| # | Role | Class | Summary |
+|---|---|---|---|
+| 1 | IMPLEMENTER | pre-emit-grilling / spec-count-literal | AC-R22-7 spec literal "= 203" doesn't hold at MERGE-READY HEAD `373b841` (cold-run = 204 because chore-B added AC-R22-8). SHA-pinned-binding convention preserves AC substance (chore-A SHA = 203/0); forward-fix: anchor count ACs to chore-A SHA explicitly in future audit-tier specs. Reinforcement appended. |
+
+OBS-1 to OBS-4: close-walk § 4 omits R21 OBS-2 (audit-traceability gap); § 1 test-count cell shows chore-A 203 not HEAD 204 (convention disclosed); AC-R22-3 dedup test exceeds spec scope (positive); § 6 commit chain can't list its own enclosing commit (chicken-and-egg; established convention).
+
+### Disposition (autonomous per late-evening authority)
+
+- **No ESCALATE.** 1 MINOR is doc-level convention drift, fully captured by reinforcement.
+- **All R20+R21 carry-forward MINORs closed** (R20 MINOR-1, MINOR-2; R21 MINOR-2, MINOR-3 — 4 of 7 closed; remaining 3 are pattern-reinforcement-only and have no in-passing fix surface).
+- **No new TQ items.**
+- **HARD STOP** per chain plan. Memorial-Updater set NEXT-ROLE.md to `OPERATOR (SLICE 3 entry decision)`.
+
+### Why R22 was clean
+
+- Audit-tier pre-authorization of test-file touches at file granularity (q20 header / q21 append / q01 header) **completely sidestepped the R19 close-walk-anti-scope-incident pattern** — no MAJOR cluster surfaced
+- R21 ARCH MINOR-1 reinforcement applied correctly: spec commit `ad12f46` lands BEFORE chore-A `480fc43`
+- Spec scope = 8 ACs (well below split threshold)
+- All carry-forward fixes were surgical and pre-architected
+
+---
+
+## Late-evening chain summary (R20–R22): SLICE 2 COMPLETE
+
+| Round | Scope | Tier | Verdict | CRIT/MAJOR/MIN/OBS |
+|---|---|---|---|---|
+| R20 | SLICE 2.A VerdictGrouper cluster_event_id scope keying | full | MERGE-READY | 0/0/3/3 (15 ACs) |
+| R21 | SLICE 2.B fleet-merge consumption layer (verdict-consumer.ts NEW module) | full | MERGE-READY | 0/0/4/4 (11 ACs) |
+| R22 | SLICE 2 close-walk + R20/R21 MINOR cleanup | audit | MERGE-READY | 0/0/1/4 (8 ACs) |
+
+**Aggregate:** 0 CRITICAL · 0 MAJOR · 8 MINOR · 11 OBS across 3 rounds.
+**Streak:** 21-round 0-CRITICAL (R02–R22); **3 consecutive rounds with 0 MAJOR** (R20+R21+R22 — emergent pattern; methodology compounding).
+**Test count growth:** R19 close 181/0 → R22 close 204/0 (+23 tests; +13% suite size).
+**Reinforcement growth (late-evening):** ARCH 18→21 (+3); IMPL 30→36 (+6); COMMON 3→3 (unchanged); REVIEWER 1→1 (unchanged); MEMORIAL 0→0 (unchanged).
+
+---
+
+## MORNING HAND-OFF (2026-05-18)
+
+**Read this section first when you wake up.**
+
+### Position summary
+
+- **HEAD:** `8e4218e` (R22 Memorial Updater outputs)
+- **Branch:** main; working tree clean
+- **Test suite:** 204 pass / 0 fail
+- **Tessera Phase status:** Phase 1 ✅ COMPLETE; Phase 2 SLICE 1 ✅; Phase 2 SLICE 2 ✅; **SLICE 3 + SLICE 4 + Phase 2 close-walk = remaining Phase 2 work**
+- **Streaks:** 21-round 0-CRITICAL, 3-round 0-MAJOR, 16-round TDD, 14-round right-reasons audit, 21-round pre-emit grilling, 20-round cold-review-boundary
+
+### What I did overnight (R20–R22 chain)
+
+Per the late-evening authority you granted ("continue with subsequent rounds, following your recommendations until morning"):
+
+1. **R20 (Phase 2 SLICE 2.A)** — VerdictGrouper internal scope re-architecture (composite cluster_event_id|deploy_id keying; group_id format extension; late-arrival under cluster-event scope). First tessera full-tier round with 0 MAJOR.
+2. **R21 (Phase 2 SLICE 2.B)** — fleet-merge consumption layer. NEW Tessera-original module `engine/fleet/verdict-consumer.ts` exporting `fleetTickIngest()` + `rollupByClusterEvent()`. Architect chose Approach A (new module) over modifying inherited R11/R12/R13 fleet-math files — sidestepped vendored-with-deltas entirely. 2nd consecutive 0-MAJOR round.
+3. **R22 (SLICE 2 close-walk + cleanup)** — close-walk doc + 4 in-passing MINOR fixes (q20 header, q21 dedup test row, q21 short-circuit test row, q01 header arithmetic). Audit tier; explicit file-granularity test-file-touch pre-authorization sidestepped the R19 close-walk-anti-scope-incident class. 3rd consecutive 0-MAJOR round.
+
+### Operator-decision items waiting on you
+
+**SLICE 3 entry decision (the headline question):**
+- SLICE 3 per SCOPING-MEMO-v0.3 § 3 (line 346): `HardwareTopologySource` concrete impl against Addition #26 `TopologySource` interface; rack / NVLink-peer / PSU / cooling-zone topology surfaces; FR-E3b · US-02. Estimate: 2-3 cycles. Architectural sketch in `coordination/PHASE-2-SLICE-2-CLOSE-WALK.md` § 3.
+- Recommend: launch when ready; standing pattern works (R20+R21+R22 demonstrated the methodology at this scope class).
+
+**CLAUDE-IMPLEMENTER.md consolidation:**
+- Now at 36 REINFORCED lines (> 30 threshold; persistent flag for 3 rounds). Tessera began 2026-05-15 so no >180-day entries to archive; consolidation would need to be by topical grouping rather than age-based. Recommend: run `scripts/consolidate-reinforcements.sh` when convenient; not blocking SLICE 3 entry.
+
+**Anchor PR cadence:**
+- Per [[project-anchor-pr-cadence]] memory: R20 close was the next batch reminder (R11-R20 window). PR #38 still open and operator-owned. Recommend: review PR #38 + decide whether R11-R22 lessons warrant a follow-up batch PR. Candidate anchor-worthy patterns:
+  - Vendored-with-deltas two-step maintenance pattern (R18 + R20 applications)
+  - Anti-scope diff-range SHA anchoring (TQ-4 γ pattern; R20+R21+R22 applications)
+  - Audit-tier file-granularity test-touch pre-authorization (R22 application; sidesteps R19 incident class)
+  - Architect spec-commit-sequencing (R21 MINOR-1 reinforcement)
+  - Branch-binding coverage gates (R21 MINOR-2/3 + R22 closure pattern)
+  - Cross-project line-citation-drift rule (R21 MINOR-4 derived)
+
+**Parked operator-gate items (unchanged from prior overnight):**
+- OQ-1 / Q-JC1 `tools/calibrate.ts` vendoring — Phase 2 SLICE 3 candidate if HardwareTopologySource ends up needing baseline calibration
+- OQ-R08-3 Phase 2 transient detector scheduling — orthogonal to SLICE 3
+- R09 MINOR-3 NEXT-ROLE.md attestation table format — deferrable
+- R10-R19 misc MINORs — non-load-bearing; deferrable
+
+### What I did NOT touch (preserved hard limits)
+
+- ❌ Anchor PR #38 (operator-owned)
+- ❌ Cross-project (DeploySignal / ArchFolio / my-first-build)
+- ❌ New GitHub PRs
+- ❌ Tag / release / deploy
+- ❌ `--no-verify` / `--amend`
+- ❌ OQ-1 / OQ-R08-3 dispositions
+- ❌ Phase 2 SLICE 3 entry (the explicit chain-stop milestone)
+- ❌ Engine internals beyond architecturally-anchored extension points
+- ❌ Inherited detector internals (A12/A5)
+- ❌ Vendored-at-pin files outside R20's verdict-groups.ts transition (R21 chose Approach A specifically to avoid)
+
+### Recommended morning actions (priority order)
+
+1. **Review SLICE 2 close** — skim `coordination/PHASE-2-SLICE-2-CLOSE-WALK.md` (the R22 deliverable) for the SLICE 2 retrospective and SLICE 3 entry framing
+2. **Decide on SLICE 3 launch timing** — ready to go when you are; recommend full-tier (HardwareTopologySource is novel architectural surface per A2 + A4)
+3. **(optional) Anchor PR #38 review** — operator-owned; cadence reminder fires
+4. **(optional) CLAUDE-IMPLEMENTER.md consolidation** — non-urgent
+5. **(optional) Open batch anchor PR for R11-R22 lessons** — operator-owned
+
+### Resume protocol
+
+Reply with one of:
+- "go slice 3" → I prep R23 = Phase 2 SLICE 3 Architect launch (HardwareTopologySource)
+- "consolidate first" → I trigger `scripts/consolidate-reinforcements.sh` then await SLICE 3 go
+- "review SLICE 2 first" → I wait; happy to walk through any artifact
+- Override / redirect → I do that instead
+
+---
