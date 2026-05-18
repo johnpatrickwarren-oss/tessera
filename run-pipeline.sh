@@ -76,6 +76,7 @@ MODEL_ARCHITECT="claude-opus-4-7"
 MODEL_IMPLEMENTER="claude-sonnet-4-6"
 MODEL_REVIEWER="claude-opus-4-7"
 MODEL_MEMORIAL="claude-sonnet-4-6"
+MODEL_COORDINATOR="claude-opus-4-7"
 MODEL_DEFAULT="claude-sonnet-4-6"
 
 # Hybrid Reviewer: when HYBRID_REVIEWER=true AND tier=audit, the Reviewer stage
@@ -100,6 +101,7 @@ BUDGET_IMPLEMENTER=120
 BUDGET_REVIEWER=60
 BUDGET_REVIEWER_MERGER=30
 BUDGET_MEMORIAL=30
+BUDGET_COORDINATOR=80
 
 # Populated by detect_claude_flags()
 PERMISSION_FLAG=()
@@ -107,6 +109,7 @@ MODEL_FLAG_SUPPORTED=false
 BUDGET_FLAG_SUPPORTED=false
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
+COORDINATOR_MODE=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     --round)            ROUND="$2";        shift 2 ;;
@@ -116,6 +119,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run)          DRY_RUN=true;      shift   ;;
     --no-model-routing) MODEL_ROUTING=false; shift  ;;
     --reset-next-role)  RESET_NEXT_ROLE=true; shift ;;
+    --coordinator)      COORDINATOR_MODE=true; shift ;;
     -h|--help)
       cat <<'EOF'
 Usage: ./run-pipeline.sh [options]
@@ -138,6 +142,13 @@ Options:
                        Default behavior refuses to overwrite (preserves
                        operator-prepared inputs); use this only when the
                        existing file has no content worth keeping.
+  --coordinator        Coordinator-only mode (multi-cluster prep). Overrides
+                       --tier; runs ONLY the Coordinator role to produce
+                       a wave plan (coordination/WAVE-PLAN-NN.md per
+                       templates/WAVE-PLAN-TEMPLATE.md). Does not dispatch
+                       clusters — emits the plan; operator reviews + invokes
+                       scripts/multi-track-cluster-setup.sh per cluster.
+                       See CLAUDE-COORDINATOR.md for role discipline.
 
 Exit codes:
   0 = success (MERGE-READY or ROUND-COMPLETE)
@@ -196,6 +207,15 @@ case "$TIER" in
     exit 1
     ;;
 esac
+
+# --coordinator overrides tier-derived ROLES entirely. Coordinator mode runs
+# ONLY the Coordinator role to produce a wave plan; cluster dispatch is a
+# separate operator step (scripts/multi-track-cluster-setup.sh per cluster).
+if $COORDINATOR_MODE; then
+  ROLES=("COORDINATOR")
+  TIER_DESC="coordinator (PRD → DAG → wave plan; cluster dispatch is separate)"
+fi
+
 FIRST_ROLE="${ROLES[0]}"
 
 mkdir -p "$LOG_DIR"
@@ -487,6 +507,80 @@ When spec passes grilling:
 ROLE BOUNDARY:
 Do not write implementation code. Do not open test files.
 All unresolved decisions → open questions in the spec. Not silent choices.
+PROMPT
+}
+
+# Coordinator-only mode: runs when --coordinator is passed. Produces a wave
+# plan from the PRD; does not dispatch clusters. See CLAUDE-COORDINATOR.md.
+build_coordinator_prompt() {
+  # Find the next wave-plan version number. WAVE-PLAN-01.md is first; subsequent
+  # plans are emitted at resequencing events from wave-gate failures.
+  local next_wave_plan_n
+  local existing_count
+  existing_count=$(find "$COORD" -maxdepth 1 -name 'WAVE-PLAN-*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
+  next_wave_plan_n=$(printf '%02d' $((existing_count + 1)))
+
+  cat > "$COORD/.prompt-coordinator.md" << PROMPT
+You are the COORDINATOR for round $ROUND.
+
+You operate at the program level above all clusters. Your job is PRD
+decomposition → DAG construction → wave sequencing. You do NOT write specs,
+implement code, or reach inside clusters. See CLAUDE-COORDINATOR.md for
+the full role discipline (loaded as your system prompt).
+
+Read these before doing anything (in order):
+  - $PRD_PATH  (requirements — read in full)
+  - coordination/SCOPING-MEMO-v0.3.md  (canonical scope; § 2 per-extension scope; § 3 Q-cycle estimates)
+  - coordination/NEXT-ROLE.md  (round-scope directive — operator-prepared inputs for this Coordinator invocation)
+  - coordination/PHASE-2-SLICE-1-CLOSE-WALK.md  (vendored-with-deltas + anti-scope SHA-anchor patterns)
+  - coordination/PHASE-2-SLICE-2-CLOSE-WALK.md  (most recent close-walk; SLICE 3 entry framing in § 3)
+  - templates/WAVE-PLAN-TEMPLATE.md  (scaffold for your primary deliverable)
+  - templates/README.md  (Tessera-local path-reference adaptation table)
+  - $CROSS_MEMORIAL  ("Reinforcement rules derived" sections — apply all)
+
+DAG construction discipline (per CLAUDE-COORDINATOR.md §DAG construction):
+  Step 1 — Deterministic work unit extraction from PRD structure
+  Step 2 — Dependency edge identification via D1-D5 tests (apply in order)
+  Step 3 — Claude judgment only at ambiguity boundaries (log each call)
+  Step 4 — DAG validation (cycle check; island check; foundation identification)
+  Step 5 — Wave sequencing (Wave 1 = foundations; cap ≤5 clusters per wave)
+  Step 6 — Work unit tier classification (solo / audit / full per CLAUDE-COMMON.md rubric)
+
+Deliverable: coordination/WAVE-PLAN-${next_wave_plan_n}.md
+  - Use templates/WAVE-PLAN-TEMPLATE.md as the scaffold
+  - Fill every section; do not leave placeholder text
+  - Pre-emit grilling per template's §Pre-emit grilling checklist
+  - Surface OQs to operator at end of plan (do not invent answers)
+
+Secondary deliverables (only if needed):
+  - templates/CLUSTER-HANDOFF-TEMPLATE.md → coordination/CLUSTER-HANDOFF-NN-WUA-WUB.md
+    (one file per directed dependency edge; created when target cluster dispatches, not pre-created at plan time)
+  - coordination/COORDINATOR-MEMORIAL.md (initialize from templates/COORDINATOR-MEMORIAL-TEMPLATE.md if first Coordinator invocation; append-only thereafter)
+
+Single-cluster vs multi-cluster outcome:
+  Your wave plan may legitimately recommend ALL waves contain exactly ONE cluster.
+  This is a valid outcome — it means the scope is genuinely sequential and the
+  existing single-cluster pipeline is the right execution mode. In that case:
+    - Emit the wave plan with single-cluster waves
+    - Recommend the operator run scripts/run-pipeline.sh in standard mode (no --coordinator)
+    - Do NOT force fan-out for its own sake — coordinator overhead is real
+  Conversely, if waves contain ≥2 clusters:
+    - Recommend the operator invoke scripts/multi-track-cluster-setup.sh per cluster
+    - Document each cluster's worktree branch + scope in the wave plan
+
+When wave plan passes grilling:
+  Update coordination/NEXT-ROLE.md:
+    NEXT-ROLE: OPERATOR (wave-plan review)
+    STATUS: WAVE-PLAN-READY
+    Inputs: coordination/WAVE-PLAN-${next_wave_plan_n}.md
+
+  Initialize or append to coordination/COORDINATOR-MEMORIAL.md:
+    CONFIRMATION or VIOLATION entries for any discipline patterns surfaced during this invocation.
+
+ROLE BOUNDARY:
+Do not draft cluster-level specs. Do not modify any cluster's NEXT-ROLE.md.
+Do not write implementation code. Do not pre-resolve OQs by assumption.
+Once the wave plan is emitted, your job for this invocation is done.
 PROMPT
 }
 
@@ -1059,6 +1153,7 @@ get_model() {
     REVIEWER-SONNET)  echo "$MODEL_REVIEWER_SECONDARY" ;;
     REVIEWER-MERGE)   echo "$MODEL_REVIEWER_MERGER" ;;
     MEMORIAL-UPDATER) echo "$MODEL_MEMORIAL" ;;
+    COORDINATOR)      echo "$MODEL_COORDINATOR" ;;
     *)                echo "$MODEL_DEFAULT" ;;
   esac
 }
@@ -1070,6 +1165,7 @@ get_budget() {
     REVIEWER|REVIEWER-OPUS|REVIEWER-SONNET) echo "$BUDGET_REVIEWER" ;;
     REVIEWER-MERGE)   echo "$BUDGET_REVIEWER_MERGER" ;;
     MEMORIAL-UPDATER) echo "$BUDGET_MEMORIAL" ;;
+    COORDINATOR)      echo "$BUDGET_COORDINATOR" ;;
     *)                echo "40" ;;
   esac
 }
@@ -1142,7 +1238,8 @@ commit_memorial_outputs() {
   # Stage all coordination/ changes + any CLAUDE*.md modification (each role's
   # reinforcement file is a possible target of this round's Memorial Updater).
   git add -A coordination/ CLAUDE.md CLAUDE-COMMON.md CLAUDE-ARCHITECT.md \
-    CLAUDE-IMPLEMENTER.md CLAUDE-REVIEWER.md CLAUDE-MEMORIAL.md 2>/dev/null || true
+    CLAUDE-IMPLEMENTER.md CLAUDE-REVIEWER.md CLAUDE-MEMORIAL.md \
+    CLAUDE-COORDINATOR.md 2>/dev/null || true
 
   if git diff --cached --quiet 2>/dev/null; then
     log "Memorial-Updater outputs: nothing to commit (already clean)."
@@ -1155,6 +1252,32 @@ commit_memorial_outputs() {
     log "Memorial-Updater outputs committed: $sha"
   else
     log_warn "Memorial-Updater commit failed; operator must commit manually."
+    log_warn "Outstanding files:"
+    git status --short 2>&1 | head -10 | tee -a "$PIPELINE_LOG"
+  fi
+}
+
+# Coordinator output commit. The Coordinator role writes WAVE-PLAN-NN.md and
+# may initialize / append to COORDINATOR-MEMORIAL.md and update NEXT-ROLE.md;
+# none of those get committed by the role itself. In --coordinator mode the
+# Coordinator is the only role in the pipeline (no Memorial-Updater follows),
+# so we commit its outputs here on clean completion.
+commit_coordinator_outputs() {
+  cd "$PROJECT_ROOT" || return 1
+
+  git add -A coordination/ 2>/dev/null || true
+
+  if git diff --cached --quiet 2>/dev/null; then
+    log "Coordinator outputs: nothing to commit (already clean)."
+    return 0
+  fi
+
+  if git commit -q -m "chore($ROUND): Coordinator wave-plan outputs"; then
+    local sha
+    sha=$(git rev-parse --short HEAD)
+    log "Coordinator outputs committed: $sha"
+  else
+    log_warn "Coordinator commit failed; operator must commit manually."
     log_warn "Outstanding files:"
     git status --short 2>&1 | head -10 | tee -a "$PIPELINE_LOG"
   fi
@@ -1197,6 +1320,7 @@ EOF
     REVIEWER|REVIEWER-OPUS|REVIEWER-SONNET|REVIEWER-MERGE)
                       role_claude_file="$PROJECT_ROOT/CLAUDE-REVIEWER.md" ;;
     MEMORIAL-UPDATER) role_claude_file="$PROJECT_ROOT/CLAUDE-MEMORIAL.md" ;;
+    COORDINATOR)      role_claude_file="$PROJECT_ROOT/CLAUDE-COORDINATOR.md" ;;
     *)
       log_error "run_role: no CLAUDE-<ROLE>.md mapping for role '$role'"
       return 1 ;;
@@ -1250,6 +1374,9 @@ EOF
       log "$role completed."
       if [[ "$role" == "MEMORIAL-UPDATER" ]]; then
         commit_memorial_outputs
+      fi
+      if [[ "$role" == "COORDINATOR" ]]; then
+        commit_coordinator_outputs
       fi
       check_escalation
       return 0
@@ -1506,6 +1633,7 @@ for role in "${ROLES[@]}"; do
     IMPLEMENTER)      build_implementer_prompt ;;
     REVIEWER)         build_reviewer_prompt ;;
     MEMORIAL-UPDATER) build_memorial_prompt ;;
+    COORDINATOR)      build_coordinator_prompt ;;
   esac
 
   run_role "$role" \
