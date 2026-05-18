@@ -1,6 +1,44 @@
 CURRENT-ROUND: R25
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
+
+## Memorial-Updater routing (R25 — round complete)
+
+**Summary log:** `coordination/logs/ROUND-R25-SUMMARY.md`
+**MEMORIAL.md:** R25 entries appended (Architect, Implementer ×2, Reviewer, Memorial-Updater sections).
+**CROSS-PROJECT-MEMORIAL.md:** Tessera R25 entries appended (all disciplines; reinforcement rule derived for Architect pre-emit-grilling, threshold 4+).
+**CLAUDE-ARCHITECT.md:** +4 REINFORCED lines (22 → 26) for MAJOR-1/2/3 and MINOR-2.
+**CLAUDE-IMPLEMENTER.md:** +2 REINFORCED lines (37 → 39) for MAJOR-1 secondary and MAJOR-2 secondary.
+**Consolidation:** CLAUDE-IMPLEMENTER.md at 39 REINFORCED lines (>30 threshold). Run `./scripts/consolidate-reinforcements.sh` before next cluster round.
+**Spec debt:** 3 spec sections remain unresolved at HEAD (§ 5.1 AC-R25-14 wording, § 3/§ 4.6/§ 9.6/§ 9.7 ALLOWED_SET, § 4.3/§ 5.1 tolerance). Architect amendment recommended before Wave 2 ingestion-adapter rounds.
+
+## Reviewer routing (R25 — cold review complete)
+
+**Report:** `coordination/reviews/REVIEWER-REPORT-R25.md`
+
+**Verdict:** MERGE-READY (no CRITICAL). 3 MAJOR + 3 MINOR + 2 OBS. All functional ACs verified; report findings are spec/artifact-drift items (Architect-attributable), not L0-contract correctness defects.
+
+**Reviewer-run binding commands (independent, at HEAD `6a07b1a`):**
+- `npx tsc -p tsconfig.test.json` → EXIT 0
+- `node --test test/*.test.js` → tests=230 / pass=229 / fail=1 (q01 AC-7 env, consistent with Implementer)
+- `grep -n "^test(" test/q25-l0-contract.test.ts` → all 12 + AC-R25-15 line citations verified
+
+**Findings headline:**
+- MAJOR-1: AC-R25-14 wording `fail=0` not satisfied (`fail=1` actual); spec not amended after operator disposition
+- MAJOR-2: Allowed-set drift — spec § 3 lists 7 entries; test enforces 8 (DIAGNOSTIC file added); spec not amended
+- MAJOR-3: § 1.8 vs § 4.3/§ 5.1 tolerance contradiction (1e-9 vs 0.001/0.01) still present at HEAD; only test was updated
+- MINOR-1: Spec § 9.1 claim 6 (baseline 217/0) not empirically re-verified in cluster worktree
+- MINOR-2: Branch-binding gap — counter-arm `?? 64` default unbound by any AC
+- MINOR-3: AC-R25-2 coverage gap — gauge + missed_scrape combination not tested
+
+## Inputs for next role (Memorial-Updater)
+- coordination/reviews/REVIEWER-REPORT-R25.md (this routing report)
+- coordination/specs/Q-R25-SPEC.md
+- coordination/MEMORIAL.md
+- ~/.claude/CROSS-PROJECT-MEMORIAL.md
+- coordination/diagnostics/DIAGNOSTIC-R25-ac12-tolerance.md (Memorial-Updater is permitted to read diagnostics per CLAUDE-COMMON.md)
+
+---
 
 ## Implementer attestation (chore-A — resumed from ESCALATE-R25-01)
 

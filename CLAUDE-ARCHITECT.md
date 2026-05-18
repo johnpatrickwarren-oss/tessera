@@ -323,3 +323,47 @@ All unresolved decisions → open questions in the spec.
 #   exercises it; if no row exercises it, add one." Detected tessera R21 MINOR-2 (dedup-by-
 #   group_id guard at verdict-consumer.ts:87-94) and MINOR-3 (empty-string short-circuit at
 #   verdict-consumer.ts:77-79). Both guards were spec-prescribed; neither had a regression test.
+# REINFORCED 2026-05-18 — In multi-cluster worktrees where the environment may differ from the
+#   reference worktree (e.g., no `../deploysignal` sibling), `git log --oneline -- test/`
+#   confirms no new test files since a reference round but cannot confirm pass/fail status.
+#   Run `node --test` (or the project's equivalent binding command) at Architect session start
+#   to empirically verify baseline pass count before encoding it in spec § 9.1 claims and AC
+#   rows. A spec clause "Baseline test count = N / fail=0" that inherits a reference-round
+#   attestation without a fresh cluster-worktree run encodes a potentially stale claim; in
+#   multi-cluster environments this is a near-certain failure (sibling-repo-dependent tests
+#   will fail). Add to § 9.7 empirical-premise-verification: "for each count AC with a
+#   pass/fail assertion, run `node --test` in this worktree and record observed counts."
+#   Detected tessera R25 MINOR-1 (root cause of MAJOR-1: AC-R25-14 `fail=0` unachievable).
+# REINFORCED 2026-05-18 — HALT commits that fire mid-round commit the DIAGNOSTIC file BEFORE
+#   chore-A; therefore the DIAGNOSTIC path IS in the round-start-to-chore-A diff range.
+#   Spec § 9.10 reasoning ("DIAGNOSTIC files are coordination-tier and outside the chore-A
+#   diff scope — they would be created in a separate route-back commit") is structurally wrong
+#   for halt-fires that occur before chore-A. The allowed-set spec must either: (a) add a
+#   conditional 8th entry `coordination/diagnostics/DIAGNOSTIC-RNN-*.md` covering halt-fire
+#   scenarios, OR (b) add § 9.10 wording requiring the Implementer to HALT for spec amendment
+#   (via DIAGNOSTIC + ESCALATE) if a halt fires and the DIAGNOSTIC file enters the diff before
+#   chore-A can be committed. A tactically self-expanded ALLOWED_SET in the test cannot be
+#   audited by the anti-scope mechanism because the test reads its own literal.
+#   Detected tessera R25 MAJOR-2 (spec § 3 listed 7 entries; test shipped 8).
+# REINFORCED 2026-05-18 — After any operator ESCALATE disposition that resolves a spec-internal
+#   contradiction (e.g., "§ 1.8 tolerance 0.001 is authoritative; § 4.3/§ 5.1 tolerance 1e-9
+#   is superseded"), the Architect must amend all non-authoritative sections to match the
+#   dispositioned value before or at round close. Leaving contradicting prescriptions at HEAD
+#   (e.g., § 4.3 and § 5.1 still prescribing 1e-9 after Option A was selected) creates a
+#   forward-contamination trap: future readers encounter the original contradiction and either
+#   (a) propagate the wrong value or (b) re-derive the disposition from commit messages.
+#   Right procedure: after operator ESCALATE disposition, Architect (or Implementer under
+#   Architect direction) amends non-authoritative spec sections + adds a § 9.x note referencing
+#   the DIAGNOSTIC + disposition commit SHA. Detected tessera R25 MAJOR-3 (§ 4.3:752 and
+#   § 5.1 AC-R25-12 row still prescribe 1e-9 at HEAD).
+# REINFORCED 2026-05-18 — When spec § 9.13 (or equivalent) claims "all branches have ≥ 1
+#   binding AC," verify the branch-binding coverage by mutation logic, not structural
+#   inspection alone. Specifically: a `?? N` default at line X in branch-arm B is NOT bound
+#   by an AC that exercises branch-arm A (which returns before reaching line X). Apply the
+#   mutation test: "if line X is changed from `expr ?? N` to `expr`, does any AC fail?" If
+#   no AC fails, the default is structurally unbound and the branch-binding claim is false.
+#   Add this mutation-check to the branch-binding coverage gate in § 9 grilling: "for each
+#   guard / default / fallback, identify which AC actually reaches and exercises it — not
+#   which AC is in the 'nearest' branch." Detected tessera R25 MINOR-2 (counter-arm
+#   `?? 64` default at counter-rate-transform.ts:119 unbound; gauge AC-R25-2 returns at
+#   line 107-115 before reaching line 119; all counter ACs explicitly pass counter_width).

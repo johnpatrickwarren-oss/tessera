@@ -514,3 +514,24 @@ with a clear commit message.
 #   independently confirm. The RED commit does not need to be complex — a stub file with
 #   `throw new Error('not implemented')` or bare imports that fail to resolve is sufficient;
 #   the purpose is a git-verifiable RED-state record. Detected tessera R23 MINOR-1.
+# REINFORCED 2026-05-18 — When the baseline `node --test` shows a non-zero fail count even if
+#   the total count matches spec (e.g., spec claims "217 / 0" but actual is "217 total / 216
+#   pass / 1 fail"), this IS a halt-condition (b) event. Spec § 7.1 scenario (b) must be read
+#   with pass/fail granularity, not just total count. Write a DIAGNOSTIC independently naming
+#   the environmental failure (e.g., missing sibling repo causing q01 AC-7 to fail), set
+#   STATUS: ESCALATE, and let the operator disposition the baseline correction. Do NOT fold
+#   this observation as a subordinate note inside a DIAGNOSTIC for a different halt condition
+#   (scenario (c) etc.) — scenario (b) and (c) halts should each produce their own named
+#   DIAGNOSTIC so the operator can evaluate them independently. Detected tessera R25 § 7.1(b)
+#   halt gap (Reviewer MAJOR-1 secondary attribution to IMPLEMENTER).
+# REINFORCED 2026-05-18 — When the chore-A diff includes a path NOT in spec § 3 allowed-set —
+#   even if the path is a legitimate HALT-committed DIAGNOSTIC file — the Implementer must
+#   HALT and write a DIAGNOSTIC recommending spec amendment (via Architect in a follow-up
+#   commit or a DIAGNOSTIC + ESCALATE cycle), NOT perform a unilateral expansion of
+#   `ALLOWED_SET` in the forward-protection test. The forward-protection mechanism (AC-R25-15
+#   class) cannot audit itself because the test reads its own ALLOWED_SET literal — a
+#   self-expanded literal is undetectable by the mechanism it is supposed to protect. A
+#   commit-message justification does not substitute for a spec-amendment audit trail. The
+#   discipline cost of an extra ESCALATE cycle is low; the audit-trail inaccuracy of allowing
+#   ALLOWED_SET to drift from spec under operator-resume-directive rationale is high and
+#   propagates to future rounds. Detected tessera R25 MAJOR-2 (IMPLEMENTER secondary attribution).
