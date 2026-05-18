@@ -1,1 +1,24 @@
-{"items":[]}
+{
+  "items": [
+    {
+      "metadata": {
+        "name": "host-01",
+        "labels": {
+          "topology.kubernetes.io/zone": "zone-A",
+          "topology.kubernetes.io/region": "region-Y",
+          "node.kubernetes.io/instance-type": "m5.large"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "name": "host-02",
+        "labels": {
+          "topology.kubernetes.io/zone": "zone-A",
+          "topology.kubernetes.io/region": "region-Y",
+          "node.kubernetes.io/instance-type": "m5.large"
+        }
+      }
+    }
+  ]
+}
