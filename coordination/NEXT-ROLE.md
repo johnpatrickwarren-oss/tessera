@@ -160,4 +160,4 @@ R22 is audit-tier; most decisions are inherited. The Architect's S2 spec should 
 
 Delta: +2 (q21: 9 → 11; AC-R22-3 at :195, AC-R22-4 at :225).
 
-**Chore-A SHA:** see git log after this commit; AC-R22-8 test substitutes it at chore-B time.
+**Chore-A SHA:** `480fc43` — AC-R22-8 test uses `git diff f7111c9..480fc43 --name-only`.

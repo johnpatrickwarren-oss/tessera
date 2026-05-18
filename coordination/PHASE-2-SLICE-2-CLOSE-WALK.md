@@ -1,13 +1,13 @@
 # Phase 2 SLICE 2 Close Walk — Tessera
 
-_2026-05-17. HEAD at R22 MERGE-READY: `<R22-MERGE-READY-SHA>` (substituted at chore-A). Phase 2 SLICE 2 closes at R22 (3 substantive rounds: R18 type substrate [SLICE 1]; R20 SLICE 2.A aggregator-contract; R21 SLICE 2.B fleet-merge consumer; R22 close-walk + MINOR cleanup). Late-evening overnight authority HARD STOP at SLICE 2 close per chain plan; SLICE 3 entry requires operator return._
+_2026-05-17. HEAD at R22 MERGE-READY: `480fc43` (substituted at chore-A). Phase 2 SLICE 2 closes at R22 (3 substantive rounds: R18 type substrate [SLICE 1]; R20 SLICE 2.A aggregator-contract; R21 SLICE 2.B fleet-merge consumer; R22 close-walk + MINOR cleanup). Late-evening overnight authority HARD STOP at SLICE 2 close per chain plan; SLICE 3 entry requires operator return._
 
 ---
 
 ## Header
 
 - **Date:** 2026-05-17
-- **HEAD at SLICE 2 close:** `<R22-MERGE-READY-SHA>` (R22 chore-A)
+- **HEAD at SLICE 2 close:** `480fc43` (R22 chore-A)
 - **Scope reference:** `coordination/SCOPING-MEMO-v0.3.md` § 2.3 Phase 2 SLICE 2 row
 - **Substantive rounds:** R18 (type substrate / SLICE 1), R20 (SLICE 2.A), R21 (SLICE 2.B); R22 (close-walk)
 - **Anti-scope reference:** `coordination/NEXT-ROLE.md` R22 anti-scope lines 52-60
@@ -217,9 +217,9 @@ For the full per-round violation/confirmation tally: `coordination/MEMORIAL.md` 
 - **SCOPING-MEMO scope reference:** `coordination/SCOPING-MEMO-v0.3.md` § 2.3 Phase 2 SLICE 2 row + § 2.3 SLICE 3 row
 - **SLICE 1 close-walk:** `coordination/PHASE-2-SLICE-1-CLOSE-WALK.md` (R18 retrospective; vendored-with-deltas two-step definition; TQ-4 γ anti-scope diff-range pattern)
 - **R22 commit chain:**
-  - `<COMMIT-A-SHA>` — spec: Q-R22-SPEC.md
-  - `<COMMIT-B-SHA>` — feat(R22): PHASE-2-SLICE-2-CLOSE-WALK.md + q20 header fix + q21 structural tests + q01 arithmetic fix
-  - `<MERGE-READY-SHA>` — chore(R22): route to REVIEWER (chore-A)
+  - `ad12f46` — spec: Q-R22-SPEC.md
+  - `1fe3aa2` — feat(R22): PHASE-2-SLICE-2-CLOSE-WALK.md + q20 header fix + q21 structural tests + q01 arithmetic fix
+  - `480fc43` — chore(R22): route to REVIEWER (chore-A)
   - `<CHORE-B-SHA>` — chore(R22-B): AC-R22-8 anti-scope runtime test + chore-A SHA substituted
 - **Active outstanding items (preserved from SLICE 1 close-walk):**
   - OQ-1 / Q-JC1: calibrate.ts vendoring — still parked

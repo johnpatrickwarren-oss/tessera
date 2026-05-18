@@ -237,3 +237,26 @@ test("AC-R22-4: rollupByClusterEvent('') short-circuits even when groups have cl
   assert.deepStrictEqual(rollup.groups, []);
   assert.deepStrictEqual(rollup.deploy_ids, []);
 });
+
+// AC-R22-8: anti-scope diff forward-protection (chore-B; SHA-pinned per TQ-4 γ + R15 MINOR-1 + R19 MAJOR-3)
+// Baseline f7111c9 = R22-prep chore commit (HEAD at R22 session start).
+// End-bound 480fc43 = R22 chore-A (coordination artifacts only; no engine/ changes).
+test('AC-R22-8: git diff baseline..chore-A only contains allowed-set paths', () => {
+  const diff = execSync(
+    'git diff f7111c9..480fc43 --name-only',
+    { encoding: 'utf-8' },
+  ).trim().split('\n').filter(Boolean);
+  const allowed = new Set([
+    'coordination/PHASE-2-SLICE-2-CLOSE-WALK.md',
+    'coordination/specs/Q-R22-SPEC.md',
+    'coordination/NEXT-ROLE.md',
+    'coordination/MEMORIAL.md',
+    'test/q20-verdict-grouper-cluster-event-scope.test.ts',
+    'test/q21-fleet-verdict-consumer.test.ts',
+    'test/q21-fleet-verdict-consumer.test.js',
+    'test/q01-no-at-pin-deltas.test.ts',
+  ]);
+  for (const p of diff) {
+    assert.ok(allowed.has(p), `unexpected path in R22 diff: ${p}`);
+  }
+});
