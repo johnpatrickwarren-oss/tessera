@@ -94,7 +94,7 @@ Per scope block § Anti-scope:
 ## Implementer chore-A attestation (R32)
 
 **GREEN commit SHA:** `8e465cb`
-**chore-A commit SHA:** `<CHORE_A_SHA>` (substituted after this NEXT-ROLE commit lands)
+**chore-A commit SHA:** `6466940`
 
 ### Binding-command attestation
 
