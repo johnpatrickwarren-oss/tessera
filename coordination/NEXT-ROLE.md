@@ -1,30 +1,78 @@
 CURRENT-ROUND: R26
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Inputs for next role
-- coordination/specs/Q-R26-SPEC.md (load-bearing; read in full)
-- coordination/specs/Q-R26-SPEC-AUDIT.md (audit sidecar; brainstorm + grilling + pre-prediction)
-- coordination/evidence/PR-F6-EVIDENCE.md (Architect-authored at spec emit; do NOT modify — chore-A includes it byte-identical from Architect commit A)
-- coordination/PRD.md (cluster scope block; PRD § Acceptance criteria + § Anti-scope are load-bearing)
+- Branch: `cluster/wu-04-md-f4-common-mode-R26`
+- Round-start SHA: `71224e7`
+- Chore-A SHA: `<CHORE-A-SHA>` (see attestation block below — substituted after chore-A commit lands)
+- coordination/specs/Q-R26-SPEC.md
+- coordination/specs/Q-R26-SPEC-AUDIT.md
+- coordination/evidence/PR-F6-EVIDENCE.md
+- coordination/PRD.md
 
-## Round-start SHA
-`71224e7` (last commit before R26 work began; anti-scope diff baseline per AC-R26-13 + AC-R26-16).
+## Implementer attestation block (chore-A)
 
-## Architect commits this round
-- Commit A `ed3235b` — spec(R26): Q-R26 Phase 2 SLICE 3.C MD-F4 common-mode attribution. Files: coordination/specs/Q-R26-SPEC.md, coordination/specs/Q-R26-SPEC-AUDIT.md, coordination/evidence/PR-F6-EVIDENCE.md.
-- Commit B `<this commit>` — chore(R26): Architect ceremony entries + routing block.
+### AC-R26-13: Anti-scope diff
+Command: `git diff 71224e7..<CHORE-A-SHA> --name-only`
+Result (verified by Implementer before chore-A commit):
+```
+coordination/MEMORIAL.md
+coordination/NEXT-ROLE.md
+coordination/evidence/PR-F6-EVIDENCE.md
+coordination/specs/Q-R26-SPEC-AUDIT.md
+coordination/specs/Q-R26-SPEC.md
+engine/topology/common-mode-attribution.ts
+test/q-md-f4-common-mode-injection.test.ts
+```
+All 7 paths are ⊆ the allowed-set at Q-R26-SPEC.md § 2.1. No anti-scope violations.
 
-## Implementer expectations
-- Two new files: `engine/topology/common-mode-attribution.ts` (Tessera-original) + `test/q-md-f4-common-mode-injection.test.ts` (Tessera-original).
-- 12 `test()` calls at chore-A (AC-R26-1 through AC-R26-12 runtime tests); 1 additional `test()` call appended at chore-B (AC-R26-16 forward-protection).
-- Anti-scope diff allowed-set: 7 paths exactly (see Q-R26-SPEC.md § 2.1).
-- `<BASELINE-AT-71224e7>` and `<CHORE-A-SHA>` literals to substitute into AC-R26-15 (and AC-R26-13 SHA) at chore-A authoring time.
-- TDD discipline (R23 MINOR-1 carry-forward): emit a separate RED commit containing `test/q-md-f4-common-mode-injection.test.ts` with stubbed `assert.fail(...)` per AC BEFORE writing any production code in `engine/topology/common-mode-attribution.ts`. GREEN commit follows. chore-A coordination commit (NEXT-ROLE.md attestation + MEMORIAL.md append) follows GREEN. chore-B (forward-protection runtime test) follows chore-A.
-- `.gitignore` audit confirmed at Architect: 0 phantom `.js` paths in the 7-path allowed-set (R23 MINOR-2 reinforcement applied).
+### AC-R26-14: Typecheck binding-command
+Command: `npx tsc -p tsconfig.test.json`
+Exit code: 0 (warnings only: TS5107 moduleResolution=node10 deprecation + TS2688 @types/node — both pre-existing across rounds; no new diagnostics from R26 code).
+
+### AC-R26-15: Test-count binding-command
+Empirically measured baseline at SHA `71224e7` (before any R26 code):
+  tests=217, pass=216, fail=1 (pre-existing: `q01-no-at-pin-deltas.test.ts` ENOENT
+  for `../deploysignal/engine/detectors/_linalg.ts`; DS sibling not present in cluster worktree;
+  documented per Q-R26-SPEC.md § 8.2 row 5 + § 5.3.)
+
+Command: `node --test test/*.test.js` at chore-A SHA
+Result: tests=229, pass=228, fail=1 (same pre-existing ENOENT; 0 new failures from R26 code)
+  Δ from baseline: +12 tests / +12 pass / +0 new failures.
+  229 = 217 + 12 ✓  228 = 216 + 12 ✓  fail=1 pre-existing (not a new R26 failure).
+
+Per-file breakdown for R26 new test file:
+  test/q-md-f4-common-mode-injection.test.js: tests=12, pass=12, fail=0 ✓
+
+### AC-R26-16: Chore-B forward-protection
+Test `AC-R26-16: anti-scope forward-protection` added at chore-B.
+Chore-A SHA literal substituted into the test string constant.
+Chore-A SHA: will be the commit SHA resulting from this chore-A commit.
+
+## Test line citations (test() declarations in test/q-md-f4-common-mode-injection.test.ts)
+Per spec § 5.3 / R03+R18+R21 reinforcement — line numbers verified via grep:
+- AC-R26-1  :23  PR-F6 Cell 1 — PSU event positive sensitivity
+- AC-R26-2  :42  PR-F6 Cell 2 — no event positive specificity
+- AC-R26-3  :50  PR-F6 Cell 3 — non-PSU cross-rack negative specificity
+- AC-R26-4  :61  PR-F6 Cell 4 — mixed-signal robustness
+- AC-R26-5  :78  BFS-on-undirected reachability
+- AC-R26-6  :104 Common-mode aggregation: shards sharing PSU grouped
+- AC-R26-7  :118 Cross-rack false-positive guard
+- AC-R26-8  :129 correlational_not_causal: true wire-format
+- AC-R26-9  :146 Sparse-topology degradation (LS-4): rack-only subset
+- AC-R26-10 :169 PR-F6 evidence package present with required fields
+- AC-R26-11 :204 Singleton and unknown-shard graceful skip
+- AC-R26-12 :224 Candidate ordering determinism and kind-filter narrowing
+
+## TDD commit sequence
+- RED commit `0b2d514`: stub production module (throws 'not implemented') + test file with real assertions. Verified: 12 tests, 11 fail, 1 pass (AC-R26-10 file-read only).
+- GREEN commit `afabc51`: full production implementation. Verified: 12/12 pass.
+- chore-A: this coordination chore (NEXT-ROLE.md + MEMORIAL.md).
+- chore-B: appends AC-R26-16 forward-protection test to test/q-md-f4-common-mode-injection.test.ts.
 
 ## Escalation items
-(none — all open questions are LOW-severity and deferred to WU-05 hybrid Reviewer cold-verification per OQ-R26-1 + OQ-R26-2.)
+(none)
 
 ## Routing notes
 - Spec artifacts committed in own Architect commit BEFORE this routing block per R21 MINOR-1 + R23 reinforcement.
