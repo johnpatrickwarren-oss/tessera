@@ -1,131 +1,110 @@
-CURRENT-ROUND: R22
-NEXT-ROLE: OPERATOR (SLICE 3 entry decision)
-STATUS: ROUND-COMPLETE
-
-## Reviewer routing (R22 close)
-
-- **Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R22.md` (0 CRIT / 0 MAJOR / 1 MINOR / 4 OBS).
-- **MERGE-READY at HEAD:** `373b841` (post chore-B3).
-- **Reviewer cold-run binding-command outputs (verification):** `npx tsc -p tsconfig.test.json` → exit 0; `node --test test/*.test.js` → 204 / 204 / 0.
-- **Anti-scope completeness gate (round-start-to-HEAD diff):** `git diff f7111c9..HEAD --name-only` → 7 paths, all in pre-authorized scope; no engine/, _substrate/, tools/ touches.
-- **MINOR-1:** AC-R22-7 spec literal "= 203" does not hold at HEAD (204); SHA-pinned-binding convention from R20/R21 preserved; suggested forward-fix: future audit-tier specs should anchor count ACs to chore-A SHA explicitly.
-- **OBS-1:** Close-walk § 4 disposition table omits R21 OBS-2 (which AC-R22-4 materially closes); audit-traceability improvement opportunity.
-- **OBS-2:** Close-walk § 1 test-count cell (203) matches chore-A but not HEAD (204); convention disclosed at header line 10.
-- **OBS-3:** AC-R22-3 binds both `seen_group_ids` AND `seen_deploy_ids` guards — stronger than spec § 3 prescribes (positive observation).
-- **OBS-4:** Close-walk § 6 commit chain cannot list its own enclosing commit `373b841` (chicken-and-egg; established convention).
-
-## Memorial-Updater inputs
-
-1. `coordination/specs/Q-R22-SPEC.md`
-2. `coordination/reviews/REVIEWER-REPORT-R22.md`
-3. `coordination/MEMORIAL.md` (R22 sections)
-4. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Memorial-Updater section)
-5. This file (`coordination/NEXT-ROLE.md`)
-6. `coordination/PHASE-2-SLICE-2-CLOSE-WALK.md` (for SLICE 2 close memorial state stamp)
-7. `CLAUDE-COMMON.md` + `CLAUDE-ARCHITECT.md` + `CLAUDE-IMPLEMENTER.md` + `CLAUDE-REVIEWER.md` + `CLAUDE-MEMORIAL.md` (for REINFORCED line counts + appends)
-
-## Operator note — HARD STOP
-
-Late-evening overnight authority chain end per [[project-overnight-authority-2026-05-17-late-evening]]. R22 was the chain's final round. After Memorial-Updater completes the R22 ceremony, **STATUS: ROUND-COMPLETE → operator return**. SLICE 3 entry (HardwareTopologySource concrete impl per FR-E3b) requires operator return + new authority chain.
-
----
-
-## Reviewer pre-attestation block (preserved for Memorial-Updater)
-
-**Binding commands (cold-run by Reviewer at HEAD `373b841`):**
-- `npx tsc -p tsconfig.test.json` → exit 0 (AC-R22-6 verified)
-- `node --test test/*.test.js` → tests 204 / pass 204 / fail 0 (AC-R22-7 at chore-A: 203/0; +1 at chore-B AC-R22-8 = 204/0 at HEAD)
-- `git diff f7111c9..480fc43 --name-only` → 7 paths ⊆ AC-R22-8 allowed-set (AC-R22-8 verified)
-- `git diff f7111c9..HEAD --name-only` → 7 paths, all in pre-authorized R22 scope (anti-scope completeness gate)
-- `grep -c "^# REINFORCED" CLAUDE-*.md` → COMMON:3, ARCH:21, IMPL:35, REVIEWER:1, MEMORIAL:0 = 60 (close-walk § 5 verified)
-
----
-
-## Original Implementer attestation (preserved below for audit trail)
-
-CURRENT-ROUND: R22 (original)
-NEXT-ROLE: REVIEWER (now superseded — Reviewer routed to MEMORIAL-UPDATER)
-STATUS: READY (now superseded — STATUS: MERGE-READY)
+CURRENT-ROUND: R23
+NEXT-ROLE: ARCHITECT
+STATUS: READY
 
 ## Round-scope directive
 
-**R22 = Phase 2 SLICE 2 close-walk + R20/R21 MINOR cleanup (bundled audit-tier round; mirrors R19 pattern).**
+**R23 = Phase 2 SLICE 3 — first round (HardwareTopologySource concrete impl).**
 
-SLICE 2 dominant cost is complete:
-- **SLICE 2.A (R20) ✅** — VerdictGrouper internal scope re-architecture; cluster_event_id composite keying; 15 ACs PASS.
-- **SLICE 2.B (R21) ✅** — fleet-merge consumption layer; new `engine/fleet/verdict-consumer.ts` module; rollupByClusterEvent + fleetTickIngest; 11 ACs PASS.
+SLICE 3 scope per `coordination/SCOPING-MEMO-v0.3.md` § 3 line 346 (3-4 Q-cycle estimate; this is round 1):
 
-R22 wraps SLICE 2 with:
-- **Deliverable 1: `coordination/PHASE-2-SLICE-2-CLOSE-WALK.md`** (NEW). Mirror `coordination/PHASE-2-SLICE-1-CLOSE-WALK.md` structure: § 1 scope summary; § 2 architectural-assessment retrospective (R20+R21 design decisions, vendoring-with-deltas pattern application, split-decision retrospective, 0-MAJOR streak analysis); § 3 Phase 2 SLICE 3 entry framing (HardwareTopologySource concrete impl per FR-E3b); § 4 R20+R21 MINOR disposition table; § 5 Memorial state stamp at SLICE 2 close; § 6 cross-references.
-- **Deliverable 2: R20 MINOR-1 in-passing fix** — `test/q20-verdict-grouper-cluster-event-scope.test.ts` file-header lines 4-6 corrected (AC-R20-12 is a committed runtime test per § 4.7, not a "binding-command attestation" as the header currently reads).
-- **Deliverable 3: R21 MINOR-2 in-passing fix** — `test/q21-fleet-verdict-consumer.test.ts` adds a NEW test row that structurally exercises the `seen_group_ids.has()` dedup guard at `engine/fleet/verdict-consumer.ts:87-94`. Construct a scenario where two ingest results carry the same (cluster_event_id, deploy_id, window_start_ts) tuple (e.g., two shards reporting the same deploy in the same window) and assert the rollup deduplicates to one group entry. Failure-mode assertion: if dedup guard removed, the test must fail.
-- **Deliverable 4: R21 MINOR-3 in-passing fix** — same q21 file adds a NEW test row that disambiguates the empty-string short-circuit (`engine/fleet/verdict-consumer.ts:77-79`) from the strict-equality filter. Construct a scenario where short-circuit removal would change behavior (e.g., legacy-mode entries with `cluster_event_id === ''` should NOT match a query for empty-string but a strict-equality-only path would still return []).
-- **Deliverable 5: R20 MINOR-2 in-passing fix** — `test/q01-no-at-pin-deltas.test.ts` lines 7-8 file-header summary formula refreshed to reflect actual file-count arithmetic (currently stale per R20 MINOR-2; the test logic itself is correct; only the comment is wrong).
+> HardwareTopologySource concrete impl (NVLink + rack + PSU + cooling-zone). Topology-aware spatial attribution (MD-F4; PR-F6 pair-review including BFS-on-undirected evaluation). Common-mode failure-injection empirical test (rack-localized PSU event simulation on synthetic v9X cluster substrate). **Hybrid Reviewer pair-review-style at SLICE 3 close.**
 
-**Tier: audit.** Justification: S2 (close-walk doc + targeted test-row additions; no novel detector / data-model / fleet-merge work) + S4 (carry-forward MINOR cleanups). Architect role retained (S2 spec produces the close-walk doc structure + AC bindings for the test-row additions); no full-tier brainstorm needed since architectural decisions are inherited from R20+R21.
+Maps to **PRD FR-E3b** (cross-shard correlation: topology-aware spatial attribution; HardwareTopologySource impl against Addition #26 TopologySource interface) · **US-02** (topology-aware common-mode failure attribution).
 
-After R22 the late-evening overnight authority HARD-STOPs at SLICE 2 close per [[project-overnight-authority-2026-05-17-late-evening]]. SLICE 3 entry requires operator return.
+Entry dependencies all delivered (per PHASE-2-SLICE-2-CLOSE-WALK.md § 3 table):
+- ✅ `TopologySource` interface (inherited; `engine/topology-overlay.ts:50-55`)
+- ✅ `TopologyNode.kind` += `'gpu_shard' | 'rack'` (R18; pending: PSU + cooling-zone)
+- ✅ `TopologyEdge.relationship` += `'contains'` (R18; pending: nvlink_peer or equivalent)
+- ✅ v9X synthetic single-rack fixture (R18; may extend or supersede with v9Y for multi-rack/PSU testing)
+- ✅ VerdictGrouper `cluster_event_id` scope keying (R20)
+- ✅ Fleet-merge consumer (R21)
 
-## Pre-authorized test-file touches (avoid R19 anti-scope incident)
+**Architect's split-decision (R23 vs R24 vs R25):** SLICE 3 is 3-4 cycles. Recommendation framing for the spec — keep R23 ACs ≤ 12-15 per R20 precedent (avoided spec bloat). Likely split candidates:
+- **R23 (this round, SLICE 3.A)** — type-layer deltas (PSU + cooling-zone + nvlink_peer enums); `HardwareTopologySource` scaffold class + StaticHardwareTopologySource impl (analogous to StaticTopologySource); v9X-or-v9Y test substrate decision; basic snapshot-hash + fetchSnapshot binding.
+- **R24 (SLICE 3.B)** — full ingestion adapter(s): Slurm topology format / K8s node-label / NVIDIA NVLink-topology output → TopologySnapshot.
+- **R25 (SLICE 3.C, hybrid Reviewer at close)** — topology-aware spatial attribution (MD-F4 empirical evidence) + common-mode failure-injection test (rack-localized PSU event on synthetic substrate) + PR-F6 hybrid Reviewer.
+- **R26** — SLICE 3 close-walk (mirroring R22 pattern).
 
-The R19 close-walk had a 4-MAJOR cluster because the Implementer touched `test/q18-…test.ts:145` without explicit anti-scope authorization. R22 EXPLICITLY pre-authorizes:
+The R23 Architect MAY split differently if scope re-distribution makes more sense. The constraint is reviewability per round (≤ 12-15 ACs target).
 
-- `test/q20-verdict-grouper-cluster-event-scope.test.ts` — file-header correction only (lines 4-6); test logic + AC bindings frozen
-- `test/q21-fleet-verdict-consumer.test.ts` — ADD new test row(s) for dedup-guard + short-circuit branch coverage; existing test rows + AC bindings frozen
-- `test/q01-no-at-pin-deltas.test.ts` — file-header summary-formula refresh only (lines 7-8); test logic + AT_PIN_FILES list frozen
+**Tier: full.** Mandate per PHASE-2-SLICE-2-CLOSE-WALK.md § 3 line 165: SLICE 3 entry = full-tier required. Justification: A1 (new dependency surface — Slurm/K8s/NVLink ingestion) + A2 (new architectural pattern — HardwareTopologySource against existing TopologySource interface; new concrete impl class) + A4 (novel data model — PSU/cooling-zone node kinds + nvlink_peer edge semantics).
 
-Any modification outside these three files' explicitly-pre-authorized scope = ESCALATE (do not proceed silently — R19 precedent applies).
+**Note:** Hybrid Reviewer pair-review fires at SLICE 3 CLOSE (likely R25), NOT at R23. R23 uses standard full-tier (Architect + single Reviewer + Memorial). The hybrid-Reviewer scheduling decision belongs to the SLICE 3.C architect.
 
 ## Inputs for next role (Architect)
 
 **Read in order:**
 
-1. **`coordination/PHASE-2-SLICE-1-CLOSE-WALK.md`** — the structural template R22's close-walk doc mirrors. Replicate the § 1 / § 2 / § 3 / § 4 / § 5 / § 6 section layout exactly.
-2. **`coordination/specs/Q-R20-SPEC.md`** + **`coordination/reviews/REVIEWER-REPORT-R20.md`** + **`coordination/logs/ROUND-R20-SUMMARY.md`** — SLICE 2.A inputs for close-walk retrospective.
-3. **`coordination/specs/Q-R21-SPEC.md`** + **`coordination/reviews/REVIEWER-REPORT-R21.md`** + **`coordination/logs/ROUND-R21-SUMMARY.md`** — SLICE 2.B inputs for close-walk retrospective.
-4. **`coordination/SCOPING-MEMO-v0.3.md`** — § 2.3 Phase 2 Extension 3 (for SLICE 3 entry framing); § 3 Q-cycle table (SLICE 3 row).
-5. **`coordination/PRD.md`** — FR-E3b (HardwareTopologySource concrete impl) for SLICE 3 entry framing.
-6. **`engine/fleet/verdict-consumer.ts`** — R21 deliverable; the file containing the structurally-unbound branches at lines 77-79 (short-circuit) + 87-94 (dedup guard) that Deliverables 3 + 4 must structurally exercise.
-7. **`test/q21-fleet-verdict-consumer.test.ts`** — current R21 test file; spec must specify exactly where new test rows insert (after which existing test) and what assertion patterns to use.
-8. **`test/q20-verdict-grouper-cluster-event-scope.test.ts`** lines 1-10 — confirm current header text; spec must specify exact replacement (R20 MINOR-1).
-9. **`test/q01-no-at-pin-deltas.test.ts`** lines 1-15 — confirm current stale arithmetic; spec must specify exact correct formula (R20 MINOR-2).
-10. **`coordination/OVERNIGHT-LOG-2026-05-17.md`** — recent late-evening session entries (R20+R21 close).
-11. **`/Users/johnwarren/.claude/CROSS-PROJECT-MEMORIAL.md`** — R21 derived cross-project rule on line-citation-drift (3-occurrence threshold crossed at tessera R03/R18/R21). Architect should note the rule but R22 is not the consolidation round.
+1. **`coordination/PRD.md`** — thin PRD; FR-E3b, US-02, AC-P4.
+2. **`coordination/SCOPING-MEMO-v0.3.md`** — canonical scope:
+   - § 2.3 Phase 2 Extension 3 → line 205 (inherited TopologySource interface + planned PSU/cooling_zone enum extensions); line 217 (HardwareTopologySource architectural sketch — inputs are Slurm/K8s/NVLink; outputs are TopologySnapshot)
+   - § 3 Q-cycle table SLICE 3 row (line 346)
+   - § 9.4 vendoring policy (relevant for topology-overlay.ts vendored-with-deltas decision)
+   - line 558 vendoring forecast: "Vendored-with-deltas at Phase 2; SLICE 3 of Phase 2 adds HardwareTopologySource concrete impl + relationship enum extension"
+   - line 483 LS-4 reference (sparse-topology-data edge cases anticipated)
+3. **`coordination/PHASE-2-SLICE-2-CLOSE-WALK.md`** — § 3 SLICE 3 entry framing + architectural sketch + open questions (OQ-1 + OQ-R08-3 still parked; LS-4 active).
+4. **`coordination/PHASE-2-SLICE-1-CLOSE-WALK.md`** — § 2 vendored-with-deltas two-step maintenance pattern (apply UPFRONT if topology-overlay.ts gains deltas) + anti-scope diff-range SHA anchoring pattern.
+5. **`engine/topology-overlay.ts`** — inherited Addition #26 enrichment layer:
+   - `TopologySource` interface (lines 50-55)
+   - `StaticTopologySource` impl (lines 83-101) — template for `HardwareTopologySource` constructor pattern
+   - `OtelServiceGraphV1` impl (lines 111-180) — template for fetch-based concrete impl
+   - BFS implementation (line 257+; already bidirectional per engine comment) — Architect determines if R23 BFS-on-undirected adaptation is needed for new edge types
+   - `computeSnapshotHash` (lines 69-78) — shared across all TopologySource impls
+6. **`engine/types/verdict.ts`** — already vendored-with-deltas:
+   - `TopologyNode.kind` union at line 236 — `'service' | 'database' | 'queue' | 'external' | 'gpu_shard' | 'rack'` — R23 extends with `'psu' | 'cooling_zone'`
+   - `TopologyEdge.relationship` union at line 246 — `'calls' | 'reads' | 'writes' | 'publishes' | 'contains'` — R23 likely extends with `'nvlink_peer'` (US-02 NVLink-peer correlation requirement; architect picks final name)
+7. **`test/_substrate/v9X-cluster.ts`** — R18 substrate. R23 decides: extend v9X with PSU/cooling-zone nodes (in-place delta) OR create v9Y for multi-rack + PSU + cooling-zone topology. Spec must justify the choice.
+8. **`coordination/specs/Q-R18-SPEC.md`** + **`coordination/specs/Q-R20-SPEC.md`** + **`coordination/specs/Q-R21-SPEC.md`** + **`coordination/specs/Q-R22-SPEC.md`** — spec-pattern precedents; especially R20 split-decision rationale + R22 audit-tier file-granularity pre-authorization (apply to R23 the patterns that worked).
+9. **`coordination/reviews/REVIEWER-REPORT-R20.md`** + **`coordination/reviews/REVIEWER-REPORT-R21.md`** + **`coordination/reviews/REVIEWER-REPORT-R22.md`** — R20/R21/R22 outcomes; carry-forward watch items.
+10. **`coordination/VENDORING-MANIFEST.md`** — current vendoring policy table.
+11. **`/Users/johnwarren/.claude/CROSS-PROJECT-MEMORIAL.md`** — cross-project rules (R21 line-citation-drift rule active; attestations must cite exact line numbers).
 
-## Anti-scope (R22 hard limits)
+## Anti-scope (R23 hard limits)
 
-- **NO modification of any `engine/*.ts` file** — R18+R20+R21 deliverables all frozen at SLICE 2 close. Any engine change = ESCALATE.
-- **NO modification of `test/_substrate/v9X-cluster.ts`** — R18 substrate frozen.
-- **NO modification of pre-R22 AC bindings** in any test file (only ADD new test rows in q21 per Deliverables 3+4; only EDIT file-header comments in q20 + q01 per Deliverables 2+5).
-- **NO `HardwareTopologySource` concrete impl** — SLICE 3 (next round after operator return).
+- **A12 — NO modification of inherited BFS internals in `engine/topology-overlay.ts`** beyond architecturally-anchored extension points. If R23 BFS-on-undirected work requires touching the BFS algorithm body, transition topology-overlay.ts to vendored-with-deltas and apply the two-step maintenance pattern (manifest + AT_PIN_FILES) UPFRONT per PHASE-2-SLICE-1-CLOSE-WALK § 2. Spec failure-mode analysis MUST enumerate every q01-* test that asserts byte-identity on touched files.
+- **NO modification of `engine/verdict-groups.ts`** — R20 deliverable frozen.
+- **NO modification of `engine/fleet/verdict-consumer.ts`** — R21 deliverable frozen.
+- **NO modification of `engine/types/verdict.ts` outside enum extensions** (R18 + R20 deltas preserved; only adding new enum literals to `TopologyNode.kind` + `TopologyEdge.relationship` is in-scope; modifying any other field structure = ESCALATE).
 - **NO deployment-event-feed ingestion** — SLICE 4.
-- **NO new vendored-with-deltas transitions** — no eligible files; if R22 ends up needing one, ESCALATE.
-- **NO modification of inherited detector internals** (A12/A5).
-- **NO Addition #25 D2/D5 or Addition #26 D4 reversal** (preserved through R18+R20+R21).
-- **NO CLAUDE-IMPLEMENTER.md consolidation in R22** — consolidation deferred to operator-triggered run of `scripts/consolidate-reinforcements.sh` (CLAUDE-IMPLEMENTER.md now at 35 lines; threshold 30; below 180-day-archive criterion since Tessera began 2026-05-15). Memorial-Updater may FLAG consolidation but does not execute.
+- **NO MD-F4 empirical evidence / common-mode failure-injection test at R23** — that's SLICE 3.C (later sub-round). R23 substrate-only is sufficient.
+- **NO PR-F6 hybrid Reviewer at R23** — fires at SLICE 3 close.
+- **NO real-cluster integration** — synthetic-cluster substrate only (R-E3 anti-scope per v0.3 § 4.2).
+- **NO Addition #25 D2/D5 reversal**; **NO Addition #26 D1/D4/D5 reversal** — all preserved through R18+R20+R21+R22.
+- **NO modification of `test/q20-…test.ts` or `test/q21-…test.ts`** — R20+R21 deliverables frozen. (R22 already corrected q20 header + added q21 branch coverage; R23 should not need to touch.)
+- **NO inherited detector internal changes** (A12/A5).
 
-## Architectural questions for R22 Architect
+## Architectural questions for Architect's brainstorm phase
 
-R22 is audit-tier; most decisions are inherited. The Architect's S2 spec should resolve:
+The R23 Architect's brainstorm + recommendation should resolve at minimum:
 
-1. **Close-walk doc section depth.** R19's close-walk was 15 KB; R22's should match for symmetry. Recommend: § 1 (1 KB scope summary); § 2 (5 KB retrospective — vendoring-with-deltas pattern application at scale; split-decision retrospective; 0-MAJOR streak emergence; line-citation-drift pattern crossing); § 3 (3 KB SLICE 3 entry framing — HardwareTopologySource architectural sketch + dependencies + open questions); § 4 (3 KB R20+R21 MINOR disposition table); § 5 (1 KB Memorial state stamp); § 6 (1 KB cross-references).
-2. **Test-row insertion location in q21.** Architect spec must specify exact line numbers + insertion order for the two new test rows (Deliverables 3+4). Recommend: append both at end of existing q21 test list (preserves existing line citations).
-3. **AC enumeration for R22.** Each in-passing fix gets one AC: AC-R22-1 (close-walk doc exists + structurally complete); AC-R22-2 (q20 header corrected); AC-R22-3 (q21 dedup-guard test row added + fails-when-guard-removed); AC-R22-4 (q21 short-circuit test row added + fails-when-short-circuit-removed); AC-R22-5 (q01 header formula corrected); AC-R22-6 (typecheck PASS); AC-R22-7 (test count = 201 baseline + 2 new = 203 PASS / 0 FAIL); AC-R22-8 (anti-scope diff ⊆ allowed-set, SHA-pinned to chore-A SHA per TQ-4 γ). 8 ACs total — well below split threshold.
-4. **Apply R20+R21 reinforcements to R22 work itself.** R20 ARCH MINOR-1 → cross-check § 5 AC-table preamble vs § 4.x. R21 ARCH MINOR-1 → spec files committed BEFORE chore-A (the R21 ARCH MINOR-1 must not recur in R22). R21 IMPL MINOR-4 → line-citation accuracy in attestation (third tessera occurrence; cross-project rule active).
+1. **R23 sub-scope split.** Recommendation framing in directive (R23 = scaffold + type-layer; R24 = ingestion adapters; R25 = MD-F4 + common-mode injection + hybrid Reviewer; R26 = close-walk). Architect confirms or re-splits with rationale.
+2. **Type-layer enum extensions.** Add `'psu' | 'cooling_zone'` to `TopologyNode.kind`; add edge-relationship literal for NVLink-peer correlation (`'nvlink_peer'`? `'peers'`? `'nvlink'`? Architect picks final identifier — affects PSU + cooling-zone edge semantics too: are they `'contains'` relations from rack/cluster, or do they need their own relationship literals?).
+3. **HardwareTopologySource class shape.** Mirror StaticTopologySource (in-memory snapshot, no fetch I/O) for R23, with R24 adding the actual Slurm/K8s/NVLink fetch impls? Or single concrete class with multiple fetch strategies via constructor? Architect picks; trade-off: testability vs class proliferation.
+4. **File placement.** Per close-walk § 3 line 152: `engine/hardware-topology-source.ts` (Tessera-original; no AT_PIN_FILES entry). Confirm or relocate.
+5. **BFS-on-undirected.** Inherited BFS at `engine/topology-overlay.ts:257` already treats edges as bidirectional. Does R23 need additional adaptation for new relationship literals (e.g., `nvlink_peer` is naturally undirected, but `contains` is naturally directional — does BFS handle both correctly with current code?). Architect's R23 decision: NO topology-overlay.ts changes (BFS handles it) OR YES vendored-with-deltas transition (BFS body needs amendment for new edge semantics).
+6. **Test substrate choice.** Extend v9X in-place (add PSU + cooling-zone nodes; same single-rack frame) OR create v9Y (multi-rack with PSU/cooling-zone for SLICE 3.C common-mode injection). Architect picks; trade-off: v9X reuse continuity vs v9Y future-proofing.
+7. **Sparse-topology degradation (LS-4 carry-forward).** Architect enumerates failure modes at spec time: what does BFS return when topology is partial (e.g., rack/shard known but no PSU/cooling-zone data)? Spec must specify graceful-degradation contract (no throw; subset attribution; null/empty fallback).
+8. **Snapshot-hash semantics.** Inherited `computeSnapshotHash` (lines 69-78) sorts nodes by id, edges by (from, to, relationship). New relationship literals must sort lexicographically without breaking inherited semantics — confirm at spec time.
 
-## Carry-forward watch items consumed by R22
+## Apply R20/R21/R22 reinforcements UPFRONT
 
-| From | Item | R22 disposition |
+- **R20 ARCH MINOR-1:** spec § 5 AC-table preamble classification claims must be cross-checked against § 4.x prescriptions. Architect runs cross-section consistency pass on classification claims.
+- **R21 ARCH MINOR-1:** spec files (Q-R23-SPEC.md + Q-R23-SPEC-AUDIT.md) MUST be committed in their own commit BEFORE chore-A. Architect role responsibility.
+- **R21 ARCH+IMPL MINOR-2/3:** branch-binding coverage gate — every guard or short-circuit in production code must have an AC that structurally exercises it (e.g., test fails when guard removed). Architect's spec must enumerate guards/branches and bind each.
+- **R22 IMPL MINOR-1:** count ACs MUST be anchored to chore-A SHA explicitly (not "after R23 implementation commits"). Architect's AC-R23-N for test count should say "at MERGE-READY chore-A SHA `<placeholder>`, `node --test test/*.test.js` reports tests = X / pass = X / fail = 0".
+- **Cross-project line-citation-drift rule (derived at R21):** every NEXT-ROLE.md attestation line citation must match actual `test()` declaration line number (cite-then-verify; not from memory).
+- **R22 audit-tier pre-authorization pattern:** if R23 includes any test-file touches beyond ADD-NEW-TEST-FILE (e.g., extending v9X), spec MUST pre-authorize at file granularity with explicit scope (e.g., "v9X fixture: ADD PSU + cooling-zone nodes; existing rack/shard nodes + canonical source_id/source_version frozen").
+
+## Carry-forward watch items from SLICE 2 (R20/R21/R22)
+
+| From | Item | R23 disposition |
 |---|---|---|
-| R20 MINOR-1 | q20 header narrative-vs-prescription | Deliverable 2 (corrected) |
-| R20 MINOR-2 | q01-no-at-pin-deltas.test.ts:7-8 stale arithmetic | Deliverable 5 (corrected) |
-| R20 MINOR-3 | spec-prescribed parenthetical placement | Pattern reinforcement (no R22 fix; reinforcement already in CLAUDE-IMPLEMENTER) |
-| R20 OBS-1 | AC-R20-8 sub-case (c)/(d) thin coverage | Not addressed at R22 (would require touching q20 test logic — out of R22 pre-auth scope); carry forward to SLICE 3 if related code touched, else backlog |
-| R21 MINOR-1 | spec-commit-sequencing | Applied to R22 (spec MUST be in chore-A) |
-| R21 MINOR-2 | AC-R21-7 dedup-branch structural binding | Deliverable 3 (new test row) |
-| R21 MINOR-3 | AC-R21-8 short-circuit structural binding | Deliverable 4 (new test row) |
-| R21 MINOR-4 | line-citation drift | Pattern reinforcement (no R22 fix; cross-project rule active; R22 attestations MUST cite correctly) |
-| R20+R21 | CLAUDE-IMPLEMENTER.md at 35 lines | FLAGGED for operator-triggered consolidation; R22 Memorial-Updater notes; does not execute |
+| R20 OBS-1 | AC-R20-8 sub-case (c)/(d) thin coverage in q20 | Carry-forward; q20 frozen at R23 unless touched (would be ESCALATE) |
+| R20 MINOR-3 | spec-prescribed parenthetical placement | Pattern reinforcement (already in CLAUDE-IMPLEMENTER); R23 IMPL applies |
+| R21 MINOR-4 | line-citation drift | Cross-project rule active; R23 attestations cite-then-verify |
+| R22 MINOR-1 | count ACs not anchored to chore-A SHA | Reinforcement applied above; R23 spec applies pattern |
+| Persistent | CLAUDE-IMPLEMENTER.md at 36 REINFORCED lines | Consolidation deferred to operator-triggered run of `scripts/consolidate-reinforcements.sh`; not blocking R23 |
 
 ## Escalation items
 
@@ -133,78 +112,27 @@ R22 is audit-tier; most decisions are inherited. The Architect's S2 spec should 
 
 ## Routing notes
 
-- Late-evening overnight authority active. R22 = HARD STOP per chain plan (SLICE 2 close milestone). SLICE 3 entry requires operator return.
-- Anti-scope diff (AC-R22-8) anchored to chore-A SHA per TQ-4 γ.
-- Spec artifacts (Q-R22-SPEC.md + Q-R22-SPEC-AUDIT.md) MUST be committed before chore-A per R21 ARCH MINOR-1 reinforcement. Architect role responsible.
-- Test-file touches pre-authorized at file granularity above; any deviation = ESCALATE.
+- Operator authorized "let's move forward with slice 3" on 2026-05-18 morning. Single-round authorization (no overnight chain authority active). R23 launches; report at close; await operator direction for R24 chain or pause.
+- Anti-scope diff (AC-R23-N) anchored to chore-A SHA per TQ-4 γ pattern.
+- Vendored-with-deltas two-step maintenance pattern (manifest + AT_PIN_FILES) UPFRONT in component inventory if topology-overlay.ts gains deltas.
+- Spec artifacts (Q-R23-SPEC.md + Q-R23-SPEC-AUDIT.md) committed in own commit BEFORE chore-A per R21 ARCH MINOR-1.
+- Hybrid Reviewer NOT scheduled for R23 (fires at SLICE 3.C close per close-walk § 3 line 165).
 
-## Phase 2 SLICE 2 readiness for close at R22 entry
+## Phase 2 SLICE 3 readiness state at R23 entry
 
 | Element | State |
 |---|---|
-| R18 type substrate (VerdictGroup.cluster_event_id?; topology enums; v9X) | ✅ |
-| R20 VerdictGrouper contract (composite keying; ingest opts; late-arrival under cluster-event) | ✅ |
-| R21 fleet-merge consumer (verdict-consumer.ts; rollupByClusterEvent; fleetTickIngest) | ✅ |
-| Vendored-with-deltas + anti-scope SHA-anchor patterns applied across R20+R21 | ✅ |
-| 0-CRITICAL streak | 20 rounds (R02-R21) |
-| 0-MAJOR full-tier streak (new) | 2 consecutive rounds (R20-R21) |
-| RED→GREEN TDD streak | 16 rounds (R04-R21) |
-| Right-reasons audit streak | 13 rounds (R08-R21) |
+| Inherited `TopologySource` interface | ✅ `engine/topology-overlay.ts:50-55` |
+| Inherited `StaticTopologySource` template class | ✅ `engine/topology-overlay.ts:83-101` |
+| Inherited `OtelServiceGraphV1` template class | ✅ `engine/topology-overlay.ts:111-180` |
+| Inherited BFS (already bidirectional) | ✅ `engine/topology-overlay.ts:257+` |
+| Inherited `computeSnapshotHash` | ✅ `engine/topology-overlay.ts:69-78` |
+| R18 type substrate (kind/relationship enums + v9X) | ✅ |
+| R20 VerdictGrouper contract | ✅ |
+| R21 fleet-merge consumer | ✅ |
+| 0-CRITICAL streak | 21 rounds (R02-R22) |
+| 0-MAJOR streak | 3 rounds (R20-R22) |
 | Working tree clean | ✅ |
-| HEAD | `e23e260` (R21 Memorial Updater outputs) |
-| Test count | 201 / 0 |
-| CLAUDE-IMPLEMENTER.md | 35 lines (consolidation flag) |
-
----
-
-## R22 Implementer attestation (chore-A)
-
-**Binding commands (OBSERVED):**
-- `npx tsc -p tsconfig.test.json` → exit 0 (AC-R22-6)
-- `node --test test/*.test.js` → tests 203 / pass 203 / fail 0 (AC-R22-7)
-
-**Per-AC citations (test() declaration lines, verified by grep):**
-
-| AC | File:Line | Disposition |
-|---|---|---|
-| AC-R22-1 | `coordination/PHASE-2-SLICE-2-CLOSE-WALK.md` | doc created; 6-section structure present |
-| AC-R22-2 | `test/q20-verdict-grouper-cluster-event-scope.test.ts:4-6` | header corrected — AC-R20-12 reclassified as runtime test |
-| AC-R22-3 | `test/q21-fleet-verdict-consumer.test.ts:195` | dedup-guard structural binding added |
-| AC-R22-4 | `test/q21-fleet-verdict-consumer.test.ts:225` | short-circuit structural binding added |
-| AC-R22-5 | `test/q01-no-at-pin-deltas.test.ts:8` | stale formula corrected to 36 files |
-| AC-R22-6 | binding command | `npx tsc -p tsconfig.test.json` → exit 0 |
-| AC-R22-7 | binding command | `node --test test/*.test.js` → 203/0 |
-| AC-R22-8 | `test/q21-fleet-verdict-consumer.test.ts` (chore-B) | SHA-pinned anti-scope diff; chore-A SHA substituted at chore-B |
-
-**Per-file OBSERVED test counts (baseline 201 → post-R22 203):**
-
-| File | Pass |
-|---|---|
-| betting-e-process-class-dispatch.test.js | 5 |
-| q01-no-at-pin-deltas.test.js | 1 |
-| q01-schema-additions.test.js | 5 |
-| q01-vendoring-coverage.test.js | 3 |
-| q02-schema-extension.test.js | 6 |
-| q03-warm-start-runtime.test.js | 13 |
-| q04-welford-stats.test.js | 11 |
-| q05-per-shard-runtime.test.js | 13 |
-| q06-baseline-pre-pass.test.js | 13 |
-| q07-fleet-correlated.test.js | 23 |
-| q10-per-shard-emission.test.js | 11 |
-| q11-hierarchical-e-value-combination.test.js | 18 |
-| q12-fleet-merged-detector-surfaces.test.js | 16 |
-| q13-e-bh-fdr.test.js | 14 |
-| q14-compiled-config-loader.test.js | 6 |
-| q14-mean-delta.test.js | 7 |
-| q14-pr-f5-storage.test.js | 4 |
-| q16-pr-f5-investigation.test.js | 2 |
-| q18-phase2-slice1-topology-substrate.test.js | 10 |
-| q20-verdict-grouper-cluster-event-scope.test.js | 11 |
-| q21-fleet-verdict-consumer.test.js | 11 |
-| **Total** | **203** |
-
-Delta: +2 (q21: 9 → 11; AC-R22-3 at :195, AC-R22-4 at :225).
-
-**Chore-A SHA:** `480fc43` — AC-R22-8 test uses `git diff f7111c9..480fc43 --name-only`.
-
-**Post chore-B count:** 204 pass / 0 fail (203 from AC-R22-7 + 1 from AC-R22-8 runtime test added at chore-B). q21 file: 12 tests.
+| HEAD | `4072ac8` (overnight-stop morning hand-off commit) |
+| Test count | 204 / 0 |
+| CLAUDE-IMPLEMENTER.md | 36 lines (consolidation flag persistent) |
