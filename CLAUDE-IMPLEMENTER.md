@@ -535,3 +535,34 @@ with a clear commit message.
 #   discipline cost of an extra ESCALATE cycle is low; the audit-trail inaccuracy of allowing
 #   ALLOWED_SET to drift from spec under operator-resume-directive rationale is high and
 #   propagates to future rounds. Detected tessera R25 MAJOR-2 (IMPLEMENTER secondary attribution).
+# REINFORCED 2026-05-18 — When a binding-command produces a result that contradicts the AC
+#   literal text (e.g., `npx tsc -p tsconfig.test.json` exits 2 when the AC requires "exit
+#   code is 0"), HALT immediately and write a DIAGNOSTIC stating: (a) the AC literal text,
+#   (b) the observed result including exact command and exit code, (c) whether the substantive
+#   AC intent was satisfied by independent means, (d) bounded remediation options (amend AC
+#   text to match environment reality; fix infra; escalate). Do NOT re-classify tsc-category
+#   errors (`error TSxxxx`) as "warnings," and do NOT report the required exit code instead
+#   of the observed exit code in the attestation block. A pre-existing infra issue is
+#   mitigating context for the remediation choice but does NOT remove the halt requirement.
+#   If the infra issue is permanent, amend the AC text via DIAGNOSTIC before attesting.
+#   Detected tessera R26 MAJOR-1 (tsc exit 2 attested as "Exit code: 0 (warnings only)" in
+#   NEXT-ROLE.md:30-32; Reviewer independently confirmed exit 2).
+# REINFORCED 2026-05-18 — Chore-B forward-protection runtime tests must use `execFileSync`
+#   (no-shell array form) rather than `execSync` (shell-string form), matching the R20/R21/
+#   R22/R23 chore-B precedent. The two are functionally equivalent for a hardcoded SHA
+#   literal, but `execSync` introduces a latent shell-injection surface if the SHA constant
+#   is ever parameterized from external input; `execFileSync` with an array argument prevents
+#   this by construction and preserves pattern consistency for future maintainers. Spec §3.2
+#   and §4 both prescribe `execFileSync` explicitly; the prescription exists for a reason.
+#   Detected tessera R26 MINOR-1 (AC-R26-16 used execSync despite both spec sections
+#   prescribing execFileSync; R20–R23 chore-B all honor execFileSync).
+# REINFORCED 2026-05-18 — When a module docstring specifies a per-member-deduplication
+#   semantics for an aggregation (e.g., "one record per distinct member shard, picking the
+#   earliest event_ts for that shard if it appears multiple times"), the implementation must
+#   match the docstring exactly, not merely pass the current ACs. If no AC exercises the
+#   divergent case (e.g., no test fires the same shard twice), the divergence is invisible at
+#   test time but is a latent defect for future integrations. Either implement the docstring
+#   semantics exactly, or amend the docstring to describe what the code actually does; do not
+#   leave them in silent disagreement. Detected tessera R26 MINOR-2 (earliest/latest_event_ts
+#   aggregation at common-mode-attribution.ts:186-191 iterates all touches rather than
+#   per-distinct-member as the module docstring and spec §3.1 both prescribe).
