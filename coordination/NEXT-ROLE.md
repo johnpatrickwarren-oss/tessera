@@ -1,13 +1,24 @@
 CURRENT-ROUND: R29
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 
 ## Inputs for next role
+- coordination/reviews/REVIEWER-REPORT-R29.md (Reviewer cold-pass; 0 CRITICAL / 0 MAJOR / 3 MINOR / 4 OBS — MERGE-READY)
 - coordination/specs/Q-R29-SPEC.md (Architect commit A: 4d44ef7; 833 lines)
 - coordination/specs/Q-R29-SPEC-AUDIT.md (audit sidecar; same commit)
+- coordination/MEMORIAL.md (R29 Architect + Implementer + Reviewer entries; 3 VIOLATION entries appended by Reviewer for MINOR-1/2/3)
 - coordination/CLUSTER-HANDOFF-1-WU00-WU02.md (Wave 1 → Wave 2 interface contract)
 - coordination/PRD.md (cluster scope WU-02 K8S-ADAPTER block)
 - Branch: cluster/wu-02-k8s-adapter-R29
+
+## Reviewer summary
+- 13 / 13 ACs PASS (per-AC verification table in REVIEWER-REPORT-R29.md § 1)
+- 0 CRITICAL / 0 MAJOR findings
+- 3 MINOR findings: (1) AC-R29-6 test verification weaker than AC literal (gpu.metadata.host non-empty-string check instead of equality-to-source-name) — Implementer-attributable; (2) AC-R29-13 ALLOWED_SET omits future Reviewer-report path (predictable forward-failure pattern matching R26 AC-R26-16) — Architect-attributable; (3) Implementer tactical env: subEnv adjustment to AC-R29-12 spec § 3.2 prescription undocumented as DIAGNOSTIC/spec-amendment (transparency-only gap) — Implementer-attributable
+- 4 OBS items: unused parseNodeListToSnapshot helper export; opts.id/opts.version overrides unbound by any AC; nameless-host defensive skip unbound (G2 carryover); sister-cluster anti-scope hold verified
+- TDD discipline: PASS (separate RED commit 241a882 → GREEN commit 778cff8)
+- Anti-scope: PASS at all 3 diff windows (round-start→chore-A, chore-A→HEAD, round-start→HEAD supplementary check per CLAUDE-COMMON 2026-05-17)
+- Architect commit sequencing: PASS (R21 ARCH MINOR-1)
 
 ## Architect spec-commit sequence (R21 ARCH MINOR-1)
 - Architect-commit-A: 4d44ef7 (spec + audit sidecar; landed BEFORE this routing block)

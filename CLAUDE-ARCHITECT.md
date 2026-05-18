@@ -367,3 +367,14 @@ All unresolved decisions → open questions in the spec.
 #   which AC is in the 'nearest' branch." Detected tessera R25 MINOR-2 (counter-arm
 #   `?? 64` default at counter-rate-transform.ts:119 unbound; gauge AC-R25-2 returns at
 #   line 107-115 before reaching line 119; all counter ACs explicitly pass counter_width).
+# REINFORCED 2026-05-18 — Spec § 2.5 ALLOWED_SET and the AC-Rxx-13 forward-protection
+#   literal must include ALL coordination artifacts that post-chore-A roles will commit —
+#   not only round-scope Implementer deliverables. Always include or cover with a regex
+#   carve-out: (1) coordination/reviews/REVIEWER-REPORT-Rxx.md (Reviewer writes this after
+#   chore-A); (2) coordination/MEMORIAL.md is already in the standard 10-entry set. Add a
+#   regex carve-out for the reviews directory alongside the existing diagnostics carve-out:
+#   `^coordination\/reviews\/REVIEWER-REPORT-R\d+\.md$`. Failure to include these paths
+#   causes AC-Rxx-13 to fail post-Reviewer-commit, adding a new entry to the "pre-existing
+#   environmental failures" baseline for subsequent rounds — same class as AC-R26-16.
+#   Detected tessera R29 MINOR-2; pattern also observable at R26 (Memorial-Updater wrote to
+#   CLAUDE-ARCHITECT.md outside the R26 ALLOWED_SET).
