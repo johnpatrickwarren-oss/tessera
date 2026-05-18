@@ -165,4 +165,23 @@ test('AC-R21-8: rollupByClusterEvent("") short-circuits to no-match (empty-strin
   assert.deepStrictEqual(rollup.deploy_ids, []);
 });
 
-// AC-R21-11 is added in chore-B per spec § 4.6 with substituted MERGE-READY SHA.
+// AC-R21-11: anti-scope diff forward-protection (chore-B; SHA-pinned per TQ-4 γ + R15 MINOR-1 + R19 MAJOR-3)
+test('AC-R21-11: git diff baseline..chore-A only contains allowed-set paths', () => {
+  const diff = execSync(
+    'git diff 62e28d7..a5cae6d --name-only',
+    { encoding: 'utf-8' },
+  ).trim().split('\n').filter(Boolean);
+  const allowed = new Set([
+    'engine/fleet/verdict-consumer.ts',
+    'engine/fleet/verdict-consumer.js',
+    'test/q21-fleet-verdict-consumer.test.ts',
+    'test/q21-fleet-verdict-consumer.test.js',
+    'coordination/specs/Q-R21-SPEC.md',
+    'coordination/specs/Q-R21-SPEC-AUDIT.md',
+    'coordination/NEXT-ROLE.md',
+    'coordination/MEMORIAL.md',
+  ]);
+  for (const p of diff) {
+    assert.ok(allowed.has(p), `unexpected path in R21 diff: ${p}`);
+  }
+});
