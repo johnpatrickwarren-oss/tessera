@@ -411,3 +411,47 @@ Per R15 PHASE-1-CLOSE-WALK.md precedent, a small `coordination/PHASE-2-SLICE-1-C
 - R18 MINORs disposition (cleanup-deferred OR closed-in-passing)
 
 **After R19: HARD STOP** per evening-overnight authority. Phase 2 SLICE 1 milestone.
+
+---
+
+## R19 — Phase 2 SLICE 1 close-walk (autonomous; audit tier; FINAL round of evening chain)
+
+**Completed:** 2026-05-17 20:48:16 (pipeline ~21 min wall-clock after retry).
+**Verdict:** MERGE-READY (per routing rule) · 0 CRITICAL · **4 MAJOR** · 4 MINOR · 4 OBS · 7 PASS + 1 PARTIAL + 1 PASS-but-self-confirming (9 ACs total).
+**Streak:** 17-round 0-CRITICAL extended (R02-R19) — preserved despite the R19 MAJOR cluster.
+**Commits:** `b2b21a5` (NEXT-ROLE retry) → `6ee3f3c` (chore SHA-A) → `76da47d` (SHA-recording) → `6afeff8` (in-passing fix to test/q18) → `0a8832b` (attestation update) → `56f132e` (Memorial Updater).
+**Reinforcements:** **+4 IMPL + +2 COMMON** (now 18 ARCH + 30 IMPL + 3 COMMON + 1 REVIEWER). Each MAJOR → 1 IMPL reinforcement; the cross-role lessons → 2 COMMON.
+**Pipeline preflight protection (PR #37) caught my Write-tool error before the round started.** First real-world catch of the fix; worked as designed.
+
+### Deliverables landed
+
+✅ **`coordination/PHASE-2-SLICE-1-CLOSE-WALK.md`** (15 KB; NEW) — Phase 2 SLICE 1 architectural-assessment retrospective; § 4 R18 MINORs disposition; § 2 ESCALATE-and-unblock pattern documentation; § 3 Phase 2 SLICE 2 entry framing.
+✅ **R18 MINOR in-passing cleanup** at Implementer's judgment.
+✅ **Test infrastructure improvement** — AC-R18-10 anti-scope diff range pinned to R18 MERGE-READY SHA (`9012faa`) instead of HEAD. Correct architectural fix but **applied in-violation of R19 anti-scope** (see TQ-4).
+
+### The 4-MAJOR cluster (morning triage TQ-4)
+
+R19 Implementer modified `test/q18-phase2-slice1-topology-substrate.test.ts:145` — explicit R19 anti-scope target. The change is architecturally correct (AC-R18-10 needs SHA-bounded range to not false-fail) but should have been routed via DIAGNOSTIC + ESCALATE per R08 reinforcement. Methodology caught the discipline failure (+4 IMPL reinforcements + +2 COMMON cross-role); Reviewer routed MERGE-READY because no CRITICAL.
+
+See **TQ-4 in morning triage queue (top of this file)** for full disposition options. My recommendation: (α) + (γ) — accept the fix; capture lessons (already done by Memorial Updater); retroactively update spec template to anchor anti-scope diffs to round-final-SHA not HEAD.
+
+### Evening-chain summary (R17–R19)
+
+| Round | Scope | Verdict | Wall-clock |
+|---|---|---|---|
+| R17 | TQ-1 (β) pitch-revise + shard definition + R10 MINOR-1 | MERGE-READY · 0/0/3/4 · 10/10 ACs · 171/0 | ~30 min |
+| R18 | Phase 2 SLICE 1 (ESCALATE → operator A → unblock → MERGE-READY) | MERGE-READY · 0/0/4/5 · 12/12 ACs · 181/0 | ~60 min including unblock |
+| R19 | Phase 2 SLICE 1 close-walk + R18 MINOR cleanup | MERGE-READY (per rule) · 0/**4**/4/4 · 9 ACs · 181/0 | ~21 min |
+
+**Aggregate:** 0 CRITICAL · 4 MAJOR · 11 MINOR · 13 OBS across 3 rounds. 17-round 0-CRITICAL streak preserved. Phase 2 SLICE 1 milestone reached.
+
+### HARD STOP per evening-overnight authority
+
+R19 was the planned final round. Per [[project-overnight-authority-2026-05-17-evening]]: "Phase 2 SLICE 1 close (planned milestone; operator review of Phase 2 entry quality)" is the stop condition. R19 closure + the TQ-4 discipline event together complete the chain.
+
+Operator returns to:
+- **TQ-4 (MEDIUM)** — R19 4-MAJOR cluster disposition
+- **TQ-3 (CLOSED)** — R18 ESCALATE dispositioned by operator (A)
+- **TQ-1 (CLOSED)** — earlier session
+- **TQ-2 (LOW)** — anchor PR #38
+- All parked operator-gate items unchanged
