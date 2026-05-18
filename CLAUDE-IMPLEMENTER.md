@@ -598,3 +598,27 @@ with a clear commit message.
 #   insufficient — a cold reader of spec + source alone cannot surface the deviation.
 #   Detected tessera R29 MINOR-3 (env: subEnv strip for Node.js v25 documented only in
 #   MEMORIAL, not in DIAGNOSTIC or code comment).
+# REINFORCED 2026-05-18 — For ACs that guard a critical cross-cutting invariant (e.g., A16
+#   D4 wire-format literal, A12 anti-scope protection), write a DISCRIMINATING assertion that
+#   is structurally anchored to the specific location being guarded — not a broad substring
+#   check that matches multiple occurrences in the same file. If `file.includes('key: value')`
+#   matches BOTH the type-declaration body (the guarded location) AND a JSDoc backtick
+#   occurrence (not guarded), removing the type-declaration line while preserving the JSDoc
+#   leaves the assertion passing and the invariant silently broken. Use a regex with line
+#   anchoring (e.g., `/^\s*key:\s*value\s*;/m`) OR read the specific line range explicitly.
+#   Detected tessera R30 MINOR-1 (AC-R30-15: `verdict.includes('correlational_not_causal: true')`
+#   matches engine/types/verdict.ts:272 JSDoc AND :289 type-declaration; removal of :289 would
+#   not fail the assertion; A16 D4 guard is structurally weakened).
+# REINFORCED 2026-05-18 — When implementing a multi-level fallback chain (`a ?? b ?? c`),
+#   verify that each level is structurally reachable by tracing data flow, not just syntax.
+#   If a called function (e.g., a parser) always provides a defined value for the intermediate
+#   field (`b`), and the return type marks that field as required (non-optional), then the
+#   third operand (`c`) is dead code — it will never fire at runtime. Either (a) remove the
+#   dead operand for code clarity, or (b) retain it as explicit defensive code and document it
+#   as such with a comment explaining WHY it is structurally unreachable (e.g., "parser always
+#   defaults this field; retained for defensive correctness if the parser is ever modified").
+#   Do not let spec-prescribed multi-level chains ship without verifying each level's
+#   reachability under all callers. Detected tessera R30 MINOR-2 (NvlinkTopologySource
+#   constructor engine/topology/nvlink-source.ts:133-134: third-operand `?? 'nvlink_topology_source'`
+#   / `?? 'nvlink-1'` unreachable because parseNvlinkStatus always defaults snapshot.source_id /
+#   source_version at :108-109; TopologySnapshot.source_id typed `string`, never undefined).
