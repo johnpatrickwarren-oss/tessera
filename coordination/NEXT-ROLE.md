@@ -70,7 +70,7 @@ If any of the following occur during Implementer work, refer to spec § 7.1 for 
 - 14 load-bearing claims empirically verified by direct file-open at session start (per spec § 9.7 table); only test count = 204 is testimonial (Implementer re-measures per § 7.1 scenario (c)).
 - Vendored-with-deltas pre-trace: 3 consumer tests of `engine/types/verdict.ts` enumerated; all UNAFFECTED by R23 enum-extension (q01-no-at-pin-deltas excludes verdict.ts; q01-vendoring-coverage header check preserves; q18 extends-not-breaks). No ESCALATE risk anticipated.
 - Branch-binding coverage: id + version fallback chains each bound to AC-R23-5 + AC-R23-6 sub-cases (a)/(b)/(c).
-- Count-AC AC-R23-14 anchored to MERGE-READY chore-A SHA `<MERGE-READY-CHORE-A-SHA>` for Implementer-time substitution per R22 IMPL MINOR-1 reinforcement.
+- Count-AC AC-R23-14 anchored to MERGE-READY chore-A SHA `d2286b2` for Implementer-time substitution per R22 IMPL MINOR-1 reinforcement.
 
 ## Round-scope directive (preserved from operator R23 launch — historical reference)
 
@@ -110,7 +110,7 @@ Maps to **PRD FR-E3b** (cross-shard correlation: topology-aware spatial attribut
 
 **Routing:** NEXT-ROLE: REVIEWER | STATUS: READY
 
-**Chore-A SHA:** `<MERGE-READY-CHORE-A-SHA>` ← substituted at chore-B per TQ-4 γ pattern
+**Chore-A SHA:** `d2286b2` ← substituted at chore-B per TQ-4 γ pattern
 
 **Binding commands at chore-A SHA:**
 - `npx tsc -p tsconfig.test.json` → exit code 0 (AC-R23-13 PASS)
@@ -134,7 +134,7 @@ Maps to **PRD FR-E3b** (cross-shard correlation: topology-aware spatial attribut
 
 **AC-R23-13** (typecheck): binding-command attestation — `npx tsc -p tsconfig.test.json` exits 0 at chore-A SHA.
 
-**AC-R23-14** (test count): binding-command attestation — `node --test test/*.test.js` at chore-A SHA `<MERGE-READY-CHORE-A-SHA>` reports tests=216 / pass=216 / fail=0.
+**AC-R23-14** (test count): binding-command attestation — `node --test test/*.test.js` at chore-A SHA `d2286b2` reports tests=216 / pass=216 / fail=0.
 
 **AC-R23-15** (anti-scope diff): runtime test added at chore-B; chore-A SHA substituted at chore-B time per TQ-4 γ pattern.
 

@@ -165,3 +165,29 @@ test('AC-R23-12: vendored .ts file count === 40 and each has SHA-pin header', ()
     );
   }
 });
+
+// AC-R23-15: anti-scope diff — baseline 2946b13 to chore-A d2286b2 within allowed-set
+// (chore-B; chore-A SHA d2286b2 substituted per TQ-4 γ pattern)
+test('AC-R23-15: git diff baseline..chore-A only contains allowed-set paths', () => {
+  const { execSync } = require('node:child_process');
+  const allowedSet = new Set([
+    'engine/types/verdict.ts',
+    'engine/types/verdict.js',
+    'engine/hardware-topology-source.ts',
+    'engine/hardware-topology-source.js',
+    'test/_substrate/v9Y-multi-rack-cluster.ts',
+    'test/_substrate/v9Y-multi-rack-cluster.js',
+    'test/q23-hardware-topology-source.test.ts',
+    'test/q23-hardware-topology-source.test.js',
+    'coordination/VENDORING-MANIFEST.md',
+    'coordination/specs/Q-R23-SPEC.md',
+    'coordination/specs/Q-R23-SPEC-AUDIT.md',
+    'coordination/NEXT-ROLE.md',
+    'coordination/MEMORIAL.md',
+  ]);
+  const output = execSync('git diff 2946b13..d2286b2 --name-only', { encoding: 'utf8' });
+  const paths = output.trim().split('\n').filter(Boolean);
+  for (const p of paths) {
+    assert.ok(allowedSet.has(p), `path outside allowed-set: ${p}`);
+  }
+});
