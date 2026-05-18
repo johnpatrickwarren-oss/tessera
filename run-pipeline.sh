@@ -557,16 +557,38 @@ Secondary deliverables (only if needed):
     (one file per directed dependency edge; created when target cluster dispatches, not pre-created at plan time)
   - coordination/COORDINATOR-MEMORIAL.md (initialize from templates/COORDINATOR-MEMORIAL-TEMPLATE.md if first Coordinator invocation; append-only thereafter)
 
-Single-cluster vs multi-cluster outcome:
-  Your wave plan may legitimately recommend ALL waves contain exactly ONE cluster.
-  This is a valid outcome — it means the scope is genuinely sequential and the
-  existing single-cluster pipeline is the right execution mode. In that case:
-    - Emit the wave plan with single-cluster waves
-    - Recommend the operator run scripts/run-pipeline.sh in standard mode (no --coordinator)
-    - Do NOT force fan-out for its own sake — coordinator overhead is real
-  Conversely, if waves contain ≥2 clusters:
+Single-cluster vs multi-cluster outcome (operator preference: PREFER fan-out
+when independence is clean; DO NOT force fan-out when scope is genuinely
+sequential):
+
+  Active bias. When the D1-D5 dependency tests show two or more work units
+  in a wave are genuinely independent (no D1 shared-output edge, no D2
+  AC-reference edge, no D5-strict write-conflict, D4 file-tree overlap
+  resolvable via worktree isolation), PREFER to dispatch them as parallel
+  clusters in the same wave. Do not collapse them into a single cluster
+  for convenience or out of conservatism — if independence is clean, fan
+  out.
+
+  When fan-out is legitimately NOT available (D1/D2/D5 edges between every
+  pair of WUs in a candidate wave; or candidate-wave WUs collapse to one
+  WU under deterministic extraction; or scope is small enough that a
+  single solo/audit cluster is more economical than coordinator overhead
+  + N parallel clusters), recommend single-cluster waves with explicit
+  reasoning. The operator does not want fan-out for its own sake — they
+  want fan-out wherever it's a clean option.
+
+  Trade-off framing in the plan summary: when you recommend a single-
+  cluster wave, briefly note WHY fan-out was unavailable (which D-test
+  fired across all candidate pairs, or which constraint collapsed the
+  candidates). This makes the operator's review explicit and surfaces
+  cases where a tighter PRD decomposition might unlock fan-out later.
+
+  For waves with ≥2 clusters:
     - Recommend the operator invoke scripts/multi-track-cluster-setup.sh per cluster
     - Document each cluster's worktree branch + scope in the wave plan
+  For single-cluster waves:
+    - Recommend the operator run scripts/run-pipeline.sh in standard mode (no --coordinator)
+    - Note the specific constraint that prevented fan-out
 
 When wave plan passes grilling:
   Update coordination/NEXT-ROLE.md:
