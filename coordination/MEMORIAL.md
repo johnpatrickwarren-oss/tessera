@@ -2993,3 +2993,17 @@ CONFIRMATION: consolidation-check | CLAUDE-ARCHITECT.md = 25 REINFORCED lines (a
 CONFIRMATION: round-summary-written | ROUND-R39-SUMMARY.md written at coordination/logs/ROUND-R39-SUMMARY.md with all required sections: What worked, What violated discipline, Root cause analysis, Reinforcements added, Watch list for next round, Emerging cross-project patterns, Recommend reinforcement consolidation. | R39 | MEMORIAL-UPDATER
 
 CONFIRMATION: role-boundary | Memorial Updater observed and recorded only. Did not re-litigate Reviewer severity classifications, re-implement any fix, modify any source/test/engine/spec file, or expand scope beyond recording. Modified only: coordination/MEMORIAL.md (this append), ~/.claude/CROSS-PROJECT-MEMORIAL.md (R39 entries), CLAUDE-IMPLEMENTER.md (4 REINFORCED appends), coordination/logs/ROUND-R39-SUMMARY.md (new file), coordination/NEXT-ROLE.md (STATUS: ROUND-COMPLETE). | R39 | MEMORIAL-UPDATER
+
+---
+
+## R40 — IMPLEMENTER accretion (2026-05-19)
+
+CONFIRMATION: brainstorm | IMPLEMENTER enumerated 3 distinct approaches (A: pure enumeration/laundry-list; B: synthesized inventory with §1-§8 structure per NEXT-ROLE.md; C: prioritization-first/Phase 3 SLICE 1 recommendation). Documented strengths/weaknesses/hidden assumptions/risks for each inline in spec § 2. Eliminated A (no synthesis value; fails Rule 5 "why this matters + dependency note" requirement). Eliminated C (Phase 3 scoping is anti-scope; HALT condition 1 fires immediately). Selected B with documented rationale. Approach selection drove entire deliverable structure. | R40 | IMPLEMENTER
+
+CONFIRMATION: spec-authorship-pre-emit-grilling | IMPLEMENTER (wearing Architect hat per audit-tier protocol) completed pre-emit grilling before routing to execute: (1) all spec claims backed by named source artifacts with specific section/line-range citations; (2) unstated assumption surfaced (WAVE-GATE-05 forward-flag dispositions are authoritative Phase 3 methodology candidates — verified by reading WAVE-GATE-05.md Decisions 3 + 6); (3) no scope beyond NEXT-ROLE.md directive added; (4) Reviewer can verify all 8 ACs via cold read + named source artifact checks; (5) AC-R40-8 anti-scope diff command specified verbatim with round-start SHA. | R40 | IMPLEMENTER
+
+CONFIRMATION: anti-scope-preserved | IMPLEMENTER produced exactly 2 new files (coordination/specs/Q-R40-SPEC.md + coordination/PHASE-3-CANDIDATES-PRELIMINARY.md). Zero modification to engine/*, test/*, src/*, tools/*, CLAUDE-*.md, SCOPING-MEMO-v0.3.md, PRD.md, or any Phase 2 deliverable artifact. Anti-scope diff verification: `git diff 0759eec HEAD --name-only -- engine/ test/ src/ tools/ CLAUDE-*.md SCOPING-MEMO* PRD.md` → empty output. AC-R40-8 PASS. | R40 | IMPLEMENTER
+
+CONFIRMATION: halt-discipline | No halt conditions encountered. R40 is a documentation-synthesis round; no operator-architectural decisions were required. All sequencing/prioritization questions surfaced as OQ-P3-1 through OQ-P3-6 in the deliverable (per AC-R40-7) without resolution. No DIAGNOSTIC files required. | R40 | IMPLEMENTER
+
+CONFIRMATION: role-boundary | IMPLEMENTER produced only the spec and deliverable artifacts. No Reviewer-role activity. No CLAUDE-*.md reinforcement file modifications (anti-scope). Tactical decisions (market-level background framing in § 1, "Architect decision" flags for enum literals, rough range framing in § 7) documented in commit message and NEXT-ROLE.md attestation section. | R40 | IMPLEMENTER

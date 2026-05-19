@@ -1,5 +1,5 @@
 CURRENT-ROUND: R40
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Round-scope directive (R40 — Phase 3 candidate synthesis; audit-tier; main worktree)
@@ -130,3 +130,40 @@ cd /Users/johnwarren/concord/tessera
 | Working tree | clean |
 | HEAD | (current main post R39) |
 | Post-Phase-2-close chain | R40 (in flight) → R41 (hygiene audit) → HARD STOP |
+
+---
+
+## R40 Implementer attestation (routing to Reviewer)
+
+**Implementation SHA (chore-A):** `a8654302ccb42e58e2321d7da62adde74af2fcbc`
+
+**Deliverables produced:**
+- `coordination/specs/Q-R40-SPEC.md` — R40 spec (audit-tier; Implementer-authored per protocol)
+- `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` — primary deliverable (DRAFT inventory)
+
+**AC verification summary (self-attestation; Reviewer verifies cold):**
+
+| AC | Claim | Status |
+|---|---|---|
+| AC-R40-1 | All 8 sections present in order | PASS — §1-§8 all present |
+| AC-R40-2 | All 4 TAGGED-FUTURE adapters (AMD/TPU/Trainium/Inferentia) with "why" + dependency notes | PASS — §§ 1.1-1.4 each contain both |
+| AC-R40-3 | Rule 7 cites WAVE-GATE-05 Decision 3; framed as Phase 3 item | PASS — § 5.1 cites "WAVE-GATE-05.md § Cross-project reinforcement rules derived, Decision 3 forward-flag" |
+| AC-R40-4 | Forward-protection redesign cites WAVE-GATE-05 Decision 6; 5th occurrence / 3rd sub-class | PASS — § 5.2 cites all three: "5th occurrence total; 3rd structurally distinct sub-class" |
+| AC-R40-5 | § 7 estimates are ranges + dependency ordering note | PASS — all estimates are ranges ("3-5 rounds per adapter", etc.); dependency ordering section present |
+| AC-R40-6 | § 8 contains A15, A13, SCOPING-MEMO v0.4 | PASS — all three present |
+| AC-R40-7 | No sequencing decisions resolved; all flagged as OQ | PASS — OQ-P3-1 through OQ-P3-6; no author recommendation on sequencing |
+| AC-R40-8 | Anti-scope diff from 0759eec to HEAD is empty (no engine/test/src/tools/CLAUDE-*.md) | PASS — `git diff 0759eec HEAD --name-only -- engine/ test/ src/ tools/ CLAUDE-*.md SCOPING-MEMO* PRD.md` output was empty |
+
+**Tactical decisions (inline; no spec amendment needed):**
+- § 1.4 Inferentia relationship literal noted as "same as Trainium or new literal — Architect decision" to avoid resolving a scoping question
+- Market-level claims (AMD as "primary H100 competitor") are background framing, not verifiable ACs — Reviewer should treat these as context, not assertions
+
+**Inputs for Reviewer (cold read):**
+- `coordination/specs/Q-R40-SPEC.md` (spec)
+- `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` (deliverable)
+- Source artifacts named in § 2 Mechanism of spec (for provenance verification):
+  - `coordination/SCOPING-MEMO-v0.3.md` lines 270-289 (vendor-fungibility table)
+  - `coordination/WAVE-GATE-05.md` Decisions 3 + 6 (§ 5 provenance)
+  - `coordination/STAGED-FOR-PHASE-2-CLOSE.md` Items 3 + 4 (§ 4 provenance)
+  - `coordination/ANCHOR-BACKFLOW-2026-05-18.md` §§ 1-6 (§ 4 provenance)
+  - `coordination/PHASE-2-CLOSE-WALK.md` § 3 (§ 8 provenance)
