@@ -78,6 +78,14 @@ All unresolved decisions → open questions in the spec.
 # Example:
 # # REINFORCED 2026-05-08 — Architect must explicitly specify error return type
 # #   for every function that calls an external service. "Handle errors" is not spec.
+#
+# MR-2 consolidation applied 2026-05-19 at R39. 33 entries → 25.
+# Strategy: cross-project rules → 1-line pointers; thematic variants → composite headings.
+# All institutional lessons preserved.
+#
+# CROSS-PROJECT RULE POINTERS (see ~/.claude/CROSS-PROJECT-MEMORIAL.md for full text):
+#   architect-branch-binding-coverage — Tessera Architect origins: R25 MINOR-2, R28 OBS-1, R30 MINOR-2.
+#   anti-scope-allowed-set-forward-coverage — Tessera Architect origins: R25 MAJOR-2, R29 MINOR-2, R34 MAJOR-1.
 
 # REINFORCED 2026-05-16 — Pre-emit grilling must include a cross-spec-section consistency
 #   pass before routing to Implementer. For every resolved decision (Q-N section) that names
@@ -334,17 +342,6 @@ All unresolved decisions → open questions in the spec.
 #   will fail). Add to § 9.7 empirical-premise-verification: "for each count AC with a
 #   pass/fail assertion, run `node --test` in this worktree and record observed counts."
 #   Detected tessera R25 MINOR-1 (root cause of MAJOR-1: AC-R25-14 `fail=0` unachievable).
-# REINFORCED 2026-05-18 — HALT commits that fire mid-round commit the DIAGNOSTIC file BEFORE
-#   chore-A; therefore the DIAGNOSTIC path IS in the round-start-to-chore-A diff range.
-#   Spec § 9.10 reasoning ("DIAGNOSTIC files are coordination-tier and outside the chore-A
-#   diff scope — they would be created in a separate route-back commit") is structurally wrong
-#   for halt-fires that occur before chore-A. The allowed-set spec must either: (a) add a
-#   conditional 8th entry `coordination/diagnostics/DIAGNOSTIC-RNN-*.md` covering halt-fire
-#   scenarios, OR (b) add § 9.10 wording requiring the Implementer to HALT for spec amendment
-#   (via DIAGNOSTIC + ESCALATE) if a halt fires and the DIAGNOSTIC file enters the diff before
-#   chore-A can be committed. A tactically self-expanded ALLOWED_SET in the test cannot be
-#   audited by the anti-scope mechanism because the test reads its own literal.
-#   Detected tessera R25 MAJOR-2 (spec § 3 listed 7 entries; test shipped 8).
 # REINFORCED 2026-05-18 — After any operator ESCALATE disposition that resolves a spec-internal
 #   contradiction (e.g., "§ 1.8 tolerance 0.001 is authoritative; § 4.3/§ 5.1 tolerance 1e-9
 #   is superseded"), the Architect must amend all non-authoritative sections to match the
@@ -356,40 +353,6 @@ All unresolved decisions → open questions in the spec.
 #   Architect direction) amends non-authoritative spec sections + adds a § 9.x note referencing
 #   the DIAGNOSTIC + disposition commit SHA. Detected tessera R25 MAJOR-3 (§ 4.3:752 and
 #   § 5.1 AC-R25-12 row still prescribe 1e-9 at HEAD).
-# REINFORCED 2026-05-18 — When spec § 9.13 (or equivalent) claims "all branches have ≥ 1
-#   binding AC," verify the branch-binding coverage by mutation logic, not structural
-#   inspection alone. Specifically: a `?? N` default at line X in branch-arm B is NOT bound
-#   by an AC that exercises branch-arm A (which returns before reaching line X). Apply the
-#   mutation test: "if line X is changed from `expr ?? N` to `expr`, does any AC fail?" If
-#   no AC fails, the default is structurally unbound and the branch-binding claim is false.
-#   Add this mutation-check to the branch-binding coverage gate in § 9 grilling: "for each
-#   guard / default / fallback, identify which AC actually reaches and exercises it — not
-#   which AC is in the 'nearest' branch." Detected tessera R25 MINOR-2 (counter-arm
-#   `?? 64` default at counter-rate-transform.ts:119 unbound; gauge AC-R25-2 returns at
-#   line 107-115 before reaching line 119; all counter ACs explicitly pass counter_width).
-# REINFORCED 2026-05-18 — The § 5.3 acknowledged-gap section must enumerate EVERY branch
-#   in the implementation that lacks a binding AC, not just the branches the Architect is
-#   actively aware of during spec-write. When spec pseudocode (§ 4.x) includes a guard or
-#   reject branch that enforces an out-of-scope input (e.g., multi-bracket hostlist rejection
-#   at slurm-source.ts:164-166), and that branch does not appear in the § 1.6 F-table and
-#   is not bound by any listed AC, it MUST be added to § 5.3 with non-load-bearing rationale
-#   + a note on what mutation would produce (silently malformed output rather than test
-#   failure). The Implementer is faithful to the pseudocode; the coverage-acknowledgment gap
-#   belongs to the Architect. Procedure: after completing the § 1.6 F-table, scan § 4.1
-#   pseudocode for every `if`/`throw`/`return` guard; for each, either map it to a F-table
-#   entry or add it to § 5.3 as acknowledged-not-bound. Detected tessera R28 OBS-1
-#   (multi-bracket branch at slurm-source.ts:164-166 absent from § 1.6 F-table and § 5.3).
-# REINFORCED 2026-05-18 — Spec § 2.5 ALLOWED_SET and the AC-Rxx-13 forward-protection
-#   literal must include ALL coordination artifacts that post-chore-A roles will commit —
-#   not only round-scope Implementer deliverables. Always include or cover with a regex
-#   carve-out: (1) coordination/reviews/REVIEWER-REPORT-Rxx.md (Reviewer writes this after
-#   chore-A); (2) coordination/MEMORIAL.md is already in the standard 10-entry set. Add a
-#   regex carve-out for the reviews directory alongside the existing diagnostics carve-out:
-#   `^coordination\/reviews\/REVIEWER-REPORT-R\d+\.md$`. Failure to include these paths
-#   causes AC-Rxx-13 to fail post-Reviewer-commit, adding a new entry to the "pre-existing
-#   environmental failures" baseline for subsequent rounds — same class as AC-R26-16.
-#   Detected tessera R29 MINOR-2; pattern also observable at R26 (Memorial-Updater wrote to
-#   CLAUDE-ARCHITECT.md outside the R26 ALLOWED_SET).
 # REINFORCED 2026-05-18 — When spec § 9.x grilling sweep notes "pattern also matches
 #   comments / JSDoc" for an AC that guards a critical invariant, the grilling must complete
 #   a discriminability check — not merely note the ambiguity. Specifically: ask "would the
@@ -402,17 +365,6 @@ All unresolved decisions → open questions in the spec.
 #   sweep noted comment-match for AC-R30-15 and characterized it as intentional but did not
 #   compute that `verdict.includes(...)` would pass even with engine/types/verdict.ts:289
 #   removed while :272 JSDoc is preserved; Reviewer cold-caught this).
-# REINFORCED 2026-05-18 — When spec § 9.x R06 opts-coverage sweep claims "all opts fields
-#   covered" for a constructor with a multi-level fallback chain (`a ?? b ?? c`), trace the
-#   coverage through the FULL data flow — including the values returned by any function called
-#   in the constructor body before the chain is evaluated. If that function always provides a
-#   defined non-nullable value for field `b`, then the third operand `c` is structurally dead
-#   and the "covered" claim is inaccurate for that operand. The sweep must ask: "under what
-#   actual inputs does each `??` operand fire?" — not merely list the opts fields syntactically.
-#   Detected tessera R30 MINOR-2 (spec § 9.2 R06 claim "all opts fields covered" for
-#   NvlinkTopologySource constructor did not trace that parseNvlinkStatus always defaults
-#   snapshot.source_id/source_version; constructor third-operand is dead code; AC-R30-9(c)
-#   passes via parser default, not the constructor branch the spec claimed was covered).
 # REINFORCED 2026-05-18 — Spec § 9.8 spec-internal-contradiction sweep MUST explicitly
 #   cross-check algorithmic boundary clauses (pre-window / post-window, filter predicates,
 #   interval endpoints) across ALL spec sections where they appear (§ 1.x prose, § 3.x
@@ -430,13 +382,3 @@ All unresolved decisions → open questions in the spec.
 #   specific anchors must be tested in a JS REPL before inclusion in spec pseudocode.
 #   Copy-pasting from spec pseudocode to test code propagates language-specific bugs that
 #   force content workarounds rather than code fixes. Detected tessera R34 MINOR-3.
-# REINFORCED 2026-05-18 — When the § 9.9 ALLOWED_SET completeness pass enumerates file
-#   categories, it MUST include the operator-authored methodology backflow class: commits
-#   to coordination-tier durable artifacts (STAGED-FOR-PHASE-2-CLOSE.md, WAVE-PLAN-NN.md,
-#   WAVE-GATE-NN.md, CLUSTER-HANDOFF files) that an operator may land at any point in the
-#   round pipeline, including between STATUS=READY and Reviewer execution. Resolution:
-#   either add regex carve-outs for all known operator-owned coordination files, OR
-#   document the gap explicitly with the recommendation that operators land methodology
-#   commits before STATUS=READY or after Reviewer routing. Third occurrence of this
-#   Architect forward-coverage gap class (R25 = DIAGNOSTIC files; R29 = REVIEWER-REPORT
-#   file; R34 = operator post-READY commits). Detected tessera R34 MAJOR-1.
