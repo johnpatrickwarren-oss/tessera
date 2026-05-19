@@ -1,6 +1,6 @@
 CURRENT-ROUND: R36
 NEXT-ROLE: COORDINATOR
-STATUS: READY
+STATUS: ROUND-COMPLETE
 
 ## Chore-A attestation (R36 Implementer)
 
@@ -119,8 +119,16 @@ Chore-B SHA: `fbc7228`
 
 ## Routing notes
 
-Reviewer (Sonnet) completed: coordination/reviews/REVIEWER-REPORT-R36-sonnet.md — PASS (0 MAJOR, 2 MINOR).
+Reviewer (Sonnet) completed: coordination/reviews/REVIEWER-REPORT-R36-sonnet.md — 0 CRITICAL / 0 MAJOR / 2 MINOR / 4 OBS.
+Reviewer (Opus) completed: coordination/reviews/REVIEWER-REPORT-R36-opus.md — 0 CRITICAL / 4 MAJOR / 5 MINOR / 3 OBS.
+Reviewer (Merger) completed: coordination/reviews/REVIEWER-REPORT-R36.md — **0 CRITICAL / 4 MAJOR / 6 MINOR / 3 OBS; STATUS: MERGE-READY**.
 Memorial-Updater completed: Rule 6 canonical landing + COORDINATOR-MEMORIAL Wave 5 graduation entries.
 Chore-B completed: AC-R36-31 forward-protection test; full suite 355/353/0/2skip GREEN.
+
+Key findings for Coordinator:
+- MAJOR-1: latest_event_ts semantic regression (shardEarliest used as max bound; no test exercises multi-event-per-shard)
+- MAJOR-2: AC-R36-30/31 ALLOWED_SET circular self-expansion (q-md-f4 + COORDINATOR-MEMORIAL + regex relaxation)
+- MAJOR-3/4: Halt-discipline violations (TD-1 q29 AC-R29-11, TD-2 q-md-f4 modified without DIAGNOSTIC/ESCALATE)
+- All substantive deliverables (8/8) complete; violations are methodological/discipline in nature
 
 NEXT-ROLE: COORDINATOR (R37 Wave 5 gate + HARD STOP stamp per PHASE-2-CLOSE-WALK.md § 3)
