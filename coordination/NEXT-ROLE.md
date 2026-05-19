@@ -2,6 +2,50 @@ CURRENT-ROUND: R38
 NEXT-ROLE: IMPLEMENTER
 STATUS: READY
 
+## Operator decision (2026-05-19 — overnight authority auto-Option-A disposition)
+
+**ESCALATE-R38 (DIAGNOSTIC-R38-baseline-mismatch.md) disposition: Option A — accept actual baseline; proceed with R38 on new test file.**
+
+**Reasoning:**
+1. **Bounded clean-fix scope:** the 4 failures are R36 post-chore-A forward-protection guards that tripped on downstream R36 Memorial-Updater + R37 Coordinator commits. They can't regress further (already failing) and they don't block R38 correctness verification.
+2. **Implementer-recommended:** the Implementer's diagnostic explicitly recommends Option A.
+3. **No anti-scope violation:** Option A authors a NEW `test/q38-verification.test.ts` (unaffected by q36 guards). R38 deliverable surface is unchanged.
+4. **Option B would require operator-authorized scope expansion** (q36 test file modification is anti-scoped at R38). Per WU-07 punch list pattern — the q36 guard refactor belongs at the next close-walk-class round (Phase 3 entry-or-prep round; R40 candidate synthesis can flag this).
+
+**Authority:** Per [[project-overnight-authority-2026-05-18-morning]] extended-evening authority auto-Option-A class (bounded question + clean-fix scope + clear architectural disposition + Implementer-recommended). Same class as R18 + R25 ESCALATE patterns.
+
+**Meta-observation (Coordinator-level memorial for COORDINATOR-MEMORIAL Wave 5+):** The Coordinator-session-as-operator-proxy (me) wrote the NEXT-ROLE.md baseline-verification directive citing `353 pass / 0 fail` from R36 chore-B state (fbc7228) WITHOUT re-running `node --test` after the R36 Memorial-Updater commit (95fb2ce) + R37 Coordinator commits (87e372f + 602350c). The Implementer's halt-discipline correctly flagged this as a Rule 1 false-compliance-attestation in the routing document. **This is itself a Rule 7 instance** (the meta-rule about derived-rule propagation): Rule 1 + Rule 6 already existed, but I wrote stale baseline anyway. Lesson: Coordinator/operator-proxy MUST re-run binding commands at routing time, NOT cite from prior chore-B state.
+
+**Recommended R38 spec text (Implementer encodes verbatim):**
+- Baseline at R38 session start: `tsc → exit 0`; `node --test → 355 tests, 349 pass, 4 fail, 2 skip`
+- Post-R38 expected: `357 tests, 351 pass, 4 fail, 2 skip` (adds 2 new q38 ACs)
+- The 4 q36 forward-protection failures are permanently-tripped + documented in R38 spec preamble as known-state (not new failures introduced by R38)
+
+**Implementer resume protocol:**
+1. Create NEW `test/q38-verification.test.ts` (R38 anti-scope explicit: this is the in-spec new test file).
+2. Implement R36 MAJOR-1 latest_event_ts regression fix at `engine/topology/common-mode-attribution.ts:188-196` per scope.
+3. AC-R38-FIXTURE + AC-R38-DOCSTRING per scope.
+4. Encode actual baseline empirically (Rule 1 compliance).
+5. Continue commit sequence (RED → GREEN → chore-A → chore-B per spec).
+6. Resume via `./run-pipeline.sh --round R38 --tier audit --start-at IMPLEMENTER` from main worktree.
+
+---
+
+## Escalation items
+
+### DIAGNOSTIC-R38-baseline-mismatch.md
+
+**File:** `coordination/diagnostics/DIAGNOSTIC-R38-baseline-mismatch.md`
+
+**Summary:** Actual baseline at R38 session entry differs from expected baseline in NEXT-ROLE.md.
+
+- Expected: `355 tests, 353 pass, 0 fail, 2 skip`
+- Actual: `355 tests, 349 pass, 4 fail, 2 skip`
+
+4 failures in `test/q36-phase2-close-walk.test.ts` (AC-R36-21, AC-R36-23, AC-R36-30, AC-R36-31). All caused by post-chore-A R36 + R37 artifacts (R36 Memorial Updater added 3 entries to CLAUDE-IMPLEMENTER.md; R37 Coordinator added WAVE-GATE-05.md and ROUND-R36-SUMMARY.md). None fixable within R38 anti-scope.
+
+**Recommended option:** A — accept actual baseline; R38 test deliverable goes in new `test/q38-verification.test.ts` (unaffected by q36 guards). See DIAGNOSTIC for full analysis and 3 bounded options.
+
 ## Round-scope directive (R38 — post-MR-2 verification; audit-tier; main worktree)
 
 R38 is the **first round of the post-Phase-2-close safe-continuation chain** authorized by extended evening overnight authority (2026-05-18 evening: "authorized post hard stop fallback, keep moving where ever possible"). Chain: R38 → R39 → R40 → R41 → HARD STOP at natural exhaustion of safe-continuation work OR explicit Phase 3 scoping requirement.
