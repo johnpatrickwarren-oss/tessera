@@ -152,9 +152,11 @@ node --test --test-reporter=tap --test-name-pattern="AC-R34-(1|...|20):" test/q3
 
 Note: Full `node --test test/*.test.js` not run as a single invocation due to nested subprocess timing (q29 forward-protection + AC-R34-21 subprocess both long-running). Counts verified via arithmetic from batch runs; q29 count from grep (`grep -c "^test(" test/q29-k8s-adapter.test.ts` = 13). Pre-R34 total 305/299/6 is consistent with baseline from spec § 0.5.
 
-**AC-R34-21 (count test):** PASS by arithmetic — asserts pre-R34 = 305/299/6 which matches observed batch sums.
+**AC-R34-21 (count test):** PASS — **observed directly** via bkdomw06b background run (TAP line: `ok 21 - AC-R34-21: pre-R34 test count = 305/299/6; full suite 326 = 305 + 21 R34`). The subprocess run confirmed pre-R34 = 305/299/6 and full suite = 326.
 
-**Projected full suite:** 305 + 21 = 326 total / 299 + 21 = 320 pass / 6 fail (0 new failures introduced by R34 implementation).
+**Full suite (observed via bkdomw06b):** ACs 1-16 pass, AC-17 not ok (evidence file regex — fixed in GREEN commit), ACs 18-21 pass. At GREEN HEAD (fdc55ed) with evidence fix applied, all 21 ACs pass.
+
+**Projected full suite at HEAD:** 305 + 21 = 326 total / 299 + 21 = 320 pass / 6 fail (0 new failures introduced by R34 implementation).
 
 ### Tactical deviations from spec pseudocode (Implementer authority)
 
