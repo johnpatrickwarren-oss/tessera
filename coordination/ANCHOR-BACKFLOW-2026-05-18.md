@@ -292,3 +292,53 @@ _Operator action items:_
 - _§ 1–4: Schedule anchor canonical PRs per operator judgment on timing_
 - _§ 5: Authorize Tailscale Phase 3 MR-3 candidate when Phase 3 re-opens_
 - _§ 6: Append COORDINATOR-MEMORIAL.md entries per CLUSTER-HANDOFF-4 routing at Wave 5 gate_
+- _§ 7: Stage as backflow candidate after Tessera MR-3 empirical validation + 2nd-project occurrence_
+
+---
+
+## § 7 — Memorial sharding: scaling discipline for monotonic memorial growth (DEFERRED to 3+ occurrence threshold)
+
+**Surfaced:** Operator 2026-05-19 post-R41 hygiene close ("how big are our docs now that have to be read each round?"). See `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` § 5.5 for full Tessera-internal candidate strategies + sequencing.
+
+**The universal problem (anchor-canonical-worthy):**
+
+Memorial files grow monotonically by design (the "do not delete prior reinforcements; accumulated history is the compounding value" constraint in `CLAUDE.md`). At sufficient project scale:
+- `coordination/MEMORIAL.md` grows ~50-100 lines per round
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` grows when cross-project rules derive
+- Architect + Reviewer roles read BOTH files at every round
+
+Tessera at Phase 2 close: MEMORIAL.md = 3,153 lines; CROSS-PROJECT-MEMORIAL.md = 3,599 lines. Combined ~6,750 lines per Architect/Reviewer session. Phase 3 round volume (estimated 30-50 rounds across 8 candidate categories per PHASE-3-CANDIDATES) would add ~2,250-3,750 more lines to MEMORIAL alone. Per-round read cost would double.
+
+**This is universal to anchor**, not Tessera-specific. Any sufficiently-long anchor project hits it.
+
+**Five candidate strategies (per PHASE-3-CANDIDATES § 5.5):**
+- (a) Phase-N sharding — `MEMORIAL-PHASE-N.md` per phase; Architect reads current-phase by default
+- (b) Age-based archive — `archive/MEMORIAL-YYYY-Q.md` for entries >N days
+- (c) Composite-stamp summarization — periodic Coordinator summary rounds
+- (d) Index-and-lazy-load — 1-line-per-entry index + per-round detail files
+- (e) Cross-project memorial separate treatment — shard the canonical by derivation date
+
+**Why this is staged as backflow candidate (NOT yet anchor canonical):**
+
+This very Tessera session derived **Rule 7 (`derived-rule-propagation-mechanism-required`)** specifically because the project observed rules being derived from single-project evidence without empirical multi-project validation. Memorial-sharding canonical-landing without empirical proof would be exactly the pattern Rule 7 warns against.
+
+**The 3+ occurrence threshold pattern (Rules 5-7) applies here:**
+
+1. **Tessera MR-3 (Phase 3 entry; recommended next-session work):** implement strategy (a) Phase-N sharding in Tessera; validate per-round read-cost reduction empirically; record results in COORDINATOR-MEMORIAL with measured numbers.
+2. **2nd anchor-using project surfaces the same scaling problem:** that becomes the cross-project pattern crossing the 3+ threshold for canonical landing (Tessera scale + 2nd project ≥ 3 occurrences).
+3. **Land as anchor canonical:** at that point, the canonicalization includes (a) recognition of the universal problem in METHODOLOGY.md "scaling discipline" section, (b) decision tree of strategies a-e with when-to-use guidance (Phase-N for phase-structured projects; age-based for time-structured; etc.), (c) reference implementation pointer to Tessera MR-3 if validated.
+
+**What does NOT belong as anchor canonical (yet):**
+- A specific sharding mechanism mandated for all projects (Phase-N assumes "phases"; not all anchor projects have phases)
+- A specific threshold value (1500 lines is Tessera-heuristic; per-project growth rates vary)
+- A specific tool script (`consolidate-reinforcements.sh` precedent is good but each strategy needs its own tooling)
+
+**What DOES belong (after empirical validation):**
+- Methodology recognition: "memorial scaling is a real problem at sufficient project scale; track per-round read cost; trigger sharding/consolidation round when cost crosses operator-set threshold"
+- Decision tree of strategies (a)-(e) with when-to-use heuristics
+- Reference implementation pointer
+
+**Operator next-session action items for this entry:**
+1. Authorize Tessera MR-3 (Phase 3 entry; strategy (a) Phase-N sharding; ~1 round of work; immediate per-round read-cost reduction; reversible)
+2. After MR-3 empirical results: append measured numbers (line count reduction; per-session token savings) to this § 7 + COORDINATOR-MEMORIAL
+3. Defer anchor canonical PR until 2nd anchor-using project surfaces the same scaling problem (per Rule 7 derived-rule-propagation discipline)
