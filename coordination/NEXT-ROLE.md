@@ -1,5 +1,5 @@
 CURRENT-ROUND: R51
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Round-scope directive (R51 — CLAUDE-IMPLEMENTER.md re-consolidation + MU re-accretion guard; audit-tier)
