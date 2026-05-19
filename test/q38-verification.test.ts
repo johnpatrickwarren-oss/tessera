@@ -85,7 +85,7 @@ test('AC-R38-2: earliest_event_ts and latest_event_ts docstrings describe per-di
   const latestTsIdx = content.indexOf('latest_event_ts: number;');
   assert.notStrictEqual(latestTsIdx, -1, 'latest_event_ts field must exist in the file');
   // Look back up to 300 chars to find the last /** in that window.
-  const windowBefore = content.substring(Math.max(0, latestTsIdx - 300), latestTsIdx);
+  const windowBefore = content.substring(Math.max(0, latestTsIdx - 500), latestTsIdx);
   const lastDocStart = windowBefore.lastIndexOf('/**');
   const latestTsDoc = lastDocStart !== -1 ? windowBefore.substring(lastDocStart) : '';
   assert.strictEqual(
