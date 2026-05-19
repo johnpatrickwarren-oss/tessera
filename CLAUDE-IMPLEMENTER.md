@@ -676,7 +676,7 @@ with a clear commit message.
 #     from within Q-RNN-EMPIRICAL.sh to satisfy a Tightening 2 AC for that same round.
 #     Instead, use a synthetic SHA range or a prior round's spec to test the runtime path.
 
-# REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 5 sub-variants observed at Tessera)
+# REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 6 sub-variants observed at Tessera)
 #
 #   OQ surfacing must cross-check against own state table + sources (R40 MAJOR-1): When
 #     surfacing OQs in any deliverable, pre-emit grilling step 5 ("can the next role act on
@@ -729,3 +729,18 @@ with a clear commit message.
 #     running the command. Known-limitation blocks that omit observable failures create
 #     confusion for operators running prior-round verifiers post-close.
 #     Detected tessera R48 MINOR-3.
+#
+#   Partial composite self-application: evaluate all sub-variants in composite (R51 MINOR-1):
+#     When self-applying one sub-variant from a REINFORCED composite, scan ALL sub-variants in
+#     that composite for applicability to the current deliverable element before declaring
+#     grilling complete. At R51, the Implementer applied R47 MAJOR-2 (Tightening-4: use
+#     `assert_eq`, not `assert_ge`) from this composite and simultaneously folded R47 MAJOR-2
+#     as a sub-variant here — but did NOT evaluate the adjacent R41 MINOR-3/4 sub-variant
+#     (substring-marker uniqueness gate) when selecting the AC-R51-3g marker "only observable
+#     by." That marker is generic (any future REINFORCED entry describing an indirectly-
+#     observable failure could use similar phrasing); R41 MINOR-3/4 applied to the same
+#     grilling step would have caught it. Pattern: "I applied sub-variant X from composite Y;
+#     therefore grilling is complete" fails when Y contains additional sub-variants directly
+#     applicable to the same deliverable element. For each sub-variant applied, ask: "are
+#     there adjacent sub-variants in this composite whose applicability I have not checked?"
+#     Detected tessera R51 MINOR-1.
