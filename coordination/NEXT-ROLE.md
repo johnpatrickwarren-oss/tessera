@@ -1,138 +1,82 @@
-CURRENT-ROUND: R47
-NEXT-ROLE: OPERATOR (R48 follows per Option B decision)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R48
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 
-## § Operator resolution of R47 ESCALATE (2026-05-19)
+## Round-scope directive (R48 — fix R47 CRITICALs; audit-tier)
 
-**Decision:** Option B selected — ESCALATE → R48 chain extension to close the recursion loop.
+R48 is the R47 follow-up fix-round per operator decision (Option B) at R47 ESCALATE close. R47 closed via pipeline MU at `6e8b1c6`; this round addresses the verifier-pattern CRITICALs the R47 Reviewer surfaced.
 
-**Rationale:** Reviewer's leaning toward Option B is structurally correct: CRITICAL-1's character (false-compliance-attestation at the round whose substantive purpose is tightening the Rule 1 sub-class against false-compliance-attestation) is meta-recursive and warrants a directed fix-round rather than historical-baseline preservation. The R46-precedent of "preserve as historical baseline" applies to attestation-level MAJOR failures where the substantive deliverable works; R47's CRITICAL is a "claimed outcome cannot occur" class — the verifier literally does not terminate. Operator-decision flags this as a structural defect requiring R48 closure.
+**Round-start SHA:** `6e8b1c6` (chore(R47): Memorial-Updater outputs).
 
-**Memorial-Updater proceeds with:**
-- Normal R47 MU close (VIOLATION entries for all 8 MINOR+ findings; cross-project tessera entries; ROUND-R47-SUMMARY.md).
-- Explicit MEMORIAL note that operator selected Option B and R48 will land the CRITICAL fixes.
-- Cross-project rule derivation check: this is the 8th+ tessera instance of `rule-derivation-without-self-application` sub-class — Rule 7 Surface (c) HARD-GATE candidate threshold material (operator-decision flag #2 above; deferred to operator-explicit cross-project canonical landing per Rule 7 anchor-canonical-landing-deferred discipline).
+### Primary deliverable
 
-**R48 will be invoked separately via pipeline** (`./run-pipeline.sh --round R48 --tier audit`) after R47 MU close. R48 scope per Reviewer Option B:
-- (a) Replace AC-R47-10's verifier body with a non-recursive substantive check (or delete the AC as a vacuous meta-AC per Tightening 1).
-- (b) Convert AC-R47-5/6 `>=` thresholds to `==` exact-count assertions (apply Tightening 4 self-application).
-- (c) Align AC-R47-7 + AC-R47-10 spec text with verifier commands (apply Rule 1 sub-class: spec carries the command; verifier runs THAT command).
-- (d) Add same-round-recursion guard to `scripts/pre-commit-rule-sweep.sh:rule_1_check` (requires `scripts/` in ALLOWED_SET for R48).
+Fix the 5 R47 Reviewer-flagged verifier issues (CRITICAL-1 + CRITICAL-2 + MAJOR-1 + MAJOR-2 + MAJOR-3) by tightening the Rule 1 sub-class authoring pattern's self-application demonstration. R48 self-applies the corrected pattern via `coordination/specs/Q-R48-EMPIRICAL.sh`.
 
-R48 is itself a Rule 1 sub-class self-application demonstration — fixing the round that fixed the round that fixed the round. Q-R48-EMPIRICAL.sh will self-apply (Rule 7 Surface c).
+Specifically (per `coordination/reviews/REVIEWER-REPORT-R47.md` § Routing Option B):
 
----
+- **(a) Fix CRITICAL-1 + CRITICAL-2 + MAJOR-3:** Replace AC-R47-10's verifier body in `coordination/specs/Q-R47-EMPIRICAL.sh` with a non-recursive substantive check, OR delete the AC as a vacuous meta-AC per Tightening 1. Spec text in `coordination/specs/Q-R47-SPEC.md` must align with the verifier behavior. The infinite-recursion path (Q-R47-EMPIRICAL.sh:204 → pre-commit-rule-sweep.sh:107 → verify-empirical-acs.sh:80 → Q-R47-EMPIRICAL.sh) MUST NOT exist post-R48.
+- **(b) Fix MAJOR-2:** Convert AC-R47-5 (`>= 1`) and AC-R47-6 (`>= 2`) to `==` exact-count assertions. Actual counts are structurally fixed (1 and 7 respectively per Reviewer). Apply Tightening 4 self-application.
+- **(c) Fix MAJOR-1:** Align AC-R47-7 spec text (Q-R47-SPEC.md:165) with the verifier grep command (Q-R47-EMPIRICAL.sh:143). Either the spec text changes to match the verifier, or the verifier changes to match the spec. Rule 1 sub-class discipline: spec carries the command; verifier runs THAT command.
+- **(d) Fix the root cause:** Add a same-round-recursion guard to `scripts/pre-commit-rule-sweep.sh:rule_1_check`. The current implementation invokes `scripts/verify-empirical-acs.sh <round>` for the round whose spec is in the diff — but if that round's own EMPIRICAL.sh contains an AC that calls back into `pre-commit-rule-sweep.sh`, infinite recursion is structural. Guard pattern: detect the recursion (e.g., environment variable set on entry; refuse if already set) and short-circuit with an advisory.
 
-## Reviewer routing — R47 cold-eye audit
+### Tier rationale
 
-**Reviewer:** Opus 4.7 cold-eye
-**Date:** 2026-05-19
-**Report:** `coordination/reviews/REVIEWER-REPORT-R47.md`
+**audit-tier** — fix-round; bounded scope; no novel architecture. Implementer authors thin spec inline (`coordination/specs/Q-R48-SPEC.md`). Reviewer audits cold-eye.
 
-**Round-start SHA:** `1049a52` (chore(R42-R46): Memorial-Updater batch close)
-**Chore-A SHA:** `8374c52` (chore(R47): tighten Rule 1 sub-class verifier)
-**HEAD at review:** `bac6854` (chore(R47): NEXT-ROLE.md SHA backfill)
-**SHAs derived at review time:** `git rev-parse HEAD` = `bac68548466d05c7a79a57c242d136eb97ab785b`; `git rev-parse 8374c52` = `8374c52c1fbe9192676a22ce13e02f1d4dc54fba`; `git rev-parse 1049a52` = `1049a52ba92e8cd32f79a4ebaa6670227a681ab4`.
+### Anti-scope (R48 hard limits)
 
-**Findings:** 1 CRITICAL (operator decision flag) + 1 co-CRITICAL + 3 MAJOR + 3 MINOR + 4 OBS = 11 findings total.
+- NO modification of `engine/*`, `test/*`, `tools/*` files (zero production-code changes).
+- NO modification of `CLAUDE-*.md` files (R43 consolidation preserved; R46 MU appends preserved).
+- NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Rule 7 anchor-canonical-landing-deferred discipline; cross-project canonical landings remain operator-gated on 2nd-project occurrence).
+- NO modification of `coordination/MEMORIAL-PHASE-*.md` (R42 frozen shards).
+- NO modification of `coordination/specs/Q-R42-*` through `Q-R46-*` (prior rounds preserved as historical baseline).
+- NO modification of R47 deliverables OTHER than the in-scope items (Q-R47-EMPIRICAL.sh per item (a); Q-R47-SPEC.md per item (c) IF spec text alignment chosen).
+- NO modification of `coordination/SCOPING-MEMO-v0.3.md` or `coordination/PRD.md`.
+- NO new REINFORCED entries in CLAUDE-*.md (R43 consolidation preserved).
+- NO Phase 3 territory.
+- NO opening any GitHub PRs.
 
----
+### Apply all 7 cross-project rules UPFRONT
 
-## § Routing — STATUS: ESCALATE
+(Per `coordination/SPEC-AUTHORING-CHECKLIST.md` § Rule 7 self-application gate. Canonical short names from `~/.claude/CROSS-PROJECT-MEMORIAL.md`.)
 
-Per CLAUDE-REVIEWER.md REINFORCED 2026-05-19 (R45 precedent): when CRITICAL severity rationale is attestation-level (substantive deliverable sound; only attested values empirically wrong), strict-routing reading is ESCALATE; pragmatic-routing reading is MERGE-READY-with-reservations + operator notification. Reviewer routes ESCALATE with explicit operator-decision framing.
+- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — R48 is fixing prior Rule 1 sub-class failures. R48's own Q-R48-EMPIRICAL.sh applies the Tightenings 1-4 correctly. Empirical-AC verification via `scripts/verify-empirical-acs.sh R48` must exit 0 at chore-A.
+- **Rule 2 (`branch-binding-coverage-gate`):** N/A — no production-code branches.
+- **Rule 3 (`implementer-spec-test-assertion-coverage`):** N/A — no test file authored (methodology round; R39/R42/R43/R44/R45/R46/R47 precedent).
+- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — ALLOWED_SET enumerated in R48 Implementer-authored spec at spec-emit time. Must include `scripts/pre-commit-rule-sweep.sh` for item (d).
+- **Rule 5 (`rule-derivation-without-self-application`):** ACTIVE GATE — R48 is the round fixing R47's same-round-as-derivation failure. R48's own implementation must NOT reproduce the same pattern. Self-application gate: Q-R48-EMPIRICAL.sh applies all 4 R47 Tightenings + tests them at runtime.
+- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if Q-R48-EMPIRICAL.sh hangs at any AC (recursion regression), HALT + DIAGNOSTIC. Do not attest exit 0 on a hanging verifier.
+- **Rule 7 (`derived-rule-propagation-mechanism-required`):** ACTIVE GATE + Surface (c) self-application — R48 extends the Rule 1 sub-class authoring pattern's enforcement. Same-round application via Q-R48-EMPIRICAL.sh. No new cross-project rule derived this round; Surface (c) is round-conditional and applies to R47 Tightenings being correctly re-applied.
 
-**The operator must decide between:**
+### Halt conditions
 
-- **Option A — MERGE-READY-with-reservations + R47 close-as-historical-baseline.** Substantive deliverable (4 tightening sub-sections in SPEC-AUTHORING-CHECKLIST.md) lands cleanly. CRITICAL-1 + CRITICAL-2 + MAJOR-1/2/3 are at the self-application demonstration layer (AC-R47-10 + AC-R47-5/6/7). R46 precedent: 3 MAJOR self-application failures were preserved as historical baseline at R46 close; R47 follows the same pattern. Memorial-Updater proceeds to batch-close R47. Future R48+ rounds inherit corrected pattern via documentary surface (SPEC-AUTHORING-CHECKLIST.md prose).
+1. **Q-R48-EMPIRICAL.sh fails its own verification:** if `scripts/verify-empirical-acs.sh R48` exits non-zero at chore-A → HALT + DIAGNOSTIC. Do NOT attest PASS on a failed AC.
+2. **Recursion guard breaks existing tested R44 spec § 7 check:** the `scripts/pre-commit-rule-sweep.sh` Rule 7 spec § 7 enumeration check (mechanical part validated at R44/R46) must remain functional after the recursion guard is added → HALT + DIAGNOSTIC if it breaks.
+3. **Test baseline drift:** any change from 361/356/2/3 → HALT + DIAGNOSTIC. R48 must not perturb the test surface.
+4. **Bash syntax error:** `bash -n` on modified scripts exits non-zero → HALT + DIAGNOSTIC.
+5. **Verifier hangs at smoke test:** if `scripts/verify-empirical-acs.sh R47` (legacy verifier post-R48-fixes) or `R48` (new verifier) hangs at any AC, HALT + DIAGNOSTIC. R48's purpose is precisely to fix the hang; reproducing it is unacceptable.
 
-- **Option B — ESCALATE → R48 chain extension to close the loop.** Operator authorizes a follow-up round to (a) replace AC-R47-10's verifier body with a non-recursive substantive check (or delete the AC as a vacuous meta-AC per Tightening 1); (b) convert AC-R47-5/6 from `>=` to `==`; (c) align AC-R47-7 + AC-R47-10 spec text with verifier commands; (d) add same-round-recursion guard to `scripts/pre-commit-rule-sweep.sh:rule_1_check` (requires ALLOWED_SET expansion to include `scripts/`). Closes the false-compliance-attestation loop at the round tightening false-compliance-attestation.
+### Inputs for Implementer
 
-**Reviewer's leaning:** Option B (ESCALATE → fix). CRITICAL-1's character — a false-compliance-attestation in the round whose substantive purpose is tightening the Rule 1 sub-class against false-compliance-attestation — is structurally more severe than a routine same-round-as-derivation violation. The Implementer's attested "exit 0 / 11 PASS / 0 FAIL" is not "wrong number quoted" (R45 pattern) but "claimed outcome cannot occur" (recursion never terminates). However, this is an operator-discretion routing call per the canonical reinforcement; Reviewer surfaces the choice and stays within role boundary.
+1. `coordination/reviews/REVIEWER-REPORT-R47.md` — full Reviewer report with per-AC findings, CRITICAL reproductions, recommended Option B fixes.
+2. `coordination/specs/Q-R47-SPEC.md` — round-being-fixed spec (Q-R47-SPEC.md:165 = AC-R47-7 text; Q-R47-SPEC.md:174-175 = AC-R47-10 text).
+3. `coordination/specs/Q-R47-EMPIRICAL.sh` — verifier to fix at item (a) and item (c). Specifically Q-R47-EMPIRICAL.sh:143 (AC-R47-7 grep) and Q-R47-EMPIRICAL.sh:204 (AC-R47-10 recursive invocation).
+4. `coordination/SPEC-AUTHORING-CHECKLIST.md` § Empirical-AC discipline + § Tightenings 1-4 — authoring pattern reference.
+5. `scripts/verify-empirical-acs.sh` — generic harness; should NOT need modification.
+6. `scripts/pre-commit-rule-sweep.sh` — script to fix at item (d). Specifically rule_1_check function needs recursion-guard.
+7. `coordination/MEMORIAL.md` R47 entries — REVIEWER + MEMORIAL-UPDATER subsections at R47 close.
 
----
+### Pipeline invocation
 
-## § Inputs
-
-- `coordination/reviews/REVIEWER-REPORT-R47.md` — full Reviewer report (per-AC table, findings, right-reasons audit, cross-cutting, grilling output, routing).
-- `coordination/MEMORIAL.md` — R47 REVIEWER section appended (8 VIOLATIONs at MINOR+, 3 CONFIRMATIONs, 4 OBS).
-- `coordination/specs/Q-R47-SPEC.md` + `coordination/specs/Q-R47-EMPIRICAL.sh` + `coordination/SPEC-AUTHORING-CHECKLIST.md` — Implementer deliverables (substantive prose lands; self-application demonstration layer has findings).
-- Binding-command outputs independently re-derived by Reviewer (see REVIEWER-REPORT-R47.md § 1 + § 4 + CRITICAL-1 reproduction).
-
----
-
-## § Findings summary (full detail in REVIEWER-REPORT-R47.md)
-
-| Severity | Finding |
-|---|---|
-| CRITICAL-1 | AC-R47-10 verifier creates infinite recursion (Q-R47-EMPIRICAL.sh:204 → pre-commit-rule-sweep.sh:107 → verify-empirical-acs.sh:80 → Q-R47-EMPIRICAL.sh); Implementer's chore-A attestation of "exit 0 / 11 PASS / 0 FAIL" is structurally impossible at chore-A `8374c52` or HEAD `bac6854`. Rule 1 false-compliance-attestation at the round tightening Rule 1 sub-class. |
-| CRITICAL-2 | AC-R47-10 spec text (Q-R47-SPEC.md:174-175) describes a vacuous meta-AC — the exact anti-pattern R47's own Tightening 1 prohibits. Same class as R46 MAJOR-1, recurring at the round deriving the fix for that class. |
-| MAJOR-1 | AC-R47-7 spec text (Q-R47-SPEC.md:165) and verifier (Q-R47-EMPIRICAL.sh:143) execute DIFFERENT grep commands. Rule 1 sub-class discipline violation: spec carries the command; verifier runs THAT command. |
-| MAJOR-2 | AC-R47-5 (`>= 1`) + AC-R47-6 (`>= 2`) use threshold assertions where actual counts are structurally fixed (1 and 7 respectively). Same-round-as-derivation Tightening 4 self-application gap. |
-| MAJOR-3 | AC-R47-10 spec text and verifier diverge entirely (spec: harness exits 0; verifier: pre-commit-rule-sweep stdout-grep). Compounds CRITICAL-1 + CRITICAL-2. |
-| MINOR-1 | Tightening 3 partial self-application: ROUND_START_SHA = `git rev-parse 1049a52` uses memorized literal. |
-| MINOR-2 | AC-R47-5 + AC-R47-6 are structurally self-referential (verifier verifying its own structure). Smaller-scale than R46 MAJOR-1 but same pattern. |
-| MINOR-3 | Halt-discipline gap: a hanging verifier satisfies halt condition #1 ("exits non-zero at chore-A"); Implementer attested exit 0 instead of HALT'ing. |
-| OBS-1 | R46 deliverables byte-identical to R46 close (anti-scope clean). |
-| OBS-2 | Substantive prose deliverable (4 tightening sub-sections, SPEC-AUTHORING-CHECKLIST.md:215-321) sound. |
-| OBS-3 | `pre-commit-rule-sweep.sh:rule_1_check` recursion vulnerability is the SCRIPT-side root cause; R48 candidate. |
-| OBS-4 | 0-CRITICAL streak R02-R46 (45 rounds) ends at R47. |
-
----
-
-## § Reviewer's independent reproduction of CRITICAL-1
-
-```
-$ git rev-parse HEAD
-bac68548466d05c7a79a57c242d136eb97ab785b
-
-$ git diff --name-only 1049a52 HEAD
-coordination/MEMORIAL.md
-coordination/NEXT-ROLE.md
-coordination/SPEC-AUTHORING-CHECKLIST.md
-coordination/specs/Q-R47-EMPIRICAL.sh
-coordination/specs/Q-R47-SPEC.md
-
-$ ( scripts/pre-commit-rule-sweep.sh 1049a52 HEAD > /tmp/sweep.out 2>&1 ) & PID=$!
-$ ( sleep 60 ; kill -9 $PID ; pkill -9 -f Q-R47-EMPIRICAL ; pkill -9 -f pre-commit-rule-sweep ; pkill -9 -f verify-empirical-acs ) &
-$ wait $PID 2>/dev/null ; echo "EXIT=$?"
-EXIT=137
-
-$ wc -l /tmp/sweep.out
-       6 /tmp/sweep.out
-$ cat /tmp/sweep.out
-Rule 7 pre-commit rule-sweep
-Round diff range: 1049a52..HEAD
-============================================================
-
-Rule 1 (false-compliance-attestation): MECHANICAL CHECK via sub-class verifier
-  Invoking: scripts/verify-empirical-acs.sh R47
-
-(... script hangs indefinitely; ps -ef shows unbounded recursion chain ...)
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R48 --tier audit
 ```
 
-Output stops at "Invoking: scripts/verify-empirical-acs.sh R47" because the inner call recurses and never returns. `scripts/verify-empirical-acs.sh R47` similarly hangs at AC-R47-10's block.
-
-Test baseline check (independent):
-```
-$ node --test --test-reporter=tap test/*.test.js 2>&1 | tail
-# tests 361 / # pass 356 / # fail 2 / # skipped 3   ✓ matches AC-R47-9
-$ npx tsc -p tsconfig.test.json ; echo "TSC_EXIT=$?"
-TSC_EXIT=0                                            ✓ matches AC-R47-9
-```
+(Operator-prepared this directive; Implementer-in-pipeline-session reads § Inputs and authors `coordination/specs/Q-R48-SPEC.md` from the scope above.)
 
 ---
 
-## § Pending operator decisions (carried forward from R46 close)
+## Operator-decision audit trail
 
-(Unchanged from prior NEXT-ROLE.md; awaiting operator wake.)
-
-1. R45 CRITICAL routing accept-vs-escalate (separately tracked from R47 ESCALATE).
-2. Rule 7 Surface (c) HARD-GATE candidate (now 7+ tessera instances per R47 OBS rule-7-surface-c-hard-gate-candidate-7-instances).
-3. Cross-project canonical landings (gated on 2nd-project occurrence).
-4. Anchor PR backflog scheduling.
-5. Phase 3 PRD authoring.
-
-**NEW from R47:** Operator decision on Option A (MERGE-READY-with-reservations) vs Option B (ESCALATE → R48 fix chain) per § Routing above.
-
-HARD STOP re-engaged on Phase 3 scope entry pending operator decisions above.
+R47 closed via pipeline MU at `6e8b1c6` with operator-selected Option B (ESCALATE → R48 chain extension to close the recursion loop). See `coordination/MEMORIAL.md` R47 MEMORIAL-UPDATER section for canonical record. R47 NEXT-ROLE.md at SHA `6e8b1c6` preserved in git history for the full pre-R48 operator-resolution content.
