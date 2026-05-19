@@ -378,9 +378,13 @@ directly. Each cluster emits a fragment at
 `coordination/clusters/<cluster-id>/MEMORIAL-fragment.md` (single-writer
 inside the cluster — no concurrency). At the wave gate, the Coordinator
 takes a `flock(2)` advisory lock on `coordination/.MEMORIAL.lock`,
-appends all fragments from the just-completed wave to `MEMORIAL.md` in
-deterministic order (cluster-id ASC, then fragment line order), and
-releases the lock. Fragments are appended verbatim — no rewriting.
+appends all fragments from the just-completed wave to the **active
+`MEMORIAL.md`** in deterministic order (cluster-id ASC, then fragment
+line order), and releases the lock. Fragments are appended verbatim —
+no rewriting. Append target is always the active file; past-phase
+shards (`coordination/MEMORIAL-PHASE-N.md`) are frozen and never
+appended-to. See CLAUDE-COMMON.md "Memorial sharding (R42 onward)" for
+the shard layout + read protocol.
 
 **Cross-project memorial (`~/.claude/CROSS-PROJECT-MEMORIAL.md`).** Not
 written per round. Each project accumulates its own per-project shard

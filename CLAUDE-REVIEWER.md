@@ -12,6 +12,10 @@
        discipline output, decision rationale, amendments — load-bearing for
        your audit even though the Implementer doesn't read it).
      - All source files + all test files for this round.
+     - coordination/MEMORIAL.md (active file; default per-round read —
+       verifies Implementer/Architect/prior-Reviewer entries match findings).
+       Phase shards (coordination/MEMORIAL-PHASE-N.md) on demand only —
+       see CLAUDE-COMMON.md "Memorial sharding (R42 onward)".
      - ~/.claude/CROSS-PROJECT-MEMORIAL.md (Reviewer section — check first).
 2. Do NOT read: diagnostics/, session logs, .prompt-*.md files.
    Cold review is intentional and required for adversarial independence.
