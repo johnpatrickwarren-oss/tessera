@@ -2924,3 +2924,20 @@ CONFIRMATION: round-summary-written | ROUND-R38-SUMMARY.md written at coordinati
 CONFIRMATION: rule-7-canonical-landing | Rule 7 (`derived-rule-propagation-mechanism-required`) canonically landed at `~/.claude/CROSS-PROJECT-MEMORIAL.md` per OQ-W5-1 Option A authorization. Draft text from WAVE-GATE-05.md § Cross-project reinforcement rules derived this gate (Decision 3, Rule 7 derivation evaluation) used verbatim with sourcing note. 3-occurrence trigger enumeration preserved: R32 MAJOR-2 (Rule 3 same-round self-application failure 4 instances); R34 MAJOR-1 (Rule 4 sub-class re-violation); R36 MAJOR-3+4 (Rule 6 same-round self-application failure, highest acuity). R38 Implementer self-applied Rule 7 at chore-A pre-commit (spec § 6 grilling item 4-6 enumerate Rule 4 + Rule 2 + Rule 3 compliance) — rule propagation mechanism validated at R38. | R38 | MEMORIAL-UPDATER
 
 CONFIRMATION: role-boundary | Memorial Updater observed and recorded only. Did not re-litigate Reviewer severity classifications, re-implement any fix, modify any source/test/engine/spec file, or expand scope beyond recording. Modified only: coordination/MEMORIAL.md (this append), ~/.claude/CROSS-PROJECT-MEMORIAL.md (R38 entries + Rule 7 canonical landing), CLAUDE-IMPLEMENTER.md (3 REINFORCED appends), coordination/logs/ROUND-R38-SUMMARY.md (new file), coordination/NEXT-ROLE.md (STATUS: ROUND-COMPLETE). | R38 | MEMORIAL-UPDATER
+
+---
+## R39 | IMPLEMENTER (audit-tier — Implementer wears Architect hat) | 2026-05-19
+
+CONFIRMATION: spec-authorship | Q-R39-SPEC.md written with required sections: Goal, Brainstorm (3 options documented with strengths/weaknesses/selection rationale), Mechanism (3 passes with precise entry mappings and Rule 5 self-application gates documented), ACs, Anti-scope, Open questions. Spec committed before any implementation work per R21 MINOR-1 reinforcement. | R39 | IMPLEMENTER
+
+CONFIRMATION: pass-1-cross-project-pointers | 6 origin entries for Rules 2 and 4 removed from CLAUDE-ARCHITECT.md; replaced by CROSS-PROJECT RULE POINTERS section with 2 pointer lines. Rule 2 origins: R25 MINOR-2, R28 OBS-1, R30 MINOR-2. Rule 4 origins: R25 MAJOR-2, R29 MINOR-2, R34 MAJOR-1. REINFORCED count 33 → 27 (verified by grep at SHA b31bc8b). | R39 | IMPLEMENTER
+
+CONFIRMATION: pass-2-empirical-premise-composite | R07 MAJOR-1, R07 MAJOR-2, and R08 MAJOR-2 entries merged under EMPIRICAL-PREMISE-VERIFICATION composite heading. Trigger conditions verified verbatim in each sub-variant (Rule 5 gate: PASS). REINFORCED count 27 → 25 (in target range [25,28], verified at SHA b4e7dd7). | R39 | IMPLEMENTER
+
+CONFIRMATION: pass-3-implementer-secondary | 6 post-MR-2 CLAUDE-IMPLEMENTER.md standalone entries folded into existing composites: HALT-DISCIPLINE (+1 sub-variant), MEMORIAL-AND-ATTESTATION-ACCURACY (+1), SPEC-PRESCRIPTION-FIDELITY (+1 combined), AC-COVERAGE-COMPLETENESS (+1). All trigger conditions preserved verbatim. IMPLEMENTER REINFORCED count 36 → 30 (back to MR-2 baseline, verified at SHA 82a0306). | R39 | IMPLEMENTER
+
+CONFIRMATION: rule-5-self-application-gate | All composite headings (new EMPIRICAL-PREMISE-VERIFICATION in ARCHITECT; 4 new sub-variants in IMPLEMENTER composites) verified to preserve trigger conditions verbatim in sub-variant text. No composite hides trigger conditions. Gate: PASS. | R39 | IMPLEMENTER
+
+CONFIRMATION: anti-scope | git diff e1b426a HEAD --name-only = {CLAUDE-ARCHITECT.md, CLAUDE-IMPLEMENTER.md, coordination/specs/Q-R39-SPEC.md, coordination/NEXT-ROLE.md, coordination/MEMORIAL.md}. No engine/* or test/* files modified. No new REINFORCED entries added. No CLAUDE-COMMON.md changes. | R39 | IMPLEMENTER
+
+CONFIRMATION: test-results-improved | Baseline: tests=358, pass=351, fail=4 (pre-existing q36 failures). Post-R39: tests=358, pass=353, fail=2. 2 previously-failing q36 tests now PASS because IMPLEMENTER REINFORCED count is restored to 30 (those tests were checking the MR-2 target). 2 remaining failures are pre-existing (q36-phase2-close-walk.test.js:419+439, checking R37 baseline diff which includes post-R37 modifications). No R39-introduced regression. | R39 | IMPLEMENTER
