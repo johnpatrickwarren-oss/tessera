@@ -212,6 +212,114 @@ becomes structurally impossible because there is no memorized number to drift.
 5. **The spec AC text** SHOULD say "Verification: see Q-RNN-EMPIRICAL.sh AC-RNN-N" rather
    than memorizing the number in the spec body.
 
+### Tightening: Avoid vacuous meta-ACs (R47)
+
+**Anti-pattern** (observed at R46 AC-R46-6; flagged as R46 Reviewer MAJOR-1):
+
+```bash
+echo "AC-R<N>-K: self-application — this file exits 0 (verified by harness aggregate)"
+echo "  PASS — AC-R<N>-K (asserted by aggregate exit code below)"
+PASS=$((PASS + 1))
+```
+
+The AC asserts a property — "this file exits 0" — that IS the aggregate of all
+other ACs. Hard-coding PASS makes the AC vacuous; the real binding is the aggregate
+exit code, which would happen regardless of this AC's presence. The block adds 1
+to the PASS counter but verifies nothing independently.
+
+**Tightened pattern:** eliminate self-referential meta-ACs. The aggregate exit code
+IS the empirical-AC harness's binding; making it an AC of itself is structurally
+circular. If "self-application demonstration" is a desired spec deliverable, make
+it a SUBSTANTIVE check:
+
+```bash
+# Concrete, non-circular property:
+echo "AC-R<N>-K: Q-R<N>-EMPIRICAL.sh syntax-validates"
+SYNTAX_OK=$(bash -n coordination/specs/Q-R<N>-EMPIRICAL.sh 2>&1 && echo "ok" || echo "fail")
+assert_eq "AC-R<N>-K" "ok" "$SYNTAX_OK"
+```
+
+**Rationale:** A vacuous AC inflates the PASS count and gives false confidence;
+worse, it can mask a genuine bug where the harness aggregate is wrong. Concrete
+ACs surface concrete failures.
+
+### Tightening: Verify runtime behavior, not source presence (R47)
+
+**Anti-pattern** (observed at R46 AC-R46-10; flagged as R46 Reviewer MAJOR-3):
+
+```bash
+ACTUAL=$(grep -c 'MECHANICAL CHECK via sub-class verifier' scripts/pre-commit-rule-sweep.sh)
+```
+
+This greps the SOURCE of `pre-commit-rule-sweep.sh` for the label "MECHANICAL CHECK
+via sub-class verifier". The check passes if the label appears in the source — but
+the function containing the label can be disabled, short-circuited via early
+return, or never invoked at runtime, and the source-grep still passes.
+
+**Tightened pattern:** for "runtime behavior active" claims, INVOKE the code path
+and grep its STDOUT:
+
+```bash
+ACTUAL=$(scripts/pre-commit-rule-sweep.sh <SHA1> <SHA2> 2>&1 \
+    | grep -c 'MECHANICAL CHECK via sub-class verifier')
+```
+
+This confirms the label appears in actual output — empirical proof the function
+ran. The check is structurally stronger: any change that disables the function
+will cause the stdout-grep to return 0, surfacing the regression.
+
+**Rationale:** Source-presence checks pass even when the code is dead. A test that
+passes when the code path is inert is not load-bearing. For every AC claiming
+"runtime mode X is active," invoke the runtime and inspect the resulting output.
+
+### Tightening: Re-derive SHAs from git at citation time (R47)
+
+**Anti-pattern** (observed at R46 NEXT-ROLE.md round-start SHA citation; flagged
+as R46 Reviewer MAJOR-2):
+
+The Implementer cited "pre-R46 SHA = `439c1ff`" — but the actual pre-R46 SHA was
+`7bc026f` after the R42-R45 Reviewer batch landed between R45 close and R46
+authorship. The 7-file diff count conflated `<pre-R46>..<chore-A>` (6 files)
+with `<pre-R46>..<HEAD-backfill>` (7 files). Both values were memorized from
+prior session state rather than re-derived from `git` at attestation time.
+
+**Tightened pattern:** every SHA + diff-count cited in a spec or attestation MUST
+come with the `git` command that derived it. The command runs at citation time:
+
+```bash
+ROUND_START_SHA=$(git rev-parse <some-ref> 2>/dev/null)
+CHORE_A_SHA=$(git rev-parse HEAD 2>/dev/null)
+DIFF_FILES=$(git diff --name-only "$ROUND_START_SHA" "$CHORE_A_SHA" | wc -l | tr -d ' ')
+```
+
+Attestation cites: "round-start SHA = `$ROUND_START_SHA` (`git rev-parse <ref>`);
+diff = $DIFF_FILES files (`git diff --name-only <ROUND_START>..<CHORE_A> | wc -l`)."
+
+**Rationale:** SHAs from prior session state become stale the moment a new commit
+lands. Memorized counts conflate ranges. The convention "cite the command that
+produced the value" makes drift structurally impossible — the command is the
+spec; the output is the attestation.
+
+### Tightening: Prefer exact counts over `≥ 1` thresholds (R47)
+
+**Anti-pattern:** `grep -c '...' file -ge 1` — passes on any non-zero count.
+Incidental matches in prose silently satisfy the threshold.
+
+**Tightened pattern:** use exact count where structural meaning supports it:
+
+```bash
+ACTUAL=$(grep -cE '^canonical_marker_at_line_start' file)
+assert_eq "AC-R<N>-K" "expected_count" "$ACTUAL"
+```
+
+Use line-anchored grep (`^pattern`) to avoid matching incidental prose mentions.
+If exact count is sensitive to formatting drift, use a discriminating regex
+that uniquely identifies the structural location.
+
+**Rationale:** `≥ 1` thresholds give false confidence — any incidental occurrence
+of the searched token passes the check, even when the structural property the AC
+intended to verify is absent. Exact counts surface structural drift immediately.
+
 ### Chore-A requirements (at Implementer commit)
 
 1. **Run `scripts/verify-empirical-acs.sh <round>` BEFORE chore-A commit.**
