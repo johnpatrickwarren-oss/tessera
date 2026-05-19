@@ -2846,3 +2846,9 @@ CONFIRMATION: round-summary-written | ROUND-R36-SUMMARY.md written at coordinati
 
 CONFIRMATION: role-boundary | Memorial Updater observed and recorded only. No re-litigation of Reviewer findings. Modified only: coordination/MEMORIAL.md (this append), ~/.claude/CROSS-PROJECT-MEMORIAL.md (violation entries + correction addendum), CLAUDE-IMPLEMENTER.md (3 REINFORCED appends), coordination/logs/ROUND-R36-SUMMARY.md (new file), coordination/NEXT-ROLE.md (STATUS: ROUND-COMPLETE). No source/test/spec/engine files touched. | R36 | MEMORIAL-UPDATER
 
+---
+
+## R38 — IMPLEMENTER halt (2026-05-19)
+
+VIOLATION: halt-discipline | Baseline mismatch at R38 session entry: NEXT-ROLE.md expected `355 tests, 353 pass, 0 fail, 2 skip` (cited from chore-B fbc7228); actual empirically observed: `355 tests, 349 pass, 4 fail, 2 skip`. 4 failures in `test/q36-phase2-close-walk.test.ts` (AC-R36-21, AC-R36-23, AC-R36-30, AC-R36-31), all caused by post-fbc7228 commits: R36 Memorial-Updater added 3 REINFORCED entries to CLAUDE-IMPLEMENTER.md (bumping count to 33 and introducing `includes()` wording); R36 routing commit and R37 Coordinator commits added files (ROUND-R36-SUMMARY.md, WAVE-GATE-05.md) outside R36's ALLOWED_SET. NEXT-ROLE.md expected baseline was not re-verified empirically after those commits — false-compliance-attestation (Rule 1) in NEXT-ROLE.md. Per R38 halt condition 1 and explicit NEXT-ROLE.md directive ("If actual differs from expected, that is a Rule 6 halt-condition"), HALT filed with DIAGNOSTIC-R38-baseline-mismatch.md + STATUS: ESCALATE. All 4 failures are in pre-R36 anti-scoped test file; none fixable within R38 anti-scope. | R38 | IMPLEMENTER
+
