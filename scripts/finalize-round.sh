@@ -174,3 +174,24 @@ echo "    STATUS         : READY"
 echo ""
 echo "Reviewer: verify with:"
 echo "    git diff $SHA_A HEAD -- src/ tests/ prisma/"
+echo ""
+
+# ── Step 7: Auto-invoke pipeline Reviewer + Memorial-Updater ─────────────────
+# Guard prevents re-entry when finalize-round.sh is called from inside a
+# pipeline run (env var propagates via export to all child processes).
+# Pattern mirrors _PRE_COMMIT_RULE_SWEEP_ACTIVE from R48 recursion guard.
+if [[ -z "${_FINALIZE_PIPELINE_ACTIVE:-}" ]]; then
+  echo "--- Step 7/7: Invoking pipeline Reviewer + Memorial-Updater ---"
+  # Read tier from NEXT-ROLE.md if present (operator sets TIER: audit/full/solo);
+  # default to full for backward compatibility.
+  TIER_VAL=$(grep "^TIER:" "$NEXT_ROLE_FILE" 2>/dev/null | awk '{print $2}' || true)
+  TIER_VAL="${TIER_VAL:-full}"
+  # Check close-walk class for hybrid Reviewer mandate.
+  HYBRID_FLAG=""
+  if grep -qE "^CLOSE-WALK-CLASS: *true" "$NEXT_ROLE_FILE" 2>/dev/null; then
+    HYBRID_FLAG="--hybrid-reviewer"
+  fi
+  export _FINALIZE_PIPELINE_ACTIVE=1
+  # shellcheck disable=SC2086
+  "$PROJECT_ROOT/run-pipeline.sh" --round "$ROUND" --start-at REVIEWER --tier "$TIER_VAL" $HYBRID_FLAG
+fi

@@ -1,6 +1,23 @@
 CURRENT-ROUND: R49
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
+SHA-A: (to be filled by finalize-round.sh)
+
+## Reviewer inputs
+
+- `coordination/specs/Q-R49-SPEC.md` — spec
+- `coordination/specs/Q-R49-EMPIRICAL.sh` — empirical verifier (run `scripts/verify-empirical-acs.sh R49`)
+- `scripts/finalize-round.sh` — extended with step 7 pipeline auto-fire
+- `CLAUDE-IMPLEMENTER.md` — "On clean completion" section updated
+- `CLAUDE-COORDINATOR.md` — hybrid Reviewer mandate section added
+- `run-pipeline.sh` — `--hybrid-reviewer` flag added
+- `coordination/SPEC-AUTHORING-CHECKLIST.md` — `## Pipeline-mandatory discipline` section added
+
+**Implementer attestation (Q-R49-EMPIRICAL.sh at pre-commit):** 14 PASS / 0 FAIL (10 ACs; AC-R49-10 has 5 sub-checks). Test baseline 361/355/3/3 preserved. `tsc` exit 0.
+
+**Spec deviance:** AC-R49-1 grep pattern amended from `run-pipeline\.sh .+--start-at REVIEWER` → `run-pipeline\.sh.*--start-at REVIEWER` because `"$PROJECT_ROOT/run-pipeline.sh"` has a quote char between `.sh` and ` --round` — the ` .+` form (literal space then one-or-more) would miss the quote. The `.*` form matches the same structural property (pipeline auto-fire invocation on the same line as `--start-at REVIEWER`). Spec updated in same session before commit.
+
+**TDD disclosure:** Verifier (Q-R49-EMPIRICAL.sh) authored before implementation; run showed 6 FAILs (spirit of TDD RED state met). No separate git RED commit (methodology round; R42-R48 precedent; letter not met per R41 MINOR-5 disclosure form).
 
 ## Round-scope directive (R49 — pipeline-mandatory discipline + hybrid Reviewer at close-walk; audit-tier)
 

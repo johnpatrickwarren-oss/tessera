@@ -366,3 +366,34 @@ R46 itself derives this sub-class AND applies it to its own ACs via
 round-of-derivation special case, the round MUST grep-sweep its own diff for
 the new sub-class's prohibited pattern. R46's compliance is verifiable by
 running `scripts/verify-empirical-acs.sh R46` — expected exit 0 at chore-A SHA.
+
+---
+
+## Pipeline-mandatory discipline
+
+Every spec's `## Pipeline invocation` footer (`./run-pipeline.sh --round R<NN> --tier <tier>`) is
+the canonical method for round execution. Interactive-mode single-session is the DEVIATION, not
+the default. Any round that does not run through the pipeline (or document an explicit
+operator-waiver with rationale) is a Rule 1 sub-class candidate violation: the Implementer
+self-attestation chain bypasses the cold-eye Reviewer safety net the framework was designed around.
+
+**Author-time requirements:**
+1. Every spec MUST include a `## Pipeline invocation` (or `## § N. Pipeline invocation`) footer
+   with the exact `./run-pipeline.sh --round R<NN> --tier <tier>` command.
+2. For close-walk class rounds (Phase close, SLICE close, sub-Phase close, wave consolidation),
+   add `CLOSE-WALK-CLASS: true` to `coordination/NEXT-ROLE.md` — `scripts/finalize-round.sh`
+   reads this field and passes `--hybrid-reviewer` to `run-pipeline.sh` automatically.
+
+**Chore-A requirements:**
+- After committing coordination artifacts, invoke `scripts/finalize-round.sh` (preferred) or
+  `./run-pipeline.sh --round R<NN> --start-at REVIEWER --tier <tier>` directly. Do NOT declare
+  the round complete at chore-A without triggering the Reviewer + Memorial-Updater pipeline stages.
+- `scripts/finalize-round.sh` auto-invokes the pipeline after its step 6 integrity check via the
+  `_FINALIZE_PIPELINE_ACTIVE` guard (prevents recursion; exported env-var propagates to pipeline).
+
+**Waiver path (exceptional only):**
+If the pipeline cannot run (network outage, Claude API unavailable, operator-explicit exception),
+document the waiver in `coordination/NEXT-ROLE.md` with rationale and manually invoke a cold-eye
+Reviewer session before merging the round's artifacts.
+
+> **Canonical text landed at:** R49 (2026-05-19). Rule 7 Surface (a) for pipeline-mandatory discipline.

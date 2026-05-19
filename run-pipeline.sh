@@ -117,6 +117,7 @@ while [[ $# -gt 0 ]]; do
     --prd)              PRD_PATH="$2";     shift 2 ;;
     --tier)             TIER="$2";         shift 2 ;;
     --dry-run)          DRY_RUN=true;      shift   ;;
+    --hybrid-reviewer)  HYBRID_REVIEWER=true; shift ;;
     --no-model-routing) MODEL_ROUTING=false; shift  ;;
     --reset-next-role)  RESET_NEXT_ROLE=true; shift ;;
     --coordinator)      COORDINATOR_MODE=true; shift ;;
@@ -136,6 +137,10 @@ Options:
                        Backward-compat: T0/T1/T3 still accepted (deprecation
                        warning emitted). See skills/11-round-scaling.md.
   --dry-run            Print what would run without executing
+  --hybrid-reviewer    Force hybrid Reviewer (Opus + Sonnet merged). Mandatory for
+                       close-walk class rounds; see CLAUDE-COORDINATOR.md. Also
+                       auto-triggered by scripts/finalize-round.sh when
+                       CLOSE-WALK-CLASS: true is set in coordination/NEXT-ROLE.md.
   --no-model-routing   Use CLAUDE_DEFAULT_MODEL for all roles
   --reset-next-role    Overwrite coordination/NEXT-ROLE.md with the auto-init
                        template even when it shows a different CURRENT-ROUND.
