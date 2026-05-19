@@ -249,11 +249,12 @@ Source: SCOPING-MEMO § 2.3 A17; PRD.md success metrics ("engine extracted to sh
   propagation mechanism, Phase 3 will reproduce the R32/R34/R36 same-round self-application
   failure pattern. Rule 7 implementation in Phase 3 SLICE 1 (or MR-3) would protect all
   subsequent Phase 3 rounds.
-- **Dependency note:** Rule 7 canonical landing is operator-owned per OQ-W5-1. If operator
-  selects OQ-W5-1 Option A (R38 Memorial-Updater stage — already completed), Rule 7 is canonical;
-  Phase 3 SLICE 1 spec can then include its first structural implementation AC.
-- **OQ:** Has Rule 7 canonical text landed in `~/.claude/CROSS-PROJECT-MEMORIAL.md` at R38/R39
-  Memorial-Updater stage? Verify before authoring the Phase 3 SLICE 1 spec. Flag as OQ-P3-5.
+- **Dependency note:** Rule 7 is canonical. Verified at R41 hygiene audit: Rule 7
+  (`derived-rule-propagation-mechanism-required`) canonically landed at R38 Memorial-Updater stage
+  per OQ-W5-1 Option A authorization. See `~/.claude/CROSS-PROJECT-MEMORIAL.md:3470`. Phase 3
+  SLICE 1 spec can include the first structural Rule 7 implementation AC.
+- **OQ-P3-5: RESOLVED** — Rule 7 canonical text confirmed at `~/.claude/CROSS-PROJECT-MEMORIAL.md:3470`
+  (R38 Memorial-Updater stage, per OQ-W5-1 Option A). No further verification needed.
 
 ### 5.2 Forward-protection mechanism redesign
 
@@ -322,7 +323,7 @@ not candidates for Phase 3 autonomous pipeline execution.
 | **OQ-R08-3** Phase 2 transient detector scheduling | Parked at R08; no Phase 2 deliverable touched it | Operator decides if Phase 3 includes scheduling of Phase 2 transient detector activations |
 | **Anchor PR #38** R06–R10 contributions | Compiled; not yet submitted to anchor canonical | Operator schedules; not pipeline work |
 | **CLAUDE-IMPLEMENTER.md consolidation threshold** | 30 entries post-MR-2; at threshold now | Monitor: if Phase 3 rounds add >5 entries, consolidation (MR-3-style pass) is warranted. Operator decides when to trigger |
-| **Rule 7 canonical landing** (OQ-W5-1 from WAVE-GATE-05.md) | Status unknown at R40 entry — depends on R38/R39 Memorial-Updater outputs | Verify before Phase 3 SLICE 1 spec authoring (OQ-P3-5 above) |
+| **Rule 7 canonical landing** (OQ-W5-1 from WAVE-GATE-05.md) | **CONFIRMED**: canonically landed at `~/.claude/CROSS-PROJECT-MEMORIAL.md:3470` per R38 Memorial-Updater stage (OQ-W5-1 Option A). Verified at R41 hygiene audit. | OQ-P3-5 RESOLVED — no further action needed before Phase 3 SLICE 1 |
 
 ---
 
@@ -375,7 +376,7 @@ production scope, or run methodology and production scope in parallel? Operator 
 | OQ-P3-2 | Is Google Cloud ICI topology accessible via API for synthetic fixture design? | § 1.2 feasibility |
 | OQ-P3-3 | Does operator have real GPU cluster access for DCGM validation? | § 2.1 feasibility |
 | OQ-P3-4 | DeploySignal integration: before or after real-cluster integration? | § 3 vs § 2 sequencing |
-| OQ-P3-5 | Rule 7 canonical landing status at R40 entry (R38/R39 Memorial-Updater outputs)? | § 5.1 pre-condition for Phase 3 SLICE 1 |
+| OQ-P3-5 | ~~Rule 7 canonical landing status at R40 entry (R38/R39 Memorial-Updater outputs)?~~ **RESOLVED at R41**: Rule 7 canonically landed at `~/.claude/CROSS-PROJECT-MEMORIAL.md:3470`. See § 5.1 updated note. | § 5.1 pre-condition satisfied |
 | OQ-P3-6 | Phase 3 SLICE 1: methodology-first or parallel methodology + production scope? | Phase 3 wave planning overall |
 
 ---

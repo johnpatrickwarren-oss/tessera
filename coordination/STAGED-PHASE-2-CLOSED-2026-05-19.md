@@ -6,6 +6,12 @@ _Durable staging artifact for methodology work the operator has authorized to ex
 
 ## Item 1 — MR-2 CLAUDE-IMPLEMENTER.md consolidation
 
+**Status at R41:** CLOSED-AT-R39. MR-2 consolidation executed at R39 across 3 passes:
+feat(R39-pass1) cross-project rule pointers in CLAUDE-ARCHITECT.md;
+feat(R39-pass2) empirical-premise composite in CLAUDE-ARCHITECT.md;
+feat(R39-pass3) CLAUDE-IMPLEMENTER.md fold of 6 post-MR-2 entries into composites.
+CLAUDE-IMPLEMENTER.md at 30 entries post-MR-2 (AC-R36-21 count guard met).
+
 **Operator-requested:** 2026-05-18 mid-afternoon ("agreed with recommendation, proceed").
 
 **Origin question:** "how do we reduce the size of the claude-implementer.md file?"
@@ -101,6 +107,8 @@ When Tessera ages past ~6 months, oldest R01-R10 reinforcements may have been su
 
 ## Item 2 — R32 carry-forward punch list (per WAVE-GATE-03 Pre-flags + OQ-W3-3 default B)
 
+**Status at R41:** CLOSED-AT-R36. WU-07 Phase 2 close-walk (feat(R36) commit c49df0e "8 deliverables GREEN") addressed the SCOPING-MEMO MAJOR-1 structural surgery, 4 weak ACs, execSync→execFileSync carry-forwards at q25 and q30, and R26 MINOR-2 PARTIALLY-CLOSED deferral per WU-07 scope. All sub-items resolved at Phase 2 close-walk.
+
 **Per WAVE-GATE-03 § Pre-flags table + OQ-W3-3 default B** (SCOPING-MEMO MAJOR-1 surgery deferred to WU-07 close-walk for cleaner scope-bounding), the following R32 carry-forward items land at WU-07 (Phase 2 close-walk):
 
 1. **SCOPING-MEMO MAJOR-1 structural surgery** (from R32 hybrid Reviewer) — specific spec amendment required; details in `coordination/reviews/REVIEWER-REPORT-R32.md` § MAJOR-1.
@@ -113,6 +121,11 @@ WU-07 Architect reads this file as part of close-walk scope authoring.
 ---
 
 ## Item 3 — Anchor backflow: subprocess-node-test transitive hang class
+
+**Status at R41:** CLOSED/FORWARDED. Tessera-local portion (q29/q34/q36 subprocess-hang
+skip guards + spec template guidance) CLOSED-AT-R36 per WU-07 deliverables. Anchor backflow
+portion FORWARDED to `coordination/ANCHOR-BACKFLOW-2026-05-18.md` (4 PRs for anchor canonical
+update — operator-scheduled). ANCHOR-BACKFLOW-2026-05-18.md file exists at disk.
 
 **Surfaced:** 2026-05-18 mid-R34 (~6:24 PM commit chain + 7:15 PM hang start). Reviewer cold-binding-command session hung indefinitely on `test/q29-k8s-adapter.test.js` during its standard `node --test test/*.test.js` invocation. Pipeline shell PID 76989 alive + waiting on hung Reviewer; 1-2 orphan node-test processes accumulated; bg task notification never fired.
 
@@ -160,6 +173,11 @@ This is real methodology learning + spec template work; should land at WU-07 clo
 
 ## Item 4 — Phase 3 capability candidate: Tailscale + M4 Pro mini remote-execution infrastructure
 
+**Status at R41:** FORWARDED-TO-PHASE-3-CANDIDATES. Item forwarded to
+`coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` § 4.1 "Tailscale + M4 Pro mini
+remote-execution (MR-3 candidate)". No Phase 2 implementation required or expected.
+Phase 3 entry authorization is operator-owned.
+
 **Surfaced:** 2026-05-18 mid-R34 (operator mentioned during Reviewer-hang investigation).
 
 **Capability:** Operator has a Mac mini (M4 Pro, 64GB RAM) accessible via Tailscale. Could be used to offload heavy compute from the M5 MacBook Pro.
@@ -189,6 +207,12 @@ This is real methodology learning + spec template work; should land at WU-07 clo
 ---
 
 ## Item 5 — R34 pending REINFORCED-line appends (spec § 9.9 anti-scope constraint)
+
+**Status at R41:** CLOSED-AT-R39. The staged R34 reinforcement lines (for CLAUDE-ARCHITECT.md
+and CLAUDE-IMPLEMENTER.md) were applied during the MR-2 consolidation passes at R39. The
+`feat(R39-pass1)` through `feat(R39-pass3)` commits incorporated the R34-staged content into
+the composite headings per Item 1 consolidation strategy. CLAUDE-IMPLEMENTER.md spec-vs-impl
+semantic conflict and regex-fix sub-variants are present in the HALT-DISCIPLINE composite.
 
 **Staged by:** Memorial-Updater (R34 close, 2026-05-18).
 
