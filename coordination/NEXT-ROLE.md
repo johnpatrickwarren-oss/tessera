@@ -191,4 +191,4 @@ coordination/MEMORIAL.md    ← ALLOWED_REGEX /^coordination\/MEMORIAL\.md$/ ✓
 
 ### Attested SHA
 
-**Chore commit SHA (to be filled after chore commit):** see git log — chore commit is immediately after `fdc55ed`.
+**Chore commit SHA:** `40ce7b5` (HEAD at routing time; Reviewer verifies against this SHA).
