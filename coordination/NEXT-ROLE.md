@@ -34,8 +34,8 @@ Skip breakdown: AC-R29-12 and AC-R34-21 skip due to NODE_TEST_CONTEXT=child-v8 (
 | test/q28-slurm-adapter.test.js | 12 | 12 | 0 |
 | test/q-md-f4-common-mode-injection.test.js | 13 | 13 | 0 |
 
-### Chore-A SHA (recorded after commit)
-`<CHORE_A_SHA>` — substitute after commit.
+### Chore-A SHA
+`c49df0e` — all R36 implementation files committed here.
 
 ---
 
