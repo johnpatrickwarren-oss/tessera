@@ -62,3 +62,13 @@ ITS primitive parameters (defaults per Q-R34-SPEC § 3.2 module constants):
 > Interrupted time series (ITS) analysis is a quasi-experimental design that can be used to evaluate the longitudinal effects of interventions at a population level. It is particularly useful when a randomized trial is not feasible or ethical. The key requirement is a clearly defined intervention point that interrupts the time series.
 
 **Tessera relevance:** ITS pre/post window comparison is the statistical primitive selected for WU-06 event-conditional attribution (§ 0.4). The approach maps directly to the 4-cell PR-F7 evidence matrix: pre-window per-shard firing rate vs post-window firing rate, classified per shard. Operates on FiredShardEvent lists (the WU-04 input shape) — no new ingestion machinery required. The correlation_window_seconds discriminator (Cell 4) implements the confounding-discrimination step that distinguishes event-correlated from latent-fault-revealed post-window fires.
+
+---
+
+## Attribution method selection rationale
+
+ITS (Bernal 2017) was selected over CausalImpact (Brodersen 2015) and Synthetic Control (Abadie 2010) for the following reasons documented in Q-R34-SPEC § 0.4:
+
+1. **CausalImpact rejected**: requires a control time series; all fleet shards see the same deployment event simultaneously, leaving no control group.
+2. **Synthetic Control rejected**: requires a donor pool of non-treated units; empty by construction for fleet-simultaneous events.
+3. **ITS selected**: pre/post window comparison maps directly to FiredShardEvent lists (the WU-04 input shape) with no additional ingestion machinery.

@@ -292,12 +292,8 @@ test('AC-R34-18: VENDORING-MANIFEST.md row for engine/types/config.ts contains D
 
 // ── AC-R34-19: Anti-scope diff chore-A SHA..HEAD ⊆ ALLOWED_SET ───────────────
 test('AC-R34-19: anti-scope diff (chore-A SHA..HEAD) ⊆ ALLOWED_SET ∪ carve-outs', () => {
-  const CHORE_A_SHA = process.env.R34_CHORE_A_SHA ?? '__placeholder__';
-  if (CHORE_A_SHA === '__placeholder__') {
-    // At chore-A RED time the SHA is not yet known; test is a PASS placeholder.
-    // The Implementer substitutes the actual SHA before routing to Reviewer.
-    return;
-  }
+  const CHORE_A_SHA = process.env.R34_CHORE_A_SHA ?? '0a346ff';
+  // 0a346ff = R34 RED commit (chore-A): test stubs + substrate + coordination artifacts.
 
   const ALLOWED_SET: ReadonlyArray<string> = [
     'engine/events/event-feed.ts',
