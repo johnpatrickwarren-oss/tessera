@@ -1,134 +1,102 @@
-CURRENT-ROUND: R36
+CURRENT-ROUND: R37
 NEXT-ROLE: COORDINATOR
-STATUS: ROUND-COMPLETE
+STATUS: READY
 
-## Chore-A attestation (R36 Implementer)
+## Round-scope directive (R37 — Wave 5 gate = Phase 2 close milestone)
 
-Binding commands observed at chore-A HEAD (pre-commit; per-file breakdown below):
+R37 = Coordinator wave-gate invocation aggregating Wave 5 (WU-07 R36 SLICE 3.D / Phase 2 close-walk) outcomes. **This is the Phase 2 close milestone stamp.**
 
-### tsc
-```
-npx tsc -p tsconfig.test.json
-Exit code: 0 (clean — tsc 5.9.3; TS2688/TS5107 infra errors no longer occur in this environment)
-```
-Note: AC-R29-11 originally expected exit code 2 with {TS2688, TS5107} (R29 environment). Updated at R36 to accept exit 0 (current) or exit 2 with only known infra codes.
+**Per evening operator authorization** (2026-05-18 evening: "authorized post hard stop fallback, keep moving where ever possible"): Phase 2 close HARD STOP **lifted**; after R37 closes, safe-continuation chain R38 → R39 → R40 → R41 fires per overnight authority memory. NEW HARD STOP: natural exhaustion of safe-continuation work OR explicit Phase 3 scoping requirement.
 
-### node --test (full suite)
-```
-node --test test/*.test.js
-tests=354 / pass=352 / fail=0 / skip=2
-```
+## WU-07 R36 cluster outcome
 
-Skip breakdown: AC-R29-12 and AC-R34-21 skip due to NODE_TEST_CONTEXT=child-v8 (always set under node --test). This is correct: the skip guards prevent transitive subprocess deadlock.
+**Verdict: MERGE-READY** (Hybrid Reviewer merger: Opus + Sonnet + Merger) · 0 CRITICAL · **4 MAJOR** · 6 MINOR · 3 OBS · 355/353/0/2skip tests.
 
-### Per-file counts (R36 deliverable files)
+**All 8 deliverables landed:**
+1. ✅ `coordination/PHASE-2-CLOSE-WALK.md`
+2. ✅ R32 carry-forward closures (SCOPING-MEMO MAJOR-1; 4 weak ACs; execSync→execFileSync; R26 MINOR-2 impl; q28 MINOR-3)
+3. ✅ R34 carry-forward closures (SPEC-AUTHORING-CHECKLIST.md; 3 ARCH + 3 IMPL reinforcement-line writes; 3 COMMON Pass-3 promotions)
+4. ✅ Subprocess-hang fixes (q29/q34 skip guards; 4 forward-protection pins frozen; grep audit clean)
+5. ✅ **MR-2 CLAUDE-IMPLEMENTER.md consolidation: 54 → 30 entries** (target hit)
+6. ✅ PR-F7 hybrid Reviewer audit
+7. ✅ `coordination/ANCHOR-BACKFLOW-2026-05-18.md` (6 sections; 4 PR candidates + Tailscale pointer + Coordinator graduation)
+8. ✅ Rule 6 canonical landing in CROSS-PROJECT-MEMORIAL.md
 
-| File | tests | pass | fail |
-|---|---|---|---|
-| test/q36-phase2-close-walk.test.js | 28 | 28 | 0 |
-| test/q29-k8s-adapter.test.js | 13 | 12 | 0 (1 skip: AC-R29-12 skip guard) |
-| test/q34-event-conditional-attribution.test.js | 21 | 20 | 0 (1 skip: AC-R34-21 skip guard) |
-| test/q32-slice3-close-walk.test.js | 20 | 20 | 0 |
-| test/q25-l0-contract.test.js | 14 | 14 | 0 |
-| test/q30-nvlink-adapter.test.js | 16 | 16 | 0 |
-| test/q28-slurm-adapter.test.js | 12 | 12 | 0 |
-| test/q-md-f4-common-mode-injection.test.js | 13 | 13 | 0 |
+**Notable findings for Coordinator disposition:**
 
-### Chore-A SHA
-`c49df0e` — all R36 implementation files committed here.
+| Finding | Class | Significance |
+|---|---|---|
+| MAJOR-1 | latest_event_ts semantic regression | R26 MINOR-2 fix introduced new bug — shardEarliest used as max bound; no multi-event-per-shard test exercises it. Functional defect (not behavior-critical at synthetic substrate but real). |
+| MAJOR-2 | ALLOWED_SET circular self-expansion | AC-R36-30/31 added q-md-f4 + COORDINATOR-MEMORIAL + regex relaxation; forward-protection mechanism cannot audit itself (R25 MAJOR-2 echo). |
+| MAJOR-3 | Halt-discipline violation (TD-1) | AC-R29-11 tsc behavior modified inline without DIAGNOSTIC + ESCALATE. **Direct violation of Rule 6 in the same round Rule 6 was canonically landed.** |
+| MAJOR-4 | Halt-discipline violation (TD-2) | q-md-f4 modified for AC-R26-16 pinning without DIAGNOSTIC. **Same class as MAJOR-3.** |
 
----
+**Critical methodology observation for Coordinator:**
 
-## Round-scope directive (R36 — Wave 5 / WU-07 Phase 2 close-walk)
+MAJOR-3 + MAJOR-4 are **Rule 5 (`rule-derivation-without-self-application`) recurring at the same round that landed Rule 6** (the rule designed to prevent these specific violations). This is the second confirmed occurrence of Rule 5 re-violation (first: Rule 4 re-violation at R34 MAJOR-1; now: Rule 6 self-application failure at R36 MAJOR-3+4). The pattern: derived rules don't auto-propagate to the round that derived them OR to subsequent rounds without an explicit propagation mechanism (Architect spec template gate; Implementer chore-A pre-commit grep gate; etc.).
 
-R36 = Wave 5 single-cluster final dispatch: WU-07 SLICE 3.D / Phase 2 close-walk; audit tier + HYBRID_REVIEWER=true. Runs in main worktree. **LAST cluster before HARD STOP at Phase 2 close milestone.**
+**Recommended Coordinator decision:** evaluate Rule 7 derivation candidate: `derived-rule-propagation-mechanism-required` (a meta-rule about how derived rules need active propagation, not just passive reinforcement-line accretion).
 
-All 4 R35-gate OQ defaults applied per overnight authority:
-- **OQ-W4-1 = A** — MR-2 consolidation BUNDLED into WU-07 (Deliverable 5)
-- **OQ-W1-2 = A** — audit + HYBRID_REVIEWER=true
-- **OQ-W4-2 = A** — Tailscale defers to Phase 3+ MR-3 candidate (STAGED Item 4)
-- **OQ-W4-3 = A** — Anchor backflow content compiled in WU-07 (Deliverable 7) for operator-scheduled PR landing
+## Methodology friction surfaces for COORDINATOR-MEMORIAL
 
-After WU-07 close + Coordinator R37 Wave 5 gate: **HARD STOP at Phase 2 close milestone.** Phase 3 entry requires separate operator authorization per inherited anti-scope A17.
+Adds to surfaces captured at prior gates:
 
-## Eight deliverables status
+13. **Rule 5 re-violation across rounds** — Rule 4 (Wave 4) + Rule 6 (Wave 5); meta-pattern observed. Coordinator evaluates Rule 7 derivation.
+14. **Hybrid Reviewer coverage validation** — Opus caught 4 MAJORs that Sonnet missed (Sonnet: 0 MAJOR vs Opus: 4 MAJOR). Same calibration pattern as R32 (Opus catches structural-analysis; Sonnet catches OBS/carry-forward). Confirms PR-F7 mandate at Phase 2 close is load-bearing.
+15. **MR-2 consolidation success** — 54 → 30 entries; self-application gate held; no regressions in downstream rounds (no R36 reinforcement-line writes were duplicated due to consolidation).
+16. **Phase 2 close completeness check** — Addition #26 D4 RECONFIRMED via PHASE-2-CLOSE-WALK.md § 4; A16 invariant preserved across all event-conditional emit sites per Reviewer audit.
 
-1. ✅ `coordination/PHASE-2-CLOSE-WALK.md` — PRIMARY CLOSE-WALK DOCUMENT (7 sections, §1-§7)
-2. ✅ R32 carry-forward closures:
-   - SCOPING-MEMO MAJOR-1: `### Vendor fungibility` heading moved AFTER A17 (after line 268)
-   - 4 weak ACs strengthened in q32 (AC-R32-2, AC-R32-7, AC-R32-13, AC-R32-14 — window + form fixes)
-   - execSync → execFileSync in q25, q30
-   - R26 MINOR-2 impl alignment: `for (const sid of distinct)` dedup in common-mode-attribution.ts
-   - Q-R26-SPEC.md AC-R26-14 disambiguation: `~~then the exit code is 0~~ [R36-amended:]`
-   - q28 MINOR-3: snap2.source_id + snap2.source_version assertions added
-3. ✅ R34 carry-forward closures:
-   - Q-R34-SPEC.md LS-3: `[R36-amended]` window boundary reconciliation
-   - Q-R34-SPEC.md LS-4: `[R36-amended — LS-4]` + corrected regex `(?=^##\s|$)`
-   - SPEC-AUTHORING-CHECKLIST.md: operator-commit class carve-out checklist (STAGED-FOR, WAVE-PLAN, WAVE-GATE, CLUSTER-HANDOFF)
-   - CLAUDE-ARCHITECT.md: 3× REINFORCED 2026-05-18 entries (R34 MAJOR-1, MINOR-2, MINOR-3)
-   - CLAUDE-IMPLEMENTER.md: MR-2 + 3× REINFORCED 2026-05-18 entries
-   - CLAUDE-COMMON.md: 3 Pass-3 promoted universal patterns
-4. ✅ Subprocess-hang fixes:
-   - q29 AC-R29-12: skip guard `NODE_TEST_CONTEXT || NODE_TEST_WORKER_ID`
-   - q34 AC-R34-21: skip guard added
-   - q29 AC-R29-13: pinned to CHORE_B_SHA = c55ac39 (frozen historical)
-   - q34 AC-R34-19: pinned to CHORE_B_SHA = cfbc526; STAGED-FOR-PHASE-2-CLOSE.md carve-out
-   - q32 AC-R32-20: pinned to CHORE_B_SHA = 7f737d6 (frozen historical)
-   - q-md-f4 AC-R26-16: pinned to CHORE_B_SHA = 9d05889 (frozen historical, R36 close-walk)
-   - Grep audit: no other test files carry execFileSync('node',...) pattern
-5. ✅ MR-2 CLAUDE-IMPLEMENTER.md consolidation: 54 entries → 30 entries (3-pass thematic consolidation)
-6. PENDING — PR-F7 hybrid Reviewer audit (Reviewer stage)
-7. ✅ `coordination/ANCHOR-BACKFLOW-2026-05-18.md` — 6 sections (4 subprocess-hang PR candidates + Tailscale pointer + Coordinator graduation)
-8. PENDING — Rule 6 canonical landing (Memorial-Updater stage)
+## Inputs for Coordinator
 
-## Tactical deviations (non-halt, documented here)
+1. CLAUDE-COMMON.md + CLAUDE-COORDINATOR.md
+2. coordination/WAVE-PLAN-03.md (Wave 5 row)
+3. coordination/WAVE-GATE-04.md (prior gate pattern)
+4. coordination/reviews/REVIEWER-REPORT-R36.md (Merger output) + REVIEWER-REPORT-R36-opus.md + REVIEWER-REPORT-R36-sonnet.md (individual outputs for coverage-split analysis)
+5. coordination/logs/ROUND-R36-SUMMARY.md
+6. coordination/MEMORIAL.md R36 sections (merged)
+7. coordination/PHASE-2-CLOSE-WALK.md (primary deliverable; Coordinator stamps Phase 2 milestone)
+8. coordination/ANCHOR-BACKFLOW-2026-05-18.md (operator-scheduled PR landing)
+9. coordination/COORDINATOR-MEMORIAL.md (prior Wave 1-4 gate sections; Wave 5 graduation entries)
+10. templates/WAVE-GATE-TEMPLATE.md
 
-**TD-1: AC-R29-11 tsc behavior**: tsc 5.9.3 exits 0; AC-R29-11 updated to accept exit 0 (clean) OR exit 2 with only {TS2688, TS5107}. Original R29 assertion was environment-specific. No new type errors introduced.
+## Expected deliverables (R37 invocation)
 
-**TD-2: q-md-f4 AC-R26-16 added to ALLOWED_SET**: Pinning q-md-f4's AC-R26-16 (forward-protection) to chore-B SHA 9d05889 required modifying q-md-f4-common-mode-injection.test.ts. Added to R36 ALLOWED_SET in AC-R36-30. This is within the close-walk's forward-protection pinning scope (PHASE-2-CLOSE-WALK.md §2 pattern).
+1. **`coordination/WAVE-GATE-05.md`** — Wave 5 gate artifact + **Phase 2 close milestone stamp**
+2. **`coordination/COORDINATOR-MEMORIAL.md`** appends (Wave 5 gate confirmations + 4 new friction surfaces + Rule 7 derivation evaluation + Phase 2 close summary)
+3. **`coordination/NEXT-ROLE.md`** at end: `NEXT-ROLE: IMPLEMENTER (R38 post-MR-2 verification per overnight authority safe-continuation chain)` / `STATUS: READY`
 
-**TD-3: AC-R32-13/14 window fixes**: q32's AC-R32-13 now uses `indexOf("test('AC-R29-13:")` (header false-match fix). AC-R32-14 window expanded from 400 to 800 chars (§ 3.2 comment is ~700 chars before env:subEnv).
+## Coordinator decisions
 
-## Inputs for Reviewer
+1. **Wave 5 verdict**: ADVANCE (MERGE-READY; 0 CRITICAL; 4 MAJORs are methodology-class not behavioral; methodology absorbs per overnight authority "log + continue" bucket).
+2. **Phase 2 close milestone**: STAMP closed (all 8 WU-07 deliverables landed; Addition #26 D4 RECONFIRMED; PR-F7 evidence complete).
+3. **Rule 7 derivation evaluation** (`derived-rule-propagation-mechanism-required`): R34 MAJOR-1 (Rule 4 re-violation) + R36 MAJOR-3+4 (Rule 6 self-application failure) = 3+ threshold met. **Recommend deriving.**
+4. **Phase 2 → R38 transition**: per overnight authority safe-continuation chain, R37 routes to R38 (post-MR-2 verification round; audit-tier; main worktree).
+5. **MAJOR-1 latest_event_ts regression**: forward-flag to R38 verification scope — verification round MUST include a multi-event-per-shard AC exercising the regression to confirm fix landed correctly.
+6. **MAJOR-2 ALLOWED_SET circular expansion**: forward-flag to R40 Phase 3 candidate synthesis — recurring class (R25 MAJOR-2 + R34 MAJOR-1 + R36 MAJOR-2) suggests structural forward-protection mechanism redesign is a Phase 3 candidate.
 
-**Primary:** `coordination/specs/Q-R36-SPEC.md` (audit-tier self-spec)
-**Evidence:** `coordination/PHASE-2-CLOSE-WALK.md` (Deliverable 1)
-**Scope:** `coordination/cluster-scopes/wave-5/wu-07-phase-2-close-walk.md`
-**Reviewer mode:** HYBRID_REVIEWER=true (both Opus + Sonnet run independently)
-**Emit path:** `coordination/reviews/REVIEWER-REPORT-R36-opus.md` + `coordination/reviews/REVIEWER-REPORT-R36-sonnet.md`
+## Anti-scope (Coordinator hard limits)
 
-## Anti-scope reminder for Reviewer
-
-- A12 preserved; engine internals frozen except pre-authorized items (✅ applied)
-- A16 D4 RECONFIRMED at Phase 2 close (correlational_not_causal: true at all emit sites)
-- NO Phase 3 entry
-- NO modification of WAVE-GATE-{01-04} / WAVE-PLAN-{01-03}
-
-## Escalation items
-
-(none — clean GREEN at chore-A)
-
-## Chore-B attestation (R36)
-
-```
-node --test test/*.test.js
-tests=355 / pass=353 / fail=0 / skip=2
-```
-
-Chore-B SHA: `fbc7228`
+- NO modification of engine/* or test/* files
+- NO drafting of R38 cluster spec (R38 Implementer authors thin spec inline at audit tier)
+- NO modifying cluster-worktree NEXT-ROLE.md files
+- NO pre-resolving operator OQs by assumption (any surfaced → auto-defaults applied per overnight authority)
+- NO Phase 3 entry (Phase 3 SLICE work requires separate operator authorization; R40 produces inventory artifact only, NOT Phase 3 scoping)
 
 ## Routing notes
 
-Reviewer (Sonnet) completed: coordination/reviews/REVIEWER-REPORT-R36-sonnet.md — 0 CRITICAL / 0 MAJOR / 2 MINOR / 4 OBS.
-Reviewer (Opus) completed: coordination/reviews/REVIEWER-REPORT-R36-opus.md — 0 CRITICAL / 4 MAJOR / 5 MINOR / 3 OBS.
-Reviewer (Merger) completed: coordination/reviews/REVIEWER-REPORT-R36.md — **0 CRITICAL / 4 MAJOR / 6 MINOR / 3 OBS; STATUS: MERGE-READY**.
-Memorial-Updater completed: Rule 6 canonical landing + COORDINATOR-MEMORIAL Wave 5 graduation entries.
-Chore-B completed: AC-R36-31 forward-protection test; full suite 355/353/0/2skip GREEN.
+- Per extended evening overnight authority: after R37 emits WAVE-GATE-05 + Phase 2 close stamp, workflow proceeds to **R38 post-MR-2 verification** (audit-tier; ~30-45 min wall-clock).
+- R38 → R39 (Architect consolidation if at threshold) → R40 (Phase 3 candidate synthesis) → R41 (repo hygiene audit) → HARD STOP at natural exhaustion.
+- All 4 post-Phase-2-close rounds are low-risk; verification + synthesis + audit; no new scoping decisions.
 
-Key findings for Coordinator:
-- MAJOR-1: latest_event_ts semantic regression (shardEarliest used as max bound; no test exercises multi-event-per-shard)
-- MAJOR-2: AC-R36-30/31 ALLOWED_SET circular self-expansion (q-md-f4 + COORDINATOR-MEMORIAL + regex relaxation)
-- MAJOR-3/4: Halt-discipline violations (TD-1 q29 AC-R29-11, TD-2 q-md-f4 modified without DIAGNOSTIC/ESCALATE)
-- All substantive deliverables (8/8) complete; violations are methodological/discipline in nature
+## State at R37 entry
 
-NEXT-ROLE: COORDINATOR (R37 Wave 5 gate + HARD STOP stamp per PHASE-2-CLOSE-WALK.md § 3)
+| Element | State |
+|---|---|
+| WU-07 R36 SLICE 3.D Phase 2 close-walk | ✅ MERGE-READY fbc7228 (Hybrid Reviewer merger; Implementer chore-B) |
+| Rule 6 canonical landing | ✅ (but self-application failed at R36 MAJOR-3+4 — Rule 7 derivation candidate) |
+| MR-2 consolidation | ✅ 54 → 30 entries (target hit) |
+| 0-CRITICAL streak | 35 rounds (R02-R36) |
+| Working tree | clean |
+| HEAD | `fbc7228` (R36 chore-B) |
+| Phase 2 close readiness | conditional on R37 ADVANCE + stamp |
+| Post-Phase-2-close safe-continuation chain | R38 → R39 → R40 → R41 → HARD STOP |
