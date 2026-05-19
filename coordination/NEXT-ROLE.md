@@ -191,4 +191,4 @@ coordination/MEMORIAL.md    ← ALLOWED_REGEX /^coordination\/MEMORIAL\.md$/ ✓
 
 ### Attested SHA
 
-**Chore commit SHA:** `40ce7b5` (HEAD at routing time; Reviewer verifies against this SHA).
+**Routing HEAD SHA:** `37df4da` (chore = `40ce7b5`; SHA-record commit = `37df4da`; final HEAD at routing time).
