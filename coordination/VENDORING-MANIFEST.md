@@ -38,7 +38,7 @@ _DeploySignal engine files maintained by `tools/vendor-from-deploysignal.sh`. An
 | engine/types/index.ts | engine/types/index.ts | 5a72371 | vendored-at-pin | 2026-05-16 | |
 | engine/types/agent.ts | engine/types/agent.ts | 5a72371 | vendored-at-pin | 2026-05-16 | Compilation dependency for config.ts + index.ts; Addition #27 dormant at Phase 1 |
 | engine/l0/schema-continuity.ts | engine/l0/schema-continuity.ts | 5a72371 | vendored-at-pin | 2026-05-16 | Compilation dependency for 7 detector files; L0 gating-layer infra |
-| engine/types/config.ts | engine/types/config.ts | 5a72371 | vendored-with-deltas | 2026-05-16 | SLICE 1 deltas: shard_id dimension + warm_start confidence + PerShardResidual/PerShardCell + per_shard_cells field |
+| engine/types/config.ts | engine/types/config.ts | 5a72371 | vendored-with-deltas | 2026-05-16 | SLICE 1+SLICE 4 deltas (5 total): SLICE 1 (R01) deltas 1-4 — shard_id dimension + warm_start confidence + PerShardResidual/PerShardCell + per_shard_cells field. R34 delta 5 — CompiledConfig.freeze_hook_enabled?: boolean (Phase 2 SLICE 4 event-driven freeze hook activation flag). |
 | engine/detectors/_q72-trace.ts | engine/detectors/_q72-trace.ts | 5a72371 | vendored-at-pin | 2026-05-16 | Compilation dependency for family-c-betting-e-process.ts; env-gated Q72 diagnostic (no-op in production) |
 | engine/o0/lifecycle-events.ts | engine/o0/lifecycle-events.ts | 5a72371 | vendored-at-pin | 2026-05-16 | Compilation dependency for types/verdict.ts + types/orchestration.ts; O0 lifecycle type contracts |
 | engine/o0/reversibility-source.ts | engine/o0/reversibility-source.ts | 5a72371 | vendored-at-pin | 2026-05-16 | Compilation dependency for types/orchestration.ts; O0 reversibility type contract |
