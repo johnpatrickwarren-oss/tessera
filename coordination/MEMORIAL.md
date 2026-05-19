@@ -453,3 +453,21 @@ CONFIRMATION: substantive-deliverable-4-tightening-sub-sections-lands | SPEC-AUT
 CONFIRMATION: reviewer-escalate-routing-discipline-applied | Reviewer correctly applied CLAUDE-REVIEWER.md REINFORCED 2026-05-19: found 1 CRITICAL + 1 co-CRITICAL + 3 MAJOR + 3 MINOR + 4 OBS (exceeded the "find at least one mistake" mandate); routed STATUS: ESCALATE with explicit operator-decision framing (Option A: MERGE-READY-with-reservations vs Option B: R48 chain extension). Framing was actionable; operator selected Option B within the R47 session. Reviewer maintained strict role boundary throughout (findings documented; no re-implementation; no unilateral routing override). | R47 | REVIEWER
 
 ---
+
+## R48 — IMPLEMENTER
+
+VIOLATION: spec-premise-empirical-failure | AC-R48-8 baseline 361/356/2/3 was authored from the R47 chore-A value rather than from `node --test` run at ROUND_START (6e8b1c6 = R47 MU commit). R47 MU commit modified CLAUDE-IMPLEMENTER.md (34 REINFORCED entries, exceeding ≤30 limit), breaking forward-protection test AC-R36-21 and shifting the actual baseline to 361/355/3/3. Spec should have said 361/355/3/3. DIAGNOSTIC-R48-baseline.md written; Option A recommended (amend to 361/355/3/3). | R48 | IMPLEMENTER
+
+CONFIRMATION: halt-discipline-applied | Pre-implementation baseline verification surfaced AC-R48-8 literal contradiction (spec 361/356/2/3 vs actual 361/355/3/3). Halted immediately per spec § 8 item 3 + R45 MAJOR-2. Wrote DIAGNOSTIC-R48-baseline.md with bounded options A/B/C. Set STATUS: ESCALATE in NEXT-ROLE.md. Did not proceed past the contradiction or inline-amend the AC without operator approval. | R48 | IMPLEMENTER
+
+CONFIRMATION: implementation-complete-all-5-findings-closed | All 5 R47 Reviewer findings closed: (a) CRITICAL-1+CRITICAL-2+MAJOR-3 — AC-R47-10 in Q-R47-EMPIRICAL.sh replaced with non-recursive guard-testing check (`_PRE_COMMIT_RULE_SWEEP_ACTIVE=1 scripts/pre-commit-rule-sweep.sh ... | grep -c 'recursion guard active'`); (b) MAJOR-2 — AC-R47-5 changed from assert_ge "1" to assert_eq "1", AC-R47-6 from assert_ge "2" to assert_eq "7" in Q-R47-EMPIRICAL.sh; (c) MAJOR-1 — Q-R47-SPEC.md AC-R47-7 text updated from loose `grep -c 'asserted by aggregate'` to tighter `grep -cE '^[[:space:]]*echo "  PASS.*aggregate exit'`; (d) root cause — same-round recursion guard added to `scripts/pre-commit-rule-sweep.sh:rule_1_check` via `_PRE_COMMIT_RULE_SWEEP_ACTIVE` env-var check + export pattern. | R48 | IMPLEMENTER
+
+CONFIRMATION: tdd-red-state-verified | RED state confirmed before implementation via static grep checks for ACs 3-6: assert_ge present (not yet replaced), old spec text present, old recursive pattern present. AC-R48-2 (guard runtime test) would have hung at RED state; confirmed non-recursive post-implementation via direct guard invocation before running full verifier. | R48 | IMPLEMENTER
+
+CONFIRMATION: verify-empirical-acs-exit-zero-pre-chore-a | `scripts/verify-empirical-acs.sh R48` produced 9 PASS, 0 FAIL before chore-A commit. Actual output recorded in NEXT-ROLE.md attestation. Will re-verify at chore-A SHA after commit. | R48 | IMPLEMENTER
+
+CONFIRMATION: anti-scope-clean | No files outside the 7-path ALLOWED_SET were modified. Q-R47-EMPIRICAL.sh (items a+b), Q-R47-SPEC.md (item c), scripts/pre-commit-rule-sweep.sh (item d), Q-R48-SPEC.md+Q-R48-EMPIRICAL.sh (baseline amendment + verifier), coordination/MEMORIAL.md, coordination/NEXT-ROLE.md. engine/*, test/*, tools/*, CLAUDE-*.md untouched. | R48 | IMPLEMENTER
+
+CONFIRMATION: tactical-timeout-deviation-documented | `timeout 30` prescribed in spec § 3.2 for AC-R47-10 and AC-R48-2 was omitted: macOS system lacks `timeout` command (`command not found: timeout`). Guard itself prevents hanging; timeout was safety net only for the pre-guard recursion case. Tactical fix per TACTICAL AUTONOMY clause. Deviation documented in NEXT-ROLE.md spec-deviances section and commit message for Reviewer visibility. | R48 | IMPLEMENTER
+
+---

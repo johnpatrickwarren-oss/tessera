@@ -1,6 +1,22 @@
 CURRENT-ROUND: R48
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
+
+## § Operator resolution of R48 ESCALATE — baseline-literal correction (2026-05-19)
+
+**Decision:** Option A approved (per `coordination/diagnostics/DIAGNOSTIC-R48-baseline.md`).
+
+**Authorization:** Amend `coordination/specs/Q-R48-SPEC.md` AC-R48-8 and `coordination/specs/Q-R48-EMPIRICAL.sh` AC-R48-8 block to use `361/355/3/3` (actual pre-R48 baseline) rather than `361/356/2/3` (R47 chore-A baseline; stale post-R47-MU).
+
+**Rationale:** R47 MU commit `6e8b1c6` (= R48 ROUND_START) added 4 REINFORCED entries to CLAUDE-IMPLEMENTER.md (30→34), breaking forward-protection test AC-R36-21 ("≤30 entries after MR-2"). The 3rd test failure (AC-R36-21) predates R48 entirely and is structurally attributable to R47 MU, not R48 implementation. R48's "test baseline preserved" intent is satisfied at `361/355/3/3` since R48 won't cause additional drift beyond the 3 pre-existing failures.
+
+**Halt condition baseline literal update:** § Halt conditions item 3 below now reads `any change from 361/355/3/3` (not 361/356/2/3).
+
+**Separate operator-decision flag (post-R48):** CLAUDE-IMPLEMENTER.md is now at 34 REINFORCED entries (re-broke the 30-entry threshold R43 consolidated to). This is the SAME failure mode R43 fixed at R36 → R43; R47 MU re-introduced via raw appends rather than composite rollups. Candidate for a future consolidation round (e.g., R51) — should NOT be folded into R48 scope per anti-scope. Flag #6 for operator wake (added to § Pending operator decisions).
+
+**Resume command:** `./run-pipeline.sh --round R48 --start-at IMPLEMENTER`. Implementer reads this resolution + DIAGNOSTIC-R48-baseline.md, applies Option A amendment to spec + verifier, proceeds with R48 implementation (items a/b/c/d), commits chore-A.
+
+---
 
 ## Round-scope directive (R48 — fix R47 CRITICALs; audit-tier)
 
@@ -52,7 +68,7 @@ Specifically (per `coordination/reviews/REVIEWER-REPORT-R47.md` § Routing Optio
 
 1. **Q-R48-EMPIRICAL.sh fails its own verification:** if `scripts/verify-empirical-acs.sh R48` exits non-zero at chore-A → HALT + DIAGNOSTIC. Do NOT attest PASS on a failed AC.
 2. **Recursion guard breaks existing tested R44 spec § 7 check:** the `scripts/pre-commit-rule-sweep.sh` Rule 7 spec § 7 enumeration check (mechanical part validated at R44/R46) must remain functional after the recursion guard is added → HALT + DIAGNOSTIC if it breaks.
-3. **Test baseline drift:** any change from 361/356/2/3 → HALT + DIAGNOSTIC. R48 must not perturb the test surface.
+3. **Test baseline drift:** any change from 361/355/3/3 (actual pre-R48 baseline; corrected per § Operator resolution above) → HALT + DIAGNOSTIC. R48 must not perturb the test surface beyond the 3 pre-existing failures (AC-R36-21 + AC-R36-30 + AC-R36-31).
 4. **Bash syntax error:** `bash -n` on modified scripts exits non-zero → HALT + DIAGNOSTIC.
 5. **Verifier hangs at smoke test:** if `scripts/verify-empirical-acs.sh R47` (legacy verifier post-R48-fixes) or `R48` (new verifier) hangs at any AC, HALT + DIAGNOSTIC. R48's purpose is precisely to fix the hang; reproducing it is unacceptable.
 
@@ -80,3 +96,47 @@ cd /Users/johnwarren/concord/tessera
 ## Operator-decision audit trail
 
 R47 closed via pipeline MU at `6e8b1c6` with operator-selected Option B (ESCALATE → R48 chain extension to close the recursion loop). See `coordination/MEMORIAL.md` R47 MEMORIAL-UPDATER section for canonical record. R47 NEXT-ROLE.md at SHA `6e8b1c6` preserved in git history for the full pre-R48 operator-resolution content.
+
+---
+
+## R48 IMPLEMENTER chore-A attestation
+
+**Branch:** main
+**Round-start SHA:** `6e8b1c6` (chore(R47): Memorial-Updater outputs)
+**Chore-A SHA:** see git HEAD after this commit (NEXT-ROLE.md updated post-commit)
+
+**Verifier output** (`scripts/verify-empirical-acs.sh R48`, run pre-chore-A):
+```
+[R48] Empirical-AC verification — Q-R48-EMPIRICAL.sh
+
+Round boundaries (derived from git, not memorized):
+  ROUND_START_SHA = 6e8b1c61494cef68e9257bf57c952820622d202f  (`git rev-parse 6e8b1c6`)
+  CHORE_A_SHA     = f4f4d081d2f68f285ee01316fb30abb41f6652c1  (`git rev-parse HEAD`)
+
+AC-R48-1: Q-R48-EMPIRICAL.sh exists + executable + syntax-valid
+  PASS — AC-R48-1 (actual: ok)
+AC-R48-2: recursion guard fires at runtime (stdout-grep; Tightening 2 + 4)
+  PASS — AC-R48-2 (actual: 1)
+AC-R48-3: AC-R47-5 uses assert_eq "1" not assert_ge
+  PASS — AC-R48-3 (assert_ge absent=0; assert_eq present=1)
+AC-R48-4: AC-R47-6 uses assert_eq "7" not assert_ge
+  PASS — AC-R48-4 (assert_ge absent=0; assert_eq present=1)
+AC-R48-5: AC-R47-7 spec text alignment
+  PASS — AC-R48-5 (old_cmd=0; new_cmd=1)
+AC-R48-6: AC-R47-10 non-recursive
+  PASS — AC-R48-6 (old_pattern=0; new_pattern=1)
+AC-R48-7: anti-scope — diff ⊆ ALLOWED_SET
+  PASS — AC-R48-7: all 1 diff paths ⊆ ALLOWED_SET (pre-chore-A; will recheck at chore-A SHA)
+AC-R48-8: test baseline = 361/355/3/3; tsc exit 0
+  PASS — AC-R48-8 (test summary actual: 361/355/3/3)
+  PASS — AC-R48-8 (tsc exit actual: 0)
+
+Summary: 9 PASS, 0 FAIL
+```
+
+**Spec deviances (Reviewer disclosure):**
+- TD-1: `timeout 30` prescribed in spec § 3.2 for AC-R47-10 (Q-R47-EMPIRICAL.sh) and in Q-R48-EMPIRICAL.sh AC-R48-2 omitted. macOS system lacks `timeout` command (`command not found: timeout`). Guard itself prevents hanging; timeout was safety net for the pre-guard recursion case only. TACTICAL AUTONOMY applied: spec API unavailable on installed system → use available equivalent (omit). AC-R48-2 and AC-R47-10 function correctly without it because the guard fires immediately on env-var check.
+- TD-2: Q-R48-SPEC.md AC-R48-7 verification description says `<ROUND_START_SHA>` placeholder — the actual SHA is `6e8b1c61494cef68e9257bf57c952820622d202f` (derived via `git rev-parse 6e8b1c6`).
+
+**Pending operator decisions (carried forward from pre-R48):**
+See § Pending operator decisions in the round-scope directive above (flags #1-#6 preserved from pre-R48 NEXT-ROLE.md).

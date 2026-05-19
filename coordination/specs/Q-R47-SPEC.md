@@ -156,13 +156,16 @@ Verification: `grep -cE '^### Tightening: Verify runtime behavior' coordination/
 Verification: `grep -cE '^### Tightening: Re-derive SHAs from git' coordination/SPEC-AUTHORING-CHECKLIST.md` == 1.
 
 **AC-R47-5 (R47 verifier uses stdout-grep for runtime-behavior checks — not source-grep):**
-Verification: Q-R47-EMPIRICAL.sh contains AT LEAST one block that pipes `scripts/...sh ... 2>&1` into `grep` (vs grepping the script's source file). Verification command: `grep -cE 'scripts/.*\.sh [^|]+\| *grep' coordination/specs/Q-R47-EMPIRICAL.sh` >= 1.
+Verification: Q-R47-EMPIRICAL.sh contains AT LEAST one block that pipes `scripts/...sh ... 2>&1` into `grep` (vs grepping the script's source file). Verification command: `grep -cE 'scripts/.*\.sh [^|]+\| *grep' coordination/specs/Q-R47-EMPIRICAL.sh` == 1.
+[R48-amended: exact count replacing >= 1 per R47 MAJOR-2 fix; structurally fixed at 1 by AC-R47-10 being the sole stdout-grep line.]
 
 **AC-R47-6 (R47 verifier re-derives SHAs/diff-counts from git at runtime — not memorized):**
-Verification: Q-R47-EMPIRICAL.sh contains `git rev-parse` OR `git diff --name-only` invocations for SHA/count derivation. Verification: `grep -cE 'git (rev-parse|diff --name-only|diff --name-status)' coordination/specs/Q-R47-EMPIRICAL.sh` >= 2.
+Verification: Q-R47-EMPIRICAL.sh contains `git rev-parse` OR `git diff --name-only` invocations for SHA/count derivation. Verification: `grep -cE 'git (rev-parse|diff --name-only|diff --name-status)' coordination/specs/Q-R47-EMPIRICAL.sh` == 7.
+[R48-amended: exact count replacing >= 2 per R47 MAJOR-2 fix; 7 git invocations confirmed at R48 time.]
 
 **AC-R47-7 (R47 verifier has no vacuous meta-ACs — no hard-coded PASS without verification logic):**
-Verification: Q-R47-EMPIRICAL.sh does NOT contain the anti-pattern `PASS — AC-R47-N (asserted by aggregate`. Verification: `grep -c 'asserted by aggregate' coordination/specs/Q-R47-EMPIRICAL.sh` == 0.
+Verification: Q-R47-EMPIRICAL.sh does NOT contain verifier code that prints a hard-coded PASS for an aggregate-self-reference. Verification: `grep -cE '^[[:space:]]*echo "  PASS.*aggregate exit' coordination/specs/Q-R47-EMPIRICAL.sh` == 0.
+[R48-amended: tighter command per R47 MAJOR-1 fix; avoids Liar's Paradox self-match in comments and documentation references.]
 
 **AC-R47-8 (R47 anti-scope ALLOWED_SET):**
 ALLOWED_SET = `coordination/specs/Q-R47-SPEC.md`, `coordination/specs/Q-R47-EMPIRICAL.sh`, `coordination/SPEC-AUTHORING-CHECKLIST.md`, `coordination/MEMORIAL.md`, `coordination/NEXT-ROLE.md`, plus regex carve-outs for `coordination/reviews/REVIEWER-REPORT-R47.md` + `coordination/diagnostics/DIAGNOSTIC-R47-*.md`.
@@ -171,8 +174,9 @@ Verification: `git diff --name-only 1049a52 HEAD` returns only paths in ALLOWED_
 **AC-R47-9 (test baseline preserved):**
 Verification: `node --test --test-reporter=tap test/*.test.js` reports `tests 361`, `pass 356`, `fail 2`, `skipped 3`. `npx tsc -p tsconfig.test.json` exits 0.
 
-**AC-R47-10 (self-application — Q-R47-EMPIRICAL.sh exits 0 via the harness):**
-Verification: `scripts/verify-empirical-acs.sh R47` exits 0.
+**AC-R47-10 (recursion guard fires when _PRE_COMMIT_RULE_SWEEP_ACTIVE is set):**
+Verification: `_PRE_COMMIT_RULE_SWEEP_ACTIVE=1 scripts/pre-commit-rule-sweep.sh <ROUND_START_SHA> HEAD 2>&1 | grep -c 'recursion guard active'` == 1. Non-recursive: guard fires on entry; no nested verify-empirical-acs.sh call. Non-vacuous: fails if guard is removed.
+[R48-amended: replacing vacuous "scripts/verify-empirical-acs.sh R47 exits 0" per R47 CRITICAL-1/2/MAJOR-3 fix.]
 
 ---
 

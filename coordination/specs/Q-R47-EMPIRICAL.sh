@@ -117,7 +117,7 @@ echo ""
 # -----------------------------------------------------------------------------
 echo "AC-$ROUND-5: R47 verifier contains stdout-grep pattern (Tightening 2 self-applied)"
 ACTUAL=$(grep -cE 'scripts/.*\.sh [^|]+\| *grep' coordination/specs/Q-R47-EMPIRICAL.sh)
-assert_ge "AC-$ROUND-5" "1" "$ACTUAL"
+assert_eq "AC-$ROUND-5" "1" "$ACTUAL"
 echo ""
 
 # -----------------------------------------------------------------------------
@@ -126,7 +126,7 @@ echo ""
 # -----------------------------------------------------------------------------
 echo "AC-$ROUND-6: R47 verifier re-derives SHAs/diff via git (Tightening 3 self-applied)"
 ACTUAL=$(grep -cE 'git (rev-parse|diff --name-only|diff --name-status)' coordination/specs/Q-R47-EMPIRICAL.sh)
-assert_ge "AC-$ROUND-6" "2" "$ACTUAL"
+assert_eq "AC-$ROUND-6" "7" "$ACTUAL"
 echo ""
 
 # -----------------------------------------------------------------------------
@@ -200,8 +200,8 @@ echo ""
 # line so the resulting code matches the AC-R47-5 self-application check
 # regex `scripts/.*\.sh [^|]+\| *grep`.
 # -----------------------------------------------------------------------------
-echo "AC-$ROUND-10: rule_1_check MECHANICAL mode active at runtime (Tightening 2 self-applied)"
-ACTUAL=$(scripts/pre-commit-rule-sweep.sh "$ROUND_START_SHA" HEAD 2>&1 | grep -c 'MECHANICAL CHECK via sub-class verifier')
+echo "AC-$ROUND-10: recursion guard fires when _PRE_COMMIT_RULE_SWEEP_ACTIVE is set"
+ACTUAL=$(_PRE_COMMIT_RULE_SWEEP_ACTIVE=1 scripts/pre-commit-rule-sweep.sh "$ROUND_START_SHA" HEAD 2>&1 | grep -c 'recursion guard active')
 assert_eq "AC-$ROUND-10" "1" "$ACTUAL"
 echo ""
 
