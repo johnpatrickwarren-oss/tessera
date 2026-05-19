@@ -92,7 +92,9 @@ On halt:
         Options: A | B | C with tradeoffs (include an "empirically verify
         with [command]" branch where ground truth is determinable).
    3. Set STATUS: ESCALATE in NEXT-ROLE.md
-   4. Append VIOLATION: halt-discipline to MEMORIAL.md
+   4. Append VIOLATION: halt-discipline to coordination/MEMORIAL.md
+      (the active file; append target is always the active file —
+      shards are frozen. See CLAUDE-COMMON.md "Memorial sharding (R42 onward)".)
    5. Session ends here.
 
 On clean completion:

@@ -6,7 +6,11 @@
 # CLAUDE-COMMON.md, loaded alongside this file.
 
 1. Read: spec, spec-audit sidecar, reviewer report, diagnostics (if any),
-   MEMORIAL.md, CROSS-PROJECT-MEMORIAL.md.
+   MEMORIAL.md (active file; default per-round read), CROSS-PROJECT-MEMORIAL.md.
+   Phase shards (coordination/MEMORIAL-PHASE-N.md) are read on demand when
+   verifying cross-phase discipline-pattern thresholds (e.g., counting prior
+   tessera instances of a discipline for the "3+ violations" reinforcement
+   rule). See CLAUDE-COMMON.md "Memorial sharding (R42 onward)".
 2. Append CONFIRMATION/VIOLATION entries to coordination/MEMORIAL.md (specific, not generic)
 3. Append same entries to ~/.claude/CROSS-PROJECT-MEMORIAL.md with project prefix
 4. If any discipline has 3+ violations across recent rounds (cross-project):

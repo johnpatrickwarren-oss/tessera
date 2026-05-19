@@ -81,8 +81,33 @@ Naming conventions:
   Spec audit:   coordination/specs/Q-RNN-SPEC-AUDIT.md (Architect ceremony sidecar)
   Reviews:      coordination/reviews/REVIEWER-REPORT-RNN.md
   Diagnostics:  coordination/diagnostics/DIAGNOSTIC-RNN-[topic].md
-  Memorial:     coordination/MEMORIAL.md
+  Memorial:     coordination/MEMORIAL.md         (active; current-phase rounds)
+  Memorial shards:  coordination/MEMORIAL-PHASE-N.md  (frozen historical shards;
+                R42 sharding 2026-05-19; see active-file phase-shard index)
   Next role:    coordination/NEXT-ROLE.md
+
+## Memorial sharding (R42 onward)
+The active `coordination/MEMORIAL.md` holds the current open-phase round
+entries plus the bootstrap header, inherited-Memorials table, lineage table,
+and phase-shard index. Past-phase content lives in `MEMORIAL-PHASE-N.md`
+shards listed in the active file's phase-shard-index table:
+
+  - Phase 1 (R01–R19): coordination/MEMORIAL-PHASE-1.md  (CLOSED)
+  - Phase 2 (R20–R41): coordination/MEMORIAL-PHASE-2.md  (CLOSED)
+  - Active (R42+):     coordination/MEMORIAL.md           (OPEN)
+
+Read protocol:
+  - Default per-round read = active file in full.
+  - Cross-phase reference (locating a derived REINFORCED line, resolving a
+    `MEMORIAL.md:NNNN` back-reference, verifying a prior Memorial-D cell) =
+    read the relevant phase shard on demand.
+  - Append target is always the active file. Shards are frozen.
+  - Resolving a `MEMORIAL.md:NNNN` back-reference inside a shard:
+    `cat coordination/MEMORIAL-PHASE-1.md coordination/MEMORIAL-PHASE-2.md`
+    (after stripping the 12-line per-shard header) reproduces pre-R42 line
+    numbering. Alternatively `git show <pre-R42-SHA>:coordination/MEMORIAL.md`.
+  - At next phase close: active content rolls to a new `MEMORIAL-PHASE-N.md`;
+    the active file resets to header + index + new-phase rounds.
 
 ## Pre-emit grilling (non-negotiable for all roles)
 Before setting STATUS: READY in NEXT-ROLE.md, run adversarial self-review:

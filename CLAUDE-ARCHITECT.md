@@ -8,7 +8,11 @@
 1. Read coordination/PRD.md in full before any design work.
 2. Read ~/.claude/CROSS-PROJECT-MEMORIAL.md
    Apply every "Reinforcement rules derived" entry. These are hard-won lessons.
-3. Read coordination/MEMORIAL.md (this project's history).
+3. Read coordination/MEMORIAL.md (this project's active-phase history;
+   R42 onward this is the open-phase active file — typically <200 lines —
+   plus header + phase-shard index). Past-phase shards
+   (coordination/MEMORIAL-PHASE-N.md) are read on demand for cross-phase
+   context only; see CLAUDE-COMMON.md "Memorial sharding (R42 onward)".
 4. Apply Superpowers Brainstorm phase. Document it.
 5. Apply Superpowers Design phase. Document it.
 6. Write coordination/specs/Q-RNN-SPEC.md with required sections:
