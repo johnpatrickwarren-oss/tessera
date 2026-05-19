@@ -346,6 +346,47 @@ The wave gate never advances under CRITICAL unresolved findings.
 LIKELY-SURFACES findings from any cluster are pre-flagged to the next
 wave's relevant clusters before dispatch.
 
+### Tier-aware consolidation Reviewer at wave-gate close
+
+**Canonical text (R50):** Multi-cluster parallel waves where any constituent cluster
+ran `--tier solo` (no per-cluster Reviewer) MUST run a cold-eye consolidation Reviewer
+at wave-gate before STATUS: WAVE-COMPLETE. The Coordinator wave-gate aggregation is NOT
+a substitute for a Reviewer — it is bookkeeping. Cross-cluster contract drift, aggregate
+scope creep, and MEMORIAL fragment semantic-conflict are visible only at the consolidated
+layer.
+
+**When mandatory:** Any constituent cluster in Wave N ran `--tier solo`. No per-cluster
+Reviewer means no cold-eye on that cluster's work. The tier-aware consolidation Reviewer
+provides the missing audit at the wave boundary.
+
+**When optional:** All clusters ran `--tier audit` or `--tier full` (each had their own
+Reviewer). Consolidation Reviewer can still be explicitly requested for additional
+cross-cluster integration coverage.
+
+**Invocation:**
+
+```bash
+# Wave-gate close — mandatory consolidation Reviewer fires automatically if solo-tier detected:
+./run-pipeline.sh --coordinator --wave-gate WAVE-01
+
+# Force consolidation Reviewer even when all clusters ran audit/full tiers:
+./run-pipeline.sh --coordinator --wave-gate WAVE-01 --consolidation-reviewer
+```
+
+**Wave-gate close flow sequence** (run-pipeline.sh `--coordinator --wave-gate`):
+1. **Aggregate verifier:** `scripts/verify-wave-aggregate.sh WAVE-NN` — three mechanical
+   checks: ALLOWED_SET union, cross-cluster contract drift (advisory), MEMORIAL fragment
+   semantic-conflict detection (advisory).
+2. **Tier detection:** scan `coordination/clusters/*/MEMORIAL-fragment.md` files for
+   REVIEWER-authored CONFIRMATION entries (absence → solo-tier heuristic).
+3. **Consolidation Reviewer** (mandatory if solo-tier detected; optional otherwise):
+   spawns a fresh Reviewer session with consolidated wave state as input.
+4. **STATUS: WAVE-COMPLETE** — set in `coordination/NEXT-ROLE.md` after the above.
+
+> **Canonical text landed at:** R50 (2026-05-19). Closes the "no cold-eye review at
+> consolidation when clusters ran solo-tier" gap identified in the R42-R47 design analysis.
+> See `coordination/SPEC-AUTHORING-CHECKLIST.md` § Wave-aggregate verification discipline.
+
 ### Hybrid Reviewer mandate at close-walk class
 
 Close-walk class rounds require hybrid Reviewer (Opus + Sonnet merged), not advisory. The

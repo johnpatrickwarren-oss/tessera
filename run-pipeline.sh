@@ -110,6 +110,9 @@ BUDGET_FLAG_SUPPORTED=false
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
 COORDINATOR_MODE=false
+WAVE_GATE_MODE=false
+WAVE_GATE_ID=""
+CONSOLIDATION_REVIEWER=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     --round)            ROUND="$2";        shift 2 ;;
@@ -121,6 +124,8 @@ while [[ $# -gt 0 ]]; do
     --no-model-routing) MODEL_ROUTING=false; shift  ;;
     --reset-next-role)  RESET_NEXT_ROLE=true; shift ;;
     --coordinator)      COORDINATOR_MODE=true; shift ;;
+    --wave-gate)        WAVE_GATE_MODE=true; WAVE_GATE_ID="$2"; shift 2 ;;
+    --consolidation-reviewer) CONSOLIDATION_REVIEWER=true; shift ;;
     -h|--help)
       cat <<'EOF'
 Usage: ./run-pipeline.sh [options]
@@ -154,6 +159,16 @@ Options:
                        clusters — emits the plan; operator reviews + invokes
                        scripts/multi-track-cluster-setup.sh per cluster.
                        See CLAUDE-COORDINATOR.md for role discipline.
+  --wave-gate WAVE-NN  Coordinator wave-gate close (use with --coordinator).
+                       Runs scripts/verify-wave-aggregate.sh WAVE-NN, detects
+                       solo-tier clusters, and fires a mandatory tier-aware
+                       consolidation Reviewer if any cluster ran --tier solo.
+                       See CLAUDE-COORDINATOR.md § Wave gate discipline.
+  --consolidation-reviewer
+                       Force consolidation Reviewer at wave-gate close, even
+                       when all clusters ran audit/full tiers (which provide
+                       per-cluster cold-eye). Requires --coordinator --wave-gate.
+                       Without --wave-gate, this flag is silently ignored.
 
 Exit codes:
   0 = success (MERGE-READY or ROUND-COMPLETE)
@@ -216,9 +231,19 @@ esac
 # --coordinator overrides tier-derived ROLES entirely. Coordinator mode runs
 # ONLY the Coordinator role to produce a wave plan; cluster dispatch is a
 # separate operator step (scripts/multi-track-cluster-setup.sh per cluster).
+#
+# --coordinator --wave-gate WAVE-NN: Coordinator wave-gate close flow.
+# Runs verify-wave-aggregate.sh, detects solo-tier clusters, and fires a
+# mandatory tier-aware consolidation Reviewer if any cluster ran --tier solo.
+# See CLAUDE-COORDINATOR.md § "Tier-aware consolidation Reviewer at wave-gate close".
 if $COORDINATOR_MODE; then
-  ROLES=("COORDINATOR")
-  TIER_DESC="coordinator (PRD → DAG → wave plan; cluster dispatch is separate)"
+  if $WAVE_GATE_MODE; then
+    ROLES=("COORDINATOR-WAVE-GATE")
+    TIER_DESC="coordinator-wave-gate (aggregate verifier + tier-aware consolidation Reviewer)"
+  else
+    ROLES=("COORDINATOR")
+    TIER_DESC="coordinator (PRD → DAG → wave plan; cluster dispatch is separate)"
+  fi
 fi
 
 FIRST_ROLE="${ROLES[0]}"
@@ -608,6 +633,109 @@ ROLE BOUNDARY:
 Do not draft cluster-level specs. Do not modify any cluster's NEXT-ROLE.md.
 Do not write implementation code. Do not pre-resolve OQs by assumption.
 Once the wave plan is emitted, your job for this invocation is done.
+PROMPT
+}
+
+# Coordinator wave-gate close flow:
+# (1) Run scripts/verify-wave-aggregate.sh <WAVE-NN>
+# (2) Detect if any cluster ran --tier solo (heuristic: no REVIEWER CONFIRMATION
+#     in MEMORIAL-fragment.md implies solo-tier — the Reviewer stage appends at
+#     minimum one CONFIRMATION entry in audit/full tiers)
+# (3) If solo-tier detected OR --consolidation-reviewer flag: dispatch consolidation
+#     Reviewer subprocess
+# See CLAUDE-COORDINATOR.md § "Tier-aware consolidation Reviewer at wave-gate close"
+run_wave_gate_close() {
+  log_section "COORDINATOR WAVE-GATE CLOSE | Wave: $WAVE_GATE_ID"
+
+  # Step 1: aggregate verifier
+  if [[ -x "scripts/verify-wave-aggregate.sh" ]]; then
+    log "Running scripts/verify-wave-aggregate.sh $WAVE_GATE_ID ..."
+    local aggregate_exit=0
+    scripts/verify-wave-aggregate.sh "$WAVE_GATE_ID" | tee -a "$PIPELINE_LOG" || aggregate_exit=$?
+    if [[ $aggregate_exit -ne 0 ]]; then
+      log_warn "verify-wave-aggregate.sh exited $aggregate_exit — aggregate finding(s) detected."
+      log_warn "Review findings above before setting STATUS: WAVE-COMPLETE."
+    else
+      log "verify-wave-aggregate.sh: clean sweep (exit 0)."
+    fi
+  else
+    log_warn "scripts/verify-wave-aggregate.sh not found or not executable; skipping aggregate sweep."
+    log_warn "Install with: chmod +x scripts/verify-wave-aggregate.sh"
+  fi
+
+  # Step 2: detect solo-tier clusters
+  local solo_tier_detected=false
+  local fragment_dir="coordination/clusters"
+  if [[ -d "$fragment_dir" ]]; then
+    for fragment in "$fragment_dir"/*/MEMORIAL-fragment.md; do
+      [[ -f "$fragment" ]] || continue
+      # Heuristic: a solo-tier cluster's fragment has no REVIEWER CONFIRMATION entry.
+      # audit/full clusters have at least one REVIEWER-authored CONFIRMATION.
+      if ! grep -qE "\| REVIEWER$" "$fragment" 2>/dev/null; then
+        cluster_id=$(basename "$(dirname "$fragment")")
+        log_warn "Cluster '$cluster_id' appears to have run solo-tier (no REVIEWER entries in fragment)."
+        solo_tier_detected=true
+      fi
+    done
+  fi
+
+  # Step 3: tier-aware consolidation Reviewer
+  local consolidation_needed=false
+  if $solo_tier_detected; then
+    log "Solo-tier cluster(s) detected — MANDATORY consolidation Reviewer required."
+    consolidation_needed=true
+  elif $CONSOLIDATION_REVIEWER; then
+    log "--consolidation-reviewer flag set — dispatching consolidation Reviewer."
+    consolidation_needed=true
+  else
+    log "All clusters ran audit/full tiers. Consolidation Reviewer not required."
+    log "Use --consolidation-reviewer to force if cross-cluster integration review is wanted."
+  fi
+
+  if $consolidation_needed; then
+    log_section "CONSOLIDATION REVIEWER — spawning cold-eye cross-cluster review"
+    build_consolidation_reviewer_prompt
+    run_role "REVIEWER" "$COORD/.prompt-consolidation-reviewer.md" \
+      "$(get_model REVIEWER)" "$(get_budget REVIEWER)"
+    log "Consolidation Reviewer complete."
+  fi
+
+  log_section "COORDINATOR WAVE-GATE — complete"
+  log "Next step: set STATUS: WAVE-COMPLETE in coordination/NEXT-ROLE.md"
+  log "Then dispatch Wave N+1 clusters per coordination/WAVE-PLAN-*.md."
+}
+
+build_consolidation_reviewer_prompt() {
+  cat > "$COORD/.prompt-consolidation-reviewer.md" << PROMPT
+You are the CONSOLIDATION REVIEWER for wave-gate close of $WAVE_GATE_ID.
+
+Your scope is cross-cluster integration audit. You are NOT re-doing per-cluster
+review (cluster-level Reviewers already covered cluster-local work). You are
+auditing cross-cluster concerns that are only visible at the consolidated layer.
+
+Read before auditing:
+  - $WAVE_PLAN  (wave plan; cluster list + scope)
+  - coordination/clusters/*/MEMORIAL-fragment.md  (all cluster memorial fragments)
+  - Any CLUSTER-HANDOFF-*.md files in coordination/ (cross-cluster contracts)
+  - coordination/MEMORIAL.md  (active memorial for methodology context)
+
+Cross-cluster concerns to audit:
+  1. **Aggregate scope creep.** Do any cluster diffs collectively reach outside the
+     wave-level scope defined in the wave plan?
+  2. **Contract drift.** If cluster A and cluster B both touch a shared schema,
+     interface, or type definition — do they agree on shape? Run:
+     \`git show <cluster-A-branch>:<shared-file>\` vs \`git show <cluster-B-branch>:<shared-file>\`
+  3. **MEMORIAL semantic-conflict.** If a discipline keyword appears as CONFIRMATION
+     in one cluster and VIOLATION in another — flag for operator decision.
+  4. **Integration gaps.** Are there behaviors that each cluster individually
+     tested but that their integration surfaces cannot exercise together?
+
+Emit a REVIEWER REPORT at coordination/reviews/REVIEWER-REPORT-${ROUND}-consolidation.md.
+Use standard CRITICAL / MAJOR / MINOR / OBS severity levels.
+
+ROLE BOUNDARY:
+Do NOT re-audit cluster-local ACs (per-cluster Reviewers own those).
+Focus only on cross-cluster integration surfaces.
 PROMPT
 }
 
@@ -1652,6 +1780,14 @@ for role in "${ROLES[@]}"; do
       log_error "Hybrid Reviewer dispatch failed for $ROUND. Pipeline aborting before Memorial-Updater."
       exit 1
     fi
+    continue
+  fi
+
+  # Coordinator wave-gate close: run aggregate verifier + tier-aware consolidation
+  # Reviewer directly (not via run_role — wave-gate is orchestration, not a single
+  # Claude session).
+  if [[ "$role" == "COORDINATOR-WAVE-GATE" ]]; then
+    run_wave_gate_close
     continue
   fi
 

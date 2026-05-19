@@ -397,3 +397,55 @@ document the waiver in `coordination/NEXT-ROLE.md` with rationale and manually i
 Reviewer session before merging the round's artifacts.
 
 > **Canonical text landed at:** R49 (2026-05-19). Rule 7 Surface (a) for pipeline-mandatory discipline.
+
+---
+
+## Wave-aggregate verification discipline
+
+**Sub-class canonical text:**
+
+> **Wave-aggregate verification discipline (R50):** Multi-cluster parallel waves where
+> any constituent cluster ran `--tier solo` (no per-cluster Reviewer) MUST run a cold-eye
+> consolidation Reviewer at wave-gate before STATUS: WAVE-COMPLETE. The Coordinator
+> wave-gate aggregation is NOT a substitute for a Reviewer — it is bookkeeping.
+> Cross-cluster contract drift, aggregate scope creep, and MEMORIAL fragment
+> semantic-conflict are visible only at the consolidated layer.
+
+**Background (why this discipline exists):** The R42-R47 design analysis identified that
+when ≥1 cluster in a wave runs `--tier solo`, no cold-eye Reviewer audits that cluster's
+work. The Coordinator wave-gate checklist (file-level bookkeeping) cannot catch semantic
+integration gaps. A consolidation Reviewer provides the missing audit at the consolidated
+layer before the wave advances.
+
+**Three mechanical checks** (`scripts/verify-wave-aggregate.sh WAVE-NN`):
+
+1. **Aggregate ALLOWED_SET union check** (mechanical where wave-level ALLOWED_SET is
+   defined in the wave plan): verifies the union of all cluster diffs ⊆ wave-level allowed
+   set. Detects aggregate scope creep invisible at per-cluster level.
+2. **Cross-cluster contract drift check** (advisory): identifies files appearing in ≥2
+   cluster diffs; flags for manual interface-shape verification. Cannot be mechanically
+   verified without semantic understanding.
+3. **MEMORIAL fragment semantic-conflict detection** (advisory): checks for the same
+   discipline keyword appearing as CONFIRMATION in one cluster and VIOLATION in another.
+   Flags for operator decision.
+
+**Authoring requirements:**
+
+At wave-plan authoring time (Coordinator):
+- Add a `## Wave-level ALLOWED_SET` section to `coordination/WAVE-PLAN-NN.md` listing
+  the union of all anticipated cluster ALLOWED_SETs plus coordination/ files.
+- Classify each cluster's tier in the wave plan. If any cluster is classified `solo`,
+  note that the wave-gate MUST run consolidation Reviewer.
+
+At wave-gate close (Coordinator):
+1. Run `./run-pipeline.sh --coordinator --wave-gate WAVE-NN` — this invokes
+   `scripts/verify-wave-aggregate.sh`, detects solo-tier clusters, and fires the
+   consolidation Reviewer if required.
+2. Review advisory outputs from Checks 2 and 3 before stamping `STATUS: WAVE-COMPLETE`.
+
+**Coordinator role-file reference:** See `CLAUDE-COORDINATOR.md` §
+"Tier-aware consolidation Reviewer at wave-gate close" for the invocation pattern and
+wave-gate close flow sequence.
+
+> **Canonical text landed at:** R50 (2026-05-19). Closes "no cold-eye review at consolidation
+> when clusters ran solo-tier" gap. Rule 7 Surface (a) for wave-aggregate verification discipline.
