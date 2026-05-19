@@ -500,3 +500,53 @@ with a clear commit message.
 #   of the prohibited behavior in surrounding prose. For ACs that prohibit implicit recommendations,
 #   read every non-OQ prose block and ask: "does this recommend, nudge, or imply a sequencing
 #   choice?" Detected tessera R40 MINOR-5.
+
+# REINFORCED 2026-05-19 — When an audit empirically checks N of M files and the AC requires
+#   "all M files" verified, the delivered artifact must scope its claim to the empirical coverage:
+#   "9 of ~50 candidates spot-checked; all have references — see MEMORIAL for per-file evidence"
+#   — NOT "All coordination/*.md files checked have at least one reference." A selective-sample
+#   audit that writes a blanket claim is a false-compliance-attestation regardless of whether
+#   the substantive conclusion is likely correct. Before writing any "all X verified" assertion
+#   in a load-bearing artifact, confirm the audit literally covered all X. If not: scope the
+#   claim or complete the audit. Detected tessera R41 MAJOR-1 (Rule 1 sub-class:
+#   selective-audit-overreach).
+
+# REINFORCED 2026-05-19 — When a hygiene-stamp or inventory table cell certifies a count of
+#   on-disk files (e.g., "CLUSTER-HANDOFF artifacts: ✅ (11 files)"), verify the count by
+#   running `ls <glob-pattern> | wc -l` and encoding the actual number before writing the
+#   table cell. A load-bearing inventory artifact that certifies "all Phase 2 deliverables
+#   confirmed on-disk" is structurally unsound if any of its own count cells are empirically
+#   wrong. Pre-emit grilling item (1) "every AC has a verifiable outcome" must include
+#   verification of all count literals in summary tables, not just the named ACs. Detected
+#   tessera R41 MINOR-1 (actual: 15 CLUSTER-HANDOFF files; claimed: 11).
+
+# REINFORCED 2026-05-19 — When a spec prescribes a scope ("~25 Phase 2 coordination
+#   artifacts") and the Implementer performs a reduced audit ("~15 key artifacts"), disclose
+#   the reduction explicitly in the artifact itself — not only in the MEMORIAL CONFIRMATION.
+#   An artifact that presents findings by category (Type A/B/C/D) without naming its actual
+#   input scope allows readers to infer more complete coverage than was performed. Required
+#   disclosure form: "Scope: ~15 of ~25 prescribed artifacts grep'd; remaining ~10 not
+#   individually verified." The MEMORIAL CONFIRMATION is an audit trail, not a substitute for
+#   artifact-level accuracy. Detected tessera R41 MINOR-2 (scope-reduction-undisclosed).
+
+# REINFORCED 2026-05-19 — When a test asserts the presence of a document section or property
+#   via substring matching, the substring must UNIQUELY identify that section/property — not be
+#   a generic word that appears throughout the document. "rounds" appears in §§ 1, 2, 4, 5, 6
+#   of a hygiene stamp and cannot serve as a section-identity marker for § 2. "RESOLVED"
+#   appears at multiple unrelated locations and cannot confirm OQ-P3-5 is marked resolved.
+#   Required: use structural anchors ("## § 5 — Cluster fan-out") or property-specific
+#   identifiers ("OQ-P3-5.*RESOLVED") that are not incidentally satisfied elsewhere in the
+#   document. For each `includes(marker)` in a document-presence test, ask: "could this match
+#   outside the target section?" before committing. A test that passes when its target section
+#   is absent is not load-bearing for its AC. Cross-project reinforcement rule derived at R41
+#   (3rd instance: R36 vacuous-absence-check + R41 MINOR-3 + R41 MINOR-4). Detected tessera
+#   R41 MINOR-3 and MINOR-4 (self-confirming-test-assertion-specificity).
+
+# REINFORCED 2026-05-19 — When the spec mandates a specific RED test form (e.g., "3
+#   assert.fail stubs"), any deviation from the literal form — even when TDD spirit is met
+#   (real assertions genuinely fail at RED for substantive reasons) — must be disclosed in the
+#   chore-A NEXT-ROLE.md spec-deviance section. "Spirit met, letter not met" is a reportable
+#   deviation, not a silent bypass. Required disclosure form: "TD-N: RED commit used real
+#   assertions failing on unmet preconditions rather than assert.fail stubs as mandated by
+#   spec § N; spirit met (tests genuinely failed); letter bypassed without prior disclosure."
+#   Detected tessera R41 MINOR-5 (1st instance: spec-mandated-stub-form-bypassed).
