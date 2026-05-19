@@ -144,7 +144,7 @@ with a clear commit message.
 #   DIAGNOSTIC is required at point-of-encounter — not deferred to the coordination step.
 #   Detected R01: 6 anti-scope files vendored; no DIAGNOSTIC files produced.
 
-# REINFORCED — HALT-DISCIPLINE (composite; 7 sub-variants observed at Tessera)
+# REINFORCED — HALT-DISCIPLINE (composite; 8 sub-variants observed at Tessera)
 #
 #   Spec-internal contradiction (R01): Two spec sections that prescribe mutually
 #     incompatible implementation choices are HALT condition (c). All sub-types
@@ -192,6 +192,14 @@ with a clear commit message.
 #     Detected tessera R45 MAJOR-2: AC-R45-4 wording inline-changed from "Rule 4 + Rule 7
 #     fully mechanized" → "Rule 4 advisory + Rule 7 mechanical" in same chore-A as
 #     implementation; honestly disclosed but landed without operator confirmation.
+#
+#   Non-terminating verifier satisfies halt condition (R47 MINOR-3): When running the empirical
+#     verifier during chore-A work, if any invocation fails to reach the final
+#     "Summary: N PASS / M FAIL" line within a reasonable time window, treat this as a
+#     non-termination event — equivalent to "exits non-zero." Do NOT attest "exit 0" for a
+#     verifier that was killed externally (SIGKILL/SIGTERM) or whose final summary line was
+#     never observed in the terminal. A non-terminating invocation must be documented as a
+#     halt condition in NEXT-ROLE.md and a DIAGNOSTIC written before attesting completeness.
 
 # REINFORCED 2026-05-18 — false-compliance-attestation (cross-project rule):
 #   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R03 MINOR-4 (spec count ≠ observed count),
@@ -256,7 +264,7 @@ with a clear commit message.
 #     entries but dropping them for others — is a verbatim-preservation failure even when the
 #     rule body itself is intact.
 
-# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 9 sub-variants)
+# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 11 sub-variants)
 #
 #   Prescriptions are binding (R01): Spec prescriptions in §Implementation surface are
 #     equivalent to ACs — not optional suggestions. When a prescription is unachievable,
@@ -341,6 +349,27 @@ with a clear commit message.
 #     IMPLEMENTER.md halt-discipline path updated; 4+ other MEMORIAL.md references untouched
 #     (clean-completion path at :112, etc.). AC-R42-6 met at floor but file was the weakest
 #     of the 6 CLAUDE-*.md updates by sweep coverage.
+#
+#   Spec text + verifier co-update when grep is tightened (R47 MAJOR-1): When debugging a
+#     verifier grep pattern during implementation and discovering the spec-text command is too
+#     loose (Liar's Paradox, self-match, or incidental hit), tighten BOTH the verifier AND the
+#     spec text in the same commit. Never leave the spec carrying command A while the verifier
+#     implements command B — even if both currently return the correct result at HEAD. The Rule 1
+#     sub-class discipline is: the spec carries the command; the verifier runs THAT command.
+#     Documenting the tightening only in NEXT-ROLE.md (as "deviation noted") is insufficient;
+#     it must be reflected in the spec file itself.
+#
+#   §3-§5-verifier consistency is a pre-emit grilling gate in audit-tier (R48 MINOR-2): In
+#     audit-tier rounds where the Implementer wears the Architect hat, spec-internal consistency
+#     between § 3 Mechanism and § 5 AC verification text is a required pre-emit grilling gate.
+#     When § 3 prescribes a specific command modifier (e.g., `timeout 30`), the § 5 verification
+#     text and verifier implementation must match — or the spec must document why the modifier is
+#     omitted with operator approval. If the system lacks a required command, this is a
+#     spec-premise failure requiring HALT + DIAGNOSTIC + spec amendment, not a post-hoc TD
+#     disclosure. A TD disclosed after routing leaves the spec internally inconsistent
+#     (§ 3 says one thing; § 5 says another; next reader cannot resolve which is authoritative).
+#     Grilling gate: for each command modifier prescribed in § 3, verify the identical modifier
+#     appears in § 5 and in the verifier. Detected tessera R48 MINOR-2.
 
 # REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 4 sub-variants)
 #
@@ -452,7 +481,7 @@ with a clear commit message.
 #   step: open the header, read each attestation-type claim, verify it still describes the
 #   current file body accurately. Detected tessera R20 MINOR-1.
 
-# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 6 sub-variants)
+# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 7 sub-variants)
 #
 #   Full-formula re-verification (R20 MINOR-2): When spec § 4.x prescribes updating a
 #     specific arithmetic expression, re-read the FULL formula at the targeted line — all
@@ -496,6 +525,17 @@ with a clear commit message.
 #     "every AC has a verifiable outcome" must include verification of all count literals in
 #     summary tables, not just the named ACs. Detected tessera R41 MINOR-1 (actual: 15
 #     CLUSTER-HANDOFF files; claimed: 11).
+#
+#   Amendment literal sweep across all file occurrences (R48 MAJOR-1+MINOR-1): When applying
+#     an operator amendment that changes a literal value in a verifier file (e.g., updating
+#     expected test count from 361/356/2/3 to 361/355/3/3), grep the modified file for the
+#     OLD literal before committing to enumerate ALL occurrences — both assert/binding lines
+#     AND echo/display header lines that print the expected value. At R48, the operator Option A
+#     amendment updated Q-R48-EMPIRICAL.sh:186 (assert_eq) but missed :179 (echo header, 7 lines
+#     away). The verifier then printed a stale display value while asserting the corrected value;
+#     the attestation transcript silently showed the corrected text. Pattern: run
+#     `grep -n "old_literal" <modified_verifier_file>` after each amendment and verify
+#     the count matches expected modifications. Detected tessera R48 MAJOR-1 + MINOR-1.
 
 # REINFORCED 2026-05-17 — When implementing a spec-prescribed guard for a distinct failure
 #   mode, write a structural test that would FAIL if the guard were removed. If the existing
@@ -556,7 +596,7 @@ with a clear commit message.
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
 
-# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 5 sub-variants observed at Tessera)
+# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 6 sub-variants observed at Tessera)
 #
 #   Selective-audit-overreach (R41 MAJOR-1): When an audit empirically checks N of M files and
 #     the AC requires "all M files" verified, the delivered artifact must scope its claim to
@@ -625,8 +665,18 @@ with a clear commit message.
 #     claim is "this script exits 0" should either be omitted (let aggregate exit code
 #     speak) or computed AFTER all other ACs run as `[ "$FAILED" -eq 0 ]`. Rule 5 self-
 #     application: the verifier of the rule R46 derives must itself satisfy the rule.
+#
+#   Tightening-2 verifier invocation chain must not be circular (R47 CRITICAL-1): When
+#     implementing a Tightening 2 stdout-grep AC by invoking `scripts/pre-commit-rule-sweep.sh`,
+#     trace the full invocation chain BEFORE authoring the AC: pre-commit-rule-sweep.sh
+#     rule_1_check invokes `verify-empirical-acs.sh R<N>`, which re-executes the current
+#     round's Q-R<N>-EMPIRICAL.sh. If that verifier IS the one containing the AC, the chain is
+#     circular with no base case. Until R48 ships the same-round-recursion guard in
+#     `scripts/pre-commit-rule-sweep.sh:rule_1_check`, never invoke pre-commit-rule-sweep.sh
+#     from within Q-RNN-EMPIRICAL.sh to satisfy a Tightening 2 AC for that same round.
+#     Instead, use a synthetic SHA range or a prior round's spec to test the runtime path.
 
-# REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 3 sub-variants observed at Tessera)
+# REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 5 sub-variants observed at Tessera)
 #
 #   OQ surfacing must cross-check against own state table + sources (R40 MAJOR-1): When
 #     surfacing OQs in any deliverable, pre-emit grilling step 5 ("can the next role act on
@@ -660,77 +710,22 @@ with a clear commit message.
 #     target section?" before committing. A test that passes when its target section is
 #     absent is not load-bearing for its AC. Cross-project reinforcement rule derived at R41
 #     (3rd instance: R36 vacuous-absence-check + R41 MINOR-3 + R41 MINOR-4).
-
-# REINFORCED 2026-05-19 — Tightening-2 stdout-grep invocation creates infinite recursion
-#   via pre-commit-rule-sweep.sh (R47 CRITICAL-1): When implementing a Tightening 2
-#   stdout-grep AC by invoking `scripts/pre-commit-rule-sweep.sh`, trace the full
-#   invocation chain BEFORE authoring the AC: pre-commit-rule-sweep.sh rule_1_check
-#   invokes `verify-empirical-acs.sh R<N>`, which re-executes the current round's
-#   Q-R<N>-EMPIRICAL.sh. If that verifier IS the one containing the AC, the chain is
-#   circular with no base case. Until R48 ships the same-round-recursion guard in
-#   `scripts/pre-commit-rule-sweep.sh:rule_1_check`, never invoke pre-commit-rule-sweep.sh
-#   from within Q-RNN-EMPIRICAL.sh to satisfy a Tightening 2 AC for that same round.
-#   Instead, use a synthetic SHA range or a prior round's spec to test the runtime path.
-
-# REINFORCED 2026-05-19 — Spec text must be updated when verifier grep is tightened
-#   (R47 MAJOR-1): When debugging a verifier grep pattern during implementation and
-#   discovering the spec-text command is too loose (Liar's Paradox, self-match, or
-#   incidental hit), tighten BOTH the verifier AND the spec text in the same commit.
-#   Never leave the spec carrying command A while the verifier implements command B — even
-#   if both currently return the correct result at HEAD. The Rule 1 sub-class discipline
-#   is: the spec carries the command; the verifier runs THAT command. Documenting the
-#   tightening only in NEXT-ROLE.md (as "deviation noted") is insufficient; it must be
-#   reflected in the spec file itself.
-
-# REINFORCED 2026-05-19 — Tightening 4 self-application requires grepping own verifier
-#   for assert_ge before commit (R47 MAJOR-2): When authoring a verifier for a round that
-#   derives or extends Tightening 4 ("prefer exact counts over `>= 1` thresholds"), run
-#   `grep 'assert_ge' coordination/specs/Q-R<N>-EMPIRICAL.sh` before chore-A commit.
-#   For each `assert_ge` found: ask "is this expected count structurally fixed by this
-#   round's own file content?" If yes, replace with `assert_eq`. A file-header comment
-#   "Exact counts: ACs use `== expected`" is a declaration that must be verified by this
-#   grep — it is not self-enforcing.
-
-# REINFORCED 2026-05-19 — Non-terminating verifier invocation satisfies the halt
-#   condition "exits non-zero at chore-A" (R47 MINOR-3): When running the empirical
-#   verifier during chore-A work, if any invocation fails to reach the final
-#   "Summary: N PASS / M FAIL" line within a reasonable time window, treat this as a
-#   non-termination event — equivalent to "exits non-zero." Do NOT attest "exit 0" for a
-#   verifier that was killed externally (SIGKILL/SIGTERM) or whose final summary line was
-#   never observed in the terminal. A non-terminating invocation must be documented as a
-#   halt condition in NEXT-ROLE.md and a DIAGNOSTIC written before attesting completeness.
-
-# REINFORCED 2026-05-19 — When applying an operator amendment that changes a literal
-#   value in a verifier file (e.g., updating expected test count from 361/356/2/3 to
-#   361/355/3/3), grep the modified file for the OLD literal before committing to
-#   enumerate ALL occurrences — both assert/binding lines AND echo/display header lines
-#   that print the expected value. At R48, the operator Option A amendment updated
-#   Q-R48-EMPIRICAL.sh:186 (assert_eq) but missed :179 (echo header, 7 lines away).
-#   The verifier then printed a stale display value while asserting the corrected value;
-#   the attestation transcript silently showed the corrected text. Pattern: run
-#   `grep -n "old_literal" <modified_verifier_file>` after each amendment and verify
-#   the count matches expected modifications. Detected tessera R48 MAJOR-1 + MINOR-1.
-
-# REINFORCED 2026-05-19 — In audit-tier rounds where the Implementer wears the
-#   Architect hat, spec-internal consistency between § 3 Mechanism and § 5 AC
-#   verification text is a required pre-emit grilling gate. When § 3 prescribes a
-#   specific command modifier (e.g., `timeout 30`), the § 5 verification text and
-#   verifier implementation must match — or the spec must document why the modifier
-#   is omitted with operator approval. If the system lacks a required command, this
-#   is a spec-premise failure requiring HALT + DIAGNOSTIC + spec amendment, not a
-#   post-hoc TD disclosure. A TD disclosed after routing leaves the spec internally
-#   inconsistent (§ 3 says one thing; § 5 says another; next reader cannot resolve
-#   which is authoritative). Grilling gate: for each command modifier prescribed in
-#   § 3, verify the identical modifier appears in § 5 and in the verifier.
-#   Detected tessera R48 MINOR-2.
-
-# REINFORCED 2026-05-19 — Before routing, when a spec's § 3.5 "known limitation"
-#   block enumerates post-round verifier failures, run
-#   `scripts/verify-empirical-acs.sh [prior-round]` at HEAD to EMPIRICALLY observe
-#   all failures — not just structurally-predictable ones. List every expected failure
-#   in § 3.5. At R48, § 3.5 documented AC-R47-8 failure (ALLOWED_SET drift, deduced
-#   structurally) but omitted AC-R47-9 failure (test baseline 361/356/2/3 vs actual
-#   361/355/3/3 caused by R47 MU commit `6e8b1c6`), which is only observable by
-#   running the command. Known-limitation blocks that omit observable failures create
-#   confusion for operators running prior-round verifiers post-close.
-#   Detected tessera R48 MINOR-3.
+#
+#   Tightening-4 self-application: grep own verifier for assert_ge (R47 MAJOR-2): When
+#     authoring a verifier for a round that derives or extends Tightening 4 ("prefer exact
+#     counts over `>= 1` thresholds"), run `grep 'assert_ge' coordination/specs/Q-R<N>-EMPIRICAL.sh`
+#     before chore-A commit. For each `assert_ge` found: ask "is this expected count
+#     structurally fixed by this round's own file content?" If yes, replace with `assert_eq`.
+#     A file-header comment "Exact counts: ACs use `== expected`" is a declaration that must
+#     be verified by this grep — it is not self-enforcing.
+#
+#   Known-limitation blocks must enumerate empirically-observable failures (R48 MINOR-3):
+#     Before routing, when a spec's § 3.5 "known limitation" block enumerates post-round
+#     verifier failures, run `scripts/verify-empirical-acs.sh [prior-round]` at HEAD to
+#     EMPIRICALLY observe all failures — not just structurally-predictable ones. List every
+#     expected failure in § 3.5. At R48, § 3.5 documented AC-R47-8 failure (ALLOWED_SET
+#     drift, deduced structurally) but omitted AC-R47-9 failure (test baseline 361/356/2/3
+#     vs actual 361/355/3/3 caused by R47 MU commit `6e8b1c6`), which is only observable by
+#     running the command. Known-limitation blocks that omit observable failures create
+#     confusion for operators running prior-round verifiers post-close.
+#     Detected tessera R48 MINOR-3.

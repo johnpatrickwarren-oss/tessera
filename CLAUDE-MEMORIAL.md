@@ -26,6 +26,15 @@
      # REINFORCED [date] — [specific rule from violation]
    Append to the file's REINFORCEMENTS section. Do not delete prior
    reinforcements — the cumulative history is the value.
+
+   **Re-accretion guard (R51):** before appending a standalone REINFORCED line, check the
+   target file's current REINFORCED count via `grep -c "^# REINFORCED" CLAUDE-<ROLE>.md`.
+   If the count is ≥ 28 (within 2 of the 30-entry threshold R43 consolidated to), THEN
+   evaluate whether the violation can be folded into an existing composite sub-variant. If
+   a thematically-matching composite exists, ROLL the violation as a new sub-variant rather
+   than adding a standalone. Only add standalone REINFORCED entries when the count is < 28
+   OR the violation is genuinely novel with no thematic composite (and the composite count
+   update discipline of R39 MAJOR-1 applies to the composite heading).
 6. Write coordination/logs/ROUND-RNN-SUMMARY.md
 7. Set NEXT-ROLE.md STATUS: ROUND-COMPLETE
 
