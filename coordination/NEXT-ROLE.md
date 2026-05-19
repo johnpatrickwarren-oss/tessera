@@ -2,6 +2,38 @@ CURRENT-ROUND: R41
 NEXT-ROLE: REVIEWER
 STATUS: READY
 
+## Implementer routing — R41 chore-A attestation
+
+**Chore-A SHA:** `ae7c438` (coordination chore). SHA backfill commit: `f5d7985` (HEAD).
+
+**Inputs for Reviewer:**
+- `coordination/specs/Q-R41-SPEC.md` — R41 spec (10 ACs; thin 2-page format)
+- `coordination/PHASE-2-CLOSED-HYGIENE-STAMP.md` — Primary deliverable (Surface 7; 7 sections)
+- `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` — Surface 6 fix applied (Rule 7 canonical status)
+- `coordination/STAGED-PHASE-2-CLOSED-2026-05-19.md` — Renamed from STAGED-FOR-PHASE-2-CLOSE.md; 5 lifecycle annotations
+- `test/q41-hygiene-audit.test.ts` — 3 tests, all GREEN; guards AC-R41-4/8/5-6
+
+**Test counts at chore-A (ae7c438):**
+- `node --test test/*.test.js` → tests=361, pass=355, fail=3 (AC-R36-21/30/31), skip=3
+- `npx tsc -p tsconfig.test.json` → exit=0
+
+**Diff from round-start (622164c):**
+```
+A   coordination/PHASE-2-CLOSED-HYGIENE-STAMP.md
+M   coordination/PHASE-3-CANDIDATES-PRELIMINARY.md
+R091 coordination/STAGED-FOR-PHASE-2-CLOSE.md → coordination/STAGED-PHASE-2-CLOSED-2026-05-19.md
+A   coordination/specs/Q-R41-SPEC.md
+A   test/q41-hygiene-audit.test.ts
+```
+All paths ⊆ ALLOWED_SET per AC-R41-9. Zero engine/* modifications.
+
+**Key tactical deviations:**
+- tsc now exits 0 (TypeScript 5.9.3 resolved TS5107/TS2688 from prior rounds). Documented as improvement; load-bearing "no new regressions" property met.
+- STAGED-FOR-PHASE-2-CLOSE.md references in WAVE-GATE-04.md, ANCHOR-BACKFLOW-2026-05-18.md, CLUSTER-HANDOFF-4-WU06-WU07.md not updated (historically accurate at write-time; Rule 4 compliance).
+- Type B planning-name drift references (WAVE-PLAN-01/02.md) not updated (historical planning artifacts; audit trail preserved).
+
+---
+
 ## Round-scope directive (R41 — repo hygiene audit; audit-tier; main worktree) — FINAL safe-continuation round
 
 R41 = fourth and **final** round of post-Phase-2-close safe-continuation chain per evening overnight authority [[project-overnight-authority-2026-05-18-morning]].
