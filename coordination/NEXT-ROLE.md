@@ -1,8 +1,39 @@
 CURRENT-ROUND: R50
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
+TIER: audit
 
-## Implementer chore-A attestation
+## Reviewer cold-eye attestation (R50)
+
+**Report:** `coordination/reviews/REVIEWER-REPORT-R50.md`
+**Verdict:** 0 CRITICAL / 1 MAJOR / 6 MINOR / 4 OBS — STATUS: MERGE-READY
+**Empirical re-run at HEAD (`53d447c`):** `bash coordination/specs/Q-R50-EMPIRICAL.sh` → `=== Summary: 14 PASS / 0 FAIL ===`. All 10 ACs (14 sub-assertions) PASS.
+
+**Inputs (cold-read):**
+- `coordination/PRD.md` (R50-relevant cluster scope blocks)
+- `coordination/specs/Q-R50-SPEC.md` (full)
+- `coordination/specs/Q-R50-EMPIRICAL.sh` (full)
+- `scripts/verify-wave-aggregate.sh` (full)
+- `run-pipeline.sh` diff + targeted reads (argument parsing, run_wave_gate_close, build_consolidation_reviewer_prompt)
+- `CLAUDE-COORDINATOR.md` diff + heading verification
+- `coordination/SPEC-AUTHORING-CHECKLIST.md` diff
+- `coordination/MEMORIAL.md` (R50 block)
+- `coordination/NEXT-ROLE.md` (this file pre-update)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` Reviewer-relevant sections (R42–R49 reinforcements)
+
+Did NOT consult: `coordination/diagnostics/` (none present for R50), `coordination/logs/`, `.prompt-*.md`.
+
+**Findings summary** (full detail in REVIEWER-REPORT-R50.md):
+- MAJOR-1 — SKIP-counts-as-PASS at Q-R50-EMPIRICAL.sh:90-93 (6th+ tessera instance; structural-gate fold candidate)
+- MINOR-1 — verify-wave-aggregate.sh:117/132-133 lowercase regex drops uppercase-prefix paths
+- MINOR-2 — Q-R50-EMPIRICAL.sh:94 CHORE_A_SHA encodes chore-B (3rd tessera instance; cross-project threshold reached)
+- MINOR-3 — AC-R50-5 weak grep satisfied by lowercase body sentence; heading uses capital T
+- MINOR-4 — AC-R50-3 weak help-text grep; does not exercise flag handler
+- MINOR-5 — solo-tier heuristic (run-pipeline.sh:674) diverges from canonical "MUST" mandate (R49 MAJOR-1 class)
+- MINOR-6 — NEXT-ROLE.md TD-3 cite "line 733" vs actual run-pipeline.sh:735 (4th tessera instance; rule canonical)
+- OBS-1/2/3/4 — Check 1 dormancy; --wave-gate-without-coordinator silent ignore; no RED commit (precedent); $ROUND default
+
+## Implementer chore-A attestation (preserved for audit)
 
 **Chore-A SHA:** `0cc87bf920584392e4008a672cc6339ef55cf0e8`
 
