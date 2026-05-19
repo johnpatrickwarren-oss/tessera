@@ -1,5 +1,5 @@
 CURRENT-ROUND: R36
-NEXT-ROLE: REVIEWER
+NEXT-ROLE: COORDINATOR
 STATUS: READY
 
 ## Chore-A attestation (R36 Implementer)
@@ -108,8 +108,19 @@ After WU-07 close + Coordinator R37 Wave 5 gate: **HARD STOP at Phase 2 close mi
 
 (none — clean GREEN at chore-A)
 
+## Chore-B attestation (R36)
+
+```
+node --test test/*.test.js
+tests=355 / pass=353 / fail=0 / skip=2
+```
+
+Chore-B SHA: `fbc7228`
+
 ## Routing notes
 
-After both Reviewer reports emit:
-- NEXT-ROLE: MEMORIAL-UPDATER (Rule 6 canonical landing + COORDINATOR-MEMORIAL graduation entries)
-- Then NEXT-ROLE: COORDINATOR (R37 Wave 5 gate + HARD STOP stamp)
+Reviewer (Sonnet) completed: coordination/reviews/REVIEWER-REPORT-R36-sonnet.md — PASS (0 MAJOR, 2 MINOR).
+Memorial-Updater completed: Rule 6 canonical landing + COORDINATOR-MEMORIAL Wave 5 graduation entries.
+Chore-B completed: AC-R36-31 forward-protection test; full suite 355/353/0/2skip GREEN.
+
+NEXT-ROLE: COORDINATOR (R37 Wave 5 gate + HARD STOP stamp per PHASE-2-CLOSE-WALK.md § 3)
