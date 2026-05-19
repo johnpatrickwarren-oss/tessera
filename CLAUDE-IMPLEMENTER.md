@@ -141,7 +141,7 @@ with a clear commit message.
 #   DIAGNOSTIC is required at point-of-encounter — not deferred to the coordination step.
 #   Detected R01: 6 anti-scope files vendored; no DIAGNOSTIC files produced.
 
-# REINFORCED — HALT-DISCIPLINE (composite; 6 sub-variants observed at Tessera)
+# REINFORCED — HALT-DISCIPLINE (composite; 7 sub-variants observed at Tessera)
 #
 #   Spec-internal contradiction (R01): Two spec sections that prescribe mutually
 #     incompatible implementation choices are HALT condition (c). All sub-types
@@ -175,6 +175,20 @@ with a clear commit message.
 #     touching any unauthorized path. NEVER expand ALLOWED_SET post-hoc. The ALLOWED_SET
 #     must be authored from the spec before implementation begins. Detected tessera R36
 #     MAJOR-2/3: test/q-md-f4-common-mode-injection.test.ts admitted via self-expansion.
+#
+#   Audit-tier spec deviance must escalate (R45 MAJOR-2): When wearing the Architect hat
+#     in an audit-tier round and a binding-command run surfaces a result that contradicts
+#     an AC literal (e.g., smoke-test false-positive that requires AC wording change), the
+#     Implementer-as-Architect MUST NOT inline-amend the AC in the same chore-A commit.
+#     Cross-project Rule 4 prohibits post-spec-emit AC amendments; audit-tier (no separate
+#     Architect cold-eye) makes this question Implementer-attributable absent escalation.
+#     Required procedure: HALT + DIAGNOSTIC + ESCALATE with bounded options (A accept AC
+#     wording change with disclosure; B try harder to mechanize; C amend spec preamble to
+#     document the structural gap). "Disclosure in NEXT-ROLE.md spec-deviance section"
+#     after-the-fact is NOT a substitute for pre-commit ESCALATE in audit-tier rounds.
+#     Detected tessera R45 MAJOR-2: AC-R45-4 wording inline-changed from "Rule 4 + Rule 7
+#     fully mechanized" → "Rule 4 advisory + Rule 7 mechanical" in same chore-A as
+#     implementation; honestly disclosed but landed without operator confirmation.
 
 # REINFORCED 2026-05-18 — false-compliance-attestation (cross-project rule):
 #   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R03 MINOR-4 (spec count ≠ observed count),
@@ -239,7 +253,7 @@ with a clear commit message.
 #     entries but dropping them for others — is a verbatim-preservation failure even when the
 #     rule body itself is intact.
 
-# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 7 sub-variants)
+# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 9 sub-variants)
 #
 #   Prescriptions are binding (R01): Spec prescriptions in §Implementation surface are
 #     equivalent to ACs — not optional suggestions. When a prescription is unachievable,
@@ -289,6 +303,41 @@ with a clear commit message.
 #     acceptable even when substantively equivalent. The spec's own quoted trigger is the
 #     authoritative verbatim form; deviations create self-inconsistency between spec and
 #     artifact.
+#
+#   Canonical-name fidelity for cross-project rule short names (R44 MAJOR-1 / R44 MINOR-1/2/4):
+#     When citing or referencing a cross-project rule by its short name in any spec, gate
+#     table, MEMORIAL entry, or checklist row, use the EXACT canonical short name from
+#     `~/.claude/CROSS-PROJECT-MEMORIAL.md` "Reinforcement rules derived" section. Canonical
+#     names are unique identifiers — a downstream tooling pass (e.g., scripts/pre-commit-
+#     rule-sweep.sh) keyed on canonical short names cannot match invented or synthesized
+#     forms. Required pre-emit gate: for each Rule N citation in spec § 7 or checklist row,
+#     run `grep -nE "^- \*\*Rule N \(\`<short-name>\`" ~/.claude/CROSS-PROJECT-MEMORIAL.md`
+#     and verify the cited short name returns ≥ 1 match in the canonical text. Detected
+#     tessera R44 MAJOR-1 (`self-application-gate` vs canonical `rule-derivation-without-
+#     self-application`); MINOR-1 (`architect-branch-binding-coverage` vs canonical
+#     `branch-binding-coverage-gate`); MINOR-2 (attestation conflates chore-A SHA with
+#     SHA-backfill SHA in diff cardinality claim); MINOR-4 (`canonical-with-empirical-proof`
+#     invented phrase not in canonical Rule 7 text). The round implementing Rule 7's
+#     structural propagation mechanism itself broke the propagation chain at first hop by
+#     using non-canonical short names — Rule 1 (cite-then-verify) + Rule 7 simultaneously
+#     self-violated. Same Rule 5 self-application failure shape as R32/R36/R39/R43/R46.
+#     R46 corrected by using canonical short names from CROSS-PROJECT-MEMORIAL.md.
+#
+#   Canonical-document sweep symmetry (R42 MINOR-1): When updating a canonical role
+#     coordination document (CLAUDE-IMPLEMENTER.md, CLAUDE-REVIEWER.md, etc.) for a
+#     structural change (e.g., memorial sharding read-protocol introducing active/shard
+#     distinction), the update MUST be applied to ALL references to the affected concept
+#     within the file — not only the halt-discipline path that the spec explicitly
+#     prescribes. Asymmetric updates (one MEMORIAL.md reference cross-linked to the new
+#     protocol; 4+ other references in the same file untouched) leave the file in a state
+#     where some sections are shard-aware and others are not. The spec-prescribed update
+#     site is the START of the sweep, not the entirety. Gate: after the prescribed
+#     single-site update, `grep -n "MEMORIAL\.md" <file>` to enumerate all references and
+#     verify each has the new context (active-file qualifier; shard cross-reference;
+#     CLAUDE-COMMON.md cross-link as appropriate). Detected tessera R42 MINOR-1: CLAUDE-
+#     IMPLEMENTER.md halt-discipline path updated; 4+ other MEMORIAL.md references untouched
+#     (clean-completion path at :112, etc.). AC-R42-6 met at floor but file was the weakest
+#     of the 6 CLAUDE-*.md updates by sweep coverage.
 
 # REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 4 sub-variants)
 #
@@ -504,7 +553,7 @@ with a clear commit message.
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
 
-# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 3 sub-variants observed at Tessera)
+# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 5 sub-variants observed at Tessera)
 #
 #   Selective-audit-overreach (R41 MAJOR-1): When an audit empirically checks N of M files and
 #     the AC requires "all M files" verified, the delivered artifact must scope its claim to
@@ -534,6 +583,45 @@ with a clear commit message.
 #     preconditions rather than assert.fail stubs as mandated by spec § N; spirit met (tests
 #     genuinely failed); letter bypassed without prior disclosure." Detected tessera R41
 #     MINOR-5 (1st instance: spec-mandated-stub-form-bypassed).
+#
+#   Empirical-command-attestation — re-run the command, do not memorize the result
+#     (R42 MAJOR-1 / R45 CRITICAL-1 + MINOR-1 / R46 MAJOR-2): When an AC asserts a numeric
+#     count, grep output, line range, file mode, or other empirically-determinable value,
+#     the attestation in NEXT-ROLE.md / MEMORIAL.md MUST be the actual output of running
+#     the prescribed command at chore-A SHA — not a value memorized from the spec or copied
+#     from an earlier draft. Declarative spec numbers get reified into attestations without
+#     re-execution. Prescription: every empirical AC binds to a labeled bash block in
+#     `coordination/specs/Q-RNN-EMPIRICAL.sh`; chore-A pre-commit runs `scripts/verify-
+#     empirical-acs.sh <round>` which exits non-zero on mismatch; attestation cites the
+#     harness output line-for-line. Recurring chain pattern detected: R42 MAJOR-1 ("99
+#     back-references" actually 26 from grep; cited in 5 surfaces); R43 MINOR-3 (distinctive-
+#     phrase grep substituted for spec-prescribed diff); R44 MINOR-2 (attestation conflates
+#     chore-A SHA with SHA-backfill SHA in file-count claim); R45 CRITICAL-1 (`grep -cE
+#     "^rule_[1-7]_check"` attested = 7; empirical = 14 because regex matches both function
+#     defs and call sites); R45 MINOR-1 (`grep -c "IMPLEMENTED at \`scripts/...\`"` attested
+#     PASS; empirical = 0 because file uses "IMPLEMENTED at R45" wording — silent grep
+#     substitution); R46 MAJOR-2 (round-start SHA + diff cardinality memorized vs re-derived).
+#     Rule 1 sub-class `empirical-command-attestation` canonically derived R46 at Tessera-
+#     internal scope (cross-project landing deferred per Rule 7 anchor-canonical-landing-
+#     deferred). Mechanically enforced via the harness.
+#
+#   Mechanical-AC verifier must not be self-confirming (R46 MAJOR-1 + MAJOR-3): When
+#     authoring a Q-RNN-EMPIRICAL.sh verification block for a per-AC empirical claim, the
+#     block MUST compute the assertion from observable command output — not hard-code the
+#     PASS branch. Two failure modes detected at R46 (the very round deriving the sub-class):
+#     (a) AC-R46-6 block emits `echo "PASS — AC-..."` and increments `PASS=$((PASS + 1))`
+#     unconditionally, with no logic that can detect failure — the per-AC binding is
+#     structurally vacuous (substantive aggregate exit-0 holds only because all other ACs
+#     PASS; if any other AC failed, the per-AC table would still report PASS); (b) AC-R46-10
+#     spec text says "stdout of `pre-commit-rule-sweep.sh` includes <string>" but the
+#     verifier source-greps the script file for the literal instead of invoking the script
+#     and grepping stdout — passes even if the rule_1_check function is disabled or renamed.
+#     Required: every Q-RNN-EMPIRICAL.sh block runs the AC's prescribed command (or the
+#     command that produces the AC's observable), captures output, and asserts on the
+#     captured value with `[ "$ACTUAL" -eq "$EXPECTED" ]` (or equivalent). Meta-ACs whose
+#     claim is "this script exits 0" should either be omitted (let aggregate exit code
+#     speak) or computed AFTER all other ACs run as `[ "$FAILED" -eq 0 ]`. Rule 5 self-
+#     application: the verifier of the rule R46 derives must itself satisfy the rule.
 
 # REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 3 sub-variants observed at Tessera)
 #
