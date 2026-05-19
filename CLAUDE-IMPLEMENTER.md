@@ -657,3 +657,42 @@ with a clear commit message.
 #     target section?" before committing. A test that passes when its target section is
 #     absent is not load-bearing for its AC. Cross-project reinforcement rule derived at R41
 #     (3rd instance: R36 vacuous-absence-check + R41 MINOR-3 + R41 MINOR-4).
+
+# REINFORCED 2026-05-19 — Tightening-2 stdout-grep invocation creates infinite recursion
+#   via pre-commit-rule-sweep.sh (R47 CRITICAL-1): When implementing a Tightening 2
+#   stdout-grep AC by invoking `scripts/pre-commit-rule-sweep.sh`, trace the full
+#   invocation chain BEFORE authoring the AC: pre-commit-rule-sweep.sh rule_1_check
+#   invokes `verify-empirical-acs.sh R<N>`, which re-executes the current round's
+#   Q-R<N>-EMPIRICAL.sh. If that verifier IS the one containing the AC, the chain is
+#   circular with no base case. Until R48 ships the same-round-recursion guard in
+#   `scripts/pre-commit-rule-sweep.sh:rule_1_check`, never invoke pre-commit-rule-sweep.sh
+#   from within Q-RNN-EMPIRICAL.sh to satisfy a Tightening 2 AC for that same round.
+#   Instead, use a synthetic SHA range or a prior round's spec to test the runtime path.
+
+# REINFORCED 2026-05-19 — Spec text must be updated when verifier grep is tightened
+#   (R47 MAJOR-1): When debugging a verifier grep pattern during implementation and
+#   discovering the spec-text command is too loose (Liar's Paradox, self-match, or
+#   incidental hit), tighten BOTH the verifier AND the spec text in the same commit.
+#   Never leave the spec carrying command A while the verifier implements command B — even
+#   if both currently return the correct result at HEAD. The Rule 1 sub-class discipline
+#   is: the spec carries the command; the verifier runs THAT command. Documenting the
+#   tightening only in NEXT-ROLE.md (as "deviation noted") is insufficient; it must be
+#   reflected in the spec file itself.
+
+# REINFORCED 2026-05-19 — Tightening 4 self-application requires grepping own verifier
+#   for assert_ge before commit (R47 MAJOR-2): When authoring a verifier for a round that
+#   derives or extends Tightening 4 ("prefer exact counts over `>= 1` thresholds"), run
+#   `grep 'assert_ge' coordination/specs/Q-R<N>-EMPIRICAL.sh` before chore-A commit.
+#   For each `assert_ge` found: ask "is this expected count structurally fixed by this
+#   round's own file content?" If yes, replace with `assert_eq`. A file-header comment
+#   "Exact counts: ACs use `== expected`" is a declaration that must be verified by this
+#   grep — it is not self-enforcing.
+
+# REINFORCED 2026-05-19 — Non-terminating verifier invocation satisfies the halt
+#   condition "exits non-zero at chore-A" (R47 MINOR-3): When running the empirical
+#   verifier during chore-A work, if any invocation fails to reach the final
+#   "Summary: N PASS / M FAIL" line within a reasonable time window, treat this as a
+#   non-termination event — equivalent to "exits non-zero." Do NOT attest "exit 0" for a
+#   verifier that was killed externally (SIGKILL/SIGTERM) or whose final summary line was
+#   never observed in the terminal. A non-terminating invocation must be documented as a
+#   halt condition in NEXT-ROLE.md and a DIAGNOSTIC written before attesting completeness.
