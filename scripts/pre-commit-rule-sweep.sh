@@ -65,13 +65,58 @@ SEMANTIC_CHECKS=0
 
 rule_1_check() {
     echo ""
-    echo "Rule 1 (false-compliance-attestation): SEMANTIC CHECK REQUIRED"
-    echo "  Check: cross-check each AC PASS claim against observed evidence."
-    echo "  For verbatim-preservation ACs: run \`diff\` between origin and derived"
-    echo "  artifact and confirm byte-identical output before attesting PASS."
-    echo "  Source: coordination/SPEC-AUTHORING-CHECKLIST.md § Rule 7 row 1."
-    SEMANTIC_CHECKS=$((SEMANTIC_CHECKS + 1))
-    return 0
+    echo "Rule 1 (false-compliance-attestation): MECHANICAL CHECK via sub-class verifier"
+    # R46 upgrade: Rule 1 sub-class `empirical-command-attestation` mechanizes
+    # the numeric/grep-output verification via scripts/verify-empirical-acs.sh.
+    # The verifier runs the round's Q-RNN-EMPIRICAL.sh and aggregates per-AC
+    # results. Mismatch → mechanical finding.
+
+    # Locate the round's spec file from the diff
+    local round_spec
+    round_spec=$(git diff --name-only "$ROUND_START_SHA" "$CHORE_A_SHA" \
+        -- 'coordination/specs/Q-R*-SPEC.md' 2>/dev/null | head -1)
+
+    if [ -z "$round_spec" ]; then
+        echo "  N/A — no spec file in this round diff."
+        return 0
+    fi
+
+    # Derive round number from spec filename (Q-RNN-SPEC.md → RNN)
+    local round_num
+    round_num=$(basename "$round_spec" | sed -E 's/Q-(R[0-9]+)-SPEC\.md/\1/')
+
+    if [ ! -x "scripts/verify-empirical-acs.sh" ]; then
+        echo "  ADVISORY — scripts/verify-empirical-acs.sh missing or not executable."
+        echo "  Pre-R46 SEMANTIC fallback: cross-check each AC PASS claim against"
+        echo "  observed evidence; for verbatim-preservation ACs run diff before PASS."
+        SEMANTIC_CHECKS=$((SEMANTIC_CHECKS + 1))
+        return 0
+    fi
+
+    local empirical_file="coordination/specs/Q-${round_num}-EMPIRICAL.sh"
+    if [ ! -f "$empirical_file" ]; then
+        echo "  ADVISORY — $empirical_file not present."
+        echo "  Per Rule 1 sub-class (empirical-command-attestation), every round with"
+        echo "  numeric/grep-output ACs MUST author this file. If this round genuinely"
+        echo "  has no empirical ACs, document the N/A in spec § 5; otherwise FAIL."
+        SEMANTIC_CHECKS=$((SEMANTIC_CHECKS + 1))
+        return 0
+    fi
+
+    echo "  Invoking: scripts/verify-empirical-acs.sh $round_num"
+    if scripts/verify-empirical-acs.sh "$round_num" >/dev/null 2>&1; then
+        echo "  OK — all empirical ACs verified (exit 0)."
+        return 0
+    else
+        local rc=$?
+        echo "  FINDING — scripts/verify-empirical-acs.sh $round_num exit $rc"
+        echo "    Per Rule 1 sub-class: HALT + DIAGNOSTIC required;"
+        echo "    do NOT attest PASS on failed empirical AC(s)."
+        echo "    Re-run manually to see per-AC failure detail:"
+        echo "      scripts/verify-empirical-acs.sh $round_num"
+        MECHANICAL_FINDINGS=$((MECHANICAL_FINDINGS + 1))
+        return 1
+    fi
 }
 
 # -----------------------------------------------------------------------------
