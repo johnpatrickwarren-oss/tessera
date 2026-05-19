@@ -2790,3 +2790,13 @@ CONFIRMATION: spec-prescription-fidelity | All 8 deliverables implemented per Q-
 
 CONFIRMATION: memorial-completeness | CONFIRMATION entries written for all active disciplines (TDD, anti-scope, halt, role-boundary, spec-fidelity). Full binding-command attestation in NEXT-ROLE.md including tsc exit code (0) and per-file test counts. | R36 | IMPLEMENTER
 
+---
+
+## R36 — Memorial-Updater (2026-05-18) — main worktree / WU-07 Phase 2 close-walk
+
+CONFIRMATION: cross-project-memorial-append | Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) canonically landed in `~/.claude/CROSS-PROJECT-MEMORIAL.md` as a derived reinforcement rule under "halt-discipline (tessera-R36 additions)". Derivation triggers: R26 MAJOR-1 + R34 MINOR-1 + R34 MINOR-3 (3+ threshold). All 6 cross-project rules now canonical. R36 entries appended: halt-discipline (confirmations + Rule 6), anti-scope, tdd-discipline, role-boundary, emerging patterns. | R36 | MEMORIAL-UPDATER
+
+CONFIRMATION: coordinator-memorial-graduation | Wave 5 graduation entries appended to `coordination/COORDINATOR-MEMORIAL.md`: `dag-construction-discipline` CONFIRMATION (0 invented WUs across all 5 waves) + `pattern-graduation` CONFIRMATION (MR-1 multi-cluster pattern proven; anchor canonical inclusion recommended). Rule 6 OBSERVATION at Wave 4 gate updated to reflect canonical landing complete. | R36 | MEMORIAL-UPDATER
+
+CONFIRMATION: role-boundary | Memorial-Updater observed and recorded only; did NOT re-litigate Reviewer findings or re-implement any spec component. Modified only: `~/.claude/CROSS-PROJECT-MEMORIAL.md` (append), `coordination/COORDINATOR-MEMORIAL.md` (append), `coordination/MEMORIAL.md` (this append). No source/test/spec/engine files touched. NEXT-ROLE.md update to COORDINATOR routing follows chore-B. | R36 | MEMORIAL-UPDATER
+
