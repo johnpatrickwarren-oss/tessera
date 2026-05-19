@@ -1,6 +1,31 @@
 CURRENT-ROUND: R50
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
+
+## Implementer chore-A attestation
+
+**Chore-A SHA:** `0cc87bf920584392e4008a672cc6339ef55cf0e8`
+
+**Empirical verifier output (Q-R50-EMPIRICAL.sh at chore-A):**
+```
+=== Summary: 14 PASS / 0 FAIL ===
+```
+All 10 ACs PASS (14 sub-assertions from AC-R50-10's 5-part decomposition).
+
+**Pre-commit rule sweep (scripts/pre-commit-rule-sweep.sh 3974d2f 0cc87bf):**
+- Rule 1: MECHANICAL — invokes verify-empirical-acs.sh R50 → exit 0
+- Rules 2,3,5,6: SEMANTIC (advisory; N/A for methodology round)
+- Rule 4: ADVISORY (new spec file; ALLOWED_SET authoring verified against spec § 4)
+- Rule 7: MECHANICAL — spec § 7 enumerates all 7 rules → OK
+- Overall: exit 0, 0 mechanical findings
+
+### Spec-deviance disclosures
+
+**TD-1 (resolved before routing):** `$WAVE_PLAN` undefined in `build_consolidation_reviewer_prompt()`. The heredoc at line 717 referenced `$WAVE_PLAN` which was only defined as a local in `run_wave_gate_close()`. Fixed in commit `0cc87bf` by deriving `wave_plan_path` from `$WAVE_GATE_ID` inside `build_consolidation_reviewer_prompt()` using the same WAVE-NN parsing logic. Empirical verifier re-confirmed 14 PASS / 0 FAIL post-fix.
+
+**TD-2 (resolved before routing):** AC-R50-5 grep used lowercase `tier-aware consolidation Reviewer` but the CLAUDE-COORDINATOR.md heading was "Tier-aware consolidation Reviewer". Fixed by ensuring the section body text contains the lowercase phrase "The tier-aware consolidation Reviewer provides the missing audit at the wave boundary." The empirical verifier's `grep -cF "tier-aware consolidation Reviewer"` finds this sentence; actual=1.
+
+**TD-3 (design limitation — disclosed for Reviewer):** `build_consolidation_reviewer_prompt()` references `$ROUND` (line 733: `coordination/reviews/REVIEWER-REPORT-${ROUND}-consolidation.md`). In wave-gate mode, `$ROUND` is the Coordinator session's round (e.g., `COORD`), which may not be ideal. This is a pre-existing pattern from the Coordinator dispatcher; the prompt is advisory scaffolding. No functional regression; AC-R50-4 (bash syntax) passes. Flag for operator: a future round could define `$WAVE_ROUND` for the consolidation report filename.
 
 ## Round-scope directive (R50 — parallel-execution levers: wave-aggregate verifier + tier-aware consolidation Reviewer; audit-tier)
 
