@@ -157,3 +157,33 @@ Beyond the anchor backflow (operator-owned), WU-07 close-walk should:
 This is real methodology learning + spec template work; should land at WU-07 close-walk regardless of whether the anchor backflow PRs land that round.
 
 ---
+
+## Item 4 — Phase 3 capability candidate: Tailscale + M4 Pro mini remote-execution infrastructure
+
+**Surfaced:** 2026-05-18 mid-R34 (operator mentioned during Reviewer-hang investigation).
+
+**Capability:** Operator has a Mac mini (M4 Pro, 64GB RAM) accessible via Tailscale. Could be used to offload heavy compute from the M5 MacBook Pro.
+
+**Where it'd genuinely help (Phase 3 onward):**
+- Multi-cluster parallel Wave execution without local CPU contention (Wave 2 had 3 parallel clusters; future Phase 3 waves may have more)
+- PR-F5-class storage/perf benchmarks (R14 PR-F5 burned real compute; Phase 2-amendment-flagged storage-compression candidates could revisit at scale)
+- Background CI-style full-suite verification continuous on remote while local stays interactive
+- Larger N synthetic cluster substrate testing (current v9X/v9Y are small; real-cluster-scale fixtures would benefit from headroom)
+
+**Where it DOESN'T help:**
+- Current R34 Reviewer hang (structural infinite loop in q29/q34 test code; more compute doesn't unblock logical deadlock)
+- Anthropic API rate limits (same account; remote machine shares the limit)
+- Methodology-level role discipline (Reviewer/Architect/etc. are claude-sided, not compute-sided)
+
+**Setup magnitude (rough):** 1-2 methodology rounds of work (~MR-1 magnitude). Components needed:
+- `coordination/remote-config.json` (Tailscale endpoint; SSH key paths; remote workdir convention)
+- `scripts/run-pipeline-remote.sh` wrapper: sync repo state (git push-pull or rsync); ssh into mini; invoke run-pipeline.sh; pull results back; clean up
+- Cleanup discipline (remote artifact lifecycle; cluster-worktree directories on mini)
+- Wave-merge handling for results produced on remote (multi-track-verify-wave-merge.sh expects same-machine git operations; needs remote-aware variant)
+- Documentation: when-to-use-remote vs when-to-stay-local decision matrix
+
+**Decision recommendation:** Queue as Phase 3 capability candidate (or post-Phase-2 MR-3 if Phase 3 wave structure benefits enough). NOT a Phase 2 deliverable; current Phase 2 close is in sight (~3-5 rounds out) and setup cost only pays back across multiple future waves.
+
+**Backflow potential:** If implemented well in Tessera, the `--remote` pattern could land in anchor canonical as a multi-track-execution capability extension. Coordinator role + cluster dispatch already have multi-machine-ready conceptual architecture; just needs the plumbing.
+
+---
