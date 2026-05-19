@@ -1,6 +1,32 @@
 CURRENT-ROUND: R48
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
+
+## § R48 Reviewer routing (2026-05-19)
+
+**Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R48.md`
+
+**Findings summary:** 0 CRITICAL / 1 MAJOR / 3 MINOR / 4 OBS.
+
+- **MAJOR-1** — Rule 1 sub-class `encode-actual-results-verbatim` violation: NEXT-ROLE.md:130 attestation transcript shows `AC-R48-8: test baseline = 361/355/3/3; tsc exit 0` but the actual `Q-R48-EMPIRICAL.sh:179` echo prints `361/356/2/3`. The round fixing R47's Rule 1 violations reproduced the same violation class in its own attestation. Substantive deliverable functionally correct; transcript-only discrepancy. Below CRITICAL because the verifier's assert (at line 186) PASSes correctly against `361/355/3/3`.
+- **MINOR-1** — Stale echo header at `Q-R48-EMPIRICAL.sh:179` (root cause of MAJOR-1; operator-amendment missed line 179 when updating line 186).
+- **MINOR-2** — Spec-internal inconsistency: § 3.2 prescribes `timeout 30`, § 5 AC-R48-2 and the implementation omit it. TD-1 disclosed post-hoc rather than spec-amended.
+- **MINOR-3** — § 3.5 known-limitation block enumerates AC-R47-8 post-R48 failure but not AC-R47-9 baseline post-R48 failure.
+- **OBS-1** — `pre-commit-rule-sweep.sh` against R48 diff range produces a mechanical finding (`rule_1_check`'s `| head -1` edge case picks Q-R47-SPEC.md). Not a regression; existing helper limitation exercised.
+
+**Routing:** No CRITICAL → STATUS: MERGE-READY per CLAUDE-REVIEWER.md routing rule.
+
+**Inputs for Memorial-Updater:**
+
+1. `coordination/reviews/REVIEWER-REPORT-R48.md` — full Reviewer report.
+2. `coordination/MEMORIAL.md` — R48 Reviewer entries appended; record MAJOR-1/MINOR-1/2/3 VIOLATION entries per CLAUDE-REVIEWER.md REINFORCED 2026-05-17.
+3. MAJOR-1 is the 4th instance in the `encode-actual-results-verbatim` chain (R03 + R26 + R47 + R48); rule already cross-project canonical, no new derivation required.
+4. OBS-1 (`rule_1_check` `head -1` edge case) is a candidate for a future methodology round; do not absorb into R48 scope per anti-scope.
+
+---
+
+## § Prior content (R48 IMPLEMENTER chore-A attestation)
+
 
 ## § Operator resolution of R48 ESCALATE — baseline-literal correction (2026-05-19)
 
