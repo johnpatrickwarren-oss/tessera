@@ -696,3 +696,38 @@ with a clear commit message.
 #   verifier that was killed externally (SIGKILL/SIGTERM) or whose final summary line was
 #   never observed in the terminal. A non-terminating invocation must be documented as a
 #   halt condition in NEXT-ROLE.md and a DIAGNOSTIC written before attesting completeness.
+
+# REINFORCED 2026-05-19 — When applying an operator amendment that changes a literal
+#   value in a verifier file (e.g., updating expected test count from 361/356/2/3 to
+#   361/355/3/3), grep the modified file for the OLD literal before committing to
+#   enumerate ALL occurrences — both assert/binding lines AND echo/display header lines
+#   that print the expected value. At R48, the operator Option A amendment updated
+#   Q-R48-EMPIRICAL.sh:186 (assert_eq) but missed :179 (echo header, 7 lines away).
+#   The verifier then printed a stale display value while asserting the corrected value;
+#   the attestation transcript silently showed the corrected text. Pattern: run
+#   `grep -n "old_literal" <modified_verifier_file>` after each amendment and verify
+#   the count matches expected modifications. Detected tessera R48 MAJOR-1 + MINOR-1.
+
+# REINFORCED 2026-05-19 — In audit-tier rounds where the Implementer wears the
+#   Architect hat, spec-internal consistency between § 3 Mechanism and § 5 AC
+#   verification text is a required pre-emit grilling gate. When § 3 prescribes a
+#   specific command modifier (e.g., `timeout 30`), the § 5 verification text and
+#   verifier implementation must match — or the spec must document why the modifier
+#   is omitted with operator approval. If the system lacks a required command, this
+#   is a spec-premise failure requiring HALT + DIAGNOSTIC + spec amendment, not a
+#   post-hoc TD disclosure. A TD disclosed after routing leaves the spec internally
+#   inconsistent (§ 3 says one thing; § 5 says another; next reader cannot resolve
+#   which is authoritative). Grilling gate: for each command modifier prescribed in
+#   § 3, verify the identical modifier appears in § 5 and in the verifier.
+#   Detected tessera R48 MINOR-2.
+
+# REINFORCED 2026-05-19 — Before routing, when a spec's § 3.5 "known limitation"
+#   block enumerates post-round verifier failures, run
+#   `scripts/verify-empirical-acs.sh [prior-round]` at HEAD to EMPIRICALLY observe
+#   all failures — not just structurally-predictable ones. List every expected failure
+#   in § 3.5. At R48, § 3.5 documented AC-R47-8 failure (ALLOWED_SET drift, deduced
+#   structurally) but omitted AC-R47-9 failure (test baseline 361/356/2/3 vs actual
+#   361/355/3/3 caused by R47 MU commit `6e8b1c6`), which is only observable by
+#   running the command. Known-limitation blocks that omit observable failures create
+#   confusion for operators running prior-round verifiers post-close.
+#   Detected tessera R48 MINOR-3.
