@@ -346,6 +346,31 @@ The wave gate never advances under CRITICAL unresolved findings.
 LIKELY-SURFACES findings from any cluster are pre-flagged to the next
 wave's relevant clusters before dispatch.
 
+### Hybrid Reviewer mandate at close-walk class
+
+Close-walk class rounds require hybrid Reviewer (Opus + Sonnet merged), not advisory. The
+hybrid Reviewer runs two independent cold-eye passes and a merger step, providing coverage
+complementarity (Opus catches AC-literal narrowings; Sonnet catches procedural violations —
+per `coordination/EVAL-SONNET-REVIEWER-2026-05-15.md`).
+
+**Close-walk class defined mechanically:**
+- Phase-close round (e.g., R15 Phase 1 close, R37 WAVE-GATE-05 Phase 2 close)
+- SLICE-close round (SLICE 1/2/3/4 close-walks)
+- Sub-Phase-close round (Phase 2 close-walk variants, WU-05 SLICE 3 close-walk)
+- Multi-cluster wave-consolidation round (any WU-NN consolidating multiple Wave N clusters)
+- Any round where the operator explicitly sets `CLOSE-WALK-CLASS: true` in `coordination/NEXT-ROLE.md`
+
+**Invocation:** add `CLOSE-WALK-CLASS: true` to the round's `coordination/NEXT-ROLE.md`
+directive. `scripts/finalize-round.sh` reads this field and passes `--hybrid-reviewer` to
+`run-pipeline.sh` automatically. Alternatively, pass `--hybrid-reviewer` directly:
+
+```bash
+./run-pipeline.sh --round R<NN> --tier audit --hybrid-reviewer
+```
+
+> **Canonical text landed at:** R49 (2026-05-19). Prior usage: R32/R36/R37/R39 (hybrid
+> used 4+ times before formalization; this section makes it MANDATORY for the named class).
+
 ## Shared-resource arbitration in multi-track mode
 
 Multi-track parallelism introduces several project-shared and

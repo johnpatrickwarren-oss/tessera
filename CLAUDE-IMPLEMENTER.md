@@ -110,6 +110,9 @@ On clean completion:
 
    Routing: NEXT-ROLE: REVIEWER | STATUS: READY
    Append CONFIRMATION entries to MEMORIAL.md.
+   MUST invoke `scripts/finalize-round.sh` OR `./run-pipeline.sh --round R<NN> --start-at REVIEWER`
+   before declaring round complete; do NOT terminate the session at chore-A —
+   pipeline Reviewer + MU stages are required to close the round.
 
 ## Implementer role boundary
 Do not review your own code. Do not change scope.
