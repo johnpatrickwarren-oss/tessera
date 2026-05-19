@@ -1,5 +1,5 @@
 // Q-R41 hygiene audit verification tests
-// Chore-A SHA: [set after chore-A commit]
+// Chore-A SHA: ae7c438. Count at ae7c438: 361 tests, 355 pass, 3 fail, 3 skip. tsc exit=0.
 // Round: R41 | 2026-05-19 | audit-tier
 
 import { test } from 'node:test';
