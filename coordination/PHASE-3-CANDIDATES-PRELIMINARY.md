@@ -310,6 +310,21 @@ Source: SCOPING-MEMO § 2.3 A17; PRD.md success metrics ("engine extracted to sh
   Tessera-confirmed; cross-project promotion requires a 2nd project's hybrid Reviewer pass per
   WAVE-GATE-05.md). Tessera-internal rule can land earlier.
 
+### 5.5 Memorial sharding (per-round per-session read-cost reduction)
+
+- **Source:** Operator-flagged 2026-05-19 post-R41 ("how big are our docs now that have to be read each round? ... memorial sharding to address the ~6,750 lines of MEMORIAL.md + CROSS-PROJECT-MEMORIAL.md per-round read cost").
+- **Background:** Architect + Reviewer roles read both `coordination/MEMORIAL.md` (3,153 lines at Phase 2 close) and `~/.claude/CROSS-PROJECT-MEMORIAL.md` (3,599 lines at Phase 2 close) at every round. These grow monotonically (~50-100 lines per round in MEMORIAL.md; CROSS-PROJECT grows when new rules derive). At ~6,750 lines combined and growing, this is the dominant per-round input-read cost and the heaviest scalability concern for Phase 3 round volume. CLAUDE-IMPLEMENTER consolidation (R36 MR-2) + CLAUDE-ARCHITECT consolidation (R39) reduced per-role system-prompt size but did NOT touch these growing files.
+- **Candidate sharding strategies (operator picks at Phase 3 spec time):**
+  - **(a) Phase-N sharding** — `coordination/MEMORIAL-PHASE-1.md` + `MEMORIAL-PHASE-2.md` + `MEMORIAL-PHASE-3.md`. Architect reads only current-phase by default + indexed lookup for cross-phase context. Most conservative; preserves audit trail integrity; modest implementation cost (~1 methodology round to shard + update Architect/Reviewer/Memorial-Updater read protocols).
+  - **(b) Age-based archive** — `MEMORIAL.md` retains last N days OR last N rounds; older entries move to `coordination/archive/MEMORIAL-YYYY-Q.md`. Same script as `scripts/consolidate-reinforcements.sh` extends to MEMORIAL. Risk: round-N debugging may need recent-archive lookup.
+  - **(c) Composite-stamp summarization** — periodic Coordinator round produces `MEMORIAL-STAMP-YYYY-MM-DD.md` summarizing prior period; original entries archived. Higher Coordinator cost; preserves searchable summaries.
+  - **(d) Index-and-lazy-load** — MEMORIAL.md becomes a 1-line-per-entry index pointing to per-round detail files at `coordination/memorial/RNN-MEMORIAL.md`. Architect grep-reads index, full-reads only relevant. Most flexible; highest churn.
+  - **(e) CROSS-PROJECT-MEMORIAL.md separate treatment** — per-project shards merged via existing operator-cadence script (per CLAUDE-COORDINATOR.md §Cross-project memorial design); confirmed working but the shard merge produces the full ~3,599-line file every round, defeating the design. Real fix: shard the canonical itself by Reinforcement-rule-derivation date.
+- **Cross-project rule candidate:** "When MEMORIAL.md or CROSS-PROJECT-MEMORIAL.md exceeds N lines (target: N=1500), trigger sharding round at next close-walk window." Heuristic mirrors the 30-line CLAUDE-*.md threshold pattern.
+- **Why this matters:** Phase 3 anticipates 8+ candidate categories (this document § 1-§ 5); if each candidate runs at ~5-10 rounds (vendor adapters precedent: WU-01/02/03 = 3 rounds; SLICE close-walks: 1 round each), Phase 3 round volume is ~30-50 rounds. At ~75 lines/round MEMORIAL growth, that adds ~2,250-3,750 lines to MEMORIAL.md alone, reaching ~5,000-7,000 lines for that file alone. Per-round read cost doubles. Sharding is the only sustainable scaling answer.
+- **Dependency note:** Strategy (a) Phase-N sharding can land at Phase 3 entry as a clean break (MEMORIAL-PHASE-1.md + MEMORIAL-PHASE-2.md already exist conceptually as historical content; just split the file). Strategy (b)-(d) can land any time but disruption is higher mid-Phase-3.
+- **Recommended sequencing:** Land strategy (a) as MR-3 (methodology round) at Phase 3 entry, BEFORE Phase 3 SLICE 1 dispatch. ~1 round of work; immediate per-round read-cost reduction for all Phase 3 work. Phase-N sharding is also reversible (concat files back if needed for audit search), so low-regret.
+
 ---
 
 ## § 6 — Parked operator-gate items
