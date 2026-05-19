@@ -706,6 +706,8 @@ run_wave_gate_close() {
 }
 
 build_consolidation_reviewer_prompt() {
+  local wave_num="${WAVE_GATE_ID#WAVE-}"
+  local wave_plan_path="coordination/WAVE-PLAN-${wave_num}.md"
   cat > "$COORD/.prompt-consolidation-reviewer.md" << PROMPT
 You are the CONSOLIDATION REVIEWER for wave-gate close of $WAVE_GATE_ID.
 
@@ -714,7 +716,7 @@ review (cluster-level Reviewers already covered cluster-local work). You are
 auditing cross-cluster concerns that are only visible at the consolidated layer.
 
 Read before auditing:
-  - $WAVE_PLAN  (wave plan; cluster list + scope)
+  - $wave_plan_path  (wave plan; cluster list + scope)
   - coordination/clusters/*/MEMORIAL-fragment.md  (all cluster memorial fragments)
   - Any CLUSTER-HANDOFF-*.md files in coordination/ (cross-cluster contracts)
   - coordination/MEMORIAL.md  (active memorial for methodology context)
