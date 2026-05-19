@@ -464,7 +464,7 @@ CONFIRMATION: implementation-complete-all-5-findings-closed | All 5 R47 Reviewer
 
 CONFIRMATION: tdd-red-state-verified | RED state confirmed before implementation via static grep checks for ACs 3-6: assert_ge present (not yet replaced), old spec text present, old recursive pattern present. AC-R48-2 (guard runtime test) would have hung at RED state; confirmed non-recursive post-implementation via direct guard invocation before running full verifier. | R48 | IMPLEMENTER
 
-CONFIRMATION: verify-empirical-acs-exit-zero-pre-chore-a | `scripts/verify-empirical-acs.sh R48` produced 9 PASS, 0 FAIL before chore-A commit. Actual output recorded in NEXT-ROLE.md attestation. Will re-verify at chore-A SHA after commit. | R48 | IMPLEMENTER
+CONFIRMATION: verify-empirical-acs-exit-zero-at-chore-a | `scripts/verify-empirical-acs.sh R48` produced 9 PASS, 0 FAIL at chore-A SHA d593720. AC-R48-7 confirmed 7 diff paths ⊆ ALLOWED_SET at chore-A (pre-chore-A showed 1; post-commit shows all 7). Actual output recorded in NEXT-ROLE.md attestation. | R48 | IMPLEMENTER
 
 CONFIRMATION: anti-scope-clean | No files outside the 7-path ALLOWED_SET were modified. Q-R47-EMPIRICAL.sh (items a+b), Q-R47-SPEC.md (item c), scripts/pre-commit-rule-sweep.sh (item d), Q-R48-SPEC.md+Q-R48-EMPIRICAL.sh (baseline amendment + verifier), coordination/MEMORIAL.md, coordination/NEXT-ROLE.md. engine/*, test/*, tools/*, CLAUDE-*.md untouched. | R48 | IMPLEMENTER
 

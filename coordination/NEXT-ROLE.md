@@ -103,15 +103,15 @@ R47 closed via pipeline MU at `6e8b1c6` with operator-selected Option B (ESCALAT
 
 **Branch:** main
 **Round-start SHA:** `6e8b1c6` (chore(R47): Memorial-Updater outputs)
-**Chore-A SHA:** see git HEAD after this commit (NEXT-ROLE.md updated post-commit)
+**Chore-A SHA:** `d593720` (chore(R48): close R47 CRITICALs — recursion guard + verifier corrections chore-A)
 
-**Verifier output** (`scripts/verify-empirical-acs.sh R48`, run pre-chore-A):
+**Verifier output** (`scripts/verify-empirical-acs.sh R48`, run at chore-A SHA `d593720`):
 ```
 [R48] Empirical-AC verification — Q-R48-EMPIRICAL.sh
 
 Round boundaries (derived from git, not memorized):
   ROUND_START_SHA = 6e8b1c61494cef68e9257bf57c952820622d202f  (`git rev-parse 6e8b1c6`)
-  CHORE_A_SHA     = f4f4d081d2f68f285ee01316fb30abb41f6652c1  (`git rev-parse HEAD`)
+  CHORE_A_SHA     = d5937207de10b2febbdd6bb419bbc99fb82b6484  (`git rev-parse HEAD`)
 
 AC-R48-1: Q-R48-EMPIRICAL.sh exists + executable + syntax-valid
   PASS — AC-R48-1 (actual: ok)
@@ -126,7 +126,7 @@ AC-R48-5: AC-R47-7 spec text alignment
 AC-R48-6: AC-R47-10 non-recursive
   PASS — AC-R48-6 (old_pattern=0; new_pattern=1)
 AC-R48-7: anti-scope — diff ⊆ ALLOWED_SET
-  PASS — AC-R48-7: all 1 diff paths ⊆ ALLOWED_SET (pre-chore-A; will recheck at chore-A SHA)
+  PASS — AC-R48-7: all 7 diff paths ⊆ ALLOWED_SET
 AC-R48-8: test baseline = 361/355/3/3; tsc exit 0
   PASS — AC-R48-8 (test summary actual: 361/355/3/3)
   PASS — AC-R48-8 (tsc exit actual: 0)
