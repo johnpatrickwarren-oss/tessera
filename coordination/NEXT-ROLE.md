@@ -1,7 +1,7 @@
 CURRENT-ROUND: R49
 NEXT-ROLE: REVIEWER
 STATUS: READY
-SHA-A: (to be filled by finalize-round.sh)
+SHA-A: 4e62d992bd7b339fccdff83906afc7ac2f8d6de2
 
 ## Reviewer inputs
 
