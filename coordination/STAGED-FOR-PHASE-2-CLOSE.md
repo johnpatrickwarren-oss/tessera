@@ -109,3 +109,51 @@ When Tessera ages past ~6 months, oldest R01-R10 reinforcements may have been su
 4. **R26 MINOR-2 PARTIALLY-CLOSED deferral** — common-mode-attribution.ts impl alignment (Option A: distinct-member-shard iteration) deferred at R32 OBS-4 to WU-06 consumer context. If WU-06 ships FusedVerdict → FiredShardEvent adapter site (Architect's call), MINOR-2 closes there; else WU-07 closes it.
 
 WU-07 Architect reads this file as part of close-walk scope authoring.
+
+---
+
+## Item 3 — Anchor backflow: subprocess-node-test transitive hang class
+
+**Surfaced:** 2026-05-18 mid-R34 (~6:24 PM commit chain + 7:15 PM hang start). Reviewer cold-binding-command session hung indefinitely on `test/q29-k8s-adapter.test.js` during its standard `node --test test/*.test.js` invocation. Pipeline shell PID 76989 alive + waiting on hung Reviewer; 1-2 orphan node-test processes accumulated; bg task notification never fired.
+
+**Root cause:** q29 contains `execFileSync('node', ['--test', ...], { env: subEnv })` per R29 MINOR-3 reinforcement (Node v25 recursive-test-detection workaround). When q29 itself runs as a worker INSIDE a parent `node --test --test-isolation=process` invocation, q29's child node-test deadlocks. The `env: subEnv` strip protects against direct self-recursion (q29 inside q29) but not against transitive recursion (parent invokes q29 worker; q29 invokes child node-test; child node-test inherits some isolation state that hangs).
+
+**Anchor backflow PR candidates** (operator-owned methodology change; capture here for next anchor canonical update window):
+
+### Backflow 1 — Pre-emit grilling rule
+
+**Proposed addition to `anchor/skills/01-pre-emit-grilling.md` or equivalent:** ANY test file that spawns `node --test` on the project suite (even with self-exclusion + env-strip) creates a transitive hang risk when that file is itself executed inside another `node --test` invocation. Architects must either:
+- Move the subprocess invocation out of the test suite entirely (e.g., a separate `scripts/verify-count.sh` invoked from Reviewer's binding-command discipline, not from within a test file), OR
+- Mark the test as skip-in-subprocess (e.g., `if (process.env.NODE_TEST_CONTEXT) test.skip(...)`)
+
+Existing R29 MINOR-3 reinforcement (env: subEnv strip) is insufficient for transitive cases.
+
+### Backflow 2 — Pipeline watchdog
+
+**Proposed addition to `anchor/integrations/superpowers-claude-code/run-pipeline.sh`:** Watchdog detecting "role-session-with-no-output for >N minutes" (default 30 min). Currently the pipeline shell silently waits indefinitely if a child claude session blocks on a subprocess. Watchdog should:
+- Detect via `tail -f $role_log` + idle-timer or via direct child-process polling
+- On timeout: log warning; offer operator choice (kill + retry, kill + advance to next role, kill + ESCALATE)
+- Default action on no-operator-response: log + kill + ESCALATE (don't silently hang overnight)
+
+R34 incident: pipeline alive 4+ hours; Implementer hung at 5:19 PM, Reviewer hung at 7:15 PM, no warnings surfaced.
+
+### Backflow 3 — Bash-tool orphan reaping
+
+**Proposed Bash-tool change:** When the Bash tool times out (default 120s), send SIGTERM to the spawned process tree (not just the wrapper shell). Currently, `node --test` subprocesses survive Bash-tool timeout and accumulate as orphans, eating system resources + potentially holding locks. The R34 incident left 2-3 orphan node-test processes running for hours.
+
+### Backflow 4 — Test isolation flag visibility
+
+**Proposed addition to spec-template anti-scope:** When a spec includes an AC that spawns `node --test` (e.g., AC-RNN-NN test-count verification), spec must enumerate the failure mode "this AC will deadlock if Reviewer/Implementer runs `node --test --test-isolation=process` over the full suite" + prescribe the mitigation. Currently R29 spec didn't anticipate this and the pattern silently propagated to R34.
+
+## Tessera-local items WU-07 close-walk should address
+
+Beyond the anchor backflow (operator-owned), WU-07 close-walk should:
+
+1. **Refactor q29 AC-R29-12 (and any equivalent in other test files) to NOT spawn `node --test` from within the suite.** Move the count-verification to a separate script invoked at the chore-A level OR mark the test as skip-in-subprocess.
+2. **Check q34 AC-R34-21 (same pattern as q29).** Same refactor needed.
+3. **Audit all test files for `execFileSync('node', '--test', ...)` pattern** + apply the skip-in-subprocess guard or move out of suite.
+4. **Update spec templates** (per backflow 4) so future rounds don't reproduce this pattern.
+
+This is real methodology learning + spec template work; should land at WU-07 close-walk regardless of whether the anchor backflow PRs land that round.
+
+---
