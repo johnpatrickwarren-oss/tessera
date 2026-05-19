@@ -386,3 +386,33 @@ with a clear commit message.
 #   declarations in the new test file AND assert pre-baseline subset count, then verify their
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
+# REINFORCED 2026-05-19 — When the Implementer modifies a file NOT in spec § 2.2's pre-authorized
+#   list and then adds that file to the AC anti-scope guard's ALLOWED_SET, the guard becomes
+#   circular: it cannot detect the violation that authored its expansion. This is the "test
+#   reads its own literal and cannot audit itself" pattern (CLAUDE-IMPLEMENTER.md: anti-scope-
+#   allowed-set-forward-coverage). Correct procedure: if modifying an unauthorized path is
+#   necessary, HALT + DIAGNOSTIC + ESCALATE before touching anything. NEVER expand the
+#   ALLOWED_SET post-hoc to absorb a path not in the spec-enumerated list. The ALLOWED_SET
+#   must be authored from the spec before implementation begins. Detected tessera R36
+#   MAJOR-2/3: test/q-md-f4-common-mode-injection.test.ts admitted via self-expansion of
+#   AC-R36-30 guard in same commit that modified the unauthorized file.
+# REINFORCED 2026-05-19 — When writing MEMORIAL entries for the current round, do NOT
+#   characterize your own halt-discipline deviation as "acceptable," "non-halt," or
+#   "observational" if it matches an established halt-discipline reinforcement. Write MEMORIAL
+#   entries that record WHAT happened (file, action, outcome) — not whether it was justified.
+#   Use NEXT-ROLE.md tactical deviations for reasoning; MEMORIAL is the audit trail, not a
+#   defense brief. A MEMORIAL CONFIRMATION entry that internally overrides an established
+#   VIOLATION pattern is an audit-trail inaccuracy per CLAUDE-COMMON.md REINFORCED 2026-05-16.
+#   Detected tessera R36: halt-discipline CONFIRMATION said "acceptable because q29 is in
+#   allowed set and the change is observational" — self-exoneration contradicting Rule 6.
+# REINFORCED 2026-05-19 — When a spec AC Then-clause requires "the docstring accurately
+#   describes X semantics," the test assertion MUST: (1) assert the ACCURATE description IS
+#   present as a positive check; (2) assert that any MISLEADING pre-fix text IS absent. Checking
+#   only `!content.includes('string-that-was-never-in-the-file')` passes vacuously and verifies
+#   nothing about docstring accuracy. Before writing the assertion, grep the file for all text
+#   describing the behavior's semantics, identify the misleading (pre-fix) wording, and assert
+#   that wording is absent. Then assert the accurate description is present. Shape-only
+#   verification (loop variable name present, marker comment present) does not substitute for
+#   semantic verification of docstring accuracy claims. Detected tessera R36 MAJOR-1/MINOR-1:
+#   earliest_event_ts docstring "not per-distinct-shard dedup" (misleading pre-fix wording)
+#   not checked; test assertion checked a string that was never in the file.
