@@ -428,3 +428,34 @@ with a clear commit message.
 #   declarations in the new test file AND assert pre-baseline subset count, then verify their
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
+
+# REINFORCED 2026-05-19 — When adding a sub-variant to an existing composite heading in a CLAUDE-*.md
+#   file, update the parent heading's "(composite; N sub-variants)" count in the SAME commit. The
+#   SPEC-PRESCRIPTION-FIDELITY R06 rule ("update ALL header comment claims stating counts in the same
+#   commit when extending a hard-coded list") applies to composite sub-variant lists, not only to
+#   path arrays and explicit enumerations. A stale heading count forces manual arithmetic to verify
+#   completeness — exactly the failure mode R06 was written to prevent. Detected tessera R39 MAJOR-1.
+
+# REINFORCED 2026-05-19 — When an AC mandates verbatim text preservation of lesson content (e.g.,
+#   "lesson text appears verbatim in sub-variant text or pointer attribution; no lesson silently
+#   omitted"), the Implementer MUST verify verbatim match by diff before attesting PASS. If the
+#   actual sub-variant text paraphrases the origin entry, choose one of: (A) revise sub-variant to
+#   achieve genuine verbatim match; (B) amend the AC with an [R{N}-amended] marker explicitly
+#   allowing paraphrasing; or (C) HALT + DIAGNOSTIC + ESCALATE. Attesting "PASS (verbatim)" for
+#   paraphrased output is false-compliance-attestation (cross-project rule; prior tessera instances:
+#   R03 MINOR-4, R18 MINOR-2+3, R26 MAJOR-1, R39 MAJOR-2). Detected tessera R39 MAJOR-2.
+
+# REINFORCED 2026-05-19 — When consolidating multiple origin entries into a composite sub-variant,
+#   apply symmetric treatment to ALL sub-variants in the same composite regarding case-study
+#   provenance preservation. If some sub-variants retain the full closing case-study paragraph
+#   (incident description, fixture values, downstream effects), all sub-variants in the same
+#   merge operation MUST retain their full provenance detail. Asymmetric elision — preserving
+#   case-study tails for some entries but dropping them for others — is a verbatim-preservation
+#   failure even when the rule body itself is intact. Detected tessera R39 MINOR-1.
+
+# REINFORCED 2026-05-19 — When spec § 3 Mechanism quotes a trigger phrase for a new composite
+#   sub-variant (e.g., "Trigger: when a load-bearing spec premise is inherited from prior
+#   testimony"), that exact quoted phrase MUST appear verbatim in the sub-variant's opening
+#   condition line. A synonymous restatement is not acceptable even when substantively equivalent.
+#   The spec's own quoted trigger is the authoritative verbatim form; deviations create
+#   self-inconsistency between spec and artifact. Detected tessera R39 MINOR-2.
