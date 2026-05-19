@@ -1,5 +1,5 @@
 CURRENT-ROUND: R41
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Round-scope directive (R41 — repo hygiene audit; audit-tier; main worktree) — FINAL safe-continuation round
