@@ -1,5 +1,5 @@
 CURRENT-ROUND: R38
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 
 ## Operator decision (2026-05-19 — overnight authority auto-Option-A disposition)

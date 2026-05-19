@@ -156,16 +156,16 @@ file.
 
 ### AC-R38-3 (COUNT — infrastructure)
 
-**Given** chore-A SHA `<SHA encoded post-commit>` (see § 3.2).
+**Given** chore-A SHA `0b4d79f` (GREEN commit; `engine/topology/common-mode-attribution.ts`
+fix + `test/q38-verification.test.ts` GREEN state).
 
-**When** `node --test test/*.test.js` is run at chore-A SHA.
+**When** `node --test test/*.test.js` is run at this SHA.
 
 **Then** output contains `tests 357`, `pass 351`, `fail 4`, `skip 2`.  
 `npx tsc -p tsconfig.test.json` exits 0.
 
-*(SHA to be filled in at chore-A commit time with the actual empirically observed
-counts. Baseline entering R38: 355 tests, 349 pass, 4 fail, 2 skip per empirical
-run at session start. R38 adds 2 new test() calls in `test/q38-verification.test.ts`.)*
+*(Baseline entering R38: 355 tests, 349 pass, 4 fail, 2 skip. R38 adds 2 new test()
+calls in `test/q38-verification.test.ts`. Empirically verified at GREEN commit.)*
 
 ### AC-R38-4 (ANTISCOPE — infrastructure)
 
