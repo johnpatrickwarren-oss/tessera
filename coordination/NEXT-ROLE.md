@@ -1,6 +1,35 @@
 CURRENT-ROUND: R41
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
+
+## Reviewer routing — R41 report
+
+**Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R41.md` (Opus, cold-eye, single-pass).
+
+**Findings summary:** 0 CRITICAL + 1 MAJOR + 5 MINOR + 3 OBS = 9 findings (non-rubber-stamp).
+
+**MAJOR-1 (operator-routed; not merge-blocking):** Hygiene stamp § 7 Surface 2 line 173-174 claim "All coordination/*.md files checked have at least one reference" contradicts MEMORIAL R41 CONFIRMATION `orphan-detection-surface2` which admits only 9 files were empirically checked. Rule 1 (false-compliance-attestation) sub-class candidate. Recommended disposition options (operator picks): (a) tighten hygiene-stamp wording to factual scope ("9 candidates spot-checked; see MEMORIAL evidence"), or (b) complete the full ~50-file enumeration before Phase 3 entry-prep. Phase 3 entry-prep not blocked.
+
+**MINOR list (improvement notes; not merge-blocking):**
+- MINOR-1: Hygiene stamp § 4 CLUSTER-HANDOFF count = 11 (actual: 15).
+- MINOR-2: Surface 1 artifact-link audit scope reduction undisclosed (~15 of ~25 grep'd).
+- MINOR-3: Test AC-R41-8 keyword "cluster" / "rounds" substring checks self-confirming.
+- MINOR-4: Test AC-R41-4 "RESOLVED" substring check not anchored to OQ-P3-5.
+- MINOR-5: TDD letter (assert.fail stubs) not met; spirit met (real assertions failed at RED).
+
+**OBS list:** AC test-code coverage sparse (6 of 10 ACs covered by spec attestation only); `.js` in ALLOWED_SET redundant (gitignored); R36 forward-protection guards correctly characterized.
+
+**Inputs for Memorial-Updater:**
+- `coordination/reviews/REVIEWER-REPORT-R41.md` — primary
+- `coordination/specs/Q-R41-SPEC.md`
+- `coordination/PHASE-2-CLOSED-HYGIENE-STAMP.md`
+- `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md`
+- `coordination/STAGED-PHASE-2-CLOSED-2026-05-19.md`
+- `test/q41-hygiene-audit.test.ts`
+
+Memorial-Updater: append CONFIRMATION/VIOLATION entries for findings at MINOR or above per CLAUDE-REVIEWER.md reinforcement 2026-05-17 ("Reviewer MUST also append corresponding VIOLATION entries to coordination/MEMORIAL.md for every finding at MINOR severity or above"). Reviewer pre-appends below; Memorial-Updater verifies completeness and continues.
+
+---
 
 ## Implementer routing — R41 chore-A attestation
 
