@@ -146,9 +146,9 @@ For detailed backflow content: `coordination/ANCHOR-BACKFLOW-2026-05-18.md`.
 **HEAD:** main branch, post-R41.
 
 **Test baseline at R41 chore-A:**
-- `node --test test/*.test.js` → 358+3 tests, 352+3 pass, 3 fail (AC-R36-21/30/31), 3 skip
+- `node --test test/*.test.js` → 361 tests, 355 pass, 3 fail (AC-R36-21/30/31), 3 skip
 - `npx tsc -p tsconfig.test.json` → exit 0 (TypeScript 5.9.3)
-- _Note: 358 = pre-R41 baseline; +3 = q41-hygiene-audit.test.ts tests added at R41_
+- _Note: baseline was 358/352; +3 tests = q41-hygiene-audit.test.ts additions at this round_
 
 **What's complete:**
 - All 7 Phase 2 deliverables on-disk (L0 contract + 3 topology adapters + common-mode + event-conditional + close-walk artifacts)
