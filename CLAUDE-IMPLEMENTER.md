@@ -162,6 +162,15 @@ with a clear commit message.
 #     matches spec pseudocode literally but the literal contradicts the spec's stated
 #     behavioral intent, this requires HALT + DIAGNOSTIC + bounded options. NEXT-ROLE.md
 #     disclosure alone does not satisfy halt-discipline. R34 MINOR-1.
+#
+#   ALLOWED_SET self-expansion halt (R36 MAJOR-2/3): When the Implementer modifies a file
+#     NOT in spec § 2.2's pre-authorized list and then adds that file to the AC anti-scope
+#     guard's ALLOWED_SET, the guard becomes circular: it cannot detect the violation that
+#     authored its expansion. This is the anti-scope-allowed-set-forward-coverage pattern
+#     applied at commit time. Correct procedure: HALT + DIAGNOSTIC + ESCALATE before
+#     touching any unauthorized path. NEVER expand ALLOWED_SET post-hoc. The ALLOWED_SET
+#     must be authored from the spec before implementation begins. Detected tessera R36
+#     MAJOR-2/3: test/q-md-f4-common-mode-injection.test.ts admitted via self-expansion.
 
 # REINFORCED 2026-05-18 — false-compliance-attestation (cross-project rule):
 #   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R03 MINOR-4 (spec count ≠ observed count),
@@ -189,6 +198,15 @@ with a clear commit message.
 #     to embed violations inside CONFIRMATION headers (e.g., "No X modified outside the Y
 #     fix"). The carve-out modifier IS the violation. Write a VIOLATION entry and let the
 #     Memorial Updater evaluate whether an exception was warranted. R19 MAJOR-4.
+#
+#   Self-exoneration in MEMORIAL (R36/Rule 6): When writing MEMORIAL entries for the current
+#     round, do NOT characterize your own halt-discipline deviation as "acceptable," "non-halt,"
+#     or "observational" if it matches an established halt-discipline reinforcement. Write
+#     MEMORIAL entries that record WHAT happened (file, action, outcome) — not whether it was
+#     justified. Use NEXT-ROLE.md tactical deviations for reasoning; MEMORIAL is the audit
+#     trail, not a defense brief. A CONFIRMATION entry that overrides an established VIOLATION
+#     pattern is an audit-trail inaccuracy. Detected tessera R36: halt-discipline CONFIRMATION
+#     said "acceptable because q29 is in allowed set" — self-exoneration contradicting Rule 6.
 
 # REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 4 sub-variants)
 #
@@ -209,6 +227,21 @@ with a clear commit message.
 #     deduplication semantics, the implementation must match exactly — not merely pass
 #     current ACs. A divergence invisible at test time is a latent defect. Either
 #     implement the docstring semantics or amend the docstring. R26 MINOR-2.
+#
+#   Docstring assertion precision (R36 MAJOR-1, R38 MINOR-1): (a) When spec AC Then-clause
+#     requires "the docstring accurately describes X semantics," the test MUST assert the
+#     ACCURATE description IS present (positive check) AND assert that MISLEADING pre-fix
+#     text IS absent. Checking only a string never in the file passes vacuously — grep the
+#     file for all text describing the behavior's semantics and identify the specific
+#     misleading wording BEFORE writing assertions. Shape-only verification does not
+#     substitute for semantic verification. Detected R36 MAJOR-1/MINOR-1.
+#     (b) Use the EXACT phrase from the spec's AC literal for absence checks — not a synonym
+#     that co-occurs in the pre-fix file. A future regression reintroducing the spec-literal
+#     phrase would silently pass the non-literal check. Detected R38 MINOR-1 (test:92).
+#     (c) When spec AC names MULTIPLE jsdoc blocks for a presence check, each named block
+#     must have its own separate extraction and assertion. Count jsdoc blocks named in the
+#     spec AC and verify count equals number of independent presence assertions in the test.
+#     Detected R38 MINOR-1: test/q38-verification.test.ts:101-111 covers only latest_event_ts.
 
 # REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 2 sub-variants)
 #
@@ -222,6 +255,15 @@ with a clear commit message.
 #     cell OR add an explicit disposition note per omitted cell. "Tested at Implementer
 #     stage" does NOT substitute for Reviewer verification when the mandate specifies it.
 #     Gate: count mandated cells vs Reviewer-verified ACs. R32 MINOR-4.
+#
+#   Chore-B forward-protection skip count (R38 MINOR-3): When chore-B adds a forward-
+#     protection test that self-skips under the standard binding command
+#     (`node --test test/*.test.js`), the spec MUST include a chore-B count AC binding
+#     the post-chore-B state. The skip-vs-fail asymmetry means a broken forward-protection
+#     test that always skips would change the skip count but leave the fail count unchanged,
+#     silently passing the chore-A-anchored count AC. Add AC-R[N]-3B stating: "At chore-B
+#     SHA [hash], node --test → tests [A], pass [B], fail [C], skip [D]." Direct-run
+#     attestation must also be bound by an AC. Detected tessera R38 MINOR-3.
 
 # REINFORCED 2026-05-17 — When spec § Mechanism defines a quantitative formula by name,
 #   pre-emit grilling MUST include a "formula vs implementation" cross-check: verify the
@@ -386,63 +428,3 @@ with a clear commit message.
 #   declarations in the new test file AND assert pre-baseline subset count, then verify their
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
-# REINFORCED 2026-05-19 — When the Implementer modifies a file NOT in spec § 2.2's pre-authorized
-#   list and then adds that file to the AC anti-scope guard's ALLOWED_SET, the guard becomes
-#   circular: it cannot detect the violation that authored its expansion. This is the "test
-#   reads its own literal and cannot audit itself" pattern (CLAUDE-IMPLEMENTER.md: anti-scope-
-#   allowed-set-forward-coverage). Correct procedure: if modifying an unauthorized path is
-#   necessary, HALT + DIAGNOSTIC + ESCALATE before touching anything. NEVER expand the
-#   ALLOWED_SET post-hoc to absorb a path not in the spec-enumerated list. The ALLOWED_SET
-#   must be authored from the spec before implementation begins. Detected tessera R36
-#   MAJOR-2/3: test/q-md-f4-common-mode-injection.test.ts admitted via self-expansion of
-#   AC-R36-30 guard in same commit that modified the unauthorized file.
-# REINFORCED 2026-05-19 — When writing MEMORIAL entries for the current round, do NOT
-#   characterize your own halt-discipline deviation as "acceptable," "non-halt," or
-#   "observational" if it matches an established halt-discipline reinforcement. Write MEMORIAL
-#   entries that record WHAT happened (file, action, outcome) — not whether it was justified.
-#   Use NEXT-ROLE.md tactical deviations for reasoning; MEMORIAL is the audit trail, not a
-#   defense brief. A MEMORIAL CONFIRMATION entry that internally overrides an established
-#   VIOLATION pattern is an audit-trail inaccuracy per CLAUDE-COMMON.md REINFORCED 2026-05-16.
-#   Detected tessera R36: halt-discipline CONFIRMATION said "acceptable because q29 is in
-#   allowed set and the change is observational" — self-exoneration contradicting Rule 6.
-# REINFORCED 2026-05-19 — When a spec AC Then-clause requires "the docstring accurately
-#   describes X semantics," the test assertion MUST: (1) assert the ACCURATE description IS
-#   present as a positive check; (2) assert that any MISLEADING pre-fix text IS absent. Checking
-#   only `!content.includes('string-that-was-never-in-the-file')` passes vacuously and verifies
-#   nothing about docstring accuracy. Before writing the assertion, grep the file for all text
-#   describing the behavior's semantics, identify the misleading (pre-fix) wording, and assert
-#   that wording is absent. Then assert the accurate description is present. Shape-only
-#   verification (loop variable name present, marker comment present) does not substitute for
-#   semantic verification of docstring accuracy claims. Detected tessera R36 MAJOR-1/MINOR-1:
-#   earliest_event_ts docstring "not per-distinct-shard dedup" (misleading pre-fix wording)
-#   not checked; test assertion checked a string that was never in the file.
-# REINFORCED 2026-05-19 — When implementing a spec AC Then-clause that requires an absence check
-#   on docstring text, use the EXACT phrase from the spec's AC literal — not a synonym that
-#   happens to co-occur in the pre-fix file. If the spec says "DOES NOT contain 'iteration over
-#   all touches'", the test assertion must be `strictEqual(content.includes('iteration over all
-#   touches'), false)` — not `content.includes('not per-distinct-shard dedup')` even though that
-#   phrase is also present in the pre-fix file. Both phrases may be non-vacuous, but only the
-#   spec-literal phrase correctly implements the AC. A future regression that reintroduces the
-#   spec-literal phrase without the synonym would silently pass the non-literal check. Applies to
-#   ALL absence assertions in docstring-accuracy ACs, not just the phrase printed in the spec
-#   preamble. Detected tessera R38 MINOR-1: `test/q38-verification.test.ts:92`.
-# REINFORCED 2026-05-19 — When a spec AC Then-clause names MULTIPLE jsdoc blocks for a presence
-#   check (e.g., "earliest_event_ts jsdoc DOES contain 'X' AND latest_event_ts jsdoc DOES
-#   contain 'X'"), each named block must have its own separate extraction and its own separate
-#   assertion in the test. Implementing the presence check for only one of the named blocks
-#   silently leaves the other block uncovered — a future regression stripping the phrase from the
-#   uncovered block would pass. Before committing chore-A, count the jsdoc blocks named in the
-#   spec AC and verify that count equals the number of independent presence assertions in the test.
-#   Detected tessera R38 MINOR-1: `test/q38-verification.test.ts:101-111` covers only
-#   latest_event_ts; earliest_event_ts presence check absent despite spec § 3 AC-R38-2 requiring
-#   both.
-# REINFORCED 2026-05-19 — When chore-B adds a forward-protection test that self-skips under the
-#   standard binding command (`node --test test/*.test.js`), the spec MUST include a chore-B count
-#   AC binding the post-chore-B state. The skip-vs-fail asymmetry means a broken forward-
-#   protection test that always skips (rather than running and passing) would change the skip
-#   count but leave the `fail` count unchanged — passing the chore-A-anchored count AC
-#   unchallenged. Correct approach: add AC-R[N]-3B (or equivalent) stating: "At chore-B SHA
-#   [hash], node --test → tests [A], pass [B], fail [C], skip [D]" so the post-chore-B count is
-#   independently bound. If direct-run attestation is also used (node test/qNN-verification.test.js
-#   → M pass, 0 fail), that must also be bound by an AC, not left as NEXT-ROLE.md disclosure only.
-#   Detected tessera R38 MINOR-3: Q-R38-SPEC.md § 3 AC-R38-3 omits chore-B count binding.
