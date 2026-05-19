@@ -50,6 +50,7 @@ b31bc8b  feat(R39-pass1): CLAUDE-ARCHITECT.md cross-project rule pointers
 b4e7dd7  feat(R39-pass2): CLAUDE-ARCHITECT.md empirical-premise composite
 82a0306  feat(R39-pass3): CLAUDE-IMPLEMENTER.md fold 6 post-MR-2 entries into composites
 2f5e7ae  chore(R39): coordination artifacts + Reviewer routing
+58cb3af  chore(R39): record chore-A SHA in NEXT-ROLE.md  ← HEAD at routing time
 ```
 
 ## For Reviewer
