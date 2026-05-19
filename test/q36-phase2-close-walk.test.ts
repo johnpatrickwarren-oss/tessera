@@ -662,6 +662,7 @@ test('AC-R36-30: round-start-to-chore-A diff path-set ⊆ R36 allowed-set', () =
     /^CLAUDE-IMPLEMENTER\.md$/,
     /^CLAUDE-COMMON\.md$/,
     /^coordination\/MEMORIAL\.md$/,
+    /^coordination\/COORDINATOR-MEMORIAL\.md$/, // TD-3: Memorial-Updater Wave 5 graduation entries
     /^coordination\/NEXT-ROLE\.md$/,
     /^coordination\/reviews\/REVIEWER-REPORT-R36(-opus|-sonnet)?\.md$/,
   ];
@@ -685,5 +686,40 @@ test('AC-R36-30: round-start-to-chore-A diff path-set ⊆ R36 allowed-set', () =
     violations,
     [],
     `R36 anti-scope violations (paths not in ALLOWED_SET): ${violations.join(', ')}`,
+  );
+});
+
+// ── AC-R36-31: chore-B forward-protection (chore-A to HEAD ⊆ post-chore-A set) ─
+// Verifies that every path committed after chore-A (c49df0e) belongs to the
+// post-chore-A allowed set: Reviewer report, MEMORIAL updates, NEXT-ROLE routing,
+// COORDINATOR-MEMORIAL graduation, and this chore-B test file itself.
+// (git diff subprocess; no transitive-hang risk; no skip guard needed.)
+test('AC-R36-31: chore-A-to-HEAD diff ⊆ R36 post-chore-A allowed set (chore-B forward protection)', () => {
+  const CHORE_A_SHA = 'c49df0e'; // R36 chore-A SHA
+
+  const ALLOWED_LITERAL = new Set([
+    'coordination/COORDINATOR-MEMORIAL.md',
+    'coordination/MEMORIAL.md',
+    'coordination/NEXT-ROLE.md',
+    'test/q36-phase2-close-walk.test.ts',
+  ]);
+  // Hybrid-aware carve-out: REVIEWER-REPORT-R36 may be -opus.md or -sonnet.md
+  const REVIEWER_REPORT_REGEX = /^coordination\/reviews\/REVIEWER-REPORT-R36(-opus|-sonnet)?\.md$/;
+
+  const diffOutput = execFileSync(
+    'git',
+    ['diff', `${CHORE_A_SHA}..HEAD`, '--name-only'],
+    { encoding: 'utf8', cwd: ROOT },
+  );
+
+  const paths = diffOutput.split('\n').filter((p) => p.length > 0);
+  const violations = paths.filter(
+    (p) => !ALLOWED_LITERAL.has(p) && !REVIEWER_REPORT_REGEX.test(p),
+  );
+
+  assert.deepStrictEqual(
+    violations,
+    [],
+    `post-chore-A modification outside allowed set: ${violations.join(', ')}`,
   );
 });
