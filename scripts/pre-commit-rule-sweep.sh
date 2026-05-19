@@ -64,6 +64,13 @@ SEMANTIC_CHECKS=0
 # -----------------------------------------------------------------------------
 
 rule_1_check() {
+    if [ -n "${_PRE_COMMIT_RULE_SWEEP_ACTIVE:-}" ]; then
+        echo "  ADVISORY — recursion guard active; same-round re-entry detected."
+        echo "    Skipping nested verify-empirical-acs.sh invocation to prevent infinite loop."
+        SEMANTIC_CHECKS=$((SEMANTIC_CHECKS + 1))
+        return 0
+    fi
+    export _PRE_COMMIT_RULE_SWEEP_ACTIVE=1
     echo ""
     echo "Rule 1 (false-compliance-attestation): MECHANICAL CHECK via sub-class verifier"
     # R46 upgrade: Rule 1 sub-class `empirical-command-attestation` mechanizes
