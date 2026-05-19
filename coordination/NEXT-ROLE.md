@@ -1,6 +1,41 @@
 CURRENT-ROUND: R38
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: IMPLEMENTER (R39 architect consolidation evaluation per overnight authority safe-continuation chain)
+STATUS: ROUND-COMPLETE
+
+## Reviewer routing (2026-05-19)
+
+**Verdict:** 0 CRITICAL / 0 MAJOR / 3 MINOR / 4 OBS — STATUS: MERGE-READY.
+**Report:** `coordination/reviews/REVIEWER-REPORT-R38.md`.
+**Streak:** 36th consecutive 0-CRITICAL round (R02–R38).
+
+**Reviewer inputs (cold-read):**
+- `coordination/PRD.md`
+- `coordination/specs/Q-R38-SPEC.md`
+- `engine/topology/common-mode-attribution.ts`
+- `test/q38-verification.test.ts`
+- `coordination/NEXT-ROLE.md`
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Reviewer-section greps + R26/R36 entries)
+- git log/show for RED `41c1ff1`, GREEN `0b4d79f`, chore-A `8bf0247`, chore-B `577b551`
+- Empirical: `node --test test/*.test.js`, `npx tsc -p tsconfig.test.json`, `git diff 41c1ff1..HEAD`
+
+**Findings summary (full detail in REVIEWER-REPORT-R38.md § 2):**
+- **MINOR-1:** AC-R38-2 test (`test/q38-verification.test.ts:91-111`) diverges from spec § 2.4 / § 3 AC-R38-2 literal — uses `'not per-distinct-shard dedup'` instead of spec-literal `'iteration over all touches'` for absence check; presence check covers only `latest_event_ts` jsdoc (not `earliest_event_ts` as spec requires).
+- **MINOR-2:** Chore-A SHA terminology contradiction across Q-R38-SPEC.md § 3 (`0b4d79f`), NEXT-ROLE.md:183 (`8bf0247`), and `test/q38-verification.test.ts:8` (`8bf0247`). Substantively benign (same count at both SHAs) but audit-trail traceability weakened.
+- **MINOR-3:** AC-R38-3 count under-specified for post-chore-B state (357/351/4/2 at spec'd SHA; actual at HEAD is 358/351/4/3). Spec § 3 lacks a chore-B count AC.
+- **OBS-1:** GREEN commit `0b4d79f` modified both production code and the test file (window 300→500). Mild Rule 6 micro-adjacent; RED→GREEN audit-trail integrity preserved.
+- **OBS-2:** Case-sensitive `includes()` binding on free-form docstring text — brittle to capitalization changes.
+- **OBS-3:** R36 forward-protection AC-R36-31 legitimately fails post-R38 (R38 is the authorized fix-cycle); documented in DIAGNOSTIC-R38-baseline-mismatch.md.
+- **OBS-4:** AC-R38-4 self-skips under `node --test test/*.test.js` (subprocess-spawn guard per R34 incident). NEXT-ROLE.md:194 covers via direct-run attestation.
+
+**Substantive verdict:** the MAJOR-1 `latest_event_ts` semantic regression is correctly fixed at `engine/topology/common-mode-attribution.ts:195-199` (`shardLatest` introduced and used in the max-aggregation path). AC-R38-1 binds the fix with a strong mutation requirement. A16 `correlational_not_causal: true` preserved at line 209. Anti-scope clean (6-path diff ⊆ ALLOWED_SET).
+
+**Next role:** MEMORIAL-UPDATER per R38 round close discipline.
+
+---
+
+# Original Architect/Implementer routing block (preserved below for trail)
+
+STATUS: READY (Reviewer-superseded)
 
 ## Operator decision (2026-05-19 — overnight authority auto-Option-A disposition)
 
