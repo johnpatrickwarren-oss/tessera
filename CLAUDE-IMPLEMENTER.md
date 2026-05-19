@@ -459,3 +459,44 @@ with a clear commit message.
 #   condition line. A synonymous restatement is not acceptable even when substantively equivalent.
 #   The spec's own quoted trigger is the authoritative verbatim form; deviations create
 #   self-inconsistency between spec and artifact. Detected tessera R39 MINOR-2.
+
+# REINFORCED 2026-05-19 — When surfacing OQs in any deliverable, pre-emit grilling step 5
+#   ("can the next role act on this with zero clarifying questions?") must include: for each
+#   OQ, verify the question is genuinely open by cross-checking against (a) the Implementer's
+#   own state table in NEXT-ROLE.md, (b) source artifacts named in the spec § 2 design sketch,
+#   and (c) the deliverable's own prose. An OQ whose answer is already present in any of these
+#   sources is a completeness-gate failure — revise to state the resolved answer or replace
+#   with the still-open sub-question. Raising an OQ on a resolved question degrades operator
+#   actionability. Detected tessera R40 MAJOR-1.
+
+# REINFORCED 2026-05-19 — When attesting PASS for an AC requiring a per-item property across
+#   N items (e.g., "each [X] must contain both Y and Z"), verify EVERY item individually against
+#   EVERY required property before attesting. A cover-all intro paragraph or section-level
+#   umbrella does not satisfy a per-item AC. The NEXT-ROLE.md attestation must disclose any gap
+#   between strict literal AC reading and what the artifact actually satisfies; "§§ 1.1-1.4
+#   each contain both" is an overconfident attestation if only the intro umbrella covers the
+#   joint requirement. Detected tessera R40 MINOR-1.
+
+# REINFORCED 2026-05-19 — When citing a source artifact by section path (e.g., "WAVE-GATE-05.md
+#   § Cross-project reinforcement rules derived, Decision 3"), verify the cited item lives under
+#   the named parent section by reading the source file's structural hierarchy — not merely
+#   confirming the item name/number appears somewhere in the document. If the source file uses
+#   `---` boundaries between sibling parent sections, the item must be under the named parent,
+#   not a sibling. Section-path citation drift causes errors that pass string-presence ACs while
+#   failing accurate traceability. Detected tessera R40 MINOR-3.
+
+# REINFORCED 2026-05-19 — When claiming "N-occurrence threshold crossed" in a deliverable and
+#   enumerating the N occurrences, list ALL N instances cited in the authoritative source — not
+#   a cherry-picked subset. If the source enumerates W2+W3+W5, the deliverable must list W2,
+#   W3, and W5. Dropping one instance while asserting the threshold count is an
+#   encode-actual-results-verbatim failure. Separately distinguish gap-exhibition instances from
+#   mitigation-observed instances when the source makes that distinction. Detected tessera R40
+#   MINOR-4.
+
+# REINFORCED 2026-05-19 — When an AC prohibits a pattern (e.g., "no Implementer-resolved
+#   sequencing recommendations"), grilling must verify the negative property by sweeping ALL
+#   deliverable prose for the prohibited pattern — not just confirming that required mitigation
+#   elements (such as OQ flags) are present. Presence of mitigations does not guarantee absence
+#   of the prohibited behavior in surrounding prose. For ACs that prohibit implicit recommendations,
+#   read every non-OQ prose block and ask: "does this recommend, nudge, or imply a sequencing
+#   choice?" Detected tessera R40 MINOR-5.

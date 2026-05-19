@@ -1,6 +1,18 @@
 CURRENT-ROUND: R40
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
+
+## R40 Reviewer routing (2026-05-19)
+
+**Verdict:** MERGE-READY (0 CRITICAL; 1 MAJOR; 5 MINOR; 4 OBS).
+
+**Report:** `coordination/reviews/REVIEWER-REPORT-R40.md`
+
+**Headline finding (MAJOR-1):** § 5.1 + § 6 + OQ-P3-5 of `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` treat Rule 7 canonical landing as "unknown / depends on R38/R39 Memorial-Updater outputs". The status is in fact RESOLVED: Rule 7 IS canonically landed per `~/.claude/CROSS-PROJECT-MEMORIAL.md:3470` + the deliverable's own state table at NEXT-ROLE.md:127 "7 cross-project rules canonical ✅". OQ-P3-5 is operative on a resolved question; degrades inventory actionability for the operator. Inventory is a DRAFT for operator review — content-correctable; does NOT block merge.
+
+**MINOR / OBS rollup:** 5 MINORs (AC-R40-2 strict-literal partial coverage; § 1.1 wrong fixture-file cite; § 5.1 wrong WAVE-GATE-05 section header; § 5.4 occurrence-count enumeration off; AC-R40-7 right-reasons gap on § 5.1 prose) + 4 OBS (anchor PR cadence drift; weak AC discriminating power; defensible § 3.2 sequencing cite; overconfident AC-R40-2 attestation). See report § 2.
+
+**Memorial-Updater inputs:** ROUND-R40-SUMMARY.md should note (a) MAJOR-1 → operator handoff so deliverable carries the correction or operator amends inline; (b) cosmetic MINORs bundleable into future R41-style or Phase 3 SLICE 1 documentation pass; (c) OBS-2 forward-flag for future inventory-synthesis specs to tighten string-presence ACs.
 
 ## Round-scope directive (R40 — Phase 3 candidate synthesis; audit-tier; main worktree)
 
