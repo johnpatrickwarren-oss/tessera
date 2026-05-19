@@ -178,43 +178,44 @@ All unresolved decisions → open questions in the spec.
 #   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
 #   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
 
-# REINFORCED 2026-05-16 — When grilling catches that an e-process or statistical-detector AC's
-#   fixture needs N windows of accumulation to cross a detection threshold (e.g., log(1/α)≈6.908
-#   at ons_lambda=0.5 requires ≈18 windows), the same accumulation-requirement reasoning MUST be
-#   applied to ALL other ACs in the same spec that use any injection or single-window H₁ pattern.
-#   The question "does this fixture accumulate enough signal to demonstrate the AC's stated
-#   intent?" must be asked exhaustively for every empirical e-process AC, not just the first one
-#   that surfaces the analysis. Catching and fixing AC-8 without propagating to AC-12/AC-13 is an
-#   incomplete grilling pass. Detected tessera R07 MAJOR-1: AC-8 correctly revised (10→30
-#   windows) but AC-12/AC-13 left at single-window injection → 0/30 fires on both H₁ scenarios.
-
-# REINFORCED 2026-05-16 — OBSERVED-binding disposition (AC binds the OBSERVED value from running
-#   production) is scoped to PRNG-drift-class prediction errors (OBSERVED and PREDICTED differ by
-#   a small integer within natural PRNG variation). It must NOT be applied when OBSERVED and
-#   PREDICTED diverge by an order of magnitude (e.g., predicted 20-30 fires, observed 0), because
-#   at that scale it produces a structurally self-confirming test: a future implementation FIX
-#   matching the prediction FAILS; a future bug preserving the wrong value PASSES. Before applying
-#   OBSERVED-binding, the pre-emit grilling must ask: "would a future implementation FIX that
-#   matched the architect's prediction FAIL this test?" If yes: redesign the fixture to accumulate
-#   sufficient signal, or explicitly scope-document the limitation. Do not delegate this check to
-#   the Reviewer's right-reasons audit — catch it at the spec layer before routing to Implementer.
-#   Detected tessera R07 MAJOR-2.
-
-# REINFORCED 2026-05-16 — When a load-bearing spec premise is inherited from a prior Reviewer's or
-#   Architect's claim (e.g., "R07 Reviewer MINOR-3 stated MCD produces zero contamination flags on
-#   the clean alternating-pattern fixture"), independently verify the premise by running the relevant
-#   fixture or command against production code before emitting the spec. "Inherited from prior
-#   testimony" is not verification. A wrong premise at the spec layer forces the Implementer into a
-#   halt-decision that could have been pre-empted at the spec layer — if the spec had been correct,
-#   no halt would have been needed. Add an "empirical premise verification" step to pre-emit
-#   grilling: for each load-bearing factual claim about production behavior that derives from prior
-#   round testimony (not your own direct code-read or command-run), record the specific command run
-#   and the observed output before marking the assumption "PASS." "Verified by own observation" and
-#   "inherited from prior testimony" are not equivalent grilling verdicts. Detected tessera R08
-#   MAJOR-2: premise "MCD produces zero flags on clean alternating-pattern fixture" inherited from
-#   R07 Reviewer MINOR-3 without running the AC-15 fixture against production; Reviewer-probed:
-#   n_ticks_contaminated=6 (2 ticks × 3 runs; curatedLen=6 vs origLen=8); downstream caused
-#   MAJOR-1 halt-discipline violation when Delta 11 tightening failed empirically.
+# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 3 sub-variants observed at Tessera)
+#
+#   Fixture accumulation adequacy (R07 MAJOR-1): When grilling catches that an e-process or
+#     statistical-detector AC's fixture needs N windows of accumulation to cross a detection
+#     threshold (e.g., log(1/α)≈6.908 at ons_lambda=0.5 requires ≈18 windows), the same
+#     accumulation-requirement reasoning MUST be applied to ALL other ACs in the same spec
+#     that use any injection or single-window H₁ pattern. The question "does this fixture
+#     accumulate enough signal to demonstrate the AC's stated intent?" must be asked
+#     exhaustively for every empirical e-process AC, not just the first one that surfaces
+#     the analysis. Catching and fixing AC-8 without propagating to AC-12/AC-13 is an
+#     incomplete grilling pass. Detected tessera R07 MAJOR-1: AC-8 correctly revised (10→30
+#     windows) but AC-12/AC-13 left at single-window injection → 0/30 fires on both H₁ scenarios.
+#
+#   OBSERVED-binding scope (R07 MAJOR-2): OBSERVED-binding disposition (AC binds the OBSERVED
+#     value from running production) is scoped to PRNG-drift-class prediction errors (OBSERVED
+#     and PREDICTED differ by a small integer within natural PRNG variation). It must NOT be
+#     applied when OBSERVED and PREDICTED diverge by an order of magnitude (e.g., predicted
+#     20-30 fires, observed 0), because at that scale it produces a structurally self-confirming
+#     test: a future implementation FIX matching the prediction FAILS; a future bug preserving
+#     the wrong value PASSES. Before applying OBSERVED-binding, the pre-emit grilling must ask:
+#     "would a future implementation FIX that matched the architect's prediction FAIL this
+#     test?" If yes: redesign the fixture to accumulate sufficient signal, or explicitly
+#     scope-document the limitation. Do not delegate this check to the Reviewer's right-reasons
+#     audit — catch it at the spec layer before routing to Implementer. Detected tessera R07 MAJOR-2.
+#
+#   Inherited-testimony verification (R08 MAJOR-2): When a load-bearing spec premise is
+#     inherited from a prior Reviewer's or Architect's claim (e.g., "R07 Reviewer MINOR-3
+#     stated MCD produces zero contamination flags on the clean alternating-pattern fixture"),
+#     independently verify the premise by running the relevant fixture or command against
+#     production code before emitting the spec. "Inherited from prior testimony" is not
+#     verification. A wrong premise at the spec layer forces the Implementer into a
+#     halt-decision that could have been pre-empted at the spec layer — if the spec had been
+#     correct, no halt would have been needed. Add an "empirical premise verification" step
+#     to pre-emit grilling: for each load-bearing factual claim about production behavior that
+#     derives from prior round testimony (not your own direct code-read or command-run),
+#     record the specific command run and the observed output before marking the assumption
+#     "PASS." "Verified by own observation" and "inherited from prior testimony" are not
+#     equivalent grilling verdicts. Detected tessera R08 MAJOR-2.
 
 # REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
 #   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include
