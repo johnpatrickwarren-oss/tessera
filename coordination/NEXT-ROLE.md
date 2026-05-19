@@ -1,12 +1,25 @@
 CURRENT-ROUND: R51
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
+
+## Reviewer outputs (R51)
+
+- Report: `coordination/reviews/REVIEWER-REPORT-R51.md`
+- Verdict: 0 CRITICAL, 0 MAJOR, 1 MINOR, 3 OBS
+- Empirical verifier re-run: 19 PASS / 0 FAIL at HEAD
+- Anti-scope diff: 6 files, all ⊆ ALLOWED_SET per Q-R51-SPEC § 3.4
+- Verbatim preservation: independently verified — all 7 fold bodies byte-identical to origin standalones (from first sentence; heading paraphrase authorized by spec § 3.1)
+- AC-R36-21 forward-protection: FAIL→PASS transition confirmed (count = 30 ≤ 30)
+- MINOR-1: AC-R51-3g substring marker "only observable by" is generic (R41 MINOR-3/4 sub-variant not self-applied within same composite as R47 MAJOR-2 the Implementer DID apply)
+
+
 
 ## Round-scope directive (R51 — CLAUDE-IMPLEMENTER.md re-consolidation + MU re-accretion guard; audit-tier)
 
 R51 follows R50 close (`c5f5862`) per operator-selected sequencing ("R51 + Phase 3 PRD authoring"). R51 is the bounded methodology fix; Phase 3 PRD authoring is a separate operator-led work item after R51 closes.
 
 **Round-start SHA:** `c5f5862` (chore(R50): Memorial-Updater outputs).
+**Chore-A SHA:** `935c728` (chore(R51): consolidate CLAUDE-IMPLEMENTER.md 37→30 + MU re-accretion guard)
 
 ### Primary deliverable
 
@@ -100,6 +113,39 @@ cd /Users/johnwarren/concord/tessera
 ```
 
 (Per R49 pipeline-mandatory discipline; this is the canonical invocation. `scripts/finalize-round.sh` will auto-fire pipeline at Implementer chore-A close.)
+
+---
+
+## Implementer attestation (chore-A: 935c728)
+
+**Q-R51-EMPIRICAL.sh result at chore-A SHA:** `=== Summary: 19 PASS / 0 FAIL ===`
+
+**Test baseline:** `tests=361 pass=356 fail=2 skip=3` (AC-R36-21 FAIL→PASS; discipline-restoration; was 361/355/3/3 pre-R51)
+
+**`tsc` exit code:** 0
+
+**AC attestation:**
+- AC-R51-1: REINFORCED count = 30 ✓ (was 37; 7 standalones folded)
+- AC-R51-2a/2b/2c/2d/2e: All 5 updated composite heading counts match body sub-variant counts ✓
+- AC-R51-3a through 3g: All 7 distinctive phrases present with count=1 ✓
+- AC-R51-4: Re-accretion guard present in CLAUDE-MEMORIAL.md ✓
+- AC-R51-5: Test baseline 361/356/2/3 ✓
+- AC-R51-6: Bash syntax valid ✓
+
+**Anti-scope diff verification:**
+`git diff c5f5862 935c728 --name-only` → 6 files:
+- CLAUDE-IMPLEMENTER.md
+- CLAUDE-MEMORIAL.md
+- coordination/MEMORIAL.md
+- coordination/NEXT-ROLE.md
+- coordination/specs/Q-R51-EMPIRICAL.sh (new)
+- coordination/specs/Q-R51-SPEC.md (new)
+
+All 6 ⊆ ALLOWED_SET per Q-R51-SPEC § 3.4.
+
+**Tactical deviations (spec-deviance):**
+- TD-1: Distinctive phrase patterns in AC-R51-3b/3c/3e needed adjustment from spec-draft because multi-line text was split across file lines. Final phrases: "Liar's Paradox, self-match, or incidental hit" (3b), "structurally fixed by this round" (3c), "The verifier then printed a stale display value" (3e). Spec updated in same edit pass (R47 MAJOR-1 self-application: spec+verifier co-updated).
+- TD-2: Tightening 4 self-application converted 7 assert_ge→assert_eq calls after discovering all 7 presence-check phrase counts are exactly 1 at HEAD. Header comment updated. Spec ACs updated from "≥ 1" to "= 1".
 
 ---
 
