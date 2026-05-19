@@ -91,9 +91,13 @@ After completing the ALLOWED_SET completeness pass, apply the Rule 5 self-audit:
 `~/.claude/CROSS-PROJECT-MEMORIAL.md:3478` (R38 Memorial-Updater stage, per OQ-W5-1 Option A
 authorization). The canonical text mandates THREE propagation surfaces:
 
-- **Surface (a) Spec template / spec-authoring-checklist gate** — IMPLEMENTED HERE (R44).
-- **Surface (b) Implementer chore-A pre-commit grep gate** — `scripts/pre-commit-rule-sweep.sh`
-  (deferred to R45 round per overnight authority chain methodology sequencing).
+- **Surface (a) Spec template / spec-authoring-checklist gate** — IMPLEMENTED at R44 (this section).
+- **Surface (b) Implementer chore-A pre-commit grep gate** — IMPLEMENTED at R45 via
+  `scripts/pre-commit-rule-sweep.sh`. Runs grep gates for the mechanizable rules (Rule 7 spec § 7
+  enumeration check is the primary mechanical finding); emits advisory output + SEMANTIC CHECK
+  REQUIRED directives for the partial-semantic rules. Invocation:
+  `scripts/pre-commit-rule-sweep.sh <round-start-SHA> <chore-A-SHA>` → exit 0 on clean sweep;
+  exit 1 on mechanical-rule finding.
 - **Surface (c) Round-of-derivation self-application** — when a round contains the canonical
   landing commit for a new rule, the Implementer at SAME-round chore-A MUST grep-sweep the
   round's own diff for the new rule's prohibited patterns before chore-B (hard gate, not soft
@@ -162,7 +166,6 @@ The round's spec § 7 should pre-anticipate Surface (c) when a derivation event 
 For the full Rule 7 text and derivation history (Trigger threshold; R32/R34/R36 occurrences
 that crossed the 3-instance threshold), see `~/.claude/CROSS-PROJECT-MEMORIAL.md:3474-3478`.
 
-> **Note:** This section implements Rule 7's Surface (a) only. Surface (b) — the mechanical
-> pre-commit grep-sweep script — is deferred to a subsequent methodology round (planned R45)
-> for dedicated bounded-scope tooling work. Surface (c) is documented above and is round-conditional
-> (only triggers when a new rule lands in the round).
+> **Note:** This section implements Rule 7's Surface (a). Surface (b) is IMPLEMENTED at
+> `scripts/pre-commit-rule-sweep.sh` (landed R45). Surface (c) is documented above and is
+> round-conditional (only triggers when a new rule lands in the round).
