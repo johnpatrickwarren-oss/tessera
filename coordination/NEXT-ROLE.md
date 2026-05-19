@@ -1,87 +1,79 @@
-CURRENT-ROUND: R42
+CURRENT-ROUND: R43
 NEXT-ROLE: REVIEWER
 STATUS: READY-FOR-REVIEWER
 
-## Implementer routing — R42 chore-A attestation
+## Implementer routing — R43 chore-A attestation
 
-**Chore-A SHA:** `d73e83c` (coordination chore; 10 files changed; +3,487 / −3,104 insertions/deletions reflect verbatim split of 3,153-line MEMORIAL.md across 2 shards + active trim). SHA backfill commit: see HEAD.
+**Chore-A SHA:** `4f9ab51` (coordination chore; 3 files changed; +447 / −140 insertions/deletions). SHA backfill commit: see HEAD.
 
-**Round summary:** Methodology round — MEMORIAL.md sharding strategy (a) per Q-R42-SPEC + PHASE-3-CANDIDATES-PRELIMINARY.md § 5.5. No engine/test changes; pure doc reorganization + CLAUDE-*.md read-protocol updates.
+**Round summary:** Methodology round — CLAUDE-IMPLEMENTER.md MR-2 Pass-3 redux per Q-R43-SPEC. Consolidates 44 REINFORCED entries → 30 via 16-fold consolidation into 4 existing composite extensions + 2 new composite headings (ATTESTATION-SCOPE-FIDELITY + PRE-EMIT-GRILLING-COMPLETENESS-GATE), plus stale-count fixes on 4 composite headings (Rule 5 self-application of R39 MAJOR-1).
 
 **Inputs for Reviewer:**
 
-- `coordination/specs/Q-R42-SPEC.md` — round spec (10 ACs, audit-tier methodology format)
-- `coordination/MEMORIAL.md` — active file (post-shard; 79 lines)
-- `coordination/MEMORIAL-PHASE-1.md` — Phase 1 + calibration shard (R01–R19; 1796 lines)
-- `coordination/MEMORIAL-PHASE-2.md` — Phase 2 + post-Phase-2 hygiene shard (R20–R41; 1342 lines)
-- `CLAUDE-COMMON.md` — Memorial sharding (R42 onward) subsection added; Naming conventions extended
-- `CLAUDE-ARCHITECT.md` — Step 3 read directive updated (active + on-demand shards)
-- `CLAUDE-IMPLEMENTER.md` — Halt-discipline append directive points to active file
-- `CLAUDE-REVIEWER.md` — Step 1 read list updated (active MEMORIAL.md added explicitly + on-demand shards)
-- `CLAUDE-MEMORIAL.md` — Step 1 read list updated (active default + on-demand shards for cross-phase threshold counts)
-- `CLAUDE-COORDINATOR.md` — wave-gate aggregation clarified to append to active file (shards frozen)
+- `coordination/specs/Q-R43-SPEC.md` — round spec (10 ACs; methodology-tier audit format)
+- `CLAUDE-IMPLEMENTER.md` — modified file (44 → 30 REINFORCED; 554 → 571 lines)
+- `coordination/MEMORIAL.md` — active file with R43 IMPLEMENTER entry appended below R42 entry
+- (Reference, not modified at R43) `coordination/MEMORIAL-PHASE-1.md`, `coordination/MEMORIAL-PHASE-2.md` — frozen R42 shards
+- (Reference) `~/.claude/CROSS-PROJECT-MEMORIAL.md` — not modified; Rule 7 discipline at landing
 
-**Test counts at R42 chore-A (carry-forward from R41; no test files modified):**
+**Test counts at R43 chore-A:**
 
-- `node --test test/*.test.js` → expected tests=361, pass=355, fail=3 (AC-R36-21/30/31 forward-protection guards), skip=3 (q29/q34/q36 subprocess-skip guards)
-- `npx tsc -p tsconfig.test.json` → expected exit=0 (TypeScript 5.9.3 since R41)
-- _Reviewer runs binding commands independently per discipline; values above are Implementer pre-prediction from R41 baseline._
+- `node --test test/*.test.js` → **361 tests, 356 pass, 2 fail (AC-R36-30 + AC-R36-31 forward-protection guards as expected), 3 skip**
+- Discipline-restoration: AC-R36-21 transitions FAIL → PASS as a direct consequence of R43's consolidation (the R36 forward-protection guard explicitly checks `≤ 30 REINFORCED block entries after MR-2`; R43 satisfies it). +1 pass / -1 fail vs R42 baseline. **Zero regression** — no previously-passing test now fails.
+- `npx tsc -p tsconfig.test.json` → exit=0 (unchanged from R42 baseline)
+- _Verified empirically at chore-A via TAP-reporter run; Implementer attests these as observed values per Rule 1._
 
-**Diff from round-start (HEAD pre-R42 = post-R41 commit `231bf7d`):**
+**Diff from round-start (HEAD pre-R43 = post-R42 commit `2817dfc`):**
 
 ```
-A   coordination/specs/Q-R42-SPEC.md
-A   coordination/MEMORIAL-PHASE-1.md
-A   coordination/MEMORIAL-PHASE-2.md
-M   coordination/MEMORIAL.md         (3,153 → 79 lines; header + index + R42 entry preserved)
-M   CLAUDE-COMMON.md                 (Naming conventions extended; Memorial sharding subsection added)
-M   CLAUDE-ARCHITECT.md              (Step 3 read directive)
-M   CLAUDE-IMPLEMENTER.md            (Halt-discipline append clarified)
-M   CLAUDE-REVIEWER.md               (Step 1 read list)
-M   CLAUDE-MEMORIAL.md               (Step 1 read list)
-M   CLAUDE-COORDINATOR.md            (Wave-gate aggregation clarified)
-M   coordination/NEXT-ROLE.md        (this file)
+A   coordination/specs/Q-R43-SPEC.md
+M   CLAUDE-IMPLEMENTER.md             (44 → 30 REINFORCED entries; 554 → 571 lines)
+M   coordination/MEMORIAL.md          (R43 IMPLEMENTER entry appended)
+M   coordination/NEXT-ROLE.md         (this file)
 ```
 
-All paths ⊆ ALLOWED_SET per AC-R42-7. Zero `engine/*`, `test/*`, `tools/*`, `SCOPING-MEMO-v0.3.md`, `PRD.md`, `~/.claude/CROSS-PROJECT-MEMORIAL.md` modifications.
+All paths ⊆ ALLOWED_SET per AC-R43-7. Zero `engine/*`, `test/*`, `tools/*`, `MEMORIAL-PHASE-*.md`, other CLAUDE-*.md, `CROSS-PROJECT-MEMORIAL.md`, `SCOPING-MEMO-v0.3.md`, `PRD.md` modifications.
 
 **AC mapping — Implementer self-attestation:**
 
-| AC | Status | Evidence location |
+| AC | Status | Evidence |
 |---|---|---|
-| AC-R42-1 (content preservation) | PASS (empirically verified) | R42 IMPLEMENTER MEMORIAL entry: `diff <(sed-extract) <(tail-strip)` → empty exit 0 |
-| AC-R42-2 (active ≤ 200 lines) | PASS | `wc -l coordination/MEMORIAL.md` = 79 |
-| AC-R42-3 (index correctness) | PASS | active MEMORIAL.md "Phase shard index" section, 3 rows (Phase 1 / Phase 2 / Active) |
-| AC-R42-4 (Phase 1 scope) | PASS | first round-entry = `## Round R01 — Phase 1 SLICE 1`; last R19 entry at end of round-entries; no R20+ leakage |
-| AC-R42-5 (Phase 2 scope) | PASS | first = `## R20 — Architect (2026-05-17)`; last = `## R41 — MEMORIAL-UPDATER`; no R01–R19 leakage |
-| AC-R42-6 (CLAUDE-*.md read protocols) | PASS | `grep -l "MEMORIAL-PHASE" CLAUDE-*.md` returns 5 files (ARCHITECT, COMMON, COORDINATOR, MEMORIAL, REVIEWER); IMPLEMENTER defers to COMMON per its edit |
-| AC-R42-7 (ALLOWED_SET coverage) | PASS at chore-A | diff above; full enumeration matches AC-R42-7 list |
-| AC-R42-8 (Memorial-Updater append preserved) | PASS | `## R42 — IMPLEMENTER` section present in active MEMORIAL.md; append pattern identical to prior rounds |
-| AC-R42-9 (line-count reduction) | PASS | 79 < 316 (10% of 3,153); 97.5% reduction in default-read cost |
-| AC-R42-10 (back-reference disclosure) | PASS | active-MEMORIAL.md Phase-shard-index read-protocol bullet documents `MEMORIAL.md:NNNN` resolution path; R42 entry OBS line confirms |
+| AC-R43-1 (count = 30) | PASS | `grep -c "^# REINFORCED" CLAUDE-IMPLEMENTER.md` = 30 |
+| AC-R43-2 (target range [25,30]) | PASS | 30 is in range |
+| AC-R43-3 (verbatim preservation) | PASS | All 16 distinctive phrases preserved verbatim (grep spot-check) |
+| AC-R43-4 (composite count matches body) | PASS | All 9 composites: heading count == body sub-variant count (audit script verified) |
+| AC-R43-5 (trigger phrase verbatim) | PASS | Spot-check on R39 MINOR-2 sub-variant: "Trigger phrase verbatim in sub-variant" preserves spec-quoted trigger phrasing |
+| AC-R43-6 (new composites present) | PASS | Both new composite headings present: ATTESTATION-SCOPE-FIDELITY + PRE-EMIT-GRILLING-COMPLETENESS-GATE |
+| AC-R43-7 (ALLOWED_SET coverage) | PASS | diff matches ALLOWED_SET; zero out-of-set paths |
+| AC-R43-8 (no lesson silently omitted) | PASS | All 16 fold-source distinctive phrases grep ≥ 1 in post-R43 file |
+| AC-R43-9 (test baseline; discipline-restoration acknowledged) | PASS | 361/356/2/3 + tsc exit 0; AC-R36-21 FAIL→PASS transition is discipline-restoration; zero regression |
+| AC-R43-10 (stale-count fixes on 4 composites) | PASS | HALT 5→6; MEMORIAL 4→8; SPEC 4→7; AC-COV 2→4 |
 
 **Reviewer cold-eye targets:**
 
-- Verify AC-R42-1 independently: re-run the `diff` command against pre-R42 MEMORIAL.md content (recovered via `git show 231bf7d:coordination/MEMORIAL.md` — pre-R42 SHA).
-- Verify shard headers do not contain content paraphrasing (only metadata; the 12-line headers carry no round-entry text).
-- Verify the active MEMORIAL.md header content (lines 1–37 verbatim) matches pre-R42 lines 1–37 exactly (no editorial drift in the inherited Memorials table or the lineage table).
-- Verify no `MEMORIAL.md:NNNN` back-references were rewritten (count inside shards still ≈ 99 per pre-R42 grep total).
-- Verify CLAUDE-*.md edits preserve append semantics (active file is the write target).
-- Right-reasons audit: the round has no test file; reconstruction-via-diff IS the spec-AC binding. Reviewer should re-verify the `diff` command rather than trust the Implementer attestation alone (Rule 1 false-compliance-attestation discipline).
+- Verify AC-R43-1 independently: re-run `grep -c "^# REINFORCED" CLAUDE-IMPLEMENTER.md` against post-chore-A SHA.
+- Verify AC-R43-3 verbatim preservation: sample 3-5 folded lessons; compare origin-entry body (recoverable via `git show <pre-R43-SHA>:CLAUDE-IMPLEMENTER.md`) against post-R43 sub-variant body; should be byte-identical except for bullet-and-label transformation.
+- Verify AC-R43-4 composite counts: re-run the per-composite audit script (in chore-A log) at HEAD.
+- Right-reasons audit: 0 tests authored (methodology-round precedent); the spec ACs are verifiable via grep/diff/test-run commands directly. Reviewer reads each AC and re-runs the binding command.
+- Spot-check that the 2 new composites' sub-variants preserve trigger conditions verbatim (AC-R43-5).
 
 **Key tactical notes:**
 
-- 99 `MEMORIAL.md:NNNN` intra-file back-references inside shards are PRESERVED rather than rewritten (Rule 6 anti-workaround discipline; explicit anti-scope in Q-R42-SPEC § 6).
-- The R37 round (Coordinator wave-gate stamp) has no entries in MEMORIAL.md — verified at MEMORIAL-PHASE-2.md (R20–R41 with R37 gap; R37 content in WAVE-GATE-05.md + COORDINATOR-MEMORIAL.md).
-- Methodology rounds at R39 (MR-2 consolidation) and R42 (MR-3 sharding) do not require new test files (precedent confirmed in Q-R42-SPEC § 7 Rule 3 note).
-- CLAUDE-IMPLEMENTER.md at 44 REINFORCED lines (above 30 threshold per R41 MEMORIAL-UPDATER); not addressed by R42 per Q-R42-SPEC § 6 anti-scope "NO new REINFORCED lines"; operator-gated for next round.
+- Pre-R43 audit revealed 4 of 7 composite headings had stale counts (R39 MAJOR-1 violations from post-R39 sub-variant additions that didn't update the count claim). R43 fixed all 4.
+- Rule 7 anchor-canonical-landing-deferred: the 2 new composites are Tessera-internal; cross-project promotion gated on 2nd-project occurrence.
+- Line count increased (554 → 571 lines) despite consolidating 14 entries — sub-variant labeling overhead in composites is larger than the standalone form. The CANONICAL metric is REINFORCED heading count (30), not file line count.
+- AC-R36-21 forward-protection guard is empirically validated end-to-end: detected accretion drift R37-R41, signaled at R41 MEMORIAL, R43 closed the loop. Pattern is sound.
 
-**Halt conditions encountered:** None. Sharding executed cleanly per Q-R42-SPEC § 3 mechanism.
+**Halt conditions encountered:** None. All folds executed cleanly; verbatim preservation verified.
 
-**Spec deviance:** None. No optional `test/q42-memorial-sharding.test.ts` written (Q-R42-SPEC § 7 Rule 3 explicitly allows Implementer judgment; reconstruction diff verified at chore-A binds AC-R42-1 empirically).
+**Spec deviance:** None. AC-R43-9 was UPDATED during chore-A from "test baseline preserved (3 fail)" to "test baseline shifts +1 pass via discipline-restoration of AC-R36-21" — this is honest disclosure of the actual post-R43 baseline rather than spec deviance. The spec edit landed in same commit as chore-A.
 
 ---
 
-## Reviewer routing — R41 report (previous round; preserved for audit trail)
+## Reviewer routing — R42 report (previous round; awaiting independent Reviewer pass)
 
-**Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R41.md` (Opus, cold-eye, single-pass). 0 CRITICAL + 1 MAJOR + 5 MINOR + 3 OBS = 9 findings. MAJOR-1 operator-routed (not merge-blocking). See R41 MEMORIAL entries (now in `coordination/MEMORIAL-PHASE-2.md`) for full disposition.
+**R42 chore-A SHA:** `d73e83c` (memorial sharding strategy a). SHA backfill commit: `2817dfc`.
+
+**Status:** Implementer self-attested all R42 ACs PASS; Reviewer cold-eye pass pending (operator-invoked via pipeline OR fresh interactive session). R42 deliverables (active MEMORIAL.md + MEMORIAL-PHASE-1.md + MEMORIAL-PHASE-2.md + all 6 CLAUDE-*.md read-protocol updates) are stable and frozen relative to R43 work.
+
+**R43 explicitly preserves R42 deliverables:** Q-R43-SPEC § 6 anti-scope forbids modification of R42 outputs except for the active MEMORIAL.md append. Reviewer can validate R42 + R43 independently or batched.
