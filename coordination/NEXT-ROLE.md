@@ -1,192 +1,87 @@
-CURRENT-ROUND: R41
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R42
+NEXT-ROLE: REVIEWER
+STATUS: READY-FOR-REVIEWER
 
-## Reviewer routing — R41 report
+## Implementer routing — R42 chore-A attestation
 
-**Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R41.md` (Opus, cold-eye, single-pass).
+**Chore-A SHA:** `d73e83c` (coordination chore; 10 files changed; +3,487 / −3,104 insertions/deletions reflect verbatim split of 3,153-line MEMORIAL.md across 2 shards + active trim). SHA backfill commit: see HEAD.
 
-**Findings summary:** 0 CRITICAL + 1 MAJOR + 5 MINOR + 3 OBS = 9 findings (non-rubber-stamp).
-
-**MAJOR-1 (operator-routed; not merge-blocking):** Hygiene stamp § 7 Surface 2 line 173-174 claim "All coordination/*.md files checked have at least one reference" contradicts MEMORIAL R41 CONFIRMATION `orphan-detection-surface2` which admits only 9 files were empirically checked. Rule 1 (false-compliance-attestation) sub-class candidate. Recommended disposition options (operator picks): (a) tighten hygiene-stamp wording to factual scope ("9 candidates spot-checked; see MEMORIAL evidence"), or (b) complete the full ~50-file enumeration before Phase 3 entry-prep. Phase 3 entry-prep not blocked.
-
-**MINOR list (improvement notes; not merge-blocking):**
-- MINOR-1: Hygiene stamp § 4 CLUSTER-HANDOFF count = 11 (actual: 15).
-- MINOR-2: Surface 1 artifact-link audit scope reduction undisclosed (~15 of ~25 grep'd).
-- MINOR-3: Test AC-R41-8 keyword "cluster" / "rounds" substring checks self-confirming.
-- MINOR-4: Test AC-R41-4 "RESOLVED" substring check not anchored to OQ-P3-5.
-- MINOR-5: TDD letter (assert.fail stubs) not met; spirit met (real assertions failed at RED).
-
-**OBS list:** AC test-code coverage sparse (6 of 10 ACs covered by spec attestation only); `.js` in ALLOWED_SET redundant (gitignored); R36 forward-protection guards correctly characterized.
-
-**Inputs for Memorial-Updater:**
-- `coordination/reviews/REVIEWER-REPORT-R41.md` — primary
-- `coordination/specs/Q-R41-SPEC.md`
-- `coordination/PHASE-2-CLOSED-HYGIENE-STAMP.md`
-- `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md`
-- `coordination/STAGED-PHASE-2-CLOSED-2026-05-19.md`
-- `test/q41-hygiene-audit.test.ts`
-
-Memorial-Updater: append CONFIRMATION/VIOLATION entries for findings at MINOR or above per CLAUDE-REVIEWER.md reinforcement 2026-05-17 ("Reviewer MUST also append corresponding VIOLATION entries to coordination/MEMORIAL.md for every finding at MINOR severity or above"). Reviewer pre-appends below; Memorial-Updater verifies completeness and continues.
-
----
-
-## Implementer routing — R41 chore-A attestation
-
-**Chore-A SHA:** `ae7c438` (coordination chore). SHA backfill commit: `f5d7985` (HEAD).
+**Round summary:** Methodology round — MEMORIAL.md sharding strategy (a) per Q-R42-SPEC + PHASE-3-CANDIDATES-PRELIMINARY.md § 5.5. No engine/test changes; pure doc reorganization + CLAUDE-*.md read-protocol updates.
 
 **Inputs for Reviewer:**
-- `coordination/specs/Q-R41-SPEC.md` — R41 spec (10 ACs; thin 2-page format)
-- `coordination/PHASE-2-CLOSED-HYGIENE-STAMP.md` — Primary deliverable (Surface 7; 7 sections)
-- `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` — Surface 6 fix applied (Rule 7 canonical status)
-- `coordination/STAGED-PHASE-2-CLOSED-2026-05-19.md` — Renamed from STAGED-FOR-PHASE-2-CLOSE.md; 5 lifecycle annotations
-- `test/q41-hygiene-audit.test.ts` — 3 tests, all GREEN; guards AC-R41-4/8/5-6
 
-**Test counts at chore-A (ae7c438):**
-- `node --test test/*.test.js` → tests=361, pass=355, fail=3 (AC-R36-21/30/31), skip=3
-- `npx tsc -p tsconfig.test.json` → exit=0
+- `coordination/specs/Q-R42-SPEC.md` — round spec (10 ACs, audit-tier methodology format)
+- `coordination/MEMORIAL.md` — active file (post-shard; 79 lines)
+- `coordination/MEMORIAL-PHASE-1.md` — Phase 1 + calibration shard (R01–R19; 1796 lines)
+- `coordination/MEMORIAL-PHASE-2.md` — Phase 2 + post-Phase-2 hygiene shard (R20–R41; 1342 lines)
+- `CLAUDE-COMMON.md` — Memorial sharding (R42 onward) subsection added; Naming conventions extended
+- `CLAUDE-ARCHITECT.md` — Step 3 read directive updated (active + on-demand shards)
+- `CLAUDE-IMPLEMENTER.md` — Halt-discipline append directive points to active file
+- `CLAUDE-REVIEWER.md` — Step 1 read list updated (active MEMORIAL.md added explicitly + on-demand shards)
+- `CLAUDE-MEMORIAL.md` — Step 1 read list updated (active default + on-demand shards for cross-phase threshold counts)
+- `CLAUDE-COORDINATOR.md` — wave-gate aggregation clarified to append to active file (shards frozen)
 
-**Diff from round-start (622164c):**
+**Test counts at R42 chore-A (carry-forward from R41; no test files modified):**
+
+- `node --test test/*.test.js` → expected tests=361, pass=355, fail=3 (AC-R36-21/30/31 forward-protection guards), skip=3 (q29/q34/q36 subprocess-skip guards)
+- `npx tsc -p tsconfig.test.json` → expected exit=0 (TypeScript 5.9.3 since R41)
+- _Reviewer runs binding commands independently per discipline; values above are Implementer pre-prediction from R41 baseline._
+
+**Diff from round-start (HEAD pre-R42 = post-R41 commit `231bf7d`):**
+
 ```
-A   coordination/PHASE-2-CLOSED-HYGIENE-STAMP.md
-M   coordination/PHASE-3-CANDIDATES-PRELIMINARY.md
-R091 coordination/STAGED-FOR-PHASE-2-CLOSE.md → coordination/STAGED-PHASE-2-CLOSED-2026-05-19.md
-A   coordination/specs/Q-R41-SPEC.md
-A   test/q41-hygiene-audit.test.ts
+A   coordination/specs/Q-R42-SPEC.md
+A   coordination/MEMORIAL-PHASE-1.md
+A   coordination/MEMORIAL-PHASE-2.md
+M   coordination/MEMORIAL.md         (3,153 → 79 lines; header + index + R42 entry preserved)
+M   CLAUDE-COMMON.md                 (Naming conventions extended; Memorial sharding subsection added)
+M   CLAUDE-ARCHITECT.md              (Step 3 read directive)
+M   CLAUDE-IMPLEMENTER.md            (Halt-discipline append clarified)
+M   CLAUDE-REVIEWER.md               (Step 1 read list)
+M   CLAUDE-MEMORIAL.md               (Step 1 read list)
+M   CLAUDE-COORDINATOR.md            (Wave-gate aggregation clarified)
+M   coordination/NEXT-ROLE.md        (this file)
 ```
-All paths ⊆ ALLOWED_SET per AC-R41-9. Zero engine/* modifications.
 
-**Key tactical deviations:**
-- tsc now exits 0 (TypeScript 5.9.3 resolved TS5107/TS2688 from prior rounds). Documented as improvement; load-bearing "no new regressions" property met.
-- STAGED-FOR-PHASE-2-CLOSE.md references in WAVE-GATE-04.md, ANCHOR-BACKFLOW-2026-05-18.md, CLUSTER-HANDOFF-4-WU06-WU07.md not updated (historically accurate at write-time; Rule 4 compliance).
-- Type B planning-name drift references (WAVE-PLAN-01/02.md) not updated (historical planning artifacts; audit trail preserved).
+All paths ⊆ ALLOWED_SET per AC-R42-7. Zero `engine/*`, `test/*`, `tools/*`, `SCOPING-MEMO-v0.3.md`, `PRD.md`, `~/.claude/CROSS-PROJECT-MEMORIAL.md` modifications.
+
+**AC mapping — Implementer self-attestation:**
+
+| AC | Status | Evidence location |
+|---|---|---|
+| AC-R42-1 (content preservation) | PASS (empirically verified) | R42 IMPLEMENTER MEMORIAL entry: `diff <(sed-extract) <(tail-strip)` → empty exit 0 |
+| AC-R42-2 (active ≤ 200 lines) | PASS | `wc -l coordination/MEMORIAL.md` = 79 |
+| AC-R42-3 (index correctness) | PASS | active MEMORIAL.md "Phase shard index" section, 3 rows (Phase 1 / Phase 2 / Active) |
+| AC-R42-4 (Phase 1 scope) | PASS | first round-entry = `## Round R01 — Phase 1 SLICE 1`; last R19 entry at end of round-entries; no R20+ leakage |
+| AC-R42-5 (Phase 2 scope) | PASS | first = `## R20 — Architect (2026-05-17)`; last = `## R41 — MEMORIAL-UPDATER`; no R01–R19 leakage |
+| AC-R42-6 (CLAUDE-*.md read protocols) | PASS | `grep -l "MEMORIAL-PHASE" CLAUDE-*.md` returns 5 files (ARCHITECT, COMMON, COORDINATOR, MEMORIAL, REVIEWER); IMPLEMENTER defers to COMMON per its edit |
+| AC-R42-7 (ALLOWED_SET coverage) | PASS at chore-A | diff above; full enumeration matches AC-R42-7 list |
+| AC-R42-8 (Memorial-Updater append preserved) | PASS | `## R42 — IMPLEMENTER` section present in active MEMORIAL.md; append pattern identical to prior rounds |
+| AC-R42-9 (line-count reduction) | PASS | 79 < 316 (10% of 3,153); 97.5% reduction in default-read cost |
+| AC-R42-10 (back-reference disclosure) | PASS | active-MEMORIAL.md Phase-shard-index read-protocol bullet documents `MEMORIAL.md:NNNN` resolution path; R42 entry OBS line confirms |
+
+**Reviewer cold-eye targets:**
+
+- Verify AC-R42-1 independently: re-run the `diff` command against pre-R42 MEMORIAL.md content (recovered via `git show 231bf7d:coordination/MEMORIAL.md` — pre-R42 SHA).
+- Verify shard headers do not contain content paraphrasing (only metadata; the 12-line headers carry no round-entry text).
+- Verify the active MEMORIAL.md header content (lines 1–37 verbatim) matches pre-R42 lines 1–37 exactly (no editorial drift in the inherited Memorials table or the lineage table).
+- Verify no `MEMORIAL.md:NNNN` back-references were rewritten (count inside shards still ≈ 99 per pre-R42 grep total).
+- Verify CLAUDE-*.md edits preserve append semantics (active file is the write target).
+- Right-reasons audit: the round has no test file; reconstruction-via-diff IS the spec-AC binding. Reviewer should re-verify the `diff` command rather than trust the Implementer attestation alone (Rule 1 false-compliance-attestation discipline).
+
+**Key tactical notes:**
+
+- 99 `MEMORIAL.md:NNNN` intra-file back-references inside shards are PRESERVED rather than rewritten (Rule 6 anti-workaround discipline; explicit anti-scope in Q-R42-SPEC § 6).
+- The R37 round (Coordinator wave-gate stamp) has no entries in MEMORIAL.md — verified at MEMORIAL-PHASE-2.md (R20–R41 with R37 gap; R37 content in WAVE-GATE-05.md + COORDINATOR-MEMORIAL.md).
+- Methodology rounds at R39 (MR-2 consolidation) and R42 (MR-3 sharding) do not require new test files (precedent confirmed in Q-R42-SPEC § 7 Rule 3 note).
+- CLAUDE-IMPLEMENTER.md at 44 REINFORCED lines (above 30 threshold per R41 MEMORIAL-UPDATER); not addressed by R42 per Q-R42-SPEC § 6 anti-scope "NO new REINFORCED lines"; operator-gated for next round.
+
+**Halt conditions encountered:** None. Sharding executed cleanly per Q-R42-SPEC § 3 mechanism.
+
+**Spec deviance:** None. No optional `test/q42-memorial-sharding.test.ts` written (Q-R42-SPEC § 7 Rule 3 explicitly allows Implementer judgment; reconstruction diff verified at chore-A binds AC-R42-1 empirically).
 
 ---
 
-## Round-scope directive (R41 — repo hygiene audit; audit-tier; main worktree) — FINAL safe-continuation round
+## Reviewer routing — R41 report (previous round; preserved for audit trail)
 
-R41 = fourth and **final** round of post-Phase-2-close safe-continuation chain per evening overnight authority [[project-overnight-authority-2026-05-18-morning]].
-
-After R41: **HARD STOP at natural exhaustion of safe-continuation work.** Operator wakes to fully-closed Phase 2 + post-Phase-2-close hygiene complete + Phase 3 entry-prep inventory ready for review.
-
-## Primary deliverable
-
-**Comprehensive repo hygiene audit + fix-as-you-go for low-risk issues.** Audit-tier; Implementer authors thin spec inline. Scope:
-
-### Surface 1 — Artifact link + reference validation
-
-For each `coordination/*.md` artifact emitted this overnight session (~25 files: PHASE-2-SLICE-{1,2,3}-CLOSE-WALK.md + PHASE-2-CLOSE-WALK.md + WAVE-PLAN-{01,02,03}.md + WAVE-GATE-{01,02,03,04,05}.md + 11 CLUSTER-HANDOFF-*.md + COORDINATOR-MEMORIAL.md + STAGED-FOR-PHASE-2-CLOSE.md + ANCHOR-BACKFLOW-2026-05-18.md + PHASE-3-CANDIDATES-PRELIMINARY.md):
-
-- Grep for relative file paths (`coordination/...`; `engine/...`; `test/...`); verify each path exists on disk
-- Grep for `[[memory-name]]` references; verify memory files exist
-- Grep for line-number citations (`file.ts:N`); spot-check accuracy for at least 5 random citations per artifact
-- Flag orphan references (path doesn't exist) for FIX-AS-YOU-GO if doc-only OR HALT if structural
-
-### Surface 2 — Orphan-file detection
-
-- `find coordination/ -type f -name "*.md"`: cross-reference against `git log --diff-filter=A` for each path; flag any committed-but-never-referenced artifacts
-- Same for `engine/events/`, `engine/topology/`, `test/_substrate/` (newer dirs from Phase 2)
-- Flag genuinely orphaned files for operator review (do NOT auto-delete)
-
-### Surface 3 — Test-pass verification + baseline encoding
-
-- Run `node --test test/*.test.js` AND `npx tsc -p tsconfig.test.json` empirically at R41 session start (Rule 1 + Rule 6 compliance)
-- Encode actual exit code + actual test counts verbatim in spec — do NOT cite from prior round attestations (lesson from R38 baseline-mismatch ESCALATE)
-- Expected baseline approximate: ~360 tests, ~353 pass, ~2-4 fail (q36 forward-protection guards), ~3 skip (q29/q34/q36 subprocess-skip guards). Implementer encodes the actual numbers.
-- Document any baseline drift in spec
-
-### Surface 4 — Vendoring-manifest cross-check
-
-- `coordination/VENDORING-MANIFEST.md` lists every vendored file with SHA + sync policy
-- For each row: verify the target file exists on disk + first line matches `VENDORED FROM ... @<SHA>` header
-- Same for anchor methodology vendoring rows (CLAUDE-COORDINATOR.md + 5 templates per MR-1)
-- Flag any drift
-
-### Surface 5 — STAGED-FOR-* artifact lifecycle audit
-
-- `coordination/STAGED-FOR-PHASE-2-CLOSE.md` had Items 1-5; verify which were closed at WU-07 (R36) Deliverables vs which still apply post-Phase-2-close
-- Items expected to be closed by R36: Item 1 (MR-2), Item 2 (R32 carry-forwards), Item 3 Tessera-local portion (subprocess-hang fixes), Item 5 (R34 reinforcement staging)
-- Items expected to carry forward: Item 3 anchor backflow portion (now in ANCHOR-BACKFLOW-2026-05-18.md), Item 4 (Tailscale Phase 3 candidate)
-- Mark STAGED file with which items are closed-and-when vs still-active
-- If all Items closed/forwarded: rename `STAGED-FOR-PHASE-2-CLOSE.md` → `STAGED-PHASE-2-CLOSED-2026-05-19.md` for audit trail
-
-### Surface 6 — R40 PHASE-3-CANDIDATES MAJOR-1 fix (fold-in opportunity per overnight authority)
-
-R40 Reviewer flagged: §§ 5.1 + 6 + OQ-P3-5 of PHASE-3-CANDIDATES-PRELIMINARY.md treated Rule 7 canonical landing as "unknown" when it IS canonical-landed at `~/.claude/CROSS-PROJECT-MEMORIAL.md:3470`. **Fix in-passing at R41:** correct the three references to acknowledge Rule 7 canonical status. Single-file doc edit; clear correctness criterion (cite the actual CROSS-PROJECT-MEMORIAL line); within R41 hygiene scope.
-
-### Surface 7 — Final state summary commit
-
-After Surfaces 1-6 complete, append a `coordination/PHASE-2-CLOSED-HYGIENE-STAMP.md` recording:
-- Wall-clock chain duration (R20 SLICE 2.A start through R41 hygiene close)
-- Total rounds + tasks completed (this session)
-- 7 cross-project rules derivation lineage
-- Phase 2 deliverable inventory cross-check
-- Cluster fan-out statistics (5 multi-track clusters; ~3 hr aggregate wall-clock per parallel wave)
-- Methodology friction surfaces total (14+ captured for backflow)
-- "Operator wakes to..." next-session-startup snapshot
-
-This is the operator's morning-of-2026-05-19 (or whenever) read-on-wake artifact.
-
-## Tier rationale
-
-**audit-tier** — hygiene audit is single-bounded scope (S3); tactical follow-up to recent rounds (S4); no novel architecture; no production code; minimal-risk doc edits. Implementer wears Architect hat; cold Reviewer audits hygiene completeness.
-
-## Anti-scope (R41 hard limits)
-
-- NO Phase 3 entry (this is HARD-STOP-imminent round)
-- NO scoping decisions
-- NO modification of engine/* (zero production-code changes)
-- NO modification of any test file beyond optional R41 hygiene additions to NEW `test/q41-hygiene-audit.test.ts` if Implementer judges in-scope
-- NO modification of CLAUDE-*.md (consolidation done at R39)
-- NO modification of SCOPING-MEMO-v0.3.md or PRD.md
-- NO writes to `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Rules 1-7 canonical and frozen)
-- NO new STAGED items beyond rename-if-all-closed
-- NO operator-gate item dispositions
-- NO opening any GitHub PRs (anchor backflow PRs remain operator-scheduled)
-
-## Apply all 7 cross-project rules UPFRONT
-
-- **Rule 1 (false-compliance-attestation):** Surface 3 actual baseline encoded verbatim; no reframing.
-- **Rule 4 (anti-scope-allowed-set-forward-coverage):** R41 ALLOWED_SET written at RED-commit time including hygiene-stamp file + REVIEWER-REPORT-R41.md + DIAGNOSTIC-R41-* carve-outs (per established pattern).
-- **Rule 5 (self-application gate):** the hygiene audit itself must produce actionable output, not just enumerate. Each finding has fix-applied OR documented-as-orphan-for-operator-review OR no-finding.
-- **Rule 6 (halt-discipline-no-DIAGNOSTIC-for-workaround):** any environmental mismatch (e.g., tsc version drift, test count drift) MUST produce DIAGNOSTIC; do NOT inline-absorb.
-- **Rule 7 (derived-rule-propagation):** Surface 6 R40 MAJOR-1 fix IS an application of Rule 7 — the canonical landing of Rule 7 needs to propagate into the inventory artifact that referenced it.
-
-## Halt conditions
-
-1. **Orphan artifact reveals a missing deliverable** (e.g., a CLUSTER-HANDOFF referenced but never emitted) — HALT + DIAGNOSTIC; structural gap requires operator decision.
-2. **Vendoring drift detected** (a vendored file's first-line SHA differs from manifest) — HALT + DIAGNOSTIC; do NOT auto-fix vendoring (operator-owned per existing discipline).
-3. **Test baseline drift > ±3 fails** vs expected — HALT + DIAGNOSTIC (could indicate regression from R38-R40).
-4. **STAGED Item lifecycle review reveals item that thought-was-closed is actually NOT closed** — HALT + DIAGNOSTIC.
-5. **R40 MAJOR-1 fix-in-passing surfaces additional Rule 7 propagation gaps** — fix all if scope-bounded; HALT + ESCALATE if surfacing scope-creep risk.
-
-## Inputs for Implementer
-
-1. ALL `coordination/*.md` artifacts (audit surface)
-2. `coordination/VENDORING-MANIFEST.md` (vendoring cross-check)
-3. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Rule 7 canonical landing reference for Surface 6 fix)
-4. `coordination/STAGED-FOR-PHASE-2-CLOSE.md` (lifecycle audit)
-5. `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` (Surface 6 target)
-6. ALL `coordination/WAVE-GATE-{01-05}.md` (audit-trail completeness)
-7. `coordination/PHASE-2-CLOSE-WALK.md` (Phase 2 close state reference)
-
-## Pipeline invocation
-
-```bash
-cd /Users/johnwarren/concord/tessera
-./run-pipeline.sh --round R41 --tier audit
-```
-
-## State at R41 entry — final safe-continuation round
-
-| Element | State |
-|---|---|
-| Phase 2 closed | ✅ R37 WAVE-GATE-05 stamp |
-| R38 MAJOR-1 fix | ✅ verified at R38 |
-| R39 consolidation | ✅ ARCH 33→25; IMPL 36→30 |
-| R40 Phase 3 candidates DRAFT | ✅ emitted (MAJOR-1 content-correction folds in at R41 Surface 6) |
-| 7 cross-project rules canonical | ✅ |
-| 0-CRITICAL streak | 39+ rounds |
-| Working tree | clean |
-| HEAD | (current main post R40) |
-| HARD STOP | after R41 close (natural exhaustion) — operator wakes to Phase 2 closed + hygiene complete |
+**Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R41.md` (Opus, cold-eye, single-pass). 0 CRITICAL + 1 MAJOR + 5 MINOR + 3 OBS = 9 findings. MAJOR-1 operator-routed (not merge-blocking). See R41 MEMORIAL entries (now in `coordination/MEMORIAL-PHASE-2.md`) for full disposition.
