@@ -187,3 +187,72 @@ This is real methodology learning + spec template work; should land at WU-07 clo
 **Backflow potential:** If implemented well in Tessera, the `--remote` pattern could land in anchor canonical as a multi-track-execution capability extension. Coordinator role + cluster dispatch already have multi-machine-ready conceptual architecture; just needs the plumbing.
 
 ---
+
+## Item 5 — R34 pending REINFORCED-line appends (spec § 9.9 anti-scope constraint)
+
+**Staged by:** Memorial-Updater (R34 close, 2026-05-18).
+
+**Context:** Q-R34-SPEC § 9.9 explicitly constrains the Memorial-Updater from appending REINFORCED lines to CLAUDE-*.md files at R34 close (ALLOWED_SET anti-scope enforcement; none of the CLAUDE-*.md files appear in the ALLOWED_SET regex carve-outs). Per spec § 9.9 option (b), reinforcement text is staged here for application at MR-2 (Phase 2 close-walk), alongside Item 1 (CLAUDE-IMPLEMENTER.md consolidation).
+
+**Apply BEFORE running Item 1 consolidation passes**, so all accumulated patterns are visible to the consolidation.
+
+### For CLAUDE-ARCHITECT.md — append to REINFORCEMENTS section
+
+```
+# REINFORCED 2026-05-18 — Spec § 9.8 spec-internal-contradiction sweep MUST explicitly
+#   cross-check algorithmic boundary clauses (pre-window / post-window, filter predicates,
+#   interval endpoints) across ALL spec sections where they appear (§ 1.x prose, § 3.x
+#   pseudocode, § 4 AC Then-columns). Listing one section's boundary convention and not
+#   diffing it against the others produces internal contradictions that surface empirically
+#   at chore-B. Procedure: for each algorithmic primitive with boundary semantics, grep
+#   the spec for all occurrences and verify each uses the same convention (inclusive vs
+#   exclusive; open vs closed). Detected tessera R34 MINOR-2 (pre/post window boundary
+#   inconsistency across § 1.1, § 3.2 pseudocode, and § 4 AC-R34-8 text).
+# REINFORCED 2026-05-18 — When spec § 3.x pseudocode contains regex literals intended for
+#   test assertions, verify each regex is valid JavaScript BEFORE emitting the spec:
+#   (1) `\Z` is not a JavaScript regex metacharacter (it is a Perl/Python construct; MDN
+#   documents it as unsupported); use `$` with /m flag, end-of-string lookahead, or
+#   restructure via split. (2) lookahead alternation `(?=X|Y)` where Y contains language-
+#   specific anchors must be tested in a JS REPL before inclusion in spec pseudocode.
+#   Copy-pasting from spec pseudocode to test code propagates language-specific bugs that
+#   force content workarounds rather than code fixes. Detected tessera R34 MINOR-3.
+# REINFORCED 2026-05-18 — When the § 9.9 ALLOWED_SET completeness pass enumerates file
+#   categories, it MUST include the operator-authored methodology backflow class: commits
+#   to coordination-tier durable artifacts (STAGED-FOR-PHASE-2-CLOSE.md, WAVE-PLAN-NN.md,
+#   WAVE-GATE-NN.md, CLUSTER-HANDOFF files) that an operator may land at any point in the
+#   round pipeline, including between STATUS=READY and Reviewer execution. Resolution:
+#   either add regex carve-outs for all known operator-owned coordination files, OR
+#   document the gap explicitly with the recommendation that operators land methodology
+#   commits before STATUS=READY or after Reviewer routing. Third occurrence of this
+#   Architect forward-coverage gap class (R25 = DIAGNOSTIC files; R29 = REVIEWER-REPORT
+#   file; R34 = operator post-READY commits). Detected tessera R34 MAJOR-1.
+```
+
+### For CLAUDE-IMPLEMENTER.md — append to REINFORCEMENTS section
+
+```
+# REINFORCED 2026-05-18 — When a test fails because the implementation matches spec
+#   pseudocode literally but the literal contradicts the spec's stated behavioral intent
+#   (e.g., spec says "non-overlapping windows" but pseudocode uses `<=` which overlaps),
+#   this is a spec-vs-impl semantic conflict requiring HALT + DIAGNOSTIC + bounded options
+#   (A: amend spec pseudocode; B: adjust test fixture; C: accept impl divergence with
+#   rationale). NEXT-ROLE.md disclosure alone does not satisfy halt-discipline; it records
+#   the outcome but bypasses the operator's option space. Detected tessera R34 MINOR-1.
+# REINFORCED 2026-05-18 — When a spec-pseudocode regex is invalid in the target language
+#   (e.g., `\Z` in JavaScript) and the test file is in ALLOWED_SET, fix the regex directly
+#   (< 10 characters). Do NOT add content to a data file to work around a broken regex.
+#   A regex fix is self-contained; a content workaround creates hidden structural coupling:
+#   future contributors may delete the "workaround section" without knowing it is load-
+#   bearing, silently breaking the test. Prefer the minimal, local, code-only fix.
+#   Detected tessera R34 MINOR-3.
+# REINFORCED 2026-05-18 — When spec § 4 prescribes a full-suite count assertion
+#   (tests=N_total; pass=N_pass; fail=N_fail) but a subprocess-hang constraint prevents
+#   running the full suite from within the test, the AC MUST structurally guarantee the
+#   full-suite count by composition: independently count `test()` declarations in the new
+#   test file AND assert pre-baseline subset count, then verify their sum equals the
+#   spec'ied total. An implementation that asserts only the pre-baseline subset no longer
+#   guarantees `total = baseline + N_new`; a silently-dropped AC is invisible to the
+#   assertion. Detected tessera R34 MINOR-4.
+```
+
+---

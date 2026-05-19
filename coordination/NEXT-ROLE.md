@@ -1,6 +1,6 @@
 CURRENT-ROUND: R34
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision — R35 Wave 4 gate / Coordinator)
+STATUS: ROUND-COMPLETE
 
 ## Round-scope directive (R34 — Wave 4 / WU-06 SLICE 4 event-conditional attribution)
 
@@ -194,3 +194,31 @@ coordination/MEMORIAL.md    ← ALLOWED_REGEX /^coordination\/MEMORIAL\.md$/ ✓
 ### Attested SHA
 
 **Routing HEAD SHA:** `ca795a2` — Reviewer: `git log --oneline -1` confirms HEAD.
+
+---
+
+## Reviewer completion block (2026-05-18)
+
+**Report:** `coordination/reviews/REVIEWER-REPORT-R34.md`
+
+**Findings:** 0 CRITICAL / 1 MAJOR / 4 MINOR / 5 OBS.
+
+**MAJOR-1 (load-bearing for Memorial-Updater + operator decision):** AC-R34-19 FAILS at HEAD `854cc7e` (post-attestation operator commits `397efd6` + `854cc7e` added `coordination/STAGED-FOR-PHASE-2-CLOSE.md` to chore-A..HEAD diff; file not in ALLOWED_SET nor regex carve-outs). Implementer's attestation at `ca795a2` was internally correct; failure is HEAD-relative. Fix surface (operator's decision): (a) extend ALLOWED_REGEX with `^coordination/STAGED-FOR-PHASE-2-CLOSE\.md$`, OR (b) revert the operator-authored chores, OR (c) acknowledge as Phase 2 close item per 397efd6 self-classification.
+
+**Routing:** STATUS=MERGE-READY per CLAUDE-COMMON.md routing rule (MAJOR or below → MERGE-READY). Memorial-Updater proceeds with VIOLATION/CONFIRMATION aggregation; MAJOR-1 should be propagated to CROSS-PROJECT-MEMORIAL.md as a new reinforcement candidate (post-attestation operator-commit class for Rule 4 forward-coverage sweep).
+
+**Binding commands independently run by Reviewer:**
+- `npx tsc -p tsconfig.test.json` → EXIT 0 (AC-R34-20 PASS)
+- `node --test --test-name-pattern="AC-R34-([1-9]|1[0-8]|20):" test/q34*.test.js` → 19/19 PASS
+- `node --test --test-name-pattern="AC-R34-19" test/q34*.test.js` → 1/1 FAIL (MAJOR-1)
+- `git diff 0a346ff..HEAD --name-only` → 8 paths, 1 ALLOWED_SET violation
+- Full `node --test test/*.test.js` HUNG on q29 transitive subprocess deadlock (operator-acknowledged at 397efd6 as Phase 2 close item); AC-R34-21 NOT REVERIFIED at HEAD; pre-R34 test files structurally unchanged at HEAD (`git diff 0a346ff..HEAD -- 'test/q*.test.ts'` confirms zero pre-R34 modifications); Implementer's batched attestation accepted as best available evidence.
+
+**Inputs for Memorial-Updater:**
+1. `coordination/reviews/REVIEWER-REPORT-R34.md` — full Reviewer report with per-AC table, findings, right-reasons audit, cross-cutting checks, grilling output.
+2. `coordination/MEMORIAL.md` — Reviewer block appended with 5 VIOLATION entries (MAJOR-1 + MINOR-1..4) and 6 CONFIRMATION entries; full R34 round trail (Architect + Implementer + Reviewer) ready for aggregation.
+3. `~/.claude/CROSS-PROJECT-MEMORIAL.md` — Memorial-Updater section reads this for cross-project rule context.
+4. `coordination/specs/Q-R34-SPEC.md` + `coordination/specs/Q-R34-SPEC-AUDIT.md` — spec + audit-sidecar for ROUND-SUMMARY context.
+5. `coordination/diagnostics/` — Memorial-Updater is permitted to read diagnostics (per CLAUDE-MEMORIAL.md); none exist for R34 (zero halts fired).
+
+**Memorial-Updater scope reminder:** Per spec § 9.9 caveat, R34 anti-scope explicitly prohibits CLAUDE-IMPLEMENTER.md modifications (MR-2 consolidation staged for Phase 2 close per STAGED-FOR-PHASE-2-CLOSE.md Item 1). Memorial-Updater MUST NOT append REINFORCED lines to CLAUDE-IMPLEMENTER.md / CLAUDE-ARCHITECT.md / CLAUDE-REVIEWER.md / CLAUDE-COMMON.md if such an append would itself widen the AC-R34-19 anti-scope failure. Two paths: (a) hold the reinforcement appends to STAGED-FOR-PHASE-2-CLOSE.md (which is already in the diff per MAJOR-1, so adds no NEW violation), OR (b) route reinforcements via the same fix-surface decision the operator makes for MAJOR-1.
