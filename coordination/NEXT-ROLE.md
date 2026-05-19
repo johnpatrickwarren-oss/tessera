@@ -193,4 +193,4 @@ coordination/MEMORIAL.md    ← ALLOWED_REGEX /^coordination\/MEMORIAL\.md$/ ✓
 
 ### Attested SHA
 
-**Routing HEAD SHA:** `c6e1246` — Reviewer: `git log --oneline -1` confirms HEAD. Chore = `40ce7b5`.
+**Routing HEAD SHA:** `ca795a2` — Reviewer: `git log --oneline -1` confirms HEAD.
