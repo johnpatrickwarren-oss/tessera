@@ -264,7 +264,9 @@ test('AC-R34-17: PR-F7-EVIDENCE.md has 3+ citation blocks (Brodersen/Abadie/Bern
   const content = readFileSync(
     resolve(ROOT, 'coordination/evidence/PR-F7-EVIDENCE.md'), 'utf8',
   );
-  const citationBlocks = content.match(/^##\s+(Brodersen|Abadie|Bernal)[\s\S]*?(?=^##\s|\Z)/gm);
+  // \Z (Perl/Python end-of-string anchor) replaced with (?![\s\S]) (JS-compatible form).
+  // See Q-R34-SPEC.md §3.6 amendment (LS-4) and CLAUDE-ARCHITECT.md REINFORCED 2026-05-18.
+  const citationBlocks = content.match(/^##\s+(Brodersen|Abadie|Bernal)[\s\S]*?(?=^##\s|(?![\s\S]))/gm);
   assert.notStrictEqual(citationBlocks, null, 'PR-F7-EVIDENCE.md must contain Brodersen/Abadie/Bernal citation blocks');
   assert.ok(citationBlocks!.length >= 3, `expected ≥3 citation blocks, got ${citationBlocks!.length}`);
   for (const block of citationBlocks!) {
@@ -315,13 +317,21 @@ test('AC-R34-19: anti-scope diff (chore-A SHA..HEAD) ⊆ ALLOWED_SET ∪ carve-o
     /^coordination\/reviews\/REVIEWER-REPORT-R34(-opus|-sonnet)?\.md$/,
     /^coordination\/diagnostics\/DIAGNOSTIC-R34-.*\.md$/,
     /^coordination\/logs\/ROUND-R34-SUMMARY\.md$/,
+    // Operator-commit methodology artifact added between Implementer STATUS=READY and Memorial-Updater.
+    // STAGED-FOR-PHASE-2-CLOSE.md was added in operator commits 397efd6 + 854cc7e; within R34 scope window.
+    // See R34 MAJOR-1 REINFORCED note in CLAUDE-ARCHITECT.md (ALLOWED_SET operator-commit class carve-out).
+    /^coordination\/STAGED-FOR-PHASE-2-CLOSE\.md$/,
   ];
 
   const subEnv = Object.fromEntries(
     Object.entries(process.env).filter(([k]) => !['NODE_TEST_CONTEXT', 'NODE_TEST_WORKER_ID'].includes(k)),
   );
+  // Pinned to R34 Memorial-Updater SHA cfbc526 — removes forward protection for post-R34 commits
+  // (per REINFORCED 2026-05-17 R19 MAJOR-3: pinning converts to frozen historical check).
+  // R34 is closed; forward protection served its purpose at Reviewer time.
+  const CHORE_B_SHA = 'cfbc526';
   const diffOut = execFileSync(
-    'git', ['diff', `${CHORE_A_SHA}..HEAD`, '--name-only'],
+    'git', ['diff', `${CHORE_A_SHA}..${CHORE_B_SHA}`, '--name-only'],
     { encoding: 'utf8', cwd: ROOT, env: subEnv },
   ).trim();
   const paths = diffOut === '' ? [] : diffOut.split('\n');
@@ -347,7 +357,13 @@ test('AC-R34-20: npx tsc -p tsconfig.test.json exits 0', () => {
 });
 
 // ── AC-R34-21: Test count baseline + 21 R34 ACs ─────────────────────────────
-test('AC-R34-21: pre-R34 test count = 305/299/6; full suite 326 = 305 + 21 R34', () => {
+// R36: skip guard added — running as a worker inside a parent node --test invocation causes
+// transitive subprocess deadlock (R34 incident). env-strip alone does not prevent transitive hang.
+test('AC-R34-21: pre-R34 test count = 305/299/6; full suite 326 = 305 + 21 R34', (t) => {
+  if (process.env.NODE_TEST_CONTEXT || process.env.NODE_TEST_WORKER_ID) {
+    t.skip('subprocess-spawn skipped in worker context — transitive hang risk (R34 incident)');
+    return;
+  }
   // Runs all test files EXCEPT q34 itself to avoid self-referential subprocess infinite
   // recursion (R29 precedent: q29 excluded itself from its own count test).
   // Pre-R34 subset (305 tests, 299 pass, 6 fail) combined with the 21 R34 tests in this

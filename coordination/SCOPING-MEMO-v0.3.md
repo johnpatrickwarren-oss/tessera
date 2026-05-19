@@ -263,6 +263,9 @@ Tessera Phase 2 SLICE 2 cost is dominated by this re-scoping, not by the aggrega
 - **A12: NO modification to per-shard Family A-E detector internals.** Extension 3 is an OUTER aggregator + attribution layer; vendored detector code unchanged.
 - **A13: NO ML-based attribution model.** Extension 3 is rule-based + statistical; conflicts with inherited calibrated-confidence honest-broker stance (NORTH-STAR Addition #11 at SHA `5a72371`).
 - **A14: NO modification to per-shard verdict shape.**
+- **A15: NO multi-region / cross-cluster federation.** Tessera is intra-cluster (one DC, one cluster, N shards). Cross-cluster federation (multi-DC, hierarchical fleet aggregator over multiple clusters) is a natural absorption candidate explicitly deferred — operational surface is different (network partition + clock-skew + cluster-federation-protocol concerns intra-cluster doesn't have). Phase 3+ candidate.
+- **A16: NO Addition #26 D4 reversal.** Inherited Addition #26 D4 `correlational_not_causal: true` wire-format constraint preserved at Tessera; Extension 3 (c) framed as event-conditional correlational attribution. Reopening D4 deferred indefinitely — no Tessera Phase 2 sub-track for ADR reversal. If a future cycle needs causal-attribution semantics (post-Phase 2), it gets a separate ADR proposal subject to John disposition.
+- **A17 (NEW at v0.3 — Tessera-specific):** NO DeploySignal-integration scope at Phase 1 + Phase 2. Tessera "perhaps provides data back to DeploySignal correlation level" is a Phase 3+ commitment per John disposition 2026-05-15; Tessera Phase 1 + 2 ship standalone with no cross-product integration scope. Tempting at Phase 2 close walk; explicitly deferred.
 
 ### Vendor fungibility
 
@@ -284,9 +287,6 @@ The Tessera methodology is fungible at every load-bearing surface. The NVIDIA-fi
 | WU-03 NVLink adapter | NVIDIA-only | Parallel-class — future `rocm-source.ts` / `tpu-source.ts` / `trainium-source.ts` slot in beside it |
 
 **TAGGED-FUTURE (Phase 3+) vendor adapters:** AMD (ROCm + Infinity Fabric / XGMI `xgmi_peer`), Google TPU (ICI `tpu_ici_peer`), AWS Trainium (Neuron Link `neuron_link_peer`), AWS Inferentia, future accelerator vendors. Each follows the WU-03 NVLink pattern: new parallel-class file at `engine/topology/<vendor>-source.ts`; new `TopologyEdge.relationship` enum literal; new vendor-specific test substrate; consumes L0 contract by interface. No modification to inherited engine internals (A12 preserved). Inherited verdict shape preserved; fleet-level output is NEW shape layered on top (parallel to inherited Addition #12 per-pod precedent).
-- **A15: NO multi-region / cross-cluster federation.** Tessera is intra-cluster (one DC, one cluster, N shards). Cross-cluster federation (multi-DC, hierarchical fleet aggregator over multiple clusters) is a natural absorption candidate explicitly deferred — operational surface is different (network partition + clock-skew + cluster-federation-protocol concerns intra-cluster doesn't have). Phase 3+ candidate.
-- **A16: NO Addition #26 D4 reversal.** Inherited Addition #26 D4 `correlational_not_causal: true` wire-format constraint preserved at Tessera; Extension 3 (c) framed as event-conditional correlational attribution. Reopening D4 deferred indefinitely — no Tessera Phase 2 sub-track for ADR reversal. If a future cycle needs causal-attribution semantics (post-Phase 2), it gets a separate ADR proposal subject to John disposition.
-- **A17 (NEW at v0.3 — Tessera-specific):** NO DeploySignal-integration scope at Phase 1 + Phase 2. Tessera "perhaps provides data back to DeploySignal correlation level" is a Phase 3+ commitment per John disposition 2026-05-15; Tessera Phase 1 + 2 ship standalone with no cross-product integration scope. Tempting at Phase 2 close walk; explicitly deferred.
 
 **Memorial D candidate-set additions:**
 

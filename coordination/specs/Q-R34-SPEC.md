@@ -407,9 +407,13 @@ export function attributeEventConditional(
     const postEnd = ev.event_ts + postWindow;
 
     // Pre-window count (ITS baseline).
+    // [R36-amended — LS-3]: Spec pseudocode originally used `<= preEnd` (inclusive right).
+    // Implementation correctly uses `< preEnd` (exclusive right), making pre `(T-300, T)` and
+    // post `[T, T+300)` non-overlapping half-open intervals. A shard firing exactly at
+    // event_ts (T) falls in post-window, not pre-window. Per R34 MINOR-2 + Reviewer rec.
     let preCount = 0;
     for (const fe of fired_events) {
-      if (fe.event_ts > preStart && fe.event_ts <= preEnd) preCount += 1;
+      if (fe.event_ts > preStart && fe.event_ts < preEnd) preCount += 1;
     }
 
     // Post-window correlated subset (Cell 4 discriminator).
@@ -632,7 +636,9 @@ test('AC-R34-17: PR-F7 evidence package shape', () => {
   const content = readFileSync('coordination/evidence/PR-F7-EVIDENCE.md', 'utf8');
   // Three required citations, each with URL + retrieval date 2026-05-18 + a verbatim quote
   // of >= 30 chars. Match three separate citation blocks via regex with anchored headers.
-  const citationBlocks = content.match(/##\s+(Brodersen|Abadie|Bernal)[\s\S]*?(?=^##\s|\Z)/gm);
+  // [R36-amended — LS-4]: `\Z` is invalid in JavaScript (Perl/Python end-of-string anchor).
+  // Use `$` or `(?![\s\S])`. Per R34 MINOR-3 + CLAUDE-ARCHITECT.md REINFORCED 2026-05-18.
+  const citationBlocks = content.match(/##\s+(Brodersen|Abadie|Bernal)[\s\S]*?(?=^##\s|$)/gm);
   assert.notStrictEqual(citationBlocks, null);
   assert.strictEqual(citationBlocks!.length >= 3, true);
   for (const block of citationBlocks!) {

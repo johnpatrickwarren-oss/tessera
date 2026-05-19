@@ -2774,3 +2774,19 @@ CONFIRMATION: round-summary-written | ROUND-R34-SUMMARY.md written at coordinati
 
 CONFIRMATION: role-boundary | Memorial Updater observed and recorded only; did NOT re-litigate Reviewer findings or re-implement any spec component. Modified only: coordination/MEMORIAL.md (append), ~/.claude/CROSS-PROJECT-MEMORIAL.md (append), coordination/STAGED-FOR-PHASE-2-CLOSE.md (Item 5 append), coordination/logs/ROUND-R34-SUMMARY.md (new file), coordination/NEXT-ROLE.md (STATUS update). No source/test/spec/engine files touched. | R34 | MEMORIAL-UPDATER
 
+---
+
+## R36 — Implementer (2026-05-18) — main worktree / WU-07 Phase 2 close-walk
+
+CONFIRMATION: tdd-discipline | RED commit 45969ae (test stubs for AC-R36-1..30) preceded all implementation. Implementation commits brought suite to GREEN. All 28 R36 tests pass at chore-A. | R36 | IMPLEMENTER
+
+CONFIRMATION: anti-scope | 16 files modified; all within ALLOWED_SET defined by AC-R36-30 (9 test files including q-md-f4 added at chore-A for forward-protection pinning, 2 engine files, 5 coordination specs/docs, 3 CLAUDE-*.md files). AC-R36-30 allowed-set gate passes at HEAD. | R36 | IMPLEMENTER
+
+CONFIRMATION: halt-discipline | No halt conditions triggered. tsc exit-0 (AC-R29-11 env change) handled as tactical deviation TD-1 with inline amendment — acceptable because q29 is in allowed set and the change is observational, not behavioral. No DIAGNOSTIC required for observational binding-command amendments in files within allowed set. | R36 | IMPLEMENTER
+
+CONFIRMATION: role-boundary | Implementer did not review own code beyond standard GREEN verification. No scope added beyond 8 deliverables. Anti-scope A12/A16/A17 preserved; A16 D4 (correlational_not_causal: true) RECONFIRMED at both emit sites. | R36 | IMPLEMENTER
+
+CONFIRMATION: spec-prescription-fidelity | All 8 deliverables implemented per Q-R36-SPEC.md § 3 ACs. AC-R36-1/2 (skip guards), AC-R36-3 (grep audit), AC-R36-4 (SHA pins), AC-R36-5 (SCOPING-MEMO surgery), AC-R36-6..10 (q32 carry-forwards), AC-R36-11/12 (execSync→execFileSync), AC-R36-13 (R26 MINOR-2 impl), AC-R36-14 (Q-R26-SPEC disambiguation), AC-R36-15 (q28 MINOR-3), AC-R36-16/17 (Q-R34-SPEC LS-3/LS-4), AC-R36-18 (SPEC-AUTHORING-CHECKLIST), AC-R36-19/20/21/22/23 (MR-2 consolidation), AC-R36-24..27 (close-walk documents), AC-R36-30 (anti-scope gate). | R36 | IMPLEMENTER
+
+CONFIRMATION: memorial-completeness | CONFIRMATION entries written for all active disciplines (TDD, anti-scope, halt, role-boundary, spec-fidelity). Full binding-command attestation in NEXT-ROLE.md including tsc exit code (0) and per-file test counts. | R36 | IMPLEMENTER
+

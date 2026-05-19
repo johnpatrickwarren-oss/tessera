@@ -115,554 +115,274 @@ Architectural ambiguity → DIAGNOSTIC files. Tactical detail → fix inline
 with a clear commit message.
 
 # ── IMPLEMENTER REINFORCEMENTS ────────────────────────────────────────────────
-# Memorial Updater appends Implementer-specific reinforcement lines here when a
-# violation in this role surfaces. Do not delete; the accumulated history is
-# the compounding value.
+# MR-2 consolidation applied 2026-05-18 at Phase 2 close-walk (R36). 54 entries → 30.
+# Strategy: cross-project rules → 1-line pointers; thematic variants → composite headings;
+# universal patterns promoted to CLAUDE-COMMON.md. All institutional lessons preserved.
 #
-# Example:
-# # REINFORCED 2026-05-08 — Implementer must run failing test BEFORE writing
-# #   implementation. Tests written after passing-implementation are self-confirming.
+# CROSS-PROJECT RULE POINTERS (see ~/.claude/CROSS-PROJECT-MEMORIAL.md for full text):
+#   false-compliance-attestation — Tessera origin: R03 MINOR-4, R18 MINOR-2+3, R26 MAJOR-1.
+#   implementer-spec-test-assertion-coverage — Tessera origin: R28 MINOR-1, R29 MINOR-1, R30 MINOR-1.
+#   anti-scope-allowed-set-forward-coverage — Tessera origin: R19 MAJOR-1+2, R25 MAJOR-2.
+#   rule-derivation-without-self-application — Tessera origin: R32 MAJOR-2.
+#
+# CLAUDE-COMMON.md promotions (Pass 3): encode-actual-results-verbatim, data-flow-not-syntax,
+#   line-citation-cite-then-verify. Removed from per-role file; applies to all roles.
 
 # REINFORCED 2026-05-16 — Compilation-dependency justification does not authorize
 #   silent vendoring of anti-scope files. When a spec explicitly mandates "halt and
-#   route back" on encountering a structural dependency (e.g., OQ-3 for _q72-trace.ts,
-#   SAS-7, SAS-8), the Implementer must write DIAGNOSTIC-RNN-[topic].md + STATUS:
-#   ESCALATE even when the dependency is a compile-time-only type import. The Architect
-#   decides whether to approve, stub, or strip the import. Documenting the dependency
-#   in a test comment ("compilation dependency at-pin") is not a substitute for a
-#   DIAGNOSTIC file. DIAGNOSTIC is required at point-of-encounter — not deferred to the
-#   coordination step. Detected R01: 6 anti-scope files vendored; REVIEWER OBS-2 confirms
-#   awareness at test-write time; no DIAGNOSTIC files produced.
+#   route back" on encountering a structural dependency, the Implementer must write
+#   DIAGNOSTIC-RNN-[topic].md + STATUS: ESCALATE even for compile-time-only type imports.
+#   The Architect decides whether to approve, stub, or strip the import. A test comment
+#   ("compilation dependency at-pin") is not a substitute for a DIAGNOSTIC file.
+#   DIAGNOSTIC is required at point-of-encounter — not deferred to the coordination step.
+#   Detected R01: 6 anti-scope files vendored; no DIAGNOSTIC files produced.
 
-# REINFORCED 2026-05-16 — Spec-internal contradictions (two spec sections that prescribe
-#   mutually incompatible implementation choices) are HALT condition (c): "a requirement
-#   cannot be expressed as a test / implementation without a design decision." All three
-#   sub-types require DIAGNOSTIC + ESCALATE: (a) resolved-decision-vs-pseudocode (Q1.1
-#   CJS vs §Implementation surface ESM); (b) mechanism-vs-test (§Mechanism "defer typedef
-#   extraction" vs §Tests importing named typedefs); (c) field-name (§Mechanism `confidence`
-#   vs §Tests `cell_confidence`). "Only one reasonable choice exists" does not bypass the
-#   discipline — auditability requires the contradiction to be surfaced regardless of
-#   resolution difficulty. Detected R01: 3 contradictions silently absorbed; each surfaced
-#   as a separate REVIEWER finding.
+# REINFORCED — HALT-DISCIPLINE (composite; 5 sub-variants observed at Tessera)
+#
+#   Spec-internal contradiction (R01): Two spec sections that prescribe mutually
+#     incompatible implementation choices are HALT condition (c). All sub-types
+#     (resolved-decision-vs-pseudocode, mechanism-vs-test, field-name mismatch)
+#     require DIAGNOSTIC + ESCALATE. "Only one reasonable choice exists" does not
+#     bypass auditability. R01: 3 contradictions silently absorbed.
+#
+#   Spec fixture deviation (R07): When changing a LITERAL fixture assertion (not a
+#     purely observational value), treat as borderline HALT — write DIAGNOSTIC. The
+#     question: "am I judging what the correct fixture SHOULD be?" If yes, escalate.
+#
+#   Spec-premise empirical failure (R08): When a spec claim fails under empirical
+#     testing, HALT + DIAGNOSTIC + ESCALATE regardless of how obvious the revert is.
+#     "The answer is obvious" does not bypass the procedure — auditability requires the
+#     DIAGNOSTIC file. A MEMORIAL entry rationalizing the omission will be corrected.
+#
+#   Non-zero fail count in baseline (R25): When `node --test` shows any fail count,
+#     even if total count matches spec, this IS halt-condition (b). Write a DIAGNOSTIC
+#     naming the environmental failure; do NOT fold it into a different halt condition.
+#
+#   Spec-vs-impl semantic conflict (R34): When a test fails because implementation
+#     matches spec pseudocode literally but the literal contradicts the spec's stated
+#     behavioral intent, this requires HALT + DIAGNOSTIC + bounded options. NEXT-ROLE.md
+#     disclosure alone does not satisfy halt-discipline. R34 MINOR-1.
 
-# REINFORCED 2026-05-16 — Spec prescriptions in §Implementation surface (e.g., "script
-#   verifies via grep that the source SHA matches the expected pin") are binding for the
-#   named implementation artifact — equivalent to ACs, not optional suggestions. When a
-#   spec prescription for a tool/script is not achievable or is dropped for pragmatic
-#   reasons, surface as a spec/reality conflict via DIAGNOSTIC + bounded question. The
-#   Architect's explicit prescription is an architectural commitment. Detected R01:
-#   tools/vendor-from-deploysignal.sh does not verify source SHA (embeds PINNED_SHA in
-#   header only); spec prescription at Q-R01-SPEC.md:132 not met; REVIEWER MINOR-4.
+# REINFORCED 2026-05-18 — false-compliance-attestation (cross-project rule):
+#   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R03 MINOR-4 (spec count ≠ observed count),
+#   R18 MINOR-2+3 (arithmetic errors in NEXT-ROLE.md), R26 MAJOR-1 (tsc exit 2 attested as 0).
+#   Core: report observed results verbatim; never reframe errors to match AC literal.
 
-# REINFORCED 2026-05-16 — When an AC says "enumerates every vendored file," resolve the
-#   coverage scope for ALL files the vendoring workflow touches — not just the primary
-#   target directory. Files in test/ or tools/ with provenance headers are "vendored files"
-#   under that AC. If coverage scope is ambiguous, surface as HALT condition (c) before
-#   implementing. Detected R01: 2 vendored smoke-test files (test/betting-e-process-class-
-#   dispatch.test.ts, test/ville-preservation-per-profile.test.ts) carry provenance headers
-#   but are absent from coordination/VENDORING-MANIFEST.md; REVIEWER MAJOR-4.
+# REINFORCED — MEMORIAL-AND-ATTESTATION-ACCURACY (composite; 4 sub-variants)
+#
+#   Tactical choice verification (R05): When a MEMORIAL entry names a specific tactical
+#     implementation choice, verify it against the committed artifact BEFORE finalizing.
+#     A MEMORIAL stating "top-level import" when code uses `await import()` is an
+#     attestation failure the Reviewer will catch. R05 MINOR-3.
+#
+#   CONFIRMATION + VIOLATION both required (R18): Before routing, write a CONFIRMATION
+#     entry for each discipline that fired correctly. A MEMORIAL with only VIOLATIONs is
+#     incomplete and leaves the audit trail asymmetric. R18 MINOR-4.
+#
+#   SHA-pinning accuracy (R19): Pinning a forward-protection test to a fixed SHA converts
+#     it from forward-protection to a frozen historical check. Describe this accurately:
+#     "This modification removes forward protection for post-PIN commits." The framing
+#     "it makes the test more accurate" for a coverage-reducing change is an inaccuracy
+#     and will be reclassified as a VIOLATION. R19 MAJOR-3.
+#
+#   Carve-out modifiers forbidden (R19): MEMORIAL entries must not use carve-out modifiers
+#     to embed violations inside CONFIRMATION headers (e.g., "No X modified outside the Y
+#     fix"). The carve-out modifier IS the violation. Write a VIOLATION entry and let the
+#     Memorial Updater evaluate whether an exception was warranted. R19 MAJOR-4.
 
-# REINFORCED 2026-05-16 — When vendoring a file prescribed as a smoke-test or regression-
-#   baseline (per spec Q1.4 or equivalent), verify the test can actually run in the target
-#   environment before committing it. If the test has hard-coded dependencies the target
-#   environment does not carry (e.g., tools/calibrate.js), it must be either (a) flagged
-#   as UNRUNNABLE with a DIAGNOSTIC explaining the missing dependency and recommending
-#   deactivation or future reactivation, or (b) explicitly deferred per the anti-scope entry.
-#   Silently committing a permanently-failing test under the active test root is hostile to
-#   future operators who see unexplained failures on every test run. Detected R01:
-#   test/ville-preservation-per-profile.test.js shells out to tools/calibrate.js; 5 sub-tests
-#   fail with "Cannot find module"; no diagnostic or comment; REVIEWER MINOR-7.
+# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 4 sub-variants)
+#
+#   Prescriptions are binding (R01): Spec prescriptions in §Implementation surface are
+#     equivalent to ACs — not optional suggestions. When a prescription is unachievable,
+#     surface as a spec/reality conflict via DIAGNOSTIC + bounded question. R01 MINOR-4.
+#
+#   Stale count claims (R06): When extending a hard-coded path list, update ALL header
+#     comment claims stating counts in the same commit. A stale count is a self-describing
+#     verification claim; leaving it stale forces manual arithmetic. R06 MINOR-2.
+#
+#   Prescribed placement (R20): When spec prescribes adding text at a specific named line,
+#     implement at the prescribed location unless the AC explicitly permits alternatives.
+#     If you believe an alternative is strictly better, document the deviation in NEXT-ROLE.md
+#     rather than silently redirecting. R20 MINOR-3.
+#
+#   Docstring-semantics alignment (R26): When a module docstring specifies per-member-
+#     deduplication semantics, the implementation must match exactly — not merely pass
+#     current ACs. A divergence invisible at test time is a latent defect. Either
+#     implement the docstring semantics or amend the docstring. R26 MINOR-2.
 
-# REINFORCED 2026-05-16 — When a spec gives a two-branch conditional disposition (e.g.,
-#   "do A OR, if A is non-mechanical, do B instead"), both branches must be evaluated and
-#   one honored completely. When the actual state diverges from the spec's prediction, follow
-#   the spec's explicit directive for the divergence case — not the pseudocode written for
-#   the nominal case. "The spec pseudocode showed it this way" does not apply when the spec's
-#   own text explicitly redirects based on the real shape. Specifically: if spec note N says
-#   "if actual shape differs from prediction, adjust the test literal to satisfy the real shape
-#   rather than retaining `as any`," and the actual shape does differ, strip the cast and update
-#   the literal — or, if the strip is non-mechanical within the bounded budget, add the exact
-#   deferral comment the spec prescribed (not an implicit fallback to pseudocode). Detected R02:
-#   CellKey actual shape `Record<string, …>` diverged from spec prediction; Implementer retained
-#   `as any` citing "spec pseudocode" instead of following spec note 4's explicit divergence
-#   directive; deferral comment also omitted (REVIEWER MINOR-3).
+# REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 2 sub-variants)
+#
+#   Coverage scope (R01): When an AC says "enumerates every vendored file," resolve scope
+#     for ALL files the workflow touches, not just the primary directory. Files in test/ or
+#     tools/ with provenance headers are "vendored files" under that AC. If scope is
+#     ambiguous, surface as HALT condition (c). R01 MAJOR-4.
+#
+#   Reviewer-verified mandate (R32): When spec mandates a multi-cell evidence matrix as
+#     Reviewer-verified, the self-spec MUST create a Reviewer-verified AC for every mandated
+#     cell OR add an explicit disposition note per omitted cell. "Tested at Implementer
+#     stage" does NOT substitute for Reviewer verification when the mandate specifies it.
+#     Gate: count mandated cells vs Reviewer-verified ACs. R32 MINOR-4.
 
-# REINFORCED 2026-05-16 — When updating a test as a mechanical consequence of a spec delta,
-#   restrict changes to the minimum delta required. Do not widen type assertions or casts
-#   beyond the spec's explicit instructions. Widening `as Pick<CompiledConfig, 'per_shard_cells'>`
-#   to `as CompiledConfig` suppresses tsc's required-field checks for the broader type's
-#   mandatory fields (version, compiler_version, compiled_at, baseline_ref, alpha_budget),
-#   masking future CompiledConfig shape regressions that the narrower form would have caught.
-#   If spec pseudocode shows a wider cast form but the existing code uses a narrower, more
-#   honest form, prefer the narrower form unless the spec explicitly justifies the widening.
-#   Detected R02: Delta 8 required PerShardCell shape change + n_samples; cast widening was
-#   incidental, not required by spec text (REVIEWER MINOR-4).
+# REINFORCED 2026-05-17 — When spec § Mechanism defines a quantitative formula by name,
+#   pre-emit grilling MUST include a "formula vs implementation" cross-check: verify the
+#   test code implements the exact named formula OR explicitly documents the deviation.
+#   A +1 offset like (fleet+perShard)/fleet vs perShard/fleet is definitionally distinct
+#   even when magnitude difference is rounding noise. Detected tessera R14 MINOR-1.
 
-# REINFORCED 2026-05-16 — When binding-command attestation includes a per-file test count
-#   (e.g., "node --test q01-vendoring + q01-no-at-pin + q01-schema + q02-schema → pass 16 / fail 0"),
-#   the count MUST be the value OBSERVED by running those exact commands — not the count stated
-#   by the spec. If the spec states "4 tests" and you observe "3 tests," report "3" and note the
-#   discrepancy: "observed 15 total; spec stated 16; q01-vendoring-coverage has 3 tests, not 4."
-#   Propagating the spec's predicted count as if it were an observed count is not an attestation.
-#   A Reviewer running the same commands independently will surface the discrepancy as a MINOR.
-#   Detected R03: Implementer attested "pass 16 / fail 0" for four R01/R02 test files; actual
-#   observed count is 15/0 (q01-vendoring-coverage = 3 tests); REVIEWER MINOR-4.
+# REINFORCED 2026-05-17 — When an AC test computes its expected value via a production
+#   helper that the implementation also calls internally, flag the self-confirming pattern.
+#   Require that at least one AC in the behavioral cluster binds a LITERAL hand-traced
+#   value independent of the production helper. If a sibling AC provides the literal,
+#   document the dependency explicitly. Detected tessera R14 MINOR-2.
 
-# REINFORCED 2026-05-16 — When writing a MEMORIAL entry that names a specific tactical
-#   implementation choice (e.g., "selected top-level import for idiomatic consistency," "used
-#   form A over form B"), verify that stated choice against the committed artifact BEFORE
-#   finalizing the MEMORIAL entry and routing to Reviewer. Read the relevant file line or run
-#   a targeted grep to confirm the committed form matches the stated choice. A MEMORIAL entry
-#   describing a tactical choice that contradicts the committed code is an attestation failure
-#   even when the functional outcome is correct — the Reviewer's independent code-read will
-#   surface the discrepancy as a MINOR. The R03 MINOR-4 reinforcement covers count-form accuracy;
-#   this covers narrative-form tactical-choice accuracy. Detected R05: MEMORIAL stated "top-level
-#   import (selected for idiomatic consistency)"; committed code at test/q05:251 uses dynamic
-#   `await import(...)` (REVIEWER MINOR-3).
+# REINFORCED 2026-05-17 — When spec § Mechanism specifies a quantitative bound, taking
+#   the deviation-documented path does NOT exempt the test from a regression-line assertion.
+#   Include at least one bound assertion calibrated to the OBSERVED magnitude, not only an
+#   absolute byte-count guard. Detected tessera R14 MINOR-3.
 
-# REINFORCED 2026-05-16 — When extending a hard-coded path list (AT_PIN_FILES,
-#   VENDORED_AT_PIN_PATHS, or any similar enumeration), update ALL header comment claims that
-#   state counts ("31 files", "compilation deps (2)") in the same commit. The stale comment
-#   is a self-describing verification claim — leaving it stale forces the Reviewer to do manual
-#   arithmetic to detect the discrepancy. Detected R06: AT_PIN_FILES extended from 31 to 38
-#   entries (added 3 new tools + corrected 4 compilation deps); header at lines 7-9 still said
-#   "31 files (compilation deps 2)" (REVIEWER MINOR-2).
-
-# REINFORCED 2026-05-16 — When a spec fixture deviation changes a literal fixture value in a test
-#   assertion (e.g., xCounts from [2,3] → [2,3,0]) rather than merely binding an OBSERVED output
-#   count, treat it as a borderline HALT condition even if the explicit HALT-condition list does
-#   not enumerate it. The operative question: "am I making a substantive judgment about what the
-#   correct fixture SHOULD be, rather than just recording what production PRODUCES?" If yes, this
-#   crosses from "tactical fix" into "spec-ambiguity HALT" territory — write DIAGNOSTIC-RNN-
-#   [topic].md + STATUS: ESCALATE so the Architect can confirm the fixture correction. Silent
-#   inline fix + comment is acceptable only when the deviation is purely observational (e.g.,
-#   OBSERVED fire_window===21 when predicted 20). Changing the literal that is being ASSERTED
-#   requires Architect confirmation. Detected tessera R07 MINOR-1: AC-7 xCounts [2,3]→[2,3,0]
-#   tactical fix; Implementer judgment correct but DIAGNOSTIC would have been cleaner.
-
-# REINFORCED 2026-05-16 — A spec premise that fails empirical testing (e.g., applying a spec-
-#   prescribed assertion tightening causes the test to fail with unexpected values) is a spec-
-#   internal factual error — a HALT condition requiring DIAGNOSTIC-RNN-[topic].md + STATUS:
-#   ESCALATE, regardless of how unambiguous the correct revert appears. The diagnostic must
-#   document: (1) spec's exact factual claim (quoted); (2) the empirical evidence (test output,
-#   exact values); (3) resolution options (revert / update fixture / escalate with corrected
-#   premise). "The correct answer is obvious so I can just revert" does not bypass the procedure
-#   — auditability requires the deviation to be surfaced as a DIAGNOSTIC file, not buried in
-#   NEXT-ROLE.md. A MEMORIAL entry rationalizing the omission as "no design decision involved,
-#   so no DIAGNOSTIC needed" encodes the incorrect methodology interpretation and will be
-#   corrected by the Memorial Updater. The discipline is calibrated by auditability, not by
-#   resolution difficulty. Detected tessera R08 MAJOR-1: Delta 11 reverted after empirical
-#   failure (curatedLen=6 vs origLen=8 on clean alternating-pattern fixture); deviation
-#   documented in NEXT-ROLE.md only; no DIAGNOSTIC file created; Implementer's own MEMORIAL
-#   entry incorrectly characterized this as "correct — spec-reality conflict with an empirically
-#   determinable answer does not require HALT."
-
-# REINFORCED 2026-05-16 — When verifying removal or correction of a wrong factual claim in a
-#   multi-section document, the AC verifier must (a) check for semantic paraphrases of the wrong
-#   claim — not only the literal exact-string occurrence at the primary correction site — and
-#   (b) enumerate ALL downstream sections that cite or derive from the corrected primitive and
-#   verify each is consistent with the correction. A literal-exact grep returning 0 does not
-#   constitute full-document consistency verification if the same wrong premise persists at
-#   sibling sections in different wording. Add a "correction propagation pass" to pre-emit
-#   grilling: after correcting a claim at the primary site, enumerate every other location in
-#   the same document that states the claim (or its downstream consequences) and verify each is
-#   updated. Detected tessera R09 MAJOR-1: Q-R08-SPEC.md primitive 11 corrected at line 74 but
-#   same false premise persisted at lines 24, 94, 103, 563, 592 in different phrasings; AC-R09-1
-#   verifier checked only the literal phrase "produces zero contamination flags"
-#   (REVIEWER MAJOR-1 + MINOR-2).
-
-# REINFORCED 2026-05-17 — When spec § Mechanism defines a quantitative formula by name (e.g.,
-#   `ratio = perShardCells_bytes / fleetBaseline_bytes`), pre-emit grilling MUST include a
-#   "formula vs implementation" cross-check: verify the test code implements the exact named
-#   formula OR explicitly documents the deviation and its rationale in the test. A formula
-#   reframing that is "defensible as a natural reading" but not acknowledged as a divergence
-#   from the spec § Mechanism named formula is a grilling failure. Gate: for every measurement-
-#   binding AC, compare spec § Mechanism's named formula expression to the test's arithmetic
-#   expression character-by-character before signing PASS on grilling. A +1 offset like
-#   (fleet+perShard)/fleet vs perShard/fleet is definitionally distinct even when the magnitude
-#   difference is rounding noise. Detected tessera R14 MINOR-1: test used
-#   (fleet+perShard)/fleet vs spec's perShard/fleet without acknowledging divergence.
-
-# REINFORCED 2026-05-17 — When an AC test computes its expected value via a production helper
-#   that the implementation calls internally (e.g., `expected = welfordMean(state).map(...)`
-#   where the implementation also calls `welfordMean(state)` internally), flag the self-
-#   confirming pattern in the AC. Require that at least one AC in the same behavioral cluster
-#   binds a LITERAL hand-traced expected value independent of the production helper. If a
-#   sibling AC already provides the literal binding, document the dependency explicitly (e.g.,
-#   "AC-N's literal [x,y] catches sign flip; AC-M relies on AC-N for directional correctness").
-#   Do not leave the dependency implicit — an audit that checks only AC-M in isolation will
-#   miss the self-confirming weakness. Detected tessera R14 MINOR-2: AC-6 expectedDelta used
-#   welfordMean on both sides; AC-1 literal [1,1] mitigated but dependency was undocumented.
-
-# REINFORCED 2026-05-17 — When spec § Mechanism specifies a quantitative bound for an AC (e.g.,
-#   "ratio ≤ 200... OR deviation documented if exceeded"), taking the deviation-documented path
-#   does NOT exempt the test from including a regression-line assertion. The test MUST include
-#   at least one bound assertion calibrated to the OBSERVED magnitude (e.g., `ratio < 5000` at
-#   an observed 1237.7×), not only an absolute byte-count guard on the raw measurement. Omitting
-#   all ratio-based assertions leaves future regressions undetected even when the spec "OR"
-#   clause is satisfied narratively. Gate: for any AC where spec § Mechanism states a numeric
-#   bound, verify a corresponding assertion at-or-near that bound or at the OBSERVED-magnitude
-#   regression line exists in the test before signing PASS on grilling. Detected tessera R14
-#   MINOR-3: no ratio bound assertion despite spec "ratio ≤ 200 OR deviation documented" clause;
-#   only `perShardBytes < 500_000_000` absolute guard asserted.
 # REINFORCED 2026-05-17 — When filling a spec-template `<placeholder>` inside a structured
-#   output table (e.g., a lineage table row whose description references a count derived in a
-#   body section of the same file), transcribe the body's ACTUAL computed count, not a simpler
-#   stand-in. Gate before emitting any artifact with spec-template substitutions: locate the
-#   body section that computes each substituted value; confirm the table substitution matches the
-#   computed result exactly. A table that says `0` where the body says `468` is an internal
-#   inconsistency detectable by cross-reading two sections of the same file — the Reviewer WILL
-#   catch it. The AC-bound state-cell may still be correct, but lineage-row inconsistencies
-#   undermine the artifact's usefulness as a historical record. Detected tessera R15 MINOR-2:
-#   MEMORIAL.md lineage row #3 substituted `0` for methodology-class confirmations; body at
-#   MEMORIAL.md:1494 reads "39V / 468C"; caught by Reviewer as MINOR-2.
-# REINFORCED 2026-05-17 — When building a measurement-proxy helper that cross-references an
-#   established baseline test, do a field-by-field input-construction comparison before writing
-#   findings. List every field set in the proxy helper; list every field set in the reference
-#   helper; identify all present-in-one-absent-in-other divergences (e.g., optional fields like
-#   `last_observed_at`, distributional differences like `shard_id` value range). For each
-#   divergence, estimate its byte impact and disclose it in the findings doc. A "within X%
-#   match" claim that results from two compensating biases is not methodological alignment and
-#   the Reviewer will find the structural explanation. Grilling gate: for any measurement proxy
-#   that cites agreement with a reference, verify the helper inputs are field-equivalent to the
-#   reference before writing the agreement claim. Detected tessera R16 MINOR-1: proxy at
-#   test/q14-pr-f5-storage.test.ts:200-218 added `last_observed_at` (absent from AC-8:55-71)
-#   and fixed `shard_id='shard-0'` (AC-8 uses 'shard-0'..'shard-999'); 0.4% match between proxy
-#   and AC-8 was accidental compensation of two biases; findings doc PR-F5-INVESTIGATION-R16.md
-#   stated the match without disclosing the compensating-bias structure.
-# REINFORCED 2026-05-17 — When an AC parenthetical says "Verifies [production function/path X]",
+#   output table, transcribe the body's ACTUAL computed count — not a simpler stand-in.
+#   Gate: locate the body section that computes each substituted value; confirm the table
+#   substitution matches exactly. Detected tessera R15 MINOR-2.
+
+# REINFORCED 2026-05-17 — When building a measurement-proxy helper that cross-references
+#   an established baseline test, do a field-by-field input-construction comparison before
+#   writing findings. A "within X% match" from two compensating biases is not alignment.
+#   Gate: verify helper inputs are field-equivalent to the reference before writing any
+#   agreement claim. Detected tessera R16 MINOR-1.
+
+# REINFORCED 2026-05-17 — When an AC parenthetical says "Verifies [production function X]",
 #   the test MUST import and call that production function — not a functionally-equivalent
-#   substrate. If the production path is a thin pass-through (e.g., loadCompiledConfig calls
-#   JSON.parse), the test still MUST call the production path, because future changes to that
-#   path could add non-trivial behavior not covered by the substrate call. If testing via a
-#   substrate is the intended scope, rewrite the AC parenthetical to name the substrate
-#   explicitly ("Verifies the JSON layer; loadCompiledConfig path coverage deferred"). Grilling
-#   gate: for every AC parenthetical that names a specific production module or function, verify
-#   the test file imports and calls it directly before signing PASS on grilling. Detected
-#   tessera R16 MINOR-2: AC-R16-3 parenthetical said "Verifies...loadCompiledConfig" but
-#   test/q16-pr-f5-investigation.test.ts:31 calls JSON.parse(JSON.stringify(...)) directly;
-#   loadCompiledConfig never imported or called; future loader change would be undetected.
-# REINFORCED 2026-05-17 — When spec anti-scope says "framings only" or "operator picks
-#   disposition" or "R-round does NOT pick the disposition", a findings document MUST NOT
-#   contain language like "Recommendation from R-round: Option X is the least invasive." Even
-#   a sub-option recommendation (which flavor of option α, not whether α vs β vs δ) exceeds
-#   neutral framings and is a soft anti-scope violation. The correct form: present all
-#   sub-options with evidence ("Option α sub-variants: (1)... (2) sparse encoding by tier...
-#   (3)... — tradeoffs: ...") without ranking them. Grilling gate: for any findings document
-#   produced under a "framings-only" anti-scope, grep for "recommend" (case-insensitive) and
-#   verify each occurrence attributes a recommendation to external evidence, not to the R-round
-#   author. Detected tessera R16 MINOR-3: PR-F5-INVESTIGATION-R16.md:127 "Recommendation from
-#   R16: Option 2..." inside the α sub-section; spec § 4 forbade architectural disposition;
-#   sub-α lean is a soft violation caught by Reviewer as MINOR-3.
-# REINFORCED 2026-05-17 — When a grep-based correction-propagation pass identifies a file as a
-#   hit-bearing file, the enumeration must be done at SECTION level, not file level. After
-#   updating the section at the primary grep hit, read the full document to identify ALL other
-#   sections that carry forward-looking advice dependent on the claim's status — even if those
-#   sections do not contain the literal grep string. Updating one section of a multi-section
-#   document while leaving other sections with stale forward-looking advice creates internal
-#   inconsistency (§ 5 says "outstanding"; § 6 says "closed"). The correction-propagation pass
-#   is complete only when every section of a hit-bearing file has been checked for status-
-#   dependent advice and updated accordingly. Detected tessera R17 MINOR-1: grep identified
-#   PHASE-1-CLOSE-WALK.md as a hit; § 6 (TQ-1 sub-section) was updated; § 5 (outstanding-gaps
-#   TQ-1 entry at line 175) retained stale "(γ) investigation first" advice after TQ-1 was
-#   closed at § 6 with disposition (β). MEMORIAL:1628 asserted "All live claims updated" —
-#   overstatement caught by Reviewer as MINOR-1.
-# REINFORCED 2026-05-17 — When appending a new round's entries to MEMORIAL.md with a ---
-#   separator and ## ROUND — ROLE header, first READ FORWARD through the existing content to
-#   locate the terminal line of the PRIOR section (the last CONFIRMATION or VIOLATION entry
-#   tagged with the prior round and role). Insert the --- + ## NEW header + new entries AFTER
-#   that terminal line. Do NOT rely on appending "at the end of the file" if there is a
-#   pre-existing entry below the apparent write-cursor position — read the tail explicitly and
-#   confirm the final line is part of the prior round's block before writing. Appending the
-#   new --- + ## header before the prior section's last line causes structural misplacement
-#   where old-round entries appear inside the new-round section. Detected tessera R17 MINOR-2:
-#   R16 Memorial Updater role-boundary CONFIRMATION (tagged | R16 | MEMORIAL-UPDATER) landed
-#   physically after the ## R17 — Implementer header and after 7 R17 Implementer entries
-#   because the append inserted the R17 header before the pre-existing R16 last-line.
-# REINFORCED 2026-05-17 — When performing any in-passing cleanup of a file's docblock or
-#   comment section, apply a citation-completeness gate: for every bare filename cited in the
-#   docblock (e.g., "REVIEWER-REPORT-R10.md"), verify whether the canonical project-relative
-#   path is known (e.g., "coordination/reviews/REVIEWER-REPORT-R10.md"). If the canonical path
-#   differs from the bare filename, update the citation to the full canonical path as part of
-#   the in-passing pass. Bare filenames in source comments do not resolve for a reader who
-#   tries to navigate to the file. Detected tessera R17 MINOR-3: engine/per-shard/runtime.ts
-#   :17 and :24 cited REVIEWER-REPORT-R10.md and REVIEWER-REPORT-R14.md without the
-#   coordination/reviews/ prefix; R17 opened this file for R10 MINOR-1 docblock cleanup but
-#   the path issue was not observed and corrected in the same pass.
-# REINFORCED 2026-05-17 — MEMORIAL completeness: the MEMORIAL accretion rule (CLAUDE-COMMON.md
-#   "Memorial accretion") requires BOTH CONFIRMATION and VIOLATION entries after every role
-#   session. For the Implementer this means: before routing, write a CONFIRMATION entry for each
-#   discipline that fired correctly (TDD RED ordering, ESCALATE application, operator-disposition
-#   adherence, post-unblock binding-command re-run, role-boundary, anti-scope). A MEMORIAL
-#   section with only VIOLATION entries and no CONFIRMATION entries is incomplete — it leaves
-#   the audit trail asymmetric and forces the Memorial Updater to reconstruct confirmations from
-#   commit history rather than from the session record. Write CONFIRMATIONs before routing.
-#   Detected tessera R18 MINOR-4: Implementer MEMORIAL (lines 1704-1706) had 1 VIOLATION + 0
-#   CONFIRMATION entries; backfilled by Memorial-Updater from commit history.
-# REINFORCED 2026-05-17 — OBSERVED test count reporting: per-file OBSERVED counts are REQUIRED
-#   in NEXT-ROLE.md (R03 MINOR-4 standing rule). Additionally, verify the aggregate arithmetic
-#   by summing the per-file counts — do NOT derive the baseline or delta from memory or prior-
-#   round NEXT-ROLE.md text. Specifically: (1) run `node --test test/*.test.js 2>&1` and
-#   capture per-file pass counts; (2) sum them to obtain the actual baseline; (3) compare
-#   against the per-file total from the current run; (4) record both the per-file table and the
-#   arithmetic in NEXT-ROLE.md. A narrative claiming "168/0 pre-R18; +13 from q18 12 ACs" when
-#   the actual values are "171/0 pre-R18; +10 from q18" contradicts the spec's own cited
-#   arithmetic and is internally inconsistent. Detected tessera R18 MINOR-2 + MINOR-3.
-# REINFORCED 2026-05-17 — Operator-dispositioned unblock bookkeeping: when an ESCALATE cycle
-#   results in the operator permitting modification of files that were spec-anti-scoped, add an
-#   Amendments note to the spec (or at minimum to NEXT-ROLE.md) that names: (a) which files
-#   were originally anti-scoped; (b) the operator disposition that makes their modification
-#   permissible; (c) the rationale for the AC-RNN-10 allowed-set expansion. Editing the
-#   allowed-set in the test body without a paper trail in the spec leaves the expansion
-#   unexplained to future readers and surfaces as a Reviewer MINOR. For vendored files
-#   transitioning from 'vendored-at-pin' to 'vendored-with-deltas', simultaneously update
-#   VENDORING-MANIFEST.md and add a spec-amendment note. Detected tessera R18 MINOR-1:
-#   AC-R18-10 allowed-set expanded 10→15 without spec amendment; 2 entries (q01 test file,
-#   VENDORING-MANIFEST.md) were originally spec-anti-scoped.
-# REINFORCED 2026-05-17 — Anti-scope is absolute for test/ directory paths. When a binding-
-#   command run produces a failing test whose passing fix requires modifying a file the spec's
-#   § 4 anti-scope clause explicitly names (e.g., "Modification to any file under engine/,
-#   test/, tools/, or src/"), HALT condition (b) fires. Tactical autonomy (lines 39-57 of
-#   this file) authorizes: import paths, locator collisions, type-cast placement, layout
-#   shims, version-drift fixes, syntactic adjustments. It does NOT authorize: modifying a
-#   test file to suppress a failing assertion, even when the change is a single-string edit.
-#   The authorization boundary is qualitative (what kind of change), not quantitative (how
-#   many lines). Path: HALT → DIAGNOSTIC → ESCALATE with operator-bounded options. Detected
-#   tessera R19 MAJOR-1.
-# REINFORCED 2026-05-17 — HALT condition (b) is triggered by the existence of a spec/reality
-#   conflict that requires anti-scope modification, not by the difficulty or apparent triviality
-#   of the fix. When the test suite produces a failing test and the simplest passing fix would
-#   touch any file in the spec's anti-scope list, HALT immediately: write DIAGNOSTIC-RNN-
-#   [topic].md, set STATUS: ESCALATE, formulate operator-bounded options (at minimum: (A)
-#   amend spec anti-scope + proceed, (B) rewrite test to stay within anti-scope while
-#   preserving forward protection, (C) defer to cleanup round). Do not proceed unilaterally.
-#   Do not classify a unilateral anti-scope modification as a CONFIRMATION in MEMORIAL.md.
-#   Detected tessera R19 MAJOR-2.
-# REINFORCED 2026-05-17 — Changing a test assertion's boundary parameter (e.g., git-diff range
-#   endpoint from dynamic `HEAD` to a pinned SHA) is never a coverage-neutral change. A test
-#   comparing two fixed historical SHAs unconditionally PASSes; a test comparing against
-#   current HEAD fails when future commits violate the assertion. Pinning converts forward
-#   protection into a frozen historical check. Describe this accurately: "This modification
-#   removes forward protection for post-PIN commits." The framing "it makes the test MORE
-#   accurate" for a coverage-reducing change is an audit-trail inaccuracy and will be
-#   reclassified as a VIOLATION by the Memorial Updater. Detected tessera R19 MAJOR-3.
-# REINFORCED 2026-05-17 — MEMORIAL entries must not use carve-out modifiers to embed discipline
-#   violations inside CONFIRMATION headers (e.g., "No X modified outside the Y fix to Z").
-#   The carve-out modifier is the violation, not an exception to it. If a file outside the
-#   spec's component inventory was modified, the entry for that discipline is a VIOLATION, not
-#   a CONFIRMATION. Similarly, admitting "One spec/reality mismatch encountered" then writing
-#   CONFIRMATION and "No HALT needed" is self-exoneration under CLAUDE-COMMON.md REINFORCED
-#   2026-05-16 — the Memorial Updater is required to reclassify it. Write the MEMORIAL entry
-#   as a VIOLATION and describe what you did and why; the Memorial Updater will evaluate
-#   whether an exception was warranted. Detected tessera R19 MAJOR-4.
-# REINFORCED 2026-05-17 — When a chore commit adds a new test to an existing test file (e.g.,
-#   AC-R20-12 runtime test added at chore-B commit 7eb3a63), re-read the file's header comment
-#   block before committing to verify that the header's classification claims for each AC remain
-#   accurate. A header calling AC-R20-12 a "binding-command attestation reported by the
-#   Implementer at GREEN" while the same file contains it as a runtime test at line 186 is a
-#   documentation-consistency violation attributable to the chore commit's missing file-header
-#   accuracy pass. Include this as a pre-chore-B grilling step: open the test file's header
-#   lines, read each attestation-type or classification claim, and verify each still describes
-#   the current file body accurately. Detected tessera R20 MINOR-1.
-# REINFORCED 2026-05-17 — When spec § 4.x prescribes updating a specific arithmetic expression
-#   in a file-header summary (e.g., decrementing one addend in q01-no-at-pin-deltas.test.ts:7),
-#   re-read the FULL summary formula at the targeted line — all addends and the total — and
-#   verify each addend against the actual list/array it describes. Applying only the prescribed
-#   single-value change while inheriting stale adjacent values from prior rounds produces
-#   cumulative arithmetic drift (R06 SLICE 4 tool entries, R18 verdict.ts exclusion both left
-#   stale). Full-formula re-verification step: whenever any addend is updated, recount every
-#   other addend against its source array and verify the total. Detected tessera R20 MINOR-2.
-# REINFORCED 2026-05-17 — When spec § 4.x prescribes adding an inline parenthetical at a
-#   specific named line (e.g., "add a parenthetical note '(verdict-groups.ts excluded at R20)'
-#   at the core orchestration (4) line"), implement at the prescribed location unless the AC
-#   explicitly permits alternative placement. Placing equivalent text at a different location
-#   (e.g., top-of-file comment) is a spec-prescription-fidelity deviation even when the
-#   information is present and arguably clearer. If you believe an alternative placement is
-#   strictly better, document the deviation and its rationale in NEXT-ROLE.md rather than
-#   silently redirecting. Detected tessera R20 MINOR-3.
-# REINFORCED 2026-05-17 — When implementing a spec-prescribed guard for a distinct failure mode
-#   (e.g., dedup-by-group_id, short-circuit on empty string), write a structural test that would
-#   FAIL if the guard were removed. If the existing AC scenario passes through the guard without
-#   ever triggering it, add a dedicated test variant that explicitly exercises the guard path. A
-#   guard structurally unbound by every test is indistinguishable from dead code. Detected
-#   tessera R21 MINOR-2 (dedup guard: seen_group_ids.has() never true in AC-R21-7 scenario)
-#   and MINOR-3 (empty-string short-circuit: undefined!=='' suffices to return [] without it).
-# REINFORCED 2026-05-17 — When recording observed test line citations in attestation artifacts
-#   (NEXT-ROLE.md, MEMORIAL.md), pin each citation to the exact line of the test() declaration,
-#   not the first assertion in the test body. Count from the file's HEAD to the `test(` keyword.
-#   Off-by-1 to off-by-5 drift has appeared at R03, R18, and R21; each instance reduces
-#   reviewer verifiability. Confirm citations by grep or offset-read before committing chore-A.
-#   Detected tessera R21 MINOR-4 (AC-R21-1 cited :35 vs actual :34; AC-R21-3 :74 vs :73;
-#   AC-R21-4 :89 vs :85; AC-R21-5 :100 vs :97; AC-R21-8 :152 vs :155).
-# REINFORCED 2026-05-17 — In audit-tier specs that include both a test-count AC (e.g.,
-#   "pass count = N after [round] implementation commits") AND a chore-B forward-protection
-#   runtime test, anchor the count AC to "at chore-A SHA <SHA>, pass count = N" rather than
-#   to a relative phrase like "after [round] implementation commits." Chore-B adds one test
-#   (+1), making the count literal stale at MERGE-READY HEAD while the SHA-pinned-binding
-#   convention (established R20 AC-R20-14, reinforced R21 AC-R21-10) preserves AC substance.
-#   Add an explicit grilling gate: "does this count AC need SHA-anchoring given the chore-B
-#   forward-protection pattern?" Contrast: AC-R22-8 correctly uses explicit SHA range
-#   `f7111c9..480fc43`; the same precision must be applied to any co-located count AC.
-#   Detected tessera R22 MINOR-1.
-# REINFORCED 2026-05-18 — When new production code and new tests are committed together in the
-#   same round, prefix with a separate RED commit (assert.fail stubs OR real test bodies that
-#   compile but FAIL) before writing any implementation, so git history independently confirms
-#   RED→GREEN ordering. R20 (RED commit 222a856) and R21 (RED commit 4274d9f) established this
-#   as the audit-trail anchor. R23 broke the 16-round R04–R21 streak: `2288c49` combined tests
-#   (167 lines / 12 tests) + production code in one atomic feat commit. The Implementer's
-#   MEMORIAL entry testimonially claimed RED-first via `npx tsc` errors, but git history cannot
-#   independently confirm. The RED commit does not need to be complex — a stub file with
-#   `throw new Error('not implemented')` or bare imports that fail to resolve is sufficient;
-#   the purpose is a git-verifiable RED-state record. Detected tessera R23 MINOR-1.
-# REINFORCED 2026-05-18 — When the baseline `node --test` shows a non-zero fail count even if
-#   the total count matches spec (e.g., spec claims "217 / 0" but actual is "217 total / 216
-#   pass / 1 fail"), this IS a halt-condition (b) event. Spec § 7.1 scenario (b) must be read
-#   with pass/fail granularity, not just total count. Write a DIAGNOSTIC independently naming
-#   the environmental failure (e.g., missing sibling repo causing q01 AC-7 to fail), set
-#   STATUS: ESCALATE, and let the operator disposition the baseline correction. Do NOT fold
-#   this observation as a subordinate note inside a DIAGNOSTIC for a different halt condition
-#   (scenario (c) etc.) — scenario (b) and (c) halts should each produce their own named
-#   DIAGNOSTIC so the operator can evaluate them independently. Detected tessera R25 § 7.1(b)
-#   halt gap (Reviewer MAJOR-1 secondary attribution to IMPLEMENTER).
-# REINFORCED 2026-05-18 — When the chore-A diff includes a path NOT in spec § 3 allowed-set —
-#   even if the path is a legitimate HALT-committed DIAGNOSTIC file — the Implementer must
-#   HALT and write a DIAGNOSTIC recommending spec amendment (via Architect in a follow-up
-#   commit or a DIAGNOSTIC + ESCALATE cycle), NOT perform a unilateral expansion of
-#   `ALLOWED_SET` in the forward-protection test. The forward-protection mechanism (AC-R25-15
-#   class) cannot audit itself because the test reads its own ALLOWED_SET literal — a
-#   self-expanded literal is undetectable by the mechanism it is supposed to protect. A
-#   commit-message justification does not substitute for a spec-amendment audit trail. The
-#   discipline cost of an extra ESCALATE cycle is low; the audit-trail inaccuracy of allowing
-#   ALLOWED_SET to drift from spec under operator-resume-directive rationale is high and
-#   propagates to future rounds. Detected tessera R25 MAJOR-2 (IMPLEMENTER secondary attribution).
-# REINFORCED 2026-05-18 — When a binding-command produces a result that contradicts the AC
-#   literal text (e.g., `npx tsc -p tsconfig.test.json` exits 2 when the AC requires "exit
-#   code is 0"), HALT immediately and write a DIAGNOSTIC stating: (a) the AC literal text,
-#   (b) the observed result including exact command and exit code, (c) whether the substantive
-#   AC intent was satisfied by independent means, (d) bounded remediation options (amend AC
-#   text to match environment reality; fix infra; escalate). Do NOT re-classify tsc-category
-#   errors (`error TSxxxx`) as "warnings," and do NOT report the required exit code instead
-#   of the observed exit code in the attestation block. A pre-existing infra issue is
-#   mitigating context for the remediation choice but does NOT remove the halt requirement.
-#   If the infra issue is permanent, amend the AC text via DIAGNOSTIC before attesting.
-#   Detected tessera R26 MAJOR-1 (tsc exit 2 attested as "Exit code: 0 (warnings only)" in
-#   NEXT-ROLE.md:30-32; Reviewer independently confirmed exit 2).
+#   substrate. If testing via substrate is intended scope, rewrite the AC parenthetical to
+#   name the substrate explicitly. Gate: for every AC parenthetical naming a specific
+#   production module, verify the test file imports and calls it directly. R16 MINOR-2.
+
+# REINFORCED 2026-05-17 — When spec anti-scope says "framings only", a findings document
+#   MUST NOT contain "Recommendation from R-round: Option X is the least invasive." Even a
+#   sub-option recommendation exceeds neutral framings. Gate: grep for "recommend" (case-
+#   insensitive) and verify each occurrence attributes recommendations to external evidence,
+#   not to the R-round author. Detected tessera R16 MINOR-3.
+
+# REINFORCED — CORRECTION-PROPAGATION (composite; 2 sub-variants — R09, R17)
+#
+#   Section-level sweep (R09): When verifying correction of a wrong factual claim, check
+#     for semantic paraphrases — not only the literal exact-string. Enumerate ALL downstream
+#     sections that cite or derive from the corrected primitive. A literal-exact grep
+#     returning 0 does not constitute full-document consistency verification if the same
+#     premise persists in different wording elsewhere. R09 MAJOR-1.
+#
+#   Hit-bearing file section-level (R17): When a grep-based correction pass identifies a
+#     hit-bearing file, enumerate at SECTION level. After updating the primary hit, read
+#     the full document to identify ALL other sections with forward-looking advice dependent
+#     on the claim's status. The pass is complete only when every section is checked. R17 MINOR-1.
+
+# REINFORCED — MEMORIAL-ORDERING-AND-CITATION (composite; 2 sub-variants — R17)
+#
+#   Append ordering (R17 MINOR-2): When appending a new round's entries to MEMORIAL.md,
+#     first READ FORWARD to the terminal line of the PRIOR section (the last CONFIRMATION
+#     or VIOLATION entry tagged with the prior round and role). Insert the separator + new
+#     header AFTER that terminal line. Do NOT rely on "appending at the end" if a
+#     pre-existing entry is below the apparent write-cursor.
+#
+#   Canonical citation paths (R17 MINOR-3): When performing in-passing cleanup of a
+#     docblock, apply a citation-completeness gate: update bare filenames (e.g.,
+#     "REVIEWER-REPORT-R10.md") to canonical project-relative paths (e.g.,
+#     "coordination/reviews/REVIEWER-REPORT-R10.md").
+
+# REINFORCED 2026-05-17 — Operator-dispositioned unblock bookkeeping: when ESCALATE
+#   results in the operator permitting modification of spec-anti-scoped files, add an
+#   Amendments note naming: (a) which files were originally anti-scoped; (b) the operator
+#   disposition; (c) rationale for the AC allowed-set expansion. Editing the allowed-set
+#   without paper trail surfaces as a Reviewer MINOR. Detected tessera R18 MINOR-1.
+
+# REINFORCED 2026-05-18 — anti-scope-allowed-set-forward-coverage (cross-project rule):
+#   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R19 MAJOR-1 (anti-scope absolute for
+#   test/ paths; HALT-b fires at existence of spec/reality conflict), R19 MAJOR-2 (HALT-b
+#   triggered by the conflict, not by difficulty of fix), R25 MAJOR-2 (forward-protection
+#   ALLOWED_SET self-expansion forbidden — test reads its own literal and cannot audit itself;
+#   commit-message justification does not substitute for spec-amendment audit trail).
+
+# REINFORCED 2026-05-17 — When a chore commit adds a new test to an existing test file,
+#   re-read the file's header comment block before committing to verify that the header's
+#   classification claims for each AC remain accurate. Include this as a pre-chore-B grilling
+#   step: open the header, read each attestation-type claim, verify it still describes the
+#   current file body accurately. Detected tessera R20 MINOR-1.
+
+# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 2 sub-variants — R20, R21)
+#
+#   Full-formula re-verification (R20 MINOR-2): When spec § 4.x prescribes updating a
+#     specific arithmetic expression, re-read the FULL formula at the targeted line — all
+#     addends and the total — and verify each addend against its source array. Applying only
+#     the prescribed single change while inheriting stale adjacent values produces cumulative
+#     arithmetic drift.
+#
+#   Test line citations (R21 MINOR-4): When recording observed test line citations in
+#     attestation artifacts, pin each citation to the exact line of the `test()` declaration,
+#     not the first assertion in the test body. Confirm citations by grep or offset-read
+#     before committing chore-A. Off-by-1 to off-by-5 drift reduces reviewer verifiability.
+
+# REINFORCED 2026-05-17 — When implementing a spec-prescribed guard for a distinct failure
+#   mode, write a structural test that would FAIL if the guard were removed. If the existing
+#   AC scenario passes through the guard without triggering it, add a dedicated variant that
+#   explicitly exercises the guard path. A guard unbound by every test is indistinguishable
+#   from dead code. Detected tessera R21 MINOR-2 (dedup guard) and MINOR-3 (short-circuit).
+
+# REINFORCED 2026-05-17 — In audit-tier specs with both a test-count AC and a chore-B
+#   forward-protection test, anchor the count AC to "at chore-A SHA <SHA>, pass count = N"
+#   rather than a relative phrase. Chore-B adds one test (+1), making relative count literals
+#   stale. Add grilling gate: "does this count AC need SHA-anchoring?" R22 MINOR-1.
+
+# REINFORCED 2026-05-18 — When new production code and new tests are committed together in
+#   the same round, prefix with a separate RED commit (assert.fail stubs that compile but FAIL)
+#   before writing any implementation, so git history independently confirms RED→GREEN ordering.
+#   The stub does not need to be complex — its purpose is a git-verifiable RED-state record.
+#   Detected tessera R23 MINOR-1.
+
 # REINFORCED 2026-05-18 — Chore-B forward-protection runtime tests must use `execFileSync`
-#   (no-shell array form) rather than `execSync` (shell-string form), matching the R20/R21/
-#   R22/R23 chore-B precedent. The two are functionally equivalent for a hardcoded SHA
-#   literal, but `execSync` introduces a latent shell-injection surface if the SHA constant
-#   is ever parameterized from external input; `execFileSync` with an array argument prevents
-#   this by construction and preserves pattern consistency for future maintainers. Spec §3.2
-#   and §4 both prescribe `execFileSync` explicitly; the prescription exists for a reason.
-#   Detected tessera R26 MINOR-1 (AC-R26-16 used execSync despite both spec sections
-#   prescribing execFileSync; R20–R23 chore-B all honor execFileSync).
-# REINFORCED 2026-05-18 — When a module docstring specifies a per-member-deduplication
-#   semantics for an aggregation (e.g., "one record per distinct member shard, picking the
-#   earliest event_ts for that shard if it appears multiple times"), the implementation must
-#   match the docstring exactly, not merely pass the current ACs. If no AC exercises the
-#   divergent case (e.g., no test fires the same shard twice), the divergence is invisible at
-#   test time but is a latent defect for future integrations. Either implement the docstring
-#   semantics exactly, or amend the docstring to describe what the code actually does; do not
-#   leave them in silent disagreement. Detected tessera R26 MINOR-2 (earliest/latest_event_ts
-#   aggregation at common-mode-attribution.ts:186-191 iterates all touches rather than
-#   per-distinct-member as the module docstring and spec §3.1 both prescribe).
-# REINFORCED 2026-05-18 — When implementing AC test assertions, assert ALL fields that the
-#   spec AC text explicitly lists, not just the fields that feel load-bearing or that are
-#   exercised by other ACs. If spec § 5.2 AC-RNN-X says "the snapshot has nodes: [], edges:
-#   [], fetched_at_ts: META.fetchedAtTs, source_id: META.sourceId, source_version:
-#   META.sourceVersion", the test must assert all 5 fields — even if source_id and
-#   source_version are covered by another AC on a different code path. The risk: a future
-#   refactor may short-circuit the branch under test (e.g., empty-input early return) and
-#   drop fields; the only guard is the AC's own assertions, not sibling-AC coverage on a
-#   different path. Procedure: for each AC in spec § 5.2, count the asserted fields in the
-#   spec text and match them one-for-one in the test assertion block. Detected tessera R28
-#   MINOR-1 (AC-R28-9 test at test/q28-slurm-adapter.test.ts:158-166 omits source_id and
-#   source_version assertions that spec § 5.2 line 764 explicitly requires).
-# REINFORCED 2026-05-18 — When an AC literal's Then column specifies equality (e.g.,
-#   "metadata.host equal to the source host name", "value is exactly Y"), the bound test
-#   MUST use strict-equality (`assert.strictEqual(actual, expected)`) — NOT a structural
-#   check (`typeof x === 'string' && x.length > 0`, `includes('x')`, truthy). Gate: before
-#   committing chore-A, for each AC, read the Then column word-for-word and apply the
-#   mutation test: "if production returned a different-but-structurally-valid value (e.g., a
-#   non-empty wrong string), would my assertion still pass?" If yes, strengthen to equality.
-#   Detected tessera R29 MINOR-1 (AC-R29-6 non-empty-string check instead of equality to
-#   source host name). Third Wave 2 cluster occurrence: R28 MINOR-1, R30 MINOR-1, R29 MINOR-1.
+#   (no-shell array form) rather than `execSync` (shell-string form). `execSync` introduces
+#   a latent shell-injection surface if the SHA constant is ever parameterized from external
+#   input; `execFileSync` with array argument prevents this by construction. R26 MINOR-1.
+
+# REINFORCED 2026-05-18 — implementer-spec-test-assertion-coverage (cross-project rule):
+#   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R28 MINOR-1 (all AC-listed fields must be
+#   asserted in every sub-case), R29 MINOR-1 (Then-column equality → strictEqual not structural
+#   check), R30 MINOR-1 (discriminating assertion — not broad substring matching multiple
+#   occurrences in same file; use regex with line anchoring or specific line-range read).
+
 # REINFORCED 2026-05-18 — Deviations from spec § 3.2 binding-command call signatures are NOT
-#   covered by the § 7.2 TACTICAL AUTONOMY clause (which applies only to § 3.1 algorithm
-#   idioms). When the installed runtime (e.g., Node.js v25) requires a change to the
-#   prescribed execFileSync options (e.g., adding env: subEnv to strip recursive-test-
-#   detection vars), make the deviation visible to cold readers via either: (a) a DIAGNOSTIC-
-#   Rxx-<topic>.md file explaining the environment mismatch + the workaround, or (b) at
-#   minimum an inline code comment cross-referencing spec § 3.2 and explaining why the
-#   prescribed form does not work in the current runtime. Recording only in MEMORIAL is
-#   insufficient — a cold reader of spec + source alone cannot surface the deviation.
-#   Detected tessera R29 MINOR-3 (env: subEnv strip for Node.js v25 documented only in
-#   MEMORIAL, not in DIAGNOSTIC or code comment).
-# REINFORCED 2026-05-18 — For ACs that guard a critical cross-cutting invariant (e.g., A16
-#   D4 wire-format literal, A12 anti-scope protection), write a DISCRIMINATING assertion that
-#   is structurally anchored to the specific location being guarded — not a broad substring
-#   check that matches multiple occurrences in the same file. If `file.includes('key: value')`
-#   matches BOTH the type-declaration body (the guarded location) AND a JSDoc backtick
-#   occurrence (not guarded), removing the type-declaration line while preserving the JSDoc
-#   leaves the assertion passing and the invariant silently broken. Use a regex with line
-#   anchoring (e.g., `/^\s*key:\s*value\s*;/m`) OR read the specific line range explicitly.
-#   Detected tessera R30 MINOR-1 (AC-R30-15: `verdict.includes('correlational_not_causal: true')`
-#   matches engine/types/verdict.ts:272 JSDoc AND :289 type-declaration; removal of :289 would
-#   not fail the assertion; A16 D4 guard is structurally weakened).
-# REINFORCED 2026-05-18 — When implementing a multi-level fallback chain (`a ?? b ?? c`),
-#   verify that each level is structurally reachable by tracing data flow, not just syntax.
-#   If a called function (e.g., a parser) always provides a defined value for the intermediate
-#   field (`b`), and the return type marks that field as required (non-optional), then the
-#   third operand (`c`) is dead code — it will never fire at runtime. Either (a) remove the
-#   dead operand for code clarity, or (b) retain it as explicit defensive code and document it
-#   as such with a comment explaining WHY it is structurally unreachable (e.g., "parser always
-#   defaults this field; retained for defensive correctness if the parser is ever modified").
-#   Do not let spec-prescribed multi-level chains ship without verifying each level's
-#   reachability under all callers. Detected tessera R30 MINOR-2 (NvlinkTopologySource
-#   constructor engine/topology/nvlink-source.ts:133-134: third-operand `?? 'nvlink_topology_source'`
-#   / `?? 'nvlink-1'` unreachable because parseNvlinkStatus always defaults snapshot.source_id /
-#   source_version at :108-109; TopologySnapshot.source_id typed `string`, never undefined).
-# REINFORCED 2026-05-18 — When inserting content into a canonical coordination document that
-#   contains a markdown bullet list (e.g., SCOPING-MEMO anti-scope constraint lists), inserting
-#   an h2 or h3 heading inside the list TERMINATES the list at that point. Markdown renderers
-#   cannot recover: the preceding list items form one list, the heading becomes an independent
-#   subsection, and the subsequent list items render as a new orphaned list with no preamble.
-#   After any edit to a canonical document containing bullet lists, re-read a 30-line window
-#   around the insertion point and verify: (a) the preceding list item retains its full
-#   rationale paragraph adjacent to its entry; (b) no orphaned rationale text appears after
-#   the new content; (c) the new content is unambiguously attached to the correct section.
-#   Do not rely on string-match ACs to catch placement defects — they are structurally blind
-#   to insertion context. Detected tessera R32 MAJOR-1 (SCOPING-MEMO-v0.3.md:267: `### Vendor
-#   fungibility` heading inserted inside A12–A17 list severing A14 rationale).
-# REINFORCED 2026-05-18 — When a cross-project rule is derived from prior-round violations
-#   and committed in a close-walk or gate document (e.g., PHASE-2-SLICE-3-CLOSE-WALK.md
-#   § 5.N), immediately apply the rule as a self-audit check to all ACs in the CURRENT ROUND's
-#   test suite before committing chore-A. The derivation and the self-audit must happen in
-#   the same chore-A staging gate — not sequentially across rounds. Procedure: for each newly
-#   derived assertion-coverage rule, grep the current test file for the weak patterns the rule
-#   prohibits (e.g., `content.includes(`, `.length > 0`, `typeof x ===`) and apply the
-#   mutation test to every match. "I derived the rule and therefore understood it" is not a
-#   substitute for applying it; rule-derivation-without-self-application is a worse violation
-#   than naive omission. Detected tessera R32 MAJOR-2 (4 AC instances of `includes(...)` in
-#   test/q32-slice3-close-walk.test.ts violate the `implementer-spec-test-assertion-coverage`
-#   rule derived and committed in PHASE-2-SLICE-3-CLOSE-WALK.md §5.3 in the same round).
-# REINFORCED 2026-05-18 — When amending a spec AC row that has an existing `Then` clause
-#   that will be superseded by the amendment, mark the original claim as superseded BEFORE
-#   appending the new claim. Use `~~strikethrough~~` on the original sentence, or prepend the
-#   new text with `[R{N}-amended: the following supersedes the prior claim]`. Leaving both
-#   the original and the amendment in the same table cell creates two mutually contradictory
-#   assertions that string-match ACs (checking only presence of the new text) cannot detect.
-#   Contradictory rows weaken the spec's authority as a source of truth for future rounds.
-#   Detected tessera R32 MINOR-2 (Q-R26-SPEC.md:552 AC-R26-14 retains "exit code is 0" and
-#   R32-appended "exit code is 2" in the same table cell with no disambiguation marker).
-# REINFORCED 2026-05-18 — When the spec mandates a multi-cell evidence matrix for a
-#   Reviewer-verified deliverable (e.g., a 4-cell PR-F6 test matrix per SCOPING-MEMO §3 Row
-#   SLICE 3.C), the self-spec in audit-tier MUST create a Reviewer-verified AC for every
-#   mandated cell OR add an explicit out-of-scope disposition note with an evidence pointer
-#   for each omitted cell. "Cell N tested at the Implementer stage and noted PASS in the
-#   close-walk" is NOT a substitute for "Cell N is Reviewer-verified" when the mandate
-#   specifies Reviewer verification. Gate: before committing chore-A, for each Reviewer-
-#   verified mandate in the spec, count the mandated cells and count the Reviewer-verified
-#   ACs; if the counts differ, add the missing ACs or add explicit disposition text.
-#   Detected tessera R32 MINOR-4 (AC-R32-23/24/25 cover PR-F6 Cells 1/2/3; Cell 4 absent
-#   despite SCOPING-MEMO §3 Row SLICE 3.C mandating a 4-cell matrix).
+#   covered by the TACTICAL AUTONOMY clause. When the installed runtime requires a change to
+#   the prescribed execFileSync options, make the deviation visible to cold readers via either
+#   (a) a DIAGNOSTIC file explaining the environment mismatch, or (b) at minimum an inline
+#   code comment cross-referencing spec § 3.2 and explaining why the prescribed form fails.
+#   Recording only in MEMORIAL is insufficient. Detected tessera R29 MINOR-3.
+
+# REINFORCED 2026-05-18 — When inserting content into a canonical coordination document
+#   containing a markdown bullet list, inserting an h2 or h3 heading inside the list
+#   TERMINATES the list at that point. After any edit to a canonical document with bullet
+#   lists, re-read a 30-line window around the insertion point and verify: (a) the preceding
+#   list item retains its full rationale paragraph adjacent to its entry; (b) no orphaned
+#   rationale text appears after the new content. Detected tessera R32 MAJOR-1.
+
+# REINFORCED 2026-05-18 — rule-derivation-without-self-application (cross-project rule):
+#   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R32 MAJOR-2 (4 AC instances of
+#   `includes(...)` violated the assertion-coverage rule derived and committed in the same round).
+#   When deriving a new rule, immediately grep the current test file for the weak patterns
+#   the rule prohibits and apply the mutation test to every match.
+
+# REINFORCED 2026-05-18 — When amending a spec AC row with an existing Then clause that will
+#   be superseded, mark the original claim as superseded BEFORE appending the new claim. Use
+#   `~~strikethrough~~` or `[R{N}-amended: the following supersedes the prior claim]`. Leaving
+#   both original and amendment creates two contradictory assertions. Detected tessera R32 MINOR-2.
+
+# REINFORCED 2026-05-18 — When a spec-pseudocode regex is invalid in the target language
+#   (e.g., `\Z` in JavaScript) and the test file is in ALLOWED_SET, fix the regex directly
+#   (< 10 characters). Do NOT add content to a data file to work around a broken regex.
+#   A content workaround creates hidden structural coupling: future contributors may delete
+#   the "workaround section" without knowing it is load-bearing. Detected tessera R34 MINOR-3.
+
+# REINFORCED 2026-05-18 — When spec § 4 prescribes a full-suite count assertion but a
+#   subprocess-hang constraint prevents running the full suite from within the test, the AC
+#   MUST structurally guarantee the count by composition: independently count `test()`
+#   declarations in the new test file AND assert pre-baseline subset count, then verify their
+#   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
+#   Detected tessera R34 MINOR-4.

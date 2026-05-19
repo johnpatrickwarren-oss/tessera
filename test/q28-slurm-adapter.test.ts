@@ -166,6 +166,9 @@ test('AC-R28-9: empty or whitespace-only input produces empty snapshot (no throw
   const snap2 = parseSlurmTopologyConf('  \n\n   \t\n', META);
   assert.deepEqual(snap2.nodes, []);
   assert.deepEqual(snap2.edges, []);
+  // R32 MINOR-3 fix: assert source_id and source_version for whitespace-only snap2 case.
+  assert.strictEqual(snap2.source_id, META.sourceId);
+  assert.strictEqual(snap2.source_version, META.sourceVersion);
 });
 
 // ── AC-R28-10: TopologySource conformance + default fallback chain ─
