@@ -62,3 +62,24 @@ Document findings. Do not fix. Do not re-implement.
 #   VIOLATION entries to coordination/MEMORIAL.md; R16 Reviewer MEMORIAL section
 #   had only CONFIRMATION entries; Memorial Updater reconstructed all 3 from
 #   the report. Precedent: R15 Reviewer appended 3 VIOLATION entries correctly.
+
+# REINFORCED 2026-05-19 — Routing-rule strict application: CLAUDE-REVIEWER.md
+#   prescribes "CRITICAL exists → STATUS: ESCALATE". When the Reviewer judges a
+#   CRITICAL finding to be attestation-level (substantive deliverable is sound;
+#   only attested values are empirically wrong), the strict-routing reading is
+#   ESCALATE; the pragmatic-routing reading is MERGE-READY-with-reservations
+#   plus operator notification. The Reviewer's role boundary is "Document
+#   findings. Do not fix. Do not re-implement." Routing is a Reviewer call but
+#   overriding the canonical rule is a discipline question the operator should
+#   decide, not the Reviewer alone. Procedure: when finding a CRITICAL whose
+#   severity rationale is "attestation-level not script-correctness", the
+#   Reviewer SHOULD set STATUS: ESCALATE with explicit framing: "Operator
+#   decision: route MERGE-READY (substantive deliverable sound; CRITICAL is
+#   attestation-only) or ESCALATE (CRITICAL strict reading)." Routing
+#   `READY-FOR-MEMORIAL-UPDATER (with reservations)` unilaterally bypasses the
+#   operator gate. Detected tessera R45: Reviewer routed READY-FOR-MEMORIAL-
+#   UPDATER with 1 CRITICAL (AC-R45-3 grep returns 14 not 7) citing
+#   attestation-vs-deliverable distinction; the 0-CRITICAL streak interpretation
+#   became operator-decision-flagged after the fact. Below 3-instance cross-
+#   project threshold for new rule derivation; reinforcement applied at Tessera-
+#   internal scope only.

@@ -387,3 +387,23 @@ All unresolved decisions → open questions in the spec.
 #   specific anchors must be tested in a JS REPL before inclusion in spec pseudocode.
 #   Copy-pasting from spec pseudocode to test code propagates language-specific bugs that
 #   force content workarounds rather than code fixes. Detected tessera R34 MINOR-3.
+
+# REINFORCED 2026-05-19 — Empirical-AC threshold binding tightness (R44 MINOR-3, R46
+#   MINOR-1+2): When authoring an AC whose verification command is a `grep -c` count,
+#   prefer tight equality (`= N`) or near-equality (`≥ N` with N close to the empirical
+#   value at spec-emit time) over permissive `≥ 1`. A `≥ 1` threshold is incidentally-
+#   satisfiable: a single comment mention, narrative prose reference, or unrelated occurrence
+#   passes the AC without the canonical structural element being present. Stronger forms:
+#   (a) anchor patterns to structural markers (e.g., `grep -cE '^> \*\*Rule 1 sub-class
+#   .empirical-command-attestation' ≥ 1` vs bare `grep -c 'empirical-command-attestation'
+#   ≥ 1`); (b) restrict file-wide patterns to section-scoped ranges via `awk '/^## section/,
+#   /^---/'` filters before counting (file-wide `grep -cE 'Rule [1-7]' ≥ 7` is mechanically
+#   discriminating only when the threshold sits far above the pre-emit baseline, by accident
+#   not design — a future round adding rule mentions elsewhere inflates the count without
+#   binding the intended structural location); (c) for empirical-command-attestation per
+#   the Rule 1 sub-class (R46), bind to the SAME command the Implementer will run at chore-A
+#   so attestation = command output verbatim. Pre-emit grilling gate: for each grep-count
+#   AC, ask "could this threshold be satisfied without the canonical structural element
+#   being present?" — if yes, tighten the pattern or anchor it. Detected tessera R44 MINOR-3
+#   (Rule [1-7] file-wide grep) + R46 MINOR-1+2 (`≥ 1` thresholds on `empirical-command-
+#   attestation` and `verify-empirical-acs.sh` mentions).
