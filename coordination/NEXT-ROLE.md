@@ -1,104 +1,103 @@
-CURRENT-ROUND: R45
+CURRENT-ROUND: R46
 NEXT-ROLE: REVIEWER
 STATUS: READY-FOR-REVIEWER
 
-## Overnight authority chain close — R42-R45 summary
+## Implementer routing — R46 chore-A attestation
 
-**Chain context:** 2026-05-19 LATE-MORNING overnight authority window (4-round budget per [[project-overnight-authority-2026-05-19-late-morning]]). HARD STOP on Phase 3 scope entry preserved throughout.
+**Chore-A SHA:** `5eff16e` (coordination chore; 6 files changed; +731 / −8 insertions/deletions; new mode 100755 on coordination/specs/Q-R46-EMPIRICAL.sh + scripts/verify-empirical-acs.sh). Reviewer-batch commit at `7bc026f` (R42-R45 cold-eye reports). SHA backfill commit: see HEAD.
 
-**Chain rounds:**
-
-| Round | Scope | Chore-A SHA | Backfill SHA |
-|---|---|---|---|
-| R42 | MR-3 memorial sharding strategy (a) — split MEMORIAL.md (3,153 → 79 active + 2 phase shards) | `d73e83c` | `2817dfc` |
-| R43 | MR-2 Pass-3 redux — CLAUDE-IMPLEMENTER.md 44 → 30 REINFORCED (16 folds + 2 new composites + 4 stale-count fixes) | `4f9ab51` | `aa3cc6d` |
-| R44 | Rule 7 Surface (a) — SPEC-AUTHORING-CHECKLIST.md extension (Rule 7 self-application gate; per-rule check mechanism table) | `a9adeda` | `e171cea` |
-| R45 | Rule 7 Surface (b) — scripts/pre-commit-rule-sweep.sh (mechanical rule-sweep script) | `4550dab` | (HEAD; backfill commit follows) |
-
-**HARD STOP re-engages** at chain close. Phase 3 scope entry remains pending operator PRD + authorization.
-
----
-
-## Implementer routing — R45 chore-A attestation
-
-**Chore-A SHA:** `4550dab` (coordination chore; 4 files changed; +547 / −7 insertions/deletions; new mode 100755 on scripts/pre-commit-rule-sweep.sh). SHA backfill commit: see HEAD.
-
-**Round summary:** Methodology round — Rule 7 structural implementation Surface (b) per Q-R45-SPEC. Creates `scripts/pre-commit-rule-sweep.sh` (executable; ~200 lines bash) with per-rule function dispatch:
-- Rule 7 mechanical: verifies spec § 7 enumerates all 7 rules (`grep -cE '^- \*\*Rule [1-7] '`)
-- Rule 4 advisory: distinguishes newly-added vs modified specs; flags manual verification needed (full mechanization deferred until spec-emit-SHA tracking exists)
-- Rules 1/2/3/5/6: SEMANTIC CHECK REQUIRED stubs with canonical checklist pointers
+**Round summary:** Methodology round (operator-directed, post-overnight-chain) — Rule 1 sub-class `empirical-command-attestation` derivation + landing at Tessera-internal scope. Three structural surfaces delivered (a) SPEC-AUTHORING-CHECKLIST.md gate addition; (b) scripts/verify-empirical-acs.sh generic harness; (c) scripts/pre-commit-rule-sweep.sh rule_1_check upgrade from SEMANTIC stub to MECHANICAL. R46 self-applies the new discipline via coordination/specs/Q-R46-EMPIRICAL.sh (Rule 7 Surface c). Cross-project canonical landing in CROSS-PROJECT-MEMORIAL.md DEFERRED per Rule 7 anchor-canonical-landing-deferred discipline.
 
 **Inputs for Reviewer:**
 
-- `coordination/specs/Q-R45-SPEC.md` — round spec (10 ACs; methodology-tier audit format)
-- `scripts/pre-commit-rule-sweep.sh` — new executable bash script
-- `coordination/SPEC-AUTHORING-CHECKLIST.md` — Surface (b) reference updated from "deferred to R45" to "IMPLEMENTED at R45"
-- `coordination/MEMORIAL.md` — active file with R45 IMPLEMENTER entry appended
-- (Reference, not modified) `~/.claude/CROSS-PROJECT-MEMORIAL.md:3478` — Rule 7 canonical text
+- `coordination/specs/Q-R46-SPEC.md` — round spec (10 ACs)
+- `coordination/specs/Q-R46-EMPIRICAL.sh` — sibling empirical-AC verifier (executable; self-applies the new sub-class)
+- `scripts/verify-empirical-acs.sh` — new generic harness
+- `scripts/pre-commit-rule-sweep.sh` — `rule_1_check` upgraded MECHANICAL
+- `coordination/SPEC-AUTHORING-CHECKLIST.md` — new "Empirical-AC discipline (Rule 1 sub-class — landed R46)" section + Rule 1 row updated `partial` → `mechanizable`
+- `coordination/MEMORIAL.md` — R46 IMPLEMENTER entry appended (incl. Rule 7 Surface c CONFIRMATION + discipline-caught-bug CONFIRMATION)
 
-**Test counts at R45 chore-A:**
+**Empirical attestation (per Rule 1 sub-class — cite OUTPUT, not memorized values):**
 
-- `node --test test/*.test.js` → **361 tests, 356 pass, 2 fail (AC-R36-30 + AC-R36-31 forward-protection guards as expected), 3 skip**. Identical to R43/R44 close baselines.
-- `npx tsc -p tsconfig.test.json` → exit=0 (unchanged)
-- _Empirically verified at chore-A via TAP-reporter run._
-
-**Diff from round-start (HEAD pre-R45 = post-R44 commit `e171cea`):**
-
+Reviewer can independently re-run:
 ```
-A   coordination/specs/Q-R45-SPEC.md
-A   scripts/pre-commit-rule-sweep.sh           (executable; mode 755)
-M   coordination/SPEC-AUTHORING-CHECKLIST.md   (Surface b reference: "deferred" → "IMPLEMENTED")
-M   coordination/MEMORIAL.md                   (R45 IMPLEMENTER entry appended)
-M   coordination/NEXT-ROLE.md                  (this file)
+$ scripts/verify-empirical-acs.sh R46
+... [11 PASS, 0 FAIL] ...
+RESULT: all empirical ACs verified (exit 0)
 ```
 
-All paths ⊆ ALLOWED_SET per AC-R45-8. Zero `engine/*`, `test/*`, `tools/*`, `CLAUDE-*.md`, `MEMORIAL-PHASE-*.md`, `~/.claude/CROSS-PROJECT-MEMORIAL.md`, `SCOPING-MEMO-v0.3.md`, `PRD.md` modifications.
+The Implementer ran this at chore-A:
+```
+Summary: 11 PASS, 0 FAIL
+RESULT: all empirical ACs verified (exit 0)
+```
 
-**AC mapping — Implementer self-attestation:**
+**Diff from round-start (HEAD pre-R46 = post-R45 commit `439c1ff`):**
 
-| AC | Status | Evidence |
+```
+A   coordination/specs/Q-R46-SPEC.md
+A   coordination/specs/Q-R46-EMPIRICAL.sh             (executable; mode 755)
+A   scripts/verify-empirical-acs.sh                   (executable; mode 755)
+M   scripts/pre-commit-rule-sweep.sh                  (rule_1_check upgraded SEMANTIC → MECHANICAL)
+M   coordination/SPEC-AUTHORING-CHECKLIST.md          (new § Empirical-AC discipline; Rule 1 row updated)
+M   coordination/MEMORIAL.md                          (R46 IMPLEMENTER entry appended)
+M   coordination/NEXT-ROLE.md                         (this file)
+```
+
+All 7 paths ⊆ ALLOWED_SET per AC-R46-8. Zero `engine/*`, `test/*`, `tools/*`, `CLAUDE-*.md`, `MEMORIAL-PHASE-*.md`, `~/.claude/CROSS-PROJECT-MEMORIAL.md`, `SCOPING-MEMO-v0.3.md`, `PRD.md` modifications.
+
+**AC mapping — empirical attestation per Rule 1 sub-class:**
+
+All 10 ACs verified mechanically via `scripts/verify-empirical-acs.sh R46` (output cited above; not memorized). See Q-R46-EMPIRICAL.sh for per-AC verification command + expected output.
+
+| AC | Status | Mechanical command |
 |---|---|---|
-| AC-R45-1 (script exists, executable) | PASS | `[ -x scripts/pre-commit-rule-sweep.sh ]` returns true; mode 755 |
-| AC-R45-2 (script header references Rule 7) | PASS | `head -10` contains "Rule 7" + "Surface (b)" markers |
-| AC-R45-3 (7 rule functions present) | PASS | `grep -cE "^rule_[1-7]_check" scripts/pre-commit-rule-sweep.sh` = 7 |
-| AC-R45-4 (Rule 4 advisory + Rule 7 mechanical) | PASS | rule_4_check uses `git diff --name-status`, emits ADVISORY; rule_7_check has mechanical spec § 7 grep + advisory for cross-memorial |
-| AC-R45-5 (stubs/advisories for 1/2/3/5/6) | PASS | Each function emits "SEMANTIC CHECK REQUIRED" with canonical checklist pointer |
-| AC-R45-6 (smoke test) | PASS | `./scripts/pre-commit-rule-sweep.sh aa3cc6d a9adeda` → exit 0; 7 semantic checks logged; Rule 7 spec § 7 check passes on Q-R44-SPEC.md |
-| AC-R45-7 (SPEC-AUTHORING-CHECKLIST.md Surface b reference) | PASS | "IMPLEMENTED at R45" grep count = 1; "deferred to R45" grep count = 0 |
-| AC-R45-8 (ALLOWED_SET coverage) | PASS | diff matches ALLOWED_SET exactly |
-| AC-R45-9 (test baseline preserved) | PASS | 361/356/2/3 + tsc exit 0; zero regression |
-| AC-R45-10 (Rule 7 Surface b framing) | PASS | Q-R45-SPEC.md § 1 + § 3 + R45 MEMORIAL entry frame round as Rule 7 Surface (b); SPEC-AUTHORING-CHECKLIST.md cross-link is bidirectional |
+| AC-R46-1 | PASS | `[ -x scripts/verify-empirical-acs.sh ]` |
+| AC-R46-2 | PASS | `[ -x coordination/specs/Q-R46-EMPIRICAL.sh ]` |
+| AC-R46-3 | PASS | `grep -cE '^## Empirical-AC discipline' coordination/SPEC-AUTHORING-CHECKLIST.md` = 1 |
+| AC-R46-4 | PASS | `grep -cE '^\| 1 \| .* \| mechanizable \|' coordination/SPEC-AUTHORING-CHECKLIST.md` = 1 |
+| AC-R46-5 | PASS | `grep -c 'verify-empirical-acs.sh' scripts/pre-commit-rule-sweep.sh` = 7 |
+| AC-R46-6 | PASS | `scripts/verify-empirical-acs.sh R46` exits 0 |
+| AC-R46-7 | PASS | `grep -c 'empirical-command-attestation' coordination/SPEC-AUTHORING-CHECKLIST.md` = 2 |
+| AC-R46-8 | PASS | Diff ⊆ ALLOWED_SET (7 files; see above) |
+| AC-R46-9 | PASS | Test summary = 361/356/2/3; tsc exit 0 |
+| AC-R46-10 | PASS | `grep -c 'MECHANICAL CHECK via sub-class verifier' scripts/pre-commit-rule-sweep.sh` = 1 |
 
 **Reviewer cold-eye targets:**
 
-- Run smoke test independently: `./scripts/pre-commit-rule-sweep.sh aa3cc6d a9adeda` — confirm exit 0 + Rule 7 spec § 7 check passes.
-- Verify Rule 4 ADVISORY downgrade rationale is documented inline in script (false-positive avoidance; not silent omission).
-- Verify Surface (a)+(b) cross-references are bidirectional (checklist points at script; script points at checklist).
-- Right-reasons audit: no test file (methodology-round precedent); spec ACs verified via shell commands directly. Reviewer re-runs each at HEAD.
-- Verify R42, R43, R44 deliverables are unmodified (MEMORIAL-PHASE-*.md frozen; CLAUDE-IMPLEMENTER.md REINFORCED count still 30).
+- **Primary mechanical re-verification:** `scripts/verify-empirical-acs.sh R46` at HEAD → expected exit 0 (11 PASS, 0 FAIL).
+- Verify the discipline-caught-bug CONFIRMATION in MEMORIAL is accurately characterized (the bash bug WAS real; the empirical-AC framework caught it before attestation; fix applied in same chore-A).
+- Verify rule_1_check upgrade by running `scripts/pre-commit-rule-sweep.sh 439c1ff <chore-A-SHA>` after commit → output includes "Rule 1 (false-compliance-attestation): MECHANICAL CHECK via sub-class verifier" (NOT "SEMANTIC CHECK REQUIRED").
+- Spot-check Q-R46-EMPIRICAL.sh structure against the convention in SPEC-AUTHORING-CHECKLIST.md § Empirical-AC discipline.
+- Verify cross-project canonical text is unchanged (CROSS-PROJECT-MEMORIAL.md Rule 1 canonical text at line 3478 is NOT amended; deferred per Rule 7 discipline).
+- Right-reasons audit: 3 of the 10 ACs (AC-R46-3, AC-R46-5, AC-R46-7) use grep counts. Sample one and verify the grep pattern is not self-confirming (does it match the intended structural location, or also incidental prose?).
 
 **Key tactical notes:**
 
-- Rule 4 mechanical check was DOWNGRADED to ADVISORY after first smoke-test iteration surfaced false-positive (matched prose mentioning "ALLOWED_SET" rather than actual ALLOWED_SET block content). Resolution: honest documentation of limitation rather than contrived grep that produces false positives. Full Rule 4 mechanization deferred until spec-emit-SHA tracking exists (future round candidate; flagged in R45 MEMORIAL OBS).
-- Rule 7 mechanical check (spec § 7 enumeration) is the sole mechanical-finding producer. Smoke-test validated on Q-R44-SPEC.md.
-- After R45 close, Rule 7 propagation surfaces are: (a) IMPLEMENTED at R44, (b) IMPLEMENTED at R45, (c) DOCUMENTED + round-conditional. Rule 7's "active propagation surfaces are load-bearing" requirement is MET at Tessera-internal scope.
-- Final round (4 of 4) in overnight authority chain.
+- **The discipline caught a real bug at its derivation round** — Q-R46-EMPIRICAL.sh's first AC-R46-9 invocation failed because of a `set -uo pipefail` + `|| echo "ERR"` interaction in my bash. Pre-R46 attestation would have been "PASS 361/356/2/3" from memorized spec text; the empirical-AC framework FORCED a re-run and surfaced the bug. Fix landed in same chore-A. This is the structural prevention working as intended — the exact failure mode R42 MAJOR-1 + R45 CRITICAL-1 reflected, caught at the source.
+- **Canonical short names used throughout** — Q-R46-SPEC.md § 7 uses `branch-binding-coverage-gate` (Rule 2) and `rule-derivation-without-self-application` (Rule 5) per CROSS-PROJECT-MEMORIAL.md, not the drifted forms from R44/R45. Discipline-restoration applied at this round.
+- **R46 is outside the 4-round overnight authority chain** (R42-R45). This round is operator-explicit-authorized post-chain-close, not overnight-autonomous. Reviewer should treat it as a directed methodology round, not as a chain-extension.
 
-**Halt conditions encountered:** Rule 4 false-positive at first smoke test — resolved via documented limitation (NOT via DIAGNOSTIC workaround); Rule 5 self-application of Rule 6 discipline.
+**Halt conditions encountered:**
+- During AC-R46-9 first run, the test-summary capture surfaced a multi-line corruption (FAIL → 1 FAILED in Q-R46-EMPIRICAL.sh aggregate). Resolution applied per § 8 halt condition 1: did NOT inline-fix the spec text to match a wrong number; did NOT attest PASS; fixed the bash bug, re-ran, all 11 PASS. Surfaced honestly in MEMORIAL CONFIRMATION rather than silently fixed.
 
-**Spec deviance:** AC-R45-4 wording UPDATED during chore-A from "Rule 4 + Rule 7 fully mechanized" to "Rule 4 advisory + Rule 7 mechanical" — honest reflection of empirical outcome after smoke test surfaced false-positive class. Spec edit landed in same commit as chore-A.
+**Spec deviance:** None.
 
 ---
 
-## Reviewer routing — R42 + R43 + R44 + R45 reports (awaiting independent Reviewer pass)
+## Post-chain summary (Reviewer pass for R42-R45 already complete; R46 added)
 
-**Status:** Implementer self-attested all ACs PASS for R42, R43, R44, R45. Reviewer cold-eye pass pending for ALL FOUR rounds (operator-invoked via pipeline OR fresh interactive sessions). Each round's deliverables are orthogonal:
+After R46 chore-A close, the methodology surface is:
 
-- **R42:** MEMORIAL.md split + CLAUDE-*.md read-protocol updates (frozen relative to R43-R45).
-- **R43:** CLAUDE-IMPLEMENTER.md only (frozen relative to R44-R45).
-- **R44:** SPEC-AUTHORING-CHECKLIST.md only (extended at R45 for Surface b cross-reference; otherwise frozen).
-- **R45:** scripts/pre-commit-rule-sweep.sh (new) + SPEC-AUTHORING-CHECKLIST.md (R44 anchor + R45 cross-reference).
+| Round | Scope | Status |
+|---|---|---|
+| R42 | MR-3 memorial sharding strategy (a) | Reviewer report at `coordination/reviews/REVIEWER-REPORT-R42.md` (1 MAJOR + 4 MINOR + 3 OBS; MERGE-READY) |
+| R43 | CLAUDE-IMPLEMENTER.md 44 → 30 REINFORCED | Reviewer report at `REVIEWER-REPORT-R43.md` (1 MAJOR + 3 MINOR + 3 OBS; MERGE-READY) |
+| R44 | Rule 7 Surface (a) | Reviewer report at `REVIEWER-REPORT-R44.md` (1 MAJOR + 4 MINOR + 3 OBS; MERGE-READY) |
+| R45 | Rule 7 Surface (b) | Reviewer report at `REVIEWER-REPORT-R45.md` (1 CRITICAL + 2 MAJOR + 3 MINOR; READY-FOR-MEMORIAL-UPDATER per Reviewer override) |
+| R46 | Rule 1 sub-class `empirical-command-attestation` | Implementer attests PASS via mechanical verifier; Reviewer pass pending |
 
-Reviewer can validate each round independently or batched. Each round's MEMORIAL entry, NEXT-ROLE.md attestation, and spec are independently auditable.
-
-After Reviewer + Memorial-Updater complete for each round, the chain is fully closed and HARD STOP on Phase 3 scope re-engages.
+**Pending operator actions:**
+- R46 Reviewer cold-eye pass (operator-invoked).
+- Memorial-Updater passes for R42-R46 (5 rounds; 19+ MINOR+ findings from R42-R45 require VIOLATION entries per CLAUDE-REVIEWER.md REINFORCED 2026-05-17).
+- Cross-project canonical landing of Rule 1 sub-class (gated on 2nd-project occurrence per Rule 7).
