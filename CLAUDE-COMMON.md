@@ -307,3 +307,24 @@ full is the default; no record required for full rounds.
 #   session check — the Reviewer is the only post-hoc gate. Promotion-to-full ensures an
 #   Architect reviews the spec amendment before the anti-scope modification is applied.
 #   Detected tessera R19 OBS-4 / MAJOR-2.
+# REINFORCED 2026-05-18 — encode-actual-results-verbatim (MR-2 Pass 3 promotion; all roles):
+#   When a binding-command or test produces a result, record the ACTUAL observed value — never
+#   reframe errors to match the AC literal, never propagate spec-predicted counts as observed.
+#   This applies to: tsc exit codes, test pass/fail counts, git diff outputs, any attestation
+#   in NEXT-ROLE.md. The discipline is the same across Architect, Implementer, and Reviewer
+#   roles. Tessera origin: R03 MINOR-4 (count), R26 MAJOR-1 (exit code) — see CROSS-PROJECT-
+#   MEMORIAL.md false-compliance-attestation rule.
+# REINFORCED 2026-05-18 — data-flow-not-syntax (MR-2 Pass 3 promotion; all roles):
+#   When making a coverage claim about a constructor, function, or fallback chain (`a ?? b ?? c`),
+#   trace the coverage through FULL data flow — including values returned by any function called
+#   before the chain is evaluated. If an upstream function always provides a non-nullable value
+#   for field `b`, then the third operand `c` is structurally dead. The coverage claim "all opts
+#   fields covered" is inaccurate for that operand. Ask: "under what actual inputs does each `??`
+#   operand fire?" — not merely list the opts fields syntactically. Tessera origin: R30 MINOR-2.
+# REINFORCED 2026-05-18 — line-citation-cite-then-verify (MR-2 Pass 3 promotion; all roles):
+#   When citing a specific file:line in any coordination artifact (NEXT-ROLE.md, MEMORIAL.md,
+#   spec AC tables, Reviewer reports), verify the citation points to the exact line BEFORE
+#   writing it. Cite the `test()` declaration line (not the first assertion), the function
+#   definition line (not a usage), the field declaration (not a comment). Off-by-1 to off-by-5
+#   drift accumulates across roles and reduces independent verifiability. Confirm by grep or
+#   offset-read. Tessera origin: R03 MINOR-4 (count), R21 MINOR-4 (test line citations).

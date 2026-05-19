@@ -19,7 +19,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import {
   parseNvlinkStatus,
   NvlinkTopologySource,
@@ -227,7 +227,7 @@ test('AC-R30-18: round-start-to-chore-A diff path-set ⊆ R30 allowed-set', () =
     'coordination/MEMORIAL.md',
     // Conditional 9th entry per spec § 3: added IFF a HALT fires mid-round.
   ]);
-  const diffOutput = execSync(`git diff ${BASELINE_SHA}..${CHORE_A_SHA} --name-only`, { encoding: 'utf8' });
+  const diffOutput = execFileSync('git', ['diff', `${BASELINE_SHA}..${CHORE_A_SHA}`, '--name-only'], { encoding: 'utf8' });
   const paths = diffOutput.split('\n').filter((p) => p.length > 0);
   for (const p of paths) {
     assert.ok(ALLOWED_SET.has(p), `unexpected R30 path in chore-A diff: ${p}`);

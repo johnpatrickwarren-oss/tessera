@@ -15,7 +15,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import {
   transformPair,
   UINT32_MAX,
@@ -213,7 +213,7 @@ test('AC-R25-15: round-start-to-chore-A diff path-set ⊆ R25 allowed-set', () =
     // 8th entry: DIAGNOSTIC file committed at HALT commit 4f405c0 per halt-discipline § 7.1
     'coordination/diagnostics/DIAGNOSTIC-R25-ac12-tolerance.md',
   ]);
-  const diffOutput = execSync(`git diff ${BASELINE_SHA}..${CHORE_A_SHA} --name-only`, { encoding: 'utf8' });
+  const diffOutput = execFileSync('git', ['diff', `${BASELINE_SHA}..${CHORE_A_SHA}`, '--name-only'], { encoding: 'utf8' });
   const paths = diffOutput.split('\n').filter(p => p.length > 0);
   for (const p of paths) {
     assert.ok(ALLOWED_SET.has(p), `unexpected R25 path in chore-A diff: ${p}`);
