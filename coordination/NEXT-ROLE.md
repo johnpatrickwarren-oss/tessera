@@ -1,10 +1,12 @@
 CURRENT-ROUND: R49
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
+TIER: audit
 SHA-A: 4e62d992bd7b339fccdff83906afc7ac2f8d6de2
 
-## Reviewer inputs
+## Memorial-Updater inputs
 
+- `coordination/reviews/REVIEWER-REPORT-R49.md` — Reviewer report (0 CRITICAL, 1 MAJOR, 5 MINOR, 5 OBS)
 - `coordination/specs/Q-R49-SPEC.md` — spec
 - `coordination/specs/Q-R49-EMPIRICAL.sh` — empirical verifier (run `scripts/verify-empirical-acs.sh R49`)
 - `scripts/finalize-round.sh` — extended with step 7 pipeline auto-fire
@@ -12,6 +14,8 @@ SHA-A: 4e62d992bd7b339fccdff83906afc7ac2f8d6de2
 - `CLAUDE-COORDINATOR.md` — hybrid Reviewer mandate section added
 - `run-pipeline.sh` — `--hybrid-reviewer` flag added
 - `coordination/SPEC-AUTHORING-CHECKLIST.md` — `## Pipeline-mandatory discipline` section added
+
+**Reviewer attestation (cold-eye Opus pass):** Q-R49-EMPIRICAL.sh → 14 PASS / 0 FAIL at chore-A. All 10 ACs PASS structurally. Findings: 0 CRITICAL, 1 MAJOR (MAJOR-1: hybrid Reviewer mandate vs structural enforcement mismatch at full-tier), 5 MINOR (MINOR-1: assert_ge vs assert_eq Tightening-4 self-app gap; MINOR-2: TIER convention not self-applied; MINOR-3: SKIP-counts-as-PASS in verifier; MINOR-4: CHORE_A_SHA mis-naming; MINOR-5: line citation drift), 5 OBS. Routing: MERGE-READY per CRITICAL=0.
 
 **Implementer attestation (Q-R49-EMPIRICAL.sh at pre-commit):** 14 PASS / 0 FAIL (10 ACs; AC-R49-10 has 5 sub-checks). Test baseline 361/355/3/3 preserved. `tsc` exit 0.
 
