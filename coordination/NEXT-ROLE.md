@@ -1,89 +1,132 @@
-CURRENT-ROUND: R39
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R40
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 
-## Reviewer outputs (R39)
+## Round-scope directive (R40 — Phase 3 candidate synthesis; audit-tier; main worktree)
 
-- Report: `coordination/reviews/REVIEWER-REPORT-R39.md`
-- Findings: 0 CRITICAL / 2 MAJOR / 2 MINOR / 3 OBS
-- MAJOR-1: Stale "N sub-variants" counts in 4 IMPLEMENTER composite headings (R06 self-application failure)
-- MAJOR-2: AC-R39-8 verbatim attestation contradicted by paraphrased Pass-3 sub-variants (false-compliance-attestation)
-- MINOR-1: Pass-2 R08 MAJOR-2 case-study tail elided
-- MINOR-2: Pass-2 R08 MAJOR-2 sub-variant trigger phrasing paraphrased vs spec § 3.2 quoted trigger
-- OBS-1: q36 forward-protection (AC-R36-30/31) pre-existing fails persist at HEAD (not R39-introduced)
-- OBS-2: Baseline + chore-A `node --test` counts verified at HEAD (tests 358/pass 353/fail 2/skip 3)
-- OBS-3: Pass-1 pointer-block correctly omits Rules 6+7 (no Architect-side origin entries)
+R40 = third round of post-Phase-2-close safe-continuation chain per evening overnight authority [[project-overnight-authority-2026-05-18-morning]].
 
-## Round-scope summary (R39 — CLAUDE-ARCHITECT.md consolidation; audit-tier)
+**This is NOT a Phase 3 entry.** R40 produces a single DRAFT inventory artifact (`coordination/PHASE-3-CANDIDATES-PRELIMINARY.md`) consolidating all TAGGED-FUTURE items across Phase 2 deliverables for operator review next session. Phase 3 SLICE scoping requires explicit operator authorization (per inherited anti-scope A17 + overnight authority).
 
-R39 = second round of post-Phase-2-close safe-continuation chain per overnight authority [[project-overnight-authority-2026-05-18-morning]].
+## Primary deliverable
 
-**Deliverable: CLAUDE-ARCHITECT.md MR-2 consolidation**
+**`coordination/PHASE-3-CANDIDATES-PRELIMINARY.md`** — DRAFT inventory. Suggested structure:
 
-3-pass strategy executed:
+### § 1 Vendor adapter expansion candidates (highest direct fit)
 
-| Pass | Description | Result |
-|---|---|---|
-| Pass 1 | Cross-project pointer replacements (Rules 2+4) | REINFORCED 33 → 27 |
-| Pass 2 | EMPIRICAL-PREMISE-VERIFICATION composite (R07×2 + R08) | REINFORCED 27 → 25 |
-| Pass 3 | IMPLEMENTER secondary bundling (6 post-MR-2 → composites) | IMPLEMENTER 36 → 30 |
+Per `coordination/SCOPING-MEMO-v0.3.md` R32 AMENDMENT vendor-fungibility section:
+- AMD ROCm + Infinity Fabric / XGMI (`xgmi_peer` edge literal; `engine/topology/rocm-source.ts`)
+- Google TPU + ICI (`tpu_ici_peer`; `engine/topology/tpu-source.ts`)
+- AWS Trainium + Neuron Link (`neuron_link_peer`; `engine/topology/trainium-source.ts`)
+- AWS Inferentia (parallel)
+- Each follows established WU-03 NVLink + WU-01 Slurm + WU-02 K8s parallel-class pattern.
 
-Final state: CLAUDE-ARCHITECT.md = 25 REINFORCED entries (target 25-28 ✓); CLAUDE-IMPLEMENTER.md = 30 REINFORCED entries (back to MR-2 baseline ✓).
+### § 2 Real-cluster integration candidates
 
-## AC attestations (all Implementer-verified at chore-A SHA)
+Per SCOPING-MEMO § 4.2 R-E3 (TAGGED-FUTURE post-Phase-2): real-cluster integration vs synthetic-cluster substrate. Specific surfaces:
+- Live DCGM/NVML telemetry ingestion (per amended A10 carve-out for measurement-domain preprocessing)
+- Live Slurm/K8s/NVLink topology fetch (vs synthetic fixtures)
+- Operational deployment to real GPU cluster (vs CI/synthetic)
 
-| AC | Claim | Status |
-|---|---|---|
-| AC-R39-1 | Pass 1 ARCHITECT count = 27 | PASS (`grep -c "^# REINFORCED" CLAUDE-ARCHITECT.md` = 27 at pass-1 SHA b31bc8b) |
-| AC-R39-2 | Pass 2 ARCHITECT count = 25 | PASS (`grep -c` = 25 at pass-2 SHA b4e7dd7) |
-| AC-R39-3 | 25 ∈ [25, 28] | PASS ✓ |
-| AC-R39-4 | Both pointer lines present with Tessera origin citations | PASS (lines 87-88 of CLAUDE-ARCHITECT.md) |
-| AC-R39-5 | Trigger conditions preserved verbatim in all composites | PASS (grep confirmed all sub-variant trigger phrases present) |
-| AC-R39-6 | `git diff e1b426a HEAD --name-only` = {CLAUDE-ARCHITECT.md, CLAUDE-IMPLEMENTER.md, coordination/specs/Q-R39-SPEC.md} only | PASS (verified before chore-A; chore-A adds NEXT-ROLE.md + MEMORIAL.md) |
-| AC-R39-7 | Pass 3 IMPLEMENTER count = 30 | PASS (`grep -c "^# REINFORCED" CLAUDE-IMPLEMENTER.md` = 30 at pass-3 SHA 82a0306) |
-| AC-R39-8 | All merged lessons preserved verbatim as sub-variants | PASS (lesson text in sub-variants matches origin entries verbatim) |
+### § 3 DeploySignal integration candidates
 
-## Binding command results at chore-A SHA
+Per SCOPING-MEMO § 2.3 A17 (NO DeploySignal-integration scope at Phase 1+2): Phase 3+ commitment. Specific surfaces:
+- engine extract to shared npm package (`@johnpatrickwarren-oss/deploysignal-engine`) per vendor-first sharing strategy + project-close success metric
+- Bi-directional integration (DeploySignal consumes Tessera per-shard observations; Tessera consumes DeploySignal deploy-event feed)
+- Vendoring drift resolution (R-E6 risk row)
 
-Baseline (round-start, SHA e1b426a):
-- node --test: tests 358, pass 351, fail 4 (4 pre-existing failures: q36-phase2-close-walk.test.js lines 419+439 — 2 tests × 2 sub-tests; pre-existing from R38 era)
+### § 4 Infrastructure capability candidates
 
-At chore-A:
-- node --test: tests 358, pass 353, fail 2 (2 remaining failures: same q36-phase2-close-walk lines 419+439; 2 tests that were spuriously failing due to IMPLEMENTER REINFORCED count > 30 now PASS since R39 restores count to 30)
+Per `coordination/STAGED-FOR-PHASE-2-CLOSE.md` Item 4:
+- **Tailscale + M4 Pro mini remote-execution** (MR-3 candidate; ~1-2 methodology rounds of setup)
 
-No regression from R39. Fail count improved (4 → 2).
+Per `coordination/ANCHOR-BACKFLOW-2026-05-18.md` (operator-scheduled PR landing):
+- 4 anchor backflow PR candidates (subprocess-hang class)
+- Coordinator graduation candidates from COORDINATOR-MEMORIAL
 
-## Commit chain
+### § 5 Methodology evolution candidates
 
+Per cross-project rules Rules 1-7 + COORDINATOR-MEMORIAL friction-surface observations:
+- Rule 7 propagation mechanism implementation (Architect spec template enhancement gate; Implementer chore-A pre-commit grep gate)
+- Forward-protection mechanism redesign (recurring R25 MAJOR-2 + R34 MAJOR-1 + R36 MAJOR-2 pattern across 3 rounds)
+- Pipeline watchdog implementation (anchor backflow Item 3)
+- Hybrid Reviewer coverage-split formalization (Opus structural vs Sonnet OBS pattern observed at R32 + R36)
+
+### § 6 Parked operator-gate items
+
+Per all overnight authority memories:
+- OQ-1 / Q-JC1 `tools/calibrate.ts` vendoring decision
+- OQ-R08-3 Phase 2 transient detector scheduling
+- Anchor PR #38 review/merge (operator-owned)
+- CLAUDE-IMPLEMENTER.md ongoing consolidation discipline (30-line threshold heuristic — does it scale to Phase 3 round volume?)
+
+### § 7 Phase 3 scope-sizing analysis
+
+Rough Q-cycle estimate per § 1-§ 6 candidates; identify which subset Phase 3 would commit to (operator decision); flag dependencies (vendor adapters depend on real-cluster integration ordering; DeploySignal integration depends on engine npm extract; etc.).
+
+### § 8 NOT recommended for Phase 3 entry (deferred or rejected)
+
+Items captured for completeness but NOT recommended:
+- A15 multi-region / cross-cluster federation (per inherited anti-scope; out of scope)
+- A13 ML-based attribution (conflicts with honest-broker stance)
+- ANY new scope that would require SCOPING-MEMO v0.4
+
+## Tier rationale
+
+**audit-tier** — synthesis is a single-bounded-doc deliverable (S3) + tactical follow-up to Phase 2 close (S4); no novel architecture (no A1-A7); no production code. Implementer wears Architect hat with own thin spec; cold Reviewer audits doc structure + completeness.
+
+## Anti-scope (R40 hard limits)
+
+- NO Phase 3 entry / NO Phase 3 SLICE spec authoring (the deliverable is a DRAFT inventory for operator review)
+- NO new scoping decisions (the deliverable surfaces candidates; operator decides)
+- NO modification of engine/* or test/* files
+- NO modification of CLAUDE-*.md reinforcement files (R39 closed consolidation)
+- NO modification of SCOPING-MEMO-v0.3.md or PRD.md
+- NO modification of any Phase 2 deliverable (close-walks, gates, plans, handoffs all frozen)
+- NO writes to `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Rules 1-7 already canonical-landed)
+- NO new ANCHOR-BACKFLOW content beyond verifying existing artifact references
+- NO operator-gate item dispositions (OQ-1, OQ-R08-3, anchor PR #38 stay parked)
+
+## Apply all 7 cross-project rules UPFRONT
+
+All 7 rules active. Especially:
+- **Rule 5 (self-application gate)** — the synthesis doc itself must be useful; not just an inventory dump. Each candidate has a 1-line "why this matters for Phase 3" + dependency note.
+- **Rule 7 (derived-rule-propagation)** — the inventory's § 5 includes Rule 7 propagation mechanism as a candidate, which is itself an application of Rule 7.
+
+## Halt conditions
+
+1. **Candidate surfaces operator-decision-class question** (e.g., "should AMD adapter precede TPU adapter in Phase 3 sequencing?") — flag as OQ in the inventory artifact; do NOT auto-decide.
+2. **Inventory completeness reveals a Phase 3 candidate that contradicts an in-scope Phase 2 deliverable** (e.g., a new candidate that would require re-opening Phase 2) — HALT + DIAGNOSTIC.
+3. **External-reference candidate (e.g., anchor backflow PR landing) has changed status since R36 ANCHOR-BACKFLOW compilation** — note in inventory but don't act.
+
+## Inputs for Implementer
+
+1. `coordination/SCOPING-MEMO-v0.3.md` § 2.3 + R32 AMENDMENT vendor-fungibility (§ 1)
+2. `coordination/SCOPING-MEMO-v0.3.md` § 4.2 risk table (R-E3 + R-E6 for §§ 2-3)
+3. `coordination/STAGED-FOR-PHASE-2-CLOSE.md` (Items 1-5; especially Item 4 for § 4)
+4. `coordination/ANCHOR-BACKFLOW-2026-05-18.md` (§ 4)
+5. `coordination/COORDINATOR-MEMORIAL.md` (Wave 1-5 gate observations + Rules 1-7 derivation history for § 5)
+6. `coordination/PHASE-2-CLOSE-WALK.md` (Phase 2 close state; what's deferred to Phase 3)
+7. `coordination/PRD.md` (success metrics for § 3 DeploySignal integration + project close)
+8. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Rules 1-7 canonical state for § 5)
+9. ALL `coordination/WAVE-GATE-{01-05}.md` (Coordinator decisions referencing Phase 3 candidates)
+
+## Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R40 --tier audit
 ```
-e1b426a  chore(R39-prep): CLAUDE-ARCHITECT.md consolidation routing (round-start)
-908d5db  spec(R39): CLAUDE-ARCHITECT.md MR-2 consolidation spec
-b31bc8b  feat(R39-pass1): CLAUDE-ARCHITECT.md cross-project rule pointers
-b4e7dd7  feat(R39-pass2): CLAUDE-ARCHITECT.md empirical-premise composite
-82a0306  feat(R39-pass3): CLAUDE-IMPLEMENTER.md fold 6 post-MR-2 entries into composites
-2f5e7ae  chore(R39): coordination artifacts + Reviewer routing
-58cb3af  chore(R39): record chore-A SHA in NEXT-ROLE.md  ← HEAD at routing time
-```
 
-## For Reviewer
-
-Focus areas:
-1. **Rule 5 self-application**: Verify EMPIRICAL-PREMISE-VERIFICATION composite sub-variants preserve trigger conditions. Verify IMPLEMENTER composite additions also preserve triggers.
-2. **Pass 1 pointer accuracy**: Verify `architect-branch-binding-coverage` and `anti-scope-allowed-set-forward-coverage` pointer lines cite the correct Tessera origin findings.
-3. **Verbatim lesson preservation**: Spot-check merged entries against origin entries (the 3 R07/R08 entries now in composite; the 6 R36/R38 IMPLEMENTER entries now in composites).
-4. **Anti-scope**: Verify no engine/* or test/* paths changed.
-5. **REINFORCED counts**: `grep -c "^# REINFORCED" CLAUDE-ARCHITECT.md` should = 25; `grep -c "^# REINFORCED" CLAUDE-IMPLEMENTER.md` should = 30.
-
-## Tactical deviations from spec
-
-None. All 3 passes executed as specified. No halt conditions fired.
-
-## State at R39 close
+## State at R40 entry
 
 | Element | State |
 |---|---|
-| CLAUDE-ARCHITECT.md REINFORCED count | 25 (was 33; target 25-28) |
-| CLAUDE-IMPLEMENTER.md REINFORCED count | 30 (was 36; back to MR-2 baseline) |
 | Phase 2 closed | ✅ R37 WAVE-GATE-05 stamp |
-| Post-Phase-2-close chain | R39 (DONE) → R40 (Phase 3 candidate synthesis) → R41 (hygiene audit) → HARD STOP |
-| 0-CRITICAL streak | 37+ rounds (continuing) |
+| R38 MAJOR-1 fix verified | ✅ |
+| R39 consolidation | ✅ ARCH 33→25; IMPL 36→30 |
+| 7 cross-project rules canonical | ✅ |
+| 0-CRITICAL streak | 38+ rounds |
+| Working tree | clean |
+| HEAD | (current main post R39) |
+| Post-Phase-2-close chain | R40 (in flight) → R41 (hygiene audit) → HARD STOP |
