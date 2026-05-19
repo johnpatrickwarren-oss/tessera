@@ -1,114 +1,114 @@
-CURRENT-ROUND: R49
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
-TIER: audit
-SHA-A: 4e62d992bd7b339fccdff83906afc7ac2f8d6de2
+CURRENT-ROUND: R50
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 
-## Memorial-Updater inputs
+## Round-scope directive (R50 — parallel-execution levers: wave-aggregate verifier + tier-aware consolidation Reviewer; audit-tier)
 
-- `coordination/reviews/REVIEWER-REPORT-R49.md` — Reviewer report (0 CRITICAL, 1 MAJOR, 5 MINOR, 5 OBS)
-- `coordination/specs/Q-R49-SPEC.md` — spec
-- `coordination/specs/Q-R49-EMPIRICAL.sh` — empirical verifier (run `scripts/verify-empirical-acs.sh R49`)
-- `scripts/finalize-round.sh` — extended with step 7 pipeline auto-fire
-- `CLAUDE-IMPLEMENTER.md` — "On clean completion" section updated
-- `CLAUDE-COORDINATOR.md` — hybrid Reviewer mandate section added
-- `run-pipeline.sh` — `--hybrid-reviewer` flag added
-- `coordination/SPEC-AUTHORING-CHECKLIST.md` — `## Pipeline-mandatory discipline` section added
+R50 follows R49 close (`3974d2f`) per operator-selected sequencing (R47 ESCALATE → R48 fix → R49 pipeline-mandatory + hybrid → R50 parallel-execution levers).
 
-**Reviewer attestation (cold-eye Opus pass):** Q-R49-EMPIRICAL.sh → 14 PASS / 0 FAIL at chore-A. All 10 ACs PASS structurally. Findings: 0 CRITICAL, 1 MAJOR (MAJOR-1: hybrid Reviewer mandate vs structural enforcement mismatch at full-tier), 5 MINOR (MINOR-1: assert_ge vs assert_eq Tightening-4 self-app gap; MINOR-2: TIER convention not self-applied; MINOR-3: SKIP-counts-as-PASS in verifier; MINOR-4: CHORE_A_SHA mis-naming; MINOR-5: line citation drift), 5 OBS. Routing: MERGE-READY per CRITICAL=0.
-
-**Implementer attestation (Q-R49-EMPIRICAL.sh at pre-commit):** 14 PASS / 0 FAIL (10 ACs; AC-R49-10 has 5 sub-checks). Test baseline 361/355/3/3 preserved. `tsc` exit 0.
-
-**Spec deviance:** AC-R49-1 grep pattern amended from `run-pipeline\.sh .+--start-at REVIEWER` → `run-pipeline\.sh.*--start-at REVIEWER` because `"$PROJECT_ROOT/run-pipeline.sh"` has a quote char between `.sh` and ` --round` — the ` .+` form (literal space then one-or-more) would miss the quote. The `.*` form matches the same structural property (pipeline auto-fire invocation on the same line as `--start-at REVIEWER`). Spec updated in same session before commit.
-
-**TDD disclosure:** Verifier (Q-R49-EMPIRICAL.sh) authored before implementation; run showed 6 FAILs (spirit of TDD RED state met). No separate git RED commit (methodology round; R42-R48 precedent; letter not met per R41 MINOR-5 disclosure form).
-
-## Round-scope directive (R49 — pipeline-mandatory discipline + hybrid Reviewer at close-walk; audit-tier)
-
-R49 follows R48 close (`356ff56`) per operator-selected sequencing (R47 ESCALATE close → R48 fix → R49 pipeline-mandatory + hybrid → R50 parallel-execution levers).
-
-**Round-start SHA:** `356ff56` (chore(R48): Memorial-Updater outputs).
+**Round-start SHA:** `3974d2f` (chore(R49): Memorial-Updater outputs).
 
 ### Primary deliverable
 
-Lock pipeline-as-default into the interactive-mode workflow + formalize hybrid Reviewer mandate at close-walk class waves. Closes the gap identified at R42-R47 where interactive Implementer sessions bypassed the framework's auto-routing.
+Add the two parallel-execution levers identified in the R42-R47 design analysis: a wave-aggregate verifier script for cross-cluster consolidation, and a tier-aware consolidation Reviewer in the pipeline that mandates cold-eye review at wave-gate when any constituent cluster ran `--tier solo`. Closes the "no cold-eye review at consolidation when clusters ran solo-tier" gap.
 
 Specifically:
 
-- **(a) Extend `scripts/finalize-round.sh` to auto-invoke pipeline.** After the existing two-commit SHA-attestation sequence completes (SHA-A + SHA-B), the script SHALL invoke `./run-pipeline.sh --round <CURRENT-ROUND> --start-at REVIEWER` (or equivalent flag for tier-aware Reviewer spawn). This makes pipeline firing MECHANICAL — the operator cannot accidentally skip Reviewer by closing a round interactively. Structural enforcement of pipeline-mandatory discipline.
+- **(a) New `scripts/verify-wave-aggregate.sh`.** Wave-gate equivalent of `verify-empirical-acs.sh`. Validates parallel-cluster wave consolidation at the Coordinator's wave-gate close, before STATUS: WAVE-COMPLETE. Three mechanical checks:
+  - **Aggregate ALLOWED_SET union check:** verify the union of all constituent clusters' diffs ⊆ a wave-level allowed-set (per-cluster ALLOWED_SETs are insufficient at wave granularity). Detects aggregate scope creep.
+  - **Cross-cluster contract verification:** if cluster A and cluster B both touch a shared schema/interface/type definition, verify they agree on shape. Detects inter-cluster contract drift.
+  - **Cross-cluster MEMORIAL fragment semantic-conflict detection:** if two cluster MEMORIAL fragments CONFIRM contradictory disciplines for the same round, flag for operator. Detects MEMORIAL semantic-collision (flock prevents write-collision; not this).
 
-- **(b) Update CLAUDE-IMPLEMENTER.md "On clean completion" section** (lines ~100-112; the role-discipline narrative section, NOT the REINFORCEMENTS section). After step 4 (record chore-A SHA in NEXT-ROLE.md) and routing step 5 (Routing: NEXT-ROLE: REVIEWER), add explicit instruction: "MUST invoke `scripts/finalize-round.sh` OR `./run-pipeline.sh --round R<NN> --start-at REVIEWER` before declaring round complete; do NOT terminate the session at chore-A — pipeline Reviewer + MU stages are required to close the round." Documentary surface; reinforces Surface (a) of the new discipline.
+  Usage: `scripts/verify-wave-aggregate.sh <wave-number>` (e.g., `WAVE-01`). Reads `coordination/WAVE-PLAN-<N>.md` for cluster list + wave-level allowed-set; reads per-cluster `coordination/clusters/<cluster-id>/MEMORIAL-fragment.md` + diff. Exit 0 = clean; non-zero = wave-aggregate finding.
 
-- **(c) Add new `coordination/SPEC-AUTHORING-CHECKLIST.md § Pipeline-mandatory discipline` section.** Sub-class canonical text: "Every spec's `## Pipeline invocation` footer (`./run-pipeline.sh --round R<NN> --tier <tier>`) is the canonical method for round execution. Interactive-mode single-session is the DEVIATION, not the default. Any round that does not run through the pipeline (or document an explicit operator-waiver with rationale) is a Rule 1 sub-class candidate violation: the Implementer self-attestation chain bypasses the cold-eye Reviewer safety net the framework was designed around." Author-time + chore-A + Reviewer requirements. Spec template surface (Surface a equivalent for the discipline).
+- **(b) `run-pipeline.sh` Coordinator-mode extension — tier-aware consolidation Reviewer.** At Coordinator wave-gate close, detect if any constituent cluster ran `--tier solo`:
+  - If yes: MANDATORY cold-eye consolidation Reviewer subprocess session before STATUS: WAVE-COMPLETE. Spawns fresh `claude` session with consolidated wave state + per-cluster handoff artifacts as input. Reviewer audits cross-cluster integration in addition to per-cluster work.
+  - If no (all clusters ran audit/full tiers with own Reviewer): consolidation Reviewer is OPTIONAL (operator can invoke via `--consolidation-reviewer` flag, but pipeline doesn't auto-fire). Cluster-level Reviewers covered cluster-local; consolidation focuses on integration.
+  - Wave-gate also invokes `scripts/verify-wave-aggregate.sh <wave>` as part of pre-consolidation-Reviewer mechanical sweep.
 
-- **(d) Formalize hybrid Reviewer at close-walk class.** Update `CLAUDE-COORDINATOR.md` § "Memorial state" or a new sub-section: at close-walk class waves (Phase close; SLICE close; sub-Phase close; multi-cluster wave consolidation; rounds where hybrid Reviewer has already been used 3+ times — R32/R36/R37/R39 + ... ), hybrid Reviewer (Opus + Sonnet merged) is MANDATORY not advisory. Define close-walk class mechanically via either: a `--hybrid-reviewer` flag check in `run-pipeline.sh` that auto-fires for the named class, OR a NEXT-ROLE.md state convention (e.g., `CLOSE-WALK-CLASS: true` triggers hybrid pipeline routing). Update `run-pipeline.sh` tier rubric documentation accordingly.
+- **(c) Update `CLAUDE-COORDINATOR.md`** § "Memorial state" or new sub-section: document the new wave-gate consolidation Reviewer behavior. The Coordinator's wave-gate flow now includes: (1) flock + cluster fragment append; (2) `verify-wave-aggregate.sh` mechanical sweep; (3) tier-aware consolidation Reviewer if solo-tier cluster present; (4) STATUS: WAVE-COMPLETE.
 
-- **(e) R49 self-applies via Q-R49-EMPIRICAL.sh.** Verifier checks post-R49 state: `scripts/finalize-round.sh` contains the auto-fire pipeline invocation; `CLAUDE-IMPLEMENTER.md` "On clean completion" has the pipeline mandate sentence; `SPEC-AUTHORING-CHECKLIST.md` has the new "Pipeline-mandatory discipline" section header; `CLAUDE-COORDINATOR.md` has the hybrid Reviewer mandate at close-walk class.
+- **(d) New `coordination/SPEC-AUTHORING-CHECKLIST.md § Wave-aggregate verification discipline` section.** Sub-class canonical text: "Multi-cluster parallel waves where any constituent cluster ran `--tier solo` (no per-cluster Reviewer) MUST run a cold-eye consolidation Reviewer at wave-gate before STATUS: WAVE-COMPLETE. The Coordinator wave-gate aggregation is NOT a substitute for a Reviewer — it is book-keeping. Cross-cluster contract drift, aggregate scope creep, and MEMORIAL fragment semantic-conflict are visible only at the consolidated layer." Authoring requirements + Coordinator + consolidation-Reviewer responsibilities.
+
+- **(e) R50 self-applies via Q-R50-EMPIRICAL.sh.** Verifier checks post-R50 state: `scripts/verify-wave-aggregate.sh` exists + executable + syntax-valid; `run-pipeline.sh` contains tier-aware consolidation Reviewer logic (stdout-grep on `--help` for the new flag/behavior); `CLAUDE-COORDINATOR.md` has the wave-gate consolidation Reviewer documentation; `SPEC-AUTHORING-CHECKLIST.md` has the new § Wave-aggregate verification discipline section header.
 
 ### Tier rationale
 
-**audit-tier** — methodology round; Implementer authors thin spec inline (Q-R49-SPEC.md); Reviewer cold-eye; MU close. The substantive work is rule documentation + light tooling extension; no novel architecture.
+**audit-tier** — methodology round; Implementer authors thin spec inline (Q-R50-SPEC.md); Reviewer cold-eye; MU close. Substantive work is new script authoring + pipeline extension + role-file documentation; bounded scope (script is ~200 lines max; pipeline extension is wave-gate-flow addition).
 
-### Anti-scope (R49 hard limits)
+### Anti-scope (R50 hard limits)
 
-- **NO addition of REINFORCED entries to CLAUDE-*.md.** CLAUDE-IMPLEMENTER.md is at **37 REINFORCED** lines (over the 30-entry threshold R43 consolidated to; R47 + R48 MU appends accumulated). Operator-decision flag #6 (added post-R47): consolidation candidate for a separate future round (R51). R49 MUST NOT add to the count. Modify ONLY the "On clean completion" narrative section of CLAUDE-IMPLEMENTER.md.
+- **NO addition of REINFORCED entries to CLAUDE-*.md.** CLAUDE-IMPLEMENTER.md still at 37 entries (operator-decision flag #6; R51 consolidation candidate). R50 must not add to the count.
 - NO modification of `engine/*`, `test/*`, `tools/*` files (zero production-code changes).
 - NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Rule 7 anchor-canonical-landing-deferred discipline).
 - NO modification of `coordination/MEMORIAL-PHASE-*.md` (R42 frozen shards).
-- NO modification of R42-R48 specs / empirical files (preserve historical baseline).
+- NO modification of R42-R49 specs / empirical files (preserve historical baseline).
 - NO modification of `coordination/SCOPING-MEMO-v0.3.md` or `coordination/PRD.md`.
+- NO modification of `scripts/finalize-round.sh` or `scripts/verify-empirical-acs.sh` or `scripts/pre-commit-rule-sweep.sh` (R45/R46/R47/R49 deliverables stable; wave-aggregate is a SEPARATE script).
 - NO Phase 3 territory.
 - NO opening any GitHub PRs.
 
-ALLOWED modifications: `scripts/finalize-round.sh`, `CLAUDE-IMPLEMENTER.md` (narrative section ONLY), `CLAUDE-COORDINATOR.md`, `coordination/SPEC-AUTHORING-CHECKLIST.md` (add new section), `run-pipeline.sh` (tier-rubric documentation update + optional `--hybrid-reviewer` flag handling).
+ALLOWED modifications:
+- `scripts/verify-wave-aggregate.sh` (NEW — wave-gate verifier)
+- `run-pipeline.sh` (modify — Coordinator-mode tier-aware consolidation Reviewer extension)
+- `CLAUDE-COORDINATOR.md` (modify — document wave-gate consolidation Reviewer behavior)
+- `coordination/SPEC-AUTHORING-CHECKLIST.md` (add new § Wave-aggregate verification discipline section)
+- `coordination/specs/Q-R50-SPEC.md` (NEW — Implementer-authored thin spec)
+- `coordination/specs/Q-R50-EMPIRICAL.sh` (NEW — self-applies tightenings)
+- `coordination/MEMORIAL.md` (chore-A append)
+- `coordination/NEXT-ROLE.md` (this file; pipeline updates)
 
 ### Apply all 7 cross-project rules UPFRONT
 
 (Per `coordination/SPEC-AUTHORING-CHECKLIST.md` § Rule 7 self-application gate. Canonical short names.)
 
-- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — all empirical claims (e.g., "section header present" / "auto-fire invocation present in script") verified via Q-R49-EMPIRICAL.sh at chore-A. Applies R47 Tightenings 1-4 + R48 corrections (no vacuous meta-ACs; stdout-grep for runtime claims; re-derive SHAs; exact counts).
-- **Rule 2 (`branch-binding-coverage-gate`):** N/A — no production-code branches.
+- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — all empirical claims (script exists; pipeline flag present; documentation section header present) verified via Q-R50-EMPIRICAL.sh at chore-A. Applies R47 Tightenings 1-4 + R48 corrections + R49 conventions (no vacuous meta-ACs; stdout-grep for runtime claims; re-derive SHAs; exact counts; assert_eq not assert_ge per R49 MINOR-1 finding).
+- **Rule 2 (`branch-binding-coverage-gate`):** N/A — no production-code branches in the round's deliverable (the wave-aggregate script is new code but methodology-class; not engine production).
 - **Rule 3 (`implementer-spec-test-assertion-coverage`):** N/A — no test file authored.
-- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — ALLOWED_SET in Q-R49-SPEC.md at spec-emit time; matches the "ALLOWED modifications" list above + standard carve-outs.
-- **Rule 5 (`rule-derivation-without-self-application`):** ACTIVE GATE — R49 is the round codifying pipeline-mandatory discipline. Self-application: R49 itself IS running through the pipeline. The empirical claim "R49 was pipeline-executed" can be verified by Reviewer via git log + pipeline metadata.
-- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if Q-R49-EMPIRICAL.sh fails, HALT + DIAGNOSTIC. No silent workarounds.
-- **Rule 7 (`derived-rule-propagation-mechanism-required`):** ACTIVE GATE + Surface (a) extension — the new "Pipeline-mandatory discipline" section in SPEC-AUTHORING-CHECKLIST.md IS Rule 7 Surface (a) for this discipline; auto-fire in finalize-round.sh IS Surface (b); Surface (c) is round-conditional (no new rule canonically landed this round; the discipline extends an existing structural intent).
+- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — ALLOWED_SET in Q-R50-SPEC.md at spec-emit time; matches the "ALLOWED modifications" list above.
+- **Rule 5 (`rule-derivation-without-self-application`):** ACTIVE GATE — R50 codifies wave-aggregate-verification discipline. Self-application: R50 is itself a single-track sequential round (not multi-cluster), so the wave-aggregate discipline doesn't directly fire for R50 — but the verifier MUST be invocable + the pipeline must be extended such that a future multi-cluster wave can rely on it. Q-R50-EMPIRICAL.sh tests the scaffolding presence, not a live wave-gate run.
+- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if Q-R50-EMPIRICAL.sh fails, HALT + DIAGNOSTIC. If verify-wave-aggregate.sh smoke test fails on a known-good wave-gate fixture (or absence of one), HALT + DIAGNOSTIC.
+- **Rule 7 (`derived-rule-propagation-mechanism-required`):** ACTIVE GATE + Surface (a) + (b) extension — new SPEC-AUTHORING-CHECKLIST.md § Wave-aggregate verification discipline section IS Rule 7 Surface (a); the new `verify-wave-aggregate.sh` script IS Surface (b) at wave granularity; Surface (c) is round-conditional (no new rule canonically landed this round; the discipline extends an existing structural intent at a new layer).
 
 ### Halt conditions
 
-1. **Q-R49-EMPIRICAL.sh exits non-zero at chore-A:** HALT + DIAGNOSTIC. Do NOT attest PASS on a failed AC.
-2. **finalize-round.sh auto-fire breaks existing two-commit attestation flow:** if the script's pre-R49 SHA-A/SHA-B sequence regresses after the auto-fire extension is added → HALT + DIAGNOSTIC. The extension MUST be additive (after existing close), not disruptive.
-3. **CLAUDE-IMPLEMENTER.md REINFORCED count drift:** any change from **37** entries → HALT + DIAGNOSTIC. R49 must not add or remove REINFORCED lines (anti-scope strict).
-4. **Test baseline drift:** any change from `361/355/3/3` (R48 close baseline) → HALT + DIAGNOSTIC.
-5. **Bash syntax error:** `bash -n` on modified scripts exits non-zero → HALT + DIAGNOSTIC.
-6. **Pipeline self-invocation regression:** if the modified `scripts/finalize-round.sh` causes infinite pipeline self-invocation (R47-class recursion bug recurring at the round codifying pipeline-mandatory), HALT + DIAGNOSTIC. R48's recursion guard pattern (`_PRE_COMMIT_RULE_SWEEP_ACTIVE` env var) should be referenced for any similar guard in finalize-round.
+1. **Q-R50-EMPIRICAL.sh exits non-zero at chore-A:** HALT + DIAGNOSTIC. Do NOT attest PASS on a failed AC.
+2. **`bash -n` syntax check fails on either modified or new script:** HALT + DIAGNOSTIC.
+3. **`run-pipeline.sh` modifications break existing R47-R49 tested workflows:** the R49 auto-fire-pipeline-after-finalize-round behavior MUST still work post-R50. If smoke test of `./run-pipeline.sh --help` fails or single-round audit-tier flow regresses → HALT + DIAGNOSTIC.
+4. **Test baseline drift:** any change from `361/355/3/3` → HALT + DIAGNOSTIC.
+5. **CLAUDE-IMPLEMENTER.md REINFORCED count drift:** any change from **37** entries → HALT + DIAGNOSTIC (anti-scope strict; R51 consolidation candidate).
+6. **scripts/finalize-round.sh modified:** R49 deliverable; out of scope for R50. Any modification → HALT + DIAGNOSTIC.
 
 ### Inputs for Implementer
 
-1. `scripts/finalize-round.sh` — existing script to extend with auto-fire pipeline (item a).
-2. `CLAUDE-IMPLEMENTER.md` "On clean completion" section (narrative; lines ~100-112) — item b target.
-3. `coordination/SPEC-AUTHORING-CHECKLIST.md` — existing checklist; add new § "Pipeline-mandatory discipline" section (item c).
-4. `CLAUDE-COORDINATOR.md` — Coordinator role file; add hybrid Reviewer mandate at close-walk class (item d).
-5. `run-pipeline.sh` — for tier-rubric documentation update + optional `--hybrid-reviewer` flag handling (item d).
-6. R48 deliverables (`coordination/specs/Q-R48-SPEC.md`, `coordination/specs/Q-R48-EMPIRICAL.sh`) — authoring pattern reference for Q-R49 (Tightenings 1-4 self-applied).
-7. `coordination/reviews/REVIEWER-REPORT-R48.md` — R48 Reviewer findings (verify R49 doesn't reproduce them).
+1. `scripts/verify-empirical-acs.sh` — reference pattern for single-round verifier (R45/R46/R49 deliverable). Adapt to wave-gate granularity.
+2. `scripts/pre-commit-rule-sweep.sh` — reference pattern for recursion-guarded multi-rule check (R45/R48 deliverable).
+3. `run-pipeline.sh` — existing pipeline; modify Coordinator-mode handling for the new tier-aware consolidation Reviewer.
+4. `CLAUDE-COORDINATOR.md` — existing Coordinator role file; § "Memorial state" wave-gate section is the integration point.
+5. `coordination/SPEC-AUTHORING-CHECKLIST.md` — existing checklist; add new § Wave-aggregate verification discipline section.
+6. `coordination/WAVE-PLAN-01.md` + `coordination/WAVE-GATE-01.md` (R24/R27 historical) — example wave-plan / wave-gate artifacts for verify-wave-aggregate.sh design reference.
+7. `coordination/clusters/*/MEMORIAL-fragment.md` (Phase 2 historical, if present) — cluster-fragment format reference.
+8. R49 deliverables (`Q-R49-SPEC.md`, `Q-R49-EMPIRICAL.sh`, R49 Reviewer report) — authoring pattern + Reviewer findings to NOT recur (MINOR-1 assert_ge vs assert_eq; MINOR-3 SKIP-counts-as-PASS).
 
 ### Pipeline invocation
 
 ```bash
 cd /Users/johnwarren/concord/tessera
-./run-pipeline.sh --round R49 --tier audit
+./run-pipeline.sh --round R50 --tier audit
 ```
+
+(Per R49 pipeline-mandatory discipline; this is the canonical invocation. `scripts/finalize-round.sh` will auto-fire pipeline at Implementer chore-A close if invoked separately.)
 
 ---
 
-## Operator-decision flags (carried forward from prior rounds; updated R48 close)
+## Operator-decision flags (carried forward; status post-R49 close)
 
 1. R45 CRITICAL routing accept-vs-escalate (separately tracked).
-2. Rule 7 Surface (c) HARD-GATE candidate (8+ tessera instances at R32/R36/R39/R43/R44/R46/R47; below cross-project 2nd-project threshold per Rule 7 anchor-canonical-landing-deferred).
-3. Cross-project canonical landings (gated on 2nd-project occurrence: R42 § 5.5 memorial sharding; R44 Rule 7 Surface a; R45 Rule 7 Surface b; R46 Rule 1 sub-class; R47 verifier tightenings; R48 recursion guard).
-4. Anchor PR backflog scheduling (R11-R48 contributions).
+2. Rule 7 Surface (c) HARD-GATE candidate (8+ tessera instances; below cross-project 2nd-project threshold per Rule 7 anchor-canonical-landing-deferred).
+3. Cross-project canonical landings (gated on 2nd-project occurrence; 7+ items now: memorial sharding; Rule 7 Surface a/b; Rule 1 sub-class; verifier tightenings; recursion guard; pipeline-mandatory; hybrid Reviewer formalization).
+4. Anchor PR backflog scheduling (R11-R49 contributions).
 5. Phase 3 PRD authoring + § 5.2 forward-protection redesign A/B/C.
-6. **NEW post-R47:** CLAUDE-IMPLEMENTER.md re-consolidation candidate. Currently at 37 REINFORCED entries (R47 + R48 MU appends; over 30-entry threshold R43 consolidated to). Same failure mode R43 fixed at R36 → R43. R51 candidate (after R49 pipeline-discipline + R50 parallel-execution levers close).
+6. CLAUDE-IMPLEMENTER.md re-consolidation candidate (R51 candidate). Currently at 37 REINFORCED entries (R47 + R48 MU appends; 7 over R43 30-entry threshold). Same failure mode R43 fixed at R36 → R43.
+7. **NEW post-R49:** R49 MAJOR-1 — hybrid Reviewer mandate vs structural enforcement mismatch at full-tier. R49 Reviewer flagged this; not blocking; candidate for fold-in at R50 (this round) IF time permits, OR separate future round (R52 candidate). R50 anti-scope DOES allow run-pipeline.sh modifications, so could be in-scope if Implementer chooses; recommend leaving for R52 to keep R50 focused on parallel-execution levers.
 
 HARD STOP re-engaged on Phase 3 scope entry pending operator decisions above.
