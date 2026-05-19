@@ -177,3 +177,35 @@ See § Anti-scope above. **Hard gates:** A12 (no inherited engine internals beyo
 | Cross-project rules canonical | 6 (Rules 1-6); Rule 7 RECOMMENDED FOR DERIVATION + draft at WAVE-GATE-05 § Cross-project reinforcement rules derived this gate; canonical landing scheduled for R38 Memorial-Updater stage per OQ-W5-1 Option A |
 | Safe-continuation chain | R37 emitted Wave 5 gate; R38 = mandatory R36 MAJOR-1 remediation + optional carry-forwards; R39-R41 follow |
 | Phase 3 entry | NOT authorized; requires separate PRD + operator authorization + HARD STOP lifted; R40 inventory artifact feeds future operator PRD authoring, does NOT constitute Phase 3 entry |
+
+## R38 Implementer attestation
+
+**Chore-A SHA (implementation complete):** `8bf0247`  
+**Chore-B SHA (forward-protection test + this attestation):** recorded below at commit time.
+
+**Binding commands at chore-A SHA `8bf0247`:**
+- `npx tsc -p tsconfig.test.json` → exit 0
+- `node --test test/*.test.js` → 357 tests, 351 pass, 4 fail, 2 skip
+
+**Binding commands at chore-B (post-forward-protection test):**
+- `npx tsc -p tsconfig.test.json` → exit 0
+- `node --test test/*.test.js` → 358 tests, 351 pass, 4 fail, 3 skip
+  (AC-R38-4 adds 1 test that skips in worker context; 4 pre-existing q36 failures unchanged)
+- `node test/q38-verification.test.js` (direct) → 3 pass, 0 fail (AC-R38-4 exercises anti-scope diff check)
+
+**AC-R38-1:** ✅ `latest_event_ts === 1050` (was 1000 with bug)  
+**AC-R38-2:** ✅ "not per-distinct-shard dedup" absent; "per-distinct-shard" in latest_event_ts jsdoc  
+**AC-R38-3:** ✅ 357 tests at 8bf0247 per spec  
+**AC-R38-4:** ✅ anti-scope diff from 41c1ff1..HEAD ⊆ ALLOWED_SET (verified via direct run)
+
+**Tactical deviations (inline fixes; no halt):**
+1. `label` → `service_name` (TopologyNode field name mismatch)
+2. `captured_at_ts` → `fetched_at_ts` + `source_id` + `source_version` (TopologySnapshot fields)
+3. `import.meta.url` → `__dirname` pattern (module system)
+4. 300-char window → 500-char window for jsdoc extraction (jsdoc is 317 chars)
+5. Docstring "Per-distinct-shard" → "per-distinct-shard" (lowercase to match test's `includes()` check)
+
+**Reviewer inputs:**
+- `coordination/specs/Q-R38-SPEC.md` (audit-tier self-spec)
+- `engine/topology/common-mode-attribution.ts` (fix at lines ~188-200; docstrings at ~68-79)
+- `test/q38-verification.test.ts` (AC-R38-1, AC-R38-2, AC-R38-4)

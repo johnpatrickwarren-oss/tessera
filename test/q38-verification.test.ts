@@ -2,11 +2,14 @@
 //
 // Verifies: (1) latest_event_ts semantic fix at
 // engine/topology/common-mode-attribution.ts:188-196; (2) docstring accuracy
-// at earliest_event_ts + latest_event_ts fields post-fix.
+// at earliest_event_ts + latest_event_ts fields post-fix; (3) forward-protection
+// AC-R38-4 anti-scope diff pinning RED commit 41c1ff1.
 //
+// Chore-A SHA: 8bf0247. Count at 8bf0247: 357 tests, 351 pass, 4 fail, 2 skip.
 // Tessera-original test (not vendored). R38 spec: coordination/specs/Q-R38-SPEC.md.
 
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { test } from 'node:test';
@@ -14,6 +17,19 @@ import type { TopologySnapshot } from '../engine/types/verdict';
 import { attributeCommonMode } from '../engine/topology/common-mode-attribution';
 
 const ROOT = resolve(__dirname, '..');
+
+// RED commit SHA — lower bound for AC-R38-4 anti-scope diff.
+const RED_COMMIT_SHA = '41c1ff1';
+const ALLOWED_SET = new Set([
+  'engine/topology/common-mode-attribution.ts',
+  'test/q38-verification.test.ts',
+  'coordination/specs/Q-R38-SPEC.md',
+  'coordination/reviews/REVIEWER-REPORT-R38.md',
+  'coordination/MEMORIAL.md',
+  'coordination/NEXT-ROLE.md',
+  'coordination/logs/ROUND-R38-SUMMARY.md',
+  'coordination/diagnostics/DIAGNOSTIC-R38-baseline-mismatch.md',
+]);
 
 // ── AC-R38-1: latest_event_ts FIXTURE ──────────────────────────────────────
 
@@ -70,8 +86,8 @@ test('AC-R38-2: earliest_event_ts and latest_event_ts docstrings describe per-di
   );
 
   // Absence check: "not per-distinct-shard dedup" (line 70, pre-fix misleading phrase)
-  // must be absent after the MAJOR-1 fix.  This phrase IS currently in the file
-  // and IS a single-line substring — verified at spec authoring time.
+  // must be absent after the MAJOR-1 fix.  This phrase IS present as a single-line
+  // substring in the pre-fix file — verified at spec authoring time.
   assert.strictEqual(
     content.includes('not per-distinct-shard dedup'),
     false,
@@ -84,7 +100,7 @@ test('AC-R38-2: earliest_event_ts and latest_event_ts docstrings describe per-di
   // Extract the jsdoc block immediately before "latest_event_ts: number;".
   const latestTsIdx = content.indexOf('latest_event_ts: number;');
   assert.notStrictEqual(latestTsIdx, -1, 'latest_event_ts field must exist in the file');
-  // Look back up to 300 chars to find the last /** in that window.
+  // 500-char window covers the 317-char docblock (verified at implementation time).
   const windowBefore = content.substring(Math.max(0, latestTsIdx - 500), latestTsIdx);
   const lastDocStart = windowBefore.lastIndexOf('/**');
   const latestTsDoc = lastDocStart !== -1 ? windowBefore.substring(lastDocStart) : '';
@@ -94,3 +110,28 @@ test('AC-R38-2: earliest_event_ts and latest_event_ts docstrings describe per-di
     'latest_event_ts jsdoc must contain "per-distinct-shard" (accurate per-shard-latest semantics)',
   );
 });
+
+// ── AC-R38-4: anti-scope forward-protection ────────────────────────────────
+
+test(
+  'AC-R38-4: R38 anti-scope diff ⊆ ALLOWED_SET (RED commit 41c1ff1..HEAD)',
+  {
+    skip: (process.env['NODE_TEST_CONTEXT'] != null || process.env['NODE_TEST_WORKER_ID'] != null)
+      ? 'subprocess-spawn skipped in worker context — transitive hang risk (R34 incident)'
+      : false,
+  },
+  () => {
+    const diffOut = execFileSync(
+      'git',
+      ['diff', `${RED_COMMIT_SHA}..HEAD`, '--name-only', '--', '.', ':!*.js'],
+      { cwd: ROOT },
+    ).toString().trim();
+    const changedPaths = diffOut.length === 0 ? [] : diffOut.split('\n');
+    const violations = changedPaths.filter((p) => !ALLOWED_SET.has(p));
+    assert.deepStrictEqual(
+      violations,
+      [],
+      `R38 anti-scope violations (paths not in ALLOWED_SET): ${violations.join(', ')}`,
+    );
+  },
+);
