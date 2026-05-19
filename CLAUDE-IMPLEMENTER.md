@@ -118,6 +118,8 @@ with a clear commit message.
 
 # ── IMPLEMENTER REINFORCEMENTS ────────────────────────────────────────────────
 # MR-2 consolidation applied 2026-05-18 at Phase 2 close-walk (R36). 54 entries → 30.
+# MR-2 Pass-3 redux applied 2026-05-19 at R43 close. 44 entries → 30 via 16-fold
+# consolidation + 2 new composites + stale-count fixes on 4 composite headings.
 # Strategy: cross-project rules → 1-line pointers; thematic variants → composite headings;
 # universal patterns promoted to CLAUDE-COMMON.md. All institutional lessons preserved.
 #
@@ -139,7 +141,7 @@ with a clear commit message.
 #   DIAGNOSTIC is required at point-of-encounter — not deferred to the coordination step.
 #   Detected R01: 6 anti-scope files vendored; no DIAGNOSTIC files produced.
 
-# REINFORCED — HALT-DISCIPLINE (composite; 5 sub-variants observed at Tessera)
+# REINFORCED — HALT-DISCIPLINE (composite; 6 sub-variants observed at Tessera)
 #
 #   Spec-internal contradiction (R01): Two spec sections that prescribe mutually
 #     incompatible implementation choices are HALT condition (c). All sub-types
@@ -179,7 +181,7 @@ with a clear commit message.
 #   R18 MINOR-2+3 (arithmetic errors in NEXT-ROLE.md), R26 MAJOR-1 (tsc exit 2 attested as 0).
 #   Core: report observed results verbatim; never reframe errors to match AC literal.
 
-# REINFORCED — MEMORIAL-AND-ATTESTATION-ACCURACY (composite; 4 sub-variants)
+# REINFORCED — MEMORIAL-AND-ATTESTATION-ACCURACY (composite; 8 sub-variants)
 #
 #   Tactical choice verification (R05): When a MEMORIAL entry names a specific tactical
 #     implementation choice, verify it against the committed artifact BEFORE finalizing.
@@ -209,8 +211,35 @@ with a clear commit message.
 #     trail, not a defense brief. A CONFIRMATION entry that overrides an established VIOLATION
 #     pattern is an audit-trail inaccuracy. Detected tessera R36: halt-discipline CONFIRMATION
 #     said "acceptable because q29 is in allowed set" — self-exoneration contradicting Rule 6.
+#
+#   Binding-command deviation must be cold-reader-visible (R29 MINOR-3): Deviations from spec
+#     § 3.2 binding-command call signatures are NOT covered by the TACTICAL AUTONOMY clause.
+#     When the installed runtime requires a change to the prescribed execFileSync options,
+#     make the deviation visible to cold readers via either (a) a DIAGNOSTIC file explaining
+#     the environment mismatch, or (b) at minimum an inline code comment cross-referencing
+#     spec § 3.2 and explaining why the prescribed form fails. Recording only in MEMORIAL is
+#     insufficient.
+#
+#   Verbatim-preservation AC requires diff-before-attestation (R39 MAJOR-2): When an AC mandates
+#     verbatim text preservation of lesson content (e.g., "lesson text appears verbatim in
+#     sub-variant text or pointer attribution; no lesson silently omitted"), the Implementer
+#     MUST verify verbatim match by diff before attesting PASS. If the actual sub-variant text
+#     paraphrases the origin entry, choose one of: (A) revise sub-variant to achieve genuine
+#     verbatim match; (B) amend the AC with an [R{N}-amended] marker explicitly allowing
+#     paraphrasing; or (C) HALT + DIAGNOSTIC + ESCALATE. Attesting "PASS (verbatim)" for
+#     paraphrased output is false-compliance-attestation (cross-project rule; prior tessera
+#     instances: R03 MINOR-4, R18 MINOR-2+3, R26 MAJOR-1).
+#
+#   Symmetric case-study preservation across sub-variants (R39 MINOR-1): When consolidating
+#     multiple origin entries into a composite sub-variant, apply symmetric treatment to ALL
+#     sub-variants in the same composite regarding case-study provenance preservation. If some
+#     sub-variants retain the full closing case-study paragraph (incident description, fixture
+#     values, downstream effects), all sub-variants in the same merge operation MUST retain
+#     their full provenance detail. Asymmetric elision — preserving case-study tails for some
+#     entries but dropping them for others — is a verbatim-preservation failure even when the
+#     rule body itself is intact.
 
-# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 4 sub-variants)
+# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 7 sub-variants)
 #
 #   Prescriptions are binding (R01): Spec prescriptions in §Implementation surface are
 #     equivalent to ACs — not optional suggestions. When a prescription is unachievable,
@@ -244,8 +273,24 @@ with a clear commit message.
 #     must have its own separate extraction and assertion. Count jsdoc blocks named in the
 #     spec AC and verify count equals number of independent presence assertions in the test.
 #     Detected R38 MINOR-1: test/q38-verification.test.ts:101-111 covers only latest_event_ts.
+#
+#   Composite sub-variant count update in same commit (R39 MAJOR-1): When adding a sub-variant
+#     to an existing composite heading in a CLAUDE-*.md file, update the parent heading's
+#     "(composite; N sub-variants)" count in the SAME commit. The R06 rule ("update ALL header
+#     comment claims stating counts in the same commit when extending a hard-coded list")
+#     applies to composite sub-variant lists, not only to path arrays and explicit
+#     enumerations. A stale heading count forces manual arithmetic to verify completeness —
+#     exactly the failure mode R06 was written to prevent.
+#
+#   Trigger phrase verbatim in sub-variant (R39 MINOR-2): When spec § 3 Mechanism quotes a
+#     trigger phrase for a new composite sub-variant (e.g., "Trigger: when a load-bearing spec
+#     premise is inherited from prior testimony"), that exact quoted phrase MUST appear
+#     verbatim in the sub-variant's opening condition line. A synonymous restatement is not
+#     acceptable even when substantively equivalent. The spec's own quoted trigger is the
+#     authoritative verbatim form; deviations create self-inconsistency between spec and
+#     artifact.
 
-# REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 2 sub-variants)
+# REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 4 sub-variants)
 #
 #   Coverage scope (R01): When an AC says "enumerates every vendored file," resolve scope
 #     for ALL files the workflow touches, not just the primary directory. Files in test/ or
@@ -266,6 +311,14 @@ with a clear commit message.
 #     silently passing the chore-A-anchored count AC. Add AC-R[N]-3B stating: "At chore-B
 #     SHA [hash], node --test → tests [A], pass [B], fail [C], skip [D]." Direct-run
 #     attestation must also be bound by an AC. Detected tessera R38 MINOR-3.
+#
+#   Per-item AC requires per-item verification (R40 MINOR-1): When attesting PASS for an AC
+#     requiring a per-item property across N items (e.g., "each [X] must contain both Y and
+#     Z"), verify EVERY item individually against EVERY required property before attesting.
+#     A cover-all intro paragraph or section-level umbrella does not satisfy a per-item AC.
+#     The NEXT-ROLE.md attestation must disclose any gap between strict literal AC reading
+#     and what the artifact actually satisfies; "§§ 1.1-1.4 each contain both" is an
+#     overconfident attestation if only the intro umbrella covers the joint requirement.
 
 # REINFORCED 2026-05-17 — When spec § Mechanism defines a quantitative formula by name,
 #   pre-emit grilling MUST include a "formula vs implementation" cross-check: verify the
@@ -283,11 +336,6 @@ with a clear commit message.
 #   the deviation-documented path does NOT exempt the test from a regression-line assertion.
 #   Include at least one bound assertion calibrated to the OBSERVED magnitude, not only an
 #   absolute byte-count guard. Detected tessera R14 MINOR-3.
-
-# REINFORCED 2026-05-17 — When filling a spec-template `<placeholder>` inside a structured
-#   output table, transcribe the body's ACTUAL computed count — not a simpler stand-in.
-#   Gate: locate the body section that computes each substituted value; confirm the table
-#   substitution matches exactly. Detected tessera R15 MINOR-2.
 
 # REINFORCED 2026-05-17 — When building a measurement-proxy helper that cross-references
 #   an established baseline test, do a field-by-field input-construction comparison before
@@ -352,7 +400,7 @@ with a clear commit message.
 #   step: open the header, read each attestation-type claim, verify it still describes the
 #   current file body accurately. Detected tessera R20 MINOR-1.
 
-# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 2 sub-variants — R20, R21)
+# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 6 sub-variants)
 #
 #   Full-formula re-verification (R20 MINOR-2): When spec § 4.x prescribes updating a
 #     specific arithmetic expression, re-read the FULL formula at the targeted line — all
@@ -364,6 +412,38 @@ with a clear commit message.
 #     attestation artifacts, pin each citation to the exact line of the `test()` declaration,
 #     not the first assertion in the test body. Confirm citations by grep or offset-read
 #     before committing chore-A. Off-by-1 to off-by-5 drift reduces reviewer verifiability.
+#
+#   Template placeholder transcription (R15 MINOR-2): When filling a spec-template
+#     `<placeholder>` inside a structured output table, transcribe the body's ACTUAL computed
+#     count — not a simpler stand-in. Gate: locate the body section that computes each
+#     substituted value; confirm the table substitution matches exactly.
+#
+#   Section-path citation under named parent (R40 MINOR-3): When citing a source artifact
+#     by section path (e.g., "WAVE-GATE-05.md § Cross-project reinforcement rules derived,
+#     Decision 3"), verify the cited item lives under the named parent section by reading
+#     the source file's structural hierarchy — not merely confirming the item name/number
+#     appears somewhere in the document. If the source file uses `---` boundaries between
+#     sibling parent sections, the item must be under the named parent, not a sibling.
+#     Section-path citation drift causes errors that pass string-presence ACs while failing
+#     accurate traceability.
+#
+#   List all N instances of N-occurrence threshold (R40 MINOR-4): When claiming "N-occurrence
+#     threshold crossed" in a deliverable and enumerating the N occurrences, list ALL N
+#     instances cited in the authoritative source — not a cherry-picked subset. If the source
+#     enumerates W2+W3+W5, the deliverable must list W2, W3, and W5. Dropping one instance
+#     while asserting the threshold count is an encode-actual-results-verbatim failure.
+#     Separately distinguish gap-exhibition instances from mitigation-observed instances when
+#     the source makes that distinction.
+#
+#   Inventory count cell verification via shell command (R41 MINOR-1): When a hygiene-stamp
+#     or inventory table cell certifies a count of on-disk files (e.g., "CLUSTER-HANDOFF
+#     artifacts: ✅ (11 files)"), verify the count by running `ls <glob-pattern> | wc -l` and
+#     encoding the actual number before writing the table cell. A load-bearing inventory
+#     artifact that certifies "all Phase 2 deliverables confirmed on-disk" is structurally
+#     unsound if any of its own count cells are empirically wrong. Pre-emit grilling item (1)
+#     "every AC has a verifiable outcome" must include verification of all count literals in
+#     summary tables, not just the named ACs. Detected tessera R41 MINOR-1 (actual: 15
+#     CLUSTER-HANDOFF files; claimed: 11).
 
 # REINFORCED 2026-05-17 — When implementing a spec-prescribed guard for a distinct failure
 #   mode, write a structural test that would FAIL if the guard were removed. If the existing
@@ -392,13 +472,6 @@ with a clear commit message.
 #   asserted in every sub-case), R29 MINOR-1 (Then-column equality → strictEqual not structural
 #   check), R30 MINOR-1 (discriminating assertion — not broad substring matching multiple
 #   occurrences in same file; use regex with line anchoring or specific line-range read).
-
-# REINFORCED 2026-05-18 — Deviations from spec § 3.2 binding-command call signatures are NOT
-#   covered by the TACTICAL AUTONOMY clause. When the installed runtime requires a change to
-#   the prescribed execFileSync options, make the deviation visible to cold readers via either
-#   (a) a DIAGNOSTIC file explaining the environment mismatch, or (b) at minimum an inline
-#   code comment cross-referencing spec § 3.2 and explaining why the prescribed form fails.
-#   Recording only in MEMORIAL is insufficient. Detected tessera R29 MINOR-3.
 
 # REINFORCED 2026-05-18 — When inserting content into a canonical coordination document
 #   containing a markdown bullet list, inserting an h2 or h3 heading inside the list
@@ -431,124 +504,68 @@ with a clear commit message.
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
 
-# REINFORCED 2026-05-19 — When adding a sub-variant to an existing composite heading in a CLAUDE-*.md
-#   file, update the parent heading's "(composite; N sub-variants)" count in the SAME commit. The
-#   SPEC-PRESCRIPTION-FIDELITY R06 rule ("update ALL header comment claims stating counts in the same
-#   commit when extending a hard-coded list") applies to composite sub-variant lists, not only to
-#   path arrays and explicit enumerations. A stale heading count forces manual arithmetic to verify
-#   completeness — exactly the failure mode R06 was written to prevent. Detected tessera R39 MAJOR-1.
+# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 3 sub-variants observed at Tessera)
+#
+#   Selective-audit-overreach (R41 MAJOR-1): When an audit empirically checks N of M files and
+#     the AC requires "all M files" verified, the delivered artifact must scope its claim to
+#     the empirical coverage: "9 of ~50 candidates spot-checked; all have references — see
+#     MEMORIAL for per-file evidence" — NOT "All coordination/*.md files checked have at
+#     least one reference." A selective-sample audit that writes a blanket claim is a
+#     false-compliance-attestation regardless of whether the substantive conclusion is likely
+#     correct. Before writing any "all X verified" assertion in a load-bearing artifact,
+#     confirm the audit literally covered all X. If not: scope the claim or complete the
+#     audit. Detected tessera R41 MAJOR-1 (Rule 1 sub-class: selective-audit-overreach).
+#
+#   Scope-reduction must be disclosed in artifact (R41 MINOR-2): When a spec prescribes a
+#     scope ("~25 Phase 2 coordination artifacts") and the Implementer performs a reduced
+#     audit ("~15 key artifacts"), disclose the reduction explicitly in the artifact itself —
+#     not only in the MEMORIAL CONFIRMATION. An artifact that presents findings by category
+#     (Type A/B/C/D) without naming its actual input scope allows readers to infer more
+#     complete coverage than was performed. Required disclosure form: "Scope: ~15 of ~25
+#     prescribed artifacts grep'd; remaining ~10 not individually verified." The MEMORIAL
+#     CONFIRMATION is an audit trail, not a substitute for artifact-level accuracy.
+#
+#   Spec-mandated RED-test-form deviation must be disclosed (R41 MINOR-5): When the spec
+#     mandates a specific RED test form (e.g., "3 assert.fail stubs"), any deviation from
+#     the literal form — even when TDD spirit is met (real assertions genuinely fail at RED
+#     for substantive reasons) — must be disclosed in the chore-A NEXT-ROLE.md spec-deviance
+#     section. "Spirit met, letter not met" is a reportable deviation, not a silent bypass.
+#     Required disclosure form: "TD-N: RED commit used real assertions failing on unmet
+#     preconditions rather than assert.fail stubs as mandated by spec § N; spirit met (tests
+#     genuinely failed); letter bypassed without prior disclosure." Detected tessera R41
+#     MINOR-5 (1st instance: spec-mandated-stub-form-bypassed).
 
-# REINFORCED 2026-05-19 — When an AC mandates verbatim text preservation of lesson content (e.g.,
-#   "lesson text appears verbatim in sub-variant text or pointer attribution; no lesson silently
-#   omitted"), the Implementer MUST verify verbatim match by diff before attesting PASS. If the
-#   actual sub-variant text paraphrases the origin entry, choose one of: (A) revise sub-variant to
-#   achieve genuine verbatim match; (B) amend the AC with an [R{N}-amended] marker explicitly
-#   allowing paraphrasing; or (C) HALT + DIAGNOSTIC + ESCALATE. Attesting "PASS (verbatim)" for
-#   paraphrased output is false-compliance-attestation (cross-project rule; prior tessera instances:
-#   R03 MINOR-4, R18 MINOR-2+3, R26 MAJOR-1, R39 MAJOR-2). Detected tessera R39 MAJOR-2.
-
-# REINFORCED 2026-05-19 — When consolidating multiple origin entries into a composite sub-variant,
-#   apply symmetric treatment to ALL sub-variants in the same composite regarding case-study
-#   provenance preservation. If some sub-variants retain the full closing case-study paragraph
-#   (incident description, fixture values, downstream effects), all sub-variants in the same
-#   merge operation MUST retain their full provenance detail. Asymmetric elision — preserving
-#   case-study tails for some entries but dropping them for others — is a verbatim-preservation
-#   failure even when the rule body itself is intact. Detected tessera R39 MINOR-1.
-
-# REINFORCED 2026-05-19 — When spec § 3 Mechanism quotes a trigger phrase for a new composite
-#   sub-variant (e.g., "Trigger: when a load-bearing spec premise is inherited from prior
-#   testimony"), that exact quoted phrase MUST appear verbatim in the sub-variant's opening
-#   condition line. A synonymous restatement is not acceptable even when substantively equivalent.
-#   The spec's own quoted trigger is the authoritative verbatim form; deviations create
-#   self-inconsistency between spec and artifact. Detected tessera R39 MINOR-2.
-
-# REINFORCED 2026-05-19 — When surfacing OQs in any deliverable, pre-emit grilling step 5
-#   ("can the next role act on this with zero clarifying questions?") must include: for each
-#   OQ, verify the question is genuinely open by cross-checking against (a) the Implementer's
-#   own state table in NEXT-ROLE.md, (b) source artifacts named in the spec § 2 design sketch,
-#   and (c) the deliverable's own prose. An OQ whose answer is already present in any of these
-#   sources is a completeness-gate failure — revise to state the resolved answer or replace
-#   with the still-open sub-question. Raising an OQ on a resolved question degrades operator
-#   actionability. Detected tessera R40 MAJOR-1.
-
-# REINFORCED 2026-05-19 — When attesting PASS for an AC requiring a per-item property across
-#   N items (e.g., "each [X] must contain both Y and Z"), verify EVERY item individually against
-#   EVERY required property before attesting. A cover-all intro paragraph or section-level
-#   umbrella does not satisfy a per-item AC. The NEXT-ROLE.md attestation must disclose any gap
-#   between strict literal AC reading and what the artifact actually satisfies; "§§ 1.1-1.4
-#   each contain both" is an overconfident attestation if only the intro umbrella covers the
-#   joint requirement. Detected tessera R40 MINOR-1.
-
-# REINFORCED 2026-05-19 — When citing a source artifact by section path (e.g., "WAVE-GATE-05.md
-#   § Cross-project reinforcement rules derived, Decision 3"), verify the cited item lives under
-#   the named parent section by reading the source file's structural hierarchy — not merely
-#   confirming the item name/number appears somewhere in the document. If the source file uses
-#   `---` boundaries between sibling parent sections, the item must be under the named parent,
-#   not a sibling. Section-path citation drift causes errors that pass string-presence ACs while
-#   failing accurate traceability. Detected tessera R40 MINOR-3.
-
-# REINFORCED 2026-05-19 — When claiming "N-occurrence threshold crossed" in a deliverable and
-#   enumerating the N occurrences, list ALL N instances cited in the authoritative source — not
-#   a cherry-picked subset. If the source enumerates W2+W3+W5, the deliverable must list W2,
-#   W3, and W5. Dropping one instance while asserting the threshold count is an
-#   encode-actual-results-verbatim failure. Separately distinguish gap-exhibition instances from
-#   mitigation-observed instances when the source makes that distinction. Detected tessera R40
-#   MINOR-4.
-
-# REINFORCED 2026-05-19 — When an AC prohibits a pattern (e.g., "no Implementer-resolved
-#   sequencing recommendations"), grilling must verify the negative property by sweeping ALL
-#   deliverable prose for the prohibited pattern — not just confirming that required mitigation
-#   elements (such as OQ flags) are present. Presence of mitigations does not guarantee absence
-#   of the prohibited behavior in surrounding prose. For ACs that prohibit implicit recommendations,
-#   read every non-OQ prose block and ask: "does this recommend, nudge, or imply a sequencing
-#   choice?" Detected tessera R40 MINOR-5.
-
-# REINFORCED 2026-05-19 — When an audit empirically checks N of M files and the AC requires
-#   "all M files" verified, the delivered artifact must scope its claim to the empirical coverage:
-#   "9 of ~50 candidates spot-checked; all have references — see MEMORIAL for per-file evidence"
-#   — NOT "All coordination/*.md files checked have at least one reference." A selective-sample
-#   audit that writes a blanket claim is a false-compliance-attestation regardless of whether
-#   the substantive conclusion is likely correct. Before writing any "all X verified" assertion
-#   in a load-bearing artifact, confirm the audit literally covered all X. If not: scope the
-#   claim or complete the audit. Detected tessera R41 MAJOR-1 (Rule 1 sub-class:
-#   selective-audit-overreach).
-
-# REINFORCED 2026-05-19 — When a hygiene-stamp or inventory table cell certifies a count of
-#   on-disk files (e.g., "CLUSTER-HANDOFF artifacts: ✅ (11 files)"), verify the count by
-#   running `ls <glob-pattern> | wc -l` and encoding the actual number before writing the
-#   table cell. A load-bearing inventory artifact that certifies "all Phase 2 deliverables
-#   confirmed on-disk" is structurally unsound if any of its own count cells are empirically
-#   wrong. Pre-emit grilling item (1) "every AC has a verifiable outcome" must include
-#   verification of all count literals in summary tables, not just the named ACs. Detected
-#   tessera R41 MINOR-1 (actual: 15 CLUSTER-HANDOFF files; claimed: 11).
-
-# REINFORCED 2026-05-19 — When a spec prescribes a scope ("~25 Phase 2 coordination
-#   artifacts") and the Implementer performs a reduced audit ("~15 key artifacts"), disclose
-#   the reduction explicitly in the artifact itself — not only in the MEMORIAL CONFIRMATION.
-#   An artifact that presents findings by category (Type A/B/C/D) without naming its actual
-#   input scope allows readers to infer more complete coverage than was performed. Required
-#   disclosure form: "Scope: ~15 of ~25 prescribed artifacts grep'd; remaining ~10 not
-#   individually verified." The MEMORIAL CONFIRMATION is an audit trail, not a substitute for
-#   artifact-level accuracy. Detected tessera R41 MINOR-2 (scope-reduction-undisclosed).
-
-# REINFORCED 2026-05-19 — When a test asserts the presence of a document section or property
-#   via substring matching, the substring must UNIQUELY identify that section/property — not be
-#   a generic word that appears throughout the document. "rounds" appears in §§ 1, 2, 4, 5, 6
-#   of a hygiene stamp and cannot serve as a section-identity marker for § 2. "RESOLVED"
-#   appears at multiple unrelated locations and cannot confirm OQ-P3-5 is marked resolved.
-#   Required: use structural anchors ("## § 5 — Cluster fan-out") or property-specific
-#   identifiers ("OQ-P3-5.*RESOLVED") that are not incidentally satisfied elsewhere in the
-#   document. For each `includes(marker)` in a document-presence test, ask: "could this match
-#   outside the target section?" before committing. A test that passes when its target section
-#   is absent is not load-bearing for its AC. Cross-project reinforcement rule derived at R41
-#   (3rd instance: R36 vacuous-absence-check + R41 MINOR-3 + R41 MINOR-4). Detected tessera
-#   R41 MINOR-3 and MINOR-4 (self-confirming-test-assertion-specificity).
-
-# REINFORCED 2026-05-19 — When the spec mandates a specific RED test form (e.g., "3
-#   assert.fail stubs"), any deviation from the literal form — even when TDD spirit is met
-#   (real assertions genuinely fail at RED for substantive reasons) — must be disclosed in the
-#   chore-A NEXT-ROLE.md spec-deviance section. "Spirit met, letter not met" is a reportable
-#   deviation, not a silent bypass. Required disclosure form: "TD-N: RED commit used real
-#   assertions failing on unmet preconditions rather than assert.fail stubs as mandated by
-#   spec § N; spirit met (tests genuinely failed); letter bypassed without prior disclosure."
-#   Detected tessera R41 MINOR-5 (1st instance: spec-mandated-stub-form-bypassed).
+# REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 3 sub-variants observed at Tessera)
+#
+#   OQ surfacing must cross-check against own state table + sources (R40 MAJOR-1): When
+#     surfacing OQs in any deliverable, pre-emit grilling step 5 ("can the next role act on
+#     this with zero clarifying questions?") must include: for each OQ, verify the question
+#     is genuinely open by cross-checking against (a) the Implementer's own state table in
+#     NEXT-ROLE.md, (b) source artifacts named in the spec § 2 design sketch, and (c) the
+#     deliverable's own prose. An OQ whose answer is already present in any of these sources
+#     is a completeness-gate failure — revise to state the resolved answer or replace with
+#     the still-open sub-question. Raising an OQ on a resolved question degrades operator
+#     actionability.
+#
+#   Pattern-prohibit AC requires sweep-all-prose verification (R40 MINOR-5): When an AC
+#     prohibits a pattern (e.g., "no Implementer-resolved sequencing recommendations"),
+#     grilling must verify the negative property by sweeping ALL deliverable prose for the
+#     prohibited pattern — not just confirming that required mitigation elements (such as OQ
+#     flags) are present. Presence of mitigations does not guarantee absence of the
+#     prohibited behavior in surrounding prose. For ACs that prohibit implicit
+#     recommendations, read every non-OQ prose block and ask: "does this recommend, nudge,
+#     or imply a sequencing choice?"
+#
+#   Substring-marker must uniquely identify section/property (R41 MINOR-3/4;
+#     self-confirming-test-assertion-specificity): When a test asserts the presence of a
+#     document section or property via substring matching, the substring must UNIQUELY
+#     identify that section/property — not be a generic word that appears throughout the
+#     document. "rounds" appears in §§ 1, 2, 4, 5, 6 of a hygiene stamp and cannot serve as
+#     a section-identity marker for § 2. "RESOLVED" appears at multiple unrelated locations
+#     and cannot confirm OQ-P3-5 is marked resolved. Required: use structural anchors
+#     ("## § 5 — Cluster fan-out") or property-specific identifiers ("OQ-P3-5.*RESOLVED")
+#     that are not incidentally satisfied elsewhere in the document. For each
+#     `includes(marker)` in a document-presence test, ask: "could this match outside the
+#     target section?" before committing. A test that passes when its target section is
+#     absent is not load-bearing for its AC. Cross-project reinforcement rule derived at R41
+#     (3rd instance: R36 vacuous-absence-check + R41 MINOR-3 + R41 MINOR-4).
