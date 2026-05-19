@@ -416,3 +416,33 @@ with a clear commit message.
 #   semantic verification of docstring accuracy claims. Detected tessera R36 MAJOR-1/MINOR-1:
 #   earliest_event_ts docstring "not per-distinct-shard dedup" (misleading pre-fix wording)
 #   not checked; test assertion checked a string that was never in the file.
+# REINFORCED 2026-05-19 — When implementing a spec AC Then-clause that requires an absence check
+#   on docstring text, use the EXACT phrase from the spec's AC literal — not a synonym that
+#   happens to co-occur in the pre-fix file. If the spec says "DOES NOT contain 'iteration over
+#   all touches'", the test assertion must be `strictEqual(content.includes('iteration over all
+#   touches'), false)` — not `content.includes('not per-distinct-shard dedup')` even though that
+#   phrase is also present in the pre-fix file. Both phrases may be non-vacuous, but only the
+#   spec-literal phrase correctly implements the AC. A future regression that reintroduces the
+#   spec-literal phrase without the synonym would silently pass the non-literal check. Applies to
+#   ALL absence assertions in docstring-accuracy ACs, not just the phrase printed in the spec
+#   preamble. Detected tessera R38 MINOR-1: `test/q38-verification.test.ts:92`.
+# REINFORCED 2026-05-19 — When a spec AC Then-clause names MULTIPLE jsdoc blocks for a presence
+#   check (e.g., "earliest_event_ts jsdoc DOES contain 'X' AND latest_event_ts jsdoc DOES
+#   contain 'X'"), each named block must have its own separate extraction and its own separate
+#   assertion in the test. Implementing the presence check for only one of the named blocks
+#   silently leaves the other block uncovered — a future regression stripping the phrase from the
+#   uncovered block would pass. Before committing chore-A, count the jsdoc blocks named in the
+#   spec AC and verify that count equals the number of independent presence assertions in the test.
+#   Detected tessera R38 MINOR-1: `test/q38-verification.test.ts:101-111` covers only
+#   latest_event_ts; earliest_event_ts presence check absent despite spec § 3 AC-R38-2 requiring
+#   both.
+# REINFORCED 2026-05-19 — When chore-B adds a forward-protection test that self-skips under the
+#   standard binding command (`node --test test/*.test.js`), the spec MUST include a chore-B count
+#   AC binding the post-chore-B state. The skip-vs-fail asymmetry means a broken forward-
+#   protection test that always skips (rather than running and passing) would change the skip
+#   count but leave the `fail` count unchanged — passing the chore-A-anchored count AC
+#   unchallenged. Correct approach: add AC-R[N]-3B (or equivalent) stating: "At chore-B SHA
+#   [hash], node --test → tests [A], pass [B], fail [C], skip [D]" so the post-chore-B count is
+#   independently bound. If direct-run attestation is also used (node test/qNN-verification.test.js
+#   → M pass, 0 fail), that must also be bound by an AC, not left as NEXT-ROLE.md disclosure only.
+#   Detected tessera R38 MINOR-3: Q-R38-SPEC.md § 3 AC-R38-3 omits chore-B count binding.
