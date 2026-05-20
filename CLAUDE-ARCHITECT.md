@@ -514,3 +514,26 @@ All unresolved decisions → open questions in the spec.
 #   firing_verdicts[] → firing_family_count === 0" but no AC asserts this; AC-R65-3/4/6 use
 #   empty input incidentally with assertions on other fields; § 5.3 did not enumerate this
 #   gap; a bug returning firing_family_count: 1 for empty input would pass all current ACs).
+# REINFORCED 2026-05-20 — When spec prescribes a hard-coded boolean or status literal in a
+#   success-response field whose name makes a semantic claim about a downstream side-effect
+#   the consumer cannot confirm (e.g., `freeze_hook_activated: true` when the consumer emits
+#   an EventEmitter event with no return path from subscribers), the Architect must either
+#   (a) choose a field name that is semantically accurate from the consumer's perspective
+#   ("event_accepted" / "event_forwarded" rather than "freeze_hook_activated") OR (b) add a
+#   JSDoc on the field interface clarifying that the value means "forwarded to wired
+#   subscribers, not confirmed activated." Pre-emit grilling Q.1 ("every claim verifiable?")
+#   must explicitly include: for each boolean status field in a success response, can the
+#   emitting component actually assert that value from its own observable state? If not, the
+#   field name is a semantic overclaim. Detected tessera R66 MINOR-1 (freeze_hook_activated:
+#   true always returned by DsEventConsumer even when no factory subscriber is wired; spec
+#   § 4.1 prescribed this literal; the consumer cannot verify the freeze hook fired).
+# REINFORCED 2026-05-20 — When amending a binding-command prediction or test-count value in
+#   a spec file (e.g., § 5.2 implicit AC), use SINGLE-VALUE replacement with an explanatory
+#   annotation rather than strikethrough dual-value format. The strikethrough markdown
+#   convention renders visually but the old literal text remains present in the file and is
+#   parseable by future grep-based attestation-archeology (e.g., grepping "what did R66
+#   predict?" finds both old and new values). Procedure: (a) replace old value with new value
+#   in-line; (b) append an [Rnn-amended per Option X: reason] bracketed annotation on the
+#   SAME line AFTER the new value. Full-disclosure intent is correct; the format must avoid
+#   leaving the old literal as a primary grep target. Detected tessera R66 MINOR-5
+#   (Q-R66-SPEC.md:1163 ~~444/439/2/3~~ alongside 444/438/3/3; old literal grep-parseable).

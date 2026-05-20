@@ -815,3 +815,40 @@ with a clear commit message.
 #     applicable to the same deliverable element. For each sub-variant applied, ask: "are
 #     there adjacent sub-variants in this composite whose applicability I have not checked?"
 #     Detected tessera R51 MINOR-1.
+# REINFORCED 2026-05-20 — When a class extends `EventEmitter` and the module exports a
+#   corresponding typed-events interface (e.g., `DsEventConsumerEvents`), the interface MUST
+#   be used as the generic parameter (`EventEmitter<DsEventConsumerEvents>`) if the project's
+#   Node.js typings support it — OR the interface MUST be dropped with a JSDoc note
+#   explaining it is "documentation only, not a compile-time gate." Exporting a typed-events
+#   interface without wiring it to the emitter implies a compile-time guarantee that does not
+#   exist: a typo in `this.emit('activte', ...)` compiles silently even with the interface
+#   present. Check at emit-time: does `EventEmitter<TEvents>` appear in the class `extends`
+#   clause? If not, and an interface is exported, add the generic parameter or remove the
+#   interface. Detected tessera R66 MINOR-2 (DsEventConsumerEvents exported at event-
+#   consumer.ts:52-55; DsEventConsumer extends EventEmitter at line 169 without the generic;
+#   no compile-time emit gate enforced).
+# REINFORCED 2026-05-20 — When a stateful factory's deactivation paths (timer callback and
+#   `cancelActivation()`) set `state.active = false`, they must also clear any identifier
+#   fields — such as `cluster_event_id` and `until_ts` — whose semantics are "valid only
+#   during an active period." Default rule: reset to undefined (or `delete state.field`) in
+#   both deactivation paths immediately after `state.active = false`. Leaving stale
+#   identifiers causes `getState()` callers (observability hooks, test inspectors, debug
+#   tooling) to receive post-deactivation data that appears to describe an active event. The
+#   exception is when the field's JSDoc explicitly states it is "sticky-after-deactivation by
+#   design." For each deactivation path: read the state object's fields; for every field with
+#   lifecycle-bounded semantics, verify it is cleared. Detected tessera R66 MINOR-3
+#   (freeze-hook-factory.ts:110-113 timer callback and :125-131 cancelActivation set
+#   active=false but leave cluster_event_id + until_ts stale; no AC verifies state hygiene).
+# REINFORCED 2026-05-20 — In `node:test` test files, ALL `import` and `import type`
+#   statements must appear at the TOP of the file, BEFORE any `describe()` calls, top-level
+#   `const` declarations, and helper-function definitions. ES modules hoist imports at runtime
+#   so misplaced imports do not cause errors, but the layout obscures the module's dependency
+#   graph for a cold reader and violates codebase convention. Procedure: after writing a test
+#   file, scan for any `import` statement below the first `describe()` or top-level `const`
+#   — if found, move it to the import block at the top. This applies to spec-prescribed
+#   fixture stubs placed at the bottom of a § 4 pseudocode block: at implementation time,
+#   move those imports to the top-of-file import block before the describe. Detected tessera
+#   R66 MINOR-4 (test/q66-ds-integration-event-consumer.test.ts:332-333 places import type
+#   { PerShardResidual } and import type { ExtendedSampleObservation } after the describe()
+#   block at line 78; codebase convention violated per sibling q65 test file which groups
+#   imports at top).

@@ -1,7 +1,66 @@
 CURRENT-ROUND: R66
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 TIER: full
+
+---
+
+## § Reviewer R66 routing block (2026-05-20)
+
+### Reviewer verdict
+
+**STATUS: MERGE-READY** — 0 CRITICAL, 0 MAJOR, 5 MINOR, 4 OBS.
+
+### Binding-command re-runs at Reviewer HEAD `0765209`
+
+- `npx tsc -p tsconfig.test.json` → exit 0, zero diagnostics.
+- `node --test --test-reporter=tap test/*.test.js` → `tests=444 / pass=438 / fail=3 / skipped=3` (exit 1). 3 fails = AC-R36-30 + AC-R36-31 + AC-R65-2 carry-forward (matches Implementer attestation verbatim).
+- `bash coordination/specs/Q-R66-EMPIRICAL.sh` → 14 PASS, 0 FAIL, exit 0.
+- `git diff 8f3dd60..HEAD --name-only | sort` → 9 ALLOWED_SET paths + 1 diagnostic regex carve-out (`DIAGNOSTIC-R66-r65-index-count-regression.md`). No anti-scope drift.
+- All 17 R66 ACs individually `ok` in q66 TAP output.
+- Frozen-surface diffs all empty: `engine/events/freeze-hook.ts`, `engine/ds-integration/event-contract.ts`, `engine/ds-integration/feed-contract.ts`, `engine/ds-integration/feed.ts`, `engine/events/event-feed.ts`, `engine/types/verdict.ts`.
+
+### Findings summary (full report at `coordination/reviews/REVIEWER-REPORT-R66.md`)
+
+| # | Severity | Citation | Subject |
+|---|---|---|---|
+| MINOR-1 | MINOR | `event-consumer.ts:267-274` (mandated by spec § 4.1) | `freeze_hook_activated: true` returned unconditionally; semantic-vs-literal misalignment inherited from spec |
+| MINOR-2 | MINOR | `event-consumer.ts:52-55,169` | `DsEventConsumerEvents` interface exported but `EventEmitter` not typed by it; no compile-time emit gate |
+| MINOR-3 | MINOR | `freeze-hook-factory.ts:110-113,125-131` | Deactivation paths set `active=false` but leave `cluster_event_id` + `until_ts` stale; documented informational-only but state-hygiene gap |
+| MINOR-4 | MINOR | `test/q66-ds-integration-event-consumer.test.ts:332-333` | Type-only imports placed after `describe(...)` block; codebase convention violation |
+| MINOR-5 | MINOR | `Q-R66-SPEC.md:1163` | Strikethrough amendment leaves OLD `444/439/2/3` literal in spec file alongside NEW `444/438/3/3`; mildly confusing for future attestation-archeology |
+| OBS-1 | OBS | diff path enumeration | Anti-scope diff includes 1 regex carve-out path (DIAGNOSTIC); spec § 3.2 allows |
+| OBS-2 | OBS | R62 + R66 pattern | 2 Tessera instances of "spec AC pattern that doesn't survive round evolution" (R62 vacuous + R66 fragile); 3rd at R67+ triggers Rule 5 cross-project promotion |
+| OBS-3 | OBS | R65 + R66 within Wave 10 | 2 instances of CLUSTER-HANDOFF doc inaccuracy in single wave; candidate for CLAUDE-COORDINATOR.md REINFORCED |
+| OBS-4 | OBS | `test/q66-ds-integration-event-consumer.test.ts:233-245` | AC-R66-12 verifies reference inequality only; does not directly verify delegation to `freezeAwareUpdatePerShardResidual` (bounded gap; downstream tests cover delegation correctness) |
+
+### Right-reasons audit (3 tests; all PASS)
+
+- AC-R66-1 (HTTP 202 acceptance): 5 independent field assertions on response; test fixture independent of consumer body construction. Discriminates against any error-class regression.
+- AC-R66-11 (freeze-path reference equality): `result === current` discriminates the freeze branch (`return current`) from the delegation branch (which constructs new object). Pathological clone-and-return would fail.
+- AC-R66-15 (freeze-hook.ts unmodified): direct git-diff structural property; cannot pass via test-internal collusion. Reviewer independently re-verified at HEAD.
+
+No self-confirming tests detected across the 17-test suite.
+
+### Cross-cutting checks
+
+- **TDD discipline:** RED commit `df0ded3` precedes GREEN `75d10bf`; production files absent at RED commit verified. ✓
+- **Halt-discipline:** ESCALATE fired on AC-R65-2 regression; DIAGNOSTIC-R66-r65-index-count-regression.md authored with 3 bounded options; operator chose Option A; spec-triad amendments landed in `d86cfc6` (ALLOWED_SET files only). No silent workaround. ✓
+- **Anti-scope:** 9-path ALLOWED_SET + 1 diagnostic carve-out; no in-test ALLOWED_SET expansion; all frozen surfaces verified unmodified. ✓
+- **Claim-then-walk discipline:** Spec § 8 documents 4 handoff-doc inaccuracies caught at Architect spec-emit via direct file Read; codebase reality used throughout instead of handoff testimony. ✓
+
+### Routing
+
+**NEXT-ROLE: MEMORIAL-UPDATER | STATUS: MERGE-READY**
+
+Memorial-Updater inputs:
+1. `coordination/reviews/REVIEWER-REPORT-R66.md`
+2. `coordination/MEMORIAL.md` (R66 ARCHITECT + IMPLEMENTER entries appended; Reviewer entries to be appended in this routing chore)
+3. `coordination/specs/Q-R66-SPEC.md` + `Q-R66-SPEC-AUDIT.md` + `Q-R66-EMPIRICAL.sh`
+4. `coordination/diagnostics/DIAGNOSTIC-R66-r65-index-count-regression.md`
+5. This NEXT-ROLE.md (Implementer + Reviewer attestations)
+
+Expected MU attention: OBS-2 reinforcement candidate (2nd "AC pattern doesn't survive round evolution" instance; tracking toward Rule 5 cross-project threshold at 3 instances); OBS-3 reinforcement candidate (2 Wave-10 instances of CLUSTER-HANDOFF doc inaccuracy — candidate CLAUDE-COORDINATOR.md REINFORCED); standard ROUND-R66-SUMMARY.md authoring; CLAUDE-*.md REINFORCED accretion if any sub-class threshold crossed.
 
 ---
 

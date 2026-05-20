@@ -648,3 +648,23 @@ cross-cluster coordination → Coordinator artifacts (`WAVE-PLAN-NN.md`,
 # #   filenames match the WU pairing they describe (filename-vs-content drift
 # #   surfaced at Wave 2 gate; D1 edge was correctly identified but the handoff
 # #   artifact was named after a different WU pair).
+# REINFORCED 2026-05-20 — When authoring a CLUSTER-HANDOFF document that references a
+#   frozen or recently-stable interface surface (e.g., contract module exports, class vs.
+#   pure-function shape, field names, endpoint structure), the Coordinator MUST Read the
+#   actual source files at handoff-emit time and verify every interface claim by direct grep
+#   or file inspection — NOT by inheriting from prior testimony, architectural model, or
+#   documentation. Two instances within Wave 10 (R65: CLUSTER-HANDOFF-WAVE10-3A-3B.md
+#   contained 4 divergences against feed-contract.ts field names; R66: CLUSTER-HANDOFF-
+#   WAVE10-3A-3C.md contained 4 structural divergences against event-contract.ts +
+#   freeze-hook.ts — including FreezeHook being framed as a class with constructor +
+#   activate/deactivate/is_active methods when the actual surface is a pure function
+#   `freezeAwareUpdatePerShardResidual` + interface `FreezeHookState`). Both downstream
+#   Architects independently applied claim-then-walk at spec-emit to catch and document the
+#   divergences in spec § 8; Implementers were protected by the spec corrections. Procedure:
+#   for each interface-surface claim in a CLUSTER-HANDOFF, run the identifying grep/Read
+#   command and quote or reference the actual output before writing the claim. "Class X has
+#   method Y" requires `grep -n "class X" path/to/file`. "Type T has field F" requires
+#   `grep -n "field F" path/to/file`. Do not assume a type shape from documentation or
+#   prior-round descriptions when the source file is directly readable. Detected tessera
+#   Wave 10 OBS-3 (R66 Reviewer + R66 Architect OBS; confirmed by both R65 + R66 Architects
+#   via independent claim-then-walk at spec-emit time).
