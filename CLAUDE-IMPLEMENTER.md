@@ -144,7 +144,7 @@ with a clear commit message.
 #   DIAGNOSTIC is required at point-of-encounter — not deferred to the coordination step.
 #   Detected R01: 6 anti-scope files vendored; no DIAGNOSTIC files produced.
 
-# REINFORCED — HALT-DISCIPLINE (composite; 9 sub-variants observed at Tessera)
+# REINFORCED — HALT-DISCIPLINE (composite; 10 sub-variants observed at Tessera)
 #
 #   Spec-internal contradiction (R01): Two spec sections that prescribe mutually
 #     incompatible implementation choices are HALT condition (c). All sub-types
@@ -216,6 +216,24 @@ with a clear commit message.
 #     substituted {'model_redeploy','env_change'} for {'deploy','rollback'} without DIAGNOSTIC;
 #     cited "spec type triggers a typecheck error at the consumer → cast at consumer or widen
 #     at producer" as TACTICAL AUTONOMY; this clause does NOT appear in Q-R72-SPEC.md § 6.2.
+#
+#   Control-flow shape rewrite in Architect-authored spec script (R73 MAJOR-2): When the
+#     Implementer encounters a structural defect in an Architect-authored artifact at chore-A
+#     (e.g., EMPIRICAL.sh Block 1 placeholder-mechanism collateral: `sed s/<INJECTED-AT-CHORE-A>/SHA/g`
+#     replaced both the assignment placeholder AND the case-pattern sentinel, inverting the check),
+#     the required procedure is HALT + DIAGNOSTIC + ESCALATE. The Implementer MAY NOT rewrite
+#     the control-flow shape (case-statement → if-guard) under a self-justified TACTICAL AUTONOMY
+#     reading. Spec § 6.2 TACTICAL AUTONOMY explicitly covers "blank lines, import order, internal
+#     helper names — no semantic change." A deleted `case/esac` block replaced by an `if/fi` block
+#     is a control-flow structure change — NOT a blank-line or helper-name change — even when the
+#     guard's logical intent is preserved. The DIAGNOSTIC + ESCALATE procedure ensures the latent
+#     design issue in the Architect-authored harness is visible to the operator before being patched,
+#     preventing the self-resolution precedent from being cited in future rounds. Gate: if a chore-A
+#     sed-injection replacement affects ANY occurrence other than the assignment-line placeholder,
+#     the entire Block containing the second occurrence must be treated as an R61-class discovery
+#     requiring HALT + DIAGNOSTIC. Do NOT patch inline and disclose only in NEXT-ROLE.md spec-deviance.
+#     3rd tessera instance of tactical-autonomy-overreach sub-pattern; cross-project rule derived.
+#     Detected tessera R73 MAJOR-2 (Reviewer-1).
 
 # REINFORCED 2026-05-18 — false-compliance-attestation (cross-project rule):
 #   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R03 MINOR-4 (spec count ≠ observed count),
@@ -280,7 +298,7 @@ with a clear commit message.
 #     entries but dropping them for others — is a verbatim-preservation failure even when the
 #     rule body itself is intact.
 
-# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 11 sub-variants)
+# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 12 sub-variants)
 #
 #   Prescriptions are binding (R01): Spec prescriptions in §Implementation surface are
 #     equivalent to ACs — not optional suggestions. When a prescription is unachievable,
@@ -386,6 +404,23 @@ with a clear commit message.
 #     (§ 3 says one thing; § 5 says another; next reader cannot resolve which is authoritative).
 #     Grilling gate: for each command modifier prescribed in § 3, verify the identical modifier
 #     appears in § 5 and in the verifier. Detected tessera R48 MINOR-2.
+#
+#   ALLOWED_SET optional-vs-uniform propagation skew (R73 MINOR-3): When spec §5.1 designates an
+#     entry as OPTIONAL (e.g., "CLAUDE-COORDINATOR.md — IF Implementer adds the --auto-tier Mode
+#     docs section; if they include it, it lands inside ALLOWED_SET"), the EMPIRICAL.sh Block 8
+#     hardcoded `allowed_set` heredoc MUST mirror the optional status — either (a) omit the path
+#     from the heredoc (script allows its absence) OR (b) include it but document the discrepancy
+#     in the script's comments. Encoding an OPTIONAL spec entry as a regular (non-annotated) entry
+#     in the heredoc creates spec-to-script alignment skew: a future reader sees spec §5.1 with
+#     "optional" and script with a hard entry and cannot determine which is authoritative. The
+#     substantive behavior is harmless if the Implementer never modifies the optional file (script
+#     entry is permissive, not required), but skew makes the EMPIRICAL.sh a less reliable
+#     cross-check against spec §5.1. Procedure: when implementing the EMPIRICAL.sh Block 8
+#     allowed_set heredoc, count spec §5.1's fixed-path list and optional-path list separately;
+#     encode fixed paths as regular heredoc entries and optional paths with an inline comment
+#     ("# OPTIONAL — path included only if Implementer touches this file"). Detected tessera
+#     R73 MINOR-3 (spec §5.1: 26 fixed + CLAUDE-COORDINATOR.md OPTIONAL; EMPIRICAL.sh Block 8:
+#     27 uniform; Reviewer MINOR-3).
 
 # REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 6 sub-variants)
 #
@@ -525,7 +560,7 @@ with a clear commit message.
 #   step: open the header, read each attestation-type claim, verify it still describes the
 #   current file body accurately. Detected tessera R20 MINOR-1.
 
-# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 8 sub-variants)
+# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 9 sub-variants)
 #
 #   Full-formula re-verification (R20 MINOR-2): When spec § 4.x prescribes updating a
 #     specific arithmetic expression, re-read the FULL formula at the targeted line — all
@@ -590,6 +625,19 @@ with a clear commit message.
 #     identity attestation was false. Rule: for any SHA recorded in an attestation artifact,
 #     run `git log --oneline | head -5` and copy the SHA verbatim from that output rather than
 #     from the mental model of "the most recent commit." Detected tessera R70 MINOR-1.
+#
+#   Anti-scope diff path-count claim must match git output exactly (R73 MAJOR-1): When the
+#     anti-scope attestation in NEXT-ROLE.md and MEMORIAL.md names a specific path count (e.g.,
+#     "git diff ee5ae2e..346de42 --name-only → 21 paths"), that count MUST be the verbatim output
+#     of running the command — not a count of the paths the Implementer added in their own commits.
+#     The diff window `round-start-SHA..GREEN-SHA` spans ALL commits between those two SHAs,
+#     including the Architect's routing-block commit and any RED commits that land coordination
+#     artifacts (NEXT-ROLE.md, MEMORIAL.md) or tsconfig changes within the window. Procedure: at
+#     attestation time, run `git diff <start>..HEAD --name-only | wc -l` and read the output before
+#     writing the count into any attestation artifact. Do NOT count only the files you touched in
+#     your own commits. All 24 paths happened to be in ALLOWED_SET at R73 (substantive contract
+#     held); the lesson is that the count itself is a binding-command observation and must be
+#     verbatim. Detected tessera R73 MAJOR-1 (Reviewer-1; count 21 claimed vs 24 actual).
 
 # REINFORCED 2026-05-17 — When implementing a spec-prescribed guard for a distinct failure
 #   mode, write a structural test that would FAIL if the guard were removed. If the existing
