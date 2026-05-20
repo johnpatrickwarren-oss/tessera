@@ -1,0 +1,715 @@
+{
+  "tpu_version": "v5p",
+  "slice_shape": [
+    4,
+    4,
+    4
+  ],
+  "topology_type": "torus",
+  "chips": [
+    {
+      "chip": "tpu-0",
+      "ici_peers": [
+        "tpu-1",
+        "tpu-3",
+        "tpu-4",
+        "tpu-12",
+        "tpu-16",
+        "tpu-48"
+      ]
+    },
+    {
+      "chip": "tpu-1",
+      "ici_peers": [
+        "tpu-2",
+        "tpu-0",
+        "tpu-5",
+        "tpu-13",
+        "tpu-17",
+        "tpu-49"
+      ]
+    },
+    {
+      "chip": "tpu-2",
+      "ici_peers": [
+        "tpu-3",
+        "tpu-1",
+        "tpu-6",
+        "tpu-14",
+        "tpu-18",
+        "tpu-50"
+      ]
+    },
+    {
+      "chip": "tpu-3",
+      "ici_peers": [
+        "tpu-0",
+        "tpu-2",
+        "tpu-7",
+        "tpu-15",
+        "tpu-19",
+        "tpu-51"
+      ]
+    },
+    {
+      "chip": "tpu-4",
+      "ici_peers": [
+        "tpu-5",
+        "tpu-7",
+        "tpu-8",
+        "tpu-0",
+        "tpu-20",
+        "tpu-52"
+      ]
+    },
+    {
+      "chip": "tpu-5",
+      "ici_peers": [
+        "tpu-6",
+        "tpu-4",
+        "tpu-9",
+        "tpu-1",
+        "tpu-21",
+        "tpu-53"
+      ]
+    },
+    {
+      "chip": "tpu-6",
+      "ici_peers": [
+        "tpu-7",
+        "tpu-5",
+        "tpu-10",
+        "tpu-2",
+        "tpu-22",
+        "tpu-54"
+      ]
+    },
+    {
+      "chip": "tpu-7",
+      "ici_peers": [
+        "tpu-4",
+        "tpu-6",
+        "tpu-11",
+        "tpu-3",
+        "tpu-23",
+        "tpu-55"
+      ]
+    },
+    {
+      "chip": "tpu-8",
+      "ici_peers": [
+        "tpu-9",
+        "tpu-11",
+        "tpu-12",
+        "tpu-4",
+        "tpu-24",
+        "tpu-56"
+      ]
+    },
+    {
+      "chip": "tpu-9",
+      "ici_peers": [
+        "tpu-10",
+        "tpu-8",
+        "tpu-13",
+        "tpu-5",
+        "tpu-25",
+        "tpu-57"
+      ]
+    },
+    {
+      "chip": "tpu-10",
+      "ici_peers": [
+        "tpu-11",
+        "tpu-9",
+        "tpu-14",
+        "tpu-6",
+        "tpu-26",
+        "tpu-58"
+      ]
+    },
+    {
+      "chip": "tpu-11",
+      "ici_peers": [
+        "tpu-8",
+        "tpu-10",
+        "tpu-15",
+        "tpu-7",
+        "tpu-27",
+        "tpu-59"
+      ]
+    },
+    {
+      "chip": "tpu-12",
+      "ici_peers": [
+        "tpu-13",
+        "tpu-15",
+        "tpu-0",
+        "tpu-8",
+        "tpu-28",
+        "tpu-60"
+      ]
+    },
+    {
+      "chip": "tpu-13",
+      "ici_peers": [
+        "tpu-14",
+        "tpu-12",
+        "tpu-1",
+        "tpu-9",
+        "tpu-29",
+        "tpu-61"
+      ]
+    },
+    {
+      "chip": "tpu-14",
+      "ici_peers": [
+        "tpu-15",
+        "tpu-13",
+        "tpu-2",
+        "tpu-10",
+        "tpu-30",
+        "tpu-62"
+      ]
+    },
+    {
+      "chip": "tpu-15",
+      "ici_peers": [
+        "tpu-12",
+        "tpu-14",
+        "tpu-3",
+        "tpu-11",
+        "tpu-31",
+        "tpu-63"
+      ]
+    },
+    {
+      "chip": "tpu-16",
+      "ici_peers": [
+        "tpu-17",
+        "tpu-19",
+        "tpu-20",
+        "tpu-28",
+        "tpu-32",
+        "tpu-0"
+      ]
+    },
+    {
+      "chip": "tpu-17",
+      "ici_peers": [
+        "tpu-18",
+        "tpu-16",
+        "tpu-21",
+        "tpu-29",
+        "tpu-33",
+        "tpu-1"
+      ]
+    },
+    {
+      "chip": "tpu-18",
+      "ici_peers": [
+        "tpu-19",
+        "tpu-17",
+        "tpu-22",
+        "tpu-30",
+        "tpu-34",
+        "tpu-2"
+      ]
+    },
+    {
+      "chip": "tpu-19",
+      "ici_peers": [
+        "tpu-16",
+        "tpu-18",
+        "tpu-23",
+        "tpu-31",
+        "tpu-35",
+        "tpu-3"
+      ]
+    },
+    {
+      "chip": "tpu-20",
+      "ici_peers": [
+        "tpu-21",
+        "tpu-23",
+        "tpu-24",
+        "tpu-16",
+        "tpu-36",
+        "tpu-4"
+      ]
+    },
+    {
+      "chip": "tpu-21",
+      "ici_peers": [
+        "tpu-22",
+        "tpu-20",
+        "tpu-25",
+        "tpu-17",
+        "tpu-37",
+        "tpu-5"
+      ]
+    },
+    {
+      "chip": "tpu-22",
+      "ici_peers": [
+        "tpu-23",
+        "tpu-21",
+        "tpu-26",
+        "tpu-18",
+        "tpu-38",
+        "tpu-6"
+      ]
+    },
+    {
+      "chip": "tpu-23",
+      "ici_peers": [
+        "tpu-20",
+        "tpu-22",
+        "tpu-27",
+        "tpu-19",
+        "tpu-39",
+        "tpu-7"
+      ]
+    },
+    {
+      "chip": "tpu-24",
+      "ici_peers": [
+        "tpu-25",
+        "tpu-27",
+        "tpu-28",
+        "tpu-20",
+        "tpu-40",
+        "tpu-8"
+      ]
+    },
+    {
+      "chip": "tpu-25",
+      "ici_peers": [
+        "tpu-26",
+        "tpu-24",
+        "tpu-29",
+        "tpu-21",
+        "tpu-41",
+        "tpu-9"
+      ]
+    },
+    {
+      "chip": "tpu-26",
+      "ici_peers": [
+        "tpu-27",
+        "tpu-25",
+        "tpu-30",
+        "tpu-22",
+        "tpu-42",
+        "tpu-10"
+      ]
+    },
+    {
+      "chip": "tpu-27",
+      "ici_peers": [
+        "tpu-24",
+        "tpu-26",
+        "tpu-31",
+        "tpu-23",
+        "tpu-43",
+        "tpu-11"
+      ]
+    },
+    {
+      "chip": "tpu-28",
+      "ici_peers": [
+        "tpu-29",
+        "tpu-31",
+        "tpu-16",
+        "tpu-24",
+        "tpu-44",
+        "tpu-12"
+      ]
+    },
+    {
+      "chip": "tpu-29",
+      "ici_peers": [
+        "tpu-30",
+        "tpu-28",
+        "tpu-17",
+        "tpu-25",
+        "tpu-45",
+        "tpu-13"
+      ]
+    },
+    {
+      "chip": "tpu-30",
+      "ici_peers": [
+        "tpu-31",
+        "tpu-29",
+        "tpu-18",
+        "tpu-26",
+        "tpu-46",
+        "tpu-14"
+      ]
+    },
+    {
+      "chip": "tpu-31",
+      "ici_peers": [
+        "tpu-28",
+        "tpu-30",
+        "tpu-19",
+        "tpu-27",
+        "tpu-47",
+        "tpu-15"
+      ]
+    },
+    {
+      "chip": "tpu-32",
+      "ici_peers": [
+        "tpu-33",
+        "tpu-35",
+        "tpu-36",
+        "tpu-44",
+        "tpu-48",
+        "tpu-16"
+      ]
+    },
+    {
+      "chip": "tpu-33",
+      "ici_peers": [
+        "tpu-34",
+        "tpu-32",
+        "tpu-37",
+        "tpu-45",
+        "tpu-49",
+        "tpu-17"
+      ]
+    },
+    {
+      "chip": "tpu-34",
+      "ici_peers": [
+        "tpu-35",
+        "tpu-33",
+        "tpu-38",
+        "tpu-46",
+        "tpu-50",
+        "tpu-18"
+      ]
+    },
+    {
+      "chip": "tpu-35",
+      "ici_peers": [
+        "tpu-32",
+        "tpu-34",
+        "tpu-39",
+        "tpu-47",
+        "tpu-51",
+        "tpu-19"
+      ]
+    },
+    {
+      "chip": "tpu-36",
+      "ici_peers": [
+        "tpu-37",
+        "tpu-39",
+        "tpu-40",
+        "tpu-32",
+        "tpu-52",
+        "tpu-20"
+      ]
+    },
+    {
+      "chip": "tpu-37",
+      "ici_peers": [
+        "tpu-38",
+        "tpu-36",
+        "tpu-41",
+        "tpu-33",
+        "tpu-53",
+        "tpu-21"
+      ]
+    },
+    {
+      "chip": "tpu-38",
+      "ici_peers": [
+        "tpu-39",
+        "tpu-37",
+        "tpu-42",
+        "tpu-34",
+        "tpu-54",
+        "tpu-22"
+      ]
+    },
+    {
+      "chip": "tpu-39",
+      "ici_peers": [
+        "tpu-36",
+        "tpu-38",
+        "tpu-43",
+        "tpu-35",
+        "tpu-55",
+        "tpu-23"
+      ]
+    },
+    {
+      "chip": "tpu-40",
+      "ici_peers": [
+        "tpu-41",
+        "tpu-43",
+        "tpu-44",
+        "tpu-36",
+        "tpu-56",
+        "tpu-24"
+      ]
+    },
+    {
+      "chip": "tpu-41",
+      "ici_peers": [
+        "tpu-42",
+        "tpu-40",
+        "tpu-45",
+        "tpu-37",
+        "tpu-57",
+        "tpu-25"
+      ]
+    },
+    {
+      "chip": "tpu-42",
+      "ici_peers": [
+        "tpu-43",
+        "tpu-41",
+        "tpu-46",
+        "tpu-38",
+        "tpu-58",
+        "tpu-26"
+      ]
+    },
+    {
+      "chip": "tpu-43",
+      "ici_peers": [
+        "tpu-40",
+        "tpu-42",
+        "tpu-47",
+        "tpu-39",
+        "tpu-59",
+        "tpu-27"
+      ]
+    },
+    {
+      "chip": "tpu-44",
+      "ici_peers": [
+        "tpu-45",
+        "tpu-47",
+        "tpu-32",
+        "tpu-40",
+        "tpu-60",
+        "tpu-28"
+      ]
+    },
+    {
+      "chip": "tpu-45",
+      "ici_peers": [
+        "tpu-46",
+        "tpu-44",
+        "tpu-33",
+        "tpu-41",
+        "tpu-61",
+        "tpu-29"
+      ]
+    },
+    {
+      "chip": "tpu-46",
+      "ici_peers": [
+        "tpu-47",
+        "tpu-45",
+        "tpu-34",
+        "tpu-42",
+        "tpu-62",
+        "tpu-30"
+      ]
+    },
+    {
+      "chip": "tpu-47",
+      "ici_peers": [
+        "tpu-44",
+        "tpu-46",
+        "tpu-35",
+        "tpu-43",
+        "tpu-63",
+        "tpu-31"
+      ]
+    },
+    {
+      "chip": "tpu-48",
+      "ici_peers": [
+        "tpu-49",
+        "tpu-51",
+        "tpu-52",
+        "tpu-60",
+        "tpu-0",
+        "tpu-32"
+      ]
+    },
+    {
+      "chip": "tpu-49",
+      "ici_peers": [
+        "tpu-50",
+        "tpu-48",
+        "tpu-53",
+        "tpu-61",
+        "tpu-1",
+        "tpu-33"
+      ]
+    },
+    {
+      "chip": "tpu-50",
+      "ici_peers": [
+        "tpu-51",
+        "tpu-49",
+        "tpu-54",
+        "tpu-62",
+        "tpu-2",
+        "tpu-34"
+      ]
+    },
+    {
+      "chip": "tpu-51",
+      "ici_peers": [
+        "tpu-48",
+        "tpu-50",
+        "tpu-55",
+        "tpu-63",
+        "tpu-3",
+        "tpu-35"
+      ]
+    },
+    {
+      "chip": "tpu-52",
+      "ici_peers": [
+        "tpu-53",
+        "tpu-55",
+        "tpu-56",
+        "tpu-48",
+        "tpu-4",
+        "tpu-36"
+      ]
+    },
+    {
+      "chip": "tpu-53",
+      "ici_peers": [
+        "tpu-54",
+        "tpu-52",
+        "tpu-57",
+        "tpu-49",
+        "tpu-5",
+        "tpu-37"
+      ]
+    },
+    {
+      "chip": "tpu-54",
+      "ici_peers": [
+        "tpu-55",
+        "tpu-53",
+        "tpu-58",
+        "tpu-50",
+        "tpu-6",
+        "tpu-38"
+      ]
+    },
+    {
+      "chip": "tpu-55",
+      "ici_peers": [
+        "tpu-52",
+        "tpu-54",
+        "tpu-59",
+        "tpu-51",
+        "tpu-7",
+        "tpu-39"
+      ]
+    },
+    {
+      "chip": "tpu-56",
+      "ici_peers": [
+        "tpu-57",
+        "tpu-59",
+        "tpu-60",
+        "tpu-52",
+        "tpu-8",
+        "tpu-40"
+      ]
+    },
+    {
+      "chip": "tpu-57",
+      "ici_peers": [
+        "tpu-58",
+        "tpu-56",
+        "tpu-61",
+        "tpu-53",
+        "tpu-9",
+        "tpu-41"
+      ]
+    },
+    {
+      "chip": "tpu-58",
+      "ici_peers": [
+        "tpu-59",
+        "tpu-57",
+        "tpu-62",
+        "tpu-54",
+        "tpu-10",
+        "tpu-42"
+      ]
+    },
+    {
+      "chip": "tpu-59",
+      "ici_peers": [
+        "tpu-56",
+        "tpu-58",
+        "tpu-63",
+        "tpu-55",
+        "tpu-11",
+        "tpu-43"
+      ]
+    },
+    {
+      "chip": "tpu-60",
+      "ici_peers": [
+        "tpu-61",
+        "tpu-63",
+        "tpu-48",
+        "tpu-56",
+        "tpu-12",
+        "tpu-44"
+      ]
+    },
+    {
+      "chip": "tpu-61",
+      "ici_peers": [
+        "tpu-62",
+        "tpu-60",
+        "tpu-49",
+        "tpu-57",
+        "tpu-13",
+        "tpu-45"
+      ]
+    },
+    {
+      "chip": "tpu-62",
+      "ici_peers": [
+        "tpu-63",
+        "tpu-61",
+        "tpu-50",
+        "tpu-58",
+        "tpu-14",
+        "tpu-46"
+      ]
+    },
+    {
+      "chip": "tpu-63",
+      "ici_peers": [
+        "tpu-60",
+        "tpu-62",
+        "tpu-51",
+        "tpu-59",
+        "tpu-15",
+        "tpu-47"
+      ]
+    }
+  ]
+}
