@@ -1396,15 +1396,18 @@ coordination/specs/Q-R72-SPEC-AUDIT.md
 coordination/specs/Q-R72-EMPIRICAL.sh
 coordination/coverage/R72-saturation-matrix.json
 coordination/coverage/R72-saturation-matrix.md
+coordination/reviews/REVIEWER-REPORT-R72.md
+coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md
 package.json
 README.md
 test/q72-coverage-saturation.test.ts
 tools/coverage-saturation.ts
+.gitignore
 ```
 
-**Regex carve-out:** `^coordination/diagnostics/DIAGNOSTIC-R72-[a-z0-9-]+\.md$` (only fires if a halt condition triggers per § 6).
+**Total: 14 enumerated paths.**
 
-**Total: 11 enumerated paths + 1 regex carve-out.**
+**[R72-amended per Reviewer-2 CRITICAL-1 + MAJOR-2; 2026-05-20]:** Original ALLOWED_SET had 11 paths + a DIAGNOSTIC regex carve-out. Three operator-authorized paths were missing from § 5.1 and from `Q-R72-EMPIRICAL.sh` Block 3's hard-coded allowed_set: (a) `coordination/reviews/REVIEWER-REPORT-R72.md` (Reviewer's audit report; written during R72 first-Reviewer pass); (b) `.gitignore` (amended at Option B per operator disposition for `!coordination/coverage/` exemption); (c) `coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md` (moved from regex carve-out to explicit enumeration since it was authored on the Option B path, not by a halt). All three are now enumerated; regex carve-out for additional DIAGNOSTIC files is removed because the operator-known diagnostic is the only one in scope at R72 close. Q-R72-EMPIRICAL.sh Block 3 `allowed_set` updated to match.
 
 `ROUND_START_SHA` = the Architect's spec-triad commit SHA (captured via `git rev-parse HEAD` after spec triad lands and before Architect routing-block commit). Per CLAUDE-ARCHITECT REINFORCED 2026-05-17 R15 MINOR-1 + REINFORCED 2026-05-18 R23 MINOR-2.
 

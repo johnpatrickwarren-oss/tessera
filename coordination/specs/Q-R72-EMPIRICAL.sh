@@ -80,10 +80,13 @@ coordination/specs/Q-R72-SPEC-AUDIT.md
 coordination/specs/Q-R72-EMPIRICAL.sh
 coordination/coverage/R72-saturation-matrix.json
 coordination/coverage/R72-saturation-matrix.md
+coordination/reviews/REVIEWER-REPORT-R72.md
+coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md
 package.json
 README.md
 test/q72-coverage-saturation.test.ts
 tools/coverage-saturation.ts
+.gitignore
 EOF
 )
 allowed_ok=1

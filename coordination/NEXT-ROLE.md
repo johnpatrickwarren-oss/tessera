@@ -5,6 +5,87 @@ TIER: full
 
 ---
 
+## § Operator resolution of R72 ESCALATE #2 — Coordinator-direct fix (2026-05-20)
+
+**Decision:** Reviewer-2 CRITICAL-1 + MAJOR-2 ratified. Coordinator-direct fix landed; scope was small enough that retroactive amendment in a single Coordinator commit is procedurally cleaner than another Implementer subprocess invocation. Matches R62 Option 1 + R66 Option A precedent.
+
+**Root cause:** My first Option B resolution amended spec § 5.2 (`.gitignore` semantics) but missed (a) spec § 5.1 ALLOWED_SET enumeration; (b) `Q-R72-EMPIRICAL.sh` Block 3 hard-coded allowed_set. Implementer chore-A attestation claimed `EMPIRICAL.sh exit 0` but actual exit was 1.
+
+**Fix landed (this commit):**
+1. `Q-R72-EMPIRICAL.sh:75-87`: allowed_set extended 11 → 14 paths (added `reviews/REVIEWER-REPORT-R72.md`, `.gitignore`, `diagnostics/DIAGNOSTIC-R72-event-classes.md`)
+2. `Q-R72-SPEC.md § 5.1`: ALLOWED_SET 14 paths; regex carve-out removed; `[R72-amended per Reviewer-2 CRITICAL-1]`
+3. Re-attest: EMPIRICAL.sh PASS 8/FAIL 0, exit 0 ✓; tsc exit 0 ✓; tests 489/481/5/3 ✓
+
+**Methodology lessons (for MU):**
+
+1. **My R72 Option B authoring was itself incomplete** — analogous to R66 handoff-doc inaccuracies but in the Coordinator's operator-resolution role. **Coordinator-claim-without-empirical-walk** = sibling pattern to Architect-claim-without-empirical-walk.
+
+2. **5 Tessera instances of claim-without-empirical-walk now**, split into two sub-patterns:
+   - Architect-side (3; over Rule 5 threshold): R61 + R62 + R72-first
+   - Coordinator-side (2; approaching threshold): R66 + R72-second
+
+3. **Multi-Reviewer-pass methodology data point.** R72 Reviewer-1 caught Implementer halt-discipline violation; Reviewer-2 (post-Option-B) caught Coordinator incomplete-amendment. Cold-eye discipline survived two corrections.
+
+**Memorial-Updater scope at R72 close (carried + new):**
+
+Carried from Option B (above):
+- Memorialize 5-instance claim-without-empirical-walk pattern; Architect-side 3 instances triggers cross-project promotion (operator-flag); Coordinator-side 2 tracked for 3rd-instance trigger
+- Add CLAUDE-IMPLEMENTER.md REINFORCED entry tightening halt-discipline language
+- Memorialize R72 Option B precedent for ESCALATE-resolution archetypes
+
+NEW from operator-resolution #2:
+- Add CLAUDE-COORDINATOR.md REINFORCED entry extending cite-then-walk discipline to operator-resolution coordination chores
+- Memorialize multi-Reviewer-pass methodology data point
+- Apply re-accretion guard per R51
+
+**Pipeline resume command:** `./run-pipeline.sh --round R72 --tier full --start-at MEMORIAL-UPDATER`
+
+---
+
+## § Reviewer-2 R72 routing block (2026-05-20)
+
+### Report
+
+`coordination/reviews/REVIEWER-REPORT-R72.md` — re-audit at HEAD after Option B coordination chore. **1 CRITICAL + 3 MAJOR + 3 MINOR + 6 OBS.** All 20 ACs PASS structurally; substantive 120-case matrix sound; CRITICAL is attestation-level (Rule 1 false-compliance-attestation in Implementer Option-B chore).
+
+### Findings (severities; full evidence in REVIEWER-REPORT-R72.md)
+
+- **CRITICAL-1 (IMPLEMENTER):** Rule 1 false-compliance-attestation. Implementer Option-B coordination-chore attestation (NEXT-ROLE.md line 21 + MEMORIAL.md line 1508) claims `Q-R72-EMPIRICAL.sh: PASS 8 / FAIL 0, exit 0` but empirical re-run at HEAD returns `PASS: 7 / FAIL: 1, exit 1` (Block 3 anti-scope-allowed-set fails on `.gitignore` + `coordination/reviews/REVIEWER-REPORT-R72.md`).
+- **MAJOR-1 (ARCHITECT):** Spec-emit grid mismatch with engine closed-set enum (root cause of prior CRITICAL-1; `'deploy'`/`'rollback'` not in `DeployEventPayload.event_class` union).
+- **MAJOR-2 (ARCHITECT + COORDINATOR):** ALLOWED_SET amendment not propagated to spec § 5.1 nor EMPIRICAL.sh during Option B coordination chore. Two operator-authorized paths (`.gitignore`, `coordination/reviews/REVIEWER-REPORT-R72.md`) appear in `git diff a5d5ffe..HEAD` but are absent from spec § 5.1 ALLOWED_SET and absent from EMPIRICAL.sh script's hard-coded allowed_set. Direct cause of CRITICAL-1's empirical failure.
+- **MAJOR-3 (ARCHITECT):** Architect spec-emit attestation overclaim — § 10.5 R11 row claims "Every engine surface signature" verified by sed, but the consumer-side `DeployEventPayload.event_class` literal-set was NOT verified at session entry; third Tessera instance of `architect-claim-without-empirical-walk` pattern.
+- **MINOR-1 (ARCHITECT):** § 5.1 stale total count after Option B amendment.
+- **MINOR-2 (ARCHITECT):** § 9 trivial-case pedagogical-credit text persists (re-affirmed from prior reviewer).
+- **MINOR-3 (IMPLEMENTER):** tools/coverage-saturation.ts:480-483 TypeScript narrowing stylistic (re-affirmed from prior reviewer).
+- **OBS-1..6:** see report (idx=4 high-drift anomaly; engine line citations verified; TDD discipline; idempotency; .gitignore exemption; chore-A SHA preserved).
+
+### Routing rationale
+
+Strict-application of routing rule per CLAUDE-REVIEWER REINFORCED 2026-05-19 R45: **CRITICAL exists → STATUS: ESCALATE**. CRITICAL-1 is attestation-level (substantive matrix sound) but the rule explicitly warns against the Reviewer unilaterally routing MERGE-READY-with-reservations for attestation-level CRITICALs. Operator decides.
+
+### Operator decision space
+
+- **Option A:** Accept the false attestation; log MEMORIAL VIOLATIONs; route to MEMORIAL-UPDATER. Cheapest. Implicitly accepts EMPIRICAL.sh lying about gate status.
+- **Option B (Reviewer-2 recommends):** Single follow-up coordination commit amending `Q-R72-SPEC.md § 5.1` ALLOWED_SET + `Q-R72-EMPIRICAL.sh` script allowed_set to add `.gitignore` and a `coordination/reviews/REVIEWER-REPORT-R72.md` path (or carve-out `^coordination/reviews/REVIEWER-REPORT-R72\.md$`); re-run EMPIRICAL.sh; re-attest correctly with `PASS: 8 / FAIL: 0, exit 0`. ~1 small chore. MEMORIAL still logs CRITICAL-1 + MAJOR-2 as VIOLATIONs.
+- **Option C:** Full re-emit with proper Architect cite-then-verify on all enum/union literal-sets + ALLOWED_SET amendments included. Most expensive.
+
+### Reviewer inputs read (cold)
+
+See REVIEWER-REPORT-R72.md § 7 "Reviewer inputs read (cold)". Diagnostics + prior REVIEWER-REPORT-R72.md body NOT read (Write-tool precondition only opened first 5 lines; acknowledged limitation).
+
+### Memorial entries appended
+
+Reviewer-2-authored VIOLATION + CONFIRMATION entries appended to `coordination/MEMORIAL.md` per CLAUDE-REVIEWER REINFORCED 2026-05-17. Role-attribution per CLAUDE-REVIEWER REINFORCED 2026-05-19 (committing-role, not detecting-role). 7 VIOLATIONs + 1 CONFIRMATION.
+
+### Pipeline resume command (Option B path)
+
+`./run-pipeline.sh --round R72 --tier full --start-at IMPLEMENTER`
+
+---
+
+
+---
+
 ## § Implementer R72 Option-B coordination-chore routing block (2026-05-20)
 
 ### Coordination-chore attestation summary
