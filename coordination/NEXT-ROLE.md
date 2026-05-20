@@ -1,7 +1,76 @@
 CURRENT-ROUND: R70
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
+
+---
+
+## § Implementer R70 routing block (2026-05-20) — chore-A completion
+
+### Implementer attestation
+
+**RED commit SHA:** `42483a3` — `test/q70-demo-scenario.test.ts` with 11 `assert.fail('R70 RED — implementation pending')` stubs; `tools/demo-scenario.ts` does NOT yet exist; `tsc -p tsconfig.test.json` exits 2 (TS2307 module-resolution failure at `from '../tools/demo-scenario'`). RED state confirmed per R23 TDD discipline.
+
+**TDD sequence:**
+- RED commit `42483a3`: 11 `assert.fail` stubs; tsc exits 2 (TS2307); no `.js` emitted. RED confirmed.
+- GREEN commit (chore-A) `123c3d3`: `tools/demo-scenario.ts` (NEW; 354 lines), `test/q70-demo-scenario.test.ts` (stubs → 11 real assertions), `package.json` (+predemo + demo scripts), `README.md` (+Quick demo section), `coordination/specs/Q-R70-EMPIRICAL.sh` (ROUND_START_SHA injected). tsc exit 0; GREEN.
+
+**Binding-command results at chore-A HEAD (ACTUAL — verbatim per Rule 1 sub-class `empirical-command-attestation`):**
+- `pnpm exec tsc -p tsconfig.test.json` → exit 0, zero diagnostics.
+- `pnpm exec node --test --test-reporter=tap test/*.test.js` → `tests=455 / pass=447 / fail=5 / skipped=3` (exit 1). 5 fails = AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14 (carry-forward set; identity-verified by grep against TAP output). 11 new q70 tests all PASS.
+- `bash coordination/specs/Q-R70-EMPIRICAL.sh` → 8 PASS, 0 FAIL, exit 0.
+
+Architect prediction was `tests=455 / pass=447 / fail=5 / skipped=3` — actual observation matches exactly.
+
+**ROUND_START_SHA injected:** `bb9549bf0a80bc5dfc5bad2247267ea275e30ab2` (spec-triad commit SHA = Architect's commit `bb9549b`). Injected directly as a literal (not via `git rev-parse HEAD` at RED time, which would yield `42483a3`), correctly implementing the § 3.2 spec-triad-SHA-as-lower-bound requirement.
+
+**Anti-scope diff at chore-A (git diff bb9549b..HEAD --name-only):**
+```
+coordination/MEMORIAL.md
+coordination/NEXT-ROLE.md
+coordination/specs/Q-R70-EMPIRICAL.sh
+package.json
+README.md
+test/q70-demo-scenario.test.ts
+tools/demo-scenario.ts
+```
+Rule 4 gate: PASS. All 7 paths in ALLOWED_SET. No unauthorized path. ALLOWED_SET not expanded in-test.
+
+**Tactical deviations:**
+- Import `.js` extensions in `tools/demo-scenario.ts` (matches `tools/curate-baseline-pipeline.ts` neighbor convention). Confirmed tsc compiles with `.js` extensions under CommonJS + moduleResolution:node.
+- `SDC_DRIFT_PER_WINDOW = 0.4` (Architect's prescription, within [0.3, 0.8] band). Under seed `0x70D1F`, shard-04 crosses DEMO_THRESHOLD=200 before window 30 (AC-R70-2 PASS confirms).
+- Box-Muller discard form (cos-only, no buffer) — Architect's prescription preserved.
+- `ROUND_START_SHA` directly encoded as literal `bb9549b` rather than via `git rev-parse HEAD` at injection time (which would yield the RED commit SHA, not the spec-triad SHA).
+
+**Cross-project rule self-application:**
+
+| Rule | Status |
+|---|---|
+| 1 (`false-compliance-attestation`; `empirical-command-attestation`) | PASS — actual `455/447/5/3` (exit 1) encoded verbatim; matches Architect prediction exactly; no reframing |
+| 2 (`architect-branch-binding-coverage`) | PASS — all load-bearing branches covered; 2 acknowledged non-load-bearing gaps (parseCliArg, Box-Muller floor) |
+| 3 (`implementer-spec-test-assertion-coverage`) | PASS — discriminating assertions per § 4.2 + § 5.3 |
+| 4 (`anti-scope-allowed-set-forward-coverage`) | PASS — 7-path diff ⊆ ALLOWED_SET; no unauthorized path; ALLOWED_SET not self-expanded |
+| 5 (`rule-derivation-without-self-application`) | N/A |
+| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | PASS — no halt conditions triggered |
+| 7 (`derived-rule-propagation-mechanism-required`) | PASS — Surface (a) § 7 in spec; Surface (c) N/A |
+
+**Spec-deviance disclosures:** None. No halt conditions triggered. All binding commands pass per specification.
+
+### Routing
+
+**NEXT-ROLE: REVIEWER | STATUS: READY**
+
+Reviewer inputs:
+1. `coordination/specs/Q-R70-SPEC.md` (spec proper)
+2. `coordination/specs/Q-R70-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read)
+3. `coordination/specs/Q-R70-EMPIRICAL.sh` (verification harness; ROUND_START_SHA = bb9549b)
+4. `tools/demo-scenario.ts` (NEW; 354 lines; 4 scenarios)
+5. `test/q70-demo-scenario.test.ts` (11 runtime ACs; all PASS at chore-A HEAD)
+6. `package.json` (+ predemo + demo scripts)
+7. `README.md` (+ Quick demo section)
+8. This NEXT-ROLE.md
+
+**Coordination chore SHA:** `<to-be-filled-after-chore-commit>`
 
 ---
 
