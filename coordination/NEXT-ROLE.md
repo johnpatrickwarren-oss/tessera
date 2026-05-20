@@ -1,7 +1,124 @@
-CURRENT-ROUND: R70
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R71
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R71 Round-scope directive (Architect — Tessera demo dashboard; static HTML + canned scenarios; mirror DS pattern) (2026-05-20)
+
+R71 = full-tier pipeline round building Tessera's comprehensive demo dashboard. Operator-confirmed scope (3 AskUserQuestion answers 2026-05-20): mirror DS's static-HTML-canned-scenarios pattern; vanilla HTML/CSS/JS (zero new deps; matches R68 anti-worm posture); 2-round decomposition (R71 dashboard now; R72 coverage validation next).
+
+**Round-start SHA:** `4cc9086` (chore(R70): Memorial-Updater outputs). Verify via `git rev-parse HEAD` at Architect session entry.
+
+**Reference pattern:** `~/concord/deploysignal/demos/demo.html` + `~/concord/deploysignal/tools/build-canned-demos.js` + `~/concord/deploysignal/DEMO-SCRIPT-10MIN.md`. Architect MAY read DS files for pattern reference (READ-ONLY; no file copying across project boundary).
+
+### Primary deliverable
+
+1. **`tools/build-canned-demos.ts`** (NEW) — offline scenario runner:
+   - Runs each scenario through the real Tessera engine; captures per-window state (M_t per shard, residual values, freeze-hook state, verdict status, threshold-crossing markers)
+   - Serializes to `demos/scenarios/<scenario-name>.json` (one per scenario)
+   - Deterministic (seeded RNG); idempotent regeneration
+
+2. **`demos/demo.html`** (NEW) — single-file static dashboard:
+   - Vanilla HTML/CSS/JS (zero new external deps; opens from `file://`)
+   - Scenario selector + Play/Pause/Reset/Speed controls
+   - SVG-based M_t trajectory chart per shard (hand-rolled SVG)
+   - Fleet topology visualization
+   - Per-window animation at configurable speed
+   - Verdict status badges per shard (clean / FIRE / freeze)
+   - **Audit trail panel:** per-window state log
+   - **Reasoning panel:** "Why did this fire?" — e-process trajectory + threshold-crossing + per-shard residual specificity
+   - **Suggested next actions panel:** verdict + topology context → operator-actionable recommendations
+
+3. **6-8 canned scenarios** (Architect picks final list):
+   - `clean-baseline` — healthy fleet (control)
+   - `sdc-drift` — single-shard SDC (Family A betting)
+   - `common-mode-rack` — multi-shard rack-localized (topology-aware attribution)
+   - `event-conditional` — DS deploy event → freeze-hook activates
+   - `fdr-multiple-testing` — e-BH FDR control; multiple shards drifting
+   - `hierarchical-evalue` — hierarchical e-value combination across layers
+   - `sparse-data-resilience` — partial topology data; graceful degradation
+   - `topology-spanning-common-mode` — cluster-wide failure pattern
+
+4. **`package.json` scripts:**
+   - `"build:demos": "pnpm exec node tools/build-canned-demos.js"` — regenerates canned scenario JSON
+
+5. **README.md** — extend "Quick demo" section: CLI (R70) still documented; NEW `open demos/demo.html` for dashboard
+
+6. **Test file** `test/q71-demo-dashboard.test.ts`:
+   - JSON structural ACs; deterministic-build ACs; HTML structural ACs; per-scenario terminal-state ACs; anti-regression (R70 CLI runners still work)
+
+7. **Q-R71-EMPIRICAL.sh** at chore-A pre-commit
+
+### Tier rationale
+
+**full-tier** — Architect (scenario design + dashboard UI layout + audit-trail/reasoning/next-actions panels; cite-then-walk over engine surfaces) + Implementer (build + HTML + tests) + Reviewer (cold-eye) + Memorial-Updater.
+
+### Anti-scope (R71 hard limits)
+
+- NO new external dependencies (R68 anti-worm posture preserved)
+- NO modification of `engine/*` files (frozen post-Phase 3)
+- NO real-cluster work (Path B preserved)
+- NO DS-repo modifications (W3-1 Option A; READ-ONLY access to `~/concord/deploysignal/demos/` for pattern reference is OK; no file copies across project boundary)
+- NO modification of carry-forward AC fail set (R36-30/R36-31/AC-R36-21/AC-R65-2/AC-R66-14)
+- NO modification of prior-round Q-RNN-SPEC.md files
+- NO modification of CLAUDE-*.md REINFORCEMENTS sections
+- NO modification of R70's CLI demo (additive, not replacement)
+- NO `gh repo` operations
+
+ALLOWED modifications:
+- `tools/build-canned-demos.ts` (NEW)
+- `demos/demo.html` (NEW)
+- `demos/scenarios/*.json` (NEW; generated)
+- `package.json` (add `build:demos` script)
+- `README.md` (extend Quick demo section)
+- `test/q71-demo-dashboard.test.ts` (NEW)
+- `coordination/specs/Q-R71-SPEC.md` + `Q-R71-SPEC-AUDIT.md` + `Q-R71-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R71.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rule 1: ACTIVE GATE — Q-R71-EMPIRICAL.sh + Tightenings 1-4
+- Rule 2: ACTIVE GATE — § 5.3 branch-binding coverage
+- Rule 3: ACTIVE GATE — discriminating assertions
+- Rule 4: ACTIVE GATE — ALLOWED_SET enumerated at spec-emit time; **MUST NOT use forward-protection / live-file-count / anti-scope-diff-against-prior-round AC patterns** (R62+R66+R68 cumulative lesson)
+- Rule 5: N/A
+- Rule 6: ACTIVE GATE
+- Rule 7: ACTIVE GATE Surface (a)
+
+### Halt conditions (R71 Implementer)
+
+1. Q-R71-EMPIRICAL.sh non-zero exit at chore-A for any reason other than pre-documented two-state mismatch
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R70 close other than R71-additions
+4. Architectural decision requires DS-repo modification: HALT + DIAGNOSTIC
+5. Architectural decision requires new external dependencies: HALT + DIAGNOSTIC
+6. **R62 + R66 + R68 cumulative lesson — apply claim-then-walk + avoid round-evolution-fragile AC patterns**
+7. R61-class architectural-reality discovery: HALT + DIAGNOSTIC + ESCALATE
+8. Scenario output rendering requires browser-bundling complexity (build step / module bundler): HALT — vanilla HTML/JS only
+
+### Inputs for Architect (R71)
+
+1. `coordination/NEXT-ROLE.md` § R71 Round-scope directive (THIS section)
+2. `~/concord/deploysignal/demos/demo.html` (READ-ONLY)
+3. `~/concord/deploysignal/demos/load-demo.js` (READ-ONLY)
+4. `~/concord/deploysignal/tools/build-canned-demos.js` (READ-ONLY)
+5. `~/concord/deploysignal/DEMO-SCRIPT-10MIN.md` (READ-ONLY; tone/voice reference)
+6. `tools/demo-scenario.ts` (R70 CLI scenarios — reuse logic)
+7. `engine/topology/*` + `engine/detectors/*` + `engine/per-shard/*` + `engine/events/freeze-hook.ts`
+8. `engine/ds-integration/event-consumer.ts` (R66) + `freeze-hook-factory.ts` (R66)
+9. `test/_substrate/*.json` — synthetic topology fixtures
+10. `tools/curate-baseline-*.ts` — synthetic-cluster generation
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R71 --tier full
+```
 
 ---
 
