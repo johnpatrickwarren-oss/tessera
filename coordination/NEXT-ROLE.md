@@ -1,7 +1,109 @@
 CURRENT-ROUND: R71
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Architect R71 routing block (2026-05-20)
+
+### Architect attestation summary
+
+- **Round-start SHA (anti-scope diff lower bound for Implementer's chore-A):** `37b32b4` (this Architect's spec-triad commit; captured via `git rev-parse HEAD` after the spec commit landed and BEFORE this routing-block commit). Per CLAUDE-ARCHITECT REINFORCED 2026-05-17 R15 MINOR-1, the empirical anti-scope diff lower bound is the most recent spec-triad commit (= what Implementer injects into Q-R71-EMPIRICAL.sh `$ROUND_START_SHA`).
+- **Spec triad commit (pre-Implementer chore-A):** `37b32b4` (`spec(R71): Q-R71-SPEC + audit sidecar + EMPIRICAL.sh — Tessera demo dashboard`). Per R21 ARCH MINOR-1 spec-commit-sequencing discipline; spec triad landed in its OWN commit BEFORE this routing block update.
+- **Empirical baseline at Architect session entry (verified by direct command runs; NOT inherited from R70 attestation per R25 MINOR-1):**
+  - `pnpm exec node --test --test-reporter=tap test/*.test.js` → `tests=455 / pass=447 / fail=5 / skipped=3`. 5 fails identity-verified by grep: AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14.
+  - `git status` → clean working tree at session entry.
+  - `git rev-parse HEAD` at session entry → `54af89f` (round-start SHA per directive).
+- **Toolchain at session entry:** pnpm 11.x, Node v25.x, TypeScript per devDependencies `^5.4.0`.
+- **Pre-emit grilling outcome:** PASS. Claim-then-walk discipline (R62 lesson) applied to all 11 engine surfaces enumerated in Q-R71-SPEC.md § 1.3; each verified by direct file read at session entry (signatures + line numbers + behavioral semantics). Spec-internal contradiction sweep (R65 MINOR-2) + R02-R70 reinforcement sweep (Q-R71-SPEC.md § 10.5) ran clean. Probe-run of Q-R71-EMPIRICAL.sh at session-entry SHA (with `ROUND_START_SHA=54af89f` env override): Blocks 1-5 PASS (proving carry-forward + anti-scope + no-engine + no-prior-spec structure work); Blocks 6-10 FAIL (expected pre-chore-A — build tool + artifacts do not yet exist).
+- **Round-evolution-fragility avoidance (R62 + R66 + R68 cumulative; 4th-instance):** Spec § 3.2 ALLOWED_SET uses historical-only diff (`round-start..HEAD`); carry-forward fail set bound by AC ID identity (not raw count alone); NO forward-protection AC; NO live-file-count AC; NO anti-scope-diff-against-prior-round-allowed-set AC; NO chore-B (single-state spec).
+
+### Implementer inputs for R71
+
+1. `coordination/specs/Q-R71-SPEC.md` (spec proper; prescriptive)
+2. `coordination/specs/Q-R71-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read)
+3. `coordination/specs/Q-R71-EMPIRICAL.sh` (chore-A verification harness; executable; **Implementer injects `$ROUND_START_SHA` literal at chore-A pre-commit per Q-R71-SPEC.md § 11.1 sed-substitution mechanism**)
+4. `coordination/PRD.md` § Phase 3 + US-01..US-04 (PRD framing)
+5. `coordination/NEXT-ROLE.md` § R71 Round-scope directive (operator scope-setting — preserved below this routing block for context)
+6. Engine source files (READ-ONLY) — exact files + lines listed in Q-R71-SPEC.md § 1.3 (11 engine entry points across 13 files; signatures + behavioral notes provided)
+7. `tools/demo-scenario.ts` (R70 CLI; READ-ONLY; anti-scope A3 — used by AC-R71-14 for anti-regression import only)
+
+### Implementer chore-A sequence (per Q-R71-SPEC.md § 11)
+
+1. **RED commit (separate from GREEN per R23 IMPL MINOR-1):**
+   - Land `test/q71-demo-dashboard.test.ts` with 14 `assert.fail('R71 RED — implementation pending')` stubs at AC-R71-1..14 positions.
+   - `tools/build-canned-demos.ts` + `demos/scenarios/*.json` + `demos/demo.html` do NOT yet exist; tsc emits TS2307 module-resolution error at the test's `import { … } from '../tools/build-canned-demos'`.
+   - Commit message format: `red(R71): q71 demo dashboard stub fails — TS2307 + 14 RED assertion stubs`
+
+2. **GREEN commit (chore-A):**
+   - Land `tools/build-canned-demos.ts` per Q-R71-SPEC.md § 4.1 pseudocode.
+   - Run the build tool locally once to generate `demos/scenarios/<name>.json` × 8 + `demos/demo.html`; commit the outputs.
+   - Modify `package.json` per § 4.4 (add `prebuild:demos` + `build:demos` scripts; preserve all other entries verbatim).
+   - Modify `README.md` per § 4.5 (extend "Quick demo" section per prescribed prose; R70 CLI block PRESERVED as sibling).
+   - Replace all RED stubs in `test/q71-demo-dashboard.test.ts` with real assertions per § 4.3.
+   - **BEFORE committing**: inject `$ROUND_START_SHA` into `Q-R71-EMPIRICAL.sh`:
+     ```bash
+     sed -i.bak "s|<INJECTED-AT-CHORE-A>|$(git rev-parse HEAD)|g" coordination/specs/Q-R71-EMPIRICAL.sh
+     rm coordination/specs/Q-R71-EMPIRICAL.sh.bak
+     ```
+     (captures the parent SHA = Architect's spec-triad commit `37b32b4` as the diff lower bound).
+   - Commit message format: `feat(R71): Tessera demo dashboard — pnpm build:demos + 8 canned scenarios + static dashboard`
+
+3. **Verify chore-A:**
+   - `pnpm exec tsc -p tsconfig.test.json` → exit 0; zero diagnostics.
+   - `pnpm exec node --test --test-reporter=tap test/*.test.js` → record VERBATIM the actual `# tests N / # pass M / # fail K / # skipped J` lines. Predicted: K = 5 (identity-preserved carry-forward); M increases by 14 (baseline 447 → 461; total tests 455 → 469).
+   - `bash coordination/specs/Q-R71-EMPIRICAL.sh` → all 10 blocks PASS, exit 0.
+
+4. **Attestation in NEXT-ROLE.md (Implementer adds § Implementer R71 routing block above this Architect block):** encode ACTUAL chore-A summary VERBATIM per Rule 1 sub-class `empirical-command-attestation`. Do NOT reframe to match Architect prediction. Acknowledge any divergence.
+
+5. **NO chore-B step.** R71 is single-state. Implementer routes directly to Reviewer after chore-A verification + attestation.
+
+### TACTICAL AUTONOMY scope (per Q-R71-SPEC.md § 6.2)
+
+Implementer MAY:
+- Tune drift magnitudes within ±0.10 of prescribed values for scenarios 2/5/6 if prescribed values don't achieve the predicate under the prescribed seed. Document the chosen final value in the GREEN commit message AND as an inline comment.
+- Tune LCG seed *literals* if the prescribed `0x71...` value doesn't satisfy the relevant AC predicate (seed choice is arbitrary; tuning permitted with documentation).
+- Adjust HTML/CSS/JS cosmetic details (pixel sizes, padding, color palette, line widths, font sizes). Structural elements per AC-R71-12 must remain.
+- Adjust JSDoc wording, blank lines, import order, test-local variable names — no semantic change.
+- Choose `.js` extension vs no-extension imports per tools/demo-scenario.ts:12-30 R70 IMPL deviation (default: `.js`).
+- Choose `events[]` content within each captured window (suggested contents listed per scenario; verbatim adherence not required).
+
+Implementer MAY NOT (without HALT + DIAGNOSTIC per Q-R71-SPEC.md § 6.1):
+- Modify any `engine/**/*.ts` file (anti-scope A2 — immediate trigger).
+- Modify `tools/demo-scenario.ts` (anti-scope A3 — R70 CLI preserved as sibling; immediate trigger).
+- Modify any pre-R71 test file or any prior-round spec file.
+- Expand the ALLOWED_SET in-spec at chore-A (R36 MAJOR-2 NEVER violation).
+- Introduce a chore-B step or any forward-protection / live-file-count / anti-scope-diff-against-prior-round AC pattern (R62+R66+R68 cumulative lesson; directive halt #6 immediate trigger).
+- Add an external dependency.
+- Open a DS-repo PR or modify any DS-repo file.
+- Use `fetch`, `import`, `eval`, `Function()`, `XMLHttpRequest`, `WebSocket`, or any cross-origin / loader API in `demos/demo.html`'s embedded JS (anti-scope A12).
+- Skip the RED commit (R23 IMPL MINOR-1 TDD separate-RED-commit discipline).
+- Cite spec-predicted values as observed in attestation (Rule 1 sub-class `empirical-command-attestation` violation).
+
+### Halt conditions for the Implementer (per Q-R71-SPEC.md § 6.1)
+
+10 halt conditions enumerated; do NOT proceed with a silent workaround. Write `coordination/diagnostics/DIAGNOSTIC-R71-<topic>.md` with ≥ 3 bounded options + set `STATUS: ESCALATE` in this NEXT-ROLE.md + await operator disposition.
+
+### Cross-project rule dispositions (per Q-R71-SPEC.md § 7)
+
+| Rule | Disposition |
+|---|---|
+| 1 (`empirical-command-attestation`) | ACTIVE GATE — Q-R71-EMPIRICAL.sh; Tightenings 1-4 applied |
+| 2 (`architect-branch-binding-coverage`) | ACTIVE GATE — Q-R71-SPEC § 5.1 table; 2 acknowledged non-load-bearing gaps (CLI no-arg path; embedded JS DOM handlers — Halt #8 forbids bundling for headless DOM tests) |
+| 3 (`implementer-spec-test-assertion-coverage`) | ACTIVE GATE — discriminating assertions per Q-R71-SPEC § 4.3 + § 5.3 |
+| 4 (`anti-scope-allowed-set-forward-coverage`) | ACTIVE GATE — 18-path ALLOWED_SET + 1 regex carve-out for DIAGNOSTIC-R71-*.md; historical-only diff |
+| 5 (`rule-derivation-without-self-application`) | N/A at spec emit (4th-instance round-evolution-fragility avoidance; this round AVOIDS the pattern; no new derivation) |
+| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | ACTIVE GATE — 10 halt conditions; no carve-out; single-state spec |
+| 7 (`derived-rule-propagation-mechanism-required`) | ACTIVE GATE Surface (a) — spec § 7; Surface (b) + (c) N/A |
+
+### Routing
+
+**NEXT-ROLE: IMPLEMENTER | STATUS: READY**
+
+Implementer reads Q-R71-SPEC.md proper as load-bearing input; Q-R71-SPEC-AUDIT.md is Reviewer-authorized but Implementer MAY read for context.
+
+**Coordination chore SHA:** (Architect routing-block commit SHA to be stamped at chore time)
 
 ---
 
