@@ -259,13 +259,10 @@ test('AC-R62-14: feed-contract.ts propagates correlational_not_causal:true liter
     'feed-contract.ts must declare correlational_not_causal as literal-type true');
 });
 
-// ───────────────────────────────────────────────────────────────────────
-// AC-R62-15: chore-A-to-HEAD diff empty (forward-protection per R36/R53/R56/R58)
-// ───────────────────────────────────────────────────────────────────────
-test('AC-R62-15: chore-A-to-HEAD diff is empty (forward-protection)', () => {
-  const CHORE_A_SHA = '0018502b12ba3e730fa093e682c9f0ae0ad42abe';
-  const out = execSync(`git diff ${CHORE_A_SHA}..HEAD --name-only`, { encoding: 'utf-8' })
-    .split('\n').filter(s => s.length > 0);
-  assert.deepStrictEqual(out, [],
-    `chore-A..HEAD diff expected empty; found: ${JSON.stringify(out)}`);
-});
+// AC-R62-15 DROPPED 2026-05-20 per Option 1 coordination chore resolving R62 ESCALATE.
+// Binding was structurally vacuous: chore-B commit itself modifies this test file (CHORE_A_SHA
+// injection for AC-R62-12), so `git diff CHORE_A_SHA..HEAD --name-only` can never be empty at
+// any committed HEAD post-chore-B. AC-R62-12 covers historical anti-scope coverage
+// (round-start-to-chore-A diff ⊆ ALLOWED_SET); the forward-protection signal is replaced by
+// Reviewer cold-eye + future-round ALLOWED_SET discipline. See coordination/NEXT-ROLE.md
+// § R62 coordination-chore resolution.
