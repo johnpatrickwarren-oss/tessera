@@ -182,7 +182,7 @@ All unresolved decisions → open questions in the spec.
 #   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
 #   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
 
-# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 3 sub-variants observed at Tessera)
+# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 4 sub-variants observed at Tessera)
 #
 #   Fixture accumulation adequacy (R07 MAJOR-1): When grilling catches that an e-process or
 #     statistical-detector AC's fixture needs N windows of accumulation to cross a detection
@@ -220,6 +220,24 @@ All unresolved decisions → open questions in the spec.
 #     record the specific command run and the observed output before marking the assumption
 #     "PASS." "Verified by own observation" and "inherited from prior testimony" are not
 #     equivalent grilling verdicts. Detected tessera R08 MAJOR-2.
+#
+#   Future-state git-simulation verification (R62 CRITICAL-1 / MAJOR-2): When a spec includes
+#     a two-state AC (chore-A failing / chore-B passing) whose chore-B PASS condition is a
+#     git-diff emptiness assertion (`git diff CHORE_A_SHA..HEAD --name-only === []`), the
+#     Architect MUST explicitly simulate the chore-B commit's actual diff AT SPEC-EMIT TIME:
+#     walk through every file the chore-B commit will touch and ask "is that file inside the
+#     diff window?". If chore-B's payload IS a modification of the test file containing the
+#     diff assertion (e.g., SHA-placeholder injection), then the test file appears inside
+#     `git diff CHORE_A_SHA..HEAD`, making the `=== []` assertion structurally unreachable
+#     at any committed HEAD post-chore-B. Catching this at spec-emit time (vs at Reviewer
+#     time) prevents an avoidable ESCALATE cycle. The audit-emit-time correction caught the
+#     chore-A 4-fail arithmetic; the same scrutiny applied to the chore-B simulation would
+#     have caught the chore-B structural impossibility in the same pass. Distinct from
+#     R53 MINOR-1 (chore-A vs chore-B count distinction): that reinforcement ensures the
+#     Architect names the SHA boundary; this sub-variant ensures the chore-B PASS state is
+#     structurally reachable before the spec encodes it as a prediction. Detected tessera
+#     R62 CRITICAL-1 / MAJOR-2 / MAJOR-3 (Reviewer CRITICAL-1; Operator Option 1 resolved
+#     by dropping the structurally-vacuous AC).
 
 # REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
 #   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include
