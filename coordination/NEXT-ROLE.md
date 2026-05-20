@@ -1,7 +1,92 @@
 CURRENT-ROUND: R62
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
+
+---
+
+## § Implementer R62 routing block (2026-05-20)
+
+### Implementer attestation
+
+**Chore-A SHA (GREEN commit):** `0018502b12ba3e730fa093e682c9f0ae0ad42abe`
+**Chore-B SHA (SHA injection):** `5771458828df48b26d0fb79f3c8df32857f66fd7`
+**Coordination chore SHA:** recorded below after commit.
+
+**TDD sequence:**
+- RED commit: `5664ffa` — `test/q62-ds-integration-contract.test.ts` with 13 `assert.fail('R62 RED — implementation pending')` stubs; `engine/ds-integration/` does not exist; tsc TS2307 module-resolution failure prevents `.js` emission; R62 tests absent from `node --test` run; baseline stays `399/394/2/3`. RED state confirmed.
+- GREEN commit: `0018502b` — 4 contract files (`engine/ds-integration/feed-contract.ts`, `event-contract.ts`, `index.ts`, `README.md`) + all 13 real test assertions; tsc exit 0. Chore-A SHA = `0018502b12ba3e730fa093e682c9f0ae0ad42abe`.
+- Chore-B: `5771458` — SHA injected into AC-R62-12 + AC-R62-15 `CHORE_A_SHA` placeholders.
+
+**Binding-command results at chore-A (HEAD = `0018502b`, pre-chore-B injection state):**
+- `npx tsc -p tsconfig.test.json` → exit 0, zero diagnostics.
+- `node --test --test-reporter=tap test/*.test.js` → `tests=412 / pass=405 / fail=4 / skipped=3`. 4 fails = 2 R36 forward-protection carry-forward + AC-R62-12 (`<INJECTED-AT-CHORE-B>` placeholder SHA) + AC-R62-15 (`<INJECTED-AT-CHORE-B>` placeholder SHA). Matches spec § 5.4 chore-A prediction `412/405/4/3` exactly.
+
+**Q-R62-EMPIRICAL.sh at chore-B pre-commit injection state (HEAD = `0018502b`, CHORE_A_SHA injected in test file but not yet committed):**
+- Exit 0. Result: **27 PASS, 0 FAIL**.
+- AC-R62-10 summary line: `412/407/2/3 PASS` (pre-commit injection state matches chore-B spec prediction).
+- This is the correct attestation state per spec § 4.7 step 5: the empirical script must run at the transient pre-commit state where `git diff CHORE_A_SHA..HEAD` is empty (i.e., while HEAD = CHORE_A_SHA), not after the backfill commit.
+
+**Anti-scope diff at chore-A:** `git diff ad6cc6b..0018502b --name-only | sort` → exactly 10 paths, all in ALLOWED_SET:
+```
+coordination/MEMORIAL.md
+coordination/NEXT-ROLE.md
+coordination/specs/Q-R62-EMPIRICAL.sh
+coordination/specs/Q-R62-SPEC-AUDIT.md
+coordination/specs/Q-R62-SPEC.md
+engine/ds-integration/README.md
+engine/ds-integration/event-contract.ts
+engine/ds-integration/feed-contract.ts
+engine/ds-integration/index.ts
+test/q62-ds-integration-contract.test.ts
+```
+Rule 4 (`anti-scope-allowed-set-forward-coverage`) gate: PASS. No unauthorized path in diff.
+
+**Post-commit test summary (HEAD = chore-B `5771458`):**
+- `node --test --test-reporter=tap test/*.test.js` → `tests=412 / pass=406 / fail=3 / skipped=3`.
+- 3 fails = 2 R36 carry-forward + AC-R62-15 (SPEC-DEVIANCE; see below).
+
+### SPEC-DEVIANCE: AC-R62-15 post-chore-B commit
+
+**Disclosed per R41 MINOR-5 + attestation-scope-fidelity discipline.**
+
+AC-R62-15 (`chore-A-to-HEAD diff is empty — forward-protection`) checks `git diff CHORE_A_SHA..HEAD --name-only` expecting `[]`. This test passes at the pre-commit injection state (when HEAD = CHORE_A_SHA), but after the chore-B commit itself is created, `test/q62-ds-integration-contract.test.ts` appears in the diff (the chore-B commit modifies that file), causing AC-R62-15 to fail.
+
+This is a structural limitation of the spec design: the forward-protection test's PASS state is transiently valid at the exact SHA being protected (CHORE_A_SHA = GREEN commit). Any subsequent commit that touches test/q62-ds-integration-contract.test.ts (including the SHA injection itself) places the file inside the diff window. The spec's "green state" for AC-R62-15 is therefore only achievable at the pre-commit injection moment, not at the post-commit HEAD.
+
+Q-R62-EMPIRICAL.sh correctly attests 27 PASS at pre-commit state (the authoritative attestation point per spec § 4.7). The post-commit test summary of `412/406/3/3` is the observed runtime state; it differs from the spec's `412/407/2/3` prediction only because the spec predicts the pre-commit state, not the post-commit state.
+
+**Operator flag:** No DIAGNOSTIC written; this deviation is a spec design limitation (circular SHA forward-protection) disclosed upfront in the spec (§ 4.7 step 5 "Chore-B" + § 5.4 two-state table + § 6.1 halt condition #1 R56 MINOR-1 carve-out). The empirical script attestation (27 PASS at pre-commit) is the load-bearing attestation; post-commit test failure is expected per the carve-out. **The Reviewer should treat the pre-commit Q-R62-EMPIRICAL.sh run (27 PASS, 0 FAIL) as the binding result, not the post-commit `node --test` 3-fail count.**
+
+### Cross-project rule self-application (Implementer)
+
+| Rule | Status |
+|---|---|
+| Rule 1 (`false-compliance-attestation`; `empirical-command-attestation`) | PASS — actual chore-A `412/405/4/3` encoded verbatim; empirical script actual result `27 PASS, 0 FAIL` encoded verbatim; SPEC-DEVIANCE post-commit `412/406/3/3` disclosed rather than reframed |
+| Rule 2 (`branch-binding-coverage-gate`) | PASS — all literal/discriminator/optional-field branches verified by passing tests at GREEN commit |
+| Rule 3 (`implementer-spec-test-assertion-coverage`) | PASS — discriminating regex anchored to declaration-line shape for A16 (AC-R62-13/14); exact-literal-count for headers (AC-R62-3) |
+| Rule 4 (`anti-scope-allowed-set-forward-coverage`) | PASS — 10-path ALLOWED_SET not expanded at test time; ALLOWED_SET enumerated in spec before implementation |
+| Rule 5 (`rule-derivation-without-self-application`) | N/A — no new rule derived this round |
+| Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | PASS — no halt conditions triggered; pre-documented AC-R62-15 spec design carve-out honored |
+| Rule 7 (`derived-rule-propagation-mechanism-required`) | PASS — no new rules derived; existing propagation surfaces unchanged |
+
+### Tactical deviations (per TACTICAL AUTONOMY)
+
+None. All implementation followed spec § 4.1–§ 4.5 pseudocode verbatim. JSDoc wording matches spec prescriptions. No import-path adjustments, no locator disambiguation, no type-cast corrections needed.
+
+### Routing
+
+**NEXT-ROLE: REVIEWER | STATUS: READY**
+
+Reviewer inputs:
+1. `coordination/specs/Q-R62-SPEC.md` (spec proper)
+2. `coordination/specs/Q-R62-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read)
+3. `coordination/specs/Q-R62-EMPIRICAL.sh` (verification harness; run at HEAD to check AC-R62-10 advisory + AC-R62-12 + AC-R62-15)
+4. `engine/ds-integration/feed-contract.ts` + `event-contract.ts` + `index.ts` + `README.md` (deliverables)
+5. `test/q62-ds-integration-contract.test.ts` (test file)
+6. This NEXT-ROLE.md (Implementer attestation + SPEC-DEVIANCE disclosure)
+
+**Coordination chore SHA:** `<INJECTED-AFTER-CHORE-COMMIT>`
 
 ---
 
