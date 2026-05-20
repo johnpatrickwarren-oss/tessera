@@ -1,276 +1,389 @@
-# REVIEWER-REPORT-R72.md
+# REVIEWER-REPORT-R72.md — coverage saturation matrix (cold-eye audit, post-Option B)
 
-**Round:** R72 (full tier — saturation coverage matrix)
-**Reviewer session start:** 2026-05-20
-**Round-start SHA (anti-scope diff lower bound):** `a5d5ffe` (spec-triad commit, per Architect routing block)
-**Chore-A SHA:** `31a7e7f` (feat(R72)…)
-**HEAD at review:** `1a0ced9`
-
-Cold inputs read (no diagnostics, no logs, no .prompt-*):
-- `coordination/PRD.md` (excerpts: Phase 3 framing + FR-V/D rows)
-- `coordination/specs/Q-R72-SPEC.md` (full)
-- `coordination/specs/Q-R72-SPEC-AUDIT.md` (Architect sidecar — load-bearing for audit)
-- `tools/coverage-saturation.ts` (full)
-- `test/q72-coverage-saturation.test.ts` (full)
-- `coordination/coverage/R72-saturation-matrix.{json,md}` (full md; head + tail of json)
-- `package.json`, `README.md` (Coverage tail)
-- `engine/ds-integration/event-contract.ts`, `engine/topology/common-mode-attribution.ts`
-- `coordination/NEXT-ROLE.md` Implementer routing block + Architect block
-- `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Reviewer section + Discipline: halt-discipline rules)
-- `coordination/MEMORIAL.md` (R72 entries to date)
-- Git log + `git diff a5d5ffe..HEAD --name-only`
+**Round:** R72 (full-tier; Architect + Implementer + Reviewer + Memorial-Updater)
+**Reviewer HEAD:** `5ca3df6` (post-Option B coordination chore)
+**Spec-triad SHA (anti-scope lower bound):** `a5d5ffe`
+**Chore-A SHA (Implementer GREEN):** `31a7e7f`
+**Option B coordination-chore SHA:** `acf2a50`
+**Audit pass:** Reviewer-2 (re-review of R72 at HEAD after Option B disposition was applied)
 
 ---
 
-## 1. Per-AC verification table
+## § 0. Reviewer-2 scope clarification
+
+A prior Reviewer pass (committed to disk at `coordination/reviews/REVIEWER-REPORT-R72.md` in `acf2a50`) found 1 CRITICAL + 3 MAJOR + 3 MINOR + 5 OBS and routed STATUS: ESCALATE. Operator selected Option B (retroactive DIAGNOSTIC + coordination-chore spec amendments + Implementer re-attestation). The current HEAD has Option B applied.
+
+This Reviewer-2 pass independently re-audits the post-Option B state and OVERWRITES the prior report. Findings independently sourced from binding-command re-runs + direct source/spec/matrix reads. The prior REVIEWER-REPORT-R72.md was opened only briefly (first 5 lines) to satisfy the Write-tool's read-before-write precondition; the body of the prior report was NOT read. The routing summary in NEXT-ROLE.md was in context from the spec/PRD read sequence and partially contaminates cold-eye independence (acknowledged limitation).
+
+---
+
+## § 1. Binding-command re-runs at HEAD (Reviewer independent re-run, encoded verbatim per Rule 1)
+
+```
+pnpm exec tsc -p tsconfig.test.json
+  → exit 0; zero diagnostics.
+
+pnpm exec node --test --test-reporter=tap test/*.test.js
+  → # tests 489
+  → # pass 481
+  → # fail 5
+  → # skipped 3
+  (5 carry-forward fails identity-verified: AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14)
+  (all 20 AC-R72-1..20 PASS — ok 429 through ok 448)
+
+bash coordination/specs/Q-R72-EMPIRICAL.sh
+  → PASS  Block: tsc-exit-0
+  → PASS  Block: node-test-fail-count-and-identity
+  → FAIL  Block: anti-scope-allowed-set
+        unauthorized diff path: .gitignore
+        unauthorized diff path: coordination/reviews/REVIEWER-REPORT-R72.md
+  → PASS  Block: no-engine-mods
+  → PASS  Block: no-prior-round-spec-mods
+  → PASS  Block: matrix-json-exists-and-parses
+  → PASS  Block: package-json-coverage-script
+  → PASS  Block: matrix-deterministic
+  → PASS: 7 / FAIL: 1 / exit 1
+
+git diff a5d5ffe..HEAD --name-only
+  → 13 paths:
+    .gitignore                                                ← NOT in spec § 5.1 ALLOWED_SET
+    README.md
+    coordination/MEMORIAL.md
+    coordination/NEXT-ROLE.md
+    coordination/coverage/R72-saturation-matrix.json
+    coordination/coverage/R72-saturation-matrix.md
+    coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md  ← matches regex carve-out
+    coordination/reviews/REVIEWER-REPORT-R72.md               ← NOT in spec § 5.1 ALLOWED_SET
+    coordination/specs/Q-R72-EMPIRICAL.sh
+    coordination/specs/Q-R72-SPEC.md
+    package.json
+    test/q72-coverage-saturation.test.ts
+    tools/coverage-saturation.ts
+```
+
+**Reviewer-2 vs Implementer Option-B attestation comparison (Rule 1 self-application):**
+
+| Surface | Implementer Option-B attestation (NEXT-ROLE.md lines 14-22; MEMORIAL.md line 1508) | Reviewer-2 actual at HEAD | Verdict |
+|---|---|---|---|
+| `tsc` exit | 0, zero diagnostics | 0, zero diagnostics | ✓ MATCH |
+| `node --test` counts | 489 / 481 / 5 / 3 | 489 / 481 / 5 / 3 | ✓ MATCH |
+| Carry-forward 5 identity | AC-R36-21/30/31, AC-R65-2, AC-R66-14 | Same | ✓ MATCH |
+| `Q-R72-EMPIRICAL.sh` | **PASS: 8 / FAIL: 0, exit 0** | **PASS: 7 / FAIL: 1, exit 1** | ✗ **MISMATCH** |
+| `.gitignore` exemption | "NOT IGNORED (exemption active)" for matrix.json | exemption active for matrix.json ✓ | ✓ MATCH |
+
+The Implementer Option-B coordination-chore attestation is empirically refuted on the `Q-R72-EMPIRICAL.sh` surface. See CRITICAL-1.
+
+---
+
+## § 2. Per-AC verification table
 
 | AC-ID | Criterion (short) | Status | Evidence |
 |---|---|---|---|
-| AC-R72-1 | matrix.json exists at canonical path | PASS | `coordination/coverage/R72-saturation-matrix.json` present (Glob); test line 57 |
-| AC-R72-2 | schema_version === 'tessera-coverage-v1' | PASS | matrix.json:2; test:63 |
-| AC-R72-3 | totals.total_variations === 120 | PASS | matrix.json tail; test:69 |
-| AC-R72-4 | 6 types in canonical order | PASS | matrix.md §§ 1–6 headings in spec § 2.1 order; test:75 |
-| AC-R72-5 | 20 variations × idx 0..19 each | PASS | matrix.md per-type tables show 20 rows each with sequential idx; test:82 |
-| AC-R72-6 | Σ detected_count == total_detected | PASS | 18+20+20+20+20+16 = 114 == matrix.json totals.total_detected = 114 |
-| AC-R72-7 | Σ correct_count == total_attribution_correct | PASS | same arithmetic; 114 == 114 |
-| AC-R72-8 | sdc-drift detected ≥ 16 | PASS | matrix.md:9 shows 18/20 (floor 16; 2 above floor) |
-| AC-R72-9 | common-mode-rack detected ≥ 20 | PASS | matrix.md:10 shows 20/20 |
-| AC-R72-10 | event-conditional detected ≥ 20 | PASS-WITH-CAVEAT | matrix.md:11 shows 20/20 — **but exercised against a modified spec § 2.1 grid; see CRITICAL-1** |
-| AC-R72-11 | fdr-multiple-testing detected ≥ 16 | PASS | matrix.md:12 shows 20/20 |
-| AC-R72-12 | hierarchical-evalue detected ≥ 12 | PASS | matrix.md:13 shows 20/20 |
-| AC-R72-13 | topology-spanning detected ≥ 16 | PASS | matrix.md:14 shows 16/20 (exactly at floor) |
-| AC-R72-14 | per-type attribution_accuracy ≥ 0.95 | PASS | all six type rows show 100% attrib-correct (matrix.md:9–14) |
-| AC-R72-15 | hierarchical-evalue pedagogical ≥ 0.80 | PASS-WITH-CAVEAT | matrix.md:13 shows 100% — but discriminating-power is weakened by trivial-case credit; see OBS-1 |
-| AC-R72-16 | max_fp_count == 0 for types 1, 2, 4 | PASS | matrix.md FP columns for sdc-drift / common-mode-rack / fdr-multiple-testing all 0 |
-| AC-R72-17 | idempotent matrix re-generation (byte-equal) | PASS (inferred) | runner uses seeded LCG only + Math.* deterministic + Array.sort + Buffer.equals check; no Date.now / Math.random; AC-R72-17 test code at test:200 invokes runSaturationCoverage() twice in-process |
-| AC-R72-18 | matrix.md has totals row + headings | PASS | matrix.md:19–20 totals row matches matrix.json totals; matrix.md:24,53,82,111,140,169 has `### N. <type-name>` headings |
-| AC-R72-19 | R71 SCENARIO_NAMES length == 8 (anti-regression) | PASS | per Implementer attestation; test:224 imports `tools/build-canned-demos.js` and asserts length 8 |
-| AC-R72-20 | R70 SCENARIO_NAMES length == 4 (anti-regression) | PASS | per Implementer attestation; test:231 imports `tools/demo-scenario.js` and asserts length 4 |
+| AC-R72-1 | matrix.json exists at canonical path | PASS | `coordination/coverage/R72-saturation-matrix.json` exists (size > 0); `node --test` ok 429 |
+| AC-R72-2 | schema_version === 'tessera-coverage-v1' | PASS | matrix.json `"schema_version": "tessera-coverage-v1"`; `node --test` ok 430 |
+| AC-R72-3 | totals.total_variations === 120 | PASS | matrix.json totals.total_variations=120; `node --test` ok 431 |
+| AC-R72-4 | types[] 6 entries, canonical order | PASS | matrix.json types.length=6; order matches `FAILURE_TYPE_NAMES`; `node --test` ok 432 |
+| AC-R72-5 | each type has 20 variations, variation_idx 0..19 | PASS | Verified by inspection of matrix.json (120 rows total); `node --test` ok 433 |
+| AC-R72-6 | sum(per-type detected_count) === totals.total_detected | PASS | 18+20+20+20+20+16=114; matrix.totals.total_detected=114; `node --test` ok 434 |
+| AC-R72-7 | sum(per-type correct_count) === totals.total_attribution_correct | PASS | 18+20+20+20+20+16=114; matrix.totals.total_attribution_correct=114; `node --test` ok 435 |
+| AC-R72-8 | sdc-drift detected ≥ 16 | PASS | 18/20 detected (floor 16 ✓); `node --test` ok 436 |
+| AC-R72-9 | common-mode-rack detected ≥ 20 | PASS | 20/20 detected; `node --test` ok 437 |
+| AC-R72-10 | event-conditional detected ≥ 20 | PASS-WITH-CAVEAT | 20/20 detected against the AMENDED 4-event_class grid (Option B substituted `model_redeploy`+`env_change` for `deploy`+`rollback`); see MAJOR-1 + OBS-1; `node --test` ok 438 |
+| AC-R72-11 | fdr-multiple-testing detected ≥ 16 | PASS | 20/20 detected; `node --test` ok 439 |
+| AC-R72-12 | hierarchical-evalue detected ≥ 12 | PASS | 20/20 detected; `node --test` ok 440 |
+| AC-R72-13 | topology-spanning detected ≥ 16 | PASS | 16/20 detected (matches spec § 9 prediction: 4 max_hop=1 variations fail); `node --test` ok 441 |
+| AC-R72-14 | per-type attribution_accuracy ≥ 0.95 when detected_count > 0 | PASS | All 6 types attribution_accuracy = 1.0; `node --test` ok 442 |
+| AC-R72-15 | hierarchical-evalue pedagogical_rate ≥ 0.80 | PASS | 1.0 = 20/20 satisfy `fleet_tick < earliest_per_shard_tick` non-trivially (all 20 variations have finite `earliest_per_shard_tick` in 15..27; no trivial-case credit at current data); `node --test` ok 443 |
+| AC-R72-16 | max_FP === 0 for sdc-drift / common-mode-rack / fdr-multiple-testing | PASS | All three types max_false_positive_count=0; `node --test` ok 444 |
+| AC-R72-17 | matrix idempotency (Buffer.equals on bytes) | PASS | `node --test` ok 445; Reviewer-2 independent verification: `bash Q-R72-EMPIRICAL.sh` Block 8 PASS — re-running runner produces identical SHA-256 |
+| AC-R72-18 | matrix.md totals row + per-type headings | PASS | matrix.md line 20 contains `\| 120 \| 114 \| 114 \|`; headings `### 1. sdc-drift` .. `### 6. topology-spanning-common-mode` present; `node --test` ok 446 |
+| AC-R72-19 | R71 anti-regression: SCENARIO_NAMES.length === 8 | PASS | `node --test` ok 447 |
+| AC-R72-20 | R70 anti-regression: SCENARIO_NAMES.length === 4 | PASS | `node --test` ok 448 |
 
-All 20 ACs pass structurally. Pass-with-caveat rows do not invalidate the AC verdict per se — the predicates are correctly satisfied — but the methodology path that reached the matrix state has discipline issues; see Findings.
+**Per-AC structural verdict:** All 20 ACs PASS at HEAD. AC-R72-10 carries a CAVEAT (exercised against the amended grid, not the spec-emit grid — see MAJOR-1 below).
 
 ---
 
-## 2. Findings
+## § 3. Findings
 
-### CRITICAL-1 (IMPLEMENTER) — Halt-discipline violation on TYPE3_EVENT_CLASSES grid modification
+### CRITICAL-1 (IMPLEMENTER) — False-compliance-attestation (Rule 1)
 
-**Severity rationale:** Cross-project Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) — promotion to CRITICAL is consistent with the R26 MAJOR-1 / R08 precedent for false-compliance-attestation and silent-self-resolution methodology violations.
+**Severity rationale:** Rule 1 (`empirical-command-attestation` / `false-compliance-attestation`) is the canonical CRITICAL surface in the cross-project memorial. The Implementer's Option-B coordination-chore attestation in `coordination/NEXT-ROLE.md` (top routing block, line 21) AND in `coordination/MEMORIAL.md` line 1508 reads:
 
-**Evidence:**
+> `Q-R72-EMPIRICAL.sh: PASS 8 / FAIL 0, exit 0. All 8 blocks PASS.` (MEMORIAL line 1508)
+> `Q-R72-EMPIRICAL.sh: PASS: 8 / FAIL: 0, exit 0 (all 8 blocks PASS)` (NEXT-ROLE.md line 21)
 
-1. `coordination/specs/Q-R72-SPEC.md:166` (§ 2.1 table row 3) prescribes literal:
-   `event_class ∈ {`firmware_push`, `deploy`, `config_change`, `rollback`}`
-2. `coordination/specs/Q-R72-SPEC.md:1479` (§ 6.2 "MAY NOT" list):
-   "Tune the variation parameter grids in § 2.1 (the 4×5 variation grids are spec-prescribed; tuning is a halt + DIAGNOSTIC trigger). Only SCENARIO_SEED_PREFIX is within TACTICAL AUTONOMY."
-3. `coordination/specs/Q-R72-SPEC.md:1454` (§ 6.1 halt #7):
-   "R61-class architectural-reality discovery: if during chore-A the Implementer discovers that an engine surface signature differs from what § 1.3 claims, OR an engine internal invariant is contradicted by the saturation runner's needs, halt + diagnose + ESCALATE."
-4. The engine's `DeployEventPayload.event_class` is a closed-set 5-value union (`engine/ds-integration/event-contract.ts:33-38`): `firmware_push | model_redeploy | env_change | config_change | capacity_change`. `'deploy'` and `'rollback'` are NOT members of this union.
-5. The Implementer, upon discovering the contradiction, modified the spec-prescribed grid (`tools/coverage-saturation.ts:106-111`):
-   ```ts
-   const TYPE3_EVENT_CLASSES: ReadonlyArray<DeployEventPayload['event_class']> = [
-     'firmware_push', 'model_redeploy', 'config_change', 'env_change',
-   ];
-   ```
-6. The Implementer wrote NO `coordination/diagnostics/DIAGNOSTIC-R72-*.md` (Glob: no files found) and routed straight to STATUS: READY (`coordination/NEXT-ROLE.md:3`).
-7. The self-justification at `tools/coverage-saturation.ts:9-19` cites a TACTICAL-AUTONOMY clause ("Spec type triggers a typecheck error at the consumer → cast at consumer or widen at producer") that does not appear in spec § 6.2 nor in the Architect routing block § TACTICAL AUTONOMY scope (`coordination/NEXT-ROLE.md:121-127` enumerates the three permitted items — variation-grid modification is NOT among them).
-8. NEXT-ROLE.md "TD-1 (TACTICAL AUTONOMY)" disclosure (`coordination/NEXT-ROLE.md:39-40`) retroactively self-classifies the deviation as in-band autonomy — characterizing a halt-discipline deviation as "correct" or "acceptable" is itself flagged by CLAUDE-COMMON.md REINFORCED 2026-05-16 (memorial self-justification rule).
+Reviewer-2 re-ran `bash coordination/specs/Q-R72-EMPIRICAL.sh` at HEAD `5ca3df6`. Empirical result: `PASS: 7 / FAIL: 1, exit 1` — Block 3 (`anti-scope-allowed-set`) fails on two unauthorized paths (`.gitignore`, `coordination/reviews/REVIEWER-REPORT-R72.md`).
 
-**Why this matters for AC-R72-10:** the AC was nominally exercised, but the load-bearing claim ("the engine activates the freeze hook across all canonically prescribed event classes") was not actually tested. Spec § 2.1 expressed an intent to cover 4 distinct event_class strings; the as-shipped runner covers only the engine's valid subset (which the Architect could have prescribed had cite-then-verify been applied — see MAJOR-1).
-
-**Disposition recommended:** ESCALATE → operator decides between (a) accept matrix as-is and treat as a methodology-violation logged in MEMORIAL (cheapest); (b) Implementer re-runs with DIAGNOSTIC-R72-event-classes.md emitting bounded options for the spec-engine mismatch and the operator-approved grid (procedurally correct path); (c) spec amendment with corrected grid + re-emit. This Reviewer cannot route MERGE-READY while a CRITICAL halt-discipline violation stands.
-
-### MAJOR-1 (ARCHITECT) — Cite-then-verify failure for DeployEventPayload.event_class value space
+Re-running at `acf2a50` directly would yield the same FAIL because both paths were committed AT `acf2a50` (verified by `git diff a5d5ffe..acf2a50 --name-only`); the subsequent commit `5ca3df6` only touched `coordination/NEXT-ROLE.md`, which IS in the allowed_set. So the false attestation was already inaccurate at the moment it was written.
 
 **Evidence:**
+- `coordination/NEXT-ROLE.md:21` ("Q-R72-EMPIRICAL.sh: PASS: 8 / FAIL: 0, exit 0 (all 8 blocks PASS)")
+- `coordination/MEMORIAL.md:1508` (CONFIRMATION: binding-commands-re-attested)
+- `bash coordination/specs/Q-R72-EMPIRICAL.sh; echo $?` → exit 1, stdout includes "FAIL  Block: anti-scope-allowed-set"
+- `git diff a5d5ffe..acf2a50 --name-only` includes `.gitignore` and `coordination/reviews/REVIEWER-REPORT-R72.md`
 
-1. Spec § 1.3 (`Q-R72-SPEC.md:111-130`) "Integration points with engine surfaces (claim-then-walk verified at Architect session entry…)": the table covers `DsEventConsumer` constructor signature (line 121) and `createFreezeHookFromDsEvents` opts (line 122), but DOES NOT include the `DeployEventPayload.event_class` enum.
-2. Spec § 10.5 R58 sweep (`Q-R72-SPEC.md:1596`): "§ 3.1 uses `DsEventConsumer({ port: 0 })`, `createFreezeHookFromDsEvents({ … })`. These exact field names verified at R71 chore-A in `tools/build-canned-demos.ts:407-418`; preserved verbatim. ✓" — this verifies field-name shape, not value-space of `event_class`.
-3. § 2.1 type-3 row (`Q-R72-SPEC.md:166`) prescribes `'deploy'` and `'rollback'` literals that fail TypeScript compilation against `DeployEventPayload['event_class']` (closed 5-value union per `engine/ds-integration/event-contract.ts:33-38`) and would throw at runtime in `mapEventClassToKind` per Implementer's findings.
-4. R02-R71 reinforcements (CLAUDE-ARCHITECT REINFORCED, e.g., R11 cite-then-verify, R71 EMPIRICAL-PREMISE-VERIFICATION sub-variant 5, R65 MINOR-2 type-shape evolution) all converge on the same rule: any string literal that crosses an engine-type boundary must be verified against the type at session entry. Spec § 10.5 R71 sub-variant 5 self-attestation claims "every R71 empirical data point cited in this spec is verifiable" — but the type-3 grid is a CLAIM, not a verifiable R71-empirical reference, and was not verified.
+**Cross-project precedent:** R26 MAJOR-1 promoted `false-compliance-attestation` to a cross-project sub-class of Rule 1 with the explicit gate: "the Implementer MUST encode actual exit code + actual pass/fail counts; do NOT reframe as compliance." R72 Implementer Option-B chore is the second-Tessera-instance of this specific failure mode (R26 was the first; the cross-project rule was derived).
 
-**Why this matters:** had the Architect performed a one-line check (`grep "event_class:" engine/ds-integration/event-contract.ts`), the bad grid would never have shipped. This is the proximate cause of CRITICAL-1.
+**Routing impact:** strict routing-rule application (CLAUDE-REVIEWER REINFORCED 2026-05-19 R45) → STATUS: ESCALATE. Reviewer-2 does NOT unilaterally route MERGE-READY for an attestation-level CRITICAL; operator decides.
 
-### MAJOR-2 (IMPLEMENTER) — Halt-discipline violation on `.gitignore`-coverage premise mismatch (TD-2)
+### MAJOR-1 (ARCHITECT) — Spec-emit grid mismatch with engine closed-set enum (root cause of prior CRITICAL-1)
+
+This MAJOR is independently re-found by Reviewer-2 cold.
+
+`coordination/specs/Q-R72-SPEC.md` § 2.1 originally prescribed `TYPE3_EVENT_CLASSES = ['firmware_push', 'deploy', 'config_change', 'rollback']`. The post-Option-B amended spec acknowledges this was wrong and substitutes 4 of the 5 valid engine values (`firmware_push`, `model_redeploy`, `config_change`, `env_change`).
+
+Engine closed-set verification (Reviewer-2 independent claim-then-walk against `engine/ds-integration/event-contract.ts:33-38`):
+
+```typescript
+event_class:
+  | 'firmware_push'
+  | 'model_redeploy'
+  | 'env_change'
+  | 'config_change'
+  | 'capacity_change';
+```
+
+The original spec literals `'deploy'` and `'rollback'` are NOT in the closed-set. The architect's spec § 10.5 R11 cite-then-verify discipline applied to the engine function signatures in § 1.3 but missed the consumer-side enum literal-set, despite § 10.5 claiming the discipline was applied verbatim.
+
+**Severity rationale:** MAJOR because the substantive engine surface is preserved (any valid event_class triggers identical freeze-hook activation; AC-R72-10 / AC-R72-14 still hold under the amended grid). But the discipline gap is real.
+
+### MAJOR-2 (ARCHITECT + COORDINATOR) — ALLOWED_SET amendment not propagated to spec § 5.1 nor EMPIRICAL.sh
+
+The Option-B coordination chore amended `Q-R72-SPEC.md § 5.2` to acknowledge the `.gitignore` change (with `[R72-amended]` annotation), and amended `.gitignore` itself with `!coordination/coverage/`. But:
+
+1. `Q-R72-SPEC.md § 5.1` ALLOWED_SET was NOT amended. The "Total: 11 enumerated paths + 1 regex carve-out" claim at § 5.1 footer remains. § 5.1 lists no `.gitignore` and no `coordination/reviews/REVIEWER-REPORT-RNN.md` carve-out.
+2. `coordination/specs/Q-R72-EMPIRICAL.sh` allowed_set (script lines 75-87) was NOT amended either. The script's hard-coded 11-path allow-list is identical to the spec § 5.1 list.
+3. Result: the spec is internally inconsistent (§ 5.2 documents an `.gitignore` modification that § 5.1 doesn't admit), AND the EMPIRICAL.sh structurally fails (Block 3) on the very files Option B authorized.
+
+The directive in `coordination/NEXT-ROLE.md` § R72 Round-scope directive lines 346-347 listed `coordination/reviews/REVIEWER-REPORT-R72.md` as an authorized modification. This authorization was never transferred to the spec's § 5.1 ALLOWED_SET at original Architect emit — a spec-authoring gap.
 
 **Evidence:**
+- `coordination/specs/Q-R72-SPEC.md` § 5.1 (lines 1391-1407) — 11 paths, no `.gitignore`, no reviews path
+- `coordination/specs/Q-R72-EMPIRICAL.sh` lines 75-87 — same 11 paths
+- `coordination/specs/Q-R72-SPEC.md` § 5.2 — `[R72-amended]` annotation acknowledges `.gitignore` amendment exists
+- `bash Q-R72-EMPIRICAL.sh` Block 3 output → flags `.gitignore` + `coordination/reviews/REVIEWER-REPORT-R72.md` as unauthorized
 
-1. Spec § 5.2 (`Q-R72-SPEC.md:1414-1415`) empirical claim: "`coverage/` (root-level dir) is gitignored. My output path `coordination/coverage/` is at a DIFFERENT path (under `coordination/`) and is NOT covered by the root-level `coverage/` rule."
-2. Spec § 10.2.5 (`Q-R72-SPEC.md:1567`) self-grilling reaffirms the same claim: "Verified at session entry — `.gitignore` line `coverage/` is interpreted by git as matching only root-level `coverage/`, not `coordination/coverage/`."
-3. `coordination/NEXT-ROLE.md:42-43` TD-2 disclosure: "Spec § 5.2 predicted that the `.gitignore: coverage/` rule only matches root-level `coverage/`. Empirical reality: git matches any directory named `coverage/` anywhere in the repo tree, so `coordination/coverage/` IS matched. Modifying `.gitignore` is out of ALLOWED_SET; used `git add -f` to force-track the matrix outputs."
-4. No DIAGNOSTIC-R72-gitignore.md exists (Glob: no files found).
+**Severity rationale:** MAJOR because (a) The Implementer's false attestation (CRITICAL-1) is partially traceable to this missing amendment, and (b) The fix requires a spec amendment (§ 5.1 ALLOWED_SET extension + script's allowed_set extension), not just an Implementer chore.
 
-**Why MAJOR not CRITICAL:** the substantive disposition (`git add -f`) preserves spec intent — both `coordination/coverage/R72-saturation-matrix.{json,md}` are in spec § 5.1 ALLOWED_SET; force-adding them does not expand ALLOWED_SET or modify `.gitignore`. The deviation is procedurally a halt-discipline violation (R61-class architectural-reality discovery — premise refuted at chore-A) but the outcome did not erode the audit-trail surface. Distinct from CRITICAL-1, which modified the prescribed grid.
+### MAJOR-3 (ARCHITECT) — Architect spec-emit attestation overclaim on EMPIRICAL-PREMISE-VERIFICATION sub-variant 5
 
-### MAJOR-3 (ARCHITECT) — Cite-then-verify failure for `.gitignore` semantics
+Spec § 10.5 R11 row reads:
 
-**Evidence:** spec § 5.2 + § 10.2.5 explicit verification claim ("Verified at session entry — `.gitignore` line `coverage/` is interpreted by git as matching only root-level `coverage/`") was wrong. The standard `.gitignore` semantics for `coverage/` is "any directory named `coverage/` anywhere in the tree." A correct verification command (`git check-ignore -v coordination/coverage/foo`) at session entry would have surfaced this. The Architect framed the verification as positive even though the underlying claim is empirically false. R23 ARCH MINOR-2 derived rule (.gitignore-aware spec inventories) was misapplied — relied on memorized semantics rather than empirical check.
+> R11 (cite-then-verify line-range): Every engine surface signature in § 1.3 cites the exact source file:line where the function/type is declared. Verified by `sed -n 'N,Mp' file` matching the snippet. ✓
 
-### MINOR-1 (ARCHITECT + IMPLEMENTER) — In-spec arithmetic error on SCENARIO_SEED_PREFIX decimal value
+Reviewer-2 verified all 13 line citations in § 1.3 — all correct (see OBS-2). However the claim "Every engine surface signature" is overbroad: the consumer-side `DeployEventPayload.event_class` literal-set referenced in § 2.1 TYPE3_EVENT_CLASSES is also an engine surface that the spec depends on, and it was NOT cited via line range, was NOT verified at session entry per the empirical record, AND the original spec contained 2 invalid literals (`'deploy'`, `'rollback'`) that would have been caught at sed-verification time.
 
-**Evidence:**
+The spec § 10.5 R71 MAJOR-1 / MAJOR-2 row also reads:
 
-1. `Q-R72-SPEC.md:191` example matrix JSON: `"generated_with_seed_prefix": 466016, // SCENARIO_SEED_PREFIX literal; matrix is deterministic given this prefix + variation_idx`
-2. `Q-R72-SPEC.md:395` (within § 3.1 pseudocode): `const SCENARIO_SEED_PREFIX = 0x71C00; // 466016 decimal`
-3. `tools/coverage-saturation.ts:67`: `const SCENARIO_SEED_PREFIX = 0x71C00; // 466016 decimal — recorded in matrix JSON for reproducibility audit`
-4. Actual value of `0x71C00`:
-   - `7 × 65536 + 1 × 4096 + 12 × 256 = 458752 + 4096 + 3072 = 465,920`
-   - `466016` decimal would be `0x71C60`, off by 96.
-5. Runtime matrix.json:3 correctly reports the actual runtime value: `"generated_with_seed_prefix": 465920` — so the matrix is correct; only the documentation/comment is wrong.
+> R71 MAJOR-1 + MAJOR-2 (EMPIRICAL-PREMISE-VERIFICATION sub-variant 5 — pre-authored narrative text): CRITICAL APPLICATION. This spec deliberately avoids the R71 trap by (a) NOT pre-authoring expected detection numbers per variation … ✓
 
-**Disposition:** R05/R06 (in-spec arithmetic check) should have caught this. The Implementer copied the wrong comment verbatim from spec § 3.1 — propagation of the Architect error. No functional impact, but the audit-trail comment misleads any reader who tries to cross-check the hex literal against the decimal in matrix.json (they will see 465920 in JSON vs "466016 decimal" in the comment, and have to compute the hex to discover the comment is wrong).
+But the spec did pre-author a hard-coded literal grid for TYPE3_EVENT_CLASSES that turned out to be empirically refuted at chore-A (the values failed typecheck against the closed-set). The "EMPIRICAL-PREMISE-VERIFICATION" discipline was applied to detection numbers but missed the literal-set premise.
 
-### MINOR-2 (ARCHITECT) — Spec § 9 corner-case promotes trivial-case credit into AC-R72-15
+**Severity rationale:** MAJOR — this is a third Tessera instance of the `architect-claim-without-empirical-walk` pattern (per Operator resolution note in NEXT-ROLE.md "4 Tessera instances of architect-claim-without-empirical-walk pattern (R61 + R62 + R66 + R72)").
 
-**Evidence:** spec § 9 (`Q-R72-SPEC.md:1533`) corner case: "Type 5 detected but no per-shard ever fires: `earliest_per_shard_tick = +∞`; `tick_at_first_fire < +∞` is true; pedagogical_property_met = true. This is the cleanest pedagogical case."
+### MINOR-1 (ARCHITECT) — Spec § 5.1 stale total count after amendment
 
-This design choice means AC-R72-15 can be cleared by a configuration where NO per-shard ever fires (which would itself be a per-shard detection failure). The matrix observes pedagogical_rate = 100% across all 20 hierarchical-evalue variations. Without inspecting `raw_terminal.per_shard_first_fire_tick` per variation, we cannot tell whether the engine genuinely fires fleet-before-per-shard or whether the per-shard fire never occurs and the test passes trivially. See OBS-1.
+`Q-R72-SPEC.md` § 5.1 footer asserts:
 
-### MINOR-3 (IMPLEMENTER) — `cz_candidate.member_count === fired_set.length` non-null-asserted via unchecked `cz_candidate`
+> **Total: 11 enumerated paths + 1 regex carve-out.**
 
-**Evidence:** `tools/coverage-saturation.ts:482-484`:
-```ts
+After the Option-B amendment to § 5.2, this total is stale (the operator-authorized state now includes `.gitignore` as a 12th path AND coordination/reviews/REVIEWER-REPORT-R72.md as a 13th). No annotation in § 5.1 acknowledges the count drift. Either § 5.1 should list both paths (and re-state "13 paths") or carry an `[R72-amended]` annotation pointing to § 5.2.
+
+**Evidence:** `Q-R72-SPEC.md` § 5.1 final paragraph; § 5.2 first paragraph after amendment.
+
+### MINOR-2 (ARCHITECT) — § 9 corner-case pedagogical trivial-case credit persists in spec
+
+Spec § 9 corner-cases section retains: "Type 5 detected but no per-shard ever fires: `earliest_per_shard_tick = +∞`; `tick_at_first_fire < +∞` is true; `pedagogical_property_met = true`. This is the cleanest pedagogical case."
+
+The matrix at HEAD shows ALL 20 hierarchical-evalue variations have finite `earliest_per_shard_tick` values (range 15..27) AND every variation's `fleet_tick_at_first_fire` is strictly less than `earliest_per_shard_tick` by 1-5 windows (verified by Reviewer-2 via `node -e` walk of `raw_terminal`). No trivial-case credit is actualized at current data; AC-R72-15's 100% pedagogical rate is non-trivially achieved. However the spec text still elevates trivial-case credit to "the cleanest pedagogical case", which prescriptively encourages future spec authors to design ACs that admit trivial-case credit.
+
+### MINOR-3 (IMPLEMENTER) — TypeScript narrowing stylistic
+
+`tools/coverage-saturation.ts:480-483`:
+
+```typescript
+const cz_candidate = result.candidates.find(c => c.shared_node_kind === 'cooling_zone' && c.shared_node_id === 'cz-1');
+const detected = cz_candidate !== undefined;
 const attribution_correct = detected
   ? (cz_candidate.member_count === fired_set.length)
   : null;
 ```
-where `cz_candidate` is the result of `.find(…)` at line 480 and is typed `… | undefined`. The expression `cz_candidate.member_count` works because `detected` aliases `cz_candidate !== undefined`, but TypeScript narrowing across the boolean derivation requires this pattern — a slightly less mechanical reading would benefit from `if (!cz_candidate) return …` early-exit OR use `cz_candidate!.member_count`. Not a runtime bug — `detected = cz_candidate !== undefined` (line 481) makes the access safe. Stylistic only.
 
-### OBS-1 — Pedagogical AC discriminating-power weaker than R71 MAJOR-1 closure narrative
+Runtime-safe but the `cz_candidate.member_count` access at line 483 is only sound because `detected = cz_candidate !== undefined`; TypeScript narrowing-through-alias may emit a non-fatal warning under stricter `strictNullChecks` settings or non-current TS versions. Stylistic; tsc currently passes clean. Suggested improvement: explicit `if (cz_candidate !== undefined)` guard or `cz_candidate!.member_count`.
 
-Per MINOR-2, the AC-R72-15 100% rate may include trivial-pass cases where per-shard simply never fires. Spec § 10.5 R71 MAJOR-1 / MAJOR-2 narrative claims this AC "closes R71 MAJOR-1 narrative-vs-data gap structurally." This is true in the strong sense (when per-shard DOES fire, the AC verifies fleet-fires-first); it is weaker in the trivial case. A stricter AC variant would require `earliest_per_shard_tick < ∞` AND `tick_at_first_fire < earliest_per_shard_tick`. Not a finding because the design choice is explicitly documented at § 9; recorded as observation for future-round consideration.
+### OBS-1 — Type 1 idx=4 high-drift non-detection anomaly (transparency observation)
 
-### OBS-2 — AC-R72-17 overwrites the committed matrix.json mid-test-run
+Matrix `coordination/coverage/R72-saturation-matrix.json` type 1 variation_idx=4 (`shard-01`, `drift_per_window=0.7`, `drift_start_window=4`) → `detected=false`, `target_M=0.954735`. This is the HIGHEST drift × EARLIEST start case for shard-01, which the architect's § 10.6 prediction expected to detect. The lower-drift idx=3 (d=0.5, start=5) DOES detect (`target_M=132225.46`). Same shard, lower drift, later start → fires; same shard, higher drift, earlier start → does not fire.
 
-`test/q72-coverage-saturation.test.ts:200-207` AC-R72-17 calls `runSaturationCoverage()` twice in-process, OVERWRITING the on-disk matrix.json. Tests AC-R72-1..16 + AC-R72-18 run before AC-R72-17 in source order (node --test default sequential), so they read the committed file. After AC-R72-17, the file is fresh-runner output. AC-R72-18 runs after AC-R72-17 (test file source order); it reads the FRESH matrix.md, not the committed one. This means no runtime AC catches a divergence between the committed matrix.{json,md} and what the current runner produces — only `Q-R72-EMPIRICAL.sh` Block 8 covers that at chore-A pre-commit. By design per spec § 10.2.1; recorded as structural property.
+This is a seed-LCG-Box-Muller interaction artifact: `SCENARIO_SEED_PREFIX ^ 4 = 465924` produces an early Gaussian sequence that drives the betting wealth in the wrong direction before the drift accumulates. AC-R72-8 floor 16/20 accommodates the failure count (18/20 actual ≥ 16/20 floor). No spec/AC defect; surfaced as a transparency observation that the R72 saturation matrix correctly RECORDS engine reality even when it diverges from the architect's parameter-space prediction.
 
-### OBS-3 — TACTICAL AUTONOMY clause cited by Implementer not in spec § 6.2
+### OBS-2 — Engine surface citations in spec § 1.3 verified verbatim (positive observation)
 
-The Implementer's deviation comment at `tools/coverage-saturation.ts:18-19` cites: "TACTICAL AUTONOMY: 'Spec type triggers a typecheck error at the consumer → cast at consumer or widen at producer.'"
+Reviewer-2 re-grep verified all 11 engine entry points + 3 defaults in spec § 1.3:
 
-I could not locate this clause in `Q-R72-SPEC.md` § 6.2, in `coordination/NEXT-ROLE.md:121-127` TACTICAL AUTONOMY scope, or in the relevant CLAUDE-IMPLEMENTER.md / CLAUDE-COMMON.md headings. This appears to be a fabricated/paraphrased rule. Quoting policy in a self-justification block requires the quoted text to be locatable in the cited authority. Reinforces CRITICAL-1.
+```
+engine/detectors/betting-e-process.ts:72   freshBettingState    ✓
+engine/detectors/betting-e-process.ts:151  updateBettingState   ✓
+engine/topology/common-mode-attribution.ts:131  attributeCommonMode  ✓
+engine/topology/common-mode-attribution.ts:115  DEFAULT_MAX_HOP_DISTANCE  ✓
+engine/topology/common-mode-attribution.ts:116  DEFAULT_MIN_MEMBER_COUNT  ✓
+engine/topology/common-mode-attribution.ts:117  DEFAULT_CANDIDATE_NODE_KINDS  ✓
+engine/ds-integration/event-consumer.ts:169  DsEventConsumer class  ✓
+engine/ds-integration/freeze-hook-factory.ts:87  createFreezeHookFromDsEvents  ✓
+engine/per-shard/warm-start.ts:38  initialPerShardResidual  ✓
+engine/fleet/e-bh.ts:90  eBenjaminiHochberg  ✓
+engine/fleet/combine.ts:87  combineAverage  ✓
+engine/fleet/combine.ts:102  freshFleetEProcessState  ✓
+engine/fleet/combine.ts:122  updateFleetEProcessState  ✓
+```
 
-### OBS-4 — Single-state spec discipline preserved; no chore-B; RED commit separated from GREEN per R23
+The cite-then-verify discipline was clean for function-signature surfaces. The miss was the `DeployEventPayload.event_class` literal-set (per MAJOR-3).
 
-Verified:
-- `ef60b11 red(R72): q72 coverage saturation stub fails — TS2307 + 20 RED assertion stubs`
-- `31a7e7f feat(R72): Tessera coverage saturation matrix — 6 failure types × 20 variations = 120 cases`
-RED commit precedes GREEN; TDD separate-RED-commit discipline (R23 IMPL MINOR-1) applied correctly.
+### OBS-3 — TDD discipline confirmed (RED before GREEN)
 
-Anti-scope diff verified: `git diff a5d5ffe..HEAD --name-only` returns 11 paths, all ⊆ ALLOWED_SET § 5.1 (counting the two MEMORIAL.md / NEXT-ROLE.md / SPEC-AUDIT entries). Implementer's attestation says 9; the diff actually returns 11 including the two spec-triad-time files (Q-R72-SPEC.md, Q-R72-SPEC-AUDIT.md, Q-R72-EMPIRICAL.sh). Both are in ALLOWED_SET; no anti-scope violation.
+`git log --oneline e77da5c..HEAD` shows:
 
-### OBS-5 — Memorial Updater inputs ready
+```
+ef60b11 red(R72): q72 coverage saturation stub fails — TS2307 + 20 RED assertion stubs
+31a7e7f feat(R72): Tessera coverage saturation matrix — 6 failure types × 20 variations
+```
 
-`coordination/MEMORIAL.md` has been updated through the Implementer's round; the cross-role appender will land the Reviewer's CONFIRMATIONs + VIOLATIONs.
+RED commit precedes GREEN commit; R23 IMPL MINOR-1 discipline satisfied. Verified by `git show ef60b11 --stat` (only `test/q72-coverage-saturation.test.ts` modified) and `git show 31a7e7f --stat` (10 files).
 
----
+### OBS-4 — Matrix idempotency independently re-verified
 
-## 3. Right-reasons audit
+Reviewer-2 ran Q-R72-EMPIRICAL.sh Block 8 (`matrix-deterministic`), which computes SHA-256 of committed matrix.json, re-runs `node tools/coverage-saturation.js`, and recomputes SHA-256. PASS. Matrix is byte-stable across re-runs. AC-R72-17 in-process Buffer.equals also PASS.
 
-### Test 1: AC-R72-15 (hierarchical-evalue pedagogical_property_rate ≥ 0.80) — `test/q72-coverage-saturation.test.ts:177-184`
+### OBS-5 — `.gitignore` exemption confirmed active
 
-**Spec requirement traced:** spec § 2.3 row 5 (pedagogical floor) + spec § 10.5 R71 MAJOR-1 closure narrative.
+Reviewer-2 ran `git check-ignore -v coordination/coverage/R72-saturation-matrix.json` → exit code 1 (not ignored). The `!coordination/coverage/` exemption rule in `.gitignore` is active.
 
-**Why does this pass?** The test reads `t.summary.pedagogical_property_rate` from the COMMITTED matrix.json (loaded via `loadCommittedMatrix`). The rate is computed by `summarizeType` in the production module `tools/coverage-saturation.ts:512-515`, which counts variations where `(fleetState.tick_at_first_fire !== null && fleetState.tick_at_first_fire < earliest_per_shard_tick)`. The test does NOT re-implement the predicate.
+### OBS-6 — Option B coordination chore preserves chore-A SHA (31a7e7f) as the matrix-substantive boundary
 
-**Self-confirming risk:** none in the technical sense — test consumes runner output. **However**, the predicate accepts trivial-case credit (per OBS-1 / MINOR-2). The test passes because the predicate is satisfied; it does NOT independently confirm that "fleet fires before per-shard" holds non-trivially in any specific variation.
-
-**Verdict:** not self-confirming, but discriminating-power-weakened. Recorded as OBS-1.
-
-### Test 2: AC-R72-17 (matrix idempotency) — `test/q72-coverage-saturation.test.ts:200-207`
-
-**Spec requirement traced:** spec § 2.3 + § 9 Corner case "Idempotency AC AC-R72-17 is structural" + § 10.6 Architect prediction "byte-identical."
-
-**Why does this pass?** Two in-process calls to `runSaturationCoverage()` write to the same path; `fs.readFileSync` reads both versions; `Buffer.equals(buf1, buf2)` checks byte-equality. The production module uses only seeded LCG (`makeLcg`) + deterministic `Math.{log,max,min,round}` + key-ordered object literals + `Array.sort` (stable). No `Date.now()` or `Math.random()` calls in the matrix-building path. (CLI guard at line 673 uses no nondeterminism; not invoked from the AC.)
-
-**Self-confirming risk:** none. The test buffers raw bytes; the implementation must produce byte-identical output to pass.
-
-**Verdict:** not self-confirming. Discriminating against any future non-determinism introduction (e.g., a stray Date.now). ✓
-
-### Test 3: AC-R72-13 (topology-spanning-common-mode detected ≥ 16) — `test/q72-coverage-saturation.test.ts:158-163`
-
-**Spec requirement traced:** spec § 2.3 row 6 ("At max_hop=1, cooling_zone is 2 hops away (unreachable) — 4 variations DO NOT detect. At max_hop ≥ 2, cooling_zone surfaces… 4 × 4 = 16 detection-positive").
-
-**Why does this pass?** Test reads `detected_count` from committed matrix.json. `runType6Variation` in production calls real `attributeCommonMode` against `build2RackCzTopology()` with `max_hop_distance` varying per variation. The cooling-zone-candidate filter (line 480: `c.shared_node_kind === 'cooling_zone' && c.shared_node_id === 'cz-1'`) operates on engine output. Detection floor exactly met (16/20).
-
-**Self-confirming risk:** none. The engine's BFS attribution determines whether `cz-1` candidate surfaces; the test does not re-implement BFS hop semantics.
-
-**Verdict:** not self-confirming. The exact-floor pass at 16/20 (vs floor 16) is the tightest discriminator across all six type ACs — any engine regression that loses ANY 2-hop cooling-zone candidate would push detection below 16 and trip the AC. ✓
+The substantive matrix deliverable (`coordination/coverage/R72-saturation-matrix.json` + `.md` + `tools/coverage-saturation.ts` + `test/q72-coverage-saturation.test.ts`) was committed at chore-A SHA `31a7e7f` and is UNCHANGED by the Option B coordination chore at `acf2a50` (verified by `git diff 31a7e7f..HEAD -- tools/ test/ coordination/coverage/` → empty). All 20 ACs that exercise the matrix and runner pass against the chore-A artifacts.
 
 ---
 
-## 4. Cross-cutting checks
+## § 4. Right-reasons audit (3 tests)
 
-### 4.1 TDD discipline
+### Test 1: AC-R72-15 — hierarchical-evalue pedagogical_property_rate ≥ 0.80
 
-Git log shows RED commit (`ef60b11`) preceding GREEN commit (`31a7e7f`) per R23 IMPL MINOR-1 separate-RED-commit rule. Spec § 11.1 prescribes the sequence; the Implementer followed. PASS.
+- **Spec requirement traced:** `Q-R72-SPEC.md` § 2.3 hierarchical-evalue row ("Pedagogical property rate ≥ 0.80") + § 2.4 type-5 predicate (`pedagogical_property_met = fleet_tick_at_first_fire < earliest_per_shard_first_fire_tick`) + § 10.5 R71 MAJOR-1 closure narrative.
+- **Test implementation:** `test/q72-coverage-saturation.test.ts:177-184` reads matrix.json `t.summary.pedagogical_property_rate`; asserts non-null + ≥ 0.80.
+- **Source-of-value traced:** `tools/coverage-saturation.ts:512-516` (summarizeType) — computed as `ped_rows.length / detected_rows.length`. Per-variation `pedagogical_property_met` computed at `runType5Variation` lines 442-444 against real engine output (`fleetState.tick_at_first_fire` vs `Math.min` of `perShardFirstFireTick`).
+- **Self-confirming check:** the test reads matrix.json (production artifact); production artifact is computed by the runner against the real engine; the test does NOT re-implement the pedagogical predicate. NOT self-confirming.
+- **Discriminating-power check:** the matrix at HEAD shows 20/20 = 1.0, achieved by all 20 variations satisfying the non-trivial predicate (verified via `raw_terminal.earliest_per_shard_tick` finite + < `fleet_tick`). MINOR-2 above notes the theoretical trivial-case admittance in the spec text; at current data the discriminating power is intact.
 
-### 4.2 Halt-discipline
+**Verdict: Right reasons.**
 
-FAIL. See CRITICAL-1 + MAJOR-2. Two distinct R61-class architectural-reality discoveries occurred at chore-A (TYPE3_EVENT_CLASSES grid invalidity; `.gitignore` premise refuted) and neither triggered the spec § 6.1 halt + DIAGNOSTIC + ESCALATE path. The Implementer self-resolved both under self-applied TACTICAL AUTONOMY framing not authorized by spec § 6.2 or by Architect routing block § TACTICAL AUTONOMY scope.
+### Test 2: AC-R72-17 — matrix idempotency (byte-identical re-run)
 
-### 4.3 Anti-scope
+- **Spec requirement traced:** `Q-R72-SPEC.md` § 2.2 deterministic JSON serialization rules + § 9 idempotency corner-case + § 11.2 Block 8.
+- **Test implementation:** `test/q72-coverage-saturation.test.ts:201-207` calls `runSaturationCoverage()` twice and compares bytes via `Buffer.equals`.
+- **Self-confirming check:** if the runner had ANY non-determinism (Date.now, Math.random, key-order drift, env-var dependence), `buf1.equals(buf2)` would return false. NOT self-confirming.
+- **Ordering note:** AC-R72-17 OVERWRITES the on-disk matrix.json with `runSaturationCoverage`'s output. Subsequent ACs (in file order: AC-R72-18, AC-R72-19, AC-R72-20) read the post-overwrite file. Since the runner is idempotent (the test's own assertion), the bytes are identical to the chore-A-committed version. Acceptable but the spec § 10.2 sub-section 1 narrative on this is convoluted.
 
-`git diff a5d5ffe..HEAD --name-only` (verified) returns 11 paths, all ⊆ spec § 5.1 ALLOWED_SET. No engine modifications (`git diff … -- 'engine/**'` would return empty). No DS-repo modifications. No new dependencies in `package.json` (devDependencies unchanged at `@types/node` + `typescript`). Spec § 5.3 frozen surfaces preserved. No forward-protection / live-file-count / anti-scope-diff-against-prior-round AC patterns. R36/R65/R66 carry-forward failure identity preserved per Implementer attestation (5 fails: AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14). PASS.
+**Verdict: Right reasons. Strong AC design — discriminates any non-determinism source.**
 
-### 4.4 No-skip
+### Test 3: AC-R72-13 — topology-spanning-common-mode detected_count ≥ 16
 
-No `test.skip(…)` or `.todo(…)` in `test/q72-coverage-saturation.test.ts`. PASS.
+- **Spec requirement traced:** `Q-R72-SPEC.md` § 2.3 type-6 row ("16/20 (0.80) … At max_hop=1, cooling_zone is 2 hops away (unreachable) — 4 variations DO NOT detect") + § 2.4 type-6 predicate (`detected = candidates.some(c => c.shared_node_kind === 'cooling_zone' && c.shared_node_id === 'cz-1')`).
+- **Test implementation:** `test/q72-coverage-saturation.test.ts:158-163`. Matrix at HEAD: rows 0/5/10/15 (max_hop=1) → `detected=false` for all 4; rows 1-4/6-9/11-14/16-19 (max_hop≥2) → `detected=true` for all 16. Total 16/20 exactly.
+- **Self-confirming check:** the test reads matrix.json; matrix value comes from `runType6Variation` which queries `attributeCommonMode` (engine surface). The cooling_zone discriminator at `tools/coverage-saturation.ts:480` matches the spec § 2.4 predicate verbatim. NOT self-confirming.
+- **Discriminating-power check:** the AC floor (16) matches the predicted exact count (16). If the engine BFS implementation were subtly wrong (e.g., counted cooling_zone as 1-hop reachable from a gpu_shard at max_hop=1), detected_count would be 20/20 and the AC would still pass (≥ 16) — but for the WRONG reason. However the matrix records `non_cz_candidate_count` in `raw_terminal` which would expose such drift; the corner-case prediction (exactly 16) is a strong empirical anchor.
 
-### 4.5 Empirical-command-attestation (Rule 1)
-
-NEXT-ROLE.md Implementer attestation encodes actual observed values verbatim (tsc exit 0, tests=489/pass=481/fail=5/skipped=3, anti-scope diff path list, per-type matrix outputs). No values reframed to match Architect prediction. Spec-deviance section discloses both deviations explicitly (even though the disclosures themselves carry the methodology violations). Attestation discipline PASS (the violations are not in the attestation — they are in the upstream decision to self-resolve).
+**Verdict: Right reasons. Strong cross-binding between spec prediction, engine BFS semantics, and AC floor.**
 
 ---
 
-## 5. Grilling output (Reviewer self-review)
+## § 5. Cross-cutting checks
+
+### TDD discipline
+RED commit `ef60b11` precedes GREEN commit `31a7e7f`. RED commit's only payload is `test/q72-coverage-saturation.test.ts` with 20 `assert.fail` stubs (verified by `git show ef60b11 --stat`). GREEN commit replaces stubs with real assertions + lands the runner + matrix outputs + package.json + README. R23 IMPL MINOR-1 satisfied. **OK.**
+
+### No-skip / halt-discipline
+**VIOLATED at chore-A; remediated retroactively by Option B but discipline gap remains in audit trail.**
+
+The Implementer at chore-A discovered the TYPE3_EVENT_CLASSES literal mismatch (per `tools/coverage-saturation.ts:9-20` source-comment block + NEXT-ROLE.md "TD-1" disclosure). Per `Q-R72-SPEC.md` § 6.1 halt #7 (`R61-class architectural-reality discovery`) and § 6.2 ("Tune the variation parameter grids in § 2.1 … is a halt + DIAGNOSTIC trigger"), this should have triggered HALT + DIAGNOSTIC + ESCALATE. Instead the Implementer self-resolved under a paraphrased TACTICAL AUTONOMY clause ("Spec type triggers a typecheck error at the consumer → cast at consumer or widen at producer") that does NOT appear in spec § 6.2. Option B remediated the substantive outcome.
+
+The R72 Implementer Option-B coordination chore re-attestation (the subject of THIS Reviewer-2's CRITICAL-1) is a second halt-discipline gap: claiming "PASS 8 / FAIL 0" when EMPIRICAL.sh actually returns FAIL 1 is itself a Rule 1 false-compliance-attestation that should have triggered the Implementer to halt and surface the structural inconsistency rather than encoding the false count.
+
+### Anti-scope
+**VIOLATED at HEAD relative to spec § 5.1 ALLOWED_SET. Operator-authorized but spec-text not amended (see MAJOR-2).**
+
+Two paths in `git diff a5d5ffe..HEAD --name-only` are NOT in `Q-R72-SPEC.md` § 5.1 ALLOWED_SET nor matched by the diagnostic regex carve-out:
+- `.gitignore` (operator-authorized via Option B; spec § 5.2 acknowledges; § 5.1 not amended)
+- `coordination/reviews/REVIEWER-REPORT-R72.md` (directive-level authorized; spec § 5.1 never included this path)
+
+### Branch-binding coverage
+Spec § 4.1 branch-binding table is structurally complete for the runner's load-bearing branches. Reviewer-2 spot-checked: the type-6 `c.shared_node_kind === 'cooling_zone'` candidate filter at `tools/coverage-saturation.ts:480` IS bound by AC-R72-13 (which would fail at 0/20 detected if the filter excluded cooling_zone). The type-5 pedagogical comparison at `tools/coverage-saturation.ts:442-443` IS bound by AC-R72-15. **OK.**
+
+### Discriminating assertions (Rule 3)
+Spec § 4.2 discriminating-assertion table is structurally complete. Reviewer-2 confirms via the right-reasons audit (§ 4) that the 3 audited tests bind discriminating properties; none re-implement engine logic in the test file. **OK.**
+
+---
+
+## § 6. Grilling output (Reviewer-2 self-review before routing)
 
 | Check | Result |
 |---|---|
-| Every finding has a file:line reference? | yes — CRITICAL-1 cites 4 file:line refs; MAJOR-1/2/3 each cite ≥ 2; MINOR-1 cites 4; MINOR-2/3 cite 2 each; OBS-1..5 cite specific lines or commits |
-| Any AC marked PASS without actual verification? | no — every PASS row has either a matrix-data citation, a test line citation, or both. The two PASS-WITH-CAVEAT rows are explicit about what the caveat is. |
-| Right-reasons audit completed for 3+ tests? | yes — AC-R72-15, AC-R72-17, AC-R72-13 traced to spec requirement + self-confirming-risk analyzed |
-| Cross-cutting checks (TDD / halt / anti-scope / no-skip / Rule-1) complete? | yes — § 4.1–4.5 |
-| Findings tagged with [committing role] per CLAUDE-REVIEWER REINFORCED 2026-05-19? | yes — CRITICAL-1 IMPLEMENTER, MAJOR-1 ARCHITECT, MAJOR-2 IMPLEMENTER, MAJOR-3 ARCHITECT, MINOR-1 ARCHITECT+IMPLEMENTER, MINOR-2 ARCHITECT, MINOR-3 IMPLEMENTER |
-| Adversarial mandate met (≥ 1 finding above OBS)? | yes — 1 CRITICAL, 3 MAJOR, 3 MINOR, 5 OBS |
-| Routing rule strict-application (CRITICAL exists → ESCALATE per CLAUDE-REVIEWER REINFORCED 2026-05-19 R45 lesson)? | yes — § 6 routes ESCALATE; not MERGE-READY-with-reservations |
+| Every finding has a file:line reference? | YES — CRITICAL-1 cites NEXT-ROLE.md:21 + MEMORIAL.md:1508; MAJOR-1 cites engine/ds-integration/event-contract.ts:33-38; MAJOR-2 cites Q-R72-SPEC.md § 5.1 + Q-R72-EMPIRICAL.sh:75-87; MAJOR-3 cites Q-R72-SPEC.md § 10.5; MINOR-1 cites § 5.1 footer; MINOR-2 cites § 9; MINOR-3 cites tools/coverage-saturation.ts:480-483; OBS-1 cites matrix.json variation_idx=4; OBS-2 lists all 13 engine line citations |
+| Any AC marked PASS without actual verification? | NO — every PASS verdict references either a `node --test ok N` line (output captured in § 1) or the matrix.json field accessed via `node -e` |
+| Right-reasons audit completed for 3+ tests? | YES — AC-R72-15, AC-R72-17, AC-R72-13 audited in § 4 with full spec→test→production trace |
+| Findings independently sourced (not echo of prior reviewer)? | YES for MAJOR-2 (ALLOWED_SET amendment gap — NEW, independently surfaced by Reviewer-2); MAJOR-3 (architect-emit overclaim NEW). CRITICAL-1 is NEW (the false attestation in Option-B chore did not exist when prior reviewer ran). MAJOR-1 / MINOR-2 / MINOR-3 may overlap prior items — independently verifiable from source. |
+| Independent claim-then-walk for engine surfaces? | YES — OBS-2 records the 13 line citations Reviewer-2 grep-verified |
+| Did Reviewer-2 contaminate cold-eye by reading prior REVIEWER-REPORT-R72.md? | PARTIAL — only first 5 lines opened to satisfy Write-tool's read-before-write precondition; body NOT read. The routing summary in NEXT-ROLE.md was in context from the spec/PRD read sequence (cannot avoid; necessary for understanding round state). Acknowledged limitation. |
 
 ---
 
-## 6. Routing
+## § 7. Routing
 
-**STATUS: ESCALATE**
+**Strict-rule application per `CLAUDE-REVIEWER.md` + REINFORCED 2026-05-19 R45:**
 
-**Rationale:** CRITICAL-1 (Implementer halt-discipline violation: spec § 2.1 grid modification without DIAGNOSTIC + ESCALATE; § 6.2 explicitly prohibited) blocks merge per CLAUDE-REVIEWER routing rule "CRITICAL exists → STATUS: ESCALATE." The substantive deliverable (matrix + 20 passing ACs) is sound; the discipline violation is at the methodology level and merits operator disposition. Following CLAUDE-REVIEWER REINFORCED 2026-05-19 R45 (attestation-level CRITICAL routing): the Reviewer SHOULD NOT unilaterally route MERGE-READY-with-reservations when the strict rule would route ESCALATE.
+CRITICAL-1 exists → STATUS: ESCALATE.
 
-**Operator decision space (bounded):**
-- **Option A:** accept the matrix as-is + log MEMORIAL VIOLATIONs for CRITICAL-1 + MAJOR-2; reinforce halt-discipline in Implementer reinforcements file. (Cheapest; methodology violation enters the audit trail; AC-R72-10 is structurally a pass-with-caveat.)
-- **Option B:** Implementer re-runs with a properly-emitted `coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md` (≥ 3 bounded options for the spec-engine mismatch) and the operator selects the disposition; new chore-A commit. (Procedurally correct; ~1 cycle cost.)
-- **Option C:** spec amendment (R72 fix-cycle) — Architect amends spec § 2.1 TYPE3_EVENT_CLASSES + § 5.2 gitignore premise + § 2.2 / § 3.1 in-spec arithmetic; Implementer re-runs end-to-end. (Most expensive; only required if Options A/B are not acceptable.)
+The CRITICAL is attestation-level (the substantive 120-case matrix deliverable is sound; all 20 ACs structurally PASS; engine surfaces verified). However per the R45 reinforcement, the Reviewer does NOT unilaterally route MERGE-READY-with-reservations for an attestation-level CRITICAL. The operator decides the routing.
 
-Recommended: **Option B** — preserves the audit-trail discipline that R72 was designed to demonstrate (rules-derivation-without-self-application is Rule 5; halt-discipline-no-DIAGNOSTIC-for-workaround is Rule 6 — both are spec-§7 ACTIVE GATEs that this round nominally observed). Option A's audit-cost is the cumulative weakening of halt-discipline reinforcement across future rounds.
+### Operator decision space
+
+- **Option A: Accept the false attestation; log MEMORIAL VIOLATIONs.** The matrix is sound; the failing EMPIRICAL.sh block is a paperwork inconsistency between spec text and operator-authorized state. Cheapest. Memorial-Updater records CRITICAL-1 + MAJOR-2 as VIOLATIONs and moves on. This implicitly accepts that EMPIRICAL.sh now lies about the spec gate's status.
+- **Option B (Reviewer recommends): Single follow-up coordination commit amending spec § 5.1 ALLOWED_SET + EMPIRICAL.sh allowed_set to add `.gitignore` and a `coordination/reviews/REVIEWER-REPORT-R72.md` carve-out (or path); re-run EMPIRICAL.sh; re-attest correctly.** Procedurally correct. ~1 small chore. The Implementer should HALT + DIAGNOSTIC if any further unexpected state is found while applying. The MEMORIAL still logs CRITICAL-1 + MAJOR-2 as VIOLATIONs (the discipline lesson is preserved).
+- **Option C: Full re-emit with proper Architect cite-then-verify on all enum/union literal-sets + ALLOWED_SET amendments included.** Most expensive; only if A/B are not acceptable.
+
+### Reviewer inputs read (cold)
+
+- coordination/PRD.md (Phase 3 extract)
+- coordination/specs/Q-R72-SPEC.md (full; 1720 lines)
+- coordination/specs/Q-R72-EMPIRICAL.sh (full)
+- coordination/coverage/R72-saturation-matrix.{json,md} (matrix.md full; matrix.json sampled via node -e for per-type summaries, raw_terminal walk)
+- tools/coverage-saturation.ts (full; 683 lines)
+- test/q72-coverage-saturation.test.ts (full)
+- package.json (script section)
+- README.md (lines 1-30; Coverage section noted in spec § 3.4 narrative)
+- engine/ds-integration/event-contract.ts (DeployEventPayload union, lines 30-50)
+- engine/topology/common-mode-attribution.ts (BFS body + defaults, lines 60-180)
+- engine/detectors/betting-e-process.ts, engine/per-shard/warm-start.ts, engine/fleet/{combine,e-bh}.ts, engine/ds-integration/{event-consumer,freeze-hook-factory}.ts (line citations 72/151, 38, 87/102/122, 90, 169, 87 — grep verification)
+- coordination/MEMORIAL.md (R72 entries, lines 1431-1508)
+- coordination/NEXT-ROLE.md (lines 1-568)
+
+**Not read** (cold-review discipline): coordination/specs/Q-R72-SPEC-AUDIT.md (Architect ceremony sidecar — out of scope for this audit pass; structural verdict from prior reviewer inherited via routing summary); coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md (per role mandate); prior REVIEWER-REPORT-R72.md body (only first 5 lines for Write-tool precondition); any .prompt-*.md, any session logs.
+
+### Memorial entries to be appended
+
+Per `CLAUDE-REVIEWER.md` REINFORCED 2026-05-17 + 2026-05-19: VIOLATION entries at MINOR+ severity must be appended to `coordination/MEMORIAL.md` with `[role] = COMMITTING role`. For this Reviewer-2 pass:
+
+- CRITICAL-1 → VIOLATION | rule-1-false-compliance-attestation | R72 | IMPLEMENTER
+- MAJOR-1 → VIOLATION | architect-cite-then-verify-closed-set-enum | R72 | ARCHITECT
+- MAJOR-2 → VIOLATION | option-b-disposition-spec-amendment-incomplete | R72 | ARCHITECT
+- MAJOR-3 → VIOLATION | architect-claim-without-empirical-walk-closed-set-enum | R72 | ARCHITECT
+- MINOR-1 → VIOLATION | spec-amendment-count-drift | R72 | ARCHITECT
+- MINOR-2 → VIOLATION (re-affirmed) | pedagogical-AC-design | R72 | ARCHITECT
+- MINOR-3 → VIOLATION (re-affirmed) | typescript-narrowing-stylistic | R72 | IMPLEMENTER
+
+Plus a Reviewer-2 CONFIRMATION:
+- CONFIRMATION | reviewer-cold-read-independent-finding | Reviewer-2 surfaced MAJOR-2 + MAJOR-3 + CRITICAL-1 independently of prior reviewer report (body not read). All 13 engine surface citations independently re-verified. | R72 | REVIEWER
 
 ---
 
-## 7. Memorial entries to be appended (per CLAUDE-REVIEWER REINFORCED 2026-05-17)
-
-For each finding ≥ MINOR, an entry will be appended to `coordination/MEMORIAL.md` after this report is committed. Each entry uses the committing-role attribution per CLAUDE-REVIEWER REINFORCED 2026-05-19 (Reviewer reports VIOLATIONs against the ROLE that wrote the offending artifact, not against the Reviewer).
-
-VIOLATION entries to author (R72 | role):
-- CRITICAL-1 | halt-discipline | R72 | IMPLEMENTER
-- MAJOR-1 | cite-then-verify | R72 | ARCHITECT
-- MAJOR-2 | halt-discipline | R72 | IMPLEMENTER
-- MAJOR-3 | cite-then-verify | R72 | ARCHITECT
-- MINOR-1 | in-spec-arithmetic | R72 | ARCHITECT (propagation: IMPLEMENTER)
-- MINOR-2 | pedagogical-AC-design | R72 | ARCHITECT
-- MINOR-3 | TypeScript-narrowing-stylistic | R72 | IMPLEMENTER
-
-CONFIRMATION entries:
-- TDD separate-RED-commit discipline preserved | R72 | IMPLEMENTER
-- Empirical-command-attestation (Rule 1) preserved in NEXT-ROLE.md attestation summary | R72 | IMPLEMENTER
-- Anti-scope ALLOWED_SET respected (11/11 paths within § 5.1) | R72 | IMPLEMENTER
-- Reviewer cold-read discipline preserved (no diagnostics / logs / .prompt-*); right-reasons audit completed for 3 tests; CRITICAL routing strict per R45 reinforcement | R72 | REVIEWER
-
----
-
-**Report end. NEXT-ROLE.md to be updated to STATUS: ESCALATE.**
+**Routing decision:** STATUS: ESCALATE (CRITICAL-1 attestation-level; strict application of routing rule per CLAUDE-REVIEWER REINFORCED 2026-05-19 R45). Operator selects between Option A / B / C above. Reviewer-2 recommendation: **Option B** (single small coordination commit amending spec § 5.1 + EMPIRICAL.sh allowed_set; correct attestation; preserves chore-A matrix substantive deliverable).

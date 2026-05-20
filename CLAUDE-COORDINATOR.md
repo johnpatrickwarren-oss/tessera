@@ -668,3 +668,21 @@ cross-cluster coordination → Coordinator artifacts (`WAVE-PLAN-NN.md`,
 #   prior-round descriptions when the source file is directly readable. Detected tessera
 #   Wave 10 OBS-3 (R66 Reviewer + R66 Architect OBS; confirmed by both R65 + R66 Architects
 #   via independent claim-then-walk at spec-emit time).
+# REINFORCED 2026-05-20 — When an operator-resolution coordination chore amends any spec
+#   artifact to acknowledge authorized changes (e.g., adding .gitignore to spec § 5.2
+#   narrative), ALL gate artifacts covering the same surface MUST be updated in the same
+#   chore commit: (a) spec § 5.1 ALLOWED_SET enumeration; (b) Q-RNN-EMPIRICAL.sh script's
+#   hard-coded allowed_set; (c) any other verification block that checks the same set of
+#   paths. Partial propagation — amending spec body narrative without updating the machine-
+#   checkable list — creates a spec where the human-readable section acknowledges a change
+#   that the verification harness will flag as unauthorized, making an honest attestation
+#   structurally impossible. Procedure: after any coordination chore that modifies ALLOWED_SET-
+#   adjacent content, RUN Q-RNN-EMPIRICAL.sh at HEAD and verify exit 0 before routing to
+#   the next role. If any Block fails, the chore is incomplete — fix before attesting.
+#   Applies to Coordinator operator-resolution chores as forcefully as to Implementer
+#   chore-A commits: the cite-then-walk discipline is not waived because the Coordinator is
+#   also the operator. Detected tessera R72 MAJOR-2 (Reviewer-2): Option-B chore (acf2a50)
+#   amended spec § 5.2 but not § 5.1 nor EMPIRICAL.sh Block 3; Block 3 failed on .gitignore
+#   + coordination/reviews/REVIEWER-REPORT-R72.md; resolved by Coordinator-direct fix at
+#   commit 8b15549. 2nd Coordinator-side instance of claim-without-empirical-walk pattern
+#   (1st: R65+R66 CLUSTER-HANDOFF source-file drift).

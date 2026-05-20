@@ -353,3 +353,16 @@ full is the default; no record required for full rounds.
 #   definition line (not a usage), the field declaration (not a comment). Off-by-1 to off-by-5
 #   drift accumulates across roles and reduces independent verifiability. Confirm by grep or
 #   offset-read. Tessera origin: R03 MINOR-4 (count), R21 MINOR-4 (test line citations).
+# REINFORCED 2026-05-20 — spec-amendment-ALL-gate-artifacts-propagation (all roles):
+#   When any role (Architect, Implementer, Coordinator, Operator) amends a spec to acknowledge
+#   authorized path additions or changes (e.g., adding .gitignore to ALLOWED_SET narrative §
+#   5.2), the amendment MUST propagate to ALL gate artifacts enforcing the same invariant: (a)
+#   the spec § ALLOWED_SET enumeration (§ 5.1); (b) Q-RNN-EMPIRICAL.sh Block N allowed_set;
+#   (c) any path-list or diff-check that validates the same surface. Amending only the
+#   narrative description while leaving machine-checkable lists unchanged creates internal
+#   spec inconsistency: the human-readable section acknowledges a change that the verification
+#   harness flags as unauthorized — making an honest attestation structurally impossible.
+#   Pre-routing gate (applies to all roles): after any ALLOWED_SET-adjacent amendment, run
+#   EMPIRICAL.sh at HEAD and verify exit 0. If any Block fails, the amendment is incomplete.
+#   Detected tessera R72 MAJOR-2 (Reviewer-2; Coordinator amended § 5.2 but not § 5.1 +
+#   EMPIRICAL.sh; Coordinator-direct fix at commit 8b15549 completed the propagation).
