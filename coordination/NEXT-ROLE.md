@@ -1,7 +1,102 @@
-CURRENT-ROUND: R65
-NEXT-ROLE: (operator decision — R66 WU-Phase3-3C)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R66
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R66 Round-scope directive (Architect — WU-Phase3-3C DS→Tessera event consumer + freeze-hook real-event factory; Wave 10 second cluster; sequential dispatch) (2026-05-20)
+
+R66 = Wave 10 second-cluster sequential dispatch. WU-Phase3-3C implements the DS→Tessera event consumer (HTTP server adapter receiving deploy events from DS) AND a freeze-hook factory module (separate file; no body modification of R20/R21/R36 frozen `engine/events/freeze-hook.ts`) that constructs `FreezeHook` instances wired to consume real DS deploy events instead of synthetic VerdictGroups.
+
+**Round-start SHA:** `03524ba` (chore(R65): Memorial-Updater outputs; verify via `git rev-parse HEAD` at Architect session entry).
+
+### Inputs for Architect (R66)
+
+1. `coordination/CLUSTER-HANDOFF-WAVE10-3A-3C.md` — event-contract surface + freeze-hook extension constraints (READ FIRST)
+2. `coordination/WAVE-PLAN-09.md` — Wave 10 framing + D-test analysis
+3. `coordination/PRD.md` § Phase 3 (FR-D3 line 441 — DS→Tessera event direction; AC-P9 line 452 — contract-based bi-directional flow)
+4. `engine/ds-integration/event-contract.ts` + `engine/ds-integration/index.ts` — contract module (R62 deliverable; frozen)
+5. `engine/ds-integration/feed.ts` (R65 deliverable; sibling adapter file; reference for HTTP adapter patterns)
+6. `engine/events/event-feed.ts:10-15` — `ClusterEventKind` 5-value closed-set source-of-truth (parity invariant per AC-R62-7)
+7. `engine/events/event-feed.ts:17-31` — `ClusterEvent` structural shape (wire-format projection reference)
+8. `engine/events/freeze-hook.ts:1-51` — FROZEN surface (R20/R21/R36); read for factory-module's `FreezeHook` constructor consumption
+9. `coordination/specs/Q-R65-SPEC.md` + `Q-R65-SPEC-AUDIT.md` — most-recent sibling pattern (HTTP adapter class) for template alignment
+10. `coordination/specs/Q-R62-SPEC.md` — contract module spec (parent surface)
+
+### Primary deliverable
+
+Implement WU-Phase3-3C per CLUSTER-HANDOFF-WAVE10-3A-3C.md contract surface + freeze-hook extension constraints:
+
+1. **`engine/ds-integration/event-consumer.ts`** (NEW; Coordinator default; Architect picks at spec time):
+   - HTTP server adapter that receives `DeployEventPayload` POSTs on `DS_TO_TESSERA_EVENT_ENDPOINT.path` (port + listen mechanics — Architect picks at spec § 0 brainstorm; default = Node.js built-in `node:http` server).
+   - Validates request body against `DeployEventPayload` shape; validates `event_class` against 5-value closed-set (AC-R62-7 parity discipline inheritance).
+   - Emits an activation event stream (function callback OR EventEmitter; Architect picks).
+   - Validates `DsToTesseraAuthHeaders` shape.
+   - Returns 202 acknowledgment per contract.
+
+2. **`engine/ds-integration/freeze-hook-factory.ts`** (NEW; required pattern per CLUSTER-HANDOFF-WAVE10-3A-3C anti-scope — separate factory module, NOT modification of `freeze-hook.ts` body):
+   - Factory function `createFreezeHookFromDsEvents(deps)` that imports the existing `FreezeHook` class (read-only), constructs a new instance via its existing R20/R21/R36 constructor, and wires the consumer's activation event stream into the freeze-hook's activation API.
+   - `ClusterEventKind ↔ event_class` mapping function: explicit switch with exhaustiveness check (5 cases; compile-time parity gate per CLUSTER-HANDOFF-WAVE10-3A-3C OQ-R64b-3 default).
+   - NO modification of `engine/events/freeze-hook.ts`. If implementation cannot achieve activation pattern without freeze-hook body modification → HALT + DIAGNOSTIC at spec-emit time.
+
+3. **Test file** `test/q66-ds-integration-event-consumer.test.ts`:
+   - HTTP server ACs: server starts on a configurable port; receives POST; parses body; rejects malformed payloads.
+   - `event_class` parity ACs: all 5 values accepted; 6th value rejected (compile-time exhaustiveness + runtime negative test).
+   - Factory ACs: factory constructs `FreezeHook` via existing constructor (no body modification verified by Reviewer cold-eye); activation event stream wired correctly.
+   - Wire-format projection ACs: `DeployEventPayload` structural validation matches contract.
+   - Anti-regression ACs: Phase 1+2+Phase-3-SLICE-1+2+R65 ACs unchanged.
+
+4. **Q-R66-EMPIRICAL.sh** at chore-A pre-commit (Rule 1 sub-class).
+
+### Tier rationale
+
+**full-tier** — Architect (HTTP server adapter + freeze-hook factory design; ClusterEventKind parity strategy) + Implementer (server + factory + tests + mock HTTP fixture) + Reviewer (cold-eye, particularly for freeze-hook body anti-scope compliance) + Memorial-Updater.
+
+### Anti-scope (R66 hard limits)
+
+- **NO modification of `engine/events/freeze-hook.ts` body or signature** (R20/R21/R36 frozen; factory-module pattern is required per CLUSTER-HANDOFF-WAVE10-3A-3C). If Implementer surfaces ANY pseudocode that touches freeze-hook.ts body → HALT + DIAGNOSTIC.
+- NO modification of `engine/ds-integration/feed-contract.ts` (R62 contract; frozen).
+- NO modification of `engine/ds-integration/event-contract.ts` (R62 contract; frozen).
+- NO modification of `engine/ds-integration/feed.ts` (R65 sibling adapter; cross-cluster anti-scope).
+- NO modification of `engine/ds-integration/index.ts` EXCEPT to add new exports for `event-consumer.ts` + `freeze-hook-factory.ts`.
+- NO modification of `engine/types/verdict.ts` (R56-frozen).
+- NO modification of `engine/events/event-feed.ts` (R36-frozen; `ClusterEventKind` parity preserved via reference, not modification).
+- NO real-DS-endpoint HTTP calls (Path B; synthetic/mock only).
+- NO new external dependencies (W3-4 Option A; HTTP via Node.js built-in `node:http`).
+- NO DS-repo modifications (W3-1 Option A).
+- NO modification of R42-R65 deliverables (except adding `event-consumer.ts` + `freeze-hook-factory.ts` + index.ts exports).
+- NO GitHub PR opening.
+
+### Halt conditions (R66 Implementer)
+
+1. Q-R66-EMPIRICAL.sh non-zero exit at chore-A for any reason other than pre-documented two-state mismatch (carve-out narrowed post-R62; do NOT propagate the structurally-vacuous forward-protection AC pattern).
+2. `npx tsc -p tsconfig.test.json` non-zero exit.
+3. Phase 1+2+Phase-3-SLICE-1+2+R65 regression.
+4. **Architect spec or Implementer pseudocode touches `engine/events/freeze-hook.ts` body or signature: HALT + DIAGNOSTIC immediately.** Factory pattern is the required mechanism; modification is anti-scope-violation.
+5. Architectural decision requires DS-repo modification (W3-1 anti-scope violation).
+6. R61-class architectural-reality discovery (spec premise empirically false): HALT + DIAGNOSTIC + ESCALATE.
+7. **R62 lesson — apply claim-then-walk:** if Architect spec § 0.2 makes ANY claim about codebase property OR future-state property of a multi-commit chain, run actual grep / Read / diff command at spec-emit time. Particularly load-bearing for the freeze-hook frozen surface claim — verify the EXACT frozen API via direct file Read of `engine/events/freeze-hook.ts:1-51`.
+8. `ClusterEventKind` parity violation: if `engine/events/event-feed.ts:10-15` 5-value closed-set has drifted since R62 contract close, surface as halt + ESCALATE (parity invariant per AC-R62-7).
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rule 1: ACTIVE GATE — Q-R66-EMPIRICAL.sh + Tightenings 1-4
+- Rule 2: ACTIVE GATE — § 5.3 branch-binding coverage for HTTP server branches + payload validation branches + ClusterEventKind exhaustiveness branches + factory wiring branches
+- Rule 3: ACTIVE GATE — discriminating assertions
+- Rule 4: ACTIVE GATE — Architect ALLOWED_SET enumerated at spec-emit time
+- Rule 5: N/A
+- Rule 6: ACTIVE GATE — § 6 halt conditions including R62 lesson #7 + freeze-hook body anti-scope #4 above
+- Rule 7: ACTIVE GATE Surface (a)
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R66 --tier full
+```
+
+---
 
 Inputs:
   1. `coordination/reviews/REVIEWER-REPORT-R65.md` (Reviewer audit; THIS handoff)
