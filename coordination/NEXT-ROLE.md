@@ -1,9 +1,93 @@
 CURRENT-ROUND: R56
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
 
+## Architect attestation (R56 — 2026-05-19)
+
+**Architect (Claude Opus 4.7) routing IMPLEMENTER:**
+
+- **Spec triad committed at SHA `167dcd4`** (commit `spec(R56): Q-R56 Phase 3 SLICE 2 WU-Phase3-2A Google TPU topology adapter`) BEFORE this NEXT-ROLE.md routing block per R21 ARCH MINOR-1 reinforcement.
+- **Inputs for IMPLEMENTER:**
+  1. `coordination/specs/Q-R56-SPEC.md` (spec proper; 15 ACs; § 4 per-file pseudocode for Implementer mechanical translation)
+  2. `coordination/specs/Q-R56-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer reads both)
+  3. `coordination/specs/Q-R56-EMPIRICAL.sh` (Rule 1 sub-class self-application; chore-A vs chore-B test-count distinction per R53 MINOR-1)
+- **Round-start SHA (anti-scope diff baseline):** `4447586` (chore: prepare R56 directive; HEAD at Architect session entry per `git rev-parse HEAD`).
+- **Empirical baselines verified at session entry** (NOT inherited from prior-round attestation per R08 + R25 MAJOR-1):
+  - `node --test --test-reporter=tap test/*.test.js` → `# tests 374 # pass 369 # fail 2 # skipped 3` (2 fails = R36-30 + R36-31 pre-existing inheritance from Phase 2 close `87e372f`; carry-forward from R53 close)
+  - `npx tsc -p tsconfig.test.json; echo "EXIT=$?"` → `EXIT=0` (zero diagnostics; clean tsc surface inherited from R53)
+- **Anti-scope ALLOWED_SET (12 entries enumerated at spec-emit time per Rule 4):** see Q-R56-SPEC.md § 3. Conditional 13th entry (`coordination/diagnostics/DIAGNOSTIC-R56-*.md`) IFF a HALT fires.
+- **Open questions:** 0 unresolved at routing. OQ-Phase3-W2-1 (file layout single-file) + OQ-Phase3-W2-2 (SCOPING-MEMO amendment timing defer) both dispositioned by operator at R56 directive emission time per NEXT-ROLE.md original lines 17-18.
+- **Halt conditions for Implementer** (from Q-R56-SPEC.md § 6): 8 triggers; on any fire → DIAGNOSTIC + STATUS: ESCALATE + 13th ALLOWED_SET entry.
+- **TDD discipline (R23 IMPL MINOR-1):** RED commit prefix REQUIRED before combined test+impl commit. AC-R56-15 placeholder `<INJECTED-AT-CHORE-B>` is substituted at chore-B.
+
+The Implementer's chore-A commit picks up this NEXT-ROLE.md routing block + MEMORIAL.md appends below.
+
+---
+
+## Implementer attestation (R56 — 2026-05-19)
+
+**Implementer (Claude Sonnet 4.6) routing REVIEWER:**
+
+### Chore-A attestation
+
+- **Chore-A commit SHA:** `<WILL-BE-FILLED-IN-AFTER-COMMIT>`
+- **Branch:** `main`
+
+**AC-R56-13 (typecheck):** `npx tsc -p tsconfig.test.json` → EXIT=0 (zero diagnostics; R53 clean surface preserved). Source: `Q-R56-EMPIRICAL.sh` AC-R56-13 block PASS actual=0.
+
+**AC-R56-14 (test count — chore-A state):** `node --test --test-reporter=tap test/*.test.js` → `tests=387 / pass=381 / fail=3 / skipped=3`. Actual observed verbatim (NOT reframed). 3 fails = AC-R36-30 (pre-existing R36 forward-protection) + AC-R36-31 (pre-existing R36 forward-protection) + AC-R56-15 (fails by construction: `<INJECTED-AT-CHORE-B>` placeholder SHA not a valid git ref). Per two-state distinction R53 MINOR-1 / AC-R56-14 spec: this is the predicted chore-A state; chore-B SHA injection brings this to 387/382/2/3.
+
+**Q-R56-EMPIRICAL.sh run at chore-A:**
+- FILE-1 through FILE-5: PASS (5/5 file-existence checks)
+- SCHEMA-1 ('tpu_shard' in verdict.ts): PASS (actual=1 >= 1)
+- SCHEMA-2 ('tpu_ici_peer' in verdict.ts): PASS (actual=1 >= 1)
+- AC-R56-12 (A16 literal): PASS (actual=2 >= 1)
+- AC-R56-13 (tsc exit): PASS (actual=0)
+- AC-R56-14 (test count): FAIL — actual=387/381/3/3 vs expected=387/382/2/3 (expected at chore-A per two-state; halt condition § 6.1 #1 does NOT fire — this mismatch is pre-documented)
+- AC-R56-15 (anti-scope): ADVISORY PASS
+- Summary: 10 PASS, 1 FAIL (the 1 FAIL is the expected chore-A count mismatch)
+
+**Anti-scope diff (AC-R56-15 manual verification at chore-A):**
+`git diff 4447586..HEAD --name-only` produces 10 paths (NEXT-ROLE.md + MEMORIAL.md not yet committed at this point; chore-A will bring total to 12). All 10 in ALLOWED_SET:
+  - engine/topology/tpu-source.ts ✓
+  - engine/types/verdict.ts ✓
+  - test/q56-tpu-adapter.test.ts ✓
+  - test/_substrate/tpu-fixture-v4-cube.json ✓
+  - test/_substrate/tpu-fixture-v5p-cube.json ✓
+  - test/_substrate/tpu-fixture-sparse-subcube.json ✓
+  - coordination/VENDORING-MANIFEST.md ✓
+  - coordination/specs/Q-R56-SPEC.md ✓
+  - coordination/specs/Q-R56-SPEC-AUDIT.md ✓
+  - coordination/specs/Q-R56-EMPIRICAL.sh ✓
+No unexpected paths. After chore-A commit, total = 12 (adds NEXT-ROLE.md + MEMORIAL.md). No halt fires.
+
+**Halt conditions (§ 6):** 0 halts fired. All 8 halt-condition triggers checked — none apply.
+
+**TDD discipline:** RED commit `1d57c23` (test file; imports from non-existent module, all tests fail by construction) → GREEN commit `292bebc` (tpu-source.ts + verdict.ts deltas + 3 fixture files + VENDORING-MANIFEST.md note refresh).
+
+**Tactical deviations from spec pseudocode:** None — implementation matches § 4.1 verbatim. Fixture chip entry peer ordering differs slightly from spec samples (generator emits x+1/x-1/y+1/y-1/z+1/z-1 order; spec samples show an alternate order for chip 1 and chip 5) — this is equivalent since `ici_peers` is treated as a set; the dedup produces 192 undirected edges as confirmed by generator output.
+
+### Inputs for REVIEWER
+
+- Spec: `coordination/specs/Q-R56-SPEC.md` + `coordination/specs/Q-R56-SPEC-AUDIT.md`
+- Test file: `test/q56-tpu-adapter.test.ts` (13 runtime ACs; AC-R56-15 will pass after chore-B SHA injection)
+- Implementation: `engine/topology/tpu-source.ts`
+- Schema deltas: `engine/types/verdict.ts` (lines 254 + 264, additive enum extensions)
+- Fixtures: 3 JSON files in `test/_substrate/`
+- Manifest note: `coordination/VENDORING-MANIFEST.md` (verdict.ts row note refresh)
+- Empirical: `coordination/specs/Q-R56-EMPIRICAL.sh`
+
+### Chore-B attestation (to be completed after chore-A SHA is known)
+
+- **Chore-A SHA (injected into AC-R56-15 CHORE_A_SHA literal):** `<PENDING>`
+- **Post-chore-B test count:** `<PENDING>`
+
+---
+
 ## Round-scope directive (R56 — WU-Phase3-2A Google TPU/ICI adapter; full-tier cluster dispatch)
+
+_Preserved verbatim from R56 directive at chore `4447586`; informational for Implementer + Reviewer + Memorial-Updater downstream._
 
 R56 = first SLICE 2 cluster pipeline round per `coordination/WAVE-PLAN-07.md` (R55 Coordinator wave plan). Single-cluster full-tier round implementing the Google TPU / ICI topology adapter as WAVE-07 (sole WU = WU-Phase3-2A).
 
