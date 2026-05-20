@@ -1,0 +1,87 @@
+{
+  "schema_version": "0.1.0",
+  "load_bearing_safety": {
+    "must_route_full": ["R45", "R61", "R62", "R66", "R72"],
+    "must_not_route_implementer_only": ["R49", "R50", "R51", "R55", "R60", "R63", "R64", "R68"]
+  },
+  "entries": [
+    {
+      "round_id": "R45",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R45-directive.md"},
+      "expected_constraint": {"must_route_full": true},
+      "label_rationale": "R45 architectural-decision round; CRITICAL-routing-override flagged (per coordination/MEMORIAL.md line 289 ref); directive contains ESCALATE-class content + halt-discipline reinforcement work"
+    },
+    {
+      "round_id": "R49",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R49-directive.md"},
+      "expected_constraint": {"must_not_route_implementer_only": true},
+      "label_rationale": "R49 audit-tier methodology round; pipeline-mandatory discipline; routes audit"
+    },
+    {
+      "round_id": "R50",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R50-directive.md"},
+      "expected_constraint": {"must_not_route_implementer_only": true},
+      "label_rationale": "R50 audit-tier methodology round; parallel-execution levers; routes audit"
+    },
+    {
+      "round_id": "R51",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R51-directive.md"},
+      "expected_constraint": {"must_not_route_implementer_only": true},
+      "label_rationale": "R51 audit-tier methodology round; CLAUDE-IMPLEMENTER.md re-consolidation + MU re-accretion guard; routes audit"
+    },
+    {
+      "round_id": "R55",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R55-directive.md"},
+      "expected_constraint": {"must_not_route_implementer_only": true},
+      "label_rationale": "R55 Coordinator wave plan; Phase 3 SLICE 2 Coordinator; routes coordinator-only"
+    },
+    {
+      "round_id": "R60",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R60-directive.md"},
+      "expected_constraint": {"must_not_route_implementer_only": true},
+      "label_rationale": "R60 Coordinator wave plan; Phase 3 SLICE 3 Coordinator; PARALLEL-FAN-OUT evaluation; routes coordinator-only"
+    },
+    {
+      "round_id": "R61",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R61-directive.md"},
+      "expected_constraint": {"must_route_full": true},
+      "label_rationale": "R61 full-tier engine npm package extract; WU-Phase3-3A; architectural restructure; HALT+DIAGNOSTIC+ESCALATE"
+    },
+    {
+      "round_id": "R62",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R62-directive.md"},
+      "expected_constraint": {"must_route_full": true},
+      "label_rationale": "R62 full-tier DS integration interface contract; engine/ds-integration/; ESCALATE history from R61"
+    },
+    {
+      "round_id": "R63",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R63-directive.md"},
+      "expected_constraint": {"must_not_route_implementer_only": true},
+      "label_rationale": "R63 Coordinator WAVE-GATE-09 close + Wave 10 CLUSTER-HANDOFF emissions; routes coordinator-only"
+    },
+    {
+      "round_id": "R64",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R64-directive.md"},
+      "expected_constraint": {"must_not_route_implementer_only": true},
+      "label_rationale": "R64 Coordinator operator-decision backlog resolution; routes coordinator-only"
+    },
+    {
+      "round_id": "R66",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R66-directive.md"},
+      "expected_constraint": {"must_route_full": true},
+      "label_rationale": "R66 full-tier WU-Phase3-3C DS→Tessera event consumer; engine/ds-integration/; HALT+DIAGNOSTIC+ESCALATE"
+    },
+    {
+      "round_id": "R68",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R68-directive.md"},
+      "expected_constraint": {"must_not_route_implementer_only": true},
+      "label_rationale": "R68 Coordinator pnpm migration; pre-publication hygiene; routes coordinator-only"
+    },
+    {
+      "round_id": "R72",
+      "directive_source": {"type": "embedded_fixture", "path": "scripts/tier-router-fixtures/R72-directive.md"},
+      "expected_constraint": {"must_route_full": true},
+      "label_rationale": "R72 full-tier coverage validation; R61-class architectural-reality discovery + ESCALATE halt conditions"
+    }
+  ]
+}

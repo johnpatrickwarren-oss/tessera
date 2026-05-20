@@ -12,7 +12,7 @@
 
 set -u  # nounset; do NOT set -e — we want every block to run for full reporting
 
-ROUND_START_SHA="<INJECTED-AT-CHORE-A>"
+ROUND_START_SHA="ee5ae2e"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
@@ -33,11 +33,12 @@ block_result() {
 }
 
 # ── Block 1: round-start-sha-injected ────────────────────────────────────────
-# Confirm the sed substitution happened.
+# Confirm the sed substitution happened (SHA must be non-empty and free of < > chars).
 sha_ok=1
-case "$ROUND_START_SHA" in
-  "<INJECTED-AT-CHORE-A>"|"") sha_ok=0; echo "  ROUND_START_SHA not injected; sed substitution missing" ;;
-esac
+if [[ -z "$ROUND_START_SHA" || "$ROUND_START_SHA" == *'<'* || "$ROUND_START_SHA" == *'>'* ]]; then
+  sha_ok=0
+  echo "  ROUND_START_SHA not injected; sed substitution missing"
+fi
 block_result "round-start-sha-injected" $sha_ok
 
 # ── Block 2: round-start-sha-is-valid-commit ─────────────────────────────────
