@@ -1,7 +1,95 @@
 CURRENT-ROUND: R65
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+Inputs:
+  1. `coordination/specs/Q-R65-SPEC.md` (spec proper; prescriptive)
+  2. `coordination/specs/Q-R65-SPEC-AUDIT.md` (Architect ceremony sidecar; audit trail + decision rationale)
+  3. `coordination/specs/Q-R65-EMPIRICAL.sh` (chore-A verification harness; executable)
+  4. `coordination/NEXT-ROLE.md` § R65 Round-scope directive (operator-authored; preserved below)
+  5. `coordination/CLUSTER-HANDOFF-WAVE10-3A-3B.md` (contract surface — NOTE: spec § 8 documents handoff-doc field-name inaccuracies; spec uses the actual `feed-contract.ts` surface as source of truth)
+  6. `coordination/PRD.md` § Phase 3 (FR-D2 line 440; AC-P9 line 452)
+
+---
+
+## § Architect R65 routing block (2026-05-20)
+
+### Architect attestation summary
+
+- **Round-start SHA (anti-scope diff lower bound):** `59a03d0` (verified via `git rev-parse HEAD` at Architect session entry; per CLAUDE-ARCHITECT REINFORCED 2026-05-17 R15 MINOR-1 advance-to-post-prep-commit reinforcement). The R65 directive text at line 12 cites `9a7512d` (R64 close) as round-start; this is the pre-prep SHA. The operator's R65 directive commit itself landed at `59a03d0` and modified `coordination/NEXT-ROLE.md` — empirical session-entry SHA is the load-bearing lower bound.
+- **Spec triad commit (pre-Implementer chore-A):** `a2be5b9` (`spec(R65): Q-R65-SPEC + audit sidecar + EMPIRICAL.sh — Phase 3 SLICE 3 Wave 10 WU-Phase3-3B Tessera→DS feed adapter`). Per R21 ARCH MINOR-1 spec-commit-sequencing discipline. Spec landed in its OWN commit BEFORE this routing block update.
+- **Empirical baseline at session entry (verified via direct command runs at Architect session entry; NOT inherited from R62/R64 attestation):**
+  - `node --test --test-reporter=tap test/*.test.js` → `tests=411 / pass=406 / fail=2 / skipped=3`. 2 fails = R36-30 + R36-31 forward-protection carry-forward (pre-existing from Phase 2 close `87e372f`; not introduced by R65).
+  - `npx tsc -p tsconfig.test.json` → exit code 0, zero diagnostics.
+- **Toolchain at session entry:** Node v25.9.0; TypeScript 5.9.3.
+- **Pre-emit grilling outcome:** PASS. Claim-then-walk discipline caught handoff-doc field-name inaccuracies (`verdict_group_id` / `verdict_set` / `tessera_at` / `protocol_version` per handoff vs. actual `group_id` / `deploy_id`+window fields / `emitted_at_ts` / `contract_version` per `feed-contract.ts:28-93`). Spec uses the actual contract-file surface; documented in spec § 8 + audit § 2 + § 3.2.
+
+### Implementer inputs for R65
+
+1. `coordination/specs/Q-R65-SPEC.md` (spec proper; prescriptive)
+2. `coordination/specs/Q-R65-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read)
+3. `coordination/specs/Q-R65-EMPIRICAL.sh` (chore-A verification harness; executable)
+4. `coordination/CLUSTER-HANDOFF-WAVE10-3A-3B.md` (contract surface — note handoff inaccuracies per spec § 8)
+5. `coordination/PRD.md` § Phase 3 (FR-D2 + AC-P9)
+6. `engine/ds-integration/feed-contract.ts` (R62 frozen — source of truth for wire types)
+7. `engine/types/verdict.ts:198-231` (engine `VerdictGroup` source shape)
+
+### Implementer chore-A sequence (per spec § 11)
+
+1. **RED commit:** lands `test/q65-ds-integration-feed.test.ts` with 16 `assert.fail('R65 RED — implementation pending')` stubs (or `test.skip` equivalent per R23 IMPL MINOR-1 RED-commit discipline). `engine/ds-integration/feed.ts` does NOT yet exist; `index.ts` un-modified. Runtime tests fail (import errors at module resolution; or RED stubs fail). RED state confirmed.
+2. **GREEN commit (chore-A):** lands `engine/ds-integration/feed.ts` per spec § 4.1 pseudocode; updates `engine/ds-integration/index.ts` per spec § 4.2 (one-line `export * from './feed';` addition); replaces all RED stubs with real assertions per spec § 4.3.
+3. **Verify chore-A:** Run `npx tsc -p tsconfig.test.json` (must exit 0); run `node --test --test-reporter=tap test/*.test.js` (chore-A actual: `427/421/3/3` — 3 fails = R36-30 + R36-31 + AC-R65-16 placeholder); run `bash coordination/specs/Q-R65-EMPIRICAL.sh` (AC-R65-18 FAIL pre-documented per spec § 6.1 carve-out; AC-R65-16 advisory PASS; all other blocks PASS).
+4. **Implementer attestation:** Encode the ACTUAL chore-A summary (`427/421/3/3`) VERBATIM in NEXT-ROLE.md per Rule 1 sub-class `empirical-command-attestation`. Do NOT reframe as compliance. Do NOT cite the spec-predicted chore-B value `427/422/2/3` as the chore-A observed value.
+5. **Chore-B (SHA injection):** Inject the chore-A SHA into `test/q65-ds-integration-feed.test.ts` at the `CHORE_A_SHA = '<INJECTED-AT-CHORE-B>'` placeholder line (single occurrence in the AC-R65-16 test block). Re-run tests (post-injection summary: `427/422/2/3`). SHA-backfill commit. Re-run `bash coordination/specs/Q-R65-EMPIRICAL.sh` — expected all-PASS.
+
+### TACTICAL AUTONOMY scope (per spec § 4)
+
+Implementer MAY:
+- Adjust JSDoc wording without changing field semantics or type shapes.
+- Adjust blank lines / minor formatting consistent with codebase style.
+- Reorder `import` statements within standard ordering.
+- Rename test-local variable names without changing assertion shape.
+- Choose between `assert.fail` stubs and `test.skip` for the RED commit pattern (Architect-acceptable).
+
+Implementer MAY NOT (without HALT + DIAGNOSTIC):
+- Change any field name in `verdictGroupToFeedRequest`'s projection output (must match `feed-contract.ts` exactly).
+- Remove the A16 `correlational_not_causal: true` literal from the projection.
+- Inline the path literal `'/v1/tessera/verdict-groups'` in `feed.ts` (must import `TESSERA_TO_DS_FEED_ENDPOINT` from `./feed-contract`).
+- Modify any frozen surface listed in spec § 3.1 anti-scope items 1-9.
+- Add the structurally-vacuous forward-protection AC pattern (`git diff CHORE_A_SHA..HEAD === []`) — only the historical-anti-scope form is used per R62 lesson.
+- Expand the ALLOWED_SET in-test (NEVER per R36 MAJOR-2).
+
+### Halt conditions for the Implementer (per spec § 6.1)
+
+1. Q-R65-EMPIRICAL.sh non-zero exit for any reason OTHER THAN the pre-documented two-state mismatch of AC-R65-16 + AC-R65-18 (carve-out per R56 MINOR-1; narrowed post-R62 to these two ACs ONLY).
+2. `npx tsc -p tsconfig.test.json` non-zero exit.
+3. Phase 1+2+Phase-3-SLICE-1+2 regression — any pre-R65 test other than R36-30 + R36-31 transitions PASS → FAIL.
+4. Anti-scope diff includes path outside ALLOWED_SET at chore-A (NEVER expand ALLOWED_SET in-test per R36 MAJOR-2).
+5. Spec-vs-reality conflict mid-implementation (Rule 6).
+6. Rule 7 Surface (c) failure — if Memorial-Updater stage of this round derives a new cross-project rule, Implementer at SAME-round chore-A MUST grep-sweep the round's own diff.
+7. R62 lesson — apply claim-then-walk: load-bearing factual claim in spec does not match codebase reality.
+8. R61-class architectural-reality discovery — premise empirically false at Implementer time.
+
+Resolution: write DIAGNOSTIC-R65-*.md with ≥3 bounded options; set STATUS: ESCALATE; await operator disposition.
+
+### Cross-project rule dispositions (per spec § 7)
+
+| Rule | Disposition |
+|---|---|
+| 1 (`false-compliance-attestation` + sub-class `empirical-command-attestation`) | ACTIVE GATE — Q-R65-EMPIRICAL.sh; Tightenings 1-4 applied |
+| 2 (`architect-branch-binding-coverage`) | ACTIVE GATE — spec § 5.3 table; 4 acknowledged non-load-bearing gaps |
+| 3 (`implementer-spec-test-assertion-coverage`) | ACTIVE GATE — discriminating assertions per spec § 4.3 |
+| 4 (`anti-scope-allowed-set-forward-coverage`) | ACTIVE GATE — 8-path ALLOWED_SET enumerated upfront |
+| 5 (`self-application-gate`) | N/A at spec emit; conditional at Memorial-Updater |
+| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | ACTIVE GATE — 8 halt conditions enumerated |
+| 7 (`derived-rule-propagation-mechanism-required`) | ACTIVE GATE Surface (a) + (b); Surface (c) conditional |
+
+### Routing
+
+**NEXT-ROLE: IMPLEMENTER | STATUS: READY**
+
+Pipeline resume command: `./run-pipeline.sh --round R65 --tier full --start-at IMPLEMENTER`
 
 ---
 
