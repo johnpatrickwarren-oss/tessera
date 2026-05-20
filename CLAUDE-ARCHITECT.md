@@ -182,7 +182,7 @@ All unresolved decisions → open questions in the spec.
 #   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
 #   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
 
-# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 6 sub-variants observed at Tessera)
+# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 7 sub-variants observed at Tessera)
 #
 #   Fixture accumulation adequacy (R07 MAJOR-1): When grilling catches that an e-process or
 #     statistical-detector AC's fixture needs N windows of accumulation to cross a detection
@@ -277,6 +277,24 @@ All unresolved decisions → open questions in the spec.
 #     | 'model_redeploy' | 'env_change' | 'config_change' | 'capacity_change'; 'deploy' and
 #     'rollback' absent; forced chore-A typecheck failure; resolved via Option B retroactive
 #     DIAGNOSTIC). 3rd Architect-side instance; Rule 5 cross-project threshold crossed.
+#
+#   Self-verification-matrix coverage-claim without branch walk (R73 MINOR-1): When spec §7
+#     (cross-project rule dispositions) includes a coverage-claim sentence of the form "Every
+#     branch in <file> has an AC: rule 1→AC-N/P, rule 2→AC-Q/R, ...", the Architect MUST walk
+#     EVERY branch individually before writing that sentence — not only the branches for which
+#     positive-binding ACs exist. At R73, § 7 Rule 2 disposition stated "Every branch in
+#     scripts/tier-router.ts has an AC: rules 1-4 → AC-R73-4/5/6/7 (rule fires for matching
+#     fixture)." Reviewer walkthrough refuted this: rule 3 (implementer-only) has NO corpus
+#     fixture triggering it positively (no fixture has mechanical/cosmetic/typo keyword + ≤3
+#     ALLOWED paths + no risky surface); rule 4 (audit) fires on R49/R50/R51 but AC-R73-5
+#     only asserts `tier !== 'implementer-only'`, leaving a regression routing R49 to 'full'
+#     undetected. The §7 disposition claimed coverage that an AC-walkthrough would have refuted.
+#     Procedure: before writing any "every branch has an AC" assertion in §7, enumerate each
+#     branch individually with its AC ID and the specific assertion that would FAIL if that
+#     branch were deleted or mutated. If any branch has no such AC, either add the AC or record
+#     the gap in spec §5.3 (acknowledged gaps) with explicit rationale. Do NOT substitute
+#     "≠ implementer-only" as a positive binding for a rule that routes to 'audit'. Detected
+#     tessera R73 MINOR-1 (Reviewer-1); safety contract still held (fail-safe direction).
 
 # REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
 #   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include

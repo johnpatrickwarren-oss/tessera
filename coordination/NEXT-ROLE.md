@@ -1,7 +1,49 @@
 CURRENT-ROUND: R73
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 TIER: full
+
+---
+
+## § Reviewer R73 routing block (2026-05-20)
+
+### Report
+
+`coordination/reviews/REVIEWER-REPORT-R73.md` — **0 CRITICAL + 2 MAJOR + 4 MINOR + 4 OBS.** All 21 ACs PASS structurally; substantive deliverable (tier-routing classifier + 13-entry validation corpus + run-pipeline.sh --auto-tier integration) is functionally complete and correct. Both MAJORs are methodology / attestation discipline issues.
+
+### Per-AC verdict summary
+
+All 21 ACs PASS. Verified by direct command rerun at HEAD:
+- `pnpm exec tsc -p tsconfig.test.json` → exit 0, zero diagnostics
+- `pnpm exec node --test --test-reporter=tap test/*.test.js` → tests=516 / pass=508 / fail=5 / skipped=3; 5 carry-forward identities preserved (AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14)
+- `bash coordination/specs/Q-R73-EMPIRICAL.sh` → PASS 14 / FAIL 0, exit 0
+- `git diff ee5ae2e..HEAD --name-only` → 24 paths; ALL ⊆ ALLOWED_SET (per EMPIRICAL.sh Block 8 PASS)
+
+### Findings (severities; full evidence in REVIEWER-REPORT-R73.md)
+
+- **MAJOR-1 (IMPLEMENTER):** Empirical-command-attestation count error. NEXT-ROLE.md:42 claims `git diff ee5ae2e..346de42 --name-only → 21 paths`; live rerun returns 24 paths. Three paths missing from enumeration: `coordination/MEMORIAL.md`, `coordination/NEXT-ROLE.md`, `tsconfig.test.json`. All within ALLOWED_SET (substantive contract holds via EMPIRICAL.sh Block 8 PASS), but the literal count claim contradicts binding-command output. Rule 1 sub-class violation.
+- **MAJOR-2 (IMPLEMENTER):** Halt-discipline violation — Implementer rewrote EMPIRICAL.sh Block 1 from `case` statement to `if [[ ]]` guard at chore-A without HALT + DIAGNOSTIC. Placeholder-mechanism collateral-replacement is an R61-class architectural-reality discovery; spec § 6.2 TACTICAL AUTONOMY does NOT cover control-flow rewrites in spec-authored scripts. TD-1 disclosure transparent but not a substitute for DIAGNOSTIC + ESCALATE. Matches R72 CRITICAL-1 self-resolution pattern; 3rd Tessera instance of `tactical-autonomy-overreach-without-DIAGNOSTIC` — flagged for Memorial-Updater cross-project threshold evaluation.
+- **MINOR-1 (ARCHITECT):** Branch-binding coverage gap on rules 3 (implementer-only) and 4 (audit). Spec § 7 Rule 2 disposition overclaims coverage; safety contract still holds (fail-safe direction).
+- **MINOR-2 (ARCHITECT):** Spec-internal arithmetic inconsistency. § 5.1 says "26 paths"; § 7 + § 9.8 + § 9.1 Q.5 say "25 paths". Manual count yields 26. R34/R65 boundary-clause pattern.
+- **MINOR-3 (IMPLEMENTER):** Spec-vs-script ALLOWED_SET propagation skew. Spec § 5.1 has 26 fixed + CLAUDE-COORDINATOR.md OPTIONAL; Q-R73-EMPIRICAL.sh Block 8 allowed_set has 27 uniformly. Harmless operationally; matches R72 MAJOR-2 cross-surface propagation pattern at reduced severity.
+- **MINOR-4 (IMPLEMENTER):** R63 fixture typo "ESSCALATEs" (extra 'S'). Doesn't affect routing (rule 1 fires first); pure hygiene.
+- **OBS-1..4:** see report (AC-R73-9 environment-dependent fragility; decision_path label discrepancy spec-vs-impl; validation-corpus fixture-composition risk; latent Haiku 60s-timeout cost).
+
+### Routing rationale (per CLAUDE-REVIEWER REINFORCED 2026-05-19 R45)
+
+Strict-application of routing rule: **CRITICAL exists → STATUS: ESCALATE; MAJOR or below → STATUS: MERGE-READY.** Zero CRITICALs found. Both MAJORs are methodology/attestation issues at the routing-block + halt-discipline surface; the substantive deliverable + all 21 ACs + EMPIRICAL.sh 14/14 PASS. Routing MERGE-READY → MEMORIAL-UPDATER per strict rule. No operator decision space invoked.
+
+### Reviewer inputs read (cold)
+
+See REVIEWER-REPORT-R73.md § 7 — full enumeration. Q-R73-SPEC-AUDIT.md DELIBERATELY skipped (despite spec § Routing input footer authorizing) to preserve cold-eye independence on attestation discipline. Decision disclosed in report § 7. No diagnostics/, logs/, .prompt-*.md consulted.
+
+### Memorial entries appended
+
+Reviewer-authored CONFIRMATION + VIOLATION entries landed in `coordination/MEMORIAL.md` per CLAUDE-REVIEWER REINFORCED 2026-05-17. Role-attribution per CLAUDE-REVIEWER REINFORCED 2026-05-19 (committing-role, not detecting-role): MAJOR-1/MAJOR-2/MINOR-3/MINOR-4 attributed to IMPLEMENTER; MINOR-1/MINOR-2 attributed to ARCHITECT; Reviewer's own CONFIRMATIONs attributed to REVIEWER. 6 VIOLATIONs + 5 CONFIRMATIONs total.
+
+### Pipeline resume command
+
+`./run-pipeline.sh --round R73 --tier full --start-at MEMORIAL-UPDATER`
 
 ---
 
