@@ -22,3 +22,7 @@ coordination/.pipeline-*.lock
 coordination/.role-stamp
 coordination/clusters/
 coordination/multi-track-status.json
+
+# R72: exempt coordination/coverage/ from the root-level coverage/ gitignore rule
+# (git's 'coverage/' pattern without leading slash matches all dirs named coverage/ in tree)
+!coordination/coverage/

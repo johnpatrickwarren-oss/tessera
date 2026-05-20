@@ -163,7 +163,7 @@ Each type has exactly 20 variations: a 4 × 5 grid of (primary_axis, secondary_a
 |---|---|---|---|---|
 | 1 | `sdc-drift` | target_shard_id ∈ {`shard-01`, `shard-03`, `shard-04`, `shard-07`} | (drift_per_window, drift_start_window) ∈ {(0.20, 10), (0.30, 8), (0.40, 6), (0.50, 5), (0.70, 4)} | `freshBettingState`, `updateBettingState` |
 | 2 | `common-mode-rack` | (target_rack, fired_set) ∈ {(`rack-A`, [00,01,02]), (`rack-A`, [00,01]), (`rack-B`, [03,04,05]), (`rack-B`, [03,04])} | attribution_window ∈ {0, 1, 2, 3, 4} | `attributeCommonMode` |
-| 3 | `event-conditional` | event_class ∈ {`firmware_push`, `deploy`, `config_change`, `rollback`} | (event_ts_offset_s, sample_ts_offset_s) ∈ {(10, 20), (50, 100), (100, 150), (200, 250), (290, 295)} | `DsEventConsumer`, `createFreezeHookFromDsEvents`, `initialPerShardResidual` |
+| 3 | `event-conditional` | event_class ∈ {`firmware_push`, `model_redeploy`, `config_change`, `env_change`} **[R72-amended per Option B operator disposition 2026-05-20: original spec-prescribed `{'firmware_push', 'deploy', 'config_change', 'rollback'}` — `'deploy'` and `'rollback'` are not valid `DeployEventPayload.event_class` values per `engine/ds-integration/event-contract.ts:33-38` (5-value closed set: `firmware_push \| model_redeploy \| env_change \| config_change \| capacity_change`); 4 valid values used at chore-A; retroactively endorsed by operator; see `coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md`]** | (event_ts_offset_s, sample_ts_offset_s) ∈ {(10, 20), (50, 100), (100, 150), (200, 250), (290, 295)} | `DsEventConsumer`, `createFreezeHookFromDsEvents`, `initialPerShardResidual` |
 | 4 | `fdr-multiple-testing` | drifting_shard_count ∈ {1, 3, 5, 8} (positions: first N of [0..9]) | qLevel ∈ {0.05, 0.10, 0.15, 0.20, 0.25} | `freshBettingState`, `updateBettingState`, `eBenjaminiHochberg` |
 | 5 | `hierarchical-evalue` | shard_count ∈ {5, 8, 10, 15} | (drift_per_window, drift_start_window) ∈ {(0.10, 8), (0.13, 7), (0.16, 6), (0.20, 5), (0.25, 5)} | `freshBettingState`, `updateBettingState`, `combineAverage`, `freshFleetEProcessState`, `updateFleetEProcessState` |
 | 6 | `topology-spanning-common-mode` | fired_set ∈ {[00,01,03,04], [00..05], [00,03], [00,01,02,03]} | max_hop_distance ∈ {1, 2, 3, 4, 5} | `attributeCommonMode` |
@@ -188,7 +188,7 @@ Top-level matrix.json shape:
 ```jsonc
 {
   "schema_version": "tessera-coverage-v1",
-  "generated_with_seed_prefix": 466016,       // SCENARIO_SEED_PREFIX literal; matrix is deterministic given this prefix + variation_idx
+  "generated_with_seed_prefix": 465920,       // SCENARIO_SEED_PREFIX literal (0x71C00 = 465920 decimal); matrix is deterministic given this prefix + variation_idx
   "types": [                                  // length 6; ordered by failure-type number 1..6
     {
       "type_name": "sdc-drift",
@@ -392,7 +392,7 @@ export interface SaturationResult {
 export interface SaturationOpts { readonly _reserved?: never; }
 
 // ── Constants (Tessera-original; not from R70/R71) ──
-const SCENARIO_SEED_PREFIX = 0x71C00; // 466016 decimal — recorded in matrix JSON for reproducibility audit
+const SCENARIO_SEED_PREFIX = 0x71C00; // 465920 decimal — recorded in matrix JSON for reproducibility audit
 const SHARD_COUNT_DEFAULT = 10;
 const WINDOW_COUNT_DEFAULT = 30;
 const DEMO_ALPHA = 5e-3;
@@ -1412,7 +1412,7 @@ tools/coverage-saturation.ts
 
 Verified at session entry against `.gitignore`:
 - `*.js` is gitignored → `tools/coverage-saturation.js` and `test/q72-coverage-saturation.test.js` (compiled outputs) are NOT git-tracked. They DO NOT appear in `git diff --name-only`. They are NOT in ALLOWED_SET because they cannot appear in the diff.
-- `coverage/` (root-level dir) is gitignored. My output path `coordination/coverage/` is at a DIFFERENT path (under `coordination/`) and is NOT covered by the root-level `coverage/` rule. `git ls-files coordination/coverage/ 2>/dev/null` is empty (directory doesn't exist pre-R72; will be created at chore-A; will become tracked when files are added).
+- `coverage/` is gitignored. **[R72-amended per Option B operator disposition 2026-05-20]:** Contrary to the spec-emit claim, git's `coverage/` pattern (without a leading `/`) matches ANY directory named `coverage/` anywhere in the repository tree — including `coordination/coverage/`. The spec-emit claim ("only root-level `coverage/`") was wrong; empirical refutation discovered at chore-A via `git check-ignore`. The `.gitignore` has been amended to add `!coordination/coverage/` exemption (Option (ii) per `coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md`). The two generated files (`R72-saturation-matrix.json` + `R72-saturation-matrix.md`) were force-added at chore-A (`git add -f`) and remain tracked after the exemption is applied.
 
 ### 5.3 Frozen surfaces (do NOT modify)
 

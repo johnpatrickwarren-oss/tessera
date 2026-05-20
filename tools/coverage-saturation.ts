@@ -64,7 +64,7 @@ export interface SaturationResult {
 export interface SaturationOpts { readonly _reserved?: never; }
 
 // ── Constants (Tessera-original; not from R70/R71) ──
-const SCENARIO_SEED_PREFIX = 0x71C00; // 466016 decimal — recorded in matrix JSON for reproducibility audit
+const SCENARIO_SEED_PREFIX = 0x71C00; // 465920 decimal — recorded in matrix JSON for reproducibility audit
 const SHARD_COUNT_DEFAULT = 10;
 const WINDOW_COUNT_DEFAULT = 30;
 const DEMO_ALPHA = 5e-3;

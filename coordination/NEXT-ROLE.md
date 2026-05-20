@@ -1,7 +1,42 @@
 CURRENT-ROUND: R72
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: MEMORIAL-UPDATER
 STATUS: READY
 TIER: full
+
+---
+
+## § Implementer R72 Option-B coordination-chore routing block (2026-05-20)
+
+### Coordination-chore attestation summary
+
+**Chore scope:** per Operator resolution § Implementer scope items 1–6.
+
+- **tsc exit:** 0, zero diagnostics (`pnpm exec tsc -p tsconfig.test.json`)
+- **node --test (actual observed verbatim):**
+  - `# tests 489`
+  - `# pass 481`
+  - `# fail 5`
+  - `# skipped 3`
+  - 5 fails identity preserved: `AC-R36-21`, `AC-R36-30`, `AC-R36-31`, `AC-R65-2`, `AC-R66-14` (carry-forward; unchanged)
+- **Q-R72-EMPIRICAL.sh:** PASS: 8 / FAIL: 0, exit 0 (all 8 blocks PASS)
+- **`.gitignore` exemption verified:** `git check-ignore -v coordination/coverage/R72-saturation-matrix.json` → NOT IGNORED (exemption active)
+
+### Files amended in this coordination chore
+
+1. `coordination/specs/Q-R72-SPEC.md § 2.1`: TYPE3_EVENT_CLASSES row updated — `'deploy'` + `'rollback'` replaced with `'model_redeploy'` + `'env_change'`; `[R72-amended]` annotation added per R45 MAJOR-2 / Option B precedent chain
+2. `coordination/specs/Q-R72-SPEC.md § 2.2`: `466016` → `465920` in example JSON comment
+3. `coordination/specs/Q-R72-SPEC.md § 3.1`: `466016 decimal` → `465920 decimal` in pseudocode comment
+4. `coordination/specs/Q-R72-SPEC.md § 5.2`: `.gitignore` semantics corrected — `[R72-amended]` annotation added; `!coordination/coverage/` exemption documented
+5. `tools/coverage-saturation.ts:67`: `466016 decimal` → `465920 decimal` (comment correction)
+6. `.gitignore`: appended `!coordination/coverage/` exemption rule
+7. `coordination/reviews/REVIEWER-REPORT-R72.md`: Reviewer report committed (was untracked from Reviewer session)
+8. `coordination/MEMORIAL.md`: Reviewer CONFIRMATION + VIOLATION entries committed (written in Reviewer session; carried forward to this chore commit)
+
+### Routing
+
+**NEXT-ROLE: MEMORIAL-UPDATER | STATUS: READY**
+
+Per operator resolution § Routing: route to MEMORIAL-UPDATER (NOT back to REVIEWER; substantive deliverable accepted at R72 Reviewer pass).
 
 ---
 
