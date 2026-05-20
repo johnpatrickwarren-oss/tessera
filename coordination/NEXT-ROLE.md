@@ -1,7 +1,121 @@
 CURRENT-ROUND: R73
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Architect R73 routing block (2026-05-20)
+
+### Architect attestation summary
+
+- **Round-start SHA (anti-scope diff lower bound for Implementer's chore-A):** `ee5ae2e` (this Architect's spec-triad commit; captured via `git rev-parse HEAD` AFTER the spec triad landed and BEFORE this routing-block commit). Per CLAUDE-ARCHITECT REINFORCED 2026-05-17 R15 MINOR-1, the empirical anti-scope diff lower bound is the most recent spec-triad commit (= what Implementer injects into `Q-R73-EMPIRICAL.sh` `$ROUND_START_SHA` via sed). The R73 directive commit `841624b` is the pre-prep SHA but NOT the load-bearing diff lower bound.
+- **Spec triad commit (pre-Implementer chore-A):** `ee5ae2e` (`spec(R73): Q-R73-SPEC + audit sidecar + EMPIRICAL.sh — tier-routing classifier`). Per R21 ARCH MINOR-1 spec-commit-sequencing discipline; spec triad landed in its OWN commit BEFORE this routing block update.
+- **Empirical baseline at Architect session entry (verified by direct command runs; NOT inherited from R72 attestation per R25 MINOR-1):**
+  - `pnpm exec node --test --test-reporter=tap test/*.test.js` → `tests=489 / pass=481 / fail=5 / skipped=3`. 5 fails identity-verified: `AC-R36-21`, `AC-R36-30`, `AC-R36-31`, `AC-R65-2`, `AC-R66-14`.
+  - `pnpm exec tsc -p tsconfig.test.json` → exit 0, zero diagnostics.
+  - `git status --short` → clean working tree at session entry.
+  - `git rev-parse HEAD` at session entry → `841624b` (R73 directive commit).
+- **Pipeline + codebase inspection at session entry (R72 claim-then-walk discipline applied):**
+  - `run-pipeline.sh` arg-parse pattern at lines 117-128 directly read; tier dispatch lines 197-228 directly read; existing TIER values = `solo`/`audit`/`full`; `--coordinator` is a separate flag at lines 230-248.
+  - `claude` CLI invocations confirmed at `run-pipeline.sh:336,1487,1598` — existing pipeline hard dependency; router's hybrid-mode `claude -p` reuse adds no new external dep.
+  - `package.json` devDependencies = `@types/node`, `typescript` only — no Anthropic SDK present; spec preserves this.
+  - **`tsconfig.test.json` include surface verified at session entry (R03 framework-config reinforcement applied):** current include is `engine/**/*.ts`, `test/**/*.ts`, `tools/**/*.ts` only — NOT `scripts/**/*.ts`. Spec amended at spec-emit time (NOT routed to Implementer for tactical discovery): `tsconfig.test.json` added to ALLOWED_SET; Implementer adds `"scripts/**/*.ts"` to the include array. Documented in Q-R73-SPEC § 1.1 + § 5.1 + § 9.1 Q.6.
+  - Directive section headings in HEAD's NEXT-ROLE.md for R63-R72 directly enumerated via grep; 10 sections present. For older safety-set rounds (R45/R49/R50/R51/R55/R60/R61/R62/R64/R68): directive commits located via `git log --grep`; R45/R62/R64/R68 lack a single dedicated "directive" commit but their directive content is recoverable via NEXT-ROLE.md history + MEMORIAL.md content (TACTICAL AUTONOMY § 2.5).
+- **Toolchain at session entry:** pnpm 11.x, Node v25.x, TypeScript per devDependencies `^5.4.0`.
+- **Pre-emit grilling outcome:** PASS. Claim-then-walk discipline (R72 lesson) applied to every load-bearing factual claim in the spec (12 claims; § 9.1 Q.6 table). Spec-internal contradiction sweep (R65 MINOR-2) + R02-R72 reinforcement sweep (Q-R73-SPEC § 9.1 Q.5/Q.6/Q.7/Q.8/Q.9/Q.10) ran clean. Probe-execution of Q-R73-EMPIRICAL.sh deferred (RED commit must land FIRST for tsc + node --test blocks to be meaningful; Architect's prediction matrix in spec § 10 + spec-audit § C records the expected outcome).
+- **Round-evolution-fragility avoidance (R62 + R66 + R68 cumulative; 5th-instance since R71):** Spec § 5.1 ALLOWED_SET uses historical-only diff (`round-start..HEAD`); carry-forward fail set bound by AC ID identity (not raw count alone); NO forward-protection AC; NO live-file-count AC; NO anti-scope-diff-against-prior-round AC; NO chore-B (single-state spec).
+- **R72 claim-then-walk specific application (Architect-side; cross-project canonical):** Every codebase claim in spec § 9.1 Q.6 verified via direct command at spec-emit time, NOT inherited from R72 attestation or mental model. Critical catch: `tsconfig.test.json` include surface (would have forced a TS2307-class chore-A halt if missed).
+
+### Implementer inputs for R73
+
+1. `coordination/specs/Q-R73-SPEC.md` (spec proper; prescriptive)
+2. `coordination/specs/Q-R73-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read; Implementer MAY read for context)
+3. `coordination/specs/Q-R73-EMPIRICAL.sh` (chore-A verification harness; executable; **Implementer injects `$ROUND_START_SHA` literal at chore-A pre-commit per Q-R73-SPEC § 5.2 sed-substitution mechanism — read SHA `ee5ae2e` from THIS routing block; do NOT use `git rev-parse HEAD` at sed time per R70 MINOR-1 reinforcement**)
+4. `coordination/PRD.md` § Phase 3 (no Phase 4 PRD yet; Phase 4 framing is in this NEXT-ROLE.md § Phase 4 SLICE 1 block)
+5. `coordination/NEXT-ROLE.md` § R73 Round-scope directive (operator scope-setting; preserved below this routing block for context)
+6. `CLAUDE-COMMON.md` (read for the A1-A7 / S1-S5 / Z1-Z5 rubric used in `buildHaikuPrompt` per Q-R73-SPEC § 3.1 TACTICAL AUTONOMY)
+7. `run-pipeline.sh` (READ-ONLY for current arg-parse + tier-dispatch patterns; MODIFY for `--auto-tier` flag addition)
+8. R63-R72 directive sections in this NEXT-ROLE.md (source for validation-corpus fixtures R63-R72)
+9. `git log` + `git show` (source for older validation-corpus fixtures R45/R49/R50/R51/R55/R60/R61/R62/R64/R68)
+
+### Implementer chore-A sequence (per Q-R73-SPEC § 5.2 + § 6.1)
+
+1. **RED commit (separate from GREEN per R23 IMPL MINOR-1):**
+   - Land `test/q73-tier-router.test.ts` with `assert.fail('R73 RED — implementation pending')` stubs at AC-R73-1..12 positions (the runtime ACs only; empirical-bound ACs live in EMPIRICAL.sh).
+   - `scripts/tier-router.ts`, `scripts/tier-router-validate.ts`, `scripts/tier-router-fixtures/`, and `package.json` `tier-router` scripts do NOT yet exist; tsc emits TS2307 module-resolution error at the test's `import` lines (parameterized fixtures need both source + corpus to exist).
+   - Commit message format: `red(R73): q73 tier-router stub fails — TS2307 + AC-R73-1..12 RED assertion stubs`.
+
+2. **GREEN commit (chore-A):**
+   - Land `scripts/tier-router.ts` per Q-R73-SPEC § 3.1 pseudocode.
+   - Land `scripts/tier-router-validate.ts` per Q-R73-SPEC § 3.2 pseudocode.
+   - Land `scripts/tier-router-criteria.md` (one-page operator-facing decision-criteria docs; mirror Q-R73-SPEC § 0 in prose).
+   - Land `scripts/tier-router-fixtures/corpus.json` per Q-R73-SPEC § 2.5.
+   - Land 13 fixture files `scripts/tier-router-fixtures/R{45,49,50,51,55,60,61,62,63,64,66,68,72}-directive.md` — extract each from HEAD NEXT-ROLE.md OR `git show <SHA>:coordination/NEXT-ROLE.md` per § 2.5 TACTICAL AUTONOMY; **verify each fixture's router output BEFORE committing chore-A** (run `node scripts/tier-router.js --directive <fixture> --mode heuristic` and check tier matches the safety-set expectation).
+   - Modify `tsconfig.test.json`: add `"scripts/**/*.ts"` to the `include` array (1-line addition).
+   - Modify `package.json`: add `tier-router` + `tier-router:validate` scripts per Q-R73-SPEC § 3.3 (preserve all other entries verbatim).
+   - Modify `run-pipeline.sh`: add `--auto-tier` flag per Q-R73-SPEC § 2.4 contract.
+   - OPTIONAL: modify `CLAUDE-COORDINATOR.md` to add `--auto-tier` Mode docs section (NOT a REINFORCEMENT entry); Implementer judges in or out per Q-R73-SPEC § 5.1.
+   - Replace all RED stubs in `test/q73-tier-router.test.ts` with real assertions per Q-R73-SPEC § 3.4.
+   - **BEFORE committing**: inject `$ROUND_START_SHA` into `Q-R73-EMPIRICAL.sh`:
+     ```bash
+     sed -i.bak "s|<INJECTED-AT-CHORE-A>|ee5ae2e|g" coordination/specs/Q-R73-EMPIRICAL.sh
+     rm coordination/specs/Q-R73-EMPIRICAL.sh.bak
+     ```
+     (`ee5ae2e` is the spec-triad commit SHA captured above — read this routing block; do NOT use `git rev-parse HEAD`).
+   - Commit message format: `feat(R73): tier-routing classifier — hybrid mechanism + validation corpus + pipeline --auto-tier integration`.
+
+3. **Verify chore-A:**
+   - `pnpm exec tsc -p tsconfig.test.json` → exit 0; zero diagnostics.
+   - `pnpm exec node --test --test-reporter=tap test/*.test.js` → record VERBATIM the actual `# tests N / # pass M / # fail K / # skipped J` lines. Predicted: tests ≈ 489+26 = 515 / pass ≈ 481+26 / fail 5 / skipped 3.
+   - `bash coordination/specs/Q-R73-EMPIRICAL.sh` → all 14 blocks PASS, exit 0.
+
+4. **Attestation in NEXT-ROLE.md (Implementer adds § Implementer R73 routing block above this Architect block):** encode ACTUAL chore-A summary VERBATIM per Rule 1 sub-class `empirical-command-attestation`. Do NOT reframe to match Architect prediction. Acknowledge any divergence in a spec-deviance section.
+
+5. **NO chore-B step.** R73 is single-state. Implementer routes directly to Reviewer after chore-A verification + attestation.
+
+### TACTICAL AUTONOMY scope (per Q-R73-SPEC § 6.2)
+
+Implementer MAY:
+- Choose `.js` extension imports per R70/R71 precedent (default: `.js`).
+- Adjust JSDoc wording, blank lines, import order, internal helper names — no semantic change.
+- Choose the exact `claude` CLI flag form for invoking Haiku — discover via `claude --help` at chore-A; omit `--max-turns 1` if unsupported.
+- Choose the exact directive-content extraction recipe per validation-corpus round (within § 2.5 mandate). **CRITICAL**: verify each fixture's router output BEFORE committing chore-A.
+- Choose the line-count of the CLAUDE-COMMON.md rubric embedded in `buildHaikuPrompt`.
+- Skip CLAUDE-COORDINATOR.md modifications if inline `--help` + `scripts/tier-router-criteria.md` are judged sufficient documentation.
+
+Implementer MAY NOT (without HALT + DIAGNOSTIC per Q-R73-SPEC § 6.1):
+- Modify any anti-scope file (engine/**/*.ts, demos/**/*, tools/coverage-saturation.ts, tools/build-canned-demos.ts, tools/demo-scenario.ts, any pre-R73 test or spec, CLAUDE-{ARCHITECT,IMPLEMENTER,REVIEWER,MEMORIAL}.md REINFORCEMENTS, CROSS-PROJECT-MEMORIAL.md).
+- Expand the ALLOWED_SET in-spec at chore-A (R36 MAJOR-2 NEVER violation).
+- Introduce a chore-B step or any forward-protection / live-file-count / anti-scope-diff-against-prior-round AC pattern (R62+R66+R68 cumulative lesson).
+- Add an external npm dependency (R68 anti-worm posture).
+- Skip the RED commit (R23 IMPL MINOR-1).
+- Cite spec-predicted values as observed in attestation (Rule 1 sub-class).
+- Tune the heuristic rules in Q-R73-SPEC § 0 (rule priorities, anchor regexes, confidence values).
+
+### Halt conditions for the Implementer (per Q-R73-SPEC § 6.1)
+
+10 halt conditions enumerated; do NOT proceed with a silent workaround. Write `coordination/diagnostics/DIAGNOSTIC-R73-<topic>.md` with ≥ 3 bounded options + set `STATUS: ESCALATE` + await operator disposition. The LOAD-BEARING SAFETY halt is #4: validation-corpus failure (router routes any of R45/R61/R62/R66/R72 to anything other than `full` under `--mode heuristic`) → immediate HALT.
+
+### Cross-project rule dispositions (per Q-R73-SPEC § 7)
+
+| Rule | Disposition |
+|---|---|
+| 1 (`empirical-command-attestation`) | ACTIVE GATE — Q-R73-EMPIRICAL.sh blocks 3+4+5 require VERBATIM attestation |
+| 2 (`architect-branch-binding-coverage`) | ACTIVE GATE — every router branch bound to an AC |
+| 3 (`implementer-spec-test-assertion-coverage`) | ACTIVE GATE — AC-R73-4/5/6/7/9 are discriminating; § 5.3 acknowledged 2 non-load-bearing gaps |
+| 4 (`anti-scope-allowed-set-forward-coverage`) | ACTIVE GATE — 26-path ALLOWED_SET + 3 regex carve-outs + 1 optional; historical-only diff bounded by spec-triad SHA `ee5ae2e` |
+| 5 (`rule-derivation-without-self-application`) | N/A at spec emit (no new rule derived this round; R72 claim-then-walk applied at session entry) |
+| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | ACTIVE GATE — 10 halt conditions; single-state spec |
+| 7 (`derived-rule-propagation-mechanism-required`) | ACTIVE GATE Surface (a) — spec § 7 + this row |
+
+### Routing
+
+**NEXT-ROLE: IMPLEMENTER | STATUS: READY**
+
+Implementer reads `Q-R73-SPEC.md` proper as load-bearing input; `Q-R73-SPEC-AUDIT.md` is Reviewer-authorized but Implementer MAY read for context.
+
+**Coordination chore SHA:** (Architect routing-block commit SHA to be stamped at chore time)
 
 ---
 
