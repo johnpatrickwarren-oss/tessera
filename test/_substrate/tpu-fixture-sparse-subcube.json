@@ -1,0 +1,15 @@
+{
+  "tpu_version": "v5p",
+  "slice_shape": [2, 2, 2],
+  "topology_type": "mesh",
+  "chips": [
+    { "chip": "tpu-0", "ici_peers": ["tpu-1", "tpu-2", "tpu-4"] },
+    { "chip": "tpu-1", "ici_peers": ["tpu-0", "tpu-3", "tpu-5"] },
+    { "chip": "tpu-2", "ici_peers": ["tpu-0", "tpu-3", "tpu-6"] },
+    { "chip": "tpu-3", "ici_peers": ["tpu-1", "tpu-2", "tpu-7"] },
+    { "chip": "tpu-4", "ici_peers": ["tpu-0", "tpu-5", "tpu-6"] },
+    { "chip": "tpu-5", "ici_peers": ["tpu-1", "tpu-4", "tpu-7"] },
+    { "chip": "tpu-6", "ici_peers": ["tpu-2", "tpu-4", "tpu-7"] },
+    { "chip": "tpu-7", "ici_peers": ["tpu-3", "tpu-5", "tpu-6"] }
+  ]
+}
