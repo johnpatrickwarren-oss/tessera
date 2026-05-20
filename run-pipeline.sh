@@ -113,18 +113,21 @@ COORDINATOR_MODE=false
 WAVE_GATE_MODE=false
 WAVE_GATE_ID=""
 CONSOLIDATION_REVIEWER=false
+AUTO_TIER=false
+TIER_EXPLICIT=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     --round)            ROUND="$2";        shift 2 ;;
     --start-at)         START_AT="$2";     shift 2 ;;
     --prd)              PRD_PATH="$2";     shift 2 ;;
-    --tier)             TIER="$2";         shift 2 ;;
+    --tier)             TIER="$2"; TIER_EXPLICIT=true; shift 2 ;;
     --dry-run)          DRY_RUN=true;      shift   ;;
     --hybrid-reviewer)  HYBRID_REVIEWER=true; shift ;;
     --no-model-routing) MODEL_ROUTING=false; shift  ;;
     --reset-next-role)  RESET_NEXT_ROLE=true; shift ;;
     --coordinator)      COORDINATOR_MODE=true; shift ;;
     --wave-gate)        WAVE_GATE_MODE=true; WAVE_GATE_ID="$2"; shift 2 ;;
+    --auto-tier)        AUTO_TIER=true;    shift   ;;
     --consolidation-reviewer) CONSOLIDATION_REVIEWER=true; shift ;;
     -h|--help)
       cat <<'EOF'
@@ -179,6 +182,31 @@ EOF
     *) echo "Unknown argument: $1"; exit 1 ;;
   esac
 done
+
+# ── Auto-tier integration (R73) ───────────────────────────────────────────────
+# When --auto-tier is passed without an explicit --tier, invoke the heuristic router
+# against coordination/NEXT-ROLE.md and set TIER from the router output.
+# Explicit --tier always wins; auto-tier is advisory when no explicit tier is given.
+if [[ "$AUTO_TIER" == "true" && "$TIER_EXPLICIT" != "true" ]]; then
+  ROUTING_LOG="coordination/logs/ROUND-${ROUND}-ROUTING.md"
+  ROUTER_OUT="$(node scripts/tier-router.js --mode hybrid 2>/dev/null)" || true
+  if [[ -n "$ROUTER_OUT" ]]; then
+    ROUTER_TIER="$(echo "$ROUTER_OUT" | node -e \
+      "process.stdin.resume(); let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{ try{console.log(JSON.parse(d).tier)}catch{} })" 2>/dev/null)" || true
+    case "$ROUTER_TIER" in
+      full)             TIER="full" ;;
+      audit)            TIER="audit" ;;
+      implementer-only) TIER="solo" ;;
+      coordinator-only) COORDINATOR_MODE=true ;;
+    esac
+    mkdir -p coordination/logs
+    printf '# Round %s auto-tier routing\n\n' "$ROUND" > "$ROUTING_LOG"
+    echo "$ROUTER_OUT" >> "$ROUTING_LOG"
+    echo "INFO:  --auto-tier: router recommended '$ROUTER_TIER'; TIER set to '$TIER'" >&2
+  else
+    echo "WARN:  --auto-tier: router failed or unavailable; defaulting to TIER='full'" >&2
+  fi
+fi
 
 # ── Tier configuration ────────────────────────────────────────────────────────
 # full (default): full Anchor — Architect writes spec, Implementer executes,
