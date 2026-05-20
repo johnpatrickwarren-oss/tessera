@@ -51,11 +51,11 @@ echo ""
 # ── Step a: Run all 5 binding commands ───────────────────────────────────────
 echo "--- Step 1/6: Running binding commands ---"
 BINDING_COMMANDS=(
-  "npm run typecheck"
-  "npm run lint"
-  "npm test"
-  "npm run test:integration"
-  "npm run test:e2e"
+  "pnpm typecheck"
+  "pnpm lint"
+  "pnpm test"
+  "pnpm test:integration"
+  "pnpm test:e2e"
 )
 
 for cmd in "${BINDING_COMMANDS[@]}"; do

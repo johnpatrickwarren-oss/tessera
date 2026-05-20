@@ -1,7 +1,7 @@
 #!/bin/bash
 # check-lint-baseline.sh — lint warning regression gate.
 #
-# Compares current `npm run lint` warning count against a checked-in baseline.
+# Compares current `pnpm lint` warning count against a checked-in baseline.
 # Any new warnings fail the check; improvements produce a hint to tighten the baseline.
 #
 # Usage:
@@ -27,7 +27,7 @@ fi
 
 # ── Run lint, capture output (|| true prevents set -e from exiting on lint errors) ──
 echo "--- Running lint ---"
-LINT_OUTPUT=$(cd "$PROJECT_ROOT" && npm run lint 2>&1 || true)
+LINT_OUTPUT=$(cd "$PROJECT_ROOT" && pnpm lint 2>&1 || true)
 
 # ── Parse error and warning counts ───────────────────────────────────────────
 # ESLint summary line format: "✖ N problems (E errors, W warnings)"

@@ -1,7 +1,36 @@
-CURRENT-ROUND: R67
+CURRENT-ROUND: R68
 NEXT-ROLE: OPERATOR
-STATUS: PHASE-3-CLOSED
+STATUS: ROUND-COMPLETE
 TIER: coordinator
+
+---
+
+## § R68 close attestation (pnpm migration) (2026-05-20)
+
+**Deliverables landed at R68:**
+- `package.json`: `packageManager: "pnpm@11.1.2"` + `engines.pnpm: ">=11"` added
+- `pnpm-lock.yaml` NEW (914 bytes; 3 packages)
+- `package-lock.json` DELETED
+- `.npmrc` NEW (`auto-install-peers=true` + `strict-peer-dependencies=true` + `prefer-frozen-lockfile=true`)
+- `scripts/finalize-round.sh`: `npm run X` → `pnpm X` (5 lines)
+- `scripts/check-lint-baseline.sh`: `npm run lint` → `pnpm lint` + header
+- `coordination/MEMORIAL.md` R68 COORDINATOR entries (6 entries: 2 CONFIRMATION + 2 VIOLATION + 2 OBS)
+
+**Verification:**
+- `pnpm install` → exit 0; 3 packages resolved
+- `pnpm exec tsc -p tsconfig.test.json` → exit 0
+- `pnpm test` → `tests=444 / pass=436 / fail=5 / skipped=3`
+
+**Carry-forward fail set at R68 close (5 fails; ALL discipline-debt, NOT substantive regressions):**
+1. AC-R36-21 — CLAUDE-IMPLEMENTER ≤30 entries; pre-existing from R66 MU growth (silent at R66 ROUND-COMPLETE per discipline-gap VIOLATION); deferred to operator-triggered `consolidate-reinforcements.sh`
+2. AC-R36-30 — Phase 2 close legacy
+3. AC-R36-31 — Phase 2 close legacy
+4. AC-R65-2 — R66 Option A documented
+5. AC-R66-14 — R68 round-evolution AC fragility (3rd-instance trigger; cross-project promotion flagged)
+
+**Cross-project promotion flag (operator decision):** 3rd Tessera instance of "Architect spec AC pattern doesn't survive round evolution" (R62 + R66 + R68) crosses Rule 5 cross-project derivation threshold. Proposed canonical name: `ac-pattern-round-evolution-fragility`. Operator decision: write to `~/.claude/CROSS-PROJECT-MEMORIAL.md` or defer to Phase 4 hygiene round?
+
+**Next round (R69):** Tessera GitHub publication (Apache 2.0 LICENSE + README + `gh repo create` public + push full history). Operator-confirmed at the publication-decision questions (license=Apache 2.0; history=full; DS-side after Tessera).
 
 ---
 
