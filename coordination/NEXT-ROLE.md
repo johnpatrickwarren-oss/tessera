@@ -1,7 +1,74 @@
-CURRENT-ROUND: R66
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
-TIER: full
+CURRENT-ROUND: R67
+NEXT-ROLE: OPERATOR
+STATUS: PHASE-3-CLOSED
+TIER: coordinator
+
+---
+
+## § R67 close attestation (Phase 3 close) (2026-05-20)
+
+**Deliverables landed at R67:**
+- `coordination/WAVE-PLAN-10.md` — pointer file (canonical content at WAVE-PLAN-09.md) satisfying `verify-wave-aggregate.sh` filename requirement
+- `coordination/WAVE-GATE-10.md` — Wave 10 close = SLICE 3 close = **Phase 3 close**; Tessera v1 = project-close candidate
+- This NEXT-ROLE.md updated to STATUS: PHASE-3-CLOSED + R68 directive prep below
+
+**Mechanical sweep:** `bash scripts/verify-wave-aggregate.sh WAVE-10` → exit 0; 0 mechanical findings; 1 advisory item (sequential dispatch precluded multi-cluster MEMORIAL fragments; same artifact as WAVE-06/07/08/09).
+
+**Phase 3 substantive ACs/FRs met:** AC-P5 + AC-P7 + AC-P9 + FR-V1a + FR-V1b + FR-V2 + FR-V4 + FR-D2 + FR-D3 + FR-D4.
+**Phase 3 deferred to Phase 4 candidate scope:** AC-P6 + AC-P8 + FR-V3 + FR-D1.
+**0-CRITICAL streak (substantive-deliverable level):** PRESERVED at R02-R66 except R45 (60+ rounds).
+
+---
+
+## § R68 Round-scope directive (Coordinator — pnpm migration; pre-publication hygiene) (2026-05-20)
+
+R68 = pnpm migration round. Operator-flagged 2026-05-20: "all our projects to pnpm to avoid worms" — Tessera currently uses npm (`package-lock.json` present; `pnpm-lock.yaml` absent); migration required before public publication for two reasons: (a) project-wide convention; (b) npm supply-chain attack mitigation (Shai-Hulud worm class) — pnpm's content-addressable store + strict-peer-deps + workspace-scoped resolution materially harder for worm propagation.
+
+**Round-start SHA:** SHA of this R67 close commit (recover via `git rev-parse HEAD` at session entry).
+
+**Scope:**
+
+1. **Replace npm references with pnpm across scripts:**
+   - `scripts/finalize-round.sh`: `npm run typecheck/lint/test/test:integration/test:e2e` → `pnpm typecheck/lint/test/test:integration/test:e2e`
+   - `scripts/check-lint-baseline.sh`: `npm run lint` → `pnpm lint`
+   - `run-pipeline.sh`: install message reference `npm install -g @anthropic-ai/claude-code` — keep npm-flavored (claude-code is distributed globally via npm; project-level pnpm migration doesn't affect global install)
+   - Grep `scripts/` for any remaining npm/npx references
+
+2. **Package manager pinning:**
+   - Add `packageManager` field to `package.json` (e.g., `"packageManager": "pnpm@9.x.y"`)
+   - Generate `pnpm-lock.yaml` via `pnpm install` (converts from npm lockfile)
+   - Delete `package-lock.json`
+
+3. **Optional pnpm config:**
+   - `.npmrc` with `auto-install-peers=true` + `strict-peer-dependencies=true` per pnpm convention
+   - Consider `prefer-frozen-lockfile=true` for CI determinism
+
+4. **Update documentation references:**
+   - Grep `CLAUDE-*.md` + `coordination/*.md` + `coordination/**/*.md` for npm/npx references; update where appropriate
+   - Architect/Implementer subprocess invocations: `npx tsc -p tsconfig.test.json` → `pnpm exec tsc -p tsconfig.test.json` for consistency (npx still works across both but inconsistent style)
+
+5. **Verification:**
+   - `pnpm install` → exit 0; `pnpm-lock.yaml` generated
+   - `pnpm exec tsc -p tsconfig.test.json` → exit 0
+   - `pnpm exec node --test --test-reporter=tap test/*.test.js` → tests=444 / pass=438 / fail=3 / skipped=3 (3 fails = AC-R36-30 + AC-R36-31 + AC-R65-2 carry-forward; unchanged from R66 baseline)
+
+**Anti-scope (R68 hard limits):**
+- NO substantive code changes (no `engine/*` / `test/*` content modifications; configuration + script refactor only)
+- NO new dependencies added
+- NO modification of R65/R66 deliverables
+- NO modification of CLAUDE-*.md REINFORCEMENTS sections
+- NO GitHub PR opening (R69 scope)
+- NO `pnpm publish` (R69 scope)
+
+**Halt conditions (R68):**
+1. Test baseline drift beyond R66 close (`444/438/3/3`): HALT + DIAGNOSTIC
+2. `pnpm install` exit non-zero
+3. `pnpm exec tsc -p tsconfig.test.json` exit non-zero
+4. Pipeline subprocess invocation regression after script updates
+
+**Tier rationale:** Coordinator-interactive. No Architect/Implementer/Reviewer/MU subagent invocation needed; pnpm migration is mechanical refactor + verification work.
+
+**Pipeline invocation:** None. Coordinator does the work interactively, commits, transitions STATUS to ROUND-COMPLETE.
 
 ---
 
