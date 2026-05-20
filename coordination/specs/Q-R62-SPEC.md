@@ -1,5 +1,34 @@
 # Q-R62-SPEC — Phase 3 SLICE 3 WU-Phase3-3A (re-scoped per Option F): DS integration interface contract design (HTTP API types)
 
+---
+
+## ⚠ AMENDED 2026-05-20 — R62 ESCALATE Option 1 resolution: AC-R62-15 DROPPED
+
+**Coordination chore amendment** (lands as 4th commit on R62 chain after RED + chore-A + chore-B). Resolves the Reviewer's CRITICAL-1 + CRITICAL-2 + MAJOR-3 findings (see `coordination/reviews/REVIEWER-REPORT-R62.md`).
+
+**Decision:** AC-R62-15 DROPPED. Binding was structurally vacuous: chore-B commit itself modifies `test/q62-ds-integration-contract.test.ts` (to inject CHORE_A_SHA for AC-R62-12), so `git diff CHORE_A_SHA..HEAD --name-only` can never be empty at any committed HEAD post-chore-B. The "chore-B PASS" state for AC-R62-15 was structurally unreachable; the spec's grouping of AC-R62-15 alongside AC-R62-10 + AC-R62-12 in the § 6.1 #1 R56 MINOR-1 carve-out was an Architect error — only -10 and -12 have legitimate two-state PASS-able patterns; -15 has no PASS-able committed-HEAD state.
+
+**Files modified by coordination chore:**
+- `test/q62-ds-integration-contract.test.ts`: AC-R62-15 test block removed; replaced with explanatory comment.
+- `coordination/specs/Q-R62-EMPIRICAL.sh`: AC-R62-10 prediction updated `412/407/2/3` → `411/406/2/3` (test count drops by 1; fails drop to 2 R36 carry-forward only).
+- `coordination/specs/Q-R62-SPEC.md` (this file): AC-R62-15 row in § 5.2 marked DROPPED; § 5.4 two-state table updated; § 6.1 #1 carve-out narrowed to AC-R62-10 + AC-R62-12 only; § 4.5 prescription updated; § 4.7 sequence updated; this amendment banner added.
+- `coordination/specs/Q-R62-SPEC-AUDIT.md`: post-emit AMENDMENT section appended documenting the chore.
+- `coordination/MEMORIAL.md`: MAJOR-1 (halt-discipline framing) + Architect-claim-without-empirical-walk pattern memorialized; OBS on cross-round repetition flagged for Reviewer reinforcement candidate.
+- `coordination/NEXT-ROLE.md`: STATUS: ESCALATE → cleared; routes to Memorial-Updater for the final hygiene pass; R62 MERGE-READY-after-coordination-chore.
+
+**Forward-protection coverage post-drop:**
+- AC-R62-12 retains historical anti-scope coverage (`git diff ad6cc6b..CHORE_A_SHA --name-only` ⊆ ALLOWED_SET).
+- Reviewer cold-eye process catches any unauthorized post-chore-A modifications (independent of test-AC machinery).
+- The R36-30/R36-31 forward-protection AC pattern continues to carry-forward-fail in the broader codebase per existing precedent (not addressed at R62; deferred as Phase 4 hygiene candidate).
+
+**Pattern lesson (for cross-project derivation if recurs at R63+):**
+The "chore-A-to-HEAD diff empty" forward-protection AC pattern (originating at R36-30/R36-31 and propagated through R53/R56/R58) has a structural impossibility when the test file itself participates in chore-B SHA injection. R62 is the first round where this was empirically caught (R36/R53/R56/R58 each carry-forward-failed the equivalent AC without surfacing the structural issue). Candidate for CLAUDE-ARCHITECT.md REINFORCED entry: "When using two-state AC patterns with SHA placeholders, walk through every chore commit's diff explicitly — the file participating in SHA-injection is in the diff window post-injection."
+
+**Note on memorialized halt-discipline framing (MAJOR-1):**
+Reviewer cited spec § 6.1 #6 (R61-class discovery) for HALT requirement. Implementer cited spec § 4.7 step 5 + § 6.1 #1 carve-out for SPEC-DEVIANCE disclosure. Both citations are accurate; the spec design grouped AC-R62-15 under the carve-out (Architect error per § 6.1 grouping). Operator resolution treats both Architect and Implementer framings as partially correct; MAJOR-1 is recorded as a process-discipline observation rather than a hard violation. The structural fix (drop the vacuous AC) addresses the root cause; halt-discipline observation is informational.
+
+---
+
 **Round:** R62 (full tier — Architect + Implementer + Reviewer + Memorial-Updater).
 **Cluster shape:** single-cluster (Wave 9 of `coordination/WAVE-PLAN-09.md`; sole WU = re-scoped WU-Phase3-3A per Option F resolution at `ad6cc6b`).
 **Phase / SLICE:** Phase 3 SLICE 3 (final Phase 3 SLICE; DS bi-directional integration foundation). WU-3A re-scoped from "engine npm package extract" (DEFERRED to Phase 4) to "DS integration interface contract design" — TypeScript types + HTTP transport metadata + contract documentation.
@@ -989,7 +1018,7 @@ R62 ships 15 ACs total: 13 are bound to runtime tests in `test/q62-ds-integratio
 | **AC-R62-12** | Given chore-A SHA (CHORE_A_SHA injected at chore-B), when `git diff ad6cc6b..<CHORE_A_SHA> --name-only` runs, then the output is a subset of the 10-path ALLOWED_SET plus the conditional 11th `DIAGNOSTIC-R62-*.md` regex carve-out. | test/q62:218-241 | runtime |
 | **AC-R62-13** | Given `engine/types/verdict.ts` at chore-A, when read, then the regex `/^\s*correlational_not_causal:\s*true\s*;/m` matches (A16 defensive — literal-type declaration preserved). | test/q62:246-255 | runtime |
 | **AC-R62-14** | Given `engine/ds-integration/feed-contract.ts` at chore-A, when read, then the regex `/^\s*correlational_not_causal:\s*true\s*;/m` matches (A16 propagation — wire-format projection preserves the literal). | test/q62:260-267 | runtime |
-| **AC-R62-15** | Given chore-A SHA (CHORE_A_SHA injected at chore-B), when `git diff <CHORE_A_SHA>..HEAD --name-only` runs, then the output is an empty array (forward-protection per R36/R53/R56/R58 precedent — chore-B SHA backfill is the ONLY post-chore-A modification; if any other path appears, an unauthorized post-chore-A modification has been introduced). | test/q62:272-281 | runtime |
+| **AC-R62-15** (DROPPED 2026-05-20 per coordination chore) | Original binding: `git diff <CHORE_A_SHA>..HEAD --name-only` empty (forward-protection per R36/R53/R56/R58). DROPPED because chore-B itself modifies test file (CHORE_A_SHA injection for AC-R62-12), making the binding structurally impossible to satisfy at any committed HEAD post-chore-B. AC-R62-12 covers historical anti-scope coverage; Reviewer cold-eye covers forward-protection. | test/q62 (comment block only) | DROPPED |
 
 ### § 5.3 Branch-binding coverage table (R21 ARCH MINOR-2/3)
 
@@ -1024,7 +1053,7 @@ Per R53 MINOR-1 + R56 MINOR-1 reinforcement, the spec carves out the pre-documen
 
 The +13 tests = 13 new R62 runtime tests in `test/q62-ds-integration-contract.test.ts`. At chore-A, AC-R62-12 and AC-R62-15 EACH fail because their `CHORE_A_SHA` literal is the placeholder `<INJECTED-AT-CHORE-B>` (not a valid git ref → `assert.fail` fires in each test block). Pass count at chore-A = baseline 394 + 11 R62 tests that pass (AC-R62-1 through AC-R62-9, AC-R62-13, AC-R62-14) = 405. Fail count = baseline 2 (R36 forward-protection) + 2 R62 placeholder = 4. Both placeholders are resolved by a single chore-B SHA injection, so the chore-A→chore-B transition is a single replacement that lifts both ACs to PASS simultaneously (pass count goes from 405 → 407; fail count goes from 4 → 2). AC-R62-10 (test summary) similarly transitions PASS at chore-B because the predicted summary `412/407/2/3` matches the post-injection state.
 
-**Why both AC-R62-12 and AC-R62-15 share the placeholder rather than only one:** the precedent at R58 used one placeholder-bound test (AC-R58-14). R62 splits the anti-scope-diff property into two ACs because (i) AC-R62-12 binds the round-start-to-chore-A coverage (the historical guarantee), and (ii) AC-R62-15 binds the chore-A-to-HEAD coverage (the forward-protection guarantee per R36 precedent). Two distinct properties → two ACs. Each individually fails at chore-A by construction; both pass simultaneously at chore-B.
+**Why both AC-R62-12 and AC-R62-15 share the placeholder rather than only one:** the precedent at R58 used one placeholder-bound test (AC-R58-14). R62 originally split the anti-scope-diff property into two ACs because (i) AC-R62-12 binds the round-start-to-chore-A coverage (the historical guarantee), and (ii) AC-R62-15 binds the chore-A-to-HEAD coverage (the forward-protection guarantee per R36 precedent). **UPDATE 2026-05-20:** AC-R62-15 DROPPED per Option 1 coordination chore resolving R62 ESCALATE. The "chore-B PASS" state for AC-R62-15 was structurally unreachable at any committed HEAD because chore-B itself modifies the test file (CHORE_A_SHA injection placing the file in the diff window). AC-R62-12 retains historical anti-scope coverage; Reviewer cold-eye covers forward-protection. The R36 precedent pattern (carry-forward-failing forward-protection ACs) is preserved at R36-30/R36-31 level but NOT propagated forward at R62.
 
 ### § 5.5 Honest-broker disclosures
 
@@ -1051,7 +1080,7 @@ Per cross-project rule `self-confirming-test-assertion-specificity` (CROSS-PROJE
 
 The Implementer HALTs and writes a DIAGNOSTIC (sets `STATUS: ESCALATE` in NEXT-ROLE.md) when any of the following fire:
 
-1. **Q-R62-EMPIRICAL.sh exits non-zero at chore-A for any reason OTHER THAN the pre-documented AC-R62-10 / AC-R62-12 / AC-R62-15 two-state mismatch (placeholder SHA fails).** Per R56 MINOR-1 carve-out — the chore-A failures of these three ACs are documented in § 5.4 + § 4.5 test placeholder code + Q-R62-EMPIRICAL.sh AC blocks AND are resolved by the single chore-B SHA injection. They are NOT halt triggers.
+1. **Q-R62-EMPIRICAL.sh exits non-zero at chore-A for any reason OTHER THAN the pre-documented AC-R62-10 / AC-R62-12 two-state mismatch (placeholder SHA fails).** Per R56 MINOR-1 carve-out — the chore-A failures of these two ACs are documented in § 5.4 + § 4.5 test placeholder code + Q-R62-EMPIRICAL.sh AC blocks AND are resolved by the single chore-B SHA injection. They are NOT halt triggers. (AC-R62-15 was originally in this carve-out but has been DROPPED per Option 1 coordination chore — see amendment banner at top of spec.)
 2. **`npx tsc -p tsconfig.test.json` exits non-zero.** R62 inherits a clean tsc surface (exit 0); any regression introduced by the contract module is a halt condition. Resolution path: identify which prescribed pseudocode pattern tsc rejects; write DIAGNOSTIC with bounded options (e.g., A: adjust spec pseudocode; B: declaration-merging fallback; C: accept tsc error if it's a known TS 5.9 quirk with workaround).
 3. **Any binding-command result CONTRADICTS the AC literal text** (Rule 1 `false-compliance-attestation` sub-class `empirical-command-attestation` per CROSS-PROJECT-MEMORIAL.md). Examples: tsc exits with diagnostics but ACTUAL exit code 0 (TS quirk); test summary deviates from predicted 412/406/3/3 at chore-A or 412/407/2/3 at chore-B for reasons other than the documented placeholder SHA failures. Resolution: encode the ACTUAL observed value verbatim in NEXT-ROLE.md attestation; do NOT reframe as compliance.
 4. **Spec-vs-reality conflict mid-implementation.** Example: TypeScript rejects the literal-type field declaration; OR the projection interface declared in § 4 doesn't compile due to a circular import that's not visible at spec-emit time; OR cited engine line numbers (`engine/types/verdict.ts:298`, `engine/events/event-feed.ts:10-15`) have shifted (Implementer must `grep` to confirm). Halt + DIAGNOSTIC + bounded options (per Rule 6 `halt-discipline-no-DIAGNOSTIC-for-workaround`).

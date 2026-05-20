@@ -19,19 +19,22 @@
 # file at chore-A SHA — not memorized values from spec text.
 #
 # Two-state distinction (per R53 MINOR-1 + R56 MINOR-1 reinforcement):
-#   - At chore-A: AC-R62-12 + AC-R62-15 each fail by construction
-#     (placeholder SHA literal `<INJECTED-AT-CHORE-B>` is not a valid git
-#     ref). Actual test summary at chore-A: tests=412 / pass=405 / fail=4 /
-#     skipped=3 (4 fails = R36-30 + R36-31 carry-forward + AC-R62-12
-#     placeholder + AC-R62-15 placeholder).
-#   - At chore-B (after Implementer SHA injection): both ACs pass. Predicted
-#     summary: tests=412 / pass=407 / fail=2 / skipped=3.
-# This script's AC-R62-10 block asserts the POST-CHORE-B predicted value
-# (412/407/2/3). At chore-A pre-injection, the AC-R62-10 block FAIL is
-# EXPECTED and load-bearing for the Implementer to attest the actual value
-# (412/405/4/3) verbatim per Rule 1 sub-class. The R56 MINOR-1 carve-out
-# documented in Q-R62-SPEC.md § 6.1 halt condition #1 makes this
-# pre-documented FAIL NOT a halt trigger.
+#   - At chore-A: AC-R62-12 fails by construction (placeholder SHA literal
+#     `<INJECTED-AT-CHORE-B>` is not a valid git ref). Actual test summary at
+#     chore-A: tests=412 / pass=405 / fail=4 / skipped=3 (4 fails =
+#     R36-30 + R36-31 carry-forward + AC-R62-12 placeholder + AC-R62-15
+#     placeholder, before AC-R62-15 was dropped by coordination chore).
+#   - At chore-B (after Implementer SHA injection): AC-R62-12 passes;
+#     AC-R62-15 was structurally unable to pass at any committed HEAD
+#     because chore-B itself modifies the test file, placing it in the
+#     `git diff CHORE_A_SHA..HEAD` window.
+#   - At coordination-chore (R62 ESCALATE Option 1 resolution; commit drops
+#     AC-R62-15 from test file + spec): test summary becomes
+#     tests=411 / pass=406 / fail=2 / skipped=3.
+# This script's AC-R62-10 block asserts the POST-COORDINATION-CHORE value
+# (411/406/2/3). The two pre-coordination-chore states (chore-A
+# `412/405/4/3` and chore-B `412/406/3/3`) are documented above for
+# audit-trail integrity per R46 Rule 1 sub-class `empirical-command-attestation`.
 
 set -uo pipefail
 
@@ -280,17 +283,17 @@ echo ""
 # -----------------------------------------------------------------------------
 # AC-R62-10 (test count attestation — node --test summary)
 # -----------------------------------------------------------------------------
-echo "AC-${ROUND}-10: test summary = 412/407/2/3 (post-chore-B; placeholder SHAs injected)"
-# Two-state distinction per R53 MINOR-1 + R56 MINOR-1:
-#   - At chore-A (pre-SHA-injection): actual will be 412/405/4/3 (4 fails =
-#     R36-30 + R36-31 pre-existing + AC-R62-12 placeholder + AC-R62-15
-#     placeholder). The block FAILs.
-#     The Implementer MUST encode the ACTUAL observed value verbatim in
-#     NEXT-ROLE.md attestation — do NOT reframe as compliance. The R56
-#     MINOR-1 carve-out in Q-R62-SPEC § 6.1 halt condition #1 makes this
-#     pre-documented FAIL NOT a halt trigger.
-#   - At chore-B (post-SHA-injection): both AC-R62-12 + AC-R62-15 pass →
-#     summary returns to spec-predicted 412/407/2/3. The block PASSes.
+echo "AC-${ROUND}-10: test summary = 411/406/2/3 (post-coordination-chore; AC-R62-15 dropped)"
+# Three-state distinction (R62 had two ESCALATEs; Option 1 resolution drops AC-R62-15):
+#   - At chore-A (pre-SHA-injection): 412/405/4/3 (4 fails = R36-30 + R36-31
+#     carry-forward + AC-R62-12 placeholder + AC-R62-15 placeholder).
+#   - At chore-B (post-SHA-injection): 412/406/3/3 (3 fails = R36-30 + R36-31
+#     carry-forward + AC-R62-15 — structurally unable to pass at any HEAD
+#     because chore-B itself modified the test file, placing it in the
+#     CHORE_A_SHA..HEAD diff window).
+#   - At coordination-chore (this HEAD; Option 1 resolution): 411/406/2/3
+#     (test count drops by 1 because AC-R62-15 test block is removed;
+#     2 remaining fails = R36-30 + R36-31 carry-forward only).
 # `|| true` because node --test exits non-zero when fail count > 0.
 # Capture output ONCE; grep multiple times against the capture (per R46
 # bash-bug lesson — multiple `node --test` invocations corrupt the summary
@@ -301,7 +304,7 @@ PASS_COUNT=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# pass ' | awk '{print $3}')
 FAIL_COUNT=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# fail ' | awk '{print $3}')
 SKIP_COUNT=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# skipped ' | awk '{print $3}')
 SUMMARY="$TESTS/$PASS_COUNT/$FAIL_COUNT/$SKIP_COUNT"
-assert_eq "AC-${ROUND}-10 (test summary)" "412/407/2/3" "$SUMMARY"
+assert_eq "AC-${ROUND}-10 (test summary)" "411/406/2/3" "$SUMMARY"
 echo ""
 
 # -----------------------------------------------------------------------------

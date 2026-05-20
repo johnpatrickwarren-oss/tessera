@@ -1,7 +1,119 @@
 CURRENT-ROUND: R62
-NEXT-ROLE: REVIEWER
+NEXT-ROLE: MEMORIAL-UPDATER
 STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R62 ESCALATE — Option 1 (DROP AC-R62-15) (2026-05-20)
+
+**Decision:** Option 1 approved. Coordination chore in same R62 round drops AC-R62-15 (the structurally-vacuous forward-protection AC). AC-R62-12 retains historical anti-scope coverage; Reviewer cold-eye covers forward-protection. R62 closes MERGE-READY-after-coordination-chore. Chore-A SHA (`0018502b`) + chore-B SHA (`5771458`) preserved.
+
+**Rationale:**
+
+1. **Structural impossibility (Reviewer CRITICAL-1 ratified):** AC-R62-15's `git diff CHORE_A_SHA..HEAD --name-only` empty binding can never be PASS at any committed HEAD post-chore-B because chore-B itself modifies `test/q62-ds-integration-contract.test.ts` (CHORE_A_SHA injection). The Architect's grouping of AC-R62-15 alongside AC-R62-10 + AC-R62-12 in spec § 6.1 #1 R56 MINOR-1 carve-out was an error — only -10 and -12 have legitimate two-state PASS-able patterns; -15 has no PASS-able committed-HEAD state.
+
+2. **AC-R62-12 covers historical anti-scope:** `git diff ad6cc6b..0018502b --name-only` ⊆ 10-path ALLOWED_SET is the load-bearing anti-scope guarantee. The forward-protection signal (chore-A-to-HEAD diff) is delivered by Reviewer cold-eye, not by an AC.
+
+3. **R36-30/R36-31 pattern not propagated forward:** the structurally-vacuous forward-protection AC pattern (originating at R36) has carry-forward-failed across R53/R56/R58 silently. R62 surfaces the structural issue and stops the propagation. R36-30/R36-31 themselves stay as legacy carry-forward-failing per existing convention (Phase 4 hygiene candidate; out of scope here).
+
+4. **MAJOR-1 (halt-discipline) recorded as observation, not hard violation:** Both Reviewer's framing (HALT per § 6.1 #6) and Implementer's framing (SPEC-DEVIANCE per § 4.7 + § 6.1 #1 carve-out) cite valid spec sections; the Architect's spec design grouped AC-R62-15 under the carve-out (root-cause Architect error). The structural fix (drop the vacuous AC) addresses the root cause; halt-discipline observation is informational.
+
+5. **Cross-round pattern flagged for future Reviewer derivation:** R61 had Architect claim "no cross-boundary imports" without grep-verification → 2 ESCALATEs. R62 has Architect claim chore-B PASS state for AC-R62-15 without walking through chore-B's actual diff → 1 ESCALATE. **Both are "Architect-claim-without-empirical-walk" at the boundary of structural realities.** Memorial-Updater is directed to derive a CLAUDE-ARCHITECT.md REINFORCED entry if pattern recurs at R63+ (currently 2 instances; 3rd → cross-project derivation candidate per Rule 5 threshold).
+
+**Coordination-chore amendments landed at this resolution:**
+
+- `test/q62-ds-integration-contract.test.ts`: AC-R62-15 test block (lines 263–271 in chore-B state) removed; replaced with explanatory comment.
+- `coordination/specs/Q-R62-EMPIRICAL.sh`: AC-R62-10 prediction updated `412/407/2/3` → `411/406/2/3`; commentary explains three-state distinction (chore-A → chore-B → coordination-chore).
+- `coordination/specs/Q-R62-SPEC.md`: amendment banner at top (lines 3–28); AC-R62-15 row in § 5.2 marked DROPPED; § 5.4 update note appended; § 6.1 #1 carve-out narrowed to AC-R62-10 + AC-R62-12.
+- `coordination/specs/Q-R62-SPEC-AUDIT.md`: (Memorial-Updater appends post-emit AMENDMENT section).
+- `coordination/MEMORIAL.md`: (Memorial-Updater appends R62 entries — Reviewer CRITICAL-1/2 + MAJOR-1 framings; COORDINATOR Option 1 resolution; Architect-claim-without-empirical-walk OBS; halt-discipline observation).
+- `coordination/NEXT-ROLE.md` (this file): STATUS: ESCALATE → READY; routes to Memorial-Updater.
+
+**Verification at coordination-chore HEAD (pre-commit):**
+- `npx tsc -p tsconfig.test.json` → exit 0, zero diagnostics. ✓
+- `node --test --test-reporter=tap test/*.test.js` → `tests=411 / pass=406 / fail=2 / skipped=3`. 2 fails = R36-30 + R36-31 carry-forward (pre-existing). ✓
+- `bash coordination/specs/Q-R62-EMPIRICAL.sh` → 27 PASS, 0 FAIL, exit 0. ✓
+- AC-R62-12 still PASS (binds round-start-to-chore-A diff which references immutable chore-A SHA `0018502b`).
+
+**R62 final state:**
+- 15 ACs minus 1 dropped = 14 ACs. AC-R62-1 through AC-R62-14 all PASS.
+- 0-CRITICAL streak: R45 remains sole exception; R62 had CRITICAL findings during Reviewer phase but they are addressed via coordination chore (root-cause AC dropped) — the CRITICAL findings are documented in MEMORIAL.md but do NOT break the streak interpretation (the Architect spec design error is the underlying issue; the substantive deliverable was sound; coordination chore resolves the AC binding, not the substantive code). Note: streak interpretation is a Memorial-Updater + Coordinator framing question; the operator has authorized Option 1 resolution but explicit streak ruling deferred to Memorial-Updater discretion + R63 Coordinator review at WAVE-GATE-09 close.
+- Substantive deliverable: 4 contract files in `engine/ds-integration/` (feed-contract.ts + event-contract.ts + index.ts + README.md). Forward inputs to WU-3B + WU-3C at Wave 10.
+
+**Memorial-Updater inputs:**
+1. `coordination/reviews/REVIEWER-REPORT-R62.md` (full Reviewer findings; for MEMORIAL.md appends)
+2. `coordination/NEXT-ROLE.md` § Operator resolution (this section)
+3. `coordination/NEXT-ROLE.md` § Reviewer R62 routing block + § Implementer R62 routing block (preserved below)
+4. `coordination/specs/Q-R62-SPEC.md` (amendment banner; updated AC table)
+5. `coordination/MEMORIAL.md` existing R62 entries (Architect CONFIRMATIONs + Implementer + Reviewer appends if already landed)
+
+**Memorial-Updater scope:**
+- Append R62 COORDINATOR resolution entry + memorialize MAJOR-1 + Architect-claim-without-empirical-walk OBS (2nd-tessera-instance flag).
+- Apply any CLAUDE-*.md REINFORCED entries per the patterns (current candidate: CLAUDE-ARCHITECT.md re cite-then-verify discipline at spec-emit time; flag for cross-project derivation IF pattern recurs at R63+).
+- Apply MU re-accretion guard (R51): threshold-aware composite rollup IF additions push CLAUDE-* counts beyond consolidation thresholds (CLAUDE-IMPLEMENTER currently at 30; CLAUDE-ARCHITECT at 26).
+- Update `coordination/MEMORIAL.md` with R62 entries (Reviewer findings + COORDINATOR resolution + Architect-pattern OBS).
+
+**Pipeline resume command:** `./run-pipeline.sh --round R62 --tier full --start-at MEMORIAL-UPDATER`
+
+---
+
+## § Reviewer R62 routing block (2026-05-20)
+
+### Reviewer attestation
+
+- **Reviewer session entry SHA:** `8bbecd56504f73fcfafa129779e029d1e63ce116`.
+- **Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R62.md`.
+- **Binding-command re-runs at session entry:**
+  - `npx tsc -p tsconfig.test.json` → exit 0, zero diagnostics. AC-R62-11 PASS verified independently.
+  - `node --test --test-reporter=tap test/*.test.js` → `tests=412 / pass=406 / fail=3 / skipped=3`. 3 fails = 2 R36 forward-protection carry-forward + AC-R62-15 (CRITICAL-1).
+  - `bash coordination/specs/Q-R62-EMPIRICAL.sh` → 26 PASS / 1 FAIL exit 1; AC-R62-10 FAIL (downstream of CRITICAL-1).
+  - `git diff ad6cc6b..HEAD --name-only | sort` → exactly 10 paths, all in ALLOWED_SET; no anti-scope violation.
+- **Per-AC verdict:** 13 PASS / 2 FAIL out of 15 ACs. AC-R62-15 + AC-R62-10 fail (downstream-related). All other ACs pass with discriminating bindings.
+
+### Findings (full detail in REVIEWER-REPORT-R62.md § 2)
+
+- **CRITICAL-1 (ARCHITECT):** AC-R62-15 fails at HEAD; spec § 5.4 + § 5.2 + § 6.2 predict PASS at chore-B but the prediction is structurally impossible to satisfy when chore-B is a separate commit (chore-B itself modifies test/q62-ds-integration-contract.test.ts, putting it inside the `git diff CHORE_A_SHA..HEAD` window).
+- **CRITICAL-2 (ARCHITECT):** AC-R62-10 fails downstream of CRITICAL-1 (test summary `412/406/3/3` vs predicted `412/407/2/3`).
+- **MAJOR-1 (IMPLEMENTER):** Halt-discipline violation. Implementer disclosed the AC-R62-15 deviation as SPEC-DEVIANCE and routed STATUS: READY without DIAGNOSTIC. Per spec § 6.1 #6 (R61-class architectural-reality discovery; spec premise empirically false), the correct action was HALT + DIAGNOSTIC + ESCALATE.
+- **MAJOR-2 (ARCHITECT):** Pre-emit grilling missed the self-referential AC-R62-15 trap. Audit-emit-time correction caught the chore-A 4-fail arithmetic but did not apply the same scrutiny to the chore-B PASS prediction.
+- **MAJOR-3 (ARCHITECT):** Cross-section consistency error in 6 spec sites encoding `412/407/2/3`.
+- **MAJOR-4 (IMPLEMENTER):** `node --test` exit code not attested per Rule 1 sub-class `empirical-command-attestation`.
+- **MINOR-1 (ARCHITECT):** AC-R62-9 underbinds interface-vs-const equivalence (asymmetric type-narrowing).
+- **MINOR-2 (ARCHITECT):** DECOUPLING-1/2 EMPIRICAL.sh checks miss double-quote-style imports.
+- **MINOR-3 (ARCHITECT):** EMPIRICAL.sh AC-R62-12 block is advisory PASS rather than binding.
+- **MINOR-4 (ARCHITECT):** First `engine/**/*.md` file precedent break (directive-authorized; flagged for future review surface).
+- **OBS-1 through OBS-4:** Substantive deliverable quality is high; Tessera-local discipline applied positively; R61 OBS reinforcement applied successfully (Architect read-side); Wave 10 forward-flag is well-positioned.
+
+### Operator decision question
+
+Two CRITICAL findings exist; both attestation-level (substantive deliverable is sound; the wire-format contract types + tests for AC-R62-1 through AC-R62-9 + AC-R62-12 + AC-R62-13 + AC-R62-14 are all empirically correct).
+
+Per CLAUDE-REVIEWER.md REINFORCED 2026-05-19 (R45 precedent): when finding a CRITICAL whose severity rationale is attestation-level not script-correctness, the Reviewer SHOULD set STATUS: ESCALATE with explicit framing rather than route MERGE-READY-with-reservations unilaterally.
+
+**Operator: route MERGE-READY (substantive deliverable sound; CRITICAL is attestation-only) or ESCALATE (CRITICAL strict reading)?**
+
+This Reviewer's recommendation: **ESCALATE.** Rationale:
+- R45 precedent reinforces operator-flag for attestation-level CRITICAL.
+- The Implementer's halt-discipline failure (MAJOR-1) is itself an operator-decision-worthy event independent of CRITICAL-1's spec design flaw.
+- The spec design flaw (CRITICAL-1) needs a substantive amendment direction (Option A redefine AC binding / Option B require single-commit chore-A+B / Option C drop AC-R62-15) that the operator should choose, not the Reviewer.
+
+### Resolution paths (for operator)
+
+- **Option A (MERGE-READY + follow-up spec amendment round).** Accept R62 substantive deliverable as merged; next round amends spec to fix AC-R62-15 binding (path-set inclusion rather than literal empty), OR squashes chore-A + chore-B into a single commit pattern going forward, OR drops AC-R62-15 (AC-R62-12 covers the historical anti-scope coverage; Reviewer cold-eye covers forward-protection).
+- **Option B (ESCALATE; this Reviewer's recommendation).** Spec amendment lands as coordination chore in the same R62 round; chore-A + chore-B SHA references stay intact (no history rewrite); halt-discipline failure (MAJOR-1) memorialized.
+- **Option C (rewrite history — NOT recommended; destructive).**
+
+### Routing
+
+**NEXT-ROLE: OPERATOR | STATUS: ESCALATE**
+
+Operator inputs:
+1. `coordination/reviews/REVIEWER-REPORT-R62.md` (this Reviewer's full report)
+2. `coordination/NEXT-ROLE.md` § Implementer R62 routing block + SPEC-DEVIANCE disclosure
+3. `coordination/specs/Q-R62-SPEC.md` § 5.2 AC-R62-15 row + § 5.4 two-state table + § 6.1 halt conditions + § 6.2 Reviewer expectations
+4. `coordination/specs/Q-R62-SPEC-AUDIT.md` § 3.1 audit-emit-time correction (showed where the audit caught chore-A arithmetic but missed chore-B self-reference)
+5. `coordination/MEMORIAL.md` R62 entries (Architect + Implementer + this Reviewer's appended entries)
 
 ---
 
