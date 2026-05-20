@@ -476,3 +476,41 @@ All unresolved decisions → open questions in the spec.
 #   A forward-flag in the spec-audit acknowledging the drift is not a substitute for providing
 #   the correct post-MOD range in the spec itself. Detected tessera R58 MINOR-3 (spec-
 #   readability impact only; first post-MOD-insertion-drift sub-variant).
+# REINFORCED 2026-05-20 — When authoring a routing block in NEXT-ROLE.md (Architect's
+#   handoff to Implementer), ANY specific AC number, file path, or section reference cited
+#   in the block MUST be copied verbatim from the spec by grep — not re-typed from memory.
+#   A routing-block copy-edit transposition (e.g., digits 16→10 and 18→12 — both off by 6)
+#   has no deliverable consequence only because the Implementer used the spec proper as the
+#   load-bearing input. Procedure: before committing the routing block, grep the spec for
+#   every carve-out AC number cited and copy-paste verbatim from grep output. Sub-variant 3
+#   of Architect cite-then-verify pattern: R58 MINOR-1 (constructor-opts field name); R58
+#   MINOR-3 (post-MOD line numbers in branch-binding table); R65 MINOR-1 (routing-block
+#   carve-out AC numbers in NEXT-ROLE.md:234 "AC-R65-10 + AC-R65-12" → correct "AC-R65-16
+#   + AC-R65-18"). Detected tessera R65 MINOR-1.
+# REINFORCED 2026-05-20 — Spec § 9.8 spec-internal-contradiction sweep must also cross-check
+#   type-shape definitions that appear in § 1.x scratch/type-pretest pseudocode against their
+#   corresponding definitions in § 4.x prescriptive pseudocode. The R34 MINOR-2 reinforcement
+#   (REINFORCED 2026-05-18) covers algorithmic boundary clause drift; this extends it to
+#   type-definition shape evolution: when § 1.5 type-pretest authors a type as a discriminated
+#   union with required fields on specific variants (e.g., status_code: number required on
+#   http_4xx/http_5xx), and § 4.x later emits the same type as an interface with optional
+#   fields (status_code?: number on all kinds), the § 10.8 sweep must explicitly diff the two.
+#   Procedure: for each named type in § 1.x pseudocode, grep spec §§ 4.x for the same type
+#   name and compare field optionality and variant structure. The drift is particularly likely
+#   when § 4.x is written after § 1.x and the type shape is simplified for implementation
+#   convenience. Detected tessera R65 MINOR-2 (FeedError § 1.5 discriminated union with
+#   required status_code vs § 4.1 interface with optional status_code; § 10.8 sweep missed;
+#   Implementer correctly followed § 4.1; weaker compile-time discrimination resulted).
+# REINFORCED 2026-05-20 — Spec § 9 P3 ten-axis verification behavioral commitments (lines
+#   that assert "corner case input Z → expected output W") must be cross-checked against the
+#   AC table. For each P3 commitment, verify that at least one AC in § 5.1 structurally
+#   exercises that (Z, W) pair — meaning the AC's assertion is ON output W for input Z, not
+#   merely incidentally passing through it with assertions targeting other fields. Procedure:
+#   for each P3 statement, grep spec § 5.1 for an AC whose Then-column asserts on output W
+#   specifically. If none exists, either add the case to § 5.3 acknowledged-gaps with rationale
+#   OR add a new AC for it. The existing Rule 2 / § 5.3 acknowledged-gaps workflow covers
+#   implementation-derived gaps; this reinforcement ensures § 9 P3 commitments receive the
+#   same coverage check. Detected tessera R65 MINOR-3 (§ 9 line 1491 commits "empty
+#   firing_verdicts[] → firing_family_count === 0" but no AC asserts this; AC-R65-3/4/6 use
+#   empty input incidentally with assertions on other fields; § 5.3 did not enumerate this
+#   gap; a bug returning firing_family_count: 1 for empty input would pass all current ACs).
