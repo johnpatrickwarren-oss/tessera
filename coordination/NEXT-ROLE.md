@@ -1,6 +1,6 @@
 CURRENT-ROUND: R59
-NEXT-ROLE: COORDINATOR
-STATUS: READY
+NEXT-ROLE: (operator decision; R60 = WAVE-PLAN-09 emit; parallel-fan-out evaluation flagged)
+STATUS: WAVE-COMPLETE
 TIER: coordinator-wave-gate
 
 ## Round-scope directive (R59 — WAVE-GATE-08 close; Phase 3 SLICE 2 closes)
