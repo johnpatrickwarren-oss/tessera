@@ -596,7 +596,7 @@ with a clear commit message.
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
 
-# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 6 sub-variants observed at Tessera)
+# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 7 sub-variants observed at Tessera)
 #
 #   Selective-audit-overreach (R41 MAJOR-1): When an audit empirically checks N of M files and
 #     the AC requires "all M files" verified, the delivered artifact must scope its claim to
@@ -675,6 +675,20 @@ with a clear commit message.
 #     `scripts/pre-commit-rule-sweep.sh:rule_1_check`, never invoke pre-commit-rule-sweep.sh
 #     from within Q-RNN-EMPIRICAL.sh to satisfy a Tightening 2 AC for that same round.
 #     Instead, use a synthetic SHA range or a prior round's spec to test the runtime path.
+#
+#   Vendored-with-deltas file additions beyond spec per-file pseudocode must be disclosed
+#     (R53 MINOR-2): When spec § 4 per-file pseudocode enumerates specific changes to an
+#     existing file (e.g., two union-extension lines and a VENDORING-MANIFEST.md row-note
+#     refresh in verdict.ts), any additional content added to that file — even a sensible
+#     extension of an established convention (R18+R23 header docblock pattern) — is a
+#     tactical-autonomy deviation that MUST be disclosed in NEXT-ROLE.md Implementer
+#     attestation or MEMORIAL.md CONFIRMATION. The TACTICAL AUTONOMY clause authorizes
+#     inline resolution; it does not waive disclosure. Pre-emit grilling must include a
+#     "deliverable-vs-spec-prescribed-changes diff": for every spec-prescribed file, enumerate
+#     EVERY change delivered and confirm each one is either spec-prescribed or disclosed as a
+#     named tactical deviation. A MEMORIAL.md CONFIRMATION that recites only spec-prescribed
+#     changes while silently omitting additional content is an attestation-scope gap regardless
+#     of whether the additional content is benign. Detected tessera R53 MINOR-2.
 
 # REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 6 sub-variants observed at Tessera)
 #

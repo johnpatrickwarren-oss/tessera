@@ -407,3 +407,17 @@ All unresolved decisions → open questions in the spec.
 #   being present?" — if yes, tighten the pattern or anchor it. Detected tessera R44 MINOR-3
 #   (Rule [1-7] file-wide grep) + R46 MINOR-1+2 (`≥ 1` thresholds on `empirical-command-
 #   attestation` and `verify-empirical-acs.sh` mentions).
+
+# REINFORCED 2026-05-19 — Chore-A vs chore-B test-count prediction (R53 MINOR-1): When a
+#   round includes an anti-scope runtime test (AC-R53-15-class) whose placeholder SHA
+#   `'<INJECTED-AT-CHORE-B>'` causes it to fail at chore-A by construction (the git object
+#   is not valid until chore-B injects the actual SHA), the spec AC-R53-14-class test-count
+#   prediction MUST distinguish two states explicitly: (a) "at chore-A state" — AC-R53-15
+#   fails; predicted count = baseline + N_new_tests − 1 pass, N_fail + 1; (b) "at chore-B
+#   state" — AC-R53-15 passes; predicted count = baseline + N_new_tests pass, N_fail.
+#   Encoding the chore-B count as the chore-A prediction is structurally impossible and
+#   forces the Implementer to choose between spec compliance and empirical accuracy (Rule 1
+#   sub-class `empirical-command-attestation`). Fix: in spec § 5 AC-R53-14 row and § 1.4
+#   Architect pre-prediction table, annotate each count with the SHA boundary it assumes.
+#   Q-R53-EMPIRICAL.sh must also carry two separate assertion blocks — one for chore-A SHA
+#   and one for chore-B HEAD. Detected tessera R53 MINOR-1.
