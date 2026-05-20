@@ -86,7 +86,7 @@ Reviewer inputs:
 5. `test/q62-ds-integration-contract.test.ts` (test file)
 6. This NEXT-ROLE.md (Implementer attestation + SPEC-DEVIANCE disclosure)
 
-**Coordination chore SHA:** `<INJECTED-AFTER-CHORE-COMMIT>`
+**Coordination chore SHA:** `9f571d64ff3d38f967f395bd116da92efaa85437`
 
 ---
 
