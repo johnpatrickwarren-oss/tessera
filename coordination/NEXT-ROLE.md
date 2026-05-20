@@ -1,7 +1,37 @@
 CURRENT-ROUND: R58
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 TIER: full
+
+## Reviewer → Memorial-Updater routing block (R58; Reviewer session HEAD `33fa15a`)
+
+**Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R58.md`.
+
+**Reviewer empirical re-verification at HEAD `33fa15a`:**
+- `npx tsc -p tsconfig.test.json; echo $?` = `0` ✓
+- `node --test test/*.test.js` summary = `tests=399 / pass=394 / fail=2 / skipped=3` (the 2 fails = R36-30 + R36-31 pre-existing carry-forward) ✓
+- `bash coordination/specs/Q-R58-EMPIRICAL.sh` = `19 PASS / 0 FAIL` ✓
+- `git diff 7e9d399..7368dcd --name-only` = 12 paths, all ⊆ 12-entry ALLOWED_SET ✓
+- `git diff 7e9d399..HEAD --name-only` = 12 paths, all ⊆ ALLOWED_SET ✓
+
+**Findings summary:** 0 CRITICAL · 0 MAJOR · 3 MINOR · 4 OBS · 14/14 ACs PASS.
+
+**MINORs (audit-trail summary; full detail in REVIEWER-REPORT-R58.md):**
+- MINOR-1 (Architect-side): spec § 4.7 pseudocode `fetched_at_ts` vs actual `SlurmTopologySourceOpts.fetchedAtTs` (Implementer correctly resolved at TD-1).
+- MINOR-2 (test discriminability): AC-R58-9 sparse-data assertions `length >= 0` trivially true; spec-licensed but tighten in future.
+- MINOR-3 (Architect-side): spec § 5.5 branch-binding line citations off by 1-2 lines vs post-MOD adapter lines.
+
+**Routing:** STATUS: MERGE-READY (0 CRITICAL; standard routing per CLAUDE-REVIEWER.md). No ESCALATE needed.
+
+**OQ-R58-1 disposition:** Spec § 0.1 Approach A (NEW `engine/topology/fetch-context.ts` instead of MOD `engine/topology-overlay.ts`) accepted by Reviewer as architecturally sound + transparently disclosed in spec § 8 OQ-R58-1 + audit § D-1. NEXT-ROLE.md line 22 permissive language admits the divergence. No operator-decision flag raised by Reviewer.
+
+**Inputs for Memorial-Updater:**
+- `coordination/reviews/REVIEWER-REPORT-R58.md` (this round's findings)
+- `coordination/MEMORIAL.md` (append target — current-phase R42+ active file)
+- `coordination/specs/Q-R58-SPEC.md` + `Q-R58-SPEC-AUDIT.md` (for cross-reference if drafting REINFORCED lines)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` (cross-project rule update — 0 new derivations this round; 3-instance threshold not crossed)
+
+---
 
 ## Implementer → Reviewer routing block (R58; implementation SHA `3bf33ca`)
 

@@ -78,6 +78,19 @@ Document findings. Do not fix. Do not re-implement.
 #   attestation-only) or ESCALATE (CRITICAL strict reading)." Routing
 #   `READY-FOR-MEMORIAL-UPDATER (with reservations)` unilaterally bypasses the
 #   operator gate. Detected tessera R45: Reviewer routed READY-FOR-MEMORIAL-
+# REINFORCED 2026-05-19 — When the Reviewer appends VIOLATION entries to MEMORIAL.md
+#   (as prescribed at CLAUDE-REVIEWER.md REINFORCED 2026-05-17), the [role] column (last
+#   field) MUST name the COMMITTING role — not the DETECTING role. Convention: [role] =
+#   who wrote the artifact that contains the error. A VIOLATION found by the Reviewer in
+#   the Architect's spec is "| RNN | ARCHITECT"; a VIOLATION found in the Implementer's
+#   test is "| RNN | IMPLEMENTER"; only Reviewer-authored artifacts (the REVIEWER-REPORT
+#   itself, MEMORIAL entries) use "| RNN | REVIEWER". R56 precedent (MEMORIAL.md Reviewer
+#   section, three VIOLATION entries correctly tagged ARCHITECT, IMPLEMENTER, IMPLEMENTER
+#   despite all being written by the Reviewer). R58 Reviewer section tagged all 3 VIOLATION
+#   entries as "| REVIEWER" — misattributing ARCHITECT-/IMPLEMENTER-attributable violations
+#   to the detecting role. Check: for each VIOLATION entry before appending, ask "which role
+#   wrote the artifact that contains this error?" — that is the [role] field. Detected
+#   tessera R58 (first role-attribution-error instance in the Reviewer role).
 #   UPDATER with 1 CRITICAL (AC-R45-3 grep returns 14 not 7) citing
 #   attestation-vs-deliverable distinction; the 0-CRITICAL streak interpretation
 #   became operator-decision-flagged after the fact. Below 3-instance cross-

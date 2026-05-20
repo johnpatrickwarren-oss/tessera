@@ -587,11 +587,26 @@ with a clear commit message.
 #   a latent shell-injection surface if the SHA constant is ever parameterized from external
 #   input; `execFileSync` with array argument prevents this by construction. R26 MINOR-1.
 
-# REINFORCED 2026-05-18 — implementer-spec-test-assertion-coverage (cross-project rule):
-#   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R28 MINOR-1 (all AC-listed fields must be
-#   asserted in every sub-case), R29 MINOR-1 (Then-column equality → strictEqual not structural
-#   check), R30 MINOR-1 (discriminating assertion — not broad substring matching multiple
-#   occurrences in same file; use regex with line anchoring or specific line-range read).
+# REINFORCED — IMPLEMENTER-SPEC-TEST-ASSERTION-COVERAGE (composite; 4 sub-variants at Tessera)
+#   Cross-project rule canonical landing: see CROSS-PROJECT-MEMORIAL.md.
+#
+#   All-AC-listed-fields-sub-case (R28 MINOR-1): All AC-listed fields must be asserted in
+#     every sub-case, not just the primary or representative case.
+#
+#   Then-column-strictness (R29 MINOR-1): Then-column equality → use strictEqual not a
+#     structural or partial check.
+#
+#   Discriminating-anchor (R30 MINOR-1): Discriminating assertion — not broad substring
+#     matching multiple occurrences in same file; use regex with line anchoring or a
+#     specific line-range read.
+#
+#   Spec-licensed-weak-assertion (R58 MINOR-2): When spec AC text licenses a weak bound
+#     ("may be empty / subset depending on adapter sparse semantics"), Rule 3 still requires
+#     encoding a discriminating lower-bound where the fixture guarantees a non-empty result.
+#     Ask: "does the sparse fixture guarantee >= N elements for this adapter?" If yes (e.g.,
+#     slurm-fixture-sparse.conf declares 4 switches → nodes.length >= 4), encode the tighter
+#     bound. "The spec said >= 0" is not a defense. If genuinely ambiguous, document the gap
+#     as an inline test comment. Detected tessera R58 MINOR-2 (4th tessera instance).
 
 # REINFORCED 2026-05-18 — When inserting content into a canonical coordination document
 #   containing a markdown bullet list, inserting an h2 or h3 heading inside the list
