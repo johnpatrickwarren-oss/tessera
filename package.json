@@ -15,6 +15,8 @@
     "demo": "node tools/demo-scenario.js",
     "prebuild:demos": "tsc -p tsconfig.test.json",
     "build:demos": "node tools/build-canned-demos.js",
+    "prebuild:coverage": "tsc -p tsconfig.test.json",
+    "coverage": "node tools/coverage-saturation.js",
     "pretest": "tsc -p tsconfig.test.json",
     "test": "node --test test/*.test.js",
     "typecheck": "tsc -p tsconfig.test.json --noEmit"
