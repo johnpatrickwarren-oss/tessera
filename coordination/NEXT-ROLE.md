@@ -1,7 +1,16 @@
 CURRENT-ROUND: R53
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 TIER: full
+
+## Reviewer-emitted inputs (R53 review at HEAD; report uncommitted at routing time)
+
+The Reviewer has completed cold-eye audit. Memorial-Updater reads:
+
+1. `coordination/reviews/REVIEWER-REPORT-R53.md` — primary review report (15 ACs PASS; 3 MINOR + 2 OBS findings; STATUS: MERGE-READY; 0 CRITICAL).
+2. `coordination/MEMORIAL.md` (R53 ARCHITECT + IMPLEMENTER sections + new REVIEWER section).
+3. `coordination/specs/Q-R53-SPEC.md` + `Q-R53-SPEC-AUDIT.md` (for context only; no modification required at MU stage).
+4. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (no R53 derivations expected; spec § 7 Rule 5 marked N/A).
 
 ## Architect-emitted inputs (R53 spec at commit `0277f7f`)
 
