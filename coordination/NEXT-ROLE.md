@@ -1,15 +1,92 @@
 CURRENT-ROUND: R65
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
 
 Inputs:
   1. `coordination/specs/Q-R65-SPEC.md` (spec proper; prescriptive)
-  2. `coordination/specs/Q-R65-SPEC-AUDIT.md` (Architect ceremony sidecar; audit trail + decision rationale)
-  3. `coordination/specs/Q-R65-EMPIRICAL.sh` (chore-A verification harness; executable)
-  4. `coordination/NEXT-ROLE.md` § R65 Round-scope directive (operator-authored; preserved below)
-  5. `coordination/CLUSTER-HANDOFF-WAVE10-3A-3B.md` (contract surface — NOTE: spec § 8 documents handoff-doc field-name inaccuracies; spec uses the actual `feed-contract.ts` surface as source of truth)
-  6. `coordination/PRD.md` § Phase 3 (FR-D2 line 440; AC-P9 line 452)
+  2. `coordination/specs/Q-R65-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read)
+  3. `coordination/specs/Q-R65-EMPIRICAL.sh` (verification harness; executable)
+  4. `engine/ds-integration/feed.ts` (R65 deliverable)
+  5. `engine/ds-integration/index.ts` (R65 modified: +1 export-star line)
+  6. `test/q65-ds-integration-feed.test.ts` (R65 test file)
+  7. This NEXT-ROLE.md (Implementer attestation)
+
+---
+
+## § Implementer R65 routing block (2026-05-20)
+
+### Implementer attestation
+
+**RED commit SHA:** `8f8246c` — `test/q65-ds-integration-feed.test.ts` with 16 `assert.fail('R65 RED — implementation pending')` stubs; `engine/ds-integration/feed.ts` does NOT exist; tsc TS2307 module-resolution failure prevents .js emission; `node --test` baseline unchanged at `411/406/2/3`. RED state confirmed per R23 TDD discipline.
+
+**Chore-A SHA (GREEN commit):** `e8d0cd1d7634c0ec7ba1d66f4f3808f87e9c357b`
+
+**Chore-B SHA (SHA injection):** `08c3108` — `CHORE_A_SHA` placeholder injected; post-injection summary `427/422/2/3`.
+
+**TDD sequence:**
+- RED commit: `8f8246c` — 16 `assert.fail` stubs; tsc TS2307; no .js emitted; baseline stays `411/406/2/3`. RED state confirmed.
+- GREEN commit: `e8d0cd1` — `engine/ds-integration/feed.ts` (NEW; ~180 lines), `engine/ds-integration/index.ts` (+1 export line), `test/q65-ds-integration-feed.test.ts` (stubs → real assertions). tsc exit 0; chore-A pre-injection summary `427/421/3/3`. RED→GREEN ordering confirmed in git history.
+- Chore-B: `08c3108` — SHA `e8d0cd1d7634c0ec7ba1d66f4f3808f87e9c357b` injected into AC-R65-16 placeholder; post-injection summary `427/422/2/3`.
+
+**Binding-command results at chore-A (HEAD = `e8d0cd1`, pre-chore-B injection state):**
+- `npx tsc -p tsconfig.test.json` → exit 0, zero diagnostics. AC-R65-17 PASS.
+- `node --test --test-reporter=tap test/*.test.js` → `tests=427 / pass=421 / fail=3 / skipped=3` (exit 1). 3 fails = R36-30 + R36-31 carry-forward + AC-R65-16 placeholder SHA (pre-documented two-state mismatch per spec § 5.4 + § 6.1 halt condition #1 carve-out).
+- `bash coordination/specs/Q-R65-EMPIRICAL.sh` → 9 PASS, 1 FAIL (AC-R65-18 only; expected pre-injection two-state FAIL), exit 1. Pre-documented carve-out per spec § 6.1 #1.
+
+**Binding-command results at chore-B HEAD (post-injection):**
+- `npx tsc -p tsconfig.test.json` → exit 0, zero diagnostics.
+- `node --test --test-reporter=tap test/*.test.js` → `tests=427 / pass=422 / fail=2 / skipped=3` (exit 1). 2 fails = R36-30 + R36-31 carry-forward only (pre-existing from Phase 2 close `87e372f`; NOT introduced by R65).
+- `bash coordination/specs/Q-R65-EMPIRICAL.sh` → 10 PASS, 0 FAIL, exit 0. AC-R65-18 PASS.
+
+**Anti-scope diff at chore-A:** `git diff 59a03d0..e8d0cd1 --name-only | sort` → exactly 8 paths, all in ALLOWED_SET:
+```
+coordination/MEMORIAL.md
+coordination/NEXT-ROLE.md
+coordination/specs/Q-R65-EMPIRICAL.sh
+coordination/specs/Q-R65-SPEC-AUDIT.md
+coordination/specs/Q-R65-SPEC.md
+engine/ds-integration/feed.ts
+engine/ds-integration/index.ts
+test/q65-ds-integration-feed.test.ts
+```
+Rule 4 (`anti-scope-allowed-set-forward-coverage`) gate: PASS. No unauthorized path in diff.
+
+**Rule 7 Surface b (pre-commit-rule-sweep.sh) at chore-A:** 1 mechanical finding from `verify-empirical-acs.sh R65 exit 1`. This is the pre-documented two-state mismatch (AC-R65-18 at chore-A pre-injection state). NOT a halt condition per spec § 6.1 #1 carve-out. All semantic checks flagged as SEMANTIC CHECK REQUIRED (manual Reviewer verification).
+
+### Cross-project rule self-application (Implementer)
+
+| Rule | Status |
+|---|---|
+| 1 (`false-compliance-attestation`; `empirical-command-attestation`) | PASS — actual chore-A `427/421/3/3` (exit 1) encoded verbatim; chore-B `427/422/2/3` (exit 1) encoded verbatim; pre-documented FAIL for AC-R65-18 at chore-A disclosed, not reframed |
+| 2 (`architect-branch-binding-coverage`) | PASS — all guard/branch paths in feed.ts exercised by ACs; 4 acknowledged gaps with non-load-bearing rationale per spec § 5.3 |
+| 3 (`implementer-spec-test-assertion-coverage`) | PASS — discriminating assertions (strictEqual for A16 literal; exact integer for family_count; 'cluster_event_id' in obj === false for absent branch; assert.match with regex for reason strings) |
+| 4 (`anti-scope-allowed-set-forward-coverage`) | PASS — 8-path ALLOWED_SET not expanded in test; chore-A diff exactly 8 paths |
+| 5 (`rule-derivation-without-self-application`) | N/A — no new rule derived this round |
+| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | PASS — no halt conditions triggered; 8 halt-condition checks surveyed; pre-documented carve-out honored for AC-R65-16/18 two-state mismatch |
+| 7 (`derived-rule-propagation-mechanism-required`) | PASS — Surface (a) enumerated in spec § 7; Surface (b) pre-commit-rule-sweep run at chore-A; 1 finding pre-documented; Surface (c) N/A at chore-A (Memorial-Updater stage conditional) |
+
+### Tactical deviations
+
+None. Implementation follows spec § 4.1–§ 4.3 pseudocode verbatim. Import paths, type shapes, JSDoc, file-internal ordering all match spec prescriptions. No import-path adjustments, locator disambiguation, type-cast corrections, or layout shims needed.
+
+### Spec-deviance disclosures
+
+None. All ACs PASS at chore-B HEAD except the pre-documented carry-forward R36-30/R36-31 (2 fails since Phase 2 close `87e372f`).
+
+### Routing
+
+**NEXT-ROLE: REVIEWER | STATUS: READY**
+
+Reviewer inputs:
+1. `coordination/specs/Q-R65-SPEC.md` (spec proper)
+2. `coordination/specs/Q-R65-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read)
+3. `coordination/specs/Q-R65-EMPIRICAL.sh` (verification harness; run at HEAD)
+4. `engine/ds-integration/feed.ts` + `engine/ds-integration/index.ts` (deliverables)
+5. `test/q65-ds-integration-feed.test.ts` (test file; chore-B state with actual SHA injected)
+6. This NEXT-ROLE.md (Implementer attestation)
+
+**Coordination chore SHA:** recorded below after commit.
 
 ---
 
