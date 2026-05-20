@@ -1,7 +1,47 @@
-CURRENT-ROUND: R68
+CURRENT-ROUND: R69
 NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+STATUS: PENDING-PUSH
 TIER: coordinator
+
+---
+
+## § R69 Round-scope directive (Coordinator — Tessera GitHub publication) (2026-05-20)
+
+R69 = Tessera GitHub publication. Operator-confirmed at R68 close: Apache 2.0 + full history + DS-side adoption after Tessera publication.
+
+**Round-start SHA:** `6918ebe` (chore(R68): pnpm migration).
+
+**Publication-prep artifacts (this commit):**
+- `LICENSE` — Apache 2.0 + Copyright 2026 John Warren header
+- `README.md` — rewritten for v1 status (Phase 3 closed; 6 vendor adapters; DS integration contract; pnpm-native install instructions; Anchor methodology overview)
+- `package.json` — `license: "Apache-2.0"`; `repository.url: "git+https://github.com/johnpatrickwarren-oss/tessera.git"`; `homepage` + `bugs` fields added
+- `coordination/NEXT-ROLE.md` STATUS: PENDING-PUSH
+
+**Repo-local git config set:** `user.email = "john.patrick.warren@gmail.com"` + `user.name = "John Warren"` for THIS commit forward. Full history retains `johnwarren@Johns-MacBook-Pro.local` per operator decision (accept-as-is; preserves methodology audit trail SHA integrity).
+
+**Pending operator action: PUSH TO PUBLIC GITHUB.** Two commands (each is irreversible exposure to public):
+
+```bash
+gh repo create johnpatrickwarren-oss/tessera --public --description "Statistically-rigorous behavioral observation for AI training/inference clusters. Per-shard residuals + topology-aware freeze-hook + bi-directional DeploySignal integration."
+git remote add origin https://github.com/johnpatrickwarren-oss/tessera.git
+git push -u origin main
+```
+
+OR a single `gh repo create` form that does all three:
+
+```bash
+gh repo create johnpatrickwarren-oss/tessera --public --source=. --remote=origin --push --description "Statistically-rigorous behavioral observation for AI training/inference clusters."
+```
+
+**Operator confirmation required before push** (publication is irreversible; once history lands on public GitHub, mirrors persist).
+
+**Post-publication:**
+- R70+ = DS-side PR effort consuming Tessera contract types (operator-scheduled at `~/concord/deploysignal/`; lands on `github.com/johnpatrickwarren-oss/deploysignal` public repo per W3-1 Option A)
+- Phase 4 candidate scope: engine npm extract dedicated cycle; AC discipline-debt cleanup (R36-30/R36-31 + AC-R36-21 + AC-R65-2 + AC-R66-14 carry-forward set); CLAUDE-ARCHITECT.md consolidation; cross-project promotion of `ac-pattern-round-evolution-fragility` rule
+
+---
+
+## § R68 close attestation (pnpm migration) (2026-05-20)
 
 ---
 
