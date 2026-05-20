@@ -2,7 +2,7 @@
   "name": "@johnpatrickwarren-oss/tessera",
   "version": "0.1.0-pre",
   "description": "Statistically-rigorous behavioral observation for AI training/inference clusters",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "private": true,
   "packageManager": "pnpm@11.1.2",
   "engines": {
@@ -21,6 +21,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "local-only-pre-v1"
+    "url": "git+https://github.com/johnpatrickwarren-oss/tessera.git"
+  },
+  "homepage": "https://github.com/johnpatrickwarren-oss/tessera",
+  "bugs": {
+    "url": "https://github.com/johnpatrickwarren-oss/tessera/issues"
   }
 }
