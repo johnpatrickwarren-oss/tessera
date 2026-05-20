@@ -180,7 +180,7 @@ test("AC-R53-12: A16 — verdict.ts retains 'correlational_not_causal: true' lit
 // (Appended by Implementer at chore-B with chore-A SHA substituted.)
 test('AC-R53-15: round-start-to-chore-A diff ⊆ R53 allowed-set (chore-A SHA pinned)', () => {
   const BASELINE_SHA = '3744012';
-  const CHORE_A_SHA = '<INJECTED-AT-CHORE-B>';
+  const CHORE_A_SHA = '2ba7bb4';
   const ALLOWED_SET = new Set<string>([
     'engine/topology/neuron-source.ts',
     'engine/types/verdict.ts',
