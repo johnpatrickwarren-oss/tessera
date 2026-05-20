@@ -182,7 +182,7 @@ All unresolved decisions → open questions in the spec.
 #   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
 #   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
 
-# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 4 sub-variants observed at Tessera)
+# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 5 sub-variants observed at Tessera)
 #
 #   Fixture accumulation adequacy (R07 MAJOR-1): When grilling catches that an e-process or
 #     statistical-detector AC's fixture needs N windows of accumulation to cross a detection
@@ -238,6 +238,28 @@ All unresolved decisions → open questions in the spec.
 #     structurally reachable before the spec encodes it as a prediction. Detected tessera
 #     R62 CRITICAL-1 / MAJOR-2 / MAJOR-3 (Reviewer CRITICAL-1; Operator Option 1 resolved
 #     by dropping the structurally-vacuous AC).
+#
+#   Pre-authored narrative text verification (R71 MAJOR-1 + MAJOR-2): When spec § 4.x prescribes
+#     prose strings that the Implementer copies verbatim into production artifacts (e.g., reasoning
+#     strings, description fields, dashboard panel text), and those strings assert a specific
+#     empirical property of the engine under the prescribed parameters (e.g., "too small to fire
+#     alone," "surfaces ONE candidate"), the Architect MUST verify those claims before routing —
+#     either (a) by running the engine with the prescribed seed and drift and checking the terminal
+#     state empirically (for claims about whether/when shards fire), OR (b) by tracing the data
+#     flow from the prescribed opts configuration through the engine's aggregation logic to verify
+#     the claimed count (for claims like "ONE candidate" when candidate_node_kinds determines how
+#     many nodes are eligible). A narrative string asserting an empirical property IS a P3
+#     commitment even if it is not expressed as an AC — the § 9 commitment audit MUST treat
+#     pre-authored narrative text as a load-bearing claim and verify it against the engine at
+#     spec-emit time. Procedure: for each pre-authored narrative string in § 4.x, extract every
+#     empirical claim ("fires before window N," "N candidates surface," "wealth stays below
+#     threshold") and ask: "can I verify this by running the engine or tracing data flow right
+#     now?" If yes and you haven't, run it. If the claim does not hold, revise either the narrative
+#     or the prescribed parameters before routing. Detected tessera R71 MAJOR-1 (hierarchical-
+#     evalue HIER_DRIFT=0.20 under seed 0x71F1E causes all 5 shards to fire individually by w=30;
+#     reasoning text "too small to fire alone" empirically false) + MAJOR-2 (candidate_node_kinds
+#     = ['cooling_zone', 'rack', 'psu'] causes engine to emit 3 candidates; reasoning text "ONE
+#     cooling-zone-level candidate" empirically false).
 
 # REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
 #   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include
@@ -569,3 +591,24 @@ All unresolved decisions → open questions in the spec.
 #   should independently discriminate. Detected tessera R70 MINOR-4 (spec § 4.2 line 808
 #   `/shard-00.*shard-01.*shard-02/` matches topology header equally well as candidate-listing
 #   line; passes even if candidate-listing line is elided).
+# REINFORCED 2026-05-20 — When a scenario's primary pedagogical claim is "X causes Y to happen
+#   DIFFERENTLY from Z" (e.g., "fleet fires BEFORE any per-shard fires," "ONE cooling-zone
+#   candidate surfaces rather than N per-rack candidates"), the AC that binds that scenario's
+#   terminal state MUST bind the DISCRIMINATING property — the one that proves the pedagogical
+#   difference — not merely the MINIMUM property that indicates the feature functions at all.
+#   An AC that binds only "fleet_fired === true" passes when the fleet fires at ANY point,
+#   including AFTER individual shards fire, defeating the scenario's intended demonstration.
+#   An AC that binds "cooling_zone candidate with member_count ≥ 4" passes even when 3 candidates
+#   surface instead of ONE. Procedure: for each scenario that carries a narrative claim of the
+#   form "X shows that Y differs from Z in situation W," write the AC's Then-clause to assert the
+#   DIFFERENCE directly — e.g., "fleet_tick_at_first_fire < min(per-shard first-fire windows)"
+#   or "candidates.length === 1 AND candidate.shared_node_kind === 'cooling_zone'." If the
+#   discriminating assertion is not expressible as a deterministic predicate (e.g., because the
+#   per-shard first-fire window depends on the LCG seed), revise the scenario parameters until
+#   it is, or document the acknowledged gap in § 5.3 with rationale. The § 5.3
+#   discriminating-assertion gate must ask: "would this AC FAIL if the implementation were
+#   correct but the pedagogical property were violated?" If no, the AC is under-specified.
+#   Detected tessera R71 MINOR-1 (AC-R71-9 passes even when all 5 shards fire individually;
+#   AC-R71-11 passes even when 3 candidates surface; downstream: MAJOR-1 + MAJOR-2 narrative-
+#   vs-data contradictions undetectable at chore-A because the ACs don't bind the narrative
+#   claim). See also: R71 EMPIRICAL-PREMISE-VERIFICATION sub-variant 5 (same root cause).

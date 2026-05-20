@@ -1,7 +1,62 @@
 CURRENT-ROUND: R71
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: ROUND-COMPLETE
 TIER: full
+
+---
+
+## § Reviewer R71 routing block (2026-05-20)
+
+### Reviewer attestation summary
+
+- **Report:** `coordination/reviews/REVIEWER-REPORT-R71.md`
+- **Routing decision:** **STATUS: MERGE-READY** per CLAUDE-REVIEWER.md routing rule "CRITICAL exists → STATUS: ESCALATE; MAJOR or below → STATUS: MERGE-READY." No CRITICAL surfaced.
+- **Findings count:** 0 CRITICAL / 2 MAJOR / 4 MINOR / 4 OBS.
+- **All 14 R71 ACs PASS at literal binding.** Substantive deliverable works: dashboard opens from `file://`, 8 scenarios load, build is idempotent, anti-scope held.
+
+### Binding command results (Reviewer-independent re-run per CLAUDE-REVIEWER.md mandate)
+
+```
+pnpm exec tsc -p tsconfig.test.json
+  → exit 0; zero diagnostics.
+
+pnpm exec node --test --test-reporter=tap test/*.test.js
+  → # tests 469 / # pass 461 / # fail 5 / # skipped 3
+  (matches spec § 10.6 Architect prediction verbatim;
+   matches Implementer attestation verbatim;
+   5 carry-forward fails identity-verified: AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14;
+   14 new q71 ACs all PASS)
+
+bash coordination/specs/Q-R71-EMPIRICAL.sh
+  → 10 PASS / 0 FAIL / exit 0
+
+git diff 54af89f..HEAD --name-only
+  → 18 paths, all ⊆ ALLOWED_SET (spec § 3.2)
+```
+
+### Findings summary
+
+| Severity | ID | One-line |
+|---|---|---|
+| MAJOR | MAJOR-1 | hierarchical-evalue scenario: reasoning text claims "too small to fire alone" but all 5 shards individually fire by terminal w=30 (shard-04 at w=18, others at w=23-24). Dashboard contradicts itself. |
+| MAJOR | MAJOR-2 | topology-spanning-common-mode scenario: reasoning + description claim "ONE cooling-zone-level candidate" but actual data has 3 candidates (rack-A, rack-B, cz-1). Dashboard contradicts itself. |
+| MINOR | MINOR-1 | AC-R71-9 + AC-R71-11 bind weaker properties than the scenarios' pedagogical claims — root cause of MAJORs is spec AC-coverage gap. |
+| MINOR | MINOR-2 | sdc-drift events array populated only at w=22 (29 windows have empty events); audit panel sparse during playback. |
+| MINOR | MINOR-3 | Dashboard JS hardcodes `Math.log10(200)` literal; if future round changes DEMO_ALPHA, threshold line drifts. |
+| MINOR | MINOR-4 | per_shard.fired flag for non-Family-A scenarios is set by inline literal predicate, not derived from engine output (silently mis-labelable). |
+| OBS | OBS-1 | Architect § 10.6 prediction matched observation byte-for-byte (tsc / test counts / empirical / 18 paths). |
+| OBS | OBS-2 | RED commit hygiene confirmed: fcc51d6 lands only test file with 14 assert.fail stubs. |
+| OBS | OBS-3 | `<span id="window-indicator">window 0 / 30</span>` static literal "30" in committed HTML; dashboard JS overwrites at render. |
+| OBS | OBS-4 | fdr-multiple-testing scenario: fdr_selected_indices === firing_shards (both [2,5,8]); e-BH layer doesn't visually discriminate from per-shard. |
+
+### Memorial-Updater inputs
+
+1. `coordination/specs/Q-R71-SPEC.md` (spec proper)
+2. `coordination/specs/Q-R71-SPEC-AUDIT.md` (Architect ceremony sidecar)
+3. `coordination/reviews/REVIEWER-REPORT-R71.md` (this Reviewer's findings)
+4. `coordination/MEMORIAL.md` (active file; R71 entries to be appended)
+5. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (cross-project reinforcement landing surface)
+6. `coordination/NEXT-ROLE.md` (this file; for context)
 
 ---
 
