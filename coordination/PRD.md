@@ -436,9 +436,10 @@ US-08 (sequenced; Phase 3 SLICE 3+): As a DeploySignal operator, I want bi-direc
 | FR-V2 | Google TPU / ICI adapter — `engine/topology/tpu-source.ts` parses TPU pod topology; synthetic fixtures from JAX topology code + TPU v4/v5 papers | US-06 | SLICE 2 |
 | FR-V3 (CONDITIONAL) | Real-cluster DCGM validation scaffolding — rental-provider scripts (vast.ai / Lambda Labs / RunPod or equivalent); DCGM smoke test against L0 contract invariants. Gated on operator decision at SLICE 1/2 boundary; deferred if operator declines rental | US-07 | SLICE 2 (conditional) |
 | FR-V4 | Live cluster topology fetch — `TopologySource.fetchSnapshot(ctx)` interface design + sparse-data tests for Slurm / K8s / NVLink / Trainium / TPU adapters. Interface-design and sparse-data resilience are unconditional; real-cluster-validation of the fetch behavior is gated on US-07 | US-07 (validation portion) | SLICE 2 (interface); SLICE 2C (validation, conditional) |
-| FR-D1 | DeploySignal npm engine extract — `@johnpatrickwarren-oss/deploysignal-engine` package; both Tessera + DS consume same package version (eliminates vendoring drift R-E6) | (project-close commitment) | SLICE 3 |
+| FR-D1 (DEFERRED 2026-05-20) | DeploySignal npm engine extract — `@johnpatrickwarren-oss/deploysignal-engine` package. DEFERRED to Phase 4 / dedicated design cycle per R61 ESCALATE #2 → Option F resolution. R61 implementation surfaced architectural reality: the truly self-consistent extraction set is ~16 type/utility files; primary detection algorithms (`betting-e-process.ts`, `family-c-betting-e-process.ts`, `spectral.ts`, `hotelling.ts`, `page-cusum.ts`, `conformal.ts`, `sequential-mmd.ts`) plus `engine/core.ts`/`engine/topology-overlay.ts`/`engine/l0/schema-continuity.ts` all import from `'../types'` barrel which re-exports from `verdict.ts`/`config.ts` (vendored-with-deltas, excluded from a "pure DS at SHA `5a72371`" package). Proper extract requires a dedicated design cycle (choice between expanding package scope to include Tessera-extended schema, or pre-refactoring algorithm imports to break the cycle). | (project-close commitment; DEFERRED) | DEFERRED |
 | FR-D2 | DS-integration: Tessera → DS — per-shard observations feed DS correlation layer (VerdictGroup → deploy-event context) | US-08 | SLICE 3 |
 | FR-D3 | DS-integration: DS → Tessera — DS event feed gates the Phase 2 freeze-hook against real deploy events (replaces synthetic VerdictGroups in event-conditional attribution) | US-08 | SLICE 3 |
+| FR-D4 (NEW 2026-05-20) | DS integration interface contract — HTTP API + TypeScript types shared between Tessera and DS; defines Tessera→DS VerdictGroup feed shape and DS→Tessera deploy-event feed shape; both repos implement against the contract. Replaces FR-D1's structural-decoupling mechanism for SLICE 3 purposes (npm package extract DEFERRED). | US-08 (decoupling layer) | SLICE 3 |
 
 ### Phase 3 acceptance criteria
 
@@ -447,7 +448,8 @@ US-08 (sequenced; Phase 3 SLICE 3+): As a DeploySignal operator, I want bi-direc
 | AC-P5 | Given an AWS Trainium synthetic topology fixture (constructed from public Neuron SDK + AWS docs), when `engine/topology/trainium-source.ts` runs, then `TopologySnapshot` produced is consumable by inherited `engine/topology-overlay.ts` BFS layer with `neuron_link_peer` edge relationship literal + `trainium_chip` node kind literal. | FR-V1a |
 | AC-P6 (CONDITIONAL on US-07 activation) | Given a rented GPU instance (vast.ai OR Lambda Labs OR RunPod OR equivalent operator-controlled rental, multi-GPU node, DCGM accessible), when L0 contract smoke test runs against live DCGM scrapes, then missed-scrape catchup + 32-bit wraparound + reset-vs-wrap-distinction invariants hold against real-hardware counter behavior (validated empirically; ≥1 successful validation pass). If operator declined rental at SLICE 1/2 gating moment, AC-P6 is DEFERRED — not failing, not blocking Phase 3 close. | FR-V3 |
 | AC-P7 | Given Phase 3 SLICE 1 close, when full Tessera fleet runs in synthetic-substrate mode WITH the AWS Trainium adapter activated for a synthetic AWS Trainium fleet (alongside the inherited NVIDIA-stack support), then all Phase 1 + Phase 2 ACs (AC-P1 through AC-P4) hold unchanged AND the AWS Trainium fleet exhibits expected per-shard observation behavior with the parallel-class topology adapter. | FR-V1a + cross-cutting |
-| AC-P8 | Given the engine extracted to `@johnpatrickwarren-oss/deploysignal-engine` npm package, when both Tessera + DeploySignal repos consume the same version, then vendoring-drift R-E6 risk row is structurally eliminated (no per-file SHA-pin re-vendoring; package-version pin replaces). | FR-D1 |
+| AC-P8 (DEFERRED 2026-05-20) | Given the engine extracted to `@johnpatrickwarren-oss/deploysignal-engine` npm package, when both Tessera + DeploySignal repos consume the same version, then vendoring-drift R-E6 risk row is structurally eliminated (no per-file SHA-pin re-vendoring; package-version pin replaces). DEFERRED to Phase 4 / dedicated design cycle per R61 ESCALATE #2 → Option F resolution. R-E6 vendoring-drift risk is NOT worsened by this deferral; A12 vendored-at-pin discipline holds for existing `engine/*` files. | FR-D1 (DEFERRED) |
+| AC-P9 (NEW 2026-05-20) | Given the DS integration interface contract (HTTP API + TypeScript types in `engine/ds-integration/`), when Tessera implements the contract endpoints (Tessera→DS feed + DS→Tessera event consumer in WU-3B + WU-3C) and DS implements the consumer/producer sides (separate PR outside Tessera per W3-1 Option A), then Tessera↔DS bi-directional data flow operates via the contract independently of file-level engine extraction. | FR-D4 |
 
 ### Phase 3 anti-scope (extends Phase 1/2)
 
@@ -482,9 +484,9 @@ The Trainium / Inferentia adapters (SLICE 1) and Google TPU adapter (SLICE 2 2A)
 
 **SLICE 3 — DeploySignal integration (sequential after SLICE 2)**
 
-- WU-Phase3-3A: Engine npm package extract (`@johnpatrickwarren-oss/deploysignal-engine`). Vendoring-drift R-E6 structural resolution. Tier: full (architectural restructure).
-- WU-Phase3-3B: Bi-directional DS integration (Tessera → DS feeds correlation layer; DS → Tessera event feed). Tier: full.
-- WU-Phase3-3C: Real-deploy-event freeze-hook (replaces synthetic VerdictGroups in event-conditional attribution). Tier: full.
+- WU-Phase3-3A (RE-SCOPED 2026-05-20 per Option F): DS integration interface contract design — HTTP API + TypeScript types in `engine/ds-integration/`; both Tessera (this round) and DS (separate PR per W3-1 Option A) implement against the contract; types only, no implementation (server/client lands at Wave 10 in 3B + 3C). Tier: full (architectural design). **Original scope (engine npm package extract) DEFERRED to Phase 4 per R61 ESCALATE #2 resolution.**
+- WU-Phase3-3B: Bi-directional DS integration (Tessera → DS feeds correlation layer; DS → Tessera event feed). Tier: full. Consumes the WU-3A contract.
+- WU-Phase3-3C: Real-deploy-event freeze-hook (replaces synthetic VerdictGroups in event-conditional attribution). Tier: full. Consumes the WU-3A contract.
 
 ### Phase 3 open questions
 
@@ -505,8 +507,8 @@ Carried forward from PHASE-3-CANDIDATES-PRELIMINARY.md § 8 (resolution status u
 - **SLICE 1 close:** AWS Trainium adapter ships against synthetic Neuron Link fixtures; AWS Inferentia adapter ships (bundled with Trainium per default per OQ-P3-10); AC-P5 met; Phase 1/2 ACs unchanged. No real cluster needed.
 - **Gating-moment outcome:** Path A or Path B selected per OQ-P3-9 operator decision.
 - **SLICE 2 close:** Google TPU adapter ships against synthetic ICI fixtures (AC-P5 holds for TPU); `TopologySource.fetchSnapshot(ctx)` interface + sparse-data resilience operational across all 6 adapters (Slurm + K8s + NVLink + Trainium + Inferentia + TPU); IF Path A: AC-P6 validated against rented cluster (real DCGM scrapes confirm L0 contract invariants); IF Path B: AC-P6 marked DEFERRED.
-- **SLICE 3 close:** Engine extracted to npm package; bi-directional DS integration operational; real-deploy-event freeze-hook validated; project-close success metric (npm package published) achieved.
-- **Project close:** Tessera v1 published to `github.com/johnpatrickwarren-oss/tessera`; vendor coverage AWS Trainium + AWS Inferentia + Google TPU + NVIDIA NVLink + Slurm + K8s; real-cluster validation precedent set; engine npm package published.
+- **SLICE 3 close:** DS integration interface contract operational (FR-D4); bi-directional DS integration implemented against the contract (FR-D2 + FR-D3); real-deploy-event freeze-hook validated. **Engine npm extract DEFERRED to Phase 4 / dedicated design cycle per R61 ESCALATE #2 → Option F resolution (FR-D1 + AC-P8 DEFERRED).**
+- **Project close:** Tessera v1 published to `github.com/johnpatrickwarren-oss/tessera`; vendor coverage AWS Trainium + AWS Inferentia + Google TPU + NVIDIA NVLink + Slurm + K8s; real-cluster validation precedent set; DS integration interface contract operational. **Engine npm package extract is a Phase 4 / dedicated design cycle deliverable (not Phase 3 project-close).**
 
 ---
 

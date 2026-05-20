@@ -1,5 +1,28 @@
 # Q-R61-SPEC — Phase 3 SLICE 3 WU-Phase3-3A: engine npm package extract
 
+---
+
+## ⚠ SUPERSEDED 2026-05-20 (R61 CLOSED-DEFERRED-BY-OPERATOR per Option F)
+
+**Status:** This spec is SUPERSEDED. R61 closed without chore-A per operator's Option F resolution to R61 ESCALATE #2.
+
+**Context:** Two consecutive Implementer ESCALATEs surfaced architectural reality the spec did not capture:
+1. **ESCALATE #1 (2026-05-19):** Spec § 0.2 claimed "no vendored-at-pin file imports from a vendored-with-deltas or Tessera-original file"; empirically false (6 AT-PIN files import from `verdict.ts`/`config.ts`). Operator resolved with Option B (reduce AT-PIN set to ~25 files).
+2. **ESCALATE #2 (2026-05-20):** Option B's "25 confirmed-clean files" list proved empirically incomplete; the truly self-consistent extract set is ~16 files — none of the primary detection algorithms (all import from `'../types'` barrel which re-exports vendored-with-deltas surfaces). See `coordination/diagnostics/DIAGNOSTIC-R61-option-b-incomplete-depth.md`.
+
+**Operator resolution (2026-05-20):** Option F — defer engine npm extract entirely; re-scope WU-Phase3-3A to "DS integration interface contract design (HTTP API)". See `coordination/NEXT-ROLE.md` § Operator resolution of R61 ESCALATE #2 — Option F.
+
+**Effect on downstream:**
+- FR-D1 + AC-P8 marked DEFERRED in PRD.
+- FR-D4 + AC-P9 added covering the re-scoped contract.
+- Wave 9 now dispatches R62 (re-scoped WU-3A); R61 has no successor implementation round.
+- A12 vendored-at-pin discipline preserved (no file moves landed).
+- Test baseline unchanged from R58 close: `399/394/2/3`; `tsc` exit 0.
+
+**This document is retained for audit trail.** Do NOT use as a template for R62. Read `coordination/NEXT-ROLE.md` for the R62 scope directive.
+
+---
+
 **Round:** R61 (full tier — Architect + Implementer + Reviewer + Memorial-Updater).
 **Cluster shape:** single-cluster (Wave 9 of `coordination/WAVE-PLAN-09.md`; sole WU = WU-Phase3-3A; foundation for Wave 10 WU-3B + WU-3C).
 **Phase / SLICE:** Phase 3 SLICE 3 — engine npm package extract; vendoring-drift R-E6 structural resolution.

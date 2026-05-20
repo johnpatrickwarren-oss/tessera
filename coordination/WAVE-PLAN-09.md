@@ -1,7 +1,25 @@
 # WAVE-PLAN-09 — Wave Plan v1: Tessera Phase 3 SLICE 3 (DeploySignal Integration)
 
+---
+
+## ⚠ R61 ESCALATE #2 → Option F amendment (2026-05-20)
+
+**WU-Phase3-3A SCOPE CHANGE.** Following R61 ESCALATE #2 (Implementer surfaced that the truly self-consistent extraction set is ~16 type/utility files, not 33 — primary detection algorithms all import from the `'../types'` barrel that re-exports vendored-with-deltas surfaces), operator selected **Option F: defer engine npm extract; re-scope WU-3A to "DS integration interface contract design (HTTP API)"**.
+
+**Effective changes to this wave plan:**
+
+- **Wave 9 (WU-3A) re-scoped:** original "engine npm package extract (`@johnpatrickwarren-oss/deploysignal-engine`)" → **"DS integration interface contract design — `engine/ds-integration/` TypeScript types + HTTP API contract shape; no implementation"**. Tier remains full. Foundational role preserved: WU-3A's contract types are inputs consumed by 3B + 3C in Wave 10.
+- **PRD updates committed alongside this amendment:** FR-D1 + AC-P8 marked DEFERRED; FR-D4 + AC-P9 added covering the contract.
+- **D-test re-analysis:** the original D1-D5 analysis (Plan summary below) bound on `engine/ds-integration/` subdirectory file-layout discipline; the analysis carries over directly to the re-scoped WU-3A because the deliverable still lives in `engine/ds-integration/` and 3B + 3C still consume its outputs. **Parallel-fan-out shape for Wave 10 UNCHANGED.** CLUSTER-HANDOFF-WAVE10-3A-3B + CLUSTER-HANDOFF-WAVE10-3A-3C still emitted at WAVE-GATE-09 close; they now document the **interface contract** that BOTH consume (instead of the npm package).
+- **R61 closed as CLOSED-DEFERRED-BY-OPERATOR** (no chore-A; Reviewer + MU not invoked). The R61 spec triad at commit `44bb19b` is SUPERSEDED. **R62** picks up Wave 9 as the first substantive cluster round under the re-scoped WU-3A.
+- **Project-close success metric amended:** "engine npm package published" → "DS integration interface contract operational"; npm extract is a Phase 4 / dedicated design cycle deliverable.
+
+The pre-amendment plan body below is preserved for audit trail. Read sections in context of this amendment: anywhere "engine npm package extract" or "npm package contract" appears in Wave 9 framing, substitute "DS integration interface contract design (HTTP API types)". Wave 10 framing is unchanged in substance (both consume WU-3A's output; the output is now a contract module rather than an npm package).
+
+---
+
 **From:** Coordinator TPM (R60 — third Phase 3 Coordinator invocation; PRD-decomposition + DAG + wave sequencing for Phase 3 SLICE 3)
-**Date:** 2026-05-19
+**Date:** 2026-05-19 (original); **AMENDED 2026-05-20 per R61 ESCALATE #2 → Option F**
 **Version:** v1 (initial Phase 3 SLICE 3 wave plan; opens the final Phase 3 SLICE)
 **Foundation:** `coordination/PRD.md` § Phase 3 Scope → SLICE 3 sub-section (lines 483–487, FR-D1 + FR-D2 + FR-D3, AC-P8); `coordination/SCOPING-MEMO-v0.3.md` § 9 (engine vendoring policy — extract-to-npm commitment); `coordination/WAVE-GATE-08.md` § Forward-flags (lines 82–103, PARALLEL-FAN-OUT mandate for 3B+3C); `coordination/WAVE-PLAN-07.md` (R55 SLICE 2 wave plan; split-with-sequential precedent reference); `coordination/WAVE-PLAN-06.md` (R52 SLICE 1 wave plan; bundle-with-Architect-override precedent)
 **Type:** wave plan — Phase 3 SLICE 3 PRD decomposition + DAG + wave sequencing

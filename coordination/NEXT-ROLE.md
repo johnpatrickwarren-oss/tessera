@@ -1,196 +1,189 @@
-CURRENT-ROUND: R61
-NEXT-ROLE: IMPLEMENTER
-STATUS: READY
+CURRENT-ROUND: R62
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
 
-## § Operator resolution of R61 ESCALATE — Option B (2026-05-19)
+## § Operator resolution of R61 ESCALATE #2 — Option F (2026-05-20)
 
-**Decision:** Option B approved. Reduce AT-PIN set to ~25 self-consistent files; the 6 problematic files (vendored-with-deltas surface + downstream dependents — `engine/types/verdict.ts`, `engine/types/config.ts`, `engine/types/orchestration.ts`, `engine/types/policy.ts`, `engine/types/audit.ts`, `engine/types/index.ts`, `engine/o0/lifecycle-events.ts`, `engine/o0/reversibility-translator.ts`) STAY at Tessera `engine/` tree and receive only import-rewrites — no relocation.
+**Decision:** Option F approved. Defer engine npm package extract entirely. Re-scope WU-Phase3-3A from "engine npm package extract" to "DS integration interface contract design (HTTP API)". Proceed to WU-3B + WU-3C in Wave 10 consuming the HTTP API contract rather than the npm package. AC-P8 + FR-D1 DEFERRED to a future phase.
 
-**Rationale:**
-- W3-1 RESOLVED A (Tessera-only) — Option A requires cross-project work; rejected per W3-1 scope.
-- A12 (vendored-at-pin discipline) — Option C would override A12 for one round's convenience; rejected as bad trade-off.
-- Option B is the natural compromise: 6 cross-boundary files genuinely belong at Tessera tree (they ARE the Tessera-vendored-with-deltas surface); the abstract DS-engine package is what DS later consumes from npm.
-- Smaller package surface (~25 files) is structurally honest: DS doesn't need or want Tessera's schema extensions; Tessera-specific surface stays at Tessera.
+**Rationale (operator-authored at decision; Coordinator-elaborated here):**
 
-**Implementer amendments required:**
-- `coordination/specs/Q-R61-SPEC.md` § 0.2 premise correction (mark "spec premise" claim as superseded; document the empirically-correct cross-boundary state from DIAGNOSTIC-R61).
-- `coordination/specs/Q-R61-SPEC.md` § 2.1 / § 4 (per-file pseudocode + mechanism) updated to reflect Option B 25-file move (not 33).
-- `coordination/specs/Q-R61-SPEC.md` AC-R61-2 count: 33 → actual moved count (Architect-Implementer-Sonnet collaboratively determines; likely 25-27 self-consistent files).
-- `coordination/specs/Q-R61-EMPIRICAL.sh` AC-R61-2 block updated to match new count.
-- `coordination/specs/Q-R61-SPEC.md` AC-R61-3 / § 3.2 ALLOWED_SET regenerated for the 6 files that stay at Tessera (import-rewrite-only) + the ~25 files that move to packages/.
+1. **R61 ESCALATE #2 surfaced architectural reality:** the truly self-consistent extraction set is ~16 type/utility files — **none of the primary detection algorithms** (`betting-e-process.ts`, `family-c-betting-e-process.ts`, `spectral.ts`, `hotelling.ts`, `page-cusum.ts`, `conformal.ts`, `sequential-mmd.ts`) plus `engine/core.ts`, `engine/topology-overlay.ts`, and `engine/l0/schema-continuity.ts` all import from `'../types'` barrel which re-exports from `verdict.ts`/`config.ts` (vendored-with-deltas, excluded). The original "pure DS at SHA `5a72371`" framing does not match codebase reality — Tessera has materially evolved the engine via deltas.
+2. **Option C (move only ~16 type/utility files; no algorithms)** would not achieve FR-D1's substantive intent — the actual engine value (detection algorithms) would not be in the package; future DS could not consume meaningfully.
+3. **Option D (expand to ~35 files including Tessera-extended `verdict.ts`/`config.ts`)** would redefine the package as "Tessera-evolved engine"; DS becomes downstream consumer that adapts. HIGH complexity; requires explicit A12 override discussion; project-close-magnitude architecture choice deserving its own design cycle rather than being absorbed mid-round.
+4. **Option E (wrapper/re-export only)** explicitly rejected in spec § 0.1 Approach B analysis as not achieving AC-P8.
+5. **Option F honors the smaller-scope reality:** the npm package extract is **architecturally harder than originally specced** — it deserves a dedicated design phase, not a forced landing inside a SLICE 3 wave whose primary value is the DS data-flow integration (3B + 3C). The DS bi-directional integration does NOT require the npm package; it requires an interface contract (HTTP API or equivalent) that both repos can implement against. Re-scoping WU-3A to that contract preserves SLICE 3's primary value while deferring the extract to where it can be properly architected.
+6. **Vendoring discipline preserved:** R-E6 vendoring-drift risk is not eliminated by this round (would have been by FR-D1), but it is NOT worsened. A12 vendored-at-pin discipline holds for the existing `engine/*` files. Phase 4 or later re-opens the extract under a proper design cycle.
 
-**Spec deviance disclosure pattern:** Implementer-amends-spec-on-operator-resolution is the canonical resume path per R45 MAJOR-2 + R48 precedent. Amend spec in same chore-A; document in NEXT-ROLE.md "Spec deviance" section.
+**Scope changes landing in this resolution commit:**
 
-**Resume command:** `./run-pipeline.sh --round R61 --tier full --start-at IMPLEMENTER`. Implementer reads this resolution + DIAGNOSTIC-R61-cross-boundary-at-pin-imports.md, amends spec per Option B, executes Option B implementation, commits chore-A.
+- `coordination/PRD.md` § Phase 3 functional requirements: FR-D1 marked DEFERRED with reason. NEW FR-D4 added: "DS integration interface contract — HTTP API + types shared between Tessera and DS; both repos implement against the contract; npm package extract DEFERRED (FR-D1)".
+- `coordination/PRD.md` § Phase 3 acceptance criteria: AC-P8 marked DEFERRED with reason. NEW AC-P9 added: "Given the DS integration interface contract (HTTP API + types), when Tessera implements the contract endpoints and DS implements the consumer side, then Tessera→DS and DS→Tessera data flows operate via the contract independently of file-level engine extraction."
+- `coordination/PRD.md` § Phase 3 success metrics: amended — "npm package published" replaced with "DS integration interface contract operational; npm extract DEFERRED to Phase 4 / dedicated design cycle".
+- `coordination/PRD.md` § Phase 3 SLICE structure: WU-Phase3-3A re-scoped from "Engine npm package extract" to "DS integration interface contract design (HTTP API types + shape definitions; no implementation)". Tier: full (architectural design).
+- `coordination/WAVE-PLAN-09.md`: WU-Phase3-3A scope section amended; Wave 9 mechanism updated to reflect HTTP API contract design (not npm package extract); D-test analysis re-confirmed (3B + 3C still depend on 3A's contract output — independence post-3A holds for the re-scoped WU as well).
+- `coordination/specs/Q-R61-SPEC.md`: SUPERSEDED banner at top — round R61 implementation deferred-by-operator; spec content retained for audit trail; new spec emits at R62.
+
+**R61 final state:**
+
+- R61 = **CLOSED-DEFERRED-BY-OPERATOR**. No chore-A commit. Spec triad at `44bb19b` SUPERSEDED. Reviewer + MU NOT invoked (no implementation to review).
+- 0-CRITICAL streak preserved (R45 remains the sole exception; R61 has no CRITICAL because no implementation landed).
+- Test baseline unchanged from R58 close: `399/394/2/3`; `tsc` exit 0.
+
+**R62 dispatch:**
+
+R62 = full-tier Architect-emit for re-scoped WU-Phase3-3A. Architect designs:
+
+1. `engine/ds-integration/` subdirectory layout (per WAVE-PLAN-09 W3-3 default Tessera-side file layout).
+2. HTTP API contract types — TypeScript interfaces defining the request/response shapes for: (a) Tessera→DS VerdictGroup feed; (b) DS→Tessera event feed gating the freeze-hook. Types only at R62; no HTTP server/client implementation (that lands at R63+ Wave 10 as WU-3B + WU-3C work).
+3. OpenAPI-style contract documentation OR pure-TypeScript contract module (Architect decides; both honor "interface contract" framing).
+4. Test scaffold validating contract type shape (TypeScript compilation + minimal runtime validation against the contract interfaces).
+
+**R62 resume command:** `./run-pipeline.sh --round R62 --tier full`
 
 ---
 
-## R61 ESCALATION — Implementer halt (spec premise false)
+## R61 ESCALATION #2 history (preserved for audit trail) — Option B incomplete-depth (2026-05-20)
+
+**Diagnostic file:** `coordination/diagnostics/DIAGNOSTIC-R61-option-b-incomplete-depth.md`
+
+**Bounded question:**
+
+> Operator's Option B resolution specified "25 confirmed-clean files" for package moves. Comprehensive import-tracing at Implementer session entry reveals this list is empirically incorrect. All 7 primary detector algorithm files (`betting-e-process.ts`, `family-c-betting-e-process.ts`, `spectral.ts`, `hotelling.ts`, `page-cusum.ts`, `conformal.ts`, `sequential-mmd.ts`) PLUS `engine/core.ts`, `engine/topology-overlay.ts`, and `engine/l0/schema-continuity.ts` all import from `'../types'` or `'./types'` (the types barrel `engine/types/index.ts`). That barrel re-exports from `verdict.ts` and `config.ts` (vendored-with-deltas, excluded). Moving any file that imports from `'../types'` creates the same package tsc failure. The actual self-consistent set is ~16 type-definition/utility files — none of the primary detection algorithms. Choose one:
+>
+> - **Option C** — Move only the ~16 self-consistent files (types + utilities; no algorithms).
+> - **Option D** — Expand to ~35 files including Tessera-extended `verdict.ts` + `config.ts`.
+> - **Option E** — Wrapper/re-export only.
+
+**Operator decision:** Option F (synthesis; defer extract entirely; re-scope WU-3A). See "Operator resolution of R61 ESCALATE #2 — Option F" section above.
+
+---
+
+## R61 ESCALATION #1 history (preserved for audit trail) — spec premise false (2026-05-19)
 
 **Diagnostic file:** `coordination/diagnostics/DIAGNOSTIC-R61-cross-boundary-at-pin-imports.md`
 
 **Bounded question:**
 
-> Spec § 0.2 claims "no vendored-at-pin file imports from a vendored-with-deltas or Tessera-original file — Verified at spec time via grep." This claim is **empirically false**. Multiple AT-PIN files (`engine/types/orchestration.ts`, `engine/types/policy.ts`, `engine/types/audit.ts`, `engine/types/index.ts`, `engine/o0/lifecycle-events.ts`, `engine/o0/reversibility-translator.ts`) import from `engine/types/verdict.ts` and/or `engine/types/config.ts` — both vendored-with-deltas files that STAY at tessera tree. The package's `tsc` would fail after the file moves. Choose one:
->
-> - **Option A** — Include DS-original `verdict.ts` + `config.ts` (without Tessera deltas) in the package; expand to 35 files; tessera-side vendored-with-deltas files restructure to extend package base types. HIGH complexity; requires confirming `~/concord/deploysignal/` is at SHA `5a72371`.
-> - **Option B** — Reduce the AT-PIN set to the ~25 self-consistent files; the 6 problematic files stay at tessera tree and receive only import-rewrites (not relocation). AC-R61-2 count changes from 33 to ~25. MEDIUM complexity; clean package but smaller API surface.
-> - **Option C** — Move all 33 files but modify the 6 cross-boundary files' imports (stub types or replace with package-internal alternatives). Requires **explicit A12 override** — contradicts spec § 3.1 #1 verbatim-preservation. HIGH complexity; degrades type surface.
+> Spec § 0.2 claims "no vendored-at-pin file imports from a vendored-with-deltas or Tessera-original file — Verified at spec time via grep." This claim is empirically false. Multiple AT-PIN files import from `verdict.ts`/`config.ts` (vendored-with-deltas). Options: A (include DS-original; 35 files), B (reduce to ~25), C (modify cross-boundary imports).
 
-**Halt triggers:** § 6.1 #7 ("package's `npm run build` produces tsc errors") AND halt condition (b) ("spec/reality conflict cannot be resolved without changing the round's component inventory").
-
-**No chore-A commit exists.** Implementation was correctly halted before any changes were staged or committed.
-
-## R61 Architect routing block (post spec-emit)
-
-**Spec triad emitted at commit `44bb19b`** (`spec(R61): Q-R61-SPEC + audit sidecar + EMPIRICAL.sh ...`). Spec artifacts committed in dedicated commit BEFORE this NEXT-ROLE.md update per R21 ARCH MINOR-1 reinforcement.
-
-**Inputs for Implementer:**
-- `coordination/specs/Q-R61-SPEC.md` (spec proper — Mechanism, Component inventory, Per-file pseudocode, ACs, Anti-scope+ALLOWED_SET, Open questions, P3 ten-axis, Grilling)
-- `coordination/specs/Q-R61-SPEC-AUDIT.md` (audit sidecar — Reviewer reads this; Implementer reads spec proper)
-- `coordination/specs/Q-R61-EMPIRICAL.sh` (Rule 1 sub-class verifier — chore-A attestation cites actual output)
-
-**Round-start SHA (anti-scope baseline):** `8c64ce0`.
-**Spec-emit commit:** `44bb19b`.
-**Empirical baseline at Architect session entry:** `tests=399 / pass=394 / fail=2 / skipped=3`; `tsc` exit 0. Two pre-existing fails are R36 forward-protection guards inheriting from Phase 2 close `87e372f` (R36-30 + R36-31).
-
-**Substantive deliverable summary (per spec § 2.1):** 5-phase chore-A — (1) Package scaffolding at `packages/deploysignal-engine/`; (2) physical `git mv` of 33 vendored-at-pin engine/* files preserving subtree layout; (3) package barrel `src/index.ts` with 33 export-star re-exports; (4) Tessera-side import rewrites from `'../engine/<moved>'` → `'@johnpatrickwarren-oss/deploysignal-engine'`; (5) build configuration + coordination updates (root package.json workspaces, VENDORING-MANIFEST.md new top section, SCOPING-MEMO § 9 opportunistic touch per W3-5, q01 test path-list updates).
-
-**15 ACs (per spec § 5).** Pre-documented two-state predicted counts: chore-A `403/397/3/3`; chore-B `403/398/2/3` (per spec § 5.4). AC-R61-15 placeholder fails by construction at chore-A; AC-R61-10 SUMMARY block in Q-R61-EMPIRICAL.sh asserts chore-B value — chore-A FAIL is pre-documented and NOT a halt trigger per § 6.1 carve-out (R56 MINOR-1 reinforcement).
-
-**OQ surfaced:** OQ-R61-1 (q01-vendoring-coverage manifest-row check fragility). Architect-recommended Option (b) — loosen test's includes check to accept either-path; preserve manifest audit trail. If Implementer encounters issues with Option (b), ESCALATE per § 6.1 #5.
-
-**Cross-project rules applied (per § 7):** Rule 1 sub-class ACTIVE (Q-R61-EMPIRICAL.sh + Tightenings 1-4); Rule 2 ACTIVE (§ 5.3 branch-binding coverage table); Rule 3 ACTIVE (§ 5.6 discriminability); Rule 4 ACTIVE (§ 3.2 ALLOWED_SET); Rule 5 N/A; Rule 6 ACTIVE (§ 6 halt conditions); Rule 7 ACTIVE Surface (a) (§ 7).
+**Operator decision (2026-05-19):** Option B. Subsequently superseded by ESCALATE #2 → Option F when Option B's 25-file list proved empirically incomplete.
 
 ---
 
-## Round-scope directive (R61 — WU-Phase3-3A engine npm package extract; full-tier; Wave 9)
+## R62 Round-scope directive (re-scoped WU-Phase3-3A — DS integration interface contract; full-tier; Wave 9)
 
-R61 = first SLICE 3 cluster pipeline round per `coordination/WAVE-PLAN-09.md` (R60 Coordinator emit). Wave 9 = single-cluster foundational round. WU-Phase3-3A: extract Tessera-vendored engine to a publishable npm package per Tessera-monorepo sub-package layout.
+R62 = first dispatch under Option F resolution. WU-Phase3-3A scope re-defined: design the HTTP API interface contract (TypeScript types + shape definitions) that WU-3B + WU-3C will consume in Wave 10. Wave 9 remains a single-cluster foundational round for WU-3A; WAVE-GATE-09 still closes Wave 9 and forward-flags 3B + 3C for parallel Wave 10 dispatch.
 
-**Round-start SHA:** (R60 Coordinator artifacts; recover via `git rev-parse HEAD` at session entry).
+**Round-start SHA:** recover via `git rev-parse HEAD` at session entry (will be the SHA of the R61 ESCALATE #2 resolution commit landing this scope shift).
 
-### Operator decisions (resolved at this dispatch)
+### Operator decisions (carried forward; re-applied to R62)
 
-- **OQ-Phase3-W3-1 RESOLVED: Option A** — Tessera-only extract; DS-side updates via separate PR (not this round; explicit anti-scope).
-- **OQ-Phase3-W3-2 RESOLVED: Option B** — Tessera monorepo sub-package layout. Package physical location: `packages/deploysignal-engine/` within Tessera repo. Tessera consumes via local-package or workspace mechanism; future DS PR consumes via published npm or git dependency.
-- **OQ-Phase3-W3-3 RESOLVED: Coordinator defaults A/A** — Tessera-side file layout `engine/ds-integration/*` (relevant at R63 SLICE 3 Wave 10 work); shared-types pre-landed in this round IF Architect spec touches; otherwise deferred to R63.
-- **OQ-Phase3-W3-4 RESOLVED: Option A** — NO new external dependencies for SLICE 3 work. Synthetic fixtures suffice per Path B.
-- **OQ-Phase3-W3-5 RESOLVED: Option A (opportunistic)** — IF Architect spec naturally touches SCOPING-MEMO § 9 (vendoring policy) or § 2.3 (DS-integration scope) for WU-3A, amend opportunistically. Otherwise defer to Phase 3 close-walk.
+- **OQ-Phase3-W3-1 RESOLVED: Option A** — Tessera-only design; DS-side implementation via separate PR.
+- **OQ-Phase3-W3-2 RESOLVED: NEW FORMULATION** — original "Tessera monorepo sub-package" decision (Option B) was for the deferred npm extract. Under Option F: file layout is `engine/ds-integration/` subdirectory within Tessera repo (no separate package); the interface contract types live there as part of the Tessera engine surface.
+- **OQ-Phase3-W3-3 RESOLVED: Coordinator default A/A** — Tessera-side file layout `engine/ds-integration/*`; this is now the PRIMARY location for the contract (no longer "shared-types pre-landed if Architect touches"; the contract IS the deliverable).
+- **OQ-Phase3-W3-4 RESOLVED: Option A** — NO new external dependencies for SLICE 3 work.
+- **OQ-Phase3-W3-5 RESOLVED: Option A (opportunistic)** — IF Architect spec naturally touches SCOPING-MEMO § 9 / § 2.3, amend opportunistically.
 
-- Path B preserved: NO real-cluster work; NO real customer telemetry.
-- Naming convention: globally-sequential WAVE-NN. WU-Phase3-3A = WAVE-09.
+- Path B preserved: NO real-cluster work.
+- Naming convention: globally-sequential WAVE-NN. R62 still under WAVE-09 (R61 closed deferred; the wave continues with R62 as the first substantive cluster round).
 
 ### Primary deliverable
 
-Implement WU-Phase3-3A engine npm package extract per WAVE-PLAN-09 Wave 9 + W3-1/W3-2 operator decisions:
+Implement re-scoped WU-Phase3-3A per Option F resolution:
 
-1. **`packages/deploysignal-engine/` sub-package directory** (Tessera monorepo layout per W3-2 Option B):
-   - `package.json` declaring `@johnpatrickwarren-oss/deploysignal-engine` package (provisional name per PRD § 3.1 success metric); version pin matches Tessera's vendored SHA `5a72371`; minimum exports surface for Tessera consumption.
-   - `tsconfig.json` for package build (extends Tessera root tsconfig or stands alone; Architect decides).
-   - `src/` directory containing engine source. Architect decides: physical-move (`git mv engine/* packages/deploysignal-engine/src/`) OR placeholder-stub with path indirection. Physical-move is cleaner but larger blast radius; stub-with-indirection preserves git history more transparently. Architect recommendation requested.
-   - `README.md` describing package contents + Tessera-as-current-consumer + vendoring history (extracted from Tessera engine vendoring at SHA `5a72371` per PRD § 3.1).
+1. **`engine/ds-integration/` subdirectory** (NEW; per W3-3 Coordinator default Option A):
+   - `contract.ts` (or similar) — TypeScript module exporting interface types defining:
+     - **Tessera→DS feed contract:** request/response shapes for sending `VerdictGroup` data to DS. Includes: payload schema for VerdictGroup observation; auth/identity headers shape; DS-side response shape (acknowledgment + correlation key).
+     - **DS→Tessera event contract:** request/response shapes for DS sending deploy-event notifications that gate Tessera's freeze-hook. Includes: deploy-event payload schema; Tessera-side response shape (acknowledgment + freeze-hook activation status).
+   - Per W3-4: NO new external dependencies (no `openapi-typescript`, no `zod`, no HTTP client libraries at this stage). Pure TypeScript type definitions only.
 
-2. **Tessera-side consumption update** — wherever Tessera production code imports from `engine/`, update to import from the local package (workspace import path; e.g., `@johnpatrickwarren-oss/deploysignal-engine`).
+2. **Contract documentation** — `engine/ds-integration/README.md` (or contract.ts JSDoc) describing the contract shape, integration semantics, freeze-hook activation, anti-scope (no implementation, no live wire-format negotiation, no auth scheme implementation; just type shapes).
 
-3. **`package.json` (root)** updates:
-   - Add `workspaces` configuration to include `packages/deploysignal-engine/` (if Architect picks workspace layout).
-   - Dependency on the local package.
+3. **Test file** `test/q62-ds-integration-contract.test.ts`:
+   - Contract module structural ACs: file exists; expected interfaces exported.
+   - Contract type-shape ACs: type-narrowing assertions confirm key fields present at compile time; minimal runtime-checked sample values validate against the interface shapes.
+   - Anti-regression ACs: Phase 1+2 ACs (AC-P1 through AC-P4) hold unchanged + Phase 3 SLICE 1+2 ACs (AC-P5, AC-P7) hold unchanged. AC-P8 marked DEFERRED in PRD; AC-P9 (new) introduced at this resolution.
 
-4. **`coordination/VENDORING-MANIFEST.md` policy update**:
-   - Pre-R61: per-file SHA pin at `5a72371` for each `engine/*` file.
-   - Post-R61: package-version-pin (single line per package) instead of per-file SHA pins. Document the policy transition.
-
-5. **Test file** `test/q61-engine-npm-extract.test.ts`:
-   - Package structure ACs: `packages/deploysignal-engine/package.json` exists + has expected `name` + `version` + `exports`
-   - Tessera consumption ACs: at least one production import points to the local package
-   - VENDORING-MANIFEST.md transition ACs
-   - Phase 1+2 ACs (AC-P1 through AC-P4) hold unchanged + AC-P7 cross-cutting (full Tessera fleet works post-extract)
-
-6. **Q-R61-EMPIRICAL.sh** at chore-A pre-commit (Rule 1 sub-class).
+4. **Q-R62-EMPIRICAL.sh** at chore-A pre-commit (Rule 1 sub-class).
 
 ### Tier rationale
 
-**full-tier** — Architect (architectural restructuring: monorepo layout; consumption-import surface design) + Implementer (file moves OR placeholder; package config; consumption updates; tests) + Reviewer (cold-eye) + Memorial-Updater. Per WAVE-PLAN-09: A1 (substantial architectural restructure) + A4 (schema-class: package structure + import surface).
+**full-tier** — Architect (interface contract design; integration semantics; freeze-hook activation shape) + Implementer (contract module authoring; tests; type-shape validation) + Reviewer (cold-eye) + Memorial-Updater. Per WAVE-PLAN-09 amended (Option F): A1 (substantial architectural design — the contract is the bi-directional integration shape) + A4 (schema-class: contract type definitions).
 
-### Anti-scope (R61 hard limits)
+### Anti-scope (R62 hard limits — Option F re-scoped)
 
-- **NO DS repo modifications** (W3-1 Option A; DS-side updates via separate PR scheduled later).
+- **NO npm package extract work** (Option F resolution; FR-D1 DEFERRED).
+- **NO DS repo modifications** (W3-1 Option A).
 - **NO real-cluster work** (Path B; A8/A11 inherited).
-- NO modification of `coordination/SCOPING-MEMO-v0.3.md` UNLESS W3-5 opportunistic-close triggers AND Architect spec genuinely touches it; otherwise defer.
-- NO modification of `coordination/PRD.md`.
-- NO modification of R42-R60 deliverables EXCEPT engine-vendored files (which need to relocate or be referenced from the new package per W3-2 Option B; this IS in-scope for WU-3A).
-- NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md`.
-- NO modification of `coordination/MEMORIAL-PHASE-*.md`.
-- NO modification of `scripts/*` or `run-pipeline.sh` (R45-R51 stable).
-- NO modification of `CLAUDE-*.md` REINFORCEMENTS sections.
-- NO Phase 3 SLICE 3 Wave 10 work (WU-3B/3C; R63+).
-- NO new external dependencies (W3-4 Option A).
-- NO opening any GitHub PRs.
+- **NO HTTP server/client implementation** — types and contract shape only. Server/client implementation lands at R63+ Wave 10 (WU-3B + WU-3C).
+- **NO new external dependencies** (W3-4 Option A; no `openapi-typescript`, `zod`, HTTP libraries).
+- **NO modification of `coordination/SCOPING-MEMO-v0.3.md`** UNLESS W3-5 opportunistic-close triggers.
+- **NO modification of R42-R60 deliverables.**
+- **NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md`.**
+- **NO modification of `coordination/MEMORIAL-PHASE-*.md`.**
+- **NO modification of `scripts/*` or `run-pipeline.sh`.**
+- **NO modification of `CLAUDE-*.md` REINFORCEMENTS sections.**
+- **NO Phase 3 SLICE 3 Wave 10 work** (WU-3B/3C; R63+).
+- **NO opening any GitHub PRs.**
 
-ALLOWED modifications:
-- `packages/deploysignal-engine/` (NEW directory + contents)
-- `engine/*` (MOD or MV depending on Architect approach)
-- `package.json` (root)
-- `tsconfig.json` and `tsconfig.test.json` (root; if monorepo restructuring affects build)
-- `coordination/VENDORING-MANIFEST.md` (MOD)
-- `coordination/SCOPING-MEMO-v0.3.md` (MOD conditional per W3-5)
-- `test/q61-engine-npm-extract.test.ts` (NEW)
-- Test imports across `test/*.test.{js,ts}` (MOD if `engine/` imports change path)
-- `coordination/specs/Q-R61-SPEC.md` + `Q-R61-SPEC-AUDIT.md` + `Q-R61-EMPIRICAL.sh` (NEW)
-- `coordination/reviews/REVIEWER-REPORT-R61.md` (Reviewer)
-- `coordination/diagnostics/DIAGNOSTIC-R61-*.md` (conditional)
+ALLOWED modifications (R62):
+
+- `engine/ds-integration/` (NEW directory + contents)
+- `test/q62-ds-integration-contract.test.ts` (NEW)
+- `coordination/specs/Q-R62-SPEC.md` + `Q-R62-SPEC-AUDIT.md` + `Q-R62-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R62.md` (Reviewer)
+- `coordination/diagnostics/DIAGNOSTIC-R62-*.md` (conditional)
 - `coordination/MEMORIAL.md` (appends)
 - `coordination/NEXT-ROLE.md` (this file)
 
 ### Apply all 7 cross-project rules UPFRONT
 
-- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — Q-R61-EMPIRICAL.sh applies R47-R51 Tightenings to all empirical claims.
-- **Rule 2 (`branch-binding-coverage-gate`):** ACTIVE GATE — Architect spec enumerates package-config branches + consumption-import-resolution branches; Acknowledged-gap section.
+- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — Q-R62-EMPIRICAL.sh applies R47-R51 Tightenings.
+- **Rule 2 (`branch-binding-coverage-gate`):** ACTIVE GATE — Architect spec enumerates contract-shape branches (Tessera→DS direction; DS→Tessera direction; freeze-hook activation states).
 - **Rule 3 (`implementer-spec-test-assertion-coverage`):** ACTIVE GATE — discriminating assertions per R30 MINOR-1.
-- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — Architect ALLOWED_SET in Q-R61-SPEC.md at spec-emit time. Special attention: the engine-file move/restructure means a LARGE diff; ALLOWED_SET must accommodate the actual scope.
+- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — Architect ALLOWED_SET in Q-R62-SPEC.md at spec-emit time.
 - **Rule 5 (`rule-derivation-without-self-application`):** N/A.
-- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if Architect surfaces unexpected dependency on DS-repo modification (W3-1 anti-scope violation potential), HALT + DIAGNOSTIC + ESCALATE.
+- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — note: R61 ESCALATE pattern (two-deep escalation when spec premise empirically failed) is the active reinforcement for R62. Architect at R62 MUST `grep` actual codebase before claiming any "X does not exist" / "X is type Y" premises in spec § 0.2. Spec-emit-time empirical verification is the active discipline.
 - **Rule 7 (`derived-rule-propagation-mechanism-required`):** ACTIVE GATE per existing surfaces.
 
 ### Halt conditions
 
-1. **Q-R61-EMPIRICAL.sh exits non-zero at chore-A:** HALT + DIAGNOSTIC.
-2. **Architectural decision requires DS-repo modification:** if Architect cannot complete WU-3A within Tessera-only scope (W3-1 = A), HALT + DIAGNOSTIC; operator may need to re-evaluate W3-1.
-3. **Phase 1/2 ACs regress:** if test baseline changes AC-P1 through AC-P4 properties post-extract (e.g., engine-import path changes break detector semantics), HALT + DIAGNOSTIC per AC-P7 cross-cutting.
-4. **Vendored SHA `5a72371` pin breakage:** if extracted package version does NOT pin to original SHA, HALT + DIAGNOSTIC (vendoring discipline preserved per AC-P8).
-5. **Test baseline drift other than R61-additions:** Architect specifies expected delta in Q-R61-SPEC.md. Unexpected shift → HALT + DIAGNOSTIC.
+1. **Q-R62-EMPIRICAL.sh exits non-zero at chore-A:** HALT + DIAGNOSTIC.
+2. **Architectural decision requires DS-repo modification:** HALT + DIAGNOSTIC.
+3. **Phase 1/2/Phase-3-SLICE-1+2 ACs regress:** HALT + DIAGNOSTIC.
+4. **Test baseline drift other than R62-additions:** HALT + DIAGNOSTIC.
+5. **Architect surfaces a spec/reality premise conflict** (R61 ESCALATE #1+#2 pattern): HALT + DIAGNOSTIC + ESCALATE before Implementer dispatch.
 
-### Inputs for Architect
+### Inputs for Architect (R62)
 
-1. `coordination/WAVE-PLAN-09.md` — Wave 9 section; READ FIRST
-2. `coordination/PRD.md` § Phase 3 Scope SLICE 3 (FR-D1 + AC-P8)
-3. `coordination/WAVE-GATE-08.md` — SLICE 2 close + forward-flags for SLICE 3
-4. `coordination/SCOPING-MEMO-v0.3.md` § 9 (engine vendoring policy)
-5. `coordination/VENDORING-MANIFEST.md` — current per-file SHA pin state
-6. `engine/*` — vendored source to extract
-7. `package.json` (root) — Tessera-side config to modify
-8. `tsconfig.json` + `tsconfig.test.json` — current TS configs
-9. `coordination/specs/Q-R53-SPEC.md` + `Q-R56-SPEC.md` + `Q-R58-SPEC.md` — recent spec triad patterns
-10. `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` § 3.1 (engine extract candidate framing)
+1. `coordination/NEXT-ROLE.md` § Operator resolution of R61 ESCALATE #2 — Option F (THIS section) — READ FIRST
+2. `coordination/WAVE-PLAN-09.md` (amended at this resolution) — Wave 9 section reflecting Option F re-scope
+3. `coordination/PRD.md` § Phase 3 Scope (amended at this resolution) — FR-D1 DEFERRED; FR-D4 NEW; AC-P8 DEFERRED; AC-P9 NEW
+4. `coordination/WAVE-GATE-08.md` — SLICE 2 close + original forward-flags for SLICE 3
+5. `coordination/specs/Q-R61-SPEC.md` (SUPERSEDED banner) — prior R61 spec retained for audit; do NOT reuse mechanism
+6. `coordination/diagnostics/DIAGNOSTIC-R61-cross-boundary-at-pin-imports.md` + `DIAGNOSTIC-R61-option-b-incomplete-depth.md` — Implementer-surfaced architectural reality that motivated Option F
+7. `engine/types/index.ts` + `engine/types/verdict.ts` + `engine/types/config.ts` — existing schema surface that the contract will reference
+8. `coordination/specs/Q-R58-SPEC.md` — most recent SLICE 2 spec pattern (interface-design class deliverable)
+9. `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` § 3 (DS integration framing)
 
 ### Pipeline invocation
 
 ```bash
 cd /Users/johnwarren/concord/tessera
-./run-pipeline.sh --round R61 --tier full
+./run-pipeline.sh --round R62 --tier full
 ```
 
 ---
 
-## Operator-decision flags (post-R60 close + W3-1/W3-2 resolutions)
+## Operator-decision flags (post-R61 ESCALATE #2 close)
 
 1. R45 CRITICAL routing.
 2. Rule 7 Surface (c) HARD-GATE candidate.
 3. Cross-project canonical landings.
 4. Anchor PR backflog scheduling.
-5. **Phase 3 SLICE 3 Wave 9 (npm extract) IN PROGRESS at R61.** Wave 10 (3B + 3C parallel) at R63+ post-WAVE-GATE-09.
-6. **Future operator action:** DS-side PR to consume the extracted npm package (W3-1 Option A defers this to a separate PR scheduled outside Tessera pipeline).
-7. Prior-round findings.
-8. OQ-Phase3-W3-1 RESOLVED A; W3-2 RESOLVED B; W3-3 RESOLVED Coordinator default A; W3-4 RESOLVED Option A; W3-5 RESOLVED Option A (opportunistic).
+5. **Phase 3 SLICE 3 Wave 9 IN PROGRESS at R62 (re-scoped WU-3A — DS integration interface contract).** Wave 10 (3B + 3C parallel) at R63+ post-WAVE-GATE-09. **AC-P8 + FR-D1 (npm extract) DEFERRED to Phase 4 or dedicated design cycle per Option F.**
+6. **Future operator action:** dedicated design cycle for npm package extract (deferred from R61). To be scheduled at Phase 3 close or Phase 4 dispatch.
+7. **NEW R61 lesson:** Architect spec-emit-time empirical verification — when spec § 0.2 claims a codebase property ("X is true about the import graph"), Architect MUST `grep` the actual files at spec emit, not assert from architectural mental model. R61 had TWO premise-false escalations; that is a Reviewer (R47-class) candidate for cross-project derivation if it recurs at R62+. Currently flagged as 1st-tessera instance.
+8. OQ-Phase3-W3-1 RESOLVED A; W3-2 NEW FORMULATION (engine/ds-integration/ subdirectory; no package); W3-3 RESOLVED Coordinator default A; W3-4 RESOLVED A; W3-5 RESOLVED A.
