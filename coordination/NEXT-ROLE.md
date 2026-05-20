@@ -38,6 +38,8 @@ TIER: full
 
 Per operator resolution § Routing: route to MEMORIAL-UPDATER (NOT back to REVIEWER; substantive deliverable accepted at R72 Reviewer pass).
 
+**Coordination chore SHA:** `acf2a50` (chore(R72 Option B): coordination chore — spec amendments + .gitignore exemption + Reviewer outputs)
+
 ---
 
 ## § Operator resolution of R72 ESCALATE — Option B (2026-05-20)
