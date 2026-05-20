@@ -84,7 +84,7 @@ No unexpected paths. After chore-A commit, total = 12 (adds NEXT-ROLE.md + MEMOR
 - **Post-chore-B test count (actual verbatim):** `tests=387 / pass=382 / fail=2 / skipped=3`
   - 2 persistent fails = AC-R36-30 + AC-R36-31 (pre-existing R36 forward-protection guards; carry-forward from Phase 2 close)
   - AC-R56-15 NOW PASSES (SHA injection effective; `git diff 4447586..93d3689 --name-only` ⊆ 12-entry ALLOWED_SET confirmed)
-- **Chore-B SHA:** `<WILL-BE-FILLED-AFTER-COMMIT>`
+- **Chore-B SHA (attested HEAD for Reviewer):** `15d6ae7`
 
 ---
 
