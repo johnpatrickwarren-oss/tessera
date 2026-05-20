@@ -1,7 +1,26 @@
 CURRENT-ROUND: R58
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
+
+## Implementer → Reviewer routing block (R58; implementation SHA `3bf33ca`)
+
+**Implementer attestations at GREEN SHA `3bf33ca` (pre-chore-A-coordination):**
+- `npx tsc -p tsconfig.test.json` exit = 0 ✓
+- `node --test test/*.test.js` = `tests=399 / pass=393 / fail=3 / skipped=3` (chore-A pre-SHA-injection; 3 fails = R36-30 + R36-31 + AC-R58-14 placeholder; pre-documented two-state per § 6.1 carve-out ✓)
+- `bash coordination/specs/Q-R58-EMPIRICAL.sh` = 18 PASS / 1 FAIL (AC-R58-13 chore-A two-state FAIL pre-documented; all 18 other ACs PASS ✓)
+- `git diff 7e9d399..HEAD --name-only` = 12 paths; all ⊆ 12-entry ALLOWED_SET ✓
+
+**Chore-A coordination SHA:** `<FILLED-AT-CHORE-B>` — see chore-B commit below.
+
+**Implementer tactical deviations (TACTICAL AUTONOMY clause):**
+- TD-1: Spec pseudocode used `{ fetched_at_ts: 1_700_000_000 }` for `SlurmTopologySource`; actual `SlurmTopologySourceOpts` uses camelCase `fetchedAtTs`. Test uses `{ fetchedAtTs: 1_700_000_000 }` per actual interface.
+- TD-2: Spec pseudocode `AdapterEntry.snapshotHash: (s: unknown) => string` rejected by tsc (function parameter contravariance). Changed to `snapshotHash(snapshot: TopologySnapshot): string` per actual covariance constraint.
+- TD-3: OQ-R58-1 (Approach A vs B): followed Architect-recommended Approach A per spec § 4 — new `engine/topology/fetch-context.ts`. A12 (`engine/topology-overlay.ts`) preserved unmodified.
+
+**Spec-deviance section:** None (all deviations covered by TACTICAL AUTONOMY clause above).
+
+---
 
 ## Architect → Implementer routing block (R58; chore-A SHA `a751a76`)
 
