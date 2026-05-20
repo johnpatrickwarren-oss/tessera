@@ -136,15 +136,10 @@ echo ""
 # -----------------------------------------------------------------------------
 # AC-R53-14 (test count attestation — node --test summary)
 # -----------------------------------------------------------------------------
-echo "AC-$ROUND-14: test summary = 374/368/3/3 (actual at chore-A; see TD-1 below)"
-# Structural deviation from spec prediction 374/369/2/3:
-# AC-R53-15 (anti-scope diff test) fails at chore-A because CHORE_A_SHA = '<INJECTED-AT-CHORE-B>'
-# is not a valid git object. execFileSync throws → 1 extra fail. This is the designed chore-B
-# workflow: AC-R53-15 passes after SHA injection (chore-B), bringing summary to 374/369/2/3.
-# Per AC-R53-14 instruction: "if actual differs from predicted, attest actual."
-# At chore-B: this line updated to assert 374/369/2/3.
-# TD-1: chore-A actual = 374/368/3/3 (3 fails: AC-R36-30 + AC-R36-31 pre-existing +
-#        AC-R53-15 placeholder SHA); predicted 374/369/2/3 was post-chore-B forecast.
+echo "AC-$ROUND-14: test summary = 374/369/2/3 (post-chore-B; AC-R53-15 SHA injected)"
+# TD-1 (chore-A historical note): at chore-A, actual was 374/368/3/3 (3 fails: AC-R36-30 +
+# AC-R36-31 pre-existing + AC-R53-15 placeholder SHA). After chore-B SHA injection, AC-R53-15
+# passes → summary returns to spec-predicted 374/369/2/3.
 # `|| true` because node --test exits non-zero when fail count > 0.
 NODE_TEST_OUTPUT=$(node --test --test-reporter=tap test/*.test.js 2>&1 || true)
 TESTS=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# tests ' | awk '{print $3}')
@@ -152,7 +147,7 @@ PASS_COUNT=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# pass ' | awk '{print $3}')
 FAIL_COUNT=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# fail ' | awk '{print $3}')
 SKIP_COUNT=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# skipped ' | awk '{print $3}')
 SUMMARY="$TESTS/$PASS_COUNT/$FAIL_COUNT/$SKIP_COUNT"
-assert_eq "AC-$ROUND-14 (test summary)" "374/368/3/3" "$SUMMARY"
+assert_eq "AC-$ROUND-14 (test summary)" "374/369/2/3" "$SUMMARY"
 echo ""
 
 # -----------------------------------------------------------------------------

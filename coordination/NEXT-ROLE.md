@@ -127,9 +127,10 @@ cd /Users/johnwarren/concord/tessera
 Per Rule 1 sub-class `empirical-command-attestation` (R46 canonical landing): all numbers below are ACTUAL output of running verification commands at chore-A SHA — NOT memorized from spec text.
 
 ```
-[chore-A SHA: <see git rev-parse HEAD after chore-A commit below>]
-[Q-R53-EMPIRICAL.sh aggregate exit: 0 — 12 PASS / 0 FAIL]
-[node --test summary at chore-A: tests=374 / pass=368 / fail=3 / skipped=3]
+[chore-A SHA: 2ba7bb4]
+[chore-B SHA: <injected after chore-B commit>]
+[Q-R53-EMPIRICAL.sh aggregate exit (chore-B): 0 — 12 PASS / 0 FAIL]
+[node --test summary at chore-B: tests=374 / pass=369 / fail=2 / skipped=3]
 [npx tsc exit at chore-A: 0 (zero diagnostics)]
 [git diff 3744012..chore-A-SHA --name-only count: 12 paths (all ⊆ ALLOWED_SET)]
 ```
