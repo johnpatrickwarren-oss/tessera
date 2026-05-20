@@ -1,7 +1,105 @@
-CURRENT-ROUND: R71
-NEXT-ROLE: MEMORIAL-UPDATER
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R72
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R72 Round-scope directive (Architect — coverage validation; 6 failure types × 20 variations = 120 saturation cases) (2026-05-20)
+
+R72 = full-tier pipeline round delivering the saturation-coverage matrix. Operator-confirmed scope at R71 dispatch ("6 failure types × 20 variations"). Validates engine catches + correctly attributes shard across the variation space underlying R71's dashboard.
+
+**Round-start SHA:** `e77da5c` (R71 MU close). Verify via `git rev-parse HEAD` at Architect session entry.
+
+### Primary deliverable
+
+1. **`tools/coverage-saturation.ts`** (NEW; Coordinator default; Architect may rename):
+   - For each of 6 failure types (Architect picks; suggested: sdc-drift, common-mode-rack, event-conditional, fdr-multiple-testing, hierarchical-evalue, topology-spanning-common-mode)
+   - For each type, 20 variations: 4 shard-ID × 5 magnitude/timing
+   - Run through real Tessera engine
+   - Capture: detected? correct-shard? detection-window-index? false-positive count?
+   - Emit `coordination/coverage/R72-saturation-matrix.json` + `.md` (machine + human readable)
+   - Deterministic (seeded RNG); idempotent
+
+2. **Coverage matrix output:** per-type detection rate; per-type shard-attribution accuracy; false-positive rate; detection-window distribution; edge cases
+
+3. **`package.json` scripts:** `"coverage": "pnpm exec node tools/coverage-saturation.js"`; optional `"coverage:summary"`
+
+4. **README.md** — extend with Coverage section + headline metrics
+
+5. **Test file** `test/q72-coverage-saturation.test.ts`:
+   - Matrix structural ACs; per-type detection-rate ACs (≥ Architect minimum); per-type shard-attribution-accuracy ACs (≥ 95%); deterministic-build; anti-regression
+
+6. **Q-R72-EMPIRICAL.sh** at chore-A pre-commit
+
+### Tier rationale
+
+**full-tier** — Architect (failure-variation parameterization + detection-correctness criteria + matrix design) + Implementer (saturation runner + matrix + tests) + Reviewer (cold-eye for shard-attribution claims) + Memorial-Updater.
+
+### Anti-scope (R72 hard limits)
+
+- NO new external dependencies (R68 anti-worm posture preserved)
+- NO modification of `engine/*` (frozen post-Phase 3)
+- NO modification of `demos/demo.html` or `demos/scenarios/*.json` (R71 frozen)
+- NO modification of `tools/build-canned-demos.ts` (R71 frozen)
+- NO modification of `tools/demo-scenario.ts` (R70 frozen)
+- NO real-cluster work (Path B preserved)
+- NO DS-repo modifications (W3-1 Option A preserved)
+- NO modification of carry-forward AC fail set
+- NO modification of prior-round Q-RNN-SPEC.md files
+- NO modification of CLAUDE-*.md REINFORCEMENTS sections
+- NO `gh repo` operations
+
+ALLOWED modifications:
+- `tools/coverage-saturation.ts` (NEW)
+- `tools/coverage-summary.ts` (optional NEW)
+- `coordination/coverage/R72-saturation-matrix.json` + `.md` (NEW; generated)
+- `package.json` (add coverage script)
+- `README.md` (extend Coverage section)
+- `test/q72-coverage-saturation.test.ts` (NEW)
+- `coordination/specs/Q-R72-SPEC.md` + `Q-R72-SPEC-AUDIT.md` + `Q-R72-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R72.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rule 1: ACTIVE GATE
+- Rule 2: ACTIVE GATE — branch-binding coverage
+- Rule 3: ACTIVE GATE — discriminating assertions
+- Rule 4: ACTIVE GATE — ALLOWED_SET at spec-emit; **NO forward-protection / live-file-count / anti-scope-diff-against-prior-round patterns** (R62+R66+R68 cumulative lesson)
+- Rule 5: N/A
+- Rule 6: ACTIVE GATE
+- Rule 7: ACTIVE GATE Surface (a)
+
+### Halt conditions (R72 Implementer)
+
+1. Q-R72-EMPIRICAL.sh non-zero exit at chore-A for any reason other than pre-documented two-state mismatch
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R71 close other than R72-additions
+4. Architectural decision requires DS-repo modification: HALT + DIAGNOSTIC
+5. Architectural decision requires new external dependencies: HALT + DIAGNOSTIC
+6. **R62+R66+R68 cumulative lesson — claim-then-walk + avoid round-evolution-fragile AC patterns**
+7. R61-class architectural-reality discovery: HALT + DIAGNOSTIC + ESCALATE
+8. **Per-type detection rate NOT MET** (any failure type below Architect minimum): HALT + DIAGNOSTIC + ESCALATE — substantive engine coverage gap
+
+### Inputs for Architect (R72)
+
+1. `coordination/NEXT-ROLE.md` § R72 Round-scope directive
+2. `tools/build-canned-demos.ts` (R71) — scenario generation patterns
+3. `tools/demo-scenario.ts` (R70) — CLI fault-injection patterns
+4. `demos/scenarios/*.json` (R71) — 8 canned scenarios as baselines
+5. `engine/topology/*` + `engine/detectors/*` + `engine/per-shard/*`
+6. `engine/events/freeze-hook.ts` + `engine/ds-integration/freeze-hook-factory.ts`
+7. `test/_substrate/*.json` — synthetic topology fixtures
+8. Phase 3 PRD § Phase 3 acceptance criteria + § Phase 3 success metrics
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R72 --tier full
+```
 
 ---
 
