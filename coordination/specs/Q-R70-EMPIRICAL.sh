@@ -38,7 +38,7 @@ assert_block() {
   fi
 }
 
-ROUND_START_SHA="${ROUND_START_SHA:-<INJECTED-AT-CHORE-A>}"
+ROUND_START_SHA="${ROUND_START_SHA:-bb9549bf0a80bc5dfc5bad2247267ea275e30ab2}"
 
 # ── Block 1: tsc exit 0 ────────────────────────────────────────────────
 assert_block "tsc-exit-0" \

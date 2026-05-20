@@ -70,6 +70,19 @@ pnpm test      # runs the full test suite (~440 tests)
 pnpm build     # tsc compile
 ```
 
+## Quick demo
+
+Once installed, run any of four canned scenarios to see Tessera detect synthetic faults end-to-end:
+
+```bash
+pnpm demo clean-baseline       # healthy fleet — no firings
+pnpm demo sdc-drift            # silent SDC drift on shard-04 → Family A betting fires
+pnpm demo common-mode-rack     # 3 shards on shared rack → 1 common-mode candidate
+pnpm demo event-conditional    # firmware-push event → freeze-hook activates
+```
+
+Each scenario runs in under 30 seconds, produces deterministic ASCII output, and exercises one real engine surface against synthetic inputs (no live cluster needed). Source: [`tools/demo-scenario.ts`](./tools/demo-scenario.ts).
+
 ## Methodology
 
 Tessera was developed using the [Anchor](https://github.com/johnpatrickwarren-oss/anchor) coordination methodology — a four-role pipeline (Architect → Implementer → Reviewer → Memorial-Updater) with cold-eye discipline, threshold-aware reinforcement accretion, and explicit ESCALATE patterns for spec/reality mismatches.
