@@ -371,7 +371,7 @@ with a clear commit message.
 #     Grilling gate: for each command modifier prescribed in § 3, verify the identical modifier
 #     appears in § 5 and in the verifier. Detected tessera R48 MINOR-2.
 
-# REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 4 sub-variants)
+# REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 6 sub-variants)
 #
 #   Coverage scope (R01): When an AC says "enumerates every vendored file," resolve scope
 #     for ALL files the workflow touches, not just the primary directory. Files in test/ or
@@ -400,6 +400,34 @@ with a clear commit message.
 #     The NEXT-ROLE.md attestation must disclose any gap between strict literal AC reading
 #     and what the artifact actually satisfies; "§§ 1.1-1.4 each contain both" is an
 #     overconfident attestation if only the intro umbrella covers the joint requirement.
+#
+#   Dual-occurrence substring marker (R56 MINOR-2): When an AC uses a `grep`-based
+#     substring marker to verify that a literal appears in a source file, and that literal
+#     appears more than once in the file (e.g., once in a JSDoc comment and once in the
+#     load-bearing type-body declaration), the marker is non-discriminating: a future
+#     regression removing the type-body literal while leaving the JSDoc comment intact
+#     still passes the AC. Mitigation: anchor the marker to declaration-line context
+#     (e.g., `/correlational_not_causal: true;\s*$/m` anchored to the line terminator),
+#     OR assert `grep -c marker source.ts === 1` to verify uniqueness. Compile-catch is
+#     one mitigating factor but does not close the gap for non-compile-caught regressions.
+#     Pre-emit grilling gate: for each substring AC on a literal that lives in a JSDoc +
+#     type-body pair, check occurrence count in the file before finalizing the marker.
+#     4th tessera instance of self-confirming-test-assertion-specificity (cross-project
+#     rule derived at R41 CROSS-PROJECT-MEMORIAL.md:3569). Detected tessera R56 MINOR-2.
+#
+#   Per-element-validation coverage gap (R56 MINOR-3): When a validation function has
+#     multiple distinct throw-branches (e.g., `validateSliceShape` at
+#     engine/topology/tpu-source.ts:79-89 has: not-array; length≠3; non-number element;
+#     element < 1), ensure at least one sub-case AC exercises EACH branch, or explicitly
+#     document each unexercised branch as defensive in spec § Acknowledged-coverage-gaps.
+#     Exercising only the first branch (length-not-3) leaves per-element guards unverified:
+#     a regression dropping `dim < 1` allows `slice_shape: [-1,-1,-1]` to flow through
+#     without throw. Acceptable disposition per R30/R53 precedent when the guard is
+#     defensive (well-formed production inputs never trigger it); but gap must be named in
+#     spec audit § 2.5 to be visible to future Reviewers. Pre-emit grilling gate: for each
+#     multi-branch validation function, list all branches in the branch-binding table and
+#     mark each as bound-by-AC or defensive+documented. Detected tessera R56 MINOR-3
+#     (parallel to R30 + R53 per-element-validation disposition; carries forward open gap).
 
 # REINFORCED 2026-05-17 — When spec § Mechanism defines a quantitative formula by name,
 #   pre-emit grilling MUST include a "formula vs implementation" cross-check: verify the
