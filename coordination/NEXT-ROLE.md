@@ -1,6 +1,6 @@
 CURRENT-ROUND: R54
-NEXT-ROLE: COORDINATOR
-STATUS: READY
+NEXT-ROLE: (operator decision; R55 = WAVE-PLAN-05 emission)
+STATUS: WAVE-COMPLETE
 TIER: coordinator-wave-gate
 
 ## Round-scope directive (R54 — WAVE-GATE-04 close ONLY; SLICE 2 plan deferred to R55)
