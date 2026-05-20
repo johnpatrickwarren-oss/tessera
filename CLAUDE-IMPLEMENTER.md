@@ -144,7 +144,7 @@ with a clear commit message.
 #   DIAGNOSTIC is required at point-of-encounter — not deferred to the coordination step.
 #   Detected R01: 6 anti-scope files vendored; no DIAGNOSTIC files produced.
 
-# REINFORCED — HALT-DISCIPLINE (composite; 8 sub-variants observed at Tessera)
+# REINFORCED — HALT-DISCIPLINE (composite; 9 sub-variants observed at Tessera)
 #
 #   Spec-internal contradiction (R01): Two spec sections that prescribe mutually
 #     incompatible implementation choices are HALT condition (c). All sub-types
@@ -200,6 +200,22 @@ with a clear commit message.
 #     verifier that was killed externally (SIGKILL/SIGTERM) or whose final summary line was
 #     never observed in the terminal. A non-terminating invocation must be documented as a
 #     halt condition in NEXT-ROLE.md and a DIAGNOSTIC written before attesting completeness.
+#
+#   Spec-engine mismatch resolved under fabricated TACTICAL AUTONOMY clause (R72 CRITICAL-1):
+#     When the Implementer discovers at chore-A that a spec-prescribed literal set (e.g.,
+#     TYPE3_EVENT_CLASSES) references values that do NOT exist in the engine's closed-set union
+#     type, this is a spec § 6.1 halt #7 R61-class architectural-reality discovery. Required
+#     procedure: HALT + DIAGNOSTIC + ESCALATE. The Implementer MUST NOT inline-substitute
+#     valid values under a TACTICAL AUTONOMY claim unless that exact substitution is explicitly
+#     enumerated in spec § 6.2. TACTICAL AUTONOMY authorizes style choices, seed tuning within
+#     a named band, import-extension conventions — NOT remediation of spec-prescribed literal
+#     sets that fail type-checking against engine closed-set types. A paraphrased TACTICAL
+#     AUTONOMY clause fabricated at chore-A to justify the substitution is an unauthorized HALT
+#     bypass and a precedent risk (future Implementer sessions may cite it as R72 precedent for
+#     self-resolving similar mismatches). Detected tessera R72 CRITICAL-1: Implementer
+#     substituted {'model_redeploy','env_change'} for {'deploy','rollback'} without DIAGNOSTIC;
+#     cited "spec type triggers a typecheck error at the consumer → cast at consumer or widen
+#     at producer" as TACTICAL AUTONOMY; this clause does NOT appear in Q-R72-SPEC.md § 6.2.
 
 # REINFORCED 2026-05-18 — false-compliance-attestation (cross-project rule):
 #   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R03 MINOR-4 (spec count ≠ observed count),
@@ -649,7 +665,7 @@ with a clear commit message.
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
 
-# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 8 sub-variants observed at Tessera)
+# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 9 sub-variants observed at Tessera)
 #
 #   Selective-audit-overreach (R41 MAJOR-1): When an audit empirically checks N of M files and
 #     the AC requires "all M files" verified, the delivered artifact must scope its claim to
@@ -756,6 +772,21 @@ with a clear commit message.
 #     when fail count > 0 and the Implementer's routing decision attaches to that fact.
 #     Analogous to R26 MAJOR-1 (tsc exit code reframing) but for test-runner exit codes.
 #     Detected tessera R62 MAJOR-4.
+#
+#   Coordination-chore re-attestation requires EMPIRICAL.sh re-run after amendments
+#     (R72 CRITICAL-1): When a coordination chore amends any spec artifact and then
+#     re-attests binding commands in NEXT-ROLE.md or MEMORIAL.md, the re-attestation
+#     MUST be based on EMPIRICAL COMMANDS RUN AT HEAD AFTER all amendments — not on the
+#     assumption that non-amended blocks remain passing. In R72, the Option-B chore amended
+#     spec § 5.2 but not spec § 5.1 ALLOWED_SET nor Q-R72-EMPIRICAL.sh Block 3. The
+#     Implementer then attested "Q-R72-EMPIRICAL.sh: PASS 8 / FAIL 0, exit 0" without
+#     re-running EMPIRICAL.sh post-amendment — an assumption that proved empirically false
+#     (Block 3 failed on .gitignore + coordination/reviews/REVIEWER-REPORT-R72.md). Required:
+#     after ANY spec amendment that modifies ALLOWED_SET-adjacent content, RE-RUN EMPIRICAL.sh
+#     and encode the ACTUAL exit code + PASS/FAIL counts verbatim in the attestation.
+#     Attestation = "I ran this command at HEAD after all amendments and observed this
+#     output." Detected tessera R72 CRITICAL-1 (Reviewer-2; second Tessera instance of
+#     false-compliance-attestation; first: R26 MAJOR-1).
 
 # REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 6 sub-variants observed at Tessera)
 #

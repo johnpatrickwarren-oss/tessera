@@ -182,7 +182,7 @@ All unresolved decisions → open questions in the spec.
 #   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
 #   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
 
-# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 5 sub-variants observed at Tessera)
+# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 6 sub-variants observed at Tessera)
 #
 #   Fixture accumulation adequacy (R07 MAJOR-1): When grilling catches that an e-process or
 #     statistical-detector AC's fixture needs N windows of accumulation to cross a detection
@@ -260,6 +260,23 @@ All unresolved decisions → open questions in the spec.
 #     reasoning text "too small to fire alone" empirically false) + MAJOR-2 (candidate_node_kinds
 #     = ['cooling_zone', 'rack', 'psu'] causes engine to emit 3 candidates; reasoning text "ONE
 #     cooling-zone-level candidate" empirically false).
+#
+#   Consumer-side enum value-space cite-then-verify (R72 MAJOR-1 + MAJOR-3): When spec § 2.x
+#     prescribes a hard-coded literal set (e.g., TYPE3_EVENT_CLASSES = ['deploy', 'rollback',
+#     ...]) that will be assigned to a TypeScript field typed as a closed-set string-union (e.g.,
+#     DeployEventPayload['event_class']), the Architect MUST verify each prescribed literal appears
+#     verbatim in the union's actual value set via direct read of the type declaration file — not
+#     only verifying the function signatures that accept the type. R11 cite-then-verify applies to
+#     ALL spec-prescribed literals that cross engine-type boundaries. Procedure: for each spec
+#     § 2.x variation-grid constant, identify the engine type it must satisfy; open the type
+#     declaration file; read the actual union/enum values; verify every spec-prescribed literal
+#     appears verbatim. Pre-emit grilling gate: "are there spec-prescribed string literals I have
+#     not verified against a closed-set engine type?" If yes, perform verification before routing.
+#     Detected tessera R72 MAJOR-1 (spec § 2.1 TYPE3_EVENT_CLASSES = ['firmware_push', 'deploy',
+#     'config_change', 'rollback']; engine closed-set per event-contract.ts:33-38 = 'firmware_push'
+#     | 'model_redeploy' | 'env_change' | 'config_change' | 'capacity_change'; 'deploy' and
+#     'rollback' absent; forced chore-A typecheck failure; resolved via Option B retroactive
+#     DIAGNOSTIC). 3rd Architect-side instance; Rule 5 cross-project threshold crossed.
 
 # REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
 #   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include
