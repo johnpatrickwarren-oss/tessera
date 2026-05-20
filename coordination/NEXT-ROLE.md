@@ -1,7 +1,119 @@
-CURRENT-ROUND: R69
-NEXT-ROLE: OPERATOR
-STATUS: PUBLISHED
-TIER: coordinator
+CURRENT-ROUND: R70
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
+TIER: full
+
+---
+
+## § R70 Round-scope directive (Architect — Tessera demo scenario runner; post-publication leverage) (2026-05-20)
+
+R70 = full-tier pipeline round building Tessera's first narrative demo. Post-publication context: Tessera v1 is now public at `github.com/johnpatrickwarren-oss/tessera`, but lacks a "show this to someone" demo surface. All 440+ tests are AC-bound discipline tests (TAP output, not narrative); 6 vendor adapters + DS integration + per-shard residuals + freeze-hook all exist and work, but a visitor to the repo can't easily SEE them work in 30 seconds. R70 closes that gap.
+
+**Round-start SHA:** `31ff55c` (chore(R69 close): Tessera v1 PUBLISHED). Verify via `git rev-parse HEAD` at Architect session entry.
+
+### Primary deliverable
+
+Build a `pnpm demo` runnable narrative scenario runner that converts Tessera from "methodology demonstration with 440 passing tests" → "show-someone-the-product-in-30-seconds":
+
+1. **`tools/demo-scenario.ts`** (NEW; Coordinator-default location; Architect picks at spec time — `scripts/demo.ts` also acceptable):
+   - Scenario selector via CLI arg (e.g., `pnpm demo clean-baseline` / `pnpm demo sdc-drift` / `pnpm demo common-mode` / `pnpm demo event-conditional`)
+   - Each scenario: (a) generate synthetic GPU cluster topology from existing fixtures or generators; (b) inject canned fault pattern; (c) run Tessera detection pipeline (Family A/C/D/E detectors + per-shard residual + e-BH FDR); (d) render ASCII output (fleet diagram + per-shard verdict table + freeze-hook activation timeline if applicable)
+   - 30-60 second runtime per scenario; deterministic seed for reproducibility
+   - Exit 0 on demo completion (not "did the fault get detected" — demo always completes; output shows the result)
+
+2. **3-4 canned scenarios** (Architect picks final list at spec § 0 brainstorm; suggested defaults):
+   - `clean-baseline` — healthy 10-shard NVIDIA NVLink cluster; all detectors stay in baseline; demonstrates "no false positives"
+   - `sdc-drift` — same fleet; inject silent SDC drift on shard 4 over 18 windows; demonstrates Family A/C detector accumulating e-process evidence past Ville threshold; per-shard residual flags shard 4 specifically
+   - `common-mode-rack` — same fleet; inject rack-localized degradation (3 shards on same NVLink rack); demonstrates topology-aware attribution (cluster signal vs fleet-wide noise)
+   - `event-conditional` — same fleet; inject drift that would normally trigger; simultaneously emit synthetic DS deploy event via `engine/ds-integration/event-consumer.ts`; freeze-hook activates; demonstrates event-conditional attribution (gate on real deploy event)
+
+3. **`package.json` scripts addition:**
+   - `"demo": "pnpm exec node tools/demo-scenario.js"` (or equivalent invocation against compiled output) — Architect specifies exact invocation pattern at spec § 4
+   - Optionally `"demo:sdc-drift": "pnpm demo sdc-drift"` etc. for per-scenario shortcuts (Architect decides)
+
+4. **README "Quick demo" section** — NEW section appended after "Getting started" section in `README.md`:
+   - 3-4 line walkthrough: `pnpm install && pnpm demo sdc-drift` produces visible output in 30 seconds
+   - Brief annotation explaining what the operator sees (e.g., "shard 4 accumulates e-process evidence; threshold crossed at window 18; per-shard residual flags this shard specifically; cluster-wide noise stays in baseline")
+   - Link to `tools/demo-scenario.ts` for "what each scenario does"
+
+5. **Test file** `test/q70-demo-scenario.test.ts`:
+   - Scenario structural ACs: each scenario produces output containing expected literal markers (e.g., scenario `sdc-drift` output contains `"shard 4"` + `"threshold crossed"`)
+   - Determinism ACs: same scenario run twice produces identical output (seeded RNG)
+   - Exit-code ACs: every scenario exits 0
+   - Anti-regression ACs: Phase 1+2+Phase-3 ACs unchanged (440-ish baseline; carry-forward fail set NOT increased)
+
+6. **Q-R70-EMPIRICAL.sh** at chore-A pre-commit (Rule 1 sub-class).
+
+### Tier rationale
+
+**full-tier** — Architect (scenario design + ASCII output formatting + fault-injection mechanism design; cite-then-walk over existing engine surfaces) + Implementer (scenario runner + 3-4 scenarios + tests + README section) + Reviewer (cold-eye) + Memorial-Updater.
+
+### Anti-scope (R70 hard limits)
+
+- NO new external dependencies (Path B preserved; no ASCII-table libraries, no faker libraries — use Node.js built-ins + existing `tools/calibrators/` infrastructure if applicable)
+- NO modification of `engine/*` files (engine is frozen post-Phase-3; demo CONSUMES engine, does not modify)
+- NO modification of `engine/ds-integration/feed-contract.ts` + `event-contract.ts` (R62 frozen) + `feed.ts` (R65 frozen) + `event-consumer.ts` + `freeze-hook-factory.ts` (R66 frozen)
+- NO real-cluster work (Path B preserved)
+- NO DS-repo modifications (W3-1 Option A preserved)
+- NO modification of `coordination/specs/Q-RNN-SPEC.md` files from prior rounds
+- NO modification of R36-30/R36-31 / AC-R36-21 / AC-R65-2 / AC-R66-14 carry-forward AC fail set (defer to Phase 4 hygiene round)
+- NO `gh repo` operations (publication is already done at R69)
+- NO modification of CLAUDE-*.md REINFORCEMENTS sections
+
+ALLOWED modifications:
+- `tools/demo-scenario.ts` (NEW; Coordinator-default; Architect may pick `scripts/demo.ts`)
+- `tools/` may add scenario-helper modules (e.g., `tools/demo-scenarios/*.ts`) if Architect picks multi-file layout
+- `package.json` (add `demo` script entry; possibly per-scenario shortcuts)
+- `README.md` (NEW "Quick demo" section)
+- `test/q70-demo-scenario.test.ts` (NEW)
+- `coordination/specs/Q-R70-SPEC.md` + `Q-R70-SPEC-AUDIT.md` + `Q-R70-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R70.md` (Reviewer)
+- `coordination/diagnostics/DIAGNOSTIC-R70-*.md` (conditional)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rule 1: ACTIVE GATE — Q-R70-EMPIRICAL.sh + Tightenings 1-4
+- Rule 2: ACTIVE GATE — § 5.3 branch-binding coverage for scenario-selector branches + each scenario's fault-injection branches + output-rendering branches
+- Rule 3: ACTIVE GATE — discriminating assertions (output marker literals)
+- Rule 4: ACTIVE GATE — ALLOWED_SET enumerated at spec-emit time; **MUST NOT use forward-protection AC pattern OR live-file-count AC pattern OR anti-scope-diff-against-prior-round-allowed-set** (R62 + R66 + R68 cumulative lesson; round-evolution AC fragility 3-instance threshold flagged in NEXT-ROLE.md operator flags). Use historical-only bindings (`git diff round-start..chore-A`).
+- Rule 5: N/A
+- Rule 6: ACTIVE GATE — § 6 halt conditions
+- Rule 7: ACTIVE GATE Surface (a)
+
+### Halt conditions (R70 Implementer)
+
+1. Q-R70-EMPIRICAL.sh non-zero exit at chore-A for any reason other than pre-documented two-state mismatch
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R68 close (`444/436/5/3`) other than R70-additions (any pre-R70 test other than the 5 carry-forward fails transitions PASS→FAIL): HALT + DIAGNOSTIC
+4. Architectural decision requires DS-repo modification: HALT + DIAGNOSTIC
+5. Architectural decision requires real-cluster work or new external dependencies: HALT + DIAGNOSTIC
+6. **R62 + R66 + R68 cumulative lesson — apply claim-then-walk + avoid round-evolution-fragile AC patterns**: Architect spec MUST walk through every claim about engine surface behavior via direct Read at spec-emit time; spec MUST NOT use forward-protection / live-file-count / anti-scope-diff-against-prior-round AC patterns
+7. R61-class architectural-reality discovery (spec premise empirically false at Implementer time): HALT + DIAGNOSTIC + ESCALATE
+
+### Inputs for Architect (R70)
+
+1. `coordination/NEXT-ROLE.md` § R70 Round-scope directive (THIS section) — READ FIRST
+2. `README.md` — current Quick demo gap (no quickstart-narrative section; only generic "Getting started" install)
+3. `coordination/PRD.md` — phase scope context
+4. `engine/topology/*` adapter source files — Tessera's parsed-topology surface
+5. `engine/detectors/*` — Family A/C/D/E detector implementations (substrate for demo's fault-detection narrative)
+6. `engine/per-shard/*` — per-shard residual semantics (substrate for "shard 4 specifically" attribution)
+7. `engine/events/freeze-hook.ts` — Phase 2 frozen freeze-hook (substrate for event-conditional scenario)
+8. `engine/ds-integration/event-consumer.ts` (R66) + `freeze-hook-factory.ts` (R66) — Tessera↔DS bi-directional event substrate
+9. `test/_substrate/*.json` — existing synthetic topology fixtures (Trainium 2D torus; Inferentia ring; K8s nodelist; etc.) for demo input
+10. `tools/curate-baseline-*.ts` — existing synthetic-cluster generation infrastructure
+11. `coordination/specs/Q-R62-SPEC.md` + `Q-R65-SPEC.md` + `Q-R66-SPEC.md` — most-recent spec triad patterns
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R70 --tier full
+```
+
+---
 
 ---
 
