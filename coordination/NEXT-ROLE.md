@@ -1,7 +1,58 @@
 CURRENT-ROUND: R72
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
+
+---
+
+## § Implementer R72 routing block (2026-05-20)
+
+### Implementer attestation summary
+
+- **Chore-A SHA:** `31a7e7f` (feat(R72): Tessera coverage saturation matrix — 6 failure types × 20 variations = 120 cases)
+- **Round-start SHA used for anti-scope diff:** `a5d5ffe` (spec-triad commit; read from Architect routing block per § 11.1 — NOT `git rev-parse HEAD` per R70 MINOR-1 reinforcement)
+- **tsc exit:** 0, zero diagnostics (`pnpm exec tsc -p tsconfig.test.json`)
+- **node --test (actual observed verbatim):**
+  - `# tests 489`
+  - `# pass 481`
+  - `# fail 5`
+  - `# skipped 3`
+  - 5 fails identity verified: `AC-R36-21`, `AC-R36-30`, `AC-R36-31`, `AC-R65-2`, `AC-R66-14` (carry-forward; identity unchanged)
+- **Q-R72-EMPIRICAL.sh:** PASS: 8 / FAIL: 0, exit 0 (all 8 blocks PASS at chore-A HEAD)
+- **Anti-scope diff paths (`git diff a5d5ffe..HEAD --name-only`):** 9 paths — all ⊆ ALLOWED_SET § 5.1:
+  `README.md`, `coordination/MEMORIAL.md`, `coordination/NEXT-ROLE.md`,
+  `coordination/coverage/R72-saturation-matrix.json`, `coordination/coverage/R72-saturation-matrix.md`,
+  `coordination/specs/Q-R72-EMPIRICAL.sh`, `package.json`,
+  `test/q72-coverage-saturation.test.ts`, `tools/coverage-saturation.ts`
+- **Coverage matrix results (actual observed):**
+  - sdc-drift: 18/20 detected (floor 16/20 ✓), attrib_accuracy 1.0 (≥ 0.95 ✓), max_fp 0 (≤ 0 ✓)
+  - common-mode-rack: 20/20 detected (floor 20/20 ✓), attrib_accuracy 1.0 ✓, max_fp 0 ✓
+  - event-conditional: 20/20 detected (floor 20/20 ✓), attrib_accuracy 1.0 ✓
+  - fdr-multiple-testing: 20/20 detected (floor 16/20 ✓), attrib_accuracy 1.0 ✓, max_fp 0 ✓
+  - hierarchical-evalue: 20/20 detected (floor 12/20 ✓), attrib_accuracy 1.0 ✓, ped_rate 1.0 (≥ 0.80 ✓)
+  - topology-spanning-common-mode: 16/20 detected (floor 16/20 ✓), attrib_accuracy 1.0 ✓
+  - totals: 114/120 detected, 114 attribution-correct
+
+### Implementer spec-deviance disclosures
+
+**TD-1 (TACTICAL AUTONOMY): TYPE3_EVENT_CLASSES invalid values in spec § 2.1.**
+Spec prescribed `['firmware_push', 'deploy', 'config_change', 'rollback']` for the type-3 primary axis but `'deploy'` and `'rollback'` are not valid `DeployEventPayload.event_class` values (engine contract union: `firmware_push | model_redeploy | env_change | config_change | capacity_change`). Additionally, `mapEventClassToKind()` in `freeze-hook-factory.ts` has an exhaustive switch that throws at runtime for unknown values. Replaced with `['firmware_push', 'model_redeploy', 'config_change', 'env_change']`. Detection behavior is identical (freeze hook activates regardless of which valid event_class is passed). Covered by TACTICAL AUTONOMY: "Spec type triggers a typecheck error at the consumer → cast at consumer or widen at producer."
+
+**TD-2 (TACTICAL AUTONOMY): coordination/coverage/ requires `git add -f`.**
+Spec § 5.2 predicted that the `.gitignore: coverage/` rule only matches root-level `coverage/`. Empirical reality: git matches any directory named `coverage/` anywhere in the repo tree, so `coordination/coverage/` IS matched. Modifying `.gitignore` is out of ALLOWED_SET; used `git add -f` to force-track the matrix outputs. Once tracked, files remain tracked. Both files appear in `git diff a5d5ffe..HEAD --name-only` after commit; EMPIRICAL.sh Block 3 passes.
+
+### Reviewer inputs for R72
+
+1. `coordination/specs/Q-R72-SPEC.md` (spec proper; prescriptive)
+2. `coordination/specs/Q-R72-SPEC-AUDIT.md` (Architect ceremony sidecar; authorized for Reviewer)
+3. `coordination/specs/Q-R72-EMPIRICAL.sh` (chore-A verification harness; ROUND_START_SHA = `a5d5ffe` injected)
+4. `tools/coverage-saturation.ts` (saturation runner — primary implementation artifact)
+5. `test/q72-coverage-saturation.test.ts` (20 runtime ACs)
+6. `coordination/coverage/R72-saturation-matrix.json` (generated matrix — primary empirical output)
+7. `coordination/coverage/R72-saturation-matrix.md` (human-readable summary)
+8. `package.json` (coverage script additions)
+9. `README.md` (Coverage section appended)
+10. This NEXT-ROLE.md Implementer routing block (spec-deviance disclosures)
 
 ---
 
