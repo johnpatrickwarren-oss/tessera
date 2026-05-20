@@ -1,0 +1,9 @@
+{
+  "instance_type": "trn1.32xlarge",
+  "neuron_devices": [
+    { "neuron_device": 0, "connected_to": [] },
+    { "neuron_device": 1, "connected_to": [] },
+    { "neuron_device": 2, "connected_to": [] },
+    { "neuron_device": 3, "connected_to": [] }
+  ]
+}
