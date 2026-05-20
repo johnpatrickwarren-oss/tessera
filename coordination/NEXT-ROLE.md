@@ -1,6 +1,6 @@
 CURRENT-ROUND: R57
-NEXT-ROLE: COORDINATOR
-STATUS: READY
+NEXT-ROLE: (operator decision; R58 = WU-Phase3-2B live-fetch interface dispatch)
+STATUS: WAVE-COMPLETE
 TIER: coordinator-wave-gate
 
 ## Round-scope directive (R57 — WAVE-GATE-07 close + CLUSTER-HANDOFF-WAVE07-2A-2B.md emit)
