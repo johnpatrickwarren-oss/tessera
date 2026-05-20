@@ -211,10 +211,7 @@ test('AC-R62-9: endpoint constants match interface literal types in both directi
 // ───────────────────────────────────────────────────────────────────────
 test('AC-R62-12: round-start-to-chore-A diff ⊆ R62 allowed-set (chore-A SHA pinned)', () => {
   const ROUND_START = 'ad6cc6b';
-  const CHORE_A_SHA = '<INJECTED-AT-CHORE-B>'; // Implementer replaces at chore-B
-  if (CHORE_A_SHA === '<INJECTED-AT-CHORE-B>') {
-    assert.fail('CHORE_A_SHA placeholder not injected — chore-B SHA backfill required');
-  }
+  const CHORE_A_SHA = '0018502b12ba3e730fa093e682c9f0ae0ad42abe';
   const ALLOWED = [
     'coordination/MEMORIAL.md',
     'coordination/NEXT-ROLE.md',
@@ -266,10 +263,7 @@ test('AC-R62-14: feed-contract.ts propagates correlational_not_causal:true liter
 // AC-R62-15: chore-A-to-HEAD diff empty (forward-protection per R36/R53/R56/R58)
 // ───────────────────────────────────────────────────────────────────────
 test('AC-R62-15: chore-A-to-HEAD diff is empty (forward-protection)', () => {
-  const CHORE_A_SHA = '<INJECTED-AT-CHORE-B>'; // Implementer replaces at chore-B
-  if (CHORE_A_SHA === '<INJECTED-AT-CHORE-B>') {
-    assert.fail('CHORE_A_SHA placeholder not injected — chore-B SHA backfill required');
-  }
+  const CHORE_A_SHA = '0018502b12ba3e730fa093e682c9f0ae0ad42abe';
   const out = execSync(`git diff ${CHORE_A_SHA}..HEAD --name-only`, { encoding: 'utf-8' })
     .split('\n').filter(s => s.length > 0);
   assert.deepStrictEqual(out, [],
