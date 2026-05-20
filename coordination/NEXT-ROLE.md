@@ -1,7 +1,132 @@
-CURRENT-ROUND: R72
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R73
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § Phase 4 SLICE 1 framing — Anchor cost efficiency (2026-05-20)
+
+**Motivation:** Anthropic's June 15, 2026 billing change moves `claude -p` from subsidized subscription pool to a separate metered "Agent SDK Credit" billed at FULL API rates. Per-round full-tier cost at full rates is ~$0.90; Tessera-class projects (~70 rounds/phase) cost ~$63/phase. Operator-flagged cost-efficiency work to reduce per-round spend without sacrificing detection power.
+
+**SLICE 1 scope: 3 substantive rounds + 1 cross-repo coordination + 2 detector tuning rounds = 6 rounds.**
+
+| Round | Work |
+|---|---|
+| **R73** (this round) | Tier-routing classifier (decides per-round tier: full / audit / implementer-only / coordinator-only) |
+| **R74** | Haiku-for-MU + Reviewer scope differentiation |
+| **R75** | Cross-session prompt-cache engineering |
+| **R76** | Anchor public-repo merge (port R73-R75 to source; re-vendor clean to Tessera) |
+| **R77** | Detector tuning gap 1 (low-magnitude SDC; Family A parameter sweep + Family C) |
+| **R78** | Detector tuning gap 2 (multi-level topology walk + small-set common-mode) |
+
+**Workflow operator-confirmed:** Tessera first + propagate to Anchor at R76; detector tuning same chain; Tessera-vendored framework files temporary divergence rebased post-R76.
+
+**Expected savings:** ~40-55% per-round cost reduction once R73-R75 land. Validates against Tessera's commit history as training/validation corpus.
+
+---
+
+## § R73 Round-scope directive (Architect — tier-routing classifier; Phase 4 SLICE 1 first round) (2026-05-20)
+
+R73 = full-tier pipeline round building the tier-routing classifier. The classifier reads the round directive + minimal prior context and outputs a tier recommendation; `run-pipeline.sh` consults the classifier output before dispatching the role chain.
+
+**Round-start SHA:** `446dd26` (chore(R72): Memorial-Updater outputs). Verify via `git rev-parse HEAD` at Architect session entry.
+
+### Primary deliverable
+
+1. **`scripts/tier-router.ts`** (NEW; Coordinator-default; Architect may rename):
+   - Reads the round directive (NEXT-ROLE.md § R{N} Round-scope directive section) + minimal context (Round-start SHA + recent commits)
+   - Outputs one of 4 tier recommendations: `full` / `audit` / `implementer-only` / `coordinator-only`
+   - Outputs confidence score (0.0-1.0); if confidence < threshold, defaults to `full` (uncertainty escape hatch)
+   - Outputs brief rationale (1-3 sentence justification)
+   - Emits machine-readable JSON for pipeline consumption
+   - Architect picks classifier mechanism at spec § 0: Haiku LLM call (recommended; nuanced reasoning) OR heuristic rules (zero-cost but brittle) OR hybrid (heuristic gate + Haiku tiebreaker)
+
+2. **`run-pipeline.sh` integration** (Tessera-vendored; modified per operator-confirmed divergence pattern):
+   - Add `--auto-tier` flag consulting `scripts/tier-router.ts` before role dispatch
+   - Preserve existing `--tier full/audit/implementer-only/coordinator-only` explicit-override behavior
+   - Tier-down behavior:
+     - `audit` → skip Architect; Implementer designs inline OR reuses prior round's spec
+     - `implementer-only` → skip Architect + Reviewer
+     - `coordinator-only` → no subagent invocations (Coordinator-interactive)
+   - Log router decision + rationale in `coordination/logs/ROUND-R{N}-ROUTING.md` for audit trail
+
+3. **`scripts/tier-router-validate.ts`** (NEW; validation script):
+   - Replays Tessera's commit history R01-R72 against the router
+   - Compares router output vs actual tier used at that round
+   - Reports: routing-accuracy matrix; divergence list (rounds where router would have downgraded but actual round needed full-tier — these are the dangerous false-negatives)
+   - **Load-bearing safety check: R45 / R61 / R62 / R66 / R72 MUST all route `full`** (architectural-decision rounds); if router misses any, design is broken
+
+4. **`pnpm` scripts:**
+   - `"tier-router": "pnpm exec node scripts/tier-router.js"`
+   - `"tier-router:validate": "pnpm exec node scripts/tier-router-validate.js"`
+
+5. **Test file** `test/q73-tier-router.test.ts`:
+   - Router structural ACs: JSON shape (tier + confidence + rationale)
+   - Validation-corpus ACs: R45/R61/R62/R66/R72 all routed `full`
+   - Coordinator-round ACs: R49/R50/R51/R55/R60/R63/R64/R68 router output is `coordinator-only` or `full` (NOT `implementer-only`)
+   - Uncertainty-escape-hatch ACs: ambiguous directive → `full`
+   - Anti-regression: R72 baseline 489/481/5/3 preserved + R73-additions
+
+6. **Q-R73-EMPIRICAL.sh** at chore-A pre-commit (Rule 1 sub-class)
+
+### Tier rationale
+
+**full-tier** — Architect (router input format + decision-criteria + validation-corpus methodology; cite-then-walk over Tessera's commit history) + Implementer (router + validation + tests + pipeline integration) + Reviewer (cold-eye for router false-negative safety claims) + Memorial-Updater. Intentionally full-tier first-round bootstrap.
+
+### Anti-scope (R73 hard limits)
+
+- NO modification of `engine/*` files (Phase 3 frozen)
+- NO modification of `demos/*` files (R70/R71 frozen)
+- NO modification of `tools/coverage-saturation.ts` or `tools/build-canned-demos.ts` or `tools/demo-scenario.ts` (frozen)
+- NO new external dependencies (R68 anti-worm posture)
+- **MODIFICATIONS PERMITTED to Tessera-vendored framework files (`run-pipeline.sh` + optionally `CLAUDE-COORDINATOR.md` for `--auto-tier` Mode docs)** per Tessera-temporary-divergence operator-confirmed pattern. Document in MEMORIAL COORDINATOR entry; rebase at R76 Anchor merge.
+- NO modification of CLAUDE-ARCHITECT/IMPLEMENTER/REVIEWER/MEMORIAL REINFORCEMENTS sections
+- NO DS-repo modifications
+- NO `gh repo` operations to Anchor (deferred to R76)
+- NO modification of carry-forward AC fail set
+- NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `scripts/tier-router.ts` (NEW)
+- `scripts/tier-router-validate.ts` (NEW)
+- `scripts/tier-router-criteria.md` (NEW; optional decision-criteria docs)
+- `coordination/logs/ROUND-R*-ROUTING.md` (NEW pattern; per-round routing logs)
+- `run-pipeline.sh` (Tessera-vendored; temporary divergence)
+- `CLAUDE-COORDINATOR.md` (optional; `--auto-tier` Mode docs addition only — NOT a REINFORCEMENT entry)
+- `package.json` (add tier-router scripts)
+- `test/q73-tier-router.test.ts` (NEW)
+- `coordination/specs/Q-R73-SPEC.md` + `Q-R73-SPEC-AUDIT.md` + `Q-R73-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R73.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends; document Tessera-temporary-divergence)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rule 1: ACTIVE GATE
+- Rule 2: ACTIVE GATE — § 5.3 branch-binding coverage for router-output + pipeline-integration + validation-corpus branches
+- Rule 3: ACTIVE GATE
+- Rule 4: ACTIVE GATE — ALLOWED_SET enumerated; MUST include `run-pipeline.sh` per divergence pattern. **NO forward-protection / live-file-count / anti-scope-diff-against-prior-round patterns** (R62+R66+R68 cumulative lesson)
+- Rule 5: N/A
+- Rule 6: ACTIVE GATE
+- Rule 7: ACTIVE GATE Surface (a) — particularly load-bearing for the **R72-promoted claim-then-walk discipline at ~/.claude/CROSS-PROJECT-MEMORIAL.md:38-39** (Architect-side + Coordinator-side). Architect at R73 MUST cite-then-walk Tessera's commit history to ground router decision criteria
+
+### Halt conditions (R73 Implementer)
+
+1. Q-R73-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R72 close other than R73-additions
+4. **Validation-corpus failure: router routes any of R45/R61/R62/R66/R72 to anything other than `full` → HALT + DIAGNOSTIC + ESCALATE.** Load-bearing safety check.
+5. R61-class architectural-reality discovery
+6. **R72-promoted claim-then-walk discipline (cross-project canonical):** Architect MUST verify codebase + future-state claims via direct verification command at spec-emit time
+7. Architect spec uses forward-protection / live-file-count / anti-scope-diff-against-prior-round AC patterns: HALT
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R73 --tier full
+```
 
 ---
 
