@@ -1,7 +1,37 @@
 CURRENT-ROUND: R69
 NEXT-ROLE: OPERATOR
-STATUS: PENDING-PUSH
+STATUS: PUBLISHED
 TIER: coordinator
+
+---
+
+## § R69 close attestation — TESSERA v1 PUBLISHED (2026-05-20)
+
+**🎉 Tessera is live at https://github.com/johnpatrickwarren-oss/tessera**
+
+**Publication mechanics confirmed:**
+- Repo: `johnpatrickwarren-oss/tessera`
+- Visibility: PUBLIC
+- Default branch: `main`
+- Commits pushed: 393 (full history; original SHAs preserved per operator decision; methodology audit trail intact)
+- Description: "Statistically-rigorous behavioral observation for AI training/inference clusters. Per-shard residuals + topology-aware freeze-hook + bi-directional DeploySignal integration."
+- License: Apache 2.0 (LICENSE format fixed in follow-up commit so GitHub auto-detector recognizes correctly)
+- Origin remote: `https://github.com/johnpatrickwarren-oss/tessera.git`
+
+**Tessera v1 milestone achieved.**
+
+---
+
+## § Phase 4 candidate scope (post-publication)
+
+| Round | Candidate work | Operator-initiative |
+|---|---|---|
+| R70+ | DS-side PR consuming Tessera contract types; lands on `github.com/johnpatrickwarren-oss/deploysignal` per W3-1 Option A | YES |
+| Phase 4 hygiene round | R36-30/R36-31 + AC-R36-21 + AC-R65-2 + AC-R66-14 carry-forward cleanup; CLAUDE-ARCHITECT.md consolidation (`./scripts/consolidate-reinforcements.sh`); cross-project promotion of `ac-pattern-round-evolution-fragility` rule | Operator decides timing |
+| Phase 4 npm extract | FR-D1 + AC-P8 deferred per Option F; dedicated design cycle (pure-DS-at-SHA vs Tessera-evolved-engine framing; types-barrel decoupling) | Operator decides timing |
+| Phase 4 real-cluster | AC-P6 deferred per Path B; rental decision (vast.ai / Lambda Labs / RunPod) | Operator decides |
+
+---
 
 ---
 
