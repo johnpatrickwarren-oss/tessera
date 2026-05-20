@@ -1,97 +1,131 @@
-CURRENT-ROUND: R52
-NEXT-ROLE: OPERATOR (wave-plan review)
-STATUS: WAVE-PLAN-READY
-TIER: coordinator
+CURRENT-ROUND: R53
+NEXT-ROLE: ARCHITECT
+STATUS: READY
+TIER: full
 
-## R52 close — Phase 3 SLICE 1 wave plan emitted
+## Round-scope directive (R53 — WU-Phase3-1 AWS Neuron adapter; full-tier cluster dispatch)
 
-**Coordinator deliverable:** `coordination/WAVE-PLAN-Phase3-01.md` (v1; 2026-05-19; PRD-decomposition + DAG + wave sequencing for Phase 3 SLICE 1).
+R53 is the first Phase 3 SLICE 1 cluster pipeline round per `coordination/WAVE-PLAN-Phase3-01.md` (R52 Coordinator wave plan emission at `f6fd482`). Single-cluster full-tier round implementing the bundled AWS Trainium + AWS Inferentia adapter.
 
-**Round-start SHA:** `620d0e2` (chore: Phase 3 PRD authored)
+**Round-start SHA:** `f6fd482` (chore(R52): Coordinator wave-plan outputs).
 
-### Plan summary
+### Operator resolutions (R52 OQ-Phase3-W1 questions)
 
-**One work unit, one wave, one cluster.** WU-Phase3-1 bundles AWS Trainium adapter + AWS Inferentia adapter into a single full-tier cluster per OQ-P3-10 default condition (PRD:466 "bundled if Neuron Link topology is shared across both chip families") confirmed empirically via Neuron SDK public docs:
+- **OQ-Phase3-W1-1 RESOLVED:** Option A — single unified `engine/topology/neuron-source.ts` parser. Per Coordinator-empirical confirmation that Trainium + Inferentia2 share NeuronCore-v2 + NeuronLink-v2 architecture, single-file precedent (WU-03 NVLink, WU-04 common-mode) is the structurally correct shape. PRD:434 explicit FR-V1a filename (`trainium-source.ts`) was over-specific drafting; Coordinator's empirical reading supersedes.
+- **OQ-Phase3-W1-2 RESOLVED:** Option B — defer SCOPING-MEMO § 2.3 amendments to Phase 3 SLICE-close walk per R32 MAJOR-1 carry-forward pattern. Architect does NOT amend SCOPING-MEMO during WU-Phase3-1 spec authoring.
 
-- Trainium + Inferentia2 share NeuronCore-v2 base architecture + NeuronLink-v2 interconnect family (`awsdocs-neuron.readthedocs-hosted.com/en/v2.26.0/general/nki/arch/trainium_inferentia2_arch.html`)
-- Trainium = 2D Torus topology with 4 NeuronLinks per chip; Inferentia2 = ring topology with 2 NeuronLinks per chip (`awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/trn1-arch.html`)
-- Shared `'neuron_link_peer'` `TopologyEdge.relationship` literal (pre-anticipated at SCOPING-MEMO-v0.3.md:285 Vendor fungibility table); distinct `'trainium_chip'` + `'inferentia_chip'` `TopologyNode.kind` literals
+### Primary deliverable
 
-**Fan-out NOT forced** because D5-strict write-conflict on shared `engine/types/verdict.ts` enum extension (both sub-WUs would add the same `'neuron_link_peer'` literal — duplicate-add merge conflict). Single-cluster bundle is the structurally correct shape per dispatch directive's "DO NOT force fan-out when scope is genuinely sequential" clause. Architect retains spec-time split-decision flexibility per R20+R21 precedent if AC count exceeds 18.
+Implement WU-Phase3-1 AWS Neuron adapter as specified in `coordination/WAVE-PLAN-Phase3-01.md`:
 
-### Wave plan deliverable
+1. **Single unified parser** `engine/topology/neuron-source.ts` — concrete `TopologySource` implementation for AWS Neuron family (Trainium + Inferentia2). Parses Neuron Link topology output (format per Neuron SDK public docs) producing `TopologySnapshot` consumable by `engine/topology-overlay.ts` BFS layer.
+2. **Synthetic fixtures** at `test/_substrate/neuron-fixture-*.{txt,json}` (Tessera-original) covering:
+   - Trainium 2D Torus topology (4 NeuronLinks per chip)
+   - Inferentia2 ring topology (2 NeuronLinks per chip)
+   - Sparse/partial topology graceful handling (matches WU-04 LS-4 pre-cleared pattern)
+3. **Schema extensions** to `engine/types/verdict.ts` (vendored-with-deltas pattern; AT_PIN_FILES + VENDORING-MANIFEST.md maintenance):
+   - `TopologyEdge.relationship` += `'neuron_link_peer'`
+   - `TopologyNode.kind` += `'trainium_chip'` + `'inferentia_chip'` (distinct per Coordinator wave-plan; Trainium and Inferentia differ in topology shape despite shared interconnect family)
+4. **Test file** `test/q53-neuron-adapter.test.ts` covering AC enumeration:
+   - Well-formed Neuron topology fixture → expected `TopologySnapshot` structure
+   - Edge-relationship literal correctness (`'neuron_link_peer'` only)
+   - Node-kind literal correctness (both `'trainium_chip'` and `'inferentia_chip'`)
+   - `TopologySource` interface conformance (`fetchSnapshot(ctx?)` + `snapshotHash(s)` delegates to `computeSnapshotHash`)
+   - Sparse-data graceful degradation
+   - `correlational_not_causal: true` invariant preserved at `TopologyCandidate` wire boundary (A16 defensive)
+   - Phase 1 + Phase 2 ACs (AC-P1 through AC-P4) hold unchanged (AC-P7 cross-cutting)
+5. **PRD/spec consistency** — Architect notes the PRD:434 `trainium-source.ts` mention is superseded by operator OQ-Phase3-W1-1 Option A resolution. No PRD amendment in this round (OQ-Phase3-W1-2 Option B defers).
 
-| Wave | Cluster count | Foundation? | Notes |
-|---|---|---|---|
-| 1 | 1 (sequential bundled) | No | WU-Phase3-1 AWS Neuron adapter (Trainium 2D Torus + Inferentia2 ring; shared parser via OQ-P3-10 default; bundled per Coordinator empirical confirmation). Full tier (A1 + A2 + A4 + A7). |
+### Tier rationale
 
-### Open questions surfaced (operator review at this stage)
+**full-tier** — Architect (spec authoring) + Implementer (production code + tests + chore-A) + Reviewer (cold-eye) + Memorial-Updater (close). Per Coordinator wave-plan: A1 (new vendor dependency: AWS Neuron) + A2 (first-vendor Neuron pattern; AWS first per OQ-P3-1 RESOLVED) + A4 (schema extensions to `engine/types/verdict.ts`) + A7 (parallel-class with WU-01/02/03 Slurm/K8s/NVLink — pattern leverage).
 
-- **OQ-Phase3-W1-1 (NEW; not blocking; Coordinator default A):** File layout under `engine/topology/`. Option A `neuron-source.ts` (single unified parser; matches WU-03/WU-04 single-file precedent — Recommended). Option B `trainium-source.ts` + `inferentia-source.ts` (split per-chip-family; matches PRD:434 explicit FR-V1a filename).
-- **OQ-Phase3-W1-2 (NEW; not blocking; Coordinator default B):** SCOPING-MEMO § 2.3 amendment timing. Option A opportunistic if WU-Phase3-1 spec touches anyway. Option B defer to future Phase 3 SLICE-close walk (matches Phase 2 R32 MAJOR-1 carry-forward pattern — Recommended).
-- **OQ-P3-9 (CARRY-FORWARD; OPERATOR-DECIDED AT SLICE 1 CLOSE NOT THIS PLAN):** Rent GPU instance for US-07 DCGM validation Path A, or defer Path B. Decision at WAVE-GATE-Phase3-01 close.
-- **OQ-P3-10 (RESOLVED AT THIS PLAN):** Bundled per Coordinator-empirical confirmation. Architect override discretion via OQ-Phase3-W1-1.
-- **OQ-P3-11 (CARRY-FORWARD; DEFAULT EXTEND v0.3):** SCOPING-MEMO v0.4 needed? Default: extend v0.3 with Phase 3 amendments at future close-walks. Escalate to v0.4 only if Reviewer at SLICE 1 close flags scope-creep.
+### Anti-scope (R53 hard limits)
 
-### Cross-project rule audit (per NEXT-ROLE.md R52 directive § "Apply all 7 cross-project rules UPFRONT")
+- NO real-cluster access required or attempted (Phase 3 SLICE 1 is synthetic-fixture-based per Phase 3 PRD; US-07 path A/B gated at WAVE-GATE-Phase3-01 close).
+- NO modification of `coordination/SCOPING-MEMO-v0.3.md` (OQ-Phase3-W1-2 Option B deferral).
+- NO modification of `coordination/PRD.md` Phase 3 sub-section (Architect cites it; doesn't amend).
+- NO modification of R42-R52 deliverables (frozen historical baseline). Specifically: no modification of R52 Coordinator artifacts (WAVE-PLAN-Phase3-01.md, COORDINATOR-MEMORIAL.md).
+- NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Rule 7 anchor-canonical-landing-deferred).
+- NO modification of `coordination/MEMORIAL-PHASE-*.md` (frozen shards).
+- NO modification of `scripts/*` (R45-R51 deliverables stable).
+- NO modification of `run-pipeline.sh` (R49-R51 deliverables stable).
+- NO modification of `CLAUDE-*.md` files in REINFORCEMENTS sections (R51 consolidation + re-accretion guard preserved). MU stage applies the new threshold-aware rule.
+- NO Phase 3 SLICE 2+ work (TPU adapter, live cluster fetch, etc.) — strictly SLICE 1.
+- NO real customer telemetry (A8/A11 inherited).
+- NO hardware-diagnostic territory (A10 inherited; live DCGM gated to SLICE 2 conditional).
+- NO opening any GitHub PRs.
 
-| Rule | Status at R52 close |
-|---|---|
-| 1 (`false-compliance-attestation`) | ACTIVE GATE applied — Coordinator cited specific PRD line numbers (434-435, 447, 463-468) + Neuron SDK URLs verbatim + retrieval dates throughout WAVE-PLAN Step 1 merge reasoning. No memorized claims. |
-| 2 (`branch-binding-coverage-gate`) | N/A — no production-code branches at Coordinator stage. |
-| 3 (`implementer-spec-test-assertion-coverage`) | N/A — no test file authored. |
-| 4 (`anti-scope-allowed-set-forward-coverage`) | ACTIVE GATE applied — Coordinator stayed within R52 NEXT-ROLE.md ALLOWED_SET (`coordination/WAVE-PLAN-Phase3-01.md` NEW; `coordination/COORDINATOR-MEMORIAL.md` append; this file STATUS update). |
-| 5 (`rule-derivation-without-self-application`) | N/A — no new rule derived at R52. |
-| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | ACTIVE GATE applied — no halt fired. PRD Phase 3 SLICE 1 sub-section internally consistent; Neuron SDK public docs sufficient to resolve OQ-P3-10 (default-condition empirically confirmed, NOT re-interpreted). |
-| 7 (`derived-rule-propagation-mechanism-required`) | N/A as derivation surface — Coordinator does not derive new propagation surfaces. Pre-flag preserved in WAVE-PLAN-Phase3-01 § Pre-emit grilling for Architect dispatch propagation gate inheritance (`scripts/pre-commit-rule-sweep.sh` + `SPEC-AUTHORING-CHECKLIST.md` + R50 wave-aggregate verifier). |
+ALLOWED modifications:
+- `engine/topology/neuron-source.ts` (NEW — primary deliverable per Option A)
+- `engine/types/verdict.ts` (modify — vendored-with-deltas; add `'neuron_link_peer'` + `'trainium_chip'` + `'inferentia_chip'`)
+- `test/q53-neuron-adapter.test.ts` (NEW — Implementer authors per Architect spec)
+- `test/_substrate/neuron-fixture-*.{txt,json}` (NEW — synthetic Neuron Link topology fixtures)
+- `coordination/VENDORING-MANIFEST.md` (modify if vendored-file deltas added to `engine/types/verdict.ts`)
+- `coordination/specs/Q-R53-SPEC.md` (NEW — Architect-authored spec)
+- `coordination/specs/Q-R53-SPEC-AUDIT.md` (NEW — Architect ceremony sidecar)
+- `coordination/specs/Q-R53-EMPIRICAL.sh` (NEW — Rule 1 sub-class self-application per R46/R51)
+- `coordination/reviews/REVIEWER-REPORT-R53.md` (Reviewer)
+- `coordination/diagnostics/DIAGNOSTIC-R53-*.md` (conditional; only if HALT fires)
+- `coordination/MEMORIAL.md` (Implementer + Reviewer + MU appends)
+- `coordination/NEXT-ROLE.md` (this file; pipeline updates)
 
-### Wave 1 dispatch recommendation (post-operator-review)
+### Apply all 7 cross-project rules UPFRONT
 
-After operator wave-plan review + (optional) answers to OQ-Phase3-W1-1 + OQ-Phase3-W1-2:
+(Per `coordination/SPEC-AUTHORING-CHECKLIST.md` § Rule 7 self-application gate. Canonical short names.)
+
+- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — Q-R53-EMPIRICAL.sh applies R47 Tightenings 1-4 + R48 corrections + R49 conventions to all empirical claims (test counts, file existence, schema extension verification). No memorized values from spec text.
+- **Rule 2 (`branch-binding-coverage-gate`):** ACTIVE GATE — Architect spec must enumerate Neuron Link parser guards/defaults/fallbacks; Acknowledged-gap section documents any unbound branches with non-load-bearing rationale.
+- **Rule 3 (`implementer-spec-test-assertion-coverage`):** ACTIVE GATE — for each AC Then-clause field, test file uses discriminating assertions (strictEqual / deepStrictEqual / regex with line anchoring; not broad substring matches per R30 MINOR-1).
+- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — Architect ALLOWED_SET in Q-R53-SPEC.md at spec-emit time; must include the ALLOWED list above + standard carve-outs (REVIEWER-REPORT + DIAGNOSTIC paths).
+- **Rule 5 (`rule-derivation-without-self-application`):** N/A — no new rule derived at R53.
+- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if Neuron SDK doc-format ambiguity surfaces during implementation (e.g., fixture format unclear), HALT + DIAGNOSTIC + ESCALATE.
+- **Rule 7 (`derived-rule-propagation-mechanism-required`):** ACTIVE GATE per existing surfaces — SPEC-AUTHORING-CHECKLIST.md § Rule 7 gate applies at Architect spec emit; pre-commit-rule-sweep.sh at chore-A; wave-aggregate verifier at WAVE-GATE-Phase3-01.
+
+### Halt conditions
+
+1. **Q-R53-EMPIRICAL.sh exits non-zero at chore-A:** HALT + DIAGNOSTIC.
+2. **Neuron SDK fixture format ambiguity:** if public docs don't clearly specify the topology output format the adapter parses, HALT + DIAGNOSTIC.
+3. **D5 schema-write-conflict regression:** if Architect spec inadvertently re-introduces split-adapter pattern (creating Trainium + Inferentia source files that both extend `engine/types/verdict.ts`), HALT + DIAGNOSTIC per OQ-Phase3-W1-1 Option A resolution.
+4. **Phase 1/2 ACs regress:** if test baseline changes any of AC-P1 through AC-P4 properties (Ville bound; warm-start; freeze-hook; topology-attribution), HALT + DIAGNOSTIC per AC-P7 cross-cutting.
+5. **Test baseline drift other than R53-additions:** expected baseline shift = R51 baseline + R53 test count delta (Architect specifies expected delta in Q-R53-SPEC.md). Any unexpected shift → HALT + DIAGNOSTIC.
+
+### Inputs for Architect
+
+1. `coordination/WAVE-PLAN-Phase3-01.md` — Coordinator wave plan; READ FIRST as primary input
+2. `coordination/PRD.md` § Phase 3 Scope (esp. FR-V1a/b + AC-P5 + SLICE 1 sub-section)
+3. `coordination/SCOPING-MEMO-v0.3.md` § 2.3 Vendor fungibility table (parallel-class pattern authorization)
+4. `engine/topology-overlay.ts` — inherited BFS layer the adapter feeds into
+5. `engine/types/verdict.ts` — schema target for delta extensions
+6. `engine/topology/slurm-source.ts` + `engine/topology/k8s-source.ts` + `engine/topology/nvlink-source.ts` — parallel-class adapter precedent
+7. `coordination/specs/Q-R28-SPEC.md` (Slurm adapter spec) + `Q-R29-SPEC.md` (K8s) + `Q-R30-SPEC.md` (NVLink) — spec authoring pattern reference
+8. Neuron SDK public docs (Architect reads + cites URLs in Q-R53-SPEC.md):
+   - `https://awsdocs-neuron.readthedocs-hosted.com/en/v2.26.0/general/nki/arch/trainium_inferentia2_arch.html`
+   - `https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/trn1-arch.html`
+9. `coordination/COORDINATOR-MEMORIAL.md` — R52 Coordinator entries
+10. `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` § 1.3 + § 1.4 (AWS Trainium + Inferentia candidate framing)
+
+### Pipeline invocation
 
 ```bash
 cd /Users/johnwarren/concord/tessera
 ./run-pipeline.sh --tier full
 ```
 
-Standard single-pipeline dispatch (NOT `--coordinator`; NOT `multi-track-cluster-setup.sh`). Wave 1 = WU-Phase3-1 single-cluster full-tier round (nominally R53 per cluster pipeline next-round-after-R52 convention). After R53 cluster close, next Coordinator invocation authors `coordination/WAVE-GATE-Phase3-01.md` + (if applicable) WAVE-PLAN-Phase3-02 for SLICE 2 per OQ-P3-9 operator decision.
-
-### Coordinator artifacts at R52 close
-
-| Artifact | Location | Status |
-|---|---|---|
-| WAVE-PLAN-Phase3-01.md | `coordination/WAVE-PLAN-Phase3-01.md` | NEW v1 (this round) |
-| COORDINATOR-MEMORIAL.md | `coordination/COORDINATOR-MEMORIAL.md` | APPENDED with R52 entries (Phase 3 SLICE 1 wave-plan emission section; 7 CONFIRMATION + 4 OBSERVATION entries) |
-| NEXT-ROLE.md | `coordination/NEXT-ROLE.md` | THIS file; STATUS: WAVE-PLAN-READY |
-| CLUSTER-HANDOFF-Phase3-*.md | (none) | Not emitted at v1 (single-cluster Wave 1; zero in-wave producer→consumer edges; Phase 2 inbound edges are informational pattern-references + interface-only — load-bearing context lives in `coordination/PHASE-2-CLOSE-WALK.md` + Reviewer reports referenced) |
-| WAVE-GATE-Phase3-01.md | (deferred) | Emits at next Coordinator round (post-R53 cluster close) |
-
-### Inputs for operator review
-
-1. **`coordination/WAVE-PLAN-Phase3-01.md`** — primary Coordinator deliverable; READ FIRST
-2. `coordination/PRD.md` § Phase 3 Scope (lines 411-510; PRD source provenance for WU extraction)
-3. `coordination/SCOPING-MEMO-v0.3.md` § 2.3 Vendor fungibility table (lines 270-289; parallel-class pattern authorization for Trainium/Inferentia adapters)
-4. `coordination/COORDINATOR-MEMORIAL.md` § Phase 3 SLICE 1 wave-plan emission (R52 confirmation + observation entries)
-5. `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` § 1.3 + § 1.4 (AWS Trainium + Inferentia candidate framing prior to PRD authoring)
-
-### Halt conditions (R52 close; all clear)
-
-1. **Neuron SDK public docs ambiguous on Inferentia topology relationship to Trainium** — NOT FIRED. 4 sources retrieved 2026-05-19 confirm shared NeuronCore-v2 + NeuronLink-v2 family; Inferentia2 ring vs Trainium 2D Torus differ in topology shape + per-chip connection count but use the same interconnect family.
-2. **PRD Phase 3 SLICE 1 sub-section internally inconsistent** — NOT FIRED. PRD:434-435 (FR-V1a + FR-V1b), 447 (AC-P5), 463-468 (SLICE 1 sub-section) are internally consistent.
-3. **D-test edge surfaces unexpected cross-WU dependency** — FIRED on D5-strict write-conflict between WU-Phase3-1A + 1B sub-WU candidates (shared `engine/types/verdict.ts` enum extension); RESOLVED via bundled single-cluster decision (Step 3 Judgment call 1 in WAVE-PLAN). No halt routed; Coordinator decision documented inline + structurally honored.
+(Per R49 pipeline-mandatory discipline; full-tier auto-routes Architect → Implementer → Reviewer → Memorial-Updater across fresh subprocess Claude sessions per role. R52 Coordinator wave plan dispatch recommendation.)
 
 ---
 
-## Operator-decision flags (carried forward; updated post-R52)
+## Operator-decision flags (carried forward; updated post-R52 Coordinator close)
 
 1. R45 CRITICAL routing accept-vs-escalate (separately tracked).
 2. Rule 7 Surface (c) HARD-GATE candidate (9+ tessera instances; below cross-project 2nd-project threshold).
 3. Cross-project canonical landings (8+ items gated on 2nd-project occurrence).
-4. Anchor PR backflog scheduling (R11-R52 contributions; expanded window).
-5. **Phase 3 SLICE 1 wave plan READY** — R52 first Phase 3 Coordinator invocation complete; operator reviews `coordination/WAVE-PLAN-Phase3-01.md`; Wave 1 dispatch authorized post-review.
+4. Anchor PR backflog scheduling (R11-R52 contributions).
+5. **Phase 3 IN PROGRESS at SLICE 1 — R53 first cluster pipeline round.**
 6. R49 MAJOR-1 hybrid-mandate-vs-full-tier mismatch — candidate for future round.
 7. R50 MAJOR-1 + 6 MINOR findings — candidate for future round.
-8. **OQ-P3-9 gating moment between SLICE 1 close and SLICE 2 dispatch** (operator decision Path A vs Path B on cluster rental) — carried forward; decision at WAVE-GATE-Phase3-01.
-9. **OQ-Phase3-W1-1 (NEW R52):** File layout under `engine/topology/` — operator may answer pre-Wave-1-dispatch; Coordinator default A (single `neuron-source.ts`) applies absent answer.
-10. **OQ-Phase3-W1-2 (NEW R52):** SCOPING-MEMO § 2.3 amendment timing — Coordinator default B (defer to close-walk) applies absent answer.
-11. **OQ-P3-11 SCOPING-MEMO v0.4 needed** — default extend v0.3; escalate if SLICE 1 Reviewer flags scope-creep.
+8. **OQ-P3-9 gating moment at WAVE-GATE-Phase3-01 close** — operator decision Path A vs Path B on cluster rental for US-07.
+9. **OQ-P3-11 SCOPING-MEMO v0.4** — default to extending v0.3; escalate if SLICE 1 Reviewer flags scope-creep.
+10. OQ-Phase3-W1-1 RESOLVED 2026-05-19 (Option A single neuron-source.ts).
+11. OQ-Phase3-W1-2 RESOLVED 2026-05-19 (Option B defer SCOPING-MEMO § 2.3 amendments to SLICE-close walk).
