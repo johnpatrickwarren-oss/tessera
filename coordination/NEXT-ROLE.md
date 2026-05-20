@@ -70,7 +70,7 @@ Reviewer inputs:
 7. `README.md` (+ Quick demo section)
 8. This NEXT-ROLE.md
 
-**Coordination chore SHA:** `<to-be-filled-after-chore-commit>`
+**Coordination chore SHA:** `d351695` (HEAD at Reviewer routing)
 
 ---
 
