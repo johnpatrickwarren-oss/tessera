@@ -5,11 +5,11 @@
 # Convention: every block prints "PASS  Block: <label>" or "FAIL  Block: <label>"
 # and increments counters. Exit code is 0 iff all blocks PASS.
 #
-# SHA placeholder: ROUND_START_SHA defaults to the literal "<INJECTED-AT-CHORE-A>"
+# SHA placeholder: ROUND_START_SHA defaults to the literal "fcc51d603a8330e0043888413512830108c98709"
 # below; the Implementer replaces this literal with the parent SHA of the chore-A
 # commit (== the Architect's spec-triad commit SHA) BEFORE committing chore-A:
 #
-#   sed -i.bak "s|<INJECTED-AT-CHORE-A>|$(git rev-parse HEAD)|g" coordination/specs/Q-R71-EMPIRICAL.sh
+#   sed -i.bak "s|fcc51d603a8330e0043888413512830108c98709|$(git rev-parse HEAD)|g" coordination/specs/Q-R71-EMPIRICAL.sh
 #   rm coordination/specs/Q-R71-EMPIRICAL.sh.bak
 #
 # (Capture SHA AFTER the spec-triad commit + BEFORE the chore-A commit.)
@@ -38,7 +38,7 @@ assert_block() {
   fi
 }
 
-ROUND_START_SHA="${ROUND_START_SHA:-<INJECTED-AT-CHORE-A>}"
+ROUND_START_SHA="${ROUND_START_SHA:-fcc51d603a8330e0043888413512830108c98709}"
 
 # ── Block 1: tsc exit 0 ─────────────────────────────────────────────────
 assert_block "tsc-exit-0" \

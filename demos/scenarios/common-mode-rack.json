@@ -1,0 +1,250 @@
+{
+  "schema_version": "tessera-demo-v1",
+  "scenario": "common-mode-rack",
+  "description": "Three shards on rack-A fire simultaneously in window 3. Topology-aware attribution surfaces 1 common-mode candidate keyed on rack-A with member_count=3, demonstrating rack-localized root-cause surfacing.",
+  "params": {
+    "seed": 465965,
+    "shard_count": 6,
+    "window_count": 5,
+    "attribution_window": 3,
+    "topology": "2-rack 6-shard (rack-A: 0/1/2; rack-B: 3/4/5)",
+    "min_member_count": 2
+  },
+  "engine_surfaces": [
+    "attributeCommonMode"
+  ],
+  "windows": [
+    {
+      "t": 0,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 1,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 2,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 3,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "shard_fired",
+          "shard_id": "shard-00",
+          "event_id": "evt-cm-1"
+        },
+        {
+          "type": "shard_fired",
+          "shard_id": "shard-01",
+          "event_id": "evt-cm-2"
+        },
+        {
+          "type": "shard_fired",
+          "shard_id": "shard-02",
+          "event_id": "evt-cm-3"
+        },
+        {
+          "type": "attribution_result",
+          "candidate_count": 1,
+          "attributed_at_ts": 1700000200
+        }
+      ]
+    },
+    {
+      "t": 4,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    }
+  ],
+  "terminal_state": {
+    "firing_shards": [
+      "shard-00",
+      "shard-01",
+      "shard-02"
+    ],
+    "common_mode_candidates": [
+      {
+        "shared_node_id": "rack-A",
+        "shared_node_kind": "rack",
+        "member_count": 3,
+        "member_shard_ids": [
+          "shard-00",
+          "shard-01",
+          "shard-02"
+        ]
+      }
+    ],
+    "freeze_active": false,
+    "fdr_selected_indices": null,
+    "fdr_qLevel": null,
+    "fdr_K": null,
+    "fleet_fired": null,
+    "fleet_tick_at_first_fire": null
+  },
+  "reasoning": "Three shards on rack-A fire simultaneously. Without topology-aware attribution this would surface as 3 independent per-shard alerts. With topology-aware attribution it surfaces as 1 common-mode candidate keyed on rack-A, suggesting a rack-localized root cause (PSU, top-of-rack switch, or shared cooling).",
+  "suggested_actions": [
+    "Inspect rack-A power / cooling / network at the rack-localized layer (NOT per-shard)",
+    "Correlate the firing window against rack-A maintenance / hardware-event audit logs",
+    "Verify no concurrent unrelated faults on rack-B before attributing to rack-A common-mode"
+  ]
+}

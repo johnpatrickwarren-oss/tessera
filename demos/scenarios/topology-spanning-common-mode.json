@@ -1,0 +1,261 @@
+{
+  "schema_version": "tessera-demo-v1",
+  "scenario": "topology-spanning-common-mode",
+  "description": "Four shards spanning both racks fire simultaneously. With max_hop_distance=2 and cooling_zone in candidate_node_kinds, BFS reaches the cooling_zone node common to both racks; ONE cooling-zone-level candidate surfaces spanning all 4 firing shards.",
+  "params": {
+    "seed": 464128,
+    "shard_count": 6,
+    "window_count": 5,
+    "attribution_window": 3,
+    "topology": "6 gpu_shard + 2 rack + 1 cooling_zone (cz-1 contains rack-A + rack-B)",
+    "fired_shards": [
+      "shard-00",
+      "shard-01",
+      "shard-03",
+      "shard-04"
+    ],
+    "max_hop_distance": 2
+  },
+  "engine_surfaces": [
+    "attributeCommonMode"
+  ],
+  "windows": [
+    {
+      "t": 0,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 1,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 2,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 3,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "attribution_result",
+          "candidate_count": 3,
+          "max_hop_distance": 2
+        }
+      ]
+    },
+    {
+      "t": 4,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    }
+  ],
+  "terminal_state": {
+    "firing_shards": [
+      "shard-00",
+      "shard-01",
+      "shard-03",
+      "shard-04"
+    ],
+    "common_mode_candidates": [
+      {
+        "shared_node_id": "rack-A",
+        "shared_node_kind": "rack",
+        "member_count": 2,
+        "member_shard_ids": [
+          "shard-00",
+          "shard-01"
+        ]
+      },
+      {
+        "shared_node_id": "rack-B",
+        "shared_node_kind": "rack",
+        "member_count": 2,
+        "member_shard_ids": [
+          "shard-03",
+          "shard-04"
+        ]
+      },
+      {
+        "shared_node_id": "cz-1",
+        "shared_node_kind": "cooling_zone",
+        "member_count": 4,
+        "member_shard_ids": [
+          "shard-00",
+          "shard-01",
+          "shard-03",
+          "shard-04"
+        ]
+      }
+    ],
+    "freeze_active": false,
+    "fdr_selected_indices": null,
+    "fdr_qLevel": null,
+    "fdr_K": null,
+    "fleet_fired": null,
+    "fleet_tick_at_first_fire": null
+  },
+  "reasoning": "Four shards spanning both racks fire simultaneously. With the default max_hop_distance = 1, common-mode attribution would surface two separate rack-level candidates. With max_hop_distance = 2 and cooling_zone included in candidate_node_kinds, the BFS reaches the cooling_zone node common to both racks and surfaces ONE cooling-zone-level candidate spanning all 4 firing shards. This demonstrates how operator-tunable BFS depth controls attribution granularity from rack to cooling-zone to (in larger fleets) datacenter-level common modes.",
+  "suggested_actions": [
+    "Inspect cooling-zone-level infrastructure (chilled-water loops, ambient temperature sensors, datacenter HVAC)",
+    "Verify the cooling-zone topology data: is cz-1 correctly modeled as containing rack-A and rack-B?",
+    "If cluster-wide common-mode is a frequent operating regime, raise the default max_hop_distance in production attribution-pipeline config (operator policy decision)"
+  ]
+}

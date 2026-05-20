@@ -1,0 +1,152 @@
+{
+  "schema_version": "tessera-demo-v1",
+  "scenario": "sparse-data-resilience",
+  "description": "Topology snapshot has nodes (6 gpu_shard + 2 rack) but zero edges. BFS over empty adjacency finds no candidate-eligible nodes; 0 candidates returned without throwing. Demonstrates graceful degradation under partial telemetry.",
+  "params": {
+    "seed": 464240,
+    "shard_count": 6,
+    "window_count": 3,
+    "attribution_window": 2,
+    "topology": "6 gpu_shard + 2 rack; zero edges (sparse)",
+    "min_member_count": 2
+  },
+  "engine_surfaces": [
+    "attributeCommonMode"
+  ],
+  "windows": [
+    {
+      "t": 0,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 1,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 2,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": null,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": null,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "attribution_result",
+          "candidate_count": 0,
+          "note": "BFS over empty adjacency returns 0 candidates without throwing"
+        }
+      ]
+    }
+  ],
+  "terminal_state": {
+    "firing_shards": [
+      "shard-00",
+      "shard-01",
+      "shard-02"
+    ],
+    "common_mode_candidates": [],
+    "freeze_active": false,
+    "fdr_selected_indices": null,
+    "fdr_qLevel": null,
+    "fdr_K": null,
+    "fleet_fired": null,
+    "fleet_tick_at_first_fire": null
+  },
+  "reasoning": "The topology snapshot has nodes (racks + shards) but zero edges — a degraded telemetry state where the relationship layer is missing or corrupted. Three shards fire simultaneously, but BFS over an empty adjacency list reaches no candidate-eligible nodes; the attribution layer returns 0 candidates without throwing. This demonstrates that topology-aware attribution degrades gracefully under partial data rather than failing closed (which would mask the per-shard alerts).",
+  "suggested_actions": [
+    "Fall back to per-shard alerts: 3 independent firings on shards 0/1/2 require individual investigation",
+    "Investigate the topology data source: why are edges missing? Re-fetch the snapshot before re-running attribution",
+    "Audit whether the topology source’s sparse-data path is correctly identifying this as ‘incomplete’ rather than ‘no common-mode found’"
+  ]
+}

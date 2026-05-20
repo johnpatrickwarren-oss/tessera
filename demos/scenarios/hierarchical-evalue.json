@@ -1,0 +1,1217 @@
+{
+  "schema_version": "tessera-demo-v1",
+  "scenario": "hierarchical-evalue",
+  "description": "Five shards × 30 windows. All 5 shards carry small drift +0.2/window from window 5. Per-shard e-values combine via combineAverage; fleet wealth crosses log(1/α_fleet)=log(20) at tick_at_first_fire.",
+  "params": {
+    "seed": 466718,
+    "shard_count": 5,
+    "window_count": 30,
+    "alpha": 0.005,
+    "threshold": 200,
+    "fleet_alpha": 0.05,
+    "log_fleet_threshold": 2.995732,
+    "hier_drift_start_window": 5,
+    "hier_drift_per_window": 0.2
+  },
+  "engine_surfaces": [
+    "combineAverage",
+    "freshBettingState",
+    "freshFleetEProcessState",
+    "updateBettingState",
+    "updateFleetEProcessState"
+  ],
+  "windows": [
+    {
+      "t": 0,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 1,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0,
+          "log_fleet_e_max": 0,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 1,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.779498,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.841278,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.594113,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.336466,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 1.470522,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.185961,
+          "log_fleet_e_max": 0.185961,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 2,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.480928,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.548844,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 2.072005,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.659841,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 1.834332,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.277018,
+          "log_fleet_e_max": 0.277018,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 3,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.417158,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.563199,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.913732,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.512351,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 2.328438,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.137128,
+          "log_fleet_e_max": 0.277018,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 4,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.425035,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.686274,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.186996,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.52751,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 2.200252,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.0052,
+          "log_fleet_e_max": 0.277018,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 5,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.485141,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.703126,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.565856,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.590368,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 3.148157,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.261233,
+          "log_fleet_e_max": 0.277018,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 6,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.580521,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.446938,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 2.109104,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.441043,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 3.715221,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.377453,
+          "log_fleet_e_max": 0.377453,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 7,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.347625,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.293933,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.59103,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.426117,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 3.860078,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.26525,
+          "log_fleet_e_max": 0.377453,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 8,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.252924,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.328641,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.730372,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.432754,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 4.550377,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.37776,
+          "log_fleet_e_max": 0.37776,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 9,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.251606,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.367406,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 0.875271,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.430082,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 6.130147,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.476795,
+          "log_fleet_e_max": 0.476795,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 10,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.275681,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.36823,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 0.680503,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.310157,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 9.512286,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 0.80172,
+          "log_fleet_e_max": 0.80172,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 11,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.383508,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.484548,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 0.651354,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.334821,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 17.584434,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 1.357826,
+          "log_fleet_e_max": 1.357826,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 12,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.637241,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.854608,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 0.712722,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.35879,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 23.550436,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 1.653026,
+          "log_fleet_e_max": 1.653026,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 13,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.906707,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 1.269492,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.028424,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.389592,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 23.620249,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 1.694311,
+          "log_fleet_e_max": 1.694311,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 14,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 1.40069,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 2.21489,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.682988,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.522631,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 26.80347,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 1.875631,
+          "log_fleet_e_max": 1.875631,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 15,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 2.110302,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 4.392665,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 2.560412,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.742879,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 44.788689,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 2.390503,
+          "log_fleet_e_max": 2.390503,
+          "fleet_fired": false,
+          "tick_at_first_fire": null
+        }
+      ]
+    },
+    {
+      "t": 16,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 3.711752,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 8.785325,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 4.62943,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.144032,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 89.577333,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 3.071284,
+          "log_fleet_e_max": 3.071284,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 17,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 7.036835,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 9.569836,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 7.615386,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 2.234848,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 171.154798,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 3.676866,
+          "log_fleet_e_max": 3.676866,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 18,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 14.073663,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 15.438734,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 14.386513,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 4.391351,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 325.263176,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 4.313623,
+          "log_fleet_e_max": 4.313623,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 19,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 21.542088,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 30.877452,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 27.406845,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 8.659191,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 642.2352,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 4.984593,
+          "log_fleet_e_max": 4.984593,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 20,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 43.084154,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 52.296996,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 52.537507,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 17.115028,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 1116.765114,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 5.546582,
+          "log_fleet_e_max": 5.546582,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 21,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 86.168265,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 104.593939,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 91.948948,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 33.885067,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 2233.529112,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 6.23446,
+          "log_fleet_e_max": 6.23446,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 22,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 167.535384,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 174.203858,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 179.044845,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 67.171864,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 4372.774607,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 6.89987,
+          "log_fleet_e_max": 6.89987,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 23,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 335.0706,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 348.407541,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 348.180813,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 133.288669,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 8745.544841,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 7.591911,
+          "log_fleet_e_max": 7.591911,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 24,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 670.140865,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 696.814735,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 681.359878,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 264.691922,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 17491.080936,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 8.284206,
+          "log_fleet_e_max": 8.284206,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 25,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 1340.28106,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 1393.628772,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1335.690171,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 525.978251,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 34982.144381,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 8.976584,
+          "log_fleet_e_max": 8.976584,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 26,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 2680.56078,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 2787.256151,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 2622.285838,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1045.750329,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 69964.25378,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 9.669032,
+          "log_fleet_e_max": 9.669032,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 27,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 5361.11888,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 5574.509514,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 5154.783022,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 2080.106429,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 139928.437595,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 10.361539,
+          "log_fleet_e_max": 10.361539,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 28,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 10722.232399,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 11149.013454,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 10144.368083,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 4139.160655,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 279856.735262,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 11.054096,
+          "log_fleet_e_max": 11.054096,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    },
+    {
+      "t": 29,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 21444.454077,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 22298.015759,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 19983.203644,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 8239.211813,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 559713.190668,
+          "fired": true
+        }
+      ],
+      "events": [
+        {
+          "type": "fleet_state",
+          "log_fleet_e_t": 11.746697,
+          "log_fleet_e_max": 11.746697,
+          "fleet_fired": true,
+          "tick_at_first_fire": 16
+        }
+      ]
+    }
+  ],
+  "terminal_state": {
+    "firing_shards": [
+      "shard-00",
+      "shard-01",
+      "shard-02",
+      "shard-03",
+      "shard-04"
+    ],
+    "common_mode_candidates": [],
+    "freeze_active": false,
+    "fdr_selected_indices": null,
+    "fdr_qLevel": null,
+    "fdr_K": null,
+    "fleet_fired": true,
+    "fleet_tick_at_first_fire": 16
+  },
+  "reasoning": "Five shards each carry small drift (+0.20/window) too small to fire alone, but the per-shard e-values combine via combineAverage (Vovk-Wang 2021 §4 — convex combinations of e-values are e-values under arbitrary dependence). The fleet wealth crosses log(1/α_fleet) = log(20) at the captured tick_at_first_fire. This demonstrates that the fleet-level Ville bound preserves the any-time guarantee under correlated drift.",
+  "suggested_actions": [
+    "Investigate at the fleet level (deploy / firmware / config rollout) — per-shard individual investigations will be inconclusive",
+    "Cross-reference the tick_at_first_fire against deploy event audit logs for a fleet-wide cause",
+    "If correlated drift cannot be ruled out, prefer combineAverage over combineProduct (the current default already does this)"
+  ]
+}

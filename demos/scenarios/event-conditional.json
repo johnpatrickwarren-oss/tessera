@@ -1,0 +1,103 @@
+{
+  "schema_version": "tessera-demo-v1",
+  "scenario": "event-conditional",
+  "description": "DS firmware-push event emitted at window 2. Freeze-hook activates; per-shard residual update at window 3 returns current residual unchanged (absorbed=false). Demonstrates event-conditional attribution suppression.",
+  "params": {
+    "seed": 466476,
+    "shard_count": 1,
+    "window_count": 5,
+    "event_window": 2,
+    "event_class": "firmware_push",
+    "activation_window_seconds": 300
+  },
+  "engine_surfaces": [
+    "createFreezeHookFromDsEvents",
+    "initialPerShardResidual"
+  ],
+  "windows": [
+    {
+      "t": 0,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 1,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 2,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "ds_event_received",
+          "event_id": "evt-demo-firmware-push",
+          "event_class": "firmware_push",
+          "event_ts": 1700000180
+        }
+      ]
+    },
+    {
+      "t": 3,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": [
+        {
+          "type": "residual_update",
+          "freeze_active": true,
+          "absorbed": false
+        }
+      ]
+    },
+    {
+      "t": 4,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": null,
+          "fired": false
+        }
+      ],
+      "events": []
+    }
+  ],
+  "terminal_state": {
+    "firing_shards": [],
+    "common_mode_candidates": [],
+    "freeze_active": true,
+    "fdr_selected_indices": null,
+    "fdr_qLevel": null,
+    "fdr_K": null,
+    "fleet_fired": null,
+    "fleet_tick_at_first_fire": null
+  },
+  "reasoning": "Tessera receives a DS firmware-push event before the per-shard sample is processed. The freeze-hook activates; the residual update path returns the current residual unchanged (no event-driven drift absorbed). Downstream detectors see the pre-event baseline; once the activation window expires, the residual resumes updating normally.",
+  "suggested_actions": [
+    "No immediate action — event-conditional attribution is suppressing this drift by design",
+    "Verify the deploy event window matches the observed drift envelope (sanity check)",
+    "If the freeze window proves too short / too long under live load, tune activation_window_seconds at the freeze-hook factory"
+  ]
+}
