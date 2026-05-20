@@ -1,163 +1,106 @@
-CURRENT-ROUND: R51
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R52
+NEXT-ROLE: COORDINATOR
+STATUS: READY
+TIER: coordinator
 
-## Reviewer outputs (R51)
+## Round-scope directive (R52 — Phase 3 SLICE 1 Coordinator wave plan)
 
-- Report: `coordination/reviews/REVIEWER-REPORT-R51.md`
-- Verdict: 0 CRITICAL, 0 MAJOR, 1 MINOR, 3 OBS
-- Empirical verifier re-run: 19 PASS / 0 FAIL at HEAD
-- Anti-scope diff: 6 files, all ⊆ ALLOWED_SET per Q-R51-SPEC § 3.4
-- Verbatim preservation: independently verified — all 7 fold bodies byte-identical to origin standalones (from first sentence; heading paraphrase authorized by spec § 3.1)
-- AC-R36-21 forward-protection: FAIL→PASS transition confirmed (count = 30 ≤ 30)
-- MINOR-1: AC-R51-3g substring marker "only observable by" is generic (R41 MINOR-3/4 sub-variant not self-applied within same composite as R47 MAJOR-2 the Implementer DID apply)
+R52 is the first Phase 3 round, following R51 close (`711b04b`) and Phase 3 PRD authoring (`620d0e2`). Coordinator-mode round: decompose Phase 3 SLICE 1 scope from PRD into work units; build dependency DAG; produce wave plan; output to `coordination/WAVE-PLAN-Phase3-01.md`.
 
-
-
-## Round-scope directive (R51 — CLAUDE-IMPLEMENTER.md re-consolidation + MU re-accretion guard; audit-tier)
-
-R51 follows R50 close (`c5f5862`) per operator-selected sequencing ("R51 + Phase 3 PRD authoring"). R51 is the bounded methodology fix; Phase 3 PRD authoring is a separate operator-led work item after R51 closes.
-
-**Round-start SHA:** `c5f5862` (chore(R50): Memorial-Updater outputs).
-**Chore-A SHA:** `935c728` (chore(R51): consolidate CLAUDE-IMPLEMENTER.md 37→30 + MU re-accretion guard)
+**Round-start SHA:** `620d0e2` (chore: Phase 3 PRD authored).
 
 ### Primary deliverable
 
-Two-part methodology fix:
-1. **Consolidate CLAUDE-IMPLEMENTER.md** from 37 REINFORCED entries back to ≤30 (R43 30-entry threshold; AC-R36-21 forward-protection guard). MR-2 Pass-3 redux pattern: roll the 7+ post-R43 standalone entries into existing composites or new composites where thematically appropriate.
-2. **Tighten CLAUDE-MEMORIAL.md MU discipline** to prevent re-accretion: future Memorial-Updaters MUST roll violations into existing composites when the role-file is at or near the 30-entry threshold, rather than adding standalone REINFORCED lines.
+Produce `coordination/WAVE-PLAN-Phase3-01.md` per `templates/WAVE-PLAN-TEMPLATE.md` containing:
 
-The structural intent: the methodology framework should self-prevent the "each round adds REINFORCED entries → consolidation needed → consolidation added → cycle repeats" recursion. R51 fixes the existing drift AND closes the source.
-
-Specifically:
-
-- **(a) CLAUDE-IMPLEMENTER.md consolidation (37 → ≤30).** Audit current state: 37 REINFORCED entries. Identify the post-R43 additions (R47/R48/R49/R50 MU appends added ~7 standalones). Fold each into an existing composite sub-variant per thematic match (R43 Pass-3 precedent):
-  - Rule 1 sub-class instances → ATTESTATION-SCOPE-FIDELITY composite (existing R43 composite)
-  - Pre-emit grilling gaps → PRE-EMIT-GRILLING-COMPLETENESS-GATE composite (existing R43 composite)
-  - Spec-prescription fidelity instances → SPEC-PRESCRIPTION-FIDELITY composite
-  - Other patterns → match to existing composites OR create new composite if 3+ thematically distinct standalones cluster
-  - Update composite heading `(composite; N sub-variants)` count in same edit (R39 MAJOR-1 discipline)
-  - Preserve verbatim lesson text in sub-variants (R39 MAJOR-2 discipline; diff before attesting PASS)
-
-- **(b) CLAUDE-MEMORIAL.md MU discipline tightening.** Update step 5 of the Memorial-Updater procedure. Current text: "Add reinforcement lines for each violation this round to the file that matches the violating role." Tightened text:
-
-  > 5. Add reinforcement lines for each violation this round to the file that matches the violating role (Architect violation → CLAUDE-ARCHITECT.md, etc.). **Re-accretion guard (R51):** before appending a standalone REINFORCED line, check the target file's current REINFORCED count via `grep -c "^# REINFORCED" CLAUDE-<ROLE>.md`. If the count is ≥ 28 (within 2 of the 30-entry threshold R43 consolidated to), THEN evaluate whether the violation can be folded into an existing composite sub-variant. If a thematically-matching composite exists, ROLL the violation as a new sub-variant rather than adding a standalone. Only add standalone REINFORCED entries when the count is < 28 OR the violation is genuinely novel with no thematic composite (and the composite count update discipline of R39 MAJOR-1 applies to the composite heading).
-
-  This converts the MU's accretion behavior from "always-standalone" (current) to "roll-when-threshold-near" (R51). The threshold-aware behavior prevents the R47-R50 re-accretion pattern.
-
-- **(c) R51 self-applies via Q-R51-EMPIRICAL.sh.** Verifier checks post-R51 state:
-  - `grep -c "^# REINFORCED" CLAUDE-IMPLEMENTER.md` == 30 (or in range [25, 30])
-  - All composite headings' `(composite; N sub-variants)` counts match body sub-variant counts (R39 MAJOR-1)
-  - All 7+ folded standalones' distinctive phrases verifiable in target composite bodies (R43 AC-R43-8 precedent)
-  - CLAUDE-MEMORIAL.md step 5 contains the new threshold-aware rule (grep for "Re-accretion guard (R51)")
-  - Test baseline shifts to `361/356/2/3` (AC-R36-21 FAIL → PASS — discipline-restoration, NOT regression; same pattern as R43 fix)
+1. **Work unit extraction** from `coordination/PRD.md` § Phase 3 Scope → SLICE 1 sub-section. Default expectation per OQ-P3-10: WU-Phase3-1A (Trainium) + WU-Phase3-1B (Inferentia) bundled into single cluster IF Neuron Link topology is shared across both chip families. Coordinator confirms via read of Neuron SDK public docs at WU extraction time; splits if Inferentia topology materially differs.
+2. **Dependency edge identification** via D1-D5 deterministic tests per `CLAUDE-COORDINATOR.md` § DAG construction discipline:
+   - D1 Shared output ownership: does any WU write to a file/schema/interface another reads from?
+   - D2 AC reference: does one WU's ACs reference another's outputs?
+   - D3 Anti-scope adjacency: any implicit-assumption edges?
+   - D4 File tree overlap: any contention risks?
+   - D5 Schema/migration sequencing: any serial gates?
+3. **Wave sequencing** from the DAG. Expected: SLICE 1 = single wave with 1 or 2 parallel clusters (WU-Phase3-1A + WU-Phase3-1B; bundled or split per default).
+4. **Work unit classification** (tier per `CLAUDE-COMMON.md` tier rubric A1-A7 / S1-S5 / Z1-Z5):
+   - WU-Phase3-1A Trainium adapter: parallel-class with WU-01/02/03 Slurm/K8s/NVLink. Novelty: new vendor (AWS); new edge-relationship literal (`neuron_link_peer`); new node-kind literal (`trainium_chip`). Inherited architecture: `TopologySource` interface; `engine/topology-overlay.ts` BFS layer. Tier expected: **full** (A2 first-vendor pattern; A3 + S2 schema additions).
+   - WU-Phase3-1B Inferentia adapter: bundled with 1A or sequential. If bundled and Neuron Link topology shared: novelty reduces to vendor-name-only; **audit-tier** sufficient. If split: own tier verdict.
+5. **Wave gate criteria** for WAVE-GATE-Phase3-01:
+   - Per-cluster Reviewer reports MERGE-READY at cluster close
+   - `scripts/verify-wave-aggregate.sh WAVE-Phase3-01` exit 0 (aggregate ALLOWED_SET union + cross-cluster contract verification + MEMORIAL fragment semantic-conflict detection)
+   - Tier-aware consolidation Reviewer per R50: if all clusters ran full-tier with cluster-internal Reviewer, consolidation Reviewer is OPTIONAL; operator may invoke via `--consolidation-reviewer` flag if integration concerns surface
+   - Phase 3 anti-scope items honored (NO real-cluster access required for SLICE 1; vendor-neutral interface; A10 carve-out)
+6. **Cross-cluster handoff artifacts** if applicable: if 1A + 1B split, document the Neuron Link topology contract between them at `coordination/CLUSTER-HANDOFF-Phase3-1A-1B.md`.
 
 ### Tier rationale
 
-**audit-tier** — methodology round; Implementer authors thin spec inline (Q-R51-SPEC.md); Reviewer cold-eye; MU close. R43 + R47 precedent — consolidation rounds are audit-tier.
+**coordinator-tier** — Coordinator-only round per pipeline `--coordinator` mode. Produces wave plan; cluster dispatch is separate (sequential WU rounds R53+ per wave plan).
 
-### Anti-scope (R51 hard limits)
+### Anti-scope (R52 hard limits)
 
-- NO modification of `engine/*`, `test/*`, `tools/*` files (zero production-code changes).
-- NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Rule 7 anchor-canonical-landing-deferred).
+- NO modification of `engine/*`, `test/*`, `tools/*` files (Coordinator role does not implement code).
+- NO modification of `CLAUDE-*.md` files (Coordinator authors WAVE-PLAN, not role-discipline updates).
+- NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md`.
 - NO modification of `coordination/MEMORIAL-PHASE-*.md` (frozen shards).
-- NO modification of R42-R50 specs / empirical files (preserve historical baseline).
-- NO modification of `coordination/SCOPING-MEMO-v0.3.md` or `coordination/PRD.md`.
-- NO modification of `scripts/finalize-round.sh`, `scripts/verify-empirical-acs.sh`, `scripts/pre-commit-rule-sweep.sh`, `scripts/verify-wave-aggregate.sh`, `run-pipeline.sh` (R45/R46/R47/R49/R50 deliverables stable).
-- NO modification of `CLAUDE-COMMON.md`, `CLAUDE-ARCHITECT.md`, `CLAUDE-REVIEWER.md`, `CLAUDE-COORDINATOR.md` (R51 only touches CLAUDE-IMPLEMENTER.md REINFORCEMENTS section + CLAUDE-MEMORIAL.md step 5).
-- NO Phase 3 territory.
-- NO opening any GitHub PRs.
+- NO modification of `coordination/PRD.md` (Phase 3 scope already authored; Coordinator reads, doesn't amend).
+- NO modification of `coordination/SCOPING-MEMO-v0.3.md` (Coordinator reads).
+- NO modification of R42-R51 specs / empirical files (preserve historical baseline).
+- NO modification of `scripts/*` or `run-pipeline.sh` (Coordinator does not modify pipeline tools).
+- NO cluster dispatch (Coordinator produces plan; dispatch happens in separate R53+ rounds per plan).
 
 ALLOWED modifications:
-- `CLAUDE-IMPLEMENTER.md` REINFORCEMENTS section (consolidation; this is the round's primary deliverable)
-- `CLAUDE-MEMORIAL.md` step 5 (re-accretion guard addition)
-- `coordination/specs/Q-R51-SPEC.md` (NEW — Implementer-authored thin spec)
-- `coordination/specs/Q-R51-EMPIRICAL.sh` (NEW — self-applies)
-- `coordination/MEMORIAL.md` (chore-A append)
-- `coordination/NEXT-ROLE.md` (this file; pipeline updates)
+- `coordination/WAVE-PLAN-Phase3-01.md` (NEW — primary deliverable)
+- `coordination/CLUSTER-HANDOFF-Phase3-1A-1B.md` (NEW conditional — only if 1A/1B split)
+- `coordination/COORDINATOR-MEMORIAL.md` (append per CLAUDE-COORDINATOR.md memorial discipline)
+- `coordination/MEMORIAL.md` (Coordinator-section append at round close)
+- `coordination/NEXT-ROLE.md` (this file; STATUS update at round close)
 
 ### Apply all 7 cross-project rules UPFRONT
 
-- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — all empirical claims (REINFORCED count; composite sub-variant count; section text grep) verified via Q-R51-EMPIRICAL.sh at chore-A. Applies R47 Tightenings 1-4 + R48 corrections + R49 conventions (assert_eq not assert_ge; stdout-grep; re-derive SHAs; exact counts).
+- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — Coordinator's WU extraction + dependency edge findings must cite specific PRD lines + Neuron SDK doc URLs. No memorized claims about Trainium / Inferentia topology — Coordinator reads + cites at wave-plan emit time.
 - **Rule 2 (`branch-binding-coverage-gate`):** N/A — no production-code branches.
-- **Rule 3 (`implementer-spec-test-assertion-coverage`):** N/A — no test file authored.
-- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — ALLOWED_SET in Q-R51-SPEC.md at spec-emit time; matches the ALLOWED modifications list above.
-- **Rule 5 (`rule-derivation-without-self-application`):** ACTIVE GATE — R51 tightens MU discipline AND applies it to itself. R51 MU stage (at MU pipeline subprocess) MUST follow the new threshold-aware rule (likely will roll its own R51 violations into composites since count is at threshold). Self-application demonstrated end-to-end.
-- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if any fold creates a thematic-mismatch sub-variant or paraphrases lesson text, HALT + DIAGNOSTIC. Per R39 MAJOR-2: run `diff` between origin standalone and target sub-variant body; require byte-identical match (allowing only bullet-and-label transformation).
-- **Rule 7 (`derived-rule-propagation-mechanism-required`):** ACTIVE GATE + Surface (a) extension — CLAUDE-MEMORIAL.md MU discipline tightening IS a new propagation surface for the re-accretion failure mode. Surface (c) round-of-derivation: R51 IS the round deriving the threshold-aware MU rule; same-round self-application via R51's own MU pass (which will use the new threshold-aware rule).
+- **Rule 3 (`implementer-spec-test-assertion-coverage`):** N/A — no test file authored at Coordinator stage.
+- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — ALLOWED_SET enumerated above; Coordinator does not invent files outside the list.
+- **Rule 5 (`rule-derivation-without-self-application`):** N/A — no new rule derived at R52. (Coordinator is applying existing framework; not deriving discipline.)
+- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if PRD Phase 3 scope is ambiguous on a WU boundary, HALT + DIAGNOSTIC; do NOT silently re-interpret.
+- **Rule 7 (`derived-rule-propagation-mechanism-required`):** N/A — Coordinator applies existing surfaces (Rule 7 (a) checklist + (b) pre-commit-sweep + R50 wave-aggregate verifier); does not derive new propagation surfaces.
 
 ### Halt conditions
 
-1. **Q-R51-EMPIRICAL.sh exits non-zero at chore-A:** HALT + DIAGNOSTIC.
-2. **CLAUDE-IMPLEMENTER.md REINFORCED count NOT in range [25, 30] post-fold:** HALT + DIAGNOSTIC. Off-by-1 acceptable for drift; larger off-target indicates structural error.
-3. **Verbatim lesson preservation failure:** if `diff` between origin standalone and target sub-variant body shows substantive paraphrasing → HALT + DIAGNOSTIC + ESCALATE per R39 MAJOR-2.
-4. **Composite count mismatch:** if any composite heading's `(N sub-variants)` count != actual body sub-variant count post-fold → HALT + DIAGNOSTIC per R39 MAJOR-1.
-5. **Thematic mismatch:** if a fold target doesn't naturally fit its assigned composite, HALT + DIAGNOSTIC; do NOT force-fit via paraphrase.
-6. **Test baseline drift other than AC-R36-21 FAIL→PASS:** expected baseline shift is 361/355/3/3 → 361/356/2/3 (discipline-restoration; AC-R36-21 passes when count ≤ 30). Any other test status change → HALT + DIAGNOSTIC.
-7. **Bash syntax error:** `bash -n` on Q-R51-EMPIRICAL.sh exits non-zero → HALT + DIAGNOSTIC.
+1. **Neuron SDK public docs ambiguous on Inferentia topology relationship to Trainium:** if Coordinator cannot determine via public docs whether Neuron Link topology is shared (default-bundled per OQ-P3-10) or distinct (split), HALT + DIAGNOSTIC; operator decides.
+2. **PRD Phase 3 SLICE 1 sub-section internally inconsistent:** if `coordination/PRD.md` Phase 3 SLICE 1 description contradicts FR-V1a/b or AC-P5 wording, HALT + DIAGNOSTIC; operator amends PRD or Coordinator escalates.
+3. **D-test edge surfaces unexpected cross-WU dependency:** if D1-D5 tests identify a hidden serial dependency between Trainium adapter and existing Slurm/K8s/NVLink adapters (e.g., shared `engine/types/verdict.ts` enum extension serializes work), HALT + DIAGNOSTIC; operator decides whether to split into 2-wave SLICE 1 or amend PRD.
 
-### Inputs for Implementer
+### Inputs for Coordinator
 
-1. `CLAUDE-IMPLEMENTER.md` — file to consolidate; 37 REINFORCED entries (item a target).
-2. `CLAUDE-MEMORIAL.md` — file to extend with re-accretion guard (item b target); step 5 specifically.
-3. `coordination/specs/Q-R43-SPEC.md` — R43 Pass-3 consolidation precedent + ATTESTATION-SCOPE-FIDELITY + PRE-EMIT-GRILLING-COMPLETENESS-GATE composite creation pattern.
-4. R49/R50 verifier patterns (`coordination/specs/Q-R49-EMPIRICAL.sh`, `coordination/specs/Q-R50-EMPIRICAL.sh`) — most recent stable empirical-verifier authoring patterns.
-5. R47/R48/R49/R50 Reviewer reports — surface the patterns R51 folds will document.
-6. `coordination/MEMORIAL.md` R47-R50 MU sections — identifies which 7+ standalones got added (the fold targets).
+1. `coordination/PRD.md` § Phase 3 Scope (especially SLICE 1 sub-section + FR-V1a/b + AC-P5 + Phase 3 anti-scope).
+2. `coordination/SCOPING-MEMO-v0.3.md` § 2.3 Extension 3 (vendor fungibility row) — relevant existing scope-memo coverage of vendor adapter pattern.
+3. `CLAUDE-COORDINATOR.md` (full) — Coordinator role discipline; DAG construction; wave gate semantics.
+4. `templates/WAVE-PLAN-TEMPLATE.md` — wave plan format.
+5. `coordination/WAVE-PLAN-01.md`, `WAVE-PLAN-02.md`, `WAVE-PLAN-03.md` — Phase 2 wave plans for pattern reference.
+6. `coordination/CLUSTER-HANDOFF-1-WU00-WU01.md` (and siblings) — cluster handoff format reference if 1A/1B split.
+7. Public Neuron SDK docs (Coordinator reads at wave-plan emit time; cite URLs in WAVE-PLAN-Phase3-01.md).
+8. `coordination/COORDINATOR-MEMORIAL.md` — Coordinator role memorial state from Phase 2.
 
 ### Pipeline invocation
 
 ```bash
 cd /Users/johnwarren/concord/tessera
-./run-pipeline.sh --round R51 --tier audit
+./run-pipeline.sh --round R52 --coordinator
 ```
 
-(Per R49 pipeline-mandatory discipline; this is the canonical invocation. `scripts/finalize-round.sh` will auto-fire pipeline at Implementer chore-A close.)
+(Coordinator mode overrides tier-derived roles; produces wave plan; cluster dispatch is separate via R53+ rounds per the wave plan.)
 
 ---
 
-## Implementer attestation (chore-A: 935c728)
-
-**Q-R51-EMPIRICAL.sh result at chore-A SHA:** `=== Summary: 19 PASS / 0 FAIL ===`
-
-**Test baseline:** `tests=361 pass=356 fail=2 skip=3` (AC-R36-21 FAIL→PASS; discipline-restoration; was 361/355/3/3 pre-R51)
-
-**`tsc` exit code:** 0
-
-**AC attestation:**
-- AC-R51-1: REINFORCED count = 30 ✓ (was 37; 7 standalones folded)
-- AC-R51-2a/2b/2c/2d/2e: All 5 updated composite heading counts match body sub-variant counts ✓
-- AC-R51-3a through 3g: All 7 distinctive phrases present with count=1 ✓
-- AC-R51-4: Re-accretion guard present in CLAUDE-MEMORIAL.md ✓
-- AC-R51-5: Test baseline 361/356/2/3 ✓
-- AC-R51-6: Bash syntax valid ✓
-
-**Anti-scope diff verification:**
-`git diff c5f5862 935c728 --name-only` → 6 files:
-- CLAUDE-IMPLEMENTER.md
-- CLAUDE-MEMORIAL.md
-- coordination/MEMORIAL.md
-- coordination/NEXT-ROLE.md
-- coordination/specs/Q-R51-EMPIRICAL.sh (new)
-- coordination/specs/Q-R51-SPEC.md (new)
-
-All 6 ⊆ ALLOWED_SET per Q-R51-SPEC § 3.4.
-
-**Tactical deviations (spec-deviance):**
-- TD-1: Distinctive phrase patterns in AC-R51-3b/3c/3e needed adjustment from spec-draft because multi-line text was split across file lines. Final phrases: "Liar's Paradox, self-match, or incidental hit" (3b), "structurally fixed by this round" (3c), "The verifier then printed a stale display value" (3e). Spec updated in same edit pass (R47 MAJOR-1 self-application: spec+verifier co-updated).
-- TD-2: Tightening 4 self-application converted 7 assert_ge→assert_eq calls after discovering all 7 presence-check phrase counts are exactly 1 at HEAD. Header comment updated. Spec ACs updated from "≥ 1" to "= 1".
-
----
-
-## Operator-decision flags (carried forward; status post-R50 close)
+## Operator-decision flags (carried forward; updated post-R51 + Phase 3 PRD authoring)
 
 1. R45 CRITICAL routing accept-vs-escalate (separately tracked).
 2. Rule 7 Surface (c) HARD-GATE candidate (9+ tessera instances; below cross-project 2nd-project threshold).
 3. Cross-project canonical landings (8+ items gated on 2nd-project occurrence).
-4. Anchor PR backflog scheduling (R11-R50 contributions).
-5. **Phase 3 PRD authoring + § 5.2 forward-protection redesign A/B/C** — operator-selected as the post-R51 next step.
-6. CLAUDE-IMPLEMENTER.md re-consolidation — **R51 IN PROGRESS (this round).**
-7. R49 MAJOR-1 hybrid-mandate-vs-full-tier mismatch — candidate for future round.
-8. R50 MAJOR-1 + 6 MINOR findings — candidate for future round.
-
-HARD STOP re-engaged on Phase 3 scope entry pending operator-led PRD authoring (post-R51).
+4. Anchor PR backflog scheduling (R11-R51 contributions).
+5. **Phase 3 PRD authored 2026-05-19** — Phase 3 entry IN PROGRESS at R52 (this round). HARD STOP on Phase 3 *scope* lifted; Phase 3 SLICE 1 execution proceeds.
+6. R49 MAJOR-1 hybrid-mandate-vs-full-tier mismatch — candidate for future round.
+7. R50 MAJOR-1 + 6 MINOR findings — candidate for future round.
+8. **NEW post-Phase-3-PRD:** OQ-P3-9 gating moment between SLICE 1 close and SLICE 2 dispatch (operator decision Path A vs Path B on cluster rental).
+9. **NEW post-Phase-3-PRD:** OQ-P3-10 Inferentia bundling — Coordinator decides at R52 wave plan based on Neuron SDK doc read.
+10. **NEW post-Phase-3-PRD:** OQ-P3-11 SCOPING-MEMO v0.4 needed — default to extending v0.3; escalate if SLICE 1 Reviewer flags scope-creep.
