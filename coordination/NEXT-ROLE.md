@@ -128,7 +128,7 @@ Per Rule 1 sub-class `empirical-command-attestation` (R46 canonical landing): al
 
 ```
 [chore-A SHA: 2ba7bb4]
-[chore-B SHA: <injected after chore-B commit>]
+[chore-B SHA: f0b0084]
 [Q-R53-EMPIRICAL.sh aggregate exit (chore-B): 0 — 12 PASS / 0 FAIL]
 [node --test summary at chore-B: tests=374 / pass=369 / fail=2 / skipped=3]
 [npx tsc exit at chore-A: 0 (zero diagnostics)]
