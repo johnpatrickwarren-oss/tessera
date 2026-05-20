@@ -1,7 +1,114 @@
 CURRENT-ROUND: R72
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Architect R72 routing block (2026-05-20)
+
+### Architect attestation summary
+
+- **Round-start SHA (anti-scope diff lower bound for Implementer's chore-A):** `a5d5ffe` (this Architect's spec-triad commit; captured via `git rev-parse HEAD` after the spec commit landed and BEFORE this routing-block commit). Per CLAUDE-ARCHITECT REINFORCED 2026-05-17 R15 MINOR-1, the empirical anti-scope diff lower bound is the most recent spec-triad commit (= what Implementer injects into `Q-R72-EMPIRICAL.sh` `$ROUND_START_SHA` via sed). The R72 directive commit `0c6507c` is the pre-prep SHA but NOT the load-bearing diff lower bound.
+- **Spec triad commit (pre-Implementer chore-A):** `a5d5ffe` (`spec(R72): Q-R72-SPEC + audit sidecar + EMPIRICAL.sh — coverage saturation matrix`). Per R21 ARCH MINOR-1 spec-commit-sequencing discipline; spec triad landed in its OWN commit BEFORE this routing block update.
+- **Empirical baseline at Architect session entry (verified by direct command runs; NOT inherited from R71 attestation per R25 MINOR-1):**
+  - `pnpm exec node --test --test-reporter=tap test/*.test.js` → `tests=469 / pass=461 / fail=5 / skipped=3`. 5 fails identity-verified by grep: AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14.
+  - `pnpm exec tsc -p tsconfig.test.json` → exit 0, zero diagnostics.
+  - `git status` → clean working tree at session entry.
+  - `git rev-parse HEAD` at session entry → `0c6507c` (R72 directive commit).
+- **R71 empirical data inspection at Architect session entry (load-bearing for parameter-space prediction grounding; R71 MAJOR-1 + MAJOR-2 reinforcement applied — EMPIRICAL-PREMISE-VERIFICATION sub-variant 5):** all 8 `demos/scenarios/*.json` files inspected via Python; key anchor data recorded:
+  - sdc-drift d=0.4: shard-04 fires w=22, zero false positives, perfect attribution.
+  - fdr-multiple-testing d=0.45, q=0.10: K=3, fdr_selected_indices=[2,5,8], zero false positives.
+  - hierarchical-evalue d=0.20, 5 shards, start=5: fleet@w=16, first per-shard@w=18 (fleet fires BEFORE per-shard; pedagogical property holds with 2-window margin).
+  - topology-spanning-common-mode max_hop=2: 3 candidates including cz-1 cooling_zone with member_count=4 (multi-candidate emission is intended engine design per R71 MAJOR-2 lesson).
+- **Toolchain at session entry:** pnpm 11.x, Node v25.x, TypeScript per devDependencies `^5.4.0`.
+- **Pre-emit grilling outcome:** PASS. Claim-then-walk discipline (R62 lesson) applied to all 11 engine surfaces enumerated in `Q-R72-SPEC.md` § 1.3; each verified by direct file read at session entry (signatures + line numbers + behavioral semantics). Spec-internal contradiction sweep (R65 MINOR-2) + R02-R71 reinforcement sweep (Q-R72-SPEC.md § 10.5) ran clean. Probe-run of `Q-R72-EMPIRICAL.sh` with locally-injected ROUND_START_SHA = `e77da5c` (directive SHA proxy, pre-spec-triad): Blocks 1-5 PASS (proving carry-forward + anti-scope + no-engine + no-prior-spec structure work); Blocks 6-8 FAIL (expected pre-chore-A — coverage matrix + package script + .js compiled artifact do not yet exist). PASS:5/FAIL:3 matches Architect prediction.
+- **Round-evolution-fragility avoidance (R62 + R66 + R68 cumulative; 4th-instance per R71 precedent):** Spec § 5.1 ALLOWED_SET uses historical-only diff (`round-start..HEAD`); carry-forward fail set bound by AC ID identity (not raw count alone); NO forward-protection AC; NO live-file-count AC; NO anti-scope-diff-against-prior-round AC; NO chore-B (single-state spec).
+- **R71 MAJOR-1 / MAJOR-2 specific application:** AC-R72-15 binds `fleet_tick_at_first_fire < earliest_per_shard_first_fire_tick` structurally (closes R71 MAJOR-1 pedagogical-property coverage gap). AC-R72-13 + the type-6 detection criterion (cooling_zone candidate with member_count = fired_set.length) close R71 MAJOR-2 narrative-vs-engine-design gap. Spec § 2.3 + § 10.5 R71-specific document the application path.
+
+### Implementer inputs for R72
+
+1. `coordination/specs/Q-R72-SPEC.md` (spec proper; prescriptive)
+2. `coordination/specs/Q-R72-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read; Implementer MAY read for context)
+3. `coordination/specs/Q-R72-EMPIRICAL.sh` (chore-A verification harness; executable; **Implementer injects `$ROUND_START_SHA` literal at chore-A pre-commit per Q-R72-SPEC.md § 11.1 sed-substitution mechanism — read SHA `a5d5ffe` from THIS routing block; do NOT use `git rev-parse HEAD` at sed time per R70 MINOR-1 reinforcement**)
+4. `coordination/PRD.md` § Phase 3 + US-01..US-04 (PRD framing)
+5. `coordination/NEXT-ROLE.md` § R72 Round-scope directive (operator scope-setting — preserved below this routing block for context)
+6. Engine source files (READ-ONLY) — exact files + lines listed in Q-R72-SPEC.md § 1.3 (11 engine entry points across 11 files; signatures + behavioral notes provided + failure-mode enumeration)
+7. R71 build artifacts (READ-ONLY for empirical reference): `tools/build-canned-demos.ts`, `demos/scenarios/*.json` — anti-scope A4 + A5
+
+### Implementer chore-A sequence (per Q-R72-SPEC.md § 11.1)
+
+1. **RED commit (separate from GREEN per R23 IMPL MINOR-1):**
+   - Land `test/q72-coverage-saturation.test.ts` with 20 `assert.fail('R72 RED — implementation pending')` stubs at AC-R72-1..20 positions.
+   - `tools/coverage-saturation.ts`, `coordination/coverage/`, and `package.json` script entries do NOT yet exist; tsc emits TS2307 module-resolution error at the test's `import { … } from '../tools/coverage-saturation.js'`.
+   - Commit message format: `red(R72): q72 coverage saturation stub fails — TS2307 + 20 RED assertion stubs`
+
+2. **GREEN commit (chore-A):**
+   - Land `tools/coverage-saturation.ts` per Q-R72-SPEC.md § 3.1 pseudocode.
+   - Compile + run the saturation runner locally once to generate `coordination/coverage/R72-saturation-matrix.json` + `.md`; commit the outputs.
+   - Modify `package.json` per § 3.2 (add `prebuild:coverage` + `coverage` scripts; preserve all other entries verbatim).
+   - Modify `README.md` per § 3.4 (append Coverage section at end-of-file; R70 + R71 sections PRESERVED).
+   - Replace all RED stubs in `test/q72-coverage-saturation.test.ts` with real assertions per § 3.3.
+   - **BEFORE committing**: inject `$ROUND_START_SHA` into `Q-R72-EMPIRICAL.sh`:
+     ```bash
+     sed -i.bak "s|<INJECTED-AT-CHORE-A>|a5d5ffe|g" coordination/specs/Q-R72-EMPIRICAL.sh
+     rm coordination/specs/Q-R72-EMPIRICAL.sh.bak
+     ```
+     (`a5d5ffe` is the spec-triad commit SHA captured above — read this routing block; do NOT use `git rev-parse HEAD`).
+   - Commit message format: `feat(R72): Tessera coverage saturation matrix — 6 failure types × 20 variations = 120 cases`
+
+3. **Verify chore-A:**
+   - `pnpm exec tsc -p tsconfig.test.json` → exit 0; zero diagnostics.
+   - `pnpm exec node --test --test-reporter=tap test/*.test.js` → record VERBATIM the actual `# tests N / # pass M / # fail K / # skipped J` lines. Predicted: tests=489 / pass=481 / fail=5 / skipped=3.
+   - `bash coordination/specs/Q-R72-EMPIRICAL.sh` → all 8 blocks PASS, exit 0.
+
+4. **Attestation in NEXT-ROLE.md (Implementer adds § Implementer R72 routing block above this Architect block):** encode ACTUAL chore-A summary VERBATIM per Rule 1 sub-class `empirical-command-attestation`. Do NOT reframe to match Architect prediction. Acknowledge any divergence in a spec-deviance section.
+
+5. **NO chore-B step.** R72 is single-state. Implementer routes directly to Reviewer after chore-A verification + attestation.
+
+### TACTICAL AUTONOMY scope (per Q-R72-SPEC.md § 6.2)
+
+Implementer MAY:
+- Choose `.js` extension imports per R70/R71 precedent (default: `.js`).
+- Adjust JSDoc wording, blank lines, import order, internal helper names — no semantic change.
+- Tune the SCENARIO_SEED_PREFIX literal IF AND ONLY IF every per-type detection floor remains met. Document any chosen non-default value in GREEN commit message AND record as `generated_with_seed_prefix` in matrix.json. Default `0x71C00` is Architect's seed; tuning band `[0x71000, 0x720FF]`.
+
+Implementer MAY NOT (without HALT + DIAGNOSTIC per Q-R72-SPEC.md § 6.1):
+- Modify any `engine/**/*.ts` file (anti-scope A2 — immediate trigger).
+- Modify `tools/demo-scenario.ts` (anti-scope A3 — R70 frozen).
+- Modify `tools/build-canned-demos.ts` or `demos/demo.html` or `demos/scenarios/*.json` (anti-scope A4 + A5 — R71 frozen).
+- Modify any pre-R72 test file or any prior-round spec file.
+- Expand the ALLOWED_SET in-spec at chore-A (R36 MAJOR-2 NEVER violation).
+- Introduce a chore-B step or any forward-protection / live-file-count / anti-scope-diff-against-prior-round AC pattern (R62+R66+R68 cumulative lesson; directive halt #6 immediate trigger).
+- Add an external dependency.
+- Open a DS-repo PR or modify any DS-repo file.
+- Skip the RED commit (R23 IMPL MINOR-1 TDD separate-RED-commit discipline).
+- Cite spec-predicted values as observed in attestation (Rule 1 sub-class `empirical-command-attestation` violation).
+- Tune variation parameter grids in Q-R72-SPEC.md § 2.1 (the 4×5 variation grids are spec-prescribed; tuning is a HALT trigger).
+
+### Halt conditions for the Implementer (per Q-R72-SPEC.md § 6.1)
+
+10 halt conditions enumerated; do NOT proceed with a silent workaround. Write `coordination/diagnostics/DIAGNOSTIC-R72-<topic>.md` with ≥ 3 bounded options + set `STATUS: ESCALATE` in this NEXT-ROLE.md + await operator disposition.
+
+### Cross-project rule dispositions (per Q-R72-SPEC.md § 7)
+
+| Rule | Disposition |
+|---|---|
+| 1 (`empirical-command-attestation`) | ACTIVE GATE — Q-R72-EMPIRICAL.sh + Implementer attestation directives |
+| 2 (`architect-branch-binding-coverage`) | ACTIVE GATE — Q-R72-SPEC § 4.1 table; 1 acknowledged non-load-bearing gap (CLI guard) |
+| 3 (`implementer-spec-test-assertion-coverage`) | ACTIVE GATE — discriminating assertions per Q-R72-SPEC § 4.2; AC-R72-15 + AC-R72-13/14 close R71 MINOR-1 pedagogical-coverage gap |
+| 4 (`anti-scope-allowed-set-forward-coverage`) | ACTIVE GATE — 11-path ALLOWED_SET + 1 regex carve-out for DIAGNOSTIC-R72-*.md; historical-only diff bounded by spec-triad SHA `a5d5ffe` |
+| 5 (`rule-derivation-without-self-application`) | N/A at spec emit (no new rule derived this round; R71 MAJOR-1/MAJOR-2 reinforcement applied AT spec authoring per EMPIRICAL-PREMISE-VERIFICATION sub-variant 5) |
+| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | ACTIVE GATE — 10 halt conditions; no carve-out; single-state spec |
+| 7 (`derived-rule-propagation-mechanism-required`) | ACTIVE GATE Surface (a) — spec § 7; Surface (b) + (c) N/A |
+
+### Routing
+
+**NEXT-ROLE: IMPLEMENTER | STATUS: READY**
+
+Implementer reads `Q-R72-SPEC.md` proper as load-bearing input; `Q-R72-SPEC-AUDIT.md` is Reviewer-authorized but Implementer MAY read for context.
+
+**Coordination chore SHA:** (Architect routing-block commit SHA to be stamped at chore time)
 
 ---
 
