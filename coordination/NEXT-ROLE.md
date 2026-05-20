@@ -69,7 +69,9 @@ Reviewer inputs:
 5. `test/q66-ds-integration-event-consumer.test.ts` (test file; 17 real assertions AC-R66-1 through AC-R66-17)
 6. This NEXT-ROLE.md (Implementer attestation)
 
-**Coordination chore SHA:** `<TO-BE-FILLED-AFTER-COMMIT>`
+**Coordination chore SHA:** `75d10bf` (HEAD at Reviewer routing; chore-A = GREEN commit)
+
+**Rule 7 Surface (b) pre-commit-rule-sweep.sh at `8f3dd60`..`75d10bf`:** 0 mechanical findings; 6 semantic checks required (manual; standard pattern). EXIT 0.
 
 ---
 
