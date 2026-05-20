@@ -509,7 +509,7 @@ with a clear commit message.
 #   step: open the header, read each attestation-type claim, verify it still describes the
 #   current file body accurately. Detected tessera R20 MINOR-1.
 
-# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 7 sub-variants)
+# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 8 sub-variants)
 #
 #   Full-formula re-verification (R20 MINOR-2): When spec § 4.x prescribes updating a
 #     specific arithmetic expression, re-read the FULL formula at the targeted line — all
@@ -564,6 +564,16 @@ with a clear commit message.
 #     the attestation transcript silently showed the corrected text. Pattern: run
 #     `grep -n "old_literal" <modified_verifier_file>` after each amendment and verify
 #     the count matches expected modifications. Detected tessera R48 MAJOR-1 + MINOR-1.
+#
+#   Commit-SHA identity verification at chore-A (R70 MINOR-1): When injecting a commit SHA
+#     placeholder into a verifier script at chore-A time, verify the SHA identity against
+#     `git log --oneline` output BEFORE recording it in NEXT-ROLE.md and MEMORIAL.md. At R70,
+#     the Architect's routing-block commit (`bb9549b`) was mis-labeled "spec-triad commit SHA"
+#     in NEXT-ROLE.md:25 and MEMORIAL.md:1314; the actual spec-triad commit is `f62c327`
+#     (one commit earlier). Both commits are ALLOWED_SET-only (zero functional impact) but the
+#     identity attestation was false. Rule: for any SHA recorded in an attestation artifact,
+#     run `git log --oneline | head -5` and copy the SHA verbatim from that output rather than
+#     from the mental model of "the most recent commit." Detected tessera R70 MINOR-1.
 
 # REINFORCED 2026-05-17 — When implementing a spec-prescribed guard for a distinct failure
 #   mode, write a structural test that would FAIL if the guard were removed. If the existing
