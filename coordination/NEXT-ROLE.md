@@ -10,6 +10,7 @@ TIER: full
 ### Implementer attestation summary
 
 - **Chore-A SHA:** `31a7e7f` (feat(R72): Tessera coverage saturation matrix — 6 failure types × 20 variations = 120 cases)
+- **Coordination chore SHA (HEAD at routing):** `c786dc6` (chore(R72 IMPLEMENTER): routing block + MEMORIAL entries)
 - **Round-start SHA used for anti-scope diff:** `a5d5ffe` (spec-triad commit; read from Architect routing block per § 11.1 — NOT `git rev-parse HEAD` per R70 MINOR-1 reinforcement)
 - **tsc exit:** 0, zero diagnostics (`pnpm exec tsc -p tsconfig.test.json`)
 - **node --test (actual observed verbatim):**
