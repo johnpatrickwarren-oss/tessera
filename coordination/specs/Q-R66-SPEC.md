@@ -1160,7 +1160,7 @@ All ACs above are STRUCTURALLY exercised at runtime; § 5 preamble classificatio
 These are the binding commands the Implementer MUST report verbatim per Rule 1 sub-class `empirical-command-attestation` (R46), not counted in the 17:
 
 - `npx tsc -p tsconfig.test.json` → expected exit 0, zero diagnostics.
-- `node --test --test-reporter=tap test/*.test.js` → expected `tests=444 / pass=439 / fail=2 / skipped=3` (baseline 427/422/2/3 + 17 new pass; the 2 fails carry forward as R36-30 + R36-31).
+- `node --test --test-reporter=tap test/*.test.js` → ~~expected `tests=444 / pass=439 / fail=2 / skipped=3`~~ [R66-amended per operator Option A 2026-05-20: `tests=444 / pass=438 / fail=3 / skipped=3`]. 3 fails = R36-30 + R36-31 (Phase 2 close carry-forward; pre-existing) + **AC-R65-2 NEW carry-forward** (live-file-count assertion in `test/q65-ds-integration-feed.test.ts` reads `index.ts` at runtime and asserts `export *` count === 3; R66's in-scope `index.ts` modification adds 2 export lines → count = 5 → AC-R65-2 PASS→FAIL). AC-R65-2 is structurally fragile (same pattern as R62 AC-R62-15 forward-protection; analogous to R36-30/R36-31 carry-forward). Operator Option A approved: amend spec + EMPIRICAL.sh; no code changes required.
 - `bash coordination/specs/Q-R66-EMPIRICAL.sh` → expected exit 0; 14 PASS, 0 FAIL.
 
 ### 5.3 Branch-binding coverage table (Rule 2 ACTIVE GATE)

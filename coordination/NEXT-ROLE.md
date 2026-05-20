@@ -1,7 +1,75 @@
 CURRENT-ROUND: R66
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
+
+---
+
+## § Implementer R66 routing block (2026-05-20) — chore-A completion
+
+### Implementer attestation
+
+**RED commit SHA:** `df0ded3` — `test/q66-ds-integration-event-consumer.test.ts` with 17 `assert.fail('R66 RED — implementation pending')` stubs; `engine/ds-integration/event-consumer.ts` + `freeze-hook-factory.ts` do NOT exist; tsc TS2307 module-resolution failure prevents .js emission; `node --test` baseline unchanged at `427/422/2/3`. RED state confirmed per R23 TDD discipline.
+
+**ESCALATE + Resolution:** Halt conditions #1 + #3 fired at initial implementation (see § Implementer R66 ESCALATE block below). Operator selected Option A: update `Q-R66-EMPIRICAL.sh` Block 14 expected count + annotate `Q-R66-SPEC.md` § 5.2. Both amendments applied; EMPIRICAL.sh re-run confirms exit 0.
+
+**TDD sequence:**
+- RED commit: `df0ded3` — 17 `assert.fail` stubs; tsc TS2307; no .js emitted; baseline stays `427/422/2/3`. RED state confirmed.
+- GREEN commit (chore-A): `engine/ds-integration/event-consumer.ts` (NEW; 291 lines), `engine/ds-integration/freeze-hook-factory.ts` (NEW; 143 lines), `engine/ds-integration/index.ts` (+2 export lines), `test/q66-ds-integration-event-consumer.test.ts` (stubs → 17 real assertions), `coordination/specs/Q-R66-EMPIRICAL.sh` (Block 14 amended per Option A), `coordination/specs/Q-R66-SPEC.md` (§ 5.2 amended per Option A), coordination artifacts. tsc exit 0; GREEN.
+
+**Binding-command results at chore-A HEAD (ACTUAL — verbatim per Rule 1 sub-class `empirical-command-attestation`):**
+- `npx tsc -p tsconfig.test.json` → exit 0, zero diagnostics.
+- `node --test --test-reporter=tap test/*.test.js` → `tests=444 / pass=438 / fail=3 / skipped=3` (exit 1). 3 fails = AC-R36-30 + AC-R36-31 (Phase 2 close carry-forward; pre-existing from `87e372f`) + **AC-R65-2 carry-forward** (live-file-count regression per Option A disposition).
+- `bash coordination/specs/Q-R66-EMPIRICAL.sh` → 14 PASS, 0 FAIL, exit 0.
+
+**Anti-scope diff at chore-A:**
+```
+coordination/MEMORIAL.md
+coordination/NEXT-ROLE.md
+coordination/diagnostics/DIAGNOSTIC-R66-r65-index-count-regression.md  ← regex carve-out
+coordination/specs/Q-R66-EMPIRICAL.sh
+coordination/specs/Q-R66-SPEC-AUDIT.md
+coordination/specs/Q-R66-SPEC.md
+engine/ds-integration/event-consumer.ts
+engine/ds-integration/freeze-hook-factory.ts
+engine/ds-integration/index.ts
+test/q66-ds-integration-event-consumer.test.ts
+```
+Rule 4 (`anti-scope-allowed-set-forward-coverage`) gate: PASS. All paths in ALLOWED_SET or regex carve-out. No unauthorized path.
+
+**Tactical deviations (per spec § 4.4 TACTICAL AUTONOMY):**
+- `ExtendedSampleObservation` imported from `engine/per-shard/runtime` (not from `engine/events/freeze-hook`; spec § 4.2 notes to verify at implementation time; verified via grep).
+- Test fixtures `freshResidual()` / `freshObs()` use minimal field sets (`{ n_samples: 0, confidence: 'none' }` / `{ observedAt, residualSeedHash, sampleVector: [1.0] }`) rather than `{} as Type` casts per spec § 4.4 TACTICAL AUTONOMY prescription.
+- Import assertion `assert {}` form from spec § 4.2 pseudocode comment dropped; standard import used (toolchain does not support empty import assertions).
+
+**Spec-deviance disclosures:**
+- `node --test` fail count = 3 (not 2 as originally predicted in spec § 5.2 / § 1.4). Root cause: AC-R65-2 carry-forward per Option A. `Q-R66-EMPIRICAL.sh` Block 14 and `Q-R66-SPEC.md` § 5.2 amended to reflect actual 3-fail count. Not a substantive R66 regression.
+
+**Cross-project rule self-application (Implementer):**
+
+| Rule | Status |
+|---|---|
+| 1 (`false-compliance-attestation`; `empirical-command-attestation`) | PASS — actual `444/438/3/3` (exit 1) encoded verbatim; not reframed; Option A disclosure explicit |
+| 2 (`architect-branch-binding-coverage`) | PASS — all load-bearing branches covered per spec § 5.3; 5 acknowledged non-load-bearing gaps |
+| 3 (`implementer-spec-test-assertion-coverage`) | PASS — discriminating assertions per spec § 5.4; fixture stubs corrected per TACTICAL AUTONOMY |
+| 4 (`anti-scope-allowed-set-forward-coverage`) | PASS — 9-path ALLOWED_SET + diagnostic carve-out; no unauthorized path; ALLOWED_SET not expanded in test |
+| 5 (`rule-derivation-without-self-application`) | N/A — no new rule derived this round |
+| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | PASS — halt conditions #1 + #3 fired; DIAGNOSTIC written; STATUS: ESCALATE set; no silent workarounds; Option A amendments applied per operator directive |
+| 7 (`derived-rule-propagation-mechanism-required`) | PASS — Surface (a) in spec § 7; Surface (b) pre-commit-rule-sweep run at chore-A (see Memorial); Surface (c) N/A |
+
+### Routing
+
+**NEXT-ROLE: REVIEWER | STATUS: READY**
+
+Reviewer inputs:
+1. `coordination/specs/Q-R66-SPEC.md` (spec proper; amended per Option A)
+2. `coordination/specs/Q-R66-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read)
+3. `coordination/specs/Q-R66-EMPIRICAL.sh` (verification harness; amended per Option A; run at HEAD)
+4. `engine/ds-integration/event-consumer.ts` + `engine/ds-integration/freeze-hook-factory.ts` + `engine/ds-integration/index.ts` (deliverables)
+5. `test/q66-ds-integration-event-consumer.test.ts` (test file; 17 real assertions AC-R66-1 through AC-R66-17)
+6. This NEXT-ROLE.md (Implementer attestation)
+
+**Coordination chore SHA:** `<TO-BE-FILLED-AFTER-COMMIT>`
 
 ---
 

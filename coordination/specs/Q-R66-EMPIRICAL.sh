@@ -234,25 +234,32 @@ assert_eq "Block 13 (tsc exit)" "0" "$TSC_EXIT"
 echo ""
 
 # -----------------------------------------------------------------------------
-# Block 14: node --test summary = 444/439/2/3
+# Block 14: node --test summary = 444/438/3/3
 #
-# Baseline 427/422/2/3 + 17 new R66 tests, all expected to pass at HEAD.
-# 2 fails = R36-30 + R36-31 forward-protection carry-forward (pre-existing
-# from Phase 2 close `87e372f`; not introduced by R66).
+# [R66-amended per operator Option A resolution 2026-05-20]:
+# 3 fails = R36-30 + R36-31 forward-protection carry-forward (pre-existing
+# from Phase 2 close `87e372f`) + AC-R65-2 NEW carry-forward (live-file-count
+# assertion in q65 that reads index.ts at runtime and asserts export-star
+# count === 3; R66 adds 2 lines → count = 5 → AC-R65-2 PASS→FAIL).
+# AC-R65-2 is structurally fragile (live-file-count pattern); documented
+# analogous to R36-30/R36-31 carry-forward. Not introduced by R66 R66
+# substantive code; consequence of R66's in-scope index.ts modification.
+# Original spec-predicted value was 444/439/2/3 (issued before R65 AC-R65-2
+# fragility was discovered at implementation time).
 #
 # `|| true` because node --test exits non-zero when fail count > 0.
 # Capture output ONCE; grep multiple times against the capture (per R46
 # bash-bug lesson — multiple `node --test` invocations corrupt the summary
 # capture with set -uo pipefail).
 # -----------------------------------------------------------------------------
-echo "Block 14: test summary = 444/439/2/3"
+echo "Block 14: test summary = 444/438/3/3"
 NODE_TEST_OUTPUT=$(node --test --test-reporter=tap test/*.test.js 2>&1 || true)
 TESTS=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# tests ' | awk '{print $3}')
 PASS_COUNT=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# pass ' | awk '{print $3}')
 FAIL_COUNT=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# fail ' | awk '{print $3}')
 SKIP_COUNT=$(echo "$NODE_TEST_OUTPUT" | grep -E '^# skipped ' | awk '{print $3}')
 SUMMARY="$TESTS/$PASS_COUNT/$FAIL_COUNT/$SKIP_COUNT"
-assert_eq "Block 14 (test summary)" "444/439/2/3" "$SUMMARY"
+assert_eq "Block 14 (test summary)" "444/438/3/3" "$SUMMARY"
 echo ""
 
 # -----------------------------------------------------------------------------
