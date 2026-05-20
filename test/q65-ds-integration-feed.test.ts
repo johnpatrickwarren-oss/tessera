@@ -382,7 +382,7 @@ describe('R65 WU-Phase3-3B Tessera→DS feed adapter', () => {
     // post-injection: the literal is replaced with the actual chore-A SHA
     // and this test PASSES.
     const ROUND_START_SHA = '59a03d0';
-    const CHORE_A_SHA = '<INJECTED-AT-CHORE-B>';
+    const CHORE_A_SHA = 'e8d0cd1d7634c0ec7ba1d66f4f3808f87e9c357b';
     const ALLOWED_SET = new Set<string>([
       'coordination/MEMORIAL.md',
       'coordination/NEXT-ROLE.md',
