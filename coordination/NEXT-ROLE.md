@@ -1,16 +1,73 @@
 CURRENT-ROUND: R65
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision — R66 WU-Phase3-3C)
+STATUS: ROUND-COMPLETE
 TIER: full
 
 Inputs:
-  1. `coordination/specs/Q-R65-SPEC.md` (spec proper; prescriptive)
-  2. `coordination/specs/Q-R65-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read)
-  3. `coordination/specs/Q-R65-EMPIRICAL.sh` (verification harness; executable)
-  4. `engine/ds-integration/feed.ts` (R65 deliverable)
-  5. `engine/ds-integration/index.ts` (R65 modified: +1 export-star line)
-  6. `test/q65-ds-integration-feed.test.ts` (R65 test file)
-  7. This NEXT-ROLE.md (Implementer attestation)
+  1. `coordination/reviews/REVIEWER-REPORT-R65.md` (Reviewer audit; THIS handoff)
+  2. `coordination/specs/Q-R65-SPEC.md` (spec proper)
+  3. `coordination/specs/Q-R65-SPEC-AUDIT.md` (Architect ceremony sidecar)
+  4. `coordination/specs/Q-R65-EMPIRICAL.sh` (verification harness)
+  5. `engine/ds-integration/feed.ts` (R65 deliverable)
+  6. `engine/ds-integration/index.ts` (R65 modified)
+  7. `test/q65-ds-integration-feed.test.ts` (R65 test file)
+  8. `coordination/MEMORIAL.md` (R65 ARCHITECT + IMPLEMENTER + REVIEWER entries appended)
+  9. This NEXT-ROLE.md (Implementer + Reviewer attestations)
+
+---
+
+## § Reviewer R65 routing block (2026-05-20)
+
+### Reviewer verdict
+
+**STATUS: MERGE-READY** — 0 CRITICAL, 0 MAJOR, 3 MINOR, 4 OBS.
+
+### Binding-command re-runs at HEAD `752d8fb`
+
+- `npx tsc -p tsconfig.test.json` → exit 0, zero diagnostics. AC-R65-17 PASS.
+- `node --test --test-reporter=tap test/*.test.js` → `tests=427 / pass=422 / fail=2 / skipped=3` (matches Implementer chore-B verbatim; 2 fails = `AC-R36-30` + `AC-R36-31` carry-forward). AC-R65-18 PASS.
+- `bash coordination/specs/Q-R65-EMPIRICAL.sh` → 10 PASS, 0 FAIL, exit 0.
+- `git diff 59a03d0..HEAD --name-only | sort` → exactly the 8-path ALLOWED_SET (no anti-scope drift).
+- `git cat-file -e e8d0cd1d7634c0ec7ba1d66f4f3808f87e9c357b` → 0 (injected SHA is a valid ref = chore-A).
+- DECOUPLING-1 / DECOUPLING-2 R62 invariants PASS.
+
+### Findings summary (full report at `coordination/reviews/REVIEWER-REPORT-R65.md`)
+
+| # | Severity | Citation | Subject |
+|---|---|---|---|
+| MINOR-1 | MINOR | `NEXT-ROLE.md:234` | Architect routing block cites wrong carve-out AC numbers (AC-R65-10 + AC-R65-12 → should be AC-R65-16 + AC-R65-18; transposition error) |
+| MINOR-2 | MINOR | `Q-R65-SPEC.md:259-264` vs `:479-484` | Spec internal contradiction between § 1.5 discriminated-union FeedError and § 4.1 interface FeedError; implementer correctly followed prescriptive § 4.1 |
+| MINOR-3 | MINOR | spec § 9 line 1491 + `feed.ts:75-78,84` | Empty-`firing_verdicts` corner case committed in spec § 9 but not bound by any explicit AC (gap; implementation empirically correct) |
+| OBS-1 | OBS | spec § 5.3 | Acknowledged branch-binding gaps sweep cleanly (4 items; non-load-bearing rationale honored) |
+| OBS-2 | OBS | `feed.ts:113-205` | `async` + explicit `Promise` wrap stylistically redundant but semantically correct |
+| OBS-3 | OBS | commits `752d8fb` after `0a19571` | Coordination chore SHA-recording extra commit chases HEAD; pattern honest |
+| OBS-4 | OBS | `feed.ts:54` | `protocol?: 'http'` accepted but unused (forward-compat reserved per D-5) |
+
+### Right-reasons audit (3 tests; all PASS)
+
+- AC-R65-5 (`firing_family_count` Set-dedup): discriminates against `verdict.length`, sum-of-`firing_families.length`, and first-only patterns.
+- AC-R65-4 (A16 literal preservation): `assert.strictEqual(..., true)` plus TS literal-type enforcement at compile time + EMPIRICAL.sh source-grep independent binding.
+- AC-R65-15 (no inline path-literal duplication): both regex-import-presence and inline-literal-count assertions; EMPIRICAL.sh duplicates the check.
+
+No self-confirming tests detected.
+
+### Cross-cutting checks
+
+- **TDD discipline:** RED `8f8246c` precedes GREEN `e8d0cd1`; module-resolution failure (TS2307) confirmed at RED per Implementer attestation. ✓
+- **Halt-discipline:** no DIAGNOSTIC-R65-*.md (no halt fired); pre-documented two-state carve-out scope (AC-R65-16 + AC-R65-18 ONLY) honored — Implementer did not invent a workaround for the chore-A FAIL. ✓
+- **Anti-scope:** `git diff 59a03d0..HEAD --name-only | sort` = 8-path ALLOWED_SET exactly. Frozen surfaces (`feed-contract.ts`, `event-contract.ts`, `verdict.ts`, `events/*`, `verdict-groups.ts`, `fleet/verdict-consumer.ts`) all unmodified. ✓
+
+### Routing
+
+**NEXT-ROLE: MEMORIAL-UPDATER | STATUS: MERGE-READY**
+
+Memorial-Updater inputs:
+1. `coordination/reviews/REVIEWER-REPORT-R65.md`
+2. `coordination/MEMORIAL.md` (R65 ARCHITECT + IMPLEMENTER + REVIEWER entries already appended)
+3. `coordination/specs/Q-R65-SPEC.md` + audit sidecar
+4. Implementer + Reviewer routing blocks above
+
+Expected Memorial-Updater actions: cross-project reinforcement-rule threshold accounting (3 MINORs all on `architect` role surface — MINOR-1 line-citation drift; MINOR-2 spec-internal-contradiction; MINOR-3 branch-binding completeness gap); ROUND-R65-SUMMARY.md authoring; CLAUDE-*.md REINFORCED accretion if any sub-class threshold crossed.
 
 ---
 
