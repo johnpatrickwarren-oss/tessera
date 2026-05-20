@@ -144,6 +144,25 @@ tessera/
 └── tools/                        # Synthetic fixtures + topology injection harness
 ```
 
+## Coverage
+
+Tessera R72 validates the engine against 6 failure types × 20 parameter variations = 120 cases. Generate the matrix with:
+
+```bash
+pnpm coverage
+```
+
+See `coordination/coverage/R72-saturation-matrix.md` for the human-readable summary; `coordination/coverage/R72-saturation-matrix.json` is the machine-readable data. The matrix is deterministic — re-running produces byte-identical output.
+
+| Type | Detection floor | Attribution floor |
+|---|---|---|
+| sdc-drift | 16 / 20 | ≥ 95% |
+| common-mode-rack | 20 / 20 | ≥ 95% |
+| event-conditional | 20 / 20 | ≥ 95% |
+| fdr-multiple-testing | 16 / 20 | ≥ 95% |
+| hierarchical-evalue | 12 / 20 | ≥ 95% (and ≥ 80% fleet-fires-before-per-shard) |
+| topology-spanning-common-mode | 16 / 20 | ≥ 95% |
+
 ## License
 
 Apache 2.0. See `LICENSE`.
