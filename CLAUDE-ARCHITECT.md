@@ -436,3 +436,25 @@ All unresolved decisions → open questions in the spec.
 #   halt trigger? If yes, the halt trigger must enumerate the exception. Detected tessera
 #   R56 MINOR-1 (Architect § 10.2 R15 grilling row affirmatively claimed no conflict —
 #   the affirmation was wrong; the conflict was not caught at spec-emit time).
+# REINFORCED 2026-05-19 — When spec pseudocode uses a constructor options literal (e.g.,
+#   `new SlurmTopologySource(data, { fetched_at_ts: ... })`), grep the actual opts interface
+#   declaration at spec-emit time — not from memory. camelCase vs snake_case field names are
+#   invisible without direct file read (e.g., `fetchedAtTs` vs `fetched_at_ts` at
+#   `engine/topology/slurm-source.ts:SlurmTopologySourceOpts`). The type-declaration-site
+#   check (REINFORCED 2026-05-16, R02) applies to TYPE shapes; this extends it to OPTS
+#   INTERFACE field names used in pseudocode constructor calls. Procedure: for each
+#   constructor-call pseudocode literal with an opts object, grep `interface.*Opts\|type.*Opts`
+#   in the source file and read the exact field names before writing. Detected tessera R58
+#   MINOR-1 (Implementer resolved at TD-1 via TACTICAL AUTONOMY; no runtime impact; first
+#   constructor-options-symbol-drift sub-variant of cite-then-verify).
+# REINFORCED 2026-05-19 — When spec § 5.x branch-binding table cites post-MOD line numbers
+#   for guards that will be inserted INSIDE an existing method body, the insertion shifts all
+#   subsequent lines by the number of inserted lines. Citing the pre-MOD absolute line number
+#   as the "after-MOD guard location" produces off-by-N citations (N = inserted lines).
+#   Procedure: cite via grep-anchor (e.g., "slurm-source.ts: search fetchSnapshot for
+#   `LIVE_FETCH_NOT_IMPLEMENTED_PATH_B`") OR note "predicted post-MOD: pre-MOD line + N_lines
+#   inserted" (e.g., "pre-MOD :58-60; 3-line guard → post-MOD :60-62"). Never cite a
+#   post-MOD absolute line number for an inline insertion without computing the offset.
+#   A forward-flag in the spec-audit acknowledging the drift is not a substitute for providing
+#   the correct post-MOD range in the spec itself. Detected tessera R58 MINOR-3 (spec-
+#   readability impact only; first post-MOD-insertion-drift sub-variant).
