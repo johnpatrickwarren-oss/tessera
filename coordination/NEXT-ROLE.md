@@ -1,7 +1,86 @@
 CURRENT-ROUND: R62
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Architect R62 routing block (2026-05-20)
+
+### Architect attestation summary
+
+- **Round-start SHA (anti-scope diff lower bound):** `ad6cc6b` (verified via `git rev-parse HEAD` at Architect session entry; matches `git log --oneline -1` showing the R61 ESCALATE #2 → Option F resolution commit).
+- **Spec triad commit (pre-Implementer chore-A):** `58c0c65` (`spec(R62): Q-R62-SPEC + audit sidecar + EMPIRICAL.sh — Phase 3 SLICE 3 WU-Phase3-3A (re-scoped per Option F) DS integration interface contract`). Per R21 ARCH MINOR-1 spec-commit-sequencing discipline. Spec landed in its OWN commit BEFORE this routing block update.
+- **Empirical baseline at session entry (verified via direct command runs; NOT inherited from R58/R61 attestation):**
+  - `node --test --test-reporter=tap test/*.test.js` → `tests=399 / pass=394 / fail=2 / skipped=3`. 2 fails = R36-30 + R36-31 forward-protection carry-forward (pre-existing; not introduced by R62).
+  - `npx tsc -p tsconfig.test.json` → exit code 0, zero diagnostics.
+- **Toolchain at session entry:** Node v25.9.0; TypeScript 5.9.3.
+- **Pre-emit grilling outcome:** PASS. Audit-emit-time grilling caught a chore-A test-count arithmetic drift (predicted `412/406/3/3` should have been `412/405/4/3` because BOTH AC-R62-12 and AC-R62-15 are placeholder-bound test blocks that each fail at chore-A). Spec corrected before routing; full disclosure at `Q-R62-SPEC-AUDIT.md § 3.1 + § 5.2 D-AUDIT-1 + § 6.1`.
+
+### Implementer inputs for R62
+
+1. `coordination/specs/Q-R62-SPEC.md` (spec proper; 1236 lines; prescriptive)
+2. `coordination/specs/Q-R62-SPEC-AUDIT.md` (Architect ceremony sidecar; 267 lines; audit trail + decision rationale)
+3. `coordination/specs/Q-R62-EMPIRICAL.sh` (chore-A verification harness; 343 lines; executable)
+4. `coordination/NEXT-ROLE.md` § R62 Round-scope directive (operator-authored; preserved below; lines 75–177)
+5. `coordination/PRD.md` § Phase 3 (FR-D4 line 442; AC-P9 line 452 — Option F amendments at `ad6cc6b`)
+6. `coordination/WAVE-PLAN-09.md` § ⚠ R61 ESCALATE #2 → Option F amendment (lines 5–18)
+
+### Implementer chore-A sequence (per spec § 4.7 + § 11)
+
+1. **RED commit:** lands `test/q62-ds-integration-contract.test.ts` with 13 `assert.fail('R62 RED — implementation pending')` stubs. Contract files do NOT yet exist; module imports fail at module-resolution layer → RED state.
+2. **GREEN commit:** lands the 4 contract files (`engine/ds-integration/feed-contract.ts` + `event-contract.ts` + `index.ts` + `README.md`) per spec § 4.1–§ 4.4 pseudocode AND replaces all `assert.fail` stubs with the real assertions per § 4.5.
+3. **Verify chore-A:** Run `npx tsc -p tsconfig.test.json` (must exit 0); run `node --test --test-reporter=tap test/*.test.js` (chore-A actual: `412/405/4/3` — 4 fails = 2 R36 + 2 R62 placeholder); run `bash coordination/specs/Q-R62-EMPIRICAL.sh` (most checks PASS; AC-R62-10 FAIL pre-documented per § 6.1 carve-out).
+4. **Implementer attestation:** Encode the ACTUAL chore-A summary (`412/405/4/3`) VERBATIM in NEXT-ROLE.md per Rule 1 sub-class `empirical-command-attestation`. Do NOT reframe as compliance. Do NOT cite the spec-predicted chore-B value `412/407/2/3` as the chore-A observed value.
+5. **Chore-B:** Inject the chore-A SHA into `test/q62-ds-integration-contract.test.ts` AC-R62-12 + AC-R62-15 `CHORE_A_SHA = '<INJECTED-AT-CHORE-B>'` placeholders. Re-run tests (post-injection summary: `412/407/2/3`). SHA-backfill commit.
+
+### TACTICAL AUTONOMY scope (per spec § 4.6)
+
+Implementer MAY:
+- Adjust JSDoc wording without changing field semantics or type shapes.
+- Adjust blank lines / minor formatting consistent with codebase style.
+- Reorder `import` statements within standard ordering.
+- Rename test-local variable names without changing assertion shape.
+
+Implementer MAY NOT (without HALT + DIAGNOSTIC):
+- Change any wire-format field name or type.
+- Add imports from `engine/types/*` or `engine/events/*` to contract files.
+- Remove the A16 `correlational_not_causal: true` literal from `VerdictGroupPayload`.
+- Modify the 5-value `event_class` closed-set.
+- Skip chore-A SHA injection for AC-R62-12 + AC-R62-15 placeholders.
+
+### Halt conditions for the Implementer (per spec § 6.1)
+
+1. Q-R62-EMPIRICAL.sh non-zero exit for any reason other than pre-documented AC-R62-10 / AC-R62-12 / AC-R62-15 two-state mismatch (carve-out per R56 MINOR-1).
+2. `npx tsc -p tsconfig.test.json` non-zero exit.
+3. Binding-command result CONTRADICTS AC literal (Rule 1 `false-compliance-attestation`).
+4. Spec-vs-reality conflict mid-implementation (Rule 6).
+5. Anti-scope diff includes path outside ALLOWED_SET (NEVER expand ALLOWED_SET in-test per R36 MAJOR-2).
+6. R61-class architectural-reality discovery (premise empirically false at Implementer time).
+7. Phase 1+2+Phase3-SLICE-1+2 regressions (any pre-R62 test other than R36-30 + R36-31 transitions PASS→FAIL).
+
+Resolution: write DIAGNOSTIC-R62-*.md with ≥3 bounded options; set STATUS: ESCALATE; await operator disposition.
+
+### Cross-project rule dispositions (per spec § 7)
+
+| Rule | Disposition |
+|---|---|
+| Rule 1 (`false-compliance-attestation`; `empirical-command-attestation`) | ACTIVE GATE — Q-R62-EMPIRICAL.sh + attest actual values |
+| Rule 2 (`branch-binding-coverage-gate`) | ACTIVE GATE — § 5.3 enumerates every literal/discriminator |
+| Rule 3 (`implementer-spec-test-assertion-coverage`) | ACTIVE GATE — discriminating substring markers (§ 5.6) |
+| Rule 4 (`anti-scope-allowed-set-forward-coverage`) | ACTIVE GATE — § 3.2 ALLOWED_SET enumerated pre-RED |
+| Rule 5 (`rule-derivation-without-self-application`) | N/A — no new rule derived this round |
+| Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | ACTIVE GATE — § 6.1 halt conditions with two-state carve-out |
+| Rule 7 (`derived-rule-propagation-mechanism-required`) | ACTIVE GATE — Surface (a) enumeration in § 7 |
+
+### Pipeline resume command
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R62 --tier full
+```
+
+---
 
 ## § Operator resolution of R61 ESCALATE #2 — Option F (2026-05-20)
 
