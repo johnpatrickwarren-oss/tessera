@@ -31,7 +31,7 @@ The Implementer's chore-A commit picks up this NEXT-ROLE.md routing block + MEMO
 
 ### Chore-A attestation
 
-- **Chore-A commit SHA:** `<WILL-BE-FILLED-IN-AFTER-COMMIT>`
+- **Chore-A commit SHA:** `93d3689`
 - **Branch:** `main`
 
 **AC-R56-13 (typecheck):** `npx tsc -p tsconfig.test.json` → EXIT=0 (zero diagnostics; R53 clean surface preserved). Source: `Q-R56-EMPIRICAL.sh` AC-R56-13 block PASS actual=0.
@@ -78,10 +78,13 @@ No unexpected paths. After chore-A commit, total = 12 (adds NEXT-ROLE.md + MEMOR
 - Manifest note: `coordination/VENDORING-MANIFEST.md` (verdict.ts row note refresh)
 - Empirical: `coordination/specs/Q-R56-EMPIRICAL.sh`
 
-### Chore-B attestation (to be completed after chore-A SHA is known)
+### Chore-B attestation
 
-- **Chore-A SHA (injected into AC-R56-15 CHORE_A_SHA literal):** `<PENDING>`
-- **Post-chore-B test count:** `<PENDING>`
+- **Chore-A SHA injected into AC-R56-15 CHORE_A_SHA literal:** `93d3689`
+- **Post-chore-B test count (actual verbatim):** `tests=387 / pass=382 / fail=2 / skipped=3`
+  - 2 persistent fails = AC-R36-30 + AC-R36-31 (pre-existing R36 forward-protection guards; carry-forward from Phase 2 close)
+  - AC-R56-15 NOW PASSES (SHA injection effective; `git diff 4447586..93d3689 --name-only` ⊆ 12-entry ALLOWED_SET confirmed)
+- **Chore-B SHA:** `<WILL-BE-FILLED-AFTER-COMMIT>`
 
 ---
 
