@@ -421,3 +421,18 @@ All unresolved decisions → open questions in the spec.
 #   Architect pre-prediction table, annotate each count with the SHA boundary it assumes.
 #   Q-R53-EMPIRICAL.sh must also carry two separate assertion blocks — one for chore-A SHA
 #   and one for chore-B HEAD. Detected tessera R53 MINOR-1.
+# REINFORCED 2026-05-19 — Spec halt-condition triggers must carve out pre-documented
+#   failure-by-construction states from the halt trigger (R56 MINOR-1). When spec § 1.4
+#   Architect-prediction and § 5 AC table BOTH predict that a binding-command block will
+#   exit non-zero at chore-A because a placeholder SHA is not a valid git object until
+#   chore-B, spec § 6.1 halt-condition text MUST exclude that specific pre-documented
+#   failure path — e.g., "exits non-zero for any reason OTHER THAN the pre-documented
+#   AC-R56-14 two-state mismatch." Omitting the carve-out creates a spec-internal
+#   contradiction (§ 6.1 says HALT; § 4.6 + § 5 describe the same non-zero exit as the
+#   expected chore-A outcome) that forces the Implementer to bypass the literal halt-rule
+#   without writing a DIAGNOSTIC. Pre-emit grilling § 9.8 R15 row "no conflicting
+#   prescriptions for the same trigger state" MUST explicitly ask: does any prediction in
+#   § 1.4 or § 5 describe a chore-A observable outcome that would also satisfy a § 6.1
+#   halt trigger? If yes, the halt trigger must enumerate the exception. Detected tessera
+#   R56 MINOR-1 (Architect § 10.2 R15 grilling row affirmatively claimed no conflict —
+#   the affirmation was wrong; the conflict was not caught at spec-emit time).
