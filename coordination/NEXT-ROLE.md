@@ -1,7 +1,37 @@
 CURRENT-ROUND: R58
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: IMPLEMENTER
 STATUS: READY
 TIER: full
+
+## Architect → Implementer routing block (R58; chore-A SHA `a751a76`)
+
+**Inputs for Implementer:**
+- `coordination/specs/Q-R58-SPEC.md` (full spec)
+- `coordination/specs/Q-R58-SPEC-AUDIT.md` (ceremony sidecar; Reviewer also reads this)
+- `coordination/specs/Q-R58-EMPIRICAL.sh` (Rule 1 sub-class verifier)
+- `coordination/CLUSTER-HANDOFF-WAVE07-2A-2B.md` (TPU contract; READ FIRST for R58 context)
+- `coordination/WAVE-PLAN-07.md` Wave 8 section
+- `engine/topology-overlay.ts` (TopologySource interface declaration; READ-ONLY)
+- `engine/topology/{slurm,k8s,nvlink,neuron,tpu}-source.ts` (5 MOD targets)
+- `engine/types/verdict.ts` (READ-ONLY; R56-frozen)
+
+**Architect attestations at chore-A SHA `a751a76`:**
+- `git rev-parse HEAD` = `a751a76` (spec-triad commit; verified via Bash at session entry)
+- Round-start SHA (anti-scope diff lower bound) = `7e9d399`
+- `node --test --test-reporter=tap test/*.test.js` at `7e9d399` = `tests=387 / pass=382 / fail=2 / skipped=3` (verified via Bash at session entry; 2 fails = R36-30 + R36-31 pre-existing carry-forward from R56 close)
+- `npx tsc -p tsconfig.test.json` at `7e9d399` = exit 0 (verified via Bash at session entry)
+- Spec triad written + committed in dedicated commit `a751a76` BEFORE NEXT-ROLE.md update per R21 ARCH MINOR-1 reinforcement.
+
+**Predicted test counts at chore-A (Implementer's chore-A SHA after RED+GREEN commits):**
+- 12 new R58 runtime tests added (AC-R58-1 through AC-R58-11 + AC-R58-14) → baseline + 12 = 399 tests.
+- Pre-AC-R58-14-SHA-injection: `399/393/3/3` (3 fails = R36-30 + R36-31 + AC-R58-14 placeholder per R53 MINOR-1 two-state).
+- Post-chore-B SHA-injection: `399/394/2/3`.
+
+**Halt-condition carve-out (R56 MINOR-1):** AC-R58-13 block FAILs by construction at chore-A pre-SHA-injection (Q-R58-EMPIRICAL.sh asserts chore-B predicted value). This is NOT a halt trigger. Implementer encodes ACTUAL observed value verbatim per Rule 1 sub-class `empirical-command-attestation`.
+
+**Operator-decision flag — OQ-R58-1 (Architect-recommended Approach A; non-blocking):** Spec § 0.1 PICKED Approach A (NEW Tessera-original `engine/topology/fetch-context.ts`) over Approach B (MOD `engine/topology-overlay.ts` per NEXT-ROLE.md literal directive). Architect rationale: preserves A12 vendored-at-pin discipline; honors WAVE-PLAN-07 line 73 frame-AC (a) "design pattern adapters CAN use without modifying interface." Implementer disposition if not pre-resolved by operator: apply Approach A per spec § 4. If Reviewer flags substantive, route ESCALATE; operator picks A or B. See Q-R58-SPEC.md § 8 OQ-R58-1.
+
+---
 
 ## Round-scope directive (R58 — WU-Phase3-2B live-cluster topology fetch INTERFACE; full-tier cluster dispatch)
 
