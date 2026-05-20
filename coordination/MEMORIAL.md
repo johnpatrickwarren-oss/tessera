@@ -1576,3 +1576,16 @@ OBS: validation-corpus-fixture-composition-risk | Q-R73-SPEC § 2.5 + spec-audit
 
 OBS: tessera-temporary-divergence-on-run-pipeline-sh | Directive § Anti-scope permits modifications to run-pipeline.sh (Tessera-vendored framework code; canonically Anchor-owned). Implementer documents the divergence in MEMORIAL COORDINATOR entry; rebase plan: R76 Anchor merge ports --auto-tier mechanism back to Anchor canonical run-pipeline.sh and re-vendors clean to Tessera. Architect spec § 2.6 names this explicitly. | R73 | ARCHITECT
 
+
+CONFIRMATION: tdd-red-green-discipline | RED commit `6af6f5d` landed first with 27 assert.fail stubs in test/q73-tier-router.test.ts + tsconfig.test.json include addition; GREEN commit `346de42` replaced all stubs with real assertions. RED verified distinct from GREEN: `git log --oneline` shows separate commit objects. R23 IMPL MINOR-1 discipline preserved. | R73 | IMPLEMENTER
+
+CONFIRMATION: empirical-command-attestation | Binding commands recorded VERBATIM from actual run at GREEN SHA `346de42`: tsc exit 0; node --test: tests 516, pass 508, fail 5, skipped 3; EMPIRICAL.sh: PASS 14 / FAIL 0 exit 0. No Architect-predicted counts substituted. Rule 1 sub-class `empirical-command-attestation` applied. | R73 | IMPLEMENTER
+
+CONFIRMATION: anti-scope-allowed-set | git diff ee5ae2e..346de42 --name-only emits 21 paths; verified against § 5.1 ALLOWED_SET (26 paths + 3 carve-outs); every path in the diff is a member. No engine/, demos/, tools/ modifications. No pre-R73 test or spec files modified. No REINFORCEMENTS added. | R73 | IMPLEMENTER
+
+CONFIRMATION: carry-forward-fail-identities | All 5 carry-forward fails (AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14) remain in TAP `not ok` output with identities unchanged; fail count = 5 exactly. EMPIRICAL.sh Block 5 verified. | R73 | IMPLEMENTER
+
+CONFIRMATION: validation-corpus-safety-full | EMPIRICAL.sh Block 6: R45/R61/R62/R66/R72 fixtures all route `full` under --mode heuristic. Block 7: R49/R50/R51/R55/R60/R63/R64/R68 fixtures all route ≠ implementer-only. Halt condition #4 (LOAD-BEARING SAFETY failure) not triggered. | R73 | IMPLEMENTER
+
+VIOLATION: empirical-block1-sed-collateral-replacement | The sed command `s/<INJECTED-AT-CHORE-A>/ee5ae2e/g` replaced ALL occurrences of the placeholder including the case-pattern in Block 1 of EMPIRICAL.sh, inverting the check (SHA matched its own case-pattern → sha_ok=0 → FAIL). Fix: replaced case with if-guard checking for empty-or-bracket. This is a latent design issue in the placeholder mechanism — the check sentinel and the injected value occupied the same string namespace. Tactical fix applied inline per TACTICAL AUTONOMY (no behavioral change to the guard's intent). Documented as spec-deviance TD-1. | R73 | IMPLEMENTER
+

@@ -1,7 +1,56 @@
 CURRENT-ROUND: R73
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
+
+---
+
+## § Implementer R73 routing block (2026-05-20)
+
+### Implementer attestation
+
+- **GREEN commit SHA:** `346de42` (`feat(R73): GREEN — tier-routing classifier + validation corpus + --auto-tier flag`)
+- **RED commit SHA:** `6af6f5d` (27 assert.fail stubs in `test/q73-tier-router.test.ts` + `tsconfig.test.json` include addition)
+- **Round-start SHA (injected into EMPIRICAL.sh):** `ee5ae2e` — read from Architect routing block per R70 MINOR-1; NOT via `git rev-parse HEAD`
+
+**Binding commands at GREEN commit SHA `346de42`:**
+
+```
+pnpm exec tsc -p tsconfig.test.json  →  exit 0, zero diagnostics
+pnpm exec node --test --test-reporter=tap test/*.test.js:
+  # tests 516
+  # suites 3
+  # pass 508
+  # fail 5
+  # skipped 3
+  exit: non-zero (fail > 0; carry-forwards only)
+bash coordination/specs/Q-R73-EMPIRICAL.sh  →  PASS: 14 / FAIL: 0, exit 0
+```
+
+**Carry-forward fail identities (unchanged from R72 baseline):** AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14 — 5 exact.
+
+**Test delta:** 516 − 489 = 27 new tests; 508 − 481 = 27 new passes; fail=5, skip=3 unchanged.
+
+### Spec-deviance section
+
+**TD-1: EMPIRICAL.sh Block 1 case-pattern collateral replacement.** The sed command `s/<INJECTED-AT-CHORE-A>/ee5ae2e/g` replaced ALL occurrences of the placeholder, including the case-pattern `"<INJECTED-AT-CHORE-A>"|""` in Block 1. After injection, the pattern became `"ee5ae2e"|""` — which incorrectly matched the injected SHA and reported sha_ok=0 (FAIL). Fix: replaced the `case` with an if-guard checking for empty-or-bracket-containing value (`[[ -z "$ROUND_START_SHA" || "$ROUND_START_SHA" == *'<'* || ... ]]`). This is a self-healing tactical fix within EMPIRICAL.sh; it does not affect the spec's intent (Block 1 verifies injection happened). No new logic is introduced; the guard is strictly equivalent. Disclosed here per TD discipline; no AC text changed.
+
+**TD-2: describe import omitted.** Spec pseudocode § 3.4 imports `{ describe, test }` but all tests are top-level `test()` calls with no `describe()` usage. Omitted `describe` from the import to avoid unused-import TypeScript noise. Spec TACTICAL AUTONOMY: "Adjust import order, internal helper names — no semantic change." Routed as tactical.
+
+### Anti-scope attestation
+
+- `git diff ee5ae2e..346de42 --name-only` → 21 paths; all within ALLOWED_SET (§ 5.1 + 3 regex carve-outs):
+  `scripts/tier-router.ts`, `scripts/tier-router-validate.ts`, `scripts/tier-router-criteria.md`,
+  `scripts/tier-router-fixtures/corpus.json`, 13 fixture .md files, `test/q73-tier-router.test.ts`,
+  `package.json`, `run-pipeline.sh`, `coordination/specs/Q-R73-EMPIRICAL.sh`.
+- No engine/ modifications; no demos/ modifications; no tools/ modifications.
+- No pre-R73 test files modified. No REINFORCEMENTS added or modified.
+- No external npm dependencies added.
+- CLAUDE-COORDINATOR.md omitted per TACTICAL AUTONOMY (inline --help + scripts/tier-router-criteria.md judged sufficient).
+
+### MEMORIAL disposition
+
+CONFIRMATION entries appended to coordination/MEMORIAL.md per discipline.
 
 ---
 
