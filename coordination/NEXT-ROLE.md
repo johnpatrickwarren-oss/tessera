@@ -1,7 +1,24 @@
 CURRENT-ROUND: R63
-NEXT-ROLE: COORDINATOR
-STATUS: PENDING
+NEXT-ROLE: OPERATOR
+STATUS: WAVE-COMPLETE
 TIER: coordinator
+
+---
+
+## § R63 close attestation (2026-05-20)
+
+**Deliverables landed:**
+- `coordination/WAVE-GATE-09.md` — Wave 9 close attestation (single-cluster WU-3A re-scoped per Option F closed via R62; documents R61→R62 architectural-reality discovery episode; 0-CRITICAL streak interpretation finalized as PRESERVED at substantive-deliverable level)
+- `coordination/CLUSTER-HANDOFF-WAVE10-3A-3B.md` — Feed-contract surface documented for WU-3B (R64a) consumption
+- `coordination/CLUSTER-HANDOFF-WAVE10-3A-3C.md` — Event-contract surface + freeze-hook extension constraints documented for WU-3C (R64b) consumption
+
+**Mechanical sweep:** `scripts/verify-wave-aggregate.sh WAVE-09` → exit 0; 0 mechanical findings; 2 advisory items (structural to single-cluster wave; same pattern as WAVE-06/07/08).
+
+**Pipeline mechanical:** `./run-pipeline.sh --round R63 --coordinator --wave-gate WAVE-09` → exited 1 per R54/R57/R59 precedent (`--wave-gate` does NOT auto-transition STATUS; Coordinator authors WAVE-GATE-NN.md + handoffs interactively then sets STATUS: WAVE-COMPLETE — this commit completes that pattern).
+
+**Next operator action:** dispatch Wave 10 parallel-cluster fan-out (R64a WU-3B + R64b WU-3C) via `scripts/multi-track-cluster-setup.sh` per cluster.
+
+---
 
 ---
 
