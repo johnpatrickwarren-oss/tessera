@@ -1,7 +1,88 @@
-CURRENT-ROUND: R62
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
-TIER: full
+CURRENT-ROUND: R63
+NEXT-ROLE: COORDINATOR
+STATUS: PENDING
+TIER: coordinator
+
+---
+
+## § R63 Round-scope directive (Coordinator — WAVE-GATE-09 close + Wave 10 CLUSTER-HANDOFF emissions) (2026-05-20)
+
+R63 = Coordinator wave-gate close for WAVE-09 (Phase 3 SLICE 3 Wave 9; closed via R62 substantive deliverable after R61 closed-deferred-by-operator) + CLUSTER-HANDOFF emissions documenting the contract module that WU-3B + WU-3C consume in Wave 10. R63 is NOT a regular pipeline round; it's a Coordinator mechanical + interactive close.
+
+**Round-start SHA:** `3b8f684` (chore(R62): Memorial-Updater outputs; verify via `git rev-parse HEAD` at session entry).
+
+### Wave 9 close summary (R62 substantive deliverable; closed at this gate)
+
+Wave 9 was originally planned as a single-cluster foundational round for WU-Phase3-3A (engine npm package extract). After R61 ESCALATE #1 + #2 surfaced architectural reality (the truly self-consistent extraction set is ~16 type/utility files, not 33), operator selected Option F (defer engine extract; re-scope WU-3A to "DS integration interface contract design"). R61 closed CLOSED-DEFERRED-BY-OPERATOR (commit `ad6cc6b`); R62 picked up Wave 9 as the substantive cluster round under the re-scoped WU-3A.
+
+**R62 deliverables landed (commits `5664ffa` RED → `0018502b` chore-A → `5771458` chore-B → `9f571d6` Implementer routing → `8bbecd5` Reviewer attestation → `3e833f4` coordination chore Option 1 → `3b8f684` MU):**
+
+- `engine/ds-integration/feed-contract.ts` — Tessera→DS feed contract (VerdictGroupPayload + HTTP transport metadata + endpoint constants + sample-value type validation)
+- `engine/ds-integration/event-contract.ts` — DS→Tessera event contract (DeployEventPayload with 5-value `event_class` closed-set + HTTP transport metadata)
+- `engine/ds-integration/index.ts` — Barrel re-export module
+- `engine/ds-integration/README.md` — Contract documentation (first markdown under `engine/` subtree; directive-authorized precedent break)
+- `test/q62-ds-integration-contract.test.ts` — 13 runtime tests (AC-R62-1 through AC-R62-9 + AC-R62-12 through AC-R62-14; AC-R62-15 DROPPED per coordination chore)
+- `coordination/specs/Q-R62-SPEC.md` + `Q-R62-SPEC-AUDIT.md` + `Q-R62-EMPIRICAL.sh` (with Option 1 amendment banner)
+
+**Test baseline at R62 close:** `tests=411 / pass=406 / fail=2 / skipped=3`. 2 fails = R36-30 + R36-31 forward-protection carry-forward (pre-existing from Phase 2 close `87e372f`). `tsc` exit 0. `bash Q-R62-EMPIRICAL.sh` → 27 PASS, 0 FAIL.
+
+### Wave 10 dispatch (forward-flag; R64+ dispatch)
+
+**Wave 10 = 2-cluster PARALLEL fan-out (WU-Phase3-3B + WU-Phase3-3C).** First Phase 3 wave to leverage parallel-cluster pattern (Phase 2 Wave 2 precedent: WU-01 + WU-02 + WU-03 in 3-cluster parallel).
+
+- **WU-Phase3-3B cluster:** Tessera → DS feed implementation. Consumes `engine/ds-integration/feed-contract.ts` types; implements HTTP client adapter for VerdictGroup → DS correlation layer.
+- **WU-Phase3-3C cluster:** DS → Tessera event consumer + freeze-hook real-event activation. Consumes `engine/ds-integration/event-contract.ts` types; extends Phase 2 freeze-hook (R20+R21+R36 frozen surface) via constructor/factory addition.
+
+D-test independence (per WAVE-PLAN-09 § Fan-out analysis): D1/D2/D3/D4/D5 all LOW; parallel-class file-layout convention inside `engine/ds-integration/` (3B owns feed adapter; 3C owns event consumer adapter); no shared write target. Operator dispatches via `scripts/multi-track-cluster-setup.sh` per cluster.
+
+### R63 Coordinator deliverables (this round)
+
+1. **`coordination/WAVE-GATE-09.md`** — Wave 9 close attestation:
+   - Wave summary (R62 single-cluster substantive deliverable; R61 closed-deferred-by-operator)
+   - Pre-advance checklist outcomes (Reviewer report MERGE-READY-after-coordination-chore; `verify-wave-aggregate.sh WAVE-09` exit; 0-CRITICAL streak interpretation)
+   - Findings by cluster (R62 Reviewer: 14 ACs PASS / 1 DROPPED / 2 CRITICAL ratified→coordination-chore-resolved / 4 MAJOR / 4 MINOR / 4 OBS)
+   - Coordinator decisions at this gate (tier-aware consolidation Reviewer NOT invoked — single-cluster; advisory dispositions; Wave 10 dispatch authorization)
+   - Phase 3 SLICE 3 progress stamp (Wave 9 done; Wave 10 remaining; SLICE 3 close == Phase 3 close == project-close candidate)
+
+2. **`coordination/CLUSTER-HANDOFF-WAVE10-3A-3B.md`** — Contract module interface documented for WU-3B consumption:
+   - Producer: WU-Phase3-3A (closed R62)
+   - Consumer: WU-Phase3-3B (R64a dispatch)
+   - Contract surface: `engine/ds-integration/feed-contract.ts` (VerdictGroupPayload + TesseraToDsFeedEndpoint + TesseraToDsAuthHeaders + transport metadata)
+   - Anti-scope: R63 + R64 MUST NOT modify the contract types; only the IMPLEMENTATION adapter is in scope at R64
+   - Schema-write-conflict risk vs 3C: LOW (3B owns `feed.ts`-class adapter; 3C owns `event-consumer.ts`-class adapter; disjoint files)
+
+3. **`coordination/CLUSTER-HANDOFF-WAVE10-3A-3C.md`** — Contract module interface documented for WU-3C consumption:
+   - Producer: WU-Phase3-3A (closed R62)
+   - Consumer: WU-Phase3-3C (R64b dispatch)
+   - Contract surface: `engine/ds-integration/event-contract.ts` (DeployEventPayload + ClusterEventKind 5-value closed-set + DsToTesseraEventEndpoint + transport metadata)
+   - Anti-scope: R63 + R64 MUST NOT modify the contract types; freeze-hook extension is constructor/factory addition only (no body modification of frozen R20/R21/R36 surface)
+   - Schema-write-conflict risk vs 3B: LOW (independent files)
+
+4. **`coordination/NEXT-ROLE.md`** updated to STATUS: WAVE-COMPLETE; R64a + R64b dispatch authorization.
+
+### Pre-advance checklist (Coordinator runs at this gate)
+
+1. `scripts/verify-wave-aggregate.sh WAVE-09` mechanical sweep (expected: 0 mechanical findings; advisory items same pattern as WAVE-06/07/08 single-cluster waves).
+2. R62 Reviewer MERGE-READY-after-coordination-chore confirmed (REVIEWER-REPORT-R62.md + § Operator resolution of R62 ESCALATE — Option 1).
+3. 0-CRITICAL streak interpretation finalized (R62 had spec-design-flaw CRITICALs resolved via coordination chore; substantive deliverable-level streak preserved at R02-R62 except R45).
+4. Phase 3 SLICE 3 anti-scope honored at R62 (cross-repo decoupling preserved; zero imports from `'../types'` / `'../events'` in contract files).
+
+### Pipeline invocation (mechanical sweep)
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R63 --coordinator --wave-gate WAVE-09
+```
+
+Per established precedent (R54/R57/R59), the `--wave-gate` mode performs mechanical checks but does NOT auto-transition STATUS. Coordinator authors `WAVE-GATE-NN.md` + handoffs interactively after the mechanical sweep, then commits + sets STATUS: WAVE-COMPLETE.
+
+---
+
+## § R62 round-summary archive (closed 2026-05-20)
+
+R62 closed at commit `3b8f684` (Memorial-Updater outputs). Full audit trail preserved in `coordination/logs/ROUND-R62-SUMMARY.md` + `coordination/MEMORIAL.md` R62 entries + `coordination/reviews/REVIEWER-REPORT-R62.md` + `coordination/specs/Q-R62-SPEC.md` (with Option 1 amendment banner) + `coordination/diagnostics/DIAGNOSTIC-R61-*.md` (R61 → R62 ESCALATE trail).
+
+R62 routing blocks (Architect / Implementer / Reviewer / COORDINATOR Option 1 resolution) preserved below for audit.
 
 ---
 
