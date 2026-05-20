@@ -1,7 +1,69 @@
 CURRENT-ROUND: R61
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: IMPLEMENTER
 STATUS: READY
 TIER: full
+
+## § Operator resolution of R61 ESCALATE — Option B (2026-05-19)
+
+**Decision:** Option B approved. Reduce AT-PIN set to ~25 self-consistent files; the 6 problematic files (vendored-with-deltas surface + downstream dependents — `engine/types/verdict.ts`, `engine/types/config.ts`, `engine/types/orchestration.ts`, `engine/types/policy.ts`, `engine/types/audit.ts`, `engine/types/index.ts`, `engine/o0/lifecycle-events.ts`, `engine/o0/reversibility-translator.ts`) STAY at Tessera `engine/` tree and receive only import-rewrites — no relocation.
+
+**Rationale:**
+- W3-1 RESOLVED A (Tessera-only) — Option A requires cross-project work; rejected per W3-1 scope.
+- A12 (vendored-at-pin discipline) — Option C would override A12 for one round's convenience; rejected as bad trade-off.
+- Option B is the natural compromise: 6 cross-boundary files genuinely belong at Tessera tree (they ARE the Tessera-vendored-with-deltas surface); the abstract DS-engine package is what DS later consumes from npm.
+- Smaller package surface (~25 files) is structurally honest: DS doesn't need or want Tessera's schema extensions; Tessera-specific surface stays at Tessera.
+
+**Implementer amendments required:**
+- `coordination/specs/Q-R61-SPEC.md` § 0.2 premise correction (mark "spec premise" claim as superseded; document the empirically-correct cross-boundary state from DIAGNOSTIC-R61).
+- `coordination/specs/Q-R61-SPEC.md` § 2.1 / § 4 (per-file pseudocode + mechanism) updated to reflect Option B 25-file move (not 33).
+- `coordination/specs/Q-R61-SPEC.md` AC-R61-2 count: 33 → actual moved count (Architect-Implementer-Sonnet collaboratively determines; likely 25-27 self-consistent files).
+- `coordination/specs/Q-R61-EMPIRICAL.sh` AC-R61-2 block updated to match new count.
+- `coordination/specs/Q-R61-SPEC.md` AC-R61-3 / § 3.2 ALLOWED_SET regenerated for the 6 files that stay at Tessera (import-rewrite-only) + the ~25 files that move to packages/.
+
+**Spec deviance disclosure pattern:** Implementer-amends-spec-on-operator-resolution is the canonical resume path per R45 MAJOR-2 + R48 precedent. Amend spec in same chore-A; document in NEXT-ROLE.md "Spec deviance" section.
+
+**Resume command:** `./run-pipeline.sh --round R61 --tier full --start-at IMPLEMENTER`. Implementer reads this resolution + DIAGNOSTIC-R61-cross-boundary-at-pin-imports.md, amends spec per Option B, executes Option B implementation, commits chore-A.
+
+---
+
+## R61 ESCALATION — Implementer halt (spec premise false)
+
+**Diagnostic file:** `coordination/diagnostics/DIAGNOSTIC-R61-cross-boundary-at-pin-imports.md`
+
+**Bounded question:**
+
+> Spec § 0.2 claims "no vendored-at-pin file imports from a vendored-with-deltas or Tessera-original file — Verified at spec time via grep." This claim is **empirically false**. Multiple AT-PIN files (`engine/types/orchestration.ts`, `engine/types/policy.ts`, `engine/types/audit.ts`, `engine/types/index.ts`, `engine/o0/lifecycle-events.ts`, `engine/o0/reversibility-translator.ts`) import from `engine/types/verdict.ts` and/or `engine/types/config.ts` — both vendored-with-deltas files that STAY at tessera tree. The package's `tsc` would fail after the file moves. Choose one:
+>
+> - **Option A** — Include DS-original `verdict.ts` + `config.ts` (without Tessera deltas) in the package; expand to 35 files; tessera-side vendored-with-deltas files restructure to extend package base types. HIGH complexity; requires confirming `~/concord/deploysignal/` is at SHA `5a72371`.
+> - **Option B** — Reduce the AT-PIN set to the ~25 self-consistent files; the 6 problematic files stay at tessera tree and receive only import-rewrites (not relocation). AC-R61-2 count changes from 33 to ~25. MEDIUM complexity; clean package but smaller API surface.
+> - **Option C** — Move all 33 files but modify the 6 cross-boundary files' imports (stub types or replace with package-internal alternatives). Requires **explicit A12 override** — contradicts spec § 3.1 #1 verbatim-preservation. HIGH complexity; degrades type surface.
+
+**Halt triggers:** § 6.1 #7 ("package's `npm run build` produces tsc errors") AND halt condition (b) ("spec/reality conflict cannot be resolved without changing the round's component inventory").
+
+**No chore-A commit exists.** Implementation was correctly halted before any changes were staged or committed.
+
+## R61 Architect routing block (post spec-emit)
+
+**Spec triad emitted at commit `44bb19b`** (`spec(R61): Q-R61-SPEC + audit sidecar + EMPIRICAL.sh ...`). Spec artifacts committed in dedicated commit BEFORE this NEXT-ROLE.md update per R21 ARCH MINOR-1 reinforcement.
+
+**Inputs for Implementer:**
+- `coordination/specs/Q-R61-SPEC.md` (spec proper — Mechanism, Component inventory, Per-file pseudocode, ACs, Anti-scope+ALLOWED_SET, Open questions, P3 ten-axis, Grilling)
+- `coordination/specs/Q-R61-SPEC-AUDIT.md` (audit sidecar — Reviewer reads this; Implementer reads spec proper)
+- `coordination/specs/Q-R61-EMPIRICAL.sh` (Rule 1 sub-class verifier — chore-A attestation cites actual output)
+
+**Round-start SHA (anti-scope baseline):** `8c64ce0`.
+**Spec-emit commit:** `44bb19b`.
+**Empirical baseline at Architect session entry:** `tests=399 / pass=394 / fail=2 / skipped=3`; `tsc` exit 0. Two pre-existing fails are R36 forward-protection guards inheriting from Phase 2 close `87e372f` (R36-30 + R36-31).
+
+**Substantive deliverable summary (per spec § 2.1):** 5-phase chore-A — (1) Package scaffolding at `packages/deploysignal-engine/`; (2) physical `git mv` of 33 vendored-at-pin engine/* files preserving subtree layout; (3) package barrel `src/index.ts` with 33 export-star re-exports; (4) Tessera-side import rewrites from `'../engine/<moved>'` → `'@johnpatrickwarren-oss/deploysignal-engine'`; (5) build configuration + coordination updates (root package.json workspaces, VENDORING-MANIFEST.md new top section, SCOPING-MEMO § 9 opportunistic touch per W3-5, q01 test path-list updates).
+
+**15 ACs (per spec § 5).** Pre-documented two-state predicted counts: chore-A `403/397/3/3`; chore-B `403/398/2/3` (per spec § 5.4). AC-R61-15 placeholder fails by construction at chore-A; AC-R61-10 SUMMARY block in Q-R61-EMPIRICAL.sh asserts chore-B value — chore-A FAIL is pre-documented and NOT a halt trigger per § 6.1 carve-out (R56 MINOR-1 reinforcement).
+
+**OQ surfaced:** OQ-R61-1 (q01-vendoring-coverage manifest-row check fragility). Architect-recommended Option (b) — loosen test's includes check to accept either-path; preserve manifest audit trail. If Implementer encounters issues with Option (b), ESCALATE per § 6.1 #5.
+
+**Cross-project rules applied (per § 7):** Rule 1 sub-class ACTIVE (Q-R61-EMPIRICAL.sh + Tightenings 1-4); Rule 2 ACTIVE (§ 5.3 branch-binding coverage table); Rule 3 ACTIVE (§ 5.6 discriminability); Rule 4 ACTIVE (§ 3.2 ALLOWED_SET); Rule 5 N/A; Rule 6 ACTIVE (§ 6 halt conditions); Rule 7 ACTIVE Surface (a) (§ 7).
+
+---
 
 ## Round-scope directive (R61 — WU-Phase3-3A engine npm package extract; full-tier; Wave 9)
 
