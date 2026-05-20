@@ -86,7 +86,7 @@ Reviewer inputs:
 5. `test/q65-ds-integration-feed.test.ts` (test file; chore-B state with actual SHA injected)
 6. This NEXT-ROLE.md (Implementer attestation)
 
-**Coordination chore SHA:** recorded below after commit.
+**Coordination chore SHA:** `0a19571` (HEAD at Reviewer routing).
 
 ---
 
