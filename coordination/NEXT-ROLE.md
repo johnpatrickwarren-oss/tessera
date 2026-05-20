@@ -1,130 +1,69 @@
 CURRENT-ROUND: R55
-NEXT-ROLE: COORDINATOR
-STATUS: READY
+NEXT-ROLE: OPERATOR (wave-plan review)
+STATUS: WAVE-PLAN-READY
 TIER: coordinator
 
-## Round-scope directive (R55 — Phase 3 SLICE 2 Coordinator wave plan)
+## Round-close summary (R55 — Phase 3 SLICE 2 Coordinator wave plan emitted)
 
-R55 follows R54 close (`fb7585c`). Coordinator-mode round: decompose Phase 3 SLICE 2 scope from PRD into work units; build dependency DAG; produce `coordination/WAVE-PLAN-07.md` for WAVE-07.
+R55 Coordinator round closed. Wave plan for Phase 3 SLICE 2 (Google TPU adapter + live-fetch interface extension) emitted at `coordination/WAVE-PLAN-07.md` per `templates/WAVE-PLAN-TEMPLATE.md` scaffold.
 
-**Round-start SHA:** `fb7585c` (chore(R54): WAVE-GATE-06 close emit).
+**Round-close SHA:** `fb7585c` (R55 entry SHA; Coordinator artifacts pending commit).
 
-### Operator decisions (carry-forward; relevant to SLICE 2)
+### Coordinator deliverables (R55)
 
-- OQ-P3-1 RESOLVED at PRD authoring: vendor sequencing AWS Trainium FIRST (R53 ✓), Google TPU SECOND (this slice).
-- OQ-P3-2 RESOLVED at PRD authoring: operator does not have Google Cloud access; SLICE 2 TPU adapter relies on public data only (JAX topology code + TPU v4/v5 architectural papers).
-- OQ-P3-9 RESOLVED at R54 close: **Path B (DEFER cluster rental).** WU-Phase3-2C NOT INCLUDED in SLICE 2 wave plan.
-- OQ-Phase3-W1-1 RESOLVED at R53: Coordinator empirically confirmed unified-parser pattern (single-file precedent). Analogous decision may apply for TPU + live-fetch interface (Coordinator decides at WAVE-PLAN-07 emit).
-- Naming convention: **globally-sequential WAVE-NN per R54-acknowledged drift fix.** Phase 3 SLICE 2 = WAVE-07; plan = `WAVE-PLAN-07.md`; future gate = `WAVE-GATE-07.md`.
+1. **`coordination/WAVE-PLAN-07.md` v1** — primary deliverable. Two WUs (WU-Phase3-2A TPU adapter + WU-Phase3-2B live-fetch interface extension); two sequential single-cluster waves (Wave 7 + Wave 8); full tier for both. Option B (split-with-sequential) chosen over Option A (bundle) and Option C (parallel-cluster fan-out — structurally impossible per D1 HIGH from WU-2A → WU-2B). All 6 template sections filled; pre-emit grilling checklist + 7 adversarial review notes inline.
+2. **`coordination/COORDINATOR-MEMORIAL.md` append** — 6 CONFIRMATIONs + 0 VIOLATIONs + 4 OBSERVATIONs at "Phase 3 SLICE 2 wave-plan emission (WAVE-PLAN-07.md, 2026-05-19) — R55 second Phase 3 Coordinator invocation" section.
+3. **`coordination/NEXT-ROLE.md` STATUS update** — this file.
+4. **No CLUSTER-HANDOFF artifact emitted** at plan time. `coordination/CLUSTER-HANDOFF-WAVE07-2A-2B.md` is inventoried as forward-looking; emits at WAVE-GATE-07 close per CLAUDE-COORDINATOR.md handoff-at-target-cluster-dispatch convention.
 
-### Primary deliverable
+### Inputs for operator review
 
-Produce `coordination/WAVE-PLAN-07.md` per `templates/WAVE-PLAN-TEMPLATE.md` containing:
+1. `coordination/WAVE-PLAN-07.md` (primary review target — wave plan v1).
+2. `coordination/COORDINATOR-MEMORIAL.md` (R55 entries appended at file tail).
+3. `coordination/PRD.md` § Phase 3 Scope → SLICE 2 sub-section (the source PRD).
+4. `coordination/WAVE-GATE-06.md` (the SLICE 1 close that authorized SLICE 2 entry).
 
-1. **Work unit extraction** from `coordination/PRD.md` § Phase 3 Scope → SLICE 2 sub-section:
-   - WU-Phase3-2A: Google TPU / ICI adapter (`engine/topology/tpu-source.ts` + synthetic fixtures from JAX + TPU v4/v5 papers)
-   - WU-Phase3-2B: Live cluster topology fetch INTERFACE design — extends Slurm/K8s/NVLink/Neuron/TPU adapters with `TopologySource.fetchSnapshot(ctx)` interface + sparse-data resilience tests (NO real-cluster validation per Path B)
-   - WU-Phase3-2C: NOT INCLUDED (Path B operator decision at WAVE-GATE-06)
+### Operator decision flags for WAVE-PLAN-07 v1
 
-2. **Dependency edge identification** via D1-D5 deterministic tests per `CLAUDE-COORDINATOR.md`:
-   - D1 Shared output ownership: WU-Phase3-2A writes new TPU source + verdict.ts enum extension; WU-Phase3-2B extends existing 4 adapter sources (Slurm/K8s/NVLink/Neuron) with new method signature → D5 write-conflict on `engine/types/verdict.ts` for 2A + write-overlap risk on existing adapter source files for 2B
-   - D2 AC reference: does 2B's AC reference 2A's TPU source for the interface coverage? Likely yes (Coordinator confirms at extraction).
-   - D5 Schema serialization: 2A and 2B both touch verdict.ts → same merge-conflict risk that drove R52 Trainium+Inferentia bundle decision.
+**Blocking decisions (NONE):** Plan verdict is READY-TO-DISPATCH for Wave 7. No operator decision is required to authorize Wave 7 cluster dispatch.
 
-3. **Wave sequencing** + **bundle-or-split decision** for 2A + 2B:
-   - **Option A (bundle):** single WU-Phase3-2 cluster combining TPU adapter + interface extension. Mirrors R52 Trainium+Inferentia bundling (D5-strict avoidance + sequential-internal-work). Recommend if 2A and 2B share substantial setup.
-   - **Option B (split with sequential):** 2A first (TPU adapter standalone); 2B second (interface extension after TPU adapter ships, so 2B can include TPU source). Sequential single-cluster waves.
-   - **Option C (parallel-cluster fan-out):** 2A and 2B in parallel clusters with explicit CLUSTER-HANDOFF on verdict.ts enum coordination. More complex; only if Coordinator confirms zero schema-conflict possible (e.g., 2A and 2B touch disjoint sections of verdict.ts).
+**Optional decisions (Coordinator defaults applied absent operator override):**
 
-4. **Work unit classification**:
-   - WU-Phase3-2A TPU: parallel-class with WU-01/02/03/Neuron. Novelty: new vendor (Google); new edge relationship literal (`'tpu_ici_peer'`); new node kind literal (`'tpu_shard'`). Tier expected: **full** (A2 first-vendor pattern; A3 + S2 schema additions).
-   - WU-Phase3-2B Live fetch interface: cross-cutting interface extension across 5 sources. Novelty: new method signature (`fetchSnapshot(ctx)`); per-adapter implementation; sparse-data resilience tests against synthetic partial-topology fixtures (NO real cluster). Tier expected: **full** (A4 schema-class interface change; A7 cross-cutting impact).
+1. **OQ-Phase3-W2-1 — TPU adapter file layout.** Coordinator default: Option A (single file `engine/topology/tpu-source.ts`). Matches R52 OQ-Phase3-W1-1 operator-confirmed Option A precedent + WU-03 NVLink + WU-04 MD-F4 + WU-00 L0-contract + WU-Phase3-1 Neuron single-file precedent. Architect retains spec-time discretion. Operator answer (A/B/Other) welcome but not required.
 
-5. **Wave gate criteria** for WAVE-GATE-07:
-   - Per-cluster Reviewer reports MERGE-READY at cluster close (if bundled: single cluster Reviewer; if split: per-cluster Reviewers)
-   - `scripts/verify-wave-aggregate.sh WAVE-07` exit 0
-   - Tier-aware consolidation Reviewer per R50 (OPTIONAL if all clusters full-tier with cluster-internal Reviewer)
-   - Phase 3 SLICE 2 anti-scope honored (NO real-cluster access; NO Phase 3 SLICE 3 work)
+2. **OQ-Phase3-W2-2 — SCOPING-MEMO § 2.3 amendment timing for Phase 3 SLICE 2.** Coordinator default: Option B (defer to a future Phase 3 SLICE-close walk). Matches R52 OQ-Phase3-W1-2 Coordinator default B + Phase 2 R32 MAJOR-1 carry-forward pattern. Architect retains spec-time opportunistic-close discretion. Operator answer (A/B/Other) welcome but not required.
 
-6. **Cross-cluster handoff artifacts** if 2A/2B split: document the interface contract at `coordination/CLUSTER-HANDOFF-WAVE07-2A-2B.md`.
+3. **Pre-Wave-7-dispatch action recommended (NOT BLOCKING).** Confirm `scripts/pre-commit-rule-sweep.sh` + SPEC-AUTHORING-CHECKLIST.md gates inherited from Phase 2 + Phase 3 SLICE 1 close are operational at WU-Phase3-2A dispatch (Rule 7 propagation surfaces (a) + (b)).
 
-### Tier rationale
+### Recommended next action (operator's call)
 
-**coordinator-tier** — Coordinator-only round per pipeline `--coordinator` mode. Produces wave plan; cluster dispatch is separate (R56+ per wave plan).
+After WAVE-PLAN-07 review:
 
-### Anti-scope (R55 hard limits)
+1. **Approve Wave 7 dispatch:** Run `./run-pipeline.sh --tier full` from `~/concord/tessera` main worktree. Single-cluster, full-tier dispatch for WU-Phase3-2A (Google TPU / ICI adapter).
+2. **OR raise objections to wave plan:** Coordinator emits WAVE-PLAN-07-v2 at next Coordinator invocation per CLAUDE-COORDINATOR.md versioning discipline.
 
-- NO modification of `engine/*`, `test/*`, `tools/*` files.
-- NO modification of R42-R54 deliverables (frozen historical baseline).
-- NO modification of `CLAUDE-*.md` files.
-- NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md`.
-- NO modification of `coordination/MEMORIAL-PHASE-*.md` (frozen shards).
-- NO modification of `coordination/PRD.md` (Coordinator reads, doesn't amend).
-- NO modification of `coordination/SCOPING-MEMO-v0.3.md`.
-- NO modification of `scripts/*` or `run-pipeline.sh`.
-- NO cluster dispatch (Coordinator produces plan; dispatch R56+).
-- NO Phase 3 SLICE 3 territory (DS integration is a separate slice; sequential after SLICE 2 close).
-- NO real-cluster work (Path B honored).
-- NO opening GitHub PRs.
+### Future Coordinator-owned actions (R56+; NOT R55 scope)
 
-ALLOWED modifications:
-- `coordination/WAVE-PLAN-07.md` (NEW — primary deliverable)
-- `coordination/CLUSTER-HANDOFF-WAVE07-2A-2B.md` (NEW conditional — only if 2A/2B split)
-- `coordination/COORDINATOR-MEMORIAL.md` (append)
-- `coordination/MEMORIAL.md` (Coordinator-section append at round close)
-- `coordination/NEXT-ROLE.md` (this file)
-
-### Apply all 7 cross-project rules UPFRONT
-
-- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — Coordinator's WU extraction + dependency edge findings must cite specific PRD lines + JAX/TPU SDK doc URLs verbatim with retrieval dates. No memorized claims about TPU ICI topology.
-- **Rule 2 (`branch-binding-coverage-gate`):** N/A — Coordinator stage.
-- **Rule 3 (`implementer-spec-test-assertion-coverage`):** N/A — Coordinator stage.
-- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — ALLOWED_SET above.
-- **Rule 5 (`rule-derivation-without-self-application`):** N/A — no new rule derived at R55. (Note: globally-sequential WAVE-NN convention surfaced at R54 → R55 honors it from emit time.)
-- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if JAX/TPU public docs ambiguous on ICI topology format, HALT + DIAGNOSTIC.
-- **Rule 7 (`derived-rule-propagation-mechanism-required`):** N/A — Coordinator applies existing surfaces.
-
-### Halt conditions
-
-1. **JAX/TPU public docs ambiguous on ICI topology format:** if Coordinator cannot determine synthetic fixture design from JAX topology code + TPU v4/v5 papers, HALT + DIAGNOSTIC; operator decides defer TPU adapter to a later SLICE.
-2. **D5 write-conflict on verdict.ts cannot be resolved by bundle/split decision:** if 2A and 2B both need to extend verdict.ts in ways that cannot be sequenced cleanly, HALT + DIAGNOSTIC.
-3. **PRD Phase 3 SLICE 2 internally inconsistent:** if FR-V2/FR-V4 wording contradicts AC-P5 cross-cutting expectations, HALT + DIAGNOSTIC.
-
-### Inputs for Coordinator
-
-1. `coordination/PRD.md` § Phase 3 Scope (esp. SLICE 2 sub-section + FR-V2 + FR-V4 + AC-P5).
-2. `coordination/WAVE-PLAN-06.md` — R52 wave plan for SLICE 1 (pattern reference).
-3. `coordination/WAVE-GATE-06.md` — R54 wave-gate close (forward-flags for SLICE 2).
-4. `coordination/SCOPING-MEMO-v0.3.md` § 2.3 Vendor fungibility table (TPU adapter row).
-5. `engine/topology/neuron-source.ts` (R53) — parallel-class pattern reference.
-6. `engine/topology-overlay.ts` — inherited BFS layer; `TopologySource` interface definition.
-7. `engine/topology/slurm-source.ts`, `k8s-source.ts`, `nvlink-source.ts` — adapters that 2B's interface extension will modify.
-8. `engine/types/verdict.ts` — schema-extension target (D5 risk).
-9. `CLAUDE-COORDINATOR.md` (full).
-10. `templates/WAVE-PLAN-TEMPLATE.md`.
-11. Public JAX source code + TPU v4/v5 architectural papers (Coordinator reads + cites URLs).
-12. `coordination/COORDINATOR-MEMORIAL.md` — Coordinator memorial state through R54.
-
-### Pipeline invocation
-
-```bash
-cd /Users/johnwarren/concord/tessera
-./run-pipeline.sh --round R55 --coordinator
-```
+- **WAVE-GATE-07.md emission** (Coordinator round after WU-Phase3-2A cluster close): per-cluster Reviewer report verification + `scripts/verify-wave-aggregate.sh WAVE-07` + tier-aware consolidation Reviewer disposition (OPTIONAL per R50 for single-cluster full-tier wave) + Phase 3 SLICE 2 anti-scope verification + **emit `coordination/CLUSTER-HANDOFF-WAVE07-2A-2B.md`** documenting WU-2A's `TpuTopologySource` interface contract for WU-2B consumption.
+- **Wave 8 dispatch** (operator action after WAVE-GATE-07 close): single-cluster full-tier dispatch for WU-Phase3-2B.
+- **WAVE-GATE-08.md emission** (Coordinator round after WU-Phase3-2B cluster close): same checks; declares SLICE 2 closed.
+- **WAVE-PLAN-09.md emission** (Coordinator round at SLICE 3 entry): SLICE 3 DS integration wave plan per FR-D1/D2/D3.
 
 ---
 
-## Operator-decision flags (updated post-R54 close)
+## Operator-decision flags (carry-forward from R54 close; unchanged at R55)
 
 1. R45 CRITICAL routing accept-vs-escalate (separately tracked).
 2. Rule 7 Surface (c) HARD-GATE candidate (9+ tessera instances; below cross-project 2nd-project threshold).
 3. Cross-project canonical landings (8+ items gated on 2nd-project occurrence).
-4. Anchor PR backflog scheduling (R11-R54 contributions).
-5. **Phase 3 SLICE 1 CLOSED at R54 WAVE-GATE-06; SLICE 2 IN PROGRESS at R55 (this round).**
+4. Anchor PR backflog scheduling (R11-R55 contributions).
+5. **Phase 3 SLICE 1 CLOSED at R54 WAVE-GATE-06; SLICE 2 wave plan EMITTED at R55 WAVE-PLAN-07; SLICE 2 cluster dispatch AT OPERATOR DISCRETION post-R55 review.**
 6. R49 MAJOR-1 hybrid-mandate-vs-full-tier mismatch — candidate for future round.
 7. R50 MAJOR-1 + 6 MINOR findings — candidate for future round.
 8. R53 3 MINOR + 2 OBS findings — Memorial-Updater appended; standalone fix-round candidate IF operator chooses.
-9. R54 naming-convention drift documented; 1st-tessera Rule 5 self-application precedent.
-10. OQ-P3-9 RESOLVED Path B (DEFER cluster rental); AC-P6 + FR-V3 + WU-Phase3-2C all DEFERRED.
-11. OQ-P3-11 SCOPING-MEMO v0.4 carry-forward.
+9. R54 naming-convention drift documented; 1st-tessera Rule 5 self-application precedent. **R55 honored resolved naming convention from emit time (no re-drift; 2nd-instance precedent toward Tessera-internal stability).**
+10. OQ-P3-9 RESOLVED Path B (DEFER cluster rental); AC-P6 + FR-V3 + WU-Phase3-2C all DEFERRED. **WAVE-PLAN-07 honors Path B: WU-Phase3-2C NOT INCLUDED.**
+11. OQ-P3-11 SCOPING-MEMO v0.4 carry-forward. **WAVE-PLAN-07 default extends v0.3 per OQ-Phase3-W2-2 Option B.**
 12. OQ-Phase3-W1-1/W1-2 RESOLVED at R53.
+13. **NEW (R55): OQ-Phase3-W2-1 (TPU file layout)** — Coordinator default A; operator override optional, not blocking.
+14. **NEW (R55): OQ-Phase3-W2-2 (SCOPING-MEMO § 2.3 SLICE 2 amendment timing)** — Coordinator default B (defer); operator override optional, not blocking.
