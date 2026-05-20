@@ -537,3 +537,35 @@ All unresolved decisions → open questions in the spec.
 #   SAME line AFTER the new value. Full-disclosure intent is correct; the format must avoid
 #   leaving the old literal as a primary grep target. Detected tessera R66 MINOR-5
 #   (Q-R66-SPEC.md:1163 ~~444/439/2/3~~ alongside 444/438/3/3; old literal grep-parseable).
+# REINFORCED 2026-05-20 — When a spec produces both a human-readable narrative pseudocode
+#   section (e.g., § 11.2 spec.md block) AND a committed executable verification script
+#   (e.g., Q-RNN-EMPIRICAL.sh) in the same spec-triad commit, the two must agree on every
+#   grep pattern, anchor, and logic construct. A narrative that uses `grep "^not ok"` (anchored)
+#   while the executable uses `grep "not ok"` (unanchored) produces divergent behavior for
+#   indented subtest lines — the executable version is correct and the narrative version silently
+#   misleads future readers about what the script actually checks. Pre-emit grilling must include
+#   a line-by-line reconciliation between spec.md pseudocode and the EMPIRICAL.sh implementation
+#   for every shared logic block. Detected tessera R70 MINOR-2 (spec § 11.2 Block 2 vs
+#   Q-R70-EMPIRICAL.sh:56; unanchored grep correctly catches AC-R65-2 + AC-R66-14 indented
+#   TAP lines that the anchored version would miss).
+# REINFORCED 2026-05-20 — When writing an AC "Then" clause that names a specific metric (e.g.,
+#   "not ok line count is exactly 5"), verify that the claimed metric is what the Block's actual
+#   verification mechanism checks. If the verification mechanism uses a TAP summary field
+#   (`# fail = 5`) rather than a direct line-count grep, the AC literal must describe the
+#   TAP-summary mechanism — not a different observable that yields a different number at the same
+#   test state. Pre-emit grilling must explicitly ask: "does the metric named in each AC 'Then'
+#   clause match exactly what the EMPIRICAL.sh Block for that AC computes?" If not, revise either
+#   the AC text or the script block before routing. Detected tessera R70 MINOR-3 (AC-R70-13
+#   "not ok line count is exactly 5" vs Block 2 checking `# fail = 5`; empirical grep -c
+#   not ok = 7 at Reviewer HEAD, not 5).
+# REINFORCED 2026-05-20 — When prescribing a regex assertion in spec pseudocode, verify the
+#   regex is strictly discriminating: it must NOT match any non-target line in the expected
+#   output. If a candidate-listing regex also matches a static topology header or any other
+#   always-present line, the test passes trivially even if the candidate-listing line is absent.
+#   Procedure: mentally enumerate every line in the expected scenario output that could match the
+#   regex; if any non-target line matches, narrow the regex (add start-of-line anchor, require a
+#   distinguishing prefix, or use a more specific pattern). The presence of other discriminating
+#   assertions in the same test does not justify a weakly-discriminating regex — each assertion
+#   should independently discriminate. Detected tessera R70 MINOR-4 (spec § 4.2 line 808
+#   `/shard-00.*shard-01.*shard-02/` matches topology header equally well as candidate-listing
+#   line; passes even if candidate-listing line is elided).

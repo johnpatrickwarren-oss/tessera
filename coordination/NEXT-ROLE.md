@@ -1,7 +1,65 @@
 CURRENT-ROUND: R70
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 TIER: full
+
+---
+
+## § Reviewer R70 routing block (2026-05-20) — cold-eye audit complete
+
+### Reviewer attestation
+
+**Reviewer HEAD at session entry:** `36371d2` (chore(R70 IMPLEMENTER): stamp chore SHA in routing block).
+
+**Report:** `coordination/reviews/REVIEWER-REPORT-R70.md`.
+
+**Findings summary:**
+- **0 CRITICAL** (no blocking issues)
+- **4 MINOR** (3 attributable to ARCHITECT spec; 1 attributable to IMPLEMENTER attestation)
+- **2 OBS** (non-blocking observations)
+
+**Routing decision:** `MERGE-READY` per CLAUDE-REVIEWER.md routing rule "MAJOR or below → STATUS: MERGE-READY." 0 CRITICAL → no ESCALATE.
+
+**Binding-command re-runs (independent of Implementer attestation):**
+- `bash coordination/specs/Q-R70-EMPIRICAL.sh` → 8 PASS / 0 FAIL / exit 0. Re-confirmed at Reviewer HEAD.
+- `pnpm exec node --test --test-reporter=tap test/*.test.js` → `tests=455 / pass=447 / fail=5 / skipped=3` with carry-forward 5-fail identity grep-verified (AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14).
+- `pnpm demo {clean-baseline,sdc-drift,common-mode-rack,event-conditional}` — all 4 CLI runs produce expected scenario-specific output; sdc-drift crosses threshold at window 15 (M=5443005 > 200); common-mode-rack surfaces 1 candidate (rack-A; 3 members); event-conditional shows Freeze active: yes + Sample absorbed: no.
+- `git diff bb9549b..HEAD --name-only` = 7 paths (all in ALLOWED_SET); `git diff f62c327..HEAD --name-only` = 9 paths (all in R70 spec-triad ALLOWED_SET). Anti-scope verified under both SHA choices.
+
+**Findings detail:**
+
+| ID | Severity | Committing Role | Summary |
+|---|---|---|---|
+| MINOR-1 | MINOR | IMPLEMENTER | NEXT-ROLE.md:25 + MEMORIAL.md:1314 attest `bb9549b` is the "spec-triad commit" — empirically false. Spec-triad commit is `f62c327` per git history + Architect routing block lines 81-82. Rule 1 `false-compliance-attestation` sub-class (line-citation-cite-then-verify miss). Zero functional impact. |
+| MINOR-2 | MINOR | ARCHITECT | Q-R70-SPEC.md § 11.2 line 1233 Block 2 pseudocode uses `grep "^not ok"` (anchored); actual EMPIRICAL.sh:56 uses `grep "not ok"` (unanchored). Internal spec/executable divergence; spec.md narrative would have failed Block 2. |
+| MINOR-3 | MINOR | ARCHITECT | Q-R70-SPEC.md:938 AC-R70-13 literal text "the `not ok` line count is exactly 5" mismatches Block 2's actual verification (TAP `# fail = 5`). Empirical `not ok` line count = 7. AC contract unverifiable as worded; substantive intent verified by Block 2. |
+| MINOR-4 | MINOR | ARCHITECT | Spec § 4.2 line 808 prescribes regex `/shard-00.*shard-01.*shard-02/` for AC-R70-3; matches both the candidate-listing line AND the static topology header — weakly discriminating. Structured-field assertions still discriminate overall. |
+| OBS-1 | OBS | IMPLEMENTER | EMPIRICAL.sh comment vs. injected SHA inconsistency (compounds MINOR-1). |
+| OBS-2 | OBS | ARCHITECT | Block 2 `# fail = 5` ↔ named-AC-IDs identity coupling is incidental (top-level summary includes suite-level rollups; underlying subtest landscape could shift while top-level count stays 5). |
+
+**Right-reasons audit:** 3 tests audited (AC-R70-1, AC-R70-3, AC-R70-4); none self-confirming; all trace to spec ACs + PRD user stories US-01 / US-02 / US-03 / US-04. Caveat at AC-R70-3 documented under MINOR-4.
+
+**Cross-cutting checks:**
+- **TDD discipline:** RED commit 42483a3 → GREEN chore-A 123c3d3. Separate commits. PASS.
+- **No-skip:** no DIAGNOSTIC-R70-*.md files; no halt conditions fired. PASS.
+- **Anti-scope:** under both SHA bounds (bb9549b and f62c327), diff ⊆ ALLOWED_SET; engine/ untouched; prior-round specs untouched. PASS.
+
+### Routing
+
+**NEXT-ROLE: MEMORIAL-UPDATER | STATUS: MERGE-READY**
+
+Memorial-Updater inputs:
+1. `coordination/reviews/REVIEWER-REPORT-R70.md` (this round's review)
+2. `coordination/specs/Q-R70-SPEC.md` + `coordination/specs/Q-R70-SPEC-AUDIT.md`
+3. `coordination/NEXT-ROLE.md` (this file; Architect + Implementer + Reviewer routing blocks)
+4. `coordination/MEMORIAL.md` (Reviewer appended 4 VIOLATION entries + 6 CONFIRMATION + 2 OBS entries per CLAUDE-REVIEWER REINFORCED 2026-05-17 + 2026-05-19 role-attribution rule)
+5. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (for Rule 1 8th-tessera-instance log + Rule 7 surface (c) consideration)
+
+**Reviewer's open questions for Memorial-Updater (operator-visible):**
+- Should the SHA injection mechanism be amended for R71+ to make `git rev-parse HEAD` (or equivalent) reliably yield the spec-triad commit SHA rather than the routing-block commit? The Architect's spec § 11.2 implicitly assumed HEAD at sed-time = spec-triad commit, which is empirically untrue when the Architect commits a separate routing block AFTER the spec triad. Candidate mechanism: `git log --grep "^spec(R" --format=%H | head -1` or operator passes SHA explicitly.
+- Should AC-R70-13's literal text "not ok line count" be amended to "TAP `# fail` count" in a future spec template to match the actual verification mechanism? (R71+ Architect template hygiene.)
+
+**Coordination chore SHA:** (Reviewer routing-block commit SHA to be stamped at chore time)
 
 ---
 
