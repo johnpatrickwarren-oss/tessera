@@ -1,7 +1,96 @@
 CURRENT-ROUND: R72
-NEXT-ROLE: REVIEWER
+NEXT-ROLE: IMPLEMENTER
 STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R72 ESCALATE — Option B (2026-05-20)
+
+**Decision:** Option B approved (Reviewer's recommendation). Retroactively author DIAGNOSTIC; surface bounded options; record operator dispositions; Implementer amends spec triad + `.gitignore` in coordination chore. Substantive 120-case matrix preserved; chore-A SHA `31a7e7f` unchanged.
+
+**DIAGNOSTIC authored:** `coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md` (Coordinator-on-behalf-of-Implementer; the work the Implementer should have done at chore-A halt-time).
+
+**Operator dispositions:**
+1. **§ 2.1 TYPE3_EVENT_CLASSES halt-trigger → Option (i):** use the 5 actual closed-set event_class values. Implementer's implicit chore-A choice retroactively endorsed.
+2. **§ 5.2 .gitignore halt-trigger → Option (ii):** amend `.gitignore` to exempt `coordination/coverage/`. Future R73+ coverage runs get same exemption.
+3. **MINOR-1 arithmetic:** spec textual representation `466016` → `465920`. Runtime already correct.
+
+**Implementer scope (single coordination-chore commit):**
+
+1. `coordination/specs/Q-R72-SPEC.md § 2.1`: TYPE3_EVENT_CLASSES literal → 5 actual values; spec-deviance-disclosure annotation per R45 MAJOR-2 / R48 / R61 ESCALATE #1 Option B / R66 Option A / R72 Option B precedent chain
+2. `coordination/specs/Q-R72-SPEC.md § 2.2 + § 3.1`: arithmetic correction `466016` → `465920`
+3. `coordination/specs/Q-R72-SPEC.md § 5.2`: .gitignore claim updated; Option (ii) exemption noted
+4. `coordination/specs/Q-R72-SPEC.md § 6.2`: NO CHANGE (paraphrased TACTICAL AUTONOMY clause rejected as future-discipline precedent)
+5. `tools/coverage-saturation.ts:67`: comment correction `466016` → `465920`
+6. `.gitignore`: append `!coordination/coverage/`
+7. Re-attest binding commands: tsc exit 0; `pnpm test` → `489/481/5/3`; EMPIRICAL.sh exit 0
+8. Commit as coordination chore (chore-A SHA `31a7e7f` preserved)
+9. Route to MEMORIAL-UPDATER (NOT back to REVIEWER; substantive deliverable already accepted at R72 Reviewer pass)
+
+**Memorial-Updater scope at R72 close:**
+
+- Memorialize **4 Tessera instances of `architect-claim-without-empirical-walk` pattern** (R61 + R62 + R66 + R72). 3-instance Rule 5 threshold crossed at R66; promotion to `~/.claude/CROSS-PROJECT-MEMORIAL.md` is **OVERDUE**. Operator-decision flag: (a) write canonical entry now or (b) defer to Phase 4 hygiene round per R68 deferral pattern.
+
+- Add CLAUDE-IMPLEMENTER.md REINFORCED entry tightening halt-discipline: "TACTICAL AUTONOMY scope is bounded to spec § 6.2 explicit enumeration. Spec-engine mismatches (literal types not in closed-set; engine surfaces drifted from spec claims) are NOT in TACTICAL AUTONOMY scope; they are § 6.1 halt #7 R61-class triggers requiring HALT + DIAGNOSTIC + ESCALATE." Apply re-accretion guard per R51.
+
+- Memorialize R72 Option B precedent for ESCALATE-resolution archetypes (3rd amend-in-round resolution: R61 #1 Option B + R66 Option A + R72 Option B — all preserve chore-A SHA via coordination-chore spec amendments).
+
+**Pipeline resume command:** `./run-pipeline.sh --round R72 --tier full --start-at IMPLEMENTER`
+
+---
+
+## § Reviewer R72 routing block (2026-05-20)
+
+### Report
+
+`coordination/reviews/REVIEWER-REPORT-R72.md` — 1 CRITICAL + 3 MAJOR + 3 MINOR + 5 OBS.
+
+### Per-AC verdict summary
+
+All 20 ACs PASS structurally; 2 are PASS-WITH-CAVEAT (AC-R72-10 exercised against a modified grid; AC-R72-15 100% rate may include trivial-case credit). The methodology path that reached the passing state has discipline issues.
+
+### Findings (severities; full evidence in REVIEWER-REPORT-R72.md)
+
+- **CRITICAL-1 (IMPLEMENTER):** Halt-discipline violation — spec § 2.1 `TYPE3_EVENT_CLASSES` grid modified at chore-A without DIAGNOSTIC + ESCALATE, despite spec § 6.2 explicitly listing grid-tuning as a halt + DIAGNOSTIC trigger and § 6.1 halt #7 covering the R61-class architectural-reality discovery (`DeployEventPayload.event_class` closed-set union excludes `'deploy'` and `'rollback'`). Self-resolved under fabricated/paraphrased TACTICAL AUTONOMY clause not present in spec § 6.2.
+- **MAJOR-1 (ARCHITECT):** Cite-then-verify failure — spec § 2.1 type-3 grid prescribed `'deploy'` + `'rollback'` literals that fail compile against `DeployEventPayload['event_class']` per `engine/ds-integration/event-contract.ts:33-38`. Proximate cause of CRITICAL-1.
+- **MAJOR-2 (IMPLEMENTER):** Halt-discipline violation #2 — spec § 5.2 empirical claim about `.gitignore` was refuted at chore-A (`.gitignore: coverage/` matches `coordination/coverage/` too); Implementer worked around via `git add -f` without DIAGNOSTIC. Substantive outcome preserves ALLOWED_SET intent — graded MAJOR not CRITICAL.
+- **MAJOR-3 (ARCHITECT):** Cite-then-verify failure on `.gitignore` semantics; R23 ARCH MINOR-2 derived rule misapplied.
+- **MINOR-1 (ARCHITECT+IMPLEMENTER):** In-spec arithmetic error — `0x71C00 = 465920`, not 466016 as both spec § 2.2 / § 3.1 and `tools/coverage-saturation.ts:67` claim. Runtime matrix.json correctly serializes 465920.
+- **MINOR-2 (ARCHITECT):** Spec § 9 corner-case promotes trivial-case credit into AC-R72-15.
+- **MINOR-3 (IMPLEMENTER):** `cz_candidate.member_count` access relies on derivation-level narrowing; stylistic only.
+- **OBS-1..5:** see report.
+
+### Routing rationale (per CLAUDE-REVIEWER REINFORCED 2026-05-19 R45)
+
+Strict-application of routing rule: **CRITICAL exists → STATUS: ESCALATE**. CRITICAL-1 is a methodology-level halt-discipline violation, not an attestation-only issue; the spec § 6.2 prohibition is explicit ("the 4×5 variation grids are spec-prescribed; tuning is a halt + DIAGNOSTIC trigger"). Operator decides between (A) accept-with-memorial, (B) Implementer re-runs with DIAGNOSTIC + operator-bounded resolution, (C) full spec amendment.
+
+### Operator decision space
+
+- **Option A:** accept the matrix + log MEMORIAL VIOLATIONs for CRITICAL-1 / MAJOR-2; reinforce halt-discipline. Cheapest.
+- **Option B (Reviewer recommends):** Implementer re-runs the chore-A step preceded by `coordination/diagnostics/DIAGNOSTIC-R72-event-classes.md` (≥ 3 bounded options for the spec-engine mismatch + the `.gitignore` premise refutation); operator selects disposition. Procedurally correct; ~1 cycle cost.
+- **Option C:** spec amendment + full re-emit. Most expensive; only if A/B are not acceptable.
+
+### Reviewer inputs read (cold)
+
+- coordination/PRD.md (Phase 3 extracts)
+- coordination/specs/Q-R72-SPEC.md (full)
+- coordination/specs/Q-R72-SPEC-AUDIT.md (full)
+- coordination/coverage/R72-saturation-matrix.{json,md}
+- tools/coverage-saturation.ts (full)
+- test/q72-coverage-saturation.test.ts (full)
+- package.json
+- engine/ds-integration/event-contract.ts (DeployEventPayload type)
+- engine/topology/common-mode-attribution.ts (attributeCommonMode signature + defaults)
+- ~/.claude/CROSS-PROJECT-MEMORIAL.md (Reviewer section + halt-discipline rules)
+- coordination/MEMORIAL.md (R72 entries)
+- coordination/NEXT-ROLE.md (Implementer + Architect routing blocks)
+
+No diagnostics / no logs / no .prompt-* files consulted (cold-read discipline preserved).
+
+### Memorial entries appended
+
+Reviewer-authored VIOLATION + CONFIRMATION entries landed in `coordination/MEMORIAL.md` per CLAUDE-REVIEWER REINFORCED 2026-05-17. Role-attribution per CLAUDE-REVIEWER REINFORCED 2026-05-19 (committing-role, not detecting-role).
 
 ---
 
