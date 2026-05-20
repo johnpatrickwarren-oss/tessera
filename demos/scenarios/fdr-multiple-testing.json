@@ -1,0 +1,1731 @@
+{
+  "schema_version": "tessera-demo-v1",
+  "scenario": "fdr-multiple-testing",
+  "description": "Ten shards × 30 windows. Shards 02, 05, 08 carry sustained drift +0.45/window from window 4. Terminal e-BH at q=0.1 selects the high-wealth subset under FDR control.",
+  "params": {
+    "seed": 466896,
+    "shard_count": 10,
+    "window_count": 30,
+    "alpha": 0.005,
+    "threshold": 200,
+    "fdr_drift_shards": [
+      "shard-02",
+      "shard-05",
+      "shard-08"
+    ],
+    "fdr_drift_start_window": 4,
+    "fdr_drift_per_window": 0.45,
+    "fdr_qLevel": 0.1
+  },
+  "engine_surfaces": [
+    "eBenjaminiHochberg",
+    "freshBettingState",
+    "updateBettingState"
+  ],
+  "windows": [
+    {
+      "t": 0,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 1,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 1,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 1,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.520992,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.595003,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.307062,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.44736,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0.957227,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 1.606625,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.628744,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 1.495452,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 1.1922,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 1.518649,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 2,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.451622,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.629186,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.786873,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.169959,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0.000001,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 1.155349,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.598944,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 1.219051,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 1.166663,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 1.600091,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 3,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.485318,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.721927,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.795854,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.245489,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0.000001,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 0.941454,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 2.119335,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.109641,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 0.943092,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.458628,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 4,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.740042,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.469343,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 2.299852,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.209951,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0.000001,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 0.707368,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 2.670867,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.104322,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 0.869231,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 3.315092,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 5,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.78306,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.409299,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1.948316,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.919801,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0.000001,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 0.582076,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 2.502478,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.111126,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 0.609555,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 3.291176,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 6,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.649191,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.408934,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 2.214804,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.031398,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0.000001,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 0.567014,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.932186,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.104168,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 0.634279,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 3.458499,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 7,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.58017,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.405254,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 4.429606,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.762258,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0.000001,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 0.72548,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.895582,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.090011,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 0.845464,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 3.795195,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 8,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.63061,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.372958,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 4.881034,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.695202,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 1.063362,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.348864,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.090186,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 1.116421,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.967538,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 9,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.793407,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.349745,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 9.762063,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.702003,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 1.487941,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.207404,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.092335,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 1.832534,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.057697,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 10,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.710653,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.377359,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 14.137104,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.769456,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 2.775957,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.93181,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.106419,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 3.665065,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.018271,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 11,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.489,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.334891,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 28.274195,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.579996,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 5.320717,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.963971,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.150619,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 7.330127,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 1.696127,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 12,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.48026,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.365605,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 56.548361,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.576372,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 10.28939,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.879482,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.168255,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 14.660247,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 1.353187,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 13,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.428757,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.373455,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 113.096666,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.633563,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 20.01407,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.856006,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.149363,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 29.32048,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.264849,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 14,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.48894,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.347571,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 226.193219,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.922338,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 39.089724,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.852125,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.160745,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 58.64093,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.58712,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 15,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.41746,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.384128,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 452.386211,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.670396,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 76.579663,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.856326,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.120423,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 117.281802,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.145347,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 16,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.462922,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.384368,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 904.77197,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.770453,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 150.37878,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.752347,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.110876,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 234.563486,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 3.197331,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 17,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.420194,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.377574,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1809.543035,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.885111,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 295.850934,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.960347,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.114378,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 469.126737,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 5.486723,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 18,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.48674,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.3378,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 3619.084261,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.891233,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 582.937203,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.958172,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.089671,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 938.253005,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 3.312868,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 19,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.461562,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.423458,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 7238.164904,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.172423,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 1150.060289,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.863062,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.09761,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 1876.505072,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.825182,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 20,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.458679,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.551649,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 14476.322569,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.437377,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 2271.346548,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.071174,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.11085,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 3753.008268,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 3.79534,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 21,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.466537,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.403928,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 28952.630662,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.604653,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 4489.963735,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.066209,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.133129,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 7506.012782,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.82868,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 22,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.376776,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.461136,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 57905.232372,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.762469,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 8882.705113,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.077887,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.180391,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 15012.018059,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 3.360407,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 23,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.376785,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.699387,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 115810.406839,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.659589,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 17585.194483,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 1.044031,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.225714,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 30024.021105,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.914546,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 24,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.383239,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.820114,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 231620.697867,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 0.889671,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 34834.768991,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.838239,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.338255,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 60048.012186,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 2.744641,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 25,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.407284,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.611994,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 463241.164113,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.181239,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 69041.918576,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.793227,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.365166,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 120095.964324,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 1.699975,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 26,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.409657,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.346498,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 926481.864984,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.510342,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 136905.846008,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.787486,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.23131,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 240191.808553,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 1.582515,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 27,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.421579,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.377757,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 1852962.803486,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.152203,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 271593.398609,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.625038,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.202104,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 480383.376914,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 1.500706,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 28,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.519909,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.315626,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 3705923.754009,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.242561,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 538997.06751,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.522219,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.195419,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 960766.273445,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 1.646724,
+          "fired": false
+        }
+      ],
+      "events": []
+    },
+    {
+      "t": 29,
+      "per_shard": [
+        {
+          "shard_id": "shard-00",
+          "M_t": 0.473163,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-01",
+          "M_t": 0.304959,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-02",
+          "M_t": 7411843.802094,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-03",
+          "M_t": 1.569823,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-04",
+          "M_t": 0,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-05",
+          "M_t": 1070059.59487,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-06",
+          "M_t": 0.52594,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-07",
+          "M_t": 0.146432,
+          "fired": false
+        },
+        {
+          "shard_id": "shard-08",
+          "M_t": 1921531.586124,
+          "fired": true
+        },
+        {
+          "shard_id": "shard-09",
+          "M_t": 0.579352,
+          "fired": false
+        }
+      ],
+      "events": []
+    }
+  ],
+  "terminal_state": {
+    "firing_shards": [
+      "shard-02",
+      "shard-05",
+      "shard-08"
+    ],
+    "common_mode_candidates": [],
+    "freeze_active": false,
+    "fdr_selected_indices": [
+      2,
+      5,
+      8
+    ],
+    "fdr_qLevel": 0.1,
+    "fdr_K": 3,
+    "fleet_fired": null,
+    "fleet_tick_at_first_fire": null
+  },
+  "reasoning": "Ten shards’ per-shard e-values (terminal M_t) are submitted to the e-Benjamini-Hochberg procedure at FDR target q = 0.10. Three shards (02, 05, 08) carried sustained drift; the e-BH procedure selects the subset whose e-values satisfy k · e_(k) ≥ N / q under the Ren-Barber 2024 / Wang-Ramdas 2022 fixed-time guarantee. Expected falsely-flagged-shard count ≤ q · K — a formal bound that holds even under correlated drift.",
+  "suggested_actions": [
+    "Triage the e-BH-selected shards as a batch (FDR bound makes this safe at q=0.10)",
+    "Do NOT inspect non-selected shards individually unless their e-value is independently interesting",
+    "Adjust qLevel down (toward 0.05) for higher-precision but lower-recall flagging in production"
+  ]
+}

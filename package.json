@@ -13,6 +13,8 @@
     "build": "tsc",
     "predemo": "tsc -p tsconfig.test.json",
     "demo": "node tools/demo-scenario.js",
+    "prebuild:demos": "tsc -p tsconfig.test.json",
+    "build:demos": "node tools/build-canned-demos.js",
     "pretest": "tsc -p tsconfig.test.json",
     "test": "node --test test/*.test.js",
     "typecheck": "tsc -p tsconfig.test.json --noEmit"

@@ -72,7 +72,19 @@ pnpm build     # tsc compile
 
 ## Quick demo
 
-Once installed, run any of four canned scenarios to see Tessera detect synthetic faults end-to-end:
+Tessera ships two demo surfaces — a CLI for terminal walk-through (R70) and a browser dashboard for clickable exploration (R71).
+
+### Browser dashboard
+
+```bash
+open demos/demo.html      # opens in default browser; no install / no server required
+```
+
+The dashboard pages through 8 pre-recorded scenarios (clean baseline, single-shard SDC drift, rack-localized common mode, event-conditional freeze, FDR control, hierarchical e-value combination, sparse-data resilience, and topology-spanning common mode) with Play / Pause / Reset / Speed controls, an audit-trail panel, a reasoning panel, and a suggested-next-actions panel. All scenarios are deterministic and regeneratable via `pnpm build:demos`. The dashboard ships as a single static HTML file with vanilla CSS/JS — no external dependencies, opens from `file://`.
+
+### CLI scenarios
+
+Run any of four canned scenarios in the terminal:
 
 ```bash
 pnpm demo clean-baseline       # healthy fleet — no firings
@@ -82,6 +94,14 @@ pnpm demo event-conditional    # firmware-push event → freeze-hook activates
 ```
 
 Each scenario runs in under 30 seconds, produces deterministic ASCII output, and exercises one real engine surface against synthetic inputs (no live cluster needed). Source: [`tools/demo-scenario.ts`](./tools/demo-scenario.ts).
+
+### Regenerating canned scenarios
+
+```bash
+pnpm build:demos        # regenerates demos/scenarios/*.json + demos/demo.html
+```
+
+Idempotent: re-running produces byte-identical files. The 8 scenario JSON files double as audit-inspectable evidence of what the dashboard shows. Source: [`tools/build-canned-demos.ts`](./tools/build-canned-demos.ts).
 
 ## Methodology
 
