@@ -1,120 +1,130 @@
-CURRENT-ROUND: R54
-NEXT-ROLE: (operator decision; R55 = WAVE-PLAN-05 emission)
-STATUS: WAVE-COMPLETE
-TIER: coordinator-wave-gate
+CURRENT-ROUND: R55
+NEXT-ROLE: COORDINATOR
+STATUS: READY
+TIER: coordinator
 
-## Round-scope directive (R54 — WAVE-GATE-04 close ONLY; SLICE 2 plan deferred to R55)
+## Round-scope directive (R55 — Phase 3 SLICE 2 Coordinator wave plan)
 
-R54 is the WAVE-GATE-04 (formerly WAVE-GATE-Phase3-01) close for Phase 3 SLICE 1. R53 (`4978e9b`) closed the sole WU in the wave (WU-Phase3-1 AWS Neuron adapter; MERGE-READY per Reviewer cold-eye). Coordinator-mode wave-gate-close round per pipeline `--coordinator --wave-gate WAVE-04` invocation.
+R55 follows R54 close (`fb7585c`). Coordinator-mode round: decompose Phase 3 SLICE 2 scope from PRD into work units; build dependency DAG; produce `coordination/WAVE-PLAN-07.md` for WAVE-07.
 
-**Round-start SHA:** `9f31224` (chore: prepare R54 directive) — superseded by intervening rename commit; Coordinator re-derives at session entry.
+**Round-start SHA:** `fb7585c` (chore(R54): WAVE-GATE-06 close emit).
 
-### Naming-convention correction (operator-acknowledged 2026-05-19)
+### Operator decisions (carry-forward; relevant to SLICE 2)
 
-Prior R52 directive specified `WAVE-PLAN-Phase3-01.md` naming; R52 Coordinator complied; R50 `scripts/verify-wave-aggregate.sh` rejected the non-`WAVE-NN` format. Self-application drift on R50's own convention. Resolution: file renamed `WAVE-PLAN-Phase3-01.md` → `WAVE-PLAN-04.md` (continues Phase 2 sequential `WAVE-PLAN-01` through `03` numbering; matches R50 verifier regex). Historical R52/R53 artifacts preserve the old name as audit trail; operative references in `coordination/PRD.md` updated to `WAVE-GATE-04`.
+- OQ-P3-1 RESOLVED at PRD authoring: vendor sequencing AWS Trainium FIRST (R53 ✓), Google TPU SECOND (this slice).
+- OQ-P3-2 RESOLVED at PRD authoring: operator does not have Google Cloud access; SLICE 2 TPU adapter relies on public data only (JAX topology code + TPU v4/v5 architectural papers).
+- OQ-P3-9 RESOLVED at R54 close: **Path B (DEFER cluster rental).** WU-Phase3-2C NOT INCLUDED in SLICE 2 wave plan.
+- OQ-Phase3-W1-1 RESOLVED at R53: Coordinator empirically confirmed unified-parser pattern (single-file precedent). Analogous decision may apply for TPU + live-fetch interface (Coordinator decides at WAVE-PLAN-07 emit).
+- Naming convention: **globally-sequential WAVE-NN per R54-acknowledged drift fix.** Phase 3 SLICE 2 = WAVE-07; plan = `WAVE-PLAN-07.md`; future gate = `WAVE-GATE-07.md`.
 
-### Operator decision — OQ-P3-9 RESOLVED 2026-05-19: **Path B (DEFER cluster rental)**
+### Primary deliverable
 
-Per PRD § Phase 3 Scope SLICE 1/2 gating moment, operator selected Path B at WAVE-GATE-04 close:
+Produce `coordination/WAVE-PLAN-07.md` per `templates/WAVE-PLAN-TEMPLATE.md` containing:
 
-- **US-07 DEFERRED.** AC-P6 (rented-GPU DCGM L0 contract validation) marked DEFERRED at Phase 3 close (not failing; not blocking).
-- **FR-V3 (rental scaffolding) DEFERRED.** No rental scripts authored.
-- **FR-V4 (live cluster topology fetch) partial.** Future SLICE 2 ships INTERFACE design + sparse-data resilience tests; real-cluster-fetch validation portion DEFERRED.
-- **WU-Phase3-2C** NOT included in any future SLICE 2 wave plan.
-- Phase 3 progresses to SLICE 3 (DS integration) without rental gating.
+1. **Work unit extraction** from `coordination/PRD.md` § Phase 3 Scope → SLICE 2 sub-section:
+   - WU-Phase3-2A: Google TPU / ICI adapter (`engine/topology/tpu-source.ts` + synthetic fixtures from JAX + TPU v4/v5 papers)
+   - WU-Phase3-2B: Live cluster topology fetch INTERFACE design — extends Slurm/K8s/NVLink/Neuron/TPU adapters with `TopologySource.fetchSnapshot(ctx)` interface + sparse-data resilience tests (NO real-cluster validation per Path B)
+   - WU-Phase3-2C: NOT INCLUDED (Path B operator decision at WAVE-GATE-06)
 
-### Primary deliverable (R54 ONLY)
+2. **Dependency edge identification** via D1-D5 deterministic tests per `CLAUDE-COORDINATOR.md`:
+   - D1 Shared output ownership: WU-Phase3-2A writes new TPU source + verdict.ts enum extension; WU-Phase3-2B extends existing 4 adapter sources (Slurm/K8s/NVLink/Neuron) with new method signature → D5 write-conflict on `engine/types/verdict.ts` for 2A + write-overlap risk on existing adapter source files for 2B
+   - D2 AC reference: does 2B's AC reference 2A's TPU source for the interface coverage? Likely yes (Coordinator confirms at extraction).
+   - D5 Schema serialization: 2A and 2B both touch verdict.ts → same merge-conflict risk that drove R52 Trainium+Inferentia bundle decision.
 
-Single Coordinator artifact for R54:
+3. **Wave sequencing** + **bundle-or-split decision** for 2A + 2B:
+   - **Option A (bundle):** single WU-Phase3-2 cluster combining TPU adapter + interface extension. Mirrors R52 Trainium+Inferentia bundling (D5-strict avoidance + sequential-internal-work). Recommend if 2A and 2B share substantial setup.
+   - **Option B (split with sequential):** 2A first (TPU adapter standalone); 2B second (interface extension after TPU adapter ships, so 2B can include TPU source). Sequential single-cluster waves.
+   - **Option C (parallel-cluster fan-out):** 2A and 2B in parallel clusters with explicit CLUSTER-HANDOFF on verdict.ts enum coordination. More complex; only if Coordinator confirms zero schema-conflict possible (e.g., 2A and 2B touch disjoint sections of verdict.ts).
 
-**`coordination/WAVE-GATE-04.md`** per `templates/WAVE-GATE-TEMPLATE.md`:
-- Wave 1 close attestation (WU-Phase3-1 MERGE-READY per Reviewer)
-- `scripts/verify-wave-aggregate.sh WAVE-04` execution + result (now passes regex; runs aggregate ALLOWED_SET union + cross-cluster contract verification + MEMORIAL fragment semantic-conflict detection)
-- Per R50 tier-aware consolidation Reviewer logic: WU-Phase3-1 ran full-tier with cluster-internal Reviewer → consolidation Reviewer is OPTIONAL; Coordinator decides invoke-or-not (recommendation: SKIP since single-cluster wave; no cross-cluster integration concerns)
-- Operator decision Path B recorded (OQ-P3-9 RESOLVED)
-- Pre-flag forward-flags for SLICE 2 work (TPU adapter; live topology fetch interface)
-- STATUS update: WAVE-COMPLETE
+4. **Work unit classification**:
+   - WU-Phase3-2A TPU: parallel-class with WU-01/02/03/Neuron. Novelty: new vendor (Google); new edge relationship literal (`'tpu_ici_peer'`); new node kind literal (`'tpu_shard'`). Tier expected: **full** (A2 first-vendor pattern; A3 + S2 schema additions).
+   - WU-Phase3-2B Live fetch interface: cross-cutting interface extension across 5 sources. Novelty: new method signature (`fetchSnapshot(ctx)`); per-adapter implementation; sparse-data resilience tests against synthetic partial-topology fixtures (NO real cluster). Tier expected: **full** (A4 schema-class interface change; A7 cross-cutting impact).
 
-**SLICE 2 wave plan (WAVE-PLAN-05.md) is NOT in R54 scope.** That's R55 — a separate regular Coordinator round (`--coordinator` without `--wave-gate`).
+5. **Wave gate criteria** for WAVE-GATE-07:
+   - Per-cluster Reviewer reports MERGE-READY at cluster close (if bundled: single cluster Reviewer; if split: per-cluster Reviewers)
+   - `scripts/verify-wave-aggregate.sh WAVE-07` exit 0
+   - Tier-aware consolidation Reviewer per R50 (OPTIONAL if all clusters full-tier with cluster-internal Reviewer)
+   - Phase 3 SLICE 2 anti-scope honored (NO real-cluster access; NO Phase 3 SLICE 3 work)
+
+6. **Cross-cluster handoff artifacts** if 2A/2B split: document the interface contract at `coordination/CLUSTER-HANDOFF-WAVE07-2A-2B.md`.
 
 ### Tier rationale
 
-**coordinator-wave-gate** — `--coordinator --wave-gate WAVE-04` mode. Pipeline runs aggregate-verifier + tier-aware-Reviewer-check; Coordinator authors WAVE-GATE-04.md; STATUS: WAVE-COMPLETE set. Next wave plan emission is separate.
+**coordinator-tier** — Coordinator-only round per pipeline `--coordinator` mode. Produces wave plan; cluster dispatch is separate (R56+ per wave plan).
 
-### Anti-scope (R54 hard limits; tightened to single deliverable)
+### Anti-scope (R55 hard limits)
 
 - NO modification of `engine/*`, `test/*`, `tools/*` files.
-- NO modification of R53 deliverables (frozen historical baseline).
-- NO modification of R52 historical artifacts (Q-R52 spec doesn't exist; the R52 commit, COORDINATOR-MEMORIAL R52 section, COORDINATOR-R52.log all preserve old `WAVE-PLAN-Phase3-01` naming as audit trail of the drift — DO NOT silently rewrite).
-- NO modification of `coordination/WAVE-PLAN-04.md` (just renamed; content frozen as Coordinator's R52 deliverable).
-- NO emission of `coordination/WAVE-PLAN-05.md` (deferred to R55).
+- NO modification of R42-R54 deliverables (frozen historical baseline).
 - NO modification of `CLAUDE-*.md` files.
 - NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md`.
 - NO modification of `coordination/MEMORIAL-PHASE-*.md` (frozen shards).
-- NO modification of `coordination/PRD.md` (operator-amended at naming-fix commit; Coordinator reads, doesn't amend).
+- NO modification of `coordination/PRD.md` (Coordinator reads, doesn't amend).
 - NO modification of `coordination/SCOPING-MEMO-v0.3.md`.
 - NO modification of `scripts/*` or `run-pipeline.sh`.
-- NO cluster dispatch (Coordinator produces wave-gate; dispatch is R55+).
-- NO real-cluster work (Path B deferral honored).
+- NO cluster dispatch (Coordinator produces plan; dispatch R56+).
+- NO Phase 3 SLICE 3 territory (DS integration is a separate slice; sequential after SLICE 2 close).
+- NO real-cluster work (Path B honored).
 - NO opening GitHub PRs.
 
 ALLOWED modifications:
-- `coordination/WAVE-GATE-04.md` (NEW — primary R54 deliverable)
-- `coordination/COORDINATOR-MEMORIAL.md` (append R54 entries)
+- `coordination/WAVE-PLAN-07.md` (NEW — primary deliverable)
+- `coordination/CLUSTER-HANDOFF-WAVE07-2A-2B.md` (NEW conditional — only if 2A/2B split)
+- `coordination/COORDINATOR-MEMORIAL.md` (append)
 - `coordination/MEMORIAL.md` (Coordinator-section append at round close)
-- `coordination/NEXT-ROLE.md` (this file; STATUS update at round close)
+- `coordination/NEXT-ROLE.md` (this file)
 
 ### Apply all 7 cross-project rules UPFRONT
 
-- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — Coordinator's WAVE-GATE attestation cites specific R53 Reviewer findings (counts; SHAs; AC PASS counts) via empirical re-derivation. R53 SHA `4978e9b` and verify-wave-aggregate.sh exit code cited from actual command outputs at R54 session entry.
+- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — Coordinator's WU extraction + dependency edge findings must cite specific PRD lines + JAX/TPU SDK doc URLs verbatim with retrieval dates. No memorized claims about TPU ICI topology.
 - **Rule 2 (`branch-binding-coverage-gate`):** N/A — Coordinator stage.
 - **Rule 3 (`implementer-spec-test-assertion-coverage`):** N/A — Coordinator stage.
-- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — ALLOWED_SET above (4 files only).
-- **Rule 5 (`rule-derivation-without-self-application`):** N/A — no new rule derived. BUT note: the naming-convention drift discovered at this R54 close IS a Rule 5 self-application failure precedent (R50 verifier convention was not honored at R52 directive authoring; same-session drift). Memorial-Updater at R54 close should record this as a CONFIRMATION/OBS class entry per CLAUDE-MEMORIAL.md threshold-aware rule (R51 deliverable).
-- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if verify-wave-aggregate.sh exits non-zero for a non-naming-format reason, HALT + DIAGNOSTIC.
-- **Rule 7 (`derived-rule-propagation-mechanism-required`):** N/A as derivation surface.
+- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — ALLOWED_SET above.
+- **Rule 5 (`rule-derivation-without-self-application`):** N/A — no new rule derived at R55. (Note: globally-sequential WAVE-NN convention surfaced at R54 → R55 honors it from emit time.)
+- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if JAX/TPU public docs ambiguous on ICI topology format, HALT + DIAGNOSTIC.
+- **Rule 7 (`derived-rule-propagation-mechanism-required`):** N/A — Coordinator applies existing surfaces.
 
 ### Halt conditions
 
-1. **`scripts/verify-wave-aggregate.sh WAVE-04` exits non-zero for content reasons:** HALT + DIAGNOSTIC. Format error is fixed by rename; content errors (aggregate scope creep; contract drift; MEMORIAL conflict) would be substantive.
-2. **R53 Reviewer findings include any CRITICAL on re-read:** Coordinator re-reads `coordination/reviews/REVIEWER-REPORT-R53.md`; if any CRITICAL surfaces, HALT + DIAGNOSTIC + ESCALATE.
-3. **WAVE-GATE-04.md emit fails:** if Coordinator cannot produce the wave-gate artifact within ALLOWED_SET, HALT + DIAGNOSTIC.
+1. **JAX/TPU public docs ambiguous on ICI topology format:** if Coordinator cannot determine synthetic fixture design from JAX topology code + TPU v4/v5 papers, HALT + DIAGNOSTIC; operator decides defer TPU adapter to a later SLICE.
+2. **D5 write-conflict on verdict.ts cannot be resolved by bundle/split decision:** if 2A and 2B both need to extend verdict.ts in ways that cannot be sequenced cleanly, HALT + DIAGNOSTIC.
+3. **PRD Phase 3 SLICE 2 internally inconsistent:** if FR-V2/FR-V4 wording contradicts AC-P5 cross-cutting expectations, HALT + DIAGNOSTIC.
 
 ### Inputs for Coordinator
 
-1. `coordination/WAVE-PLAN-04.md` — R52 wave plan (renamed; content unchanged)
-2. `coordination/reviews/REVIEWER-REPORT-R53.md` — R53 cold-eye Reviewer report (15 ACs PASS; 3 MINOR + 2 OBS; MERGE-READY)
-3. `coordination/MEMORIAL.md` § R53 entries (Architect + Implementer + Reviewer + MU subsections)
-4. `coordination/specs/Q-R53-SPEC.md` + `Q-R53-SPEC-AUDIT.md` + `Q-R53-EMPIRICAL.sh` — R53 spec triad
-5. `coordination/PRD.md` § Phase 3 Scope (esp. SLICE 1 close criteria + operator Path B decision documentation)
-6. `CLAUDE-COORDINATOR.md` (full)
-7. `templates/WAVE-GATE-TEMPLATE.md`
-8. `scripts/verify-wave-aggregate.sh` (R50; invoked by pipeline at wave-gate close)
-9. `coordination/COORDINATOR-MEMORIAL.md` — Phase 2 wave-gate-close patterns + R52 entries
+1. `coordination/PRD.md` § Phase 3 Scope (esp. SLICE 2 sub-section + FR-V2 + FR-V4 + AC-P5).
+2. `coordination/WAVE-PLAN-06.md` — R52 wave plan for SLICE 1 (pattern reference).
+3. `coordination/WAVE-GATE-06.md` — R54 wave-gate close (forward-flags for SLICE 2).
+4. `coordination/SCOPING-MEMO-v0.3.md` § 2.3 Vendor fungibility table (TPU adapter row).
+5. `engine/topology/neuron-source.ts` (R53) — parallel-class pattern reference.
+6. `engine/topology-overlay.ts` — inherited BFS layer; `TopologySource` interface definition.
+7. `engine/topology/slurm-source.ts`, `k8s-source.ts`, `nvlink-source.ts` — adapters that 2B's interface extension will modify.
+8. `engine/types/verdict.ts` — schema-extension target (D5 risk).
+9. `CLAUDE-COORDINATOR.md` (full).
+10. `templates/WAVE-PLAN-TEMPLATE.md`.
+11. Public JAX source code + TPU v4/v5 architectural papers (Coordinator reads + cites URLs).
+12. `coordination/COORDINATOR-MEMORIAL.md` — Coordinator memorial state through R54.
 
 ### Pipeline invocation
 
 ```bash
 cd /Users/johnwarren/concord/tessera
-./run-pipeline.sh --round R54 --coordinator --wave-gate WAVE-04
+./run-pipeline.sh --round R55 --coordinator
 ```
-
-(Wave name now matches R50 verifier `WAVE-NN` regex.)
 
 ---
 
-## Operator-decision flags (updated post-R53 close + naming-fix)
+## Operator-decision flags (updated post-R54 close)
 
 1. R45 CRITICAL routing accept-vs-escalate (separately tracked).
 2. Rule 7 Surface (c) HARD-GATE candidate (9+ tessera instances; below cross-project 2nd-project threshold).
 3. Cross-project canonical landings (8+ items gated on 2nd-project occurrence).
-4. Anchor PR backflog scheduling (R11-R53 contributions).
-5. **Phase 3 SLICE 1 substantively complete at R53; WAVE-GATE-04 close at R54 (this round); SLICE 2 dispatch at R55+.**
+4. Anchor PR backflog scheduling (R11-R54 contributions).
+5. **Phase 3 SLICE 1 CLOSED at R54 WAVE-GATE-06; SLICE 2 IN PROGRESS at R55 (this round).**
 6. R49 MAJOR-1 hybrid-mandate-vs-full-tier mismatch — candidate for future round.
 7. R50 MAJOR-1 + 6 MINOR findings — candidate for future round.
-8. R53 3 MINOR + 2 OBS — Memorial-Updater appends documented; standalone fix-round candidate IF operator chooses.
-9. OQ-P3-9 RESOLVED Path B (DEFER cluster rental).
-10. OQ-P3-11 SCOPING-MEMO v0.4 carry-forward.
-11. OQ-Phase3-W1-1 RESOLVED (Option A single neuron-source.ts).
-12. OQ-Phase3-W1-2 RESOLVED (Option B defer § 2.3 amendments).
-13. **NEW post-R54:** Naming-convention drift between R52 directive and R50 verifier surfaced at R54 pre-flight. R50 verifier convention is authoritative (`WAVE-NN` regex). Future Coordinator directives MUST use `WAVE-NN` naming for plan + gate files. Documented at R54 MEMORIAL entry as Rule 5 self-application failure precedent (CLAUDE-MEMORIAL.md threshold-aware rule applies — likely composite rollup rather than standalone REINFORCED).
+8. R53 3 MINOR + 2 OBS findings — Memorial-Updater appended; standalone fix-round candidate IF operator chooses.
+9. R54 naming-convention drift documented; 1st-tessera Rule 5 self-application precedent.
+10. OQ-P3-9 RESOLVED Path B (DEFER cluster rental); AC-P6 + FR-V3 + WU-Phase3-2C all DEFERRED.
+11. OQ-P3-11 SCOPING-MEMO v0.4 carry-forward.
+12. OQ-Phase3-W1-1/W1-2 RESOLVED at R53.
