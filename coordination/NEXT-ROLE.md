@@ -52,6 +52,8 @@ bash coordination/specs/Q-R73-EMPIRICAL.sh  →  PASS: 14 / FAIL: 0, exit 0
 
 CONFIRMATION entries appended to coordination/MEMORIAL.md per discipline.
 
+**Chore-A commit SHA (HEAD at Reviewer routing):** `64b312f` (`chore(R73 IMPLEMENTER): routing block + MEMORIAL entries — route to REVIEWER`)
+
 ---
 
 ## § Architect R73 routing block (2026-05-20)
