@@ -1,7 +1,97 @@
-CURRENT-ROUND: R64
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
-TIER: coordinator
+CURRENT-ROUND: R65
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
+TIER: full
+
+---
+
+## § R65 Round-scope directive (Architect — WU-Phase3-3B Tessera→DS feed implementation; Wave 10 first cluster; sequential dispatch) (2026-05-20)
+
+R65 = Wave 10 first-cluster sequential dispatch. WU-Phase3-3B implements the Tessera→DS feed adapter (HTTP client that constructs `VerdictGroupPayload` from engine `VerdictGroup` instances and POSTs to the DS correlation layer). Wave 10 was forward-flagged as PARALLEL-FAN-OUT opportunity (3B + 3C concurrent in 2-cluster pattern); operator authorized sequential autonomous dispatch this session.
+
+**Round-start SHA:** `9a7512d` (chore(R64): operator-decision backlog resolution + methodology hardening; verify via `git rev-parse HEAD` at Architect session entry).
+
+### Inputs for Architect (R65)
+
+1. `coordination/CLUSTER-HANDOFF-WAVE10-3A-3B.md` — feed-contract surface + anti-scope (READ FIRST)
+2. `coordination/WAVE-PLAN-09.md` — Wave 10 framing + D-test analysis
+3. `coordination/PRD.md` § Phase 3 (FR-D2 line 440 — Tessera→DS feed direction; AC-P9 line 452 — contract-based bi-directional flow)
+4. `engine/ds-integration/feed-contract.ts` + `engine/ds-integration/index.ts` — contract module (R62 deliverable; frozen)
+5. `engine/types/verdict.ts:198-231` — engine `VerdictGroup` source shape
+6. `engine/events/freeze-hook.ts` + `engine/events/event-feed.ts` — frozen surfaces (R20/R21/R36)
+7. `coordination/specs/Q-R62-SPEC.md` + `Q-R62-SPEC-AUDIT.md` — most-recent spec pattern (interface-design class) for template
+8. `coordination/NEXT-ROLE.md` § R64 close attestation (operator-decision flag state)
+
+### Primary deliverable
+
+Implement WU-Phase3-3B per CLUSTER-HANDOFF-WAVE10-3A-3B.md contract surface:
+
+1. **`engine/ds-integration/feed.ts`** (NEW; Coordinator default; Architect picks at spec time):
+   - HTTP client adapter that constructs `VerdictGroupPayload` from engine `VerdictGroup` instances (wire-format projection per spec § 4.1 pattern).
+   - POST request to `TESSERA_TO_DS_FEED_ENDPOINT.path` with `TesseraToDsAuthHeaders`.
+   - Returns acknowledgment + correlation key (or error structure) per contract response shape.
+   - NO real DS endpoint; synthetic-fixture pattern (Node.js built-in `node:http` mock OR pure-function payload-construction test only).
+   - Preserves A16 literal `correlational_not_causal: true` in payload construction.
+
+2. **Tessera-side wiring** (Architect picks at spec § 0 brainstorm; default candidates: event-driven via existing emit path; polled via background timer; imperative call from existing verdict-emission code):
+   - The chosen wiring approach must NOT modify R20/R21/R36 frozen `freeze-hook.ts` body.
+   - May modify (Architect specifies): any non-frozen Tessera-internal emit path that already handles `VerdictGroup` output.
+
+3. **Test file** `test/q65-ds-integration-feed.test.ts`:
+   - Payload construction ACs: `VerdictGroupPayload` structurally equals engine `VerdictGroup` projection per contract; A16 literal preserved.
+   - HTTP wire-format ACs: POST request body validates against `VerdictGroupPayload` shape; auth headers structurally correct.
+   - Error-handling ACs: network error / 4xx / 5xx response paths return sentinel structures.
+   - Anti-regression ACs: Phase 1+2+Phase-3-SLICE-1+2 ACs unchanged.
+
+4. **Q-R65-EMPIRICAL.sh** at chore-A pre-commit (Rule 1 sub-class).
+
+### Tier rationale
+
+**full-tier** — Architect (HTTP client adapter design; wire-format projection from engine `VerdictGroup` to `VerdictGroupPayload`; wiring approach decision) + Implementer (adapter implementation; tests; mock HTTP fixture) + Reviewer (cold-eye) + Memorial-Updater.
+
+### Anti-scope (R65 hard limits)
+
+- NO modification of `engine/ds-integration/feed-contract.ts` (R62 contract; frozen).
+- NO modification of `engine/ds-integration/event-contract.ts` (WU-3C surface; cross-cluster anti-scope).
+- NO modification of `engine/ds-integration/index.ts` EXCEPT to add new export for `feed.ts` adapter.
+- NO modification of `engine/types/verdict.ts` (R56-frozen; A16 literal preserved).
+- NO modification of `engine/events/event-feed.ts` (R36-frozen).
+- NO modification of `engine/events/freeze-hook.ts` body or signature (R20/R21/R36 frozen).
+- NO real-DS-endpoint HTTP calls (Path B; synthetic/mock only).
+- NO new external dependencies (W3-4 Option A; HTTP via Node.js built-in `node:http`).
+- NO DS-repo modifications (W3-1 Option A).
+- NO `engine/ds-integration/event-consumer.ts` work (WU-3C scope; R66).
+- NO modification of R42-R64 deliverables (except adding `feed.ts` adapter implementation file).
+- NO GitHub PR opening.
+
+### Halt conditions (R65 Implementer)
+
+1. Q-R65-EMPIRICAL.sh non-zero exit at chore-A for any reason other than pre-documented two-state mismatch (carve-out per R56 MINOR-1; NARROWED post-R62 to AC-R65-10 + AC-R65-12 only — do NOT propagate the structurally-vacuous forward-protection AC pattern; see R62 lesson).
+2. `npx tsc -p tsconfig.test.json` non-zero exit.
+3. Phase 1+2+Phase-3-SLICE-1+2 regression.
+4. Architectural decision requires DS-repo modification (W3-1 anti-scope violation).
+5. Spec-vs-reality conflict mid-implementation (Rule 6).
+6. R61-class architectural-reality discovery: HALT + DIAGNOSTIC + ESCALATE.
+7. **R62 lesson — apply claim-then-walk:** if Architect spec § 0.2 makes ANY claim about codebase property OR future-state property of a multi-commit chain, run actual grep / Read / diff command at spec-emit time. Pre-emit grilling Q1 ("every claim verifiable?") MUST cover both current-codebase claims AND future-commit-chain simulations.
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rule 1: ACTIVE GATE — Q-R65-EMPIRICAL.sh + Tightenings 1-4
+- Rule 2: ACTIVE GATE — § 5.3 branch-binding coverage for HTTP request branches + payload projection branches + error-handling branches
+- Rule 3: ACTIVE GATE — discriminating assertions per R30 MINOR-1
+- Rule 4: ACTIVE GATE — Architect ALLOWED_SET enumerated at spec-emit time
+- Rule 5: N/A
+- Rule 6: ACTIVE GATE — § 6 halt conditions including R62 lesson #7 above
+- Rule 7: ACTIVE GATE Surface (a)
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R65 --tier full
+```
+
+---
 
 ---
 
