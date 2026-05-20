@@ -639,7 +639,7 @@ with a clear commit message.
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
 
-# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 7 sub-variants observed at Tessera)
+# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 8 sub-variants observed at Tessera)
 #
 #   Selective-audit-overreach (R41 MAJOR-1): When an audit empirically checks N of M files and
 #     the AC requires "all M files" verified, the delivered artifact must scope its claim to
@@ -732,6 +732,20 @@ with a clear commit message.
 #     named tactical deviation. A MEMORIAL.md CONFIRMATION that recites only spec-prescribed
 #     changes while silently omitting additional content is an attestation-scope gap regardless
 #     of whether the additional content is benign. Detected tessera R53 MINOR-2.
+#
+#   Process-exit-code must be attested alongside pass/fail counts (R62 MAJOR-4): When
+#     attesting a binding-command result that produces both a numeric summary (tests=N /
+#     pass=P / fail=F / skipped=S) AND a non-zero process exit code (e.g., `node --test`
+#     exits non-zero when fail > 0), BOTH the summary line AND the exit code must be
+#     encoded in NEXT-ROLE.md. Attesting the pass/fail count verbatim while omitting the
+#     exit code is a Rule 1 sub-class `empirical-command-attestation` gap — the exit code
+#     is load-bearing context when the summary is the disclosed SPEC-DEVIANCE point (a
+#     reader needs the exit code to understand whether the harness treated the result as
+#     a failure). Procedure: after every `node --test` run, record `echo $?` output in
+#     the attestation block immediately after the summary line. This applies especially
+#     when fail count > 0 and the Implementer's routing decision attaches to that fact.
+#     Analogous to R26 MAJOR-1 (tsc exit code reframing) but for test-runner exit codes.
+#     Detected tessera R62 MAJOR-4.
 
 # REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 6 sub-variants observed at Tessera)
 #
