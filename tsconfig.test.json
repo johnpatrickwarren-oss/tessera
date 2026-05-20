@@ -12,7 +12,8 @@
   "include": [
     "engine/**/*.ts",
     "test/**/*.ts",
-    "tools/**/*.ts"
+    "tools/**/*.ts",
+    "scripts/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
