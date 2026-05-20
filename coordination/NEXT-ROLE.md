@@ -1,7 +1,97 @@
 CURRENT-ROUND: R66
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Architect R66 routing block (2026-05-20)
+
+### Architect attestation summary
+
+- **Round-start SHA (anti-scope diff lower bound):** `8f3dd60` (verified via `git rev-parse HEAD` at Architect session entry; the operator's R66 directive commit itself; per CLAUDE-ARCHITECT REINFORCED 2026-05-17 R15 MINOR-1 advance-to-post-prep-commit reinforcement). The R66 directive text at NEXT-ROLE.md:12 cites `03524ba` (R65 MU commit) as round-start; that is the pre-prep SHA. The directive commit `8f3dd60` itself modified `coordination/NEXT-ROLE.md` — empirical session-entry SHA is the load-bearing lower bound for anti-scope diff.
+- **Spec triad commit (pre-Implementer chore-A):** `ba28a84` (`spec(R66): Q-R66-SPEC + audit sidecar + EMPIRICAL.sh — Phase 3 SLICE 3 Wave 10 WU-Phase3-3C DS→Tessera event consumer + freeze-hook factory`). Per R21 ARCH MINOR-1 spec-commit-sequencing discipline. Spec landed in its OWN commit BEFORE this routing block update.
+- **Empirical baseline at session entry (verified via direct command runs at Architect session entry; NOT inherited from R65 attestation per R25 MINOR-1):**
+  - `node --test --test-reporter=tap test/*.test.js` → `tests=427 / pass=422 / fail=2 / skipped=3`. 2 fails = R36-30 + R36-31 forward-protection carry-forward (pre-existing from Phase 2 close `87e372f`; not introduced by R66).
+  - `npx tsc -p tsconfig.test.json` → exit code 0, zero diagnostics.
+- **Toolchain at session entry:** Node v25.9.0; TypeScript 5.9.3.
+- **Pre-emit grilling outcome:** PASS. Claim-then-walk discipline (R62 lesson) surfaced 4 handoff-doc inaccuracies in CLUSTER-HANDOFF-WAVE10-3A-3C.md vs actual codebase state at spec-emit. Documented in spec § 8 + audit § 3.2:
+  - 8.1.1: `DsToTesseraAuthHeaders` is NOT in `event-contract.ts` (only `TesseraToDsAuthHeaders` exists in `feed-contract.ts`). Spec defines `DsToTesseraAuthHeaders` locally in `event-consumer.ts`.
+  - 8.1.2: `FreezeHook` is NOT a class — actual surface is `interface FreezeHookState` + pure function `freezeAwareUpdatePerShardResidual`. Factory pattern owns mutable state externally + delegates to the pure function.
+  - 8.1.3: `DsToTesseraEventEndpoint` has no `expected_response_status` field; spec hard-codes 202 in success path.
+  - 8.1.4: `DeployEventPayload` field names diverge (actual: `event_id`/`event_class`/`event_ts`/`event_window_end_ts?`/`metadata?`); spec uses actual.
+
+### Implementer inputs for R66
+
+1. `coordination/specs/Q-R66-SPEC.md` (spec proper; prescriptive)
+2. `coordination/specs/Q-R66-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read)
+3. `coordination/specs/Q-R66-EMPIRICAL.sh` (chore-A verification harness; executable)
+4. `coordination/CLUSTER-HANDOFF-WAVE10-3A-3C.md` (contract surface — note handoff inaccuracies per spec § 8)
+5. `coordination/PRD.md` § Phase 3 (FR-D3 + FR-D4 + AC-P9)
+6. `engine/ds-integration/event-contract.ts` (R62 frozen — source of truth for wire types)
+7. `engine/events/freeze-hook.ts:1-51` (R20+R21+R36 frozen — pure-function freeze-hook surface; do NOT modify)
+8. `engine/events/event-feed.ts:10-15` (R36 frozen — ClusterEventKind 5-value parity invariant)
+
+### Implementer chore-A sequence (per spec § 11)
+
+1. **RED commit:** lands `test/q66-ds-integration-event-consumer.test.ts` with 17 `assert.fail('R66 RED — implementation pending')` stubs (or `test.skip` equivalent per R23 IMPL MINOR-1 RED-commit discipline). `engine/ds-integration/event-consumer.ts` + `freeze-hook-factory.ts` do NOT yet exist; `index.ts` un-modified. Runtime tests fail (import errors at module resolution; or RED stubs fail). RED state confirmed.
+2. **GREEN commit (chore-A):** lands `engine/ds-integration/event-consumer.ts` per spec § 4.1 pseudocode; lands `engine/ds-integration/freeze-hook-factory.ts` per spec § 4.2 pseudocode; updates `engine/ds-integration/index.ts` per spec § 4.3 (+2 lines: `export * from './event-consumer';` + `export * from './freeze-hook-factory';`); replaces all RED stubs with real assertions per spec § 4.4.
+3. **Verify chore-A:** Run `npx tsc -p tsconfig.test.json` (must exit 0); run `node --test --test-reporter=tap test/*.test.js` (predicted: `tests=444 / pass=439 / fail=2 / skipped=3` — 2 fails = R36-30 + R36-31 carry-forward); run `bash coordination/specs/Q-R66-EMPIRICAL.sh` (predicted: 14 PASS, 0 FAIL, exit 0).
+4. **Implementer attestation:** Encode the ACTUAL chore-A summary VERBATIM in NEXT-ROLE.md per Rule 1 sub-class `empirical-command-attestation`. Do NOT reframe as compliance. Do NOT cite spec-predicted values as the observed values.
+5. **NO chore-B step.** R66 has NO SHA injection requirement; NO forward-protection AC; NO two-state mismatch carve-out. The "narrowed carve-out" pattern from R56-R65 is dropped per R66 directive halt #1 + R62 lesson (do NOT propagate the structurally-vacuous forward-protection AC pattern). Implementer routes directly to Reviewer after chore-A verification + attestation.
+
+### TACTICAL AUTONOMY scope (per spec § 4.4 note)
+
+Implementer MAY:
+- Adjust `freshResidual()` / `freshObs()` test fixture stubs from `{} as Type` casts to minimal-valid-field-set constructions if `tsc` strict mode rejects the empty-object cast (grep `engine/types/config.ts` for `PerShardResidual` field shape; grep `engine/per-shard/runtime.ts` for `ExtendedSampleObservation` shape).
+- Choose between `assert.fail` stubs and `test.skip` for the RED commit pattern (Architect-acceptable per R65 precedent).
+- Adjust JSDoc wording without changing field semantics or type shapes.
+- Adjust blank lines / minor formatting consistent with codebase style.
+- Reorder `import` statements within standard ordering.
+- Rename test-local variable names without changing assertion shape.
+- Resolve `import ... assert {}` form if the toolchain rejects it (drop the assertion; standard import path; document tactical fix in attestation).
+- Use `removeListener` instead of `off` if Node v25 surface variance requires.
+
+Implementer MAY NOT (without HALT + DIAGNOSTIC per spec § 6.1):
+- Change any field name in event-consumer's payload validation (must match `event-contract.ts` exactly).
+- Modify `engine/events/freeze-hook.ts` body or signature (halt #4 immediate trigger).
+- Modify `engine/ds-integration/event-contract.ts` or any other frozen surface listed in spec § 3.1 anti-scope items 1-8.
+- Add the structurally-vacuous forward-protection AC pattern (`git diff CHORE_A_SHA..HEAD === []`).
+- Expand the ALLOWED_SET in-test (NEVER per R36 MAJOR-2).
+- Add ad-hoc string comparison against `event_class` (use the C1 exhaustiveness switch per AC-R62-7 inheritance + spec § 3.1 item 13).
+
+### Halt conditions for the Implementer (per spec § 6.1)
+
+1. Q-R66-EMPIRICAL.sh non-zero exit at chore-A for ANY reason — R66 has NO chore-B; no carve-out; ALL non-zero exits are halt conditions.
+2. `npx tsc -p tsconfig.test.json` non-zero exit.
+3. Phase 1+2+Phase-3-SLICE-1+2+R65 regression — any pre-R66 test other than R36-30 + R36-31 transitions PASS → FAIL.
+4. **Spec pseudocode requires `engine/events/freeze-hook.ts` body or signature modification** — HALT + DIAGNOSTIC immediately; factory pattern is the mandated mechanism.
+5. Anti-scope diff includes path outside ALLOWED_SET (NEVER expand ALLOWED_SET in-test per R36 MAJOR-2).
+6. Architectural decision requires DS-repo modification (W3-1 anti-scope violation).
+7. R62 lesson — claim-then-walk: load-bearing factual claim in spec does not match codebase reality.
+8. R61-class architectural-reality discovery — premise empirically false at Implementer time (especially: actual PerShardResidual / ExtendedSampleObservation / FreezeHookState field shapes diverge materially from spec § 1.5 type-pretest).
+9. ClusterEventKind 5-value closed-set at `engine/events/event-feed.ts:10-15` has drifted (verified by grep at chore-A) — parity invariant per AC-R62-7.
+10. `node:http` or `node:events` Node-version-specific API unavailable.
+
+Resolution: write DIAGNOSTIC-R66-*.md with ≥3 bounded options; set STATUS: ESCALATE; await operator disposition.
+
+### Cross-project rule dispositions (per spec § 7)
+
+| Rule | Disposition |
+|---|---|
+| 1 (`false-compliance-attestation` + sub-class `empirical-command-attestation`) | ACTIVE GATE — Q-R66-EMPIRICAL.sh; Tightenings 1-4 applied |
+| 2 (`architect-branch-binding-coverage`) | ACTIVE GATE — spec § 5.3 table; 5 acknowledged non-load-bearing gaps |
+| 3 (`implementer-spec-test-assertion-coverage`) | ACTIVE GATE — discriminating assertions per spec § 4.4 + § 5.4 |
+| 4 (`anti-scope-allowed-set-forward-coverage`) | ACTIVE GATE — 9-path ALLOWED_SET enumerated upfront at spec § 3.2 |
+| 5 (`rule-derivation-without-self-application`) | N/A at spec emit; no new rule derived at R66 spec-emit; conditional at Memorial-Updater |
+| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | ACTIVE GATE — 10 halt conditions enumerated; NO narrowed carve-out (single-state spec) |
+| 7 (`derived-rule-propagation-mechanism-required`) | ACTIVE GATE Surface (a) + (b); Surface (c) conditional |
+
+### Routing
+
+**NEXT-ROLE: IMPLEMENTER | STATUS: READY**
+
+Pipeline resume command: `./run-pipeline.sh --round R66 --tier full --start-at IMPLEMENTER`
 
 ---
 
