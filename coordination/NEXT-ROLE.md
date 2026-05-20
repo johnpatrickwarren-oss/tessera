@@ -11,7 +11,7 @@ TIER: full
 - `bash coordination/specs/Q-R58-EMPIRICAL.sh` = 18 PASS / 1 FAIL (AC-R58-13 chore-A two-state FAIL pre-documented; all 18 other ACs PASS ✓)
 - `git diff 7e9d399..HEAD --name-only` = 12 paths; all ⊆ 12-entry ALLOWED_SET ✓
 
-**Chore-A coordination SHA:** `<FILLED-AT-CHORE-B>` — see chore-B commit below.
+**Chore-A coordination SHA:** `7368dcd` (this coordination commit; HEAD at routing time after chore-B).
 
 **Implementer tactical deviations (TACTICAL AUTONOMY clause):**
 - TD-1: Spec pseudocode used `{ fetched_at_ts: 1_700_000_000 }` for `SlurmTopologySource`; actual `SlurmTopologySourceOpts` uses camelCase `fetchedAtTs`. Test uses `{ fetchedAtTs: 1_700_000_000 }` per actual interface.

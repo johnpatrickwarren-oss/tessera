@@ -182,7 +182,7 @@ test("AC-R58-11: A16 — verdict.ts retains 'correlational_not_causal: true' lit
 // Appended by Implementer at chore-B with chore-A SHA substituted into CHORE_A_SHA literal.
 test('AC-R58-14: round-start-to-chore-A diff ⊆ R58 allowed-set (chore-A SHA pinned)', () => {
   const BASELINE_SHA = '7e9d399';
-  const CHORE_A_SHA  = '<INJECTED-AT-CHORE-B>';
+  const CHORE_A_SHA  = '7368dcd';
   const ALLOWED_SET = new Set<string>([
     'coordination/MEMORIAL.md',
     'coordination/NEXT-ROLE.md',
