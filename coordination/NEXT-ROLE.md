@@ -1,7 +1,67 @@
 CURRENT-ROUND: R71
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
+
+---
+
+## § Implementer R71 routing block (2026-05-20)
+
+### Implementer attestation summary
+
+- **RED commit SHA:** `fcc51d6` (`red(R71): q71 demo dashboard stub fails — TS2307 + 14 RED assertion stubs`)
+- **GREEN chore-A SHA:** `cfa7d0f` (`feat(R71): Tessera demo dashboard — pnpm build:demos + 8 canned scenarios + static dashboard`)
+- **ROUND_START_SHA injected into Q-R71-EMPIRICAL.sh:** `fcc51d603a8330e0043888413512830108c98709` (RED commit SHA = the parent of chore-A; captured via `git rev-parse HEAD` after RED commit and BEFORE chore-A commit, per spec § 11.1 sed-substitution mechanism).
+- **Spec-deviance:** None. Prescribed drift magnitudes (sdc-drift 0.4, fdr 0.45, hierarchical 0.20) produced correct terminal predicates under prescribed seeds. No tactical tuning was required. No halt conditions fired.
+
+### Binding command results (ACTUAL observed verbatim at chore-A HEAD `cfa7d0f`)
+
+```
+pnpm exec tsc -p tsconfig.test.json
+  → exit 0; zero diagnostics.
+
+pnpm exec node --test --test-reporter=tap test/*.test.js
+  → # tests 469
+  → # pass 461
+  → # fail 5
+  → # skipped 3
+  (5 carry-forward fails identity-verified: AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14)
+  (14 new AC-R71-1..14 all PASS)
+
+bash coordination/specs/Q-R71-EMPIRICAL.sh
+  → PASS  Block: tsc-exit-0
+  → PASS  Block: node-test-fail-count-and-identity
+  → PASS  Block: anti-scope-allowed-set
+  → PASS  Block: no-engine-mods
+  → PASS  Block: no-prior-round-spec-mods
+  → PASS  Block: build-canned-demos-structure
+  → PASS  Block: package-json-build-demos-script
+  → PASS  Block: scenario-json-files-exist-and-parse
+  → PASS  Block: demo-html-structural-elements
+  → PASS  Block: build-demos-idempotent
+  → PASS: 10 / FAIL: 0 / exit 0
+```
+
+### AC predicate observations (actual terminal state values at chore-A)
+
+| AC | Observed |
+|---|---|
+| AC-R71-4 (clean-baseline firing_shards) | `[]` |
+| AC-R71-5 (sdc-drift firing_shards) | `["shard-04"]` |
+| AC-R71-6 (common-mode-rack rack-A candidate) | member_count=3, member_shard_ids=["shard-00","shard-01","shard-02"] |
+| AC-R71-7 (event-conditional freeze_active) | `true` |
+| AC-R71-8 (fdr_K ∈ [1,5]) | fdr_K=3, fdr_qLevel=0.10, fdr_selected_indices=[2,5,8] |
+| AC-R71-9 (fleet_fired) | `true`, tick_at_first_fire=16 |
+| AC-R71-10 (sparse-data candidates) | `[]` |
+| AC-R71-11 (cooling_zone candidate) | member_count=4 |
+
+### Reviewer inputs
+
+1. `coordination/specs/Q-R71-SPEC.md` (full spec + § 5 ACs + § 5.1 branch-binding + § 5.3 discriminating-assertion table)
+2. `coordination/specs/Q-R71-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized)
+3. `coordination/specs/Q-R71-EMPIRICAL.sh` (empirical verification harness; re-run at Reviewer HEAD)
+4. All 12 new/modified files enumerated in § 3.1 ALLOWED_SET
+5. Chore-A commit `cfa7d0f` (GREEN) — diff from `fcc51d6` (RED) covers the implementation
 
 ---
 
