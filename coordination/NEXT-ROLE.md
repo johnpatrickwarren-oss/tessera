@@ -1,7 +1,99 @@
-CURRENT-ROUND: R63
+CURRENT-ROUND: R64
 NEXT-ROLE: OPERATOR
-STATUS: WAVE-COMPLETE
+STATUS: ROUND-COMPLETE
 TIER: coordinator
+
+---
+
+## § R64 close attestation (2026-05-20)
+
+**Deliverables landed:**
+- `coordination/MEMORIAL.md` R64 COORDINATOR entries (8 CONFIRMATIONs + 2 OBS documenting backlog inventory + resolutions + flagged-for-operator items)
+- `coordination/NEXT-ROLE.md` operator-flag list consolidated (see below)
+- No CLAUDE-*.md modifications (R62 MU already landed Architect-claim-without-empirical-walk reinforcement; no items crossed 3-instance threshold at R64)
+- No `~/.claude/CROSS-PROJECT-MEMORIAL.md` modifications (no cross-project promotions this round)
+
+**Next round (R65):** Wave 10 first-cluster sequential dispatch — WU-Phase3-3B (Tessera→DS feed implementation). Pipeline: `./run-pipeline.sh --round R65 --tier full`. CLUSTER-HANDOFF-WAVE10-3A-3B.md is the contract input.
+
+---
+
+## § Operator-decision flag list (consolidated at R64 close)
+
+**FLAGGED — operator decision needed (3 items; non-blocking for Phase 3 close):**
+
+1. **R45 CRITICAL routing policy promotion to cross-project canonical.** Tessera-internal pattern codified in CLAUDE-REVIEWER.md (R45 + R62 = 2 instances). Recommendation: keep Tessera-internal at 2 instances; promote to `~/.claude/CROSS-PROJECT-MEMORIAL.md` at 3rd Tessera instance OR when a sibling project surfaces the same pattern.
+
+2. **Rule 7 Surface (c) HARD-GATE candidate disposition.** Recommendation: keep SOFT (advisory). Surface (a) SPEC-AUTHORING-CHECKLIST + Surface (b) pre-commit-rule-sweep already provide enforcement. HARD-GATE would create false-positive churn at Coordinator + Architect rounds that don't derive new rules.
+
+3. **Anchor PR backflog scheduling.** Current state: PR #38 = R06-R10. 5 windows accumulated (R11-R20, R21-R30, R31-R40, R41-R50, R51-R63). Recommendation: batch by phase boundaries — PR #39 = R11-R40 (Phase 2 substantive), PR #40 = R41-R51 (methodology hardening), PR #41 = R52-R67 (Phase 3 substantive; lands post-Phase-3-close at R67). 3 PRs total instead of 5.
+
+**FLAGGED — new at R64 (operator-initiative scheduling):**
+
+4. **Phase 4 / dedicated-cycle planning for engine npm extract** (FR-D1 + AC-P8 DEFERRED per Option F at R61 ESCALATE #2). Defer scheduling until post-Phase-3-close (R67+). Key design decisions to surface: package scope (pure-DS-at-SHA vs Tessera-evolved-engine framing); types-barrel decoupling strategy; DS-side consumption mechanism; backwards-compatibility.
+
+5. **DS-side PR consuming the contract module.** Outside Tessera scope per W3-1 Option A. Operator schedules at `~/concord/deploysignal/` once Tessera Phase 3 close lands (R67+). Contract surfaces documented in CLUSTER-HANDOFF-WAVE10-3A-3B.md + CLUSTER-HANDOFF-WAVE10-3A-3C.md (relevant for DS-side spec authoring).
+
+**CLOSED at R63/R64 (no operator action needed):**
+
+- ✓ 0-CRITICAL streak interpretation — finalized at R63 WAVE-GATE-09 (PRESERVED at substantive-deliverable level)
+- ✓ OQ-Phase3-W3-* (1 through 5) — all resolved at R60/R61/R62
+- ✓ Cross-project canonical landings (R64 inventory) — 0 items at 3-instance threshold
+- ✓ Architect-claim-without-empirical-walk reinforcement — R62 MU codified as EMPIRICAL-PREMISE-VERIFICATION 4th sub-variant; 3rd-instance promotion threshold tracked
+
+---
+
+---
+
+## § R64 Round-scope directive (Coordinator — operator-decision backlog resolution + methodology hardening) (2026-05-20)
+
+R64 = interactive Coordinator round resolving the operator-decision backlog accumulated through Phase 3. Methodology hardening pattern matches R49/R50/R51 precedent (no pipeline subagent invocation; Coordinator authors landings + commits + surfaces remaining operator-decision items with recommendations).
+
+**Round-start SHA:** `9637863` (chore(R63): WAVE-GATE-09 close + CLUSTER-HANDOFF emissions).
+
+**Placement rationale:** insertion between R63 (Wave 9 close) and Wave 10 dispatch (R65-R66 sequential WU-3B + WU-3C) because (a) the Architect-claim-without-empirical-walk lesson tightens R65/R66 spec authoring; (b) consolidates Tessera methodology lessons before R65+ rounds add accretion; (c) leaves WAVE-GATE-10 close uncluttered by deferred operator-decision overhang.
+
+### Operator-decision backlog inventory (8 items pre-R64)
+
+| # | Item | Resolution at R64 |
+|---|---|---|
+| 1 | R45 CRITICAL routing policy | FLAG with recommendation (codify the operator-decision-question pattern per R45 + R62 precedent; 2 instances) |
+| 2 | Rule 7 Surface (c) HARD-GATE candidate | FLAG with recommendation (keep soft; HARD-GATE would over-constrain) |
+| 3 | Cross-project canonical landings | AUTONOMOUS — inventory complete; no items cross 3-instance threshold at R64 (covered below) |
+| 4 | Anchor PR backflog scheduling | FLAG with cadence summary + recommendation (batch by phase boundaries: 1 PR for R11-R40 Phase 2, 1 PR for R51-R67 Phase 3) |
+| 5 | Architect-claim-without-empirical-walk reinforcement | AUTONOMOUS — R62 MU already landed as EMPIRICAL-PREMISE-VERIFICATION 4th sub-variant in CLAUDE-ARCHITECT.md; codify at R64 close + flag 3rd-instance threshold for cross-project promotion |
+| 6 | 0-CRITICAL streak interpretation | CLOSED — finalized at R63 WAVE-GATE-09 (PRESERVED at substantive-deliverable level) |
+| 7 | DS-side PR scheduling | OPERATOR action; outside Tessera scope per W3-1 Option A |
+| 8 | OQ-Phase3-W3-* | CLOSED — all resolved at R60/R61/R62 |
+
+### R64 Coordinator deliverables (autonomous landings)
+
+1. **CLAUDE-ARCHITECT.md** — codify the empirical-walk lesson framing (R62 MU added the sub-variant; R64 adds the 3rd-instance promotion-flag annotation in the composite's lead-in line). Re-accretion guard preserved (still 30 REINFORCED entries; sub-variant rollup).
+
+2. **`~/.claude/CROSS-PROJECT-MEMORIAL.md`** inventory pass — no Tessera-derived rules cross the 3-instance threshold for cross-project promotion at R64. Documented as no-op in this round's memorial.
+
+3. **`coordination/MEMORIAL.md`** R64 COORDINATOR entries documenting (a) operator-decision backlog inventory + resolutions; (b) Anchor PR cadence current state; (c) flagged-for-operator items with recommendations; (d) methodology-hardening rationale for inserting this round between R63 and R65.
+
+4. **`coordination/NEXT-ROLE.md`** update (this directive becomes the closed-state record; STATUS: ROUND-COMPLETE after R64 work lands).
+
+### R64 Coordinator deliverables (flagged for operator)
+
+These items require operator input but do NOT block Wave 10 dispatch (R65-R66) OR Phase 3 close (R67). Surface in NEXT-ROLE.md operator-decision flag list with explicit recommendations; operator can resolve at any point (Phase 3 close attestation is a natural moment).
+
+1. **R45 CRITICAL routing policy:** recommendation = codify the operator-decision-question pattern (Reviewer routes ESCALATE to OPERATOR for attestation-level CRITICALs rather than route MERGE-READY-with-reservations unilaterally). 2 Tessera instances (R45 + R62); below cross-project threshold; Tessera-internal pattern via CLAUDE-REVIEWER.md REINFORCED entry already landed at R62 MU.
+
+2. **Rule 7 Surface (c) HARD-GATE candidate:** recommendation = keep soft. Surface (a) (SPEC-AUTHORING-CHECKLIST.md gate) + Surface (b) (`scripts/pre-commit-rule-sweep.sh`) provide sufficient enforcement; HARD-GATE on Surface (c) (round-of-derivation self-application) would over-constrain and create false-positive churn at Coordinator + Architect rounds that legitimately don't need self-application.
+
+3. **Anchor PR backflog scheduling:** recommendation = batch by phase boundaries. Current state: PR #38 = R06-R10. Suggested future PRs: PR #39 = R11-R40 (Phase 2 substantive work; 30 rounds spanning SLICE 1+2+3 + close); PR #40 = R41-R51 (methodology hardening R41-R51); PR #41 = R52-R67 (Phase 3 substantive). Operator schedules each PR independently; suggested cadence = at major milestone closures.
+
+4. **DS-side PR for contract consumption:** outside Tessera scope. Operator schedules separately at `~/concord/deploysignal/` once Tessera Phase 3 close lands (R67+).
+
+5. **Phase 4 / dedicated-cycle planning for engine npm extract (FR-D1 + AC-P8 deferred):** Phase 4 candidate planning is operator-initiative. Defer scheduling until post-Phase-3-close (R67+).
+
+### Pipeline invocation
+
+R64 is a Coordinator interactive round; NO pipeline subagent invocation. Pattern matches R49/R50/R51. Coordinator authors landings + commits + emits round-summary; STATUS transitions PENDING → ROUND-COMPLETE in the commit itself.
+
+---
 
 ---
 
