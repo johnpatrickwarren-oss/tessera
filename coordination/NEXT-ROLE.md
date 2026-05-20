@@ -1,328 +1,124 @@
-CURRENT-ROUND: R53
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
-TIER: full
+CURRENT-ROUND: R54
+NEXT-ROLE: COORDINATOR
+STATUS: READY
+TIER: coordinator-wave-gate
 
-## Reviewer-emitted inputs (R53 review at HEAD; report uncommitted at routing time)
+## Round-scope directive (R54 — WAVE-GATE-Phase3-01 close + SLICE 2 wave plan)
 
-The Reviewer has completed cold-eye audit. Memorial-Updater reads:
+R54 is the WAVE-GATE-Phase3-01 close for Phase 3 SLICE 1. R53 (`4978e9b`) closed the sole WU in the wave (WU-Phase3-1 AWS Neuron adapter; MERGE-READY per Reviewer cold-eye). Coordinator-mode wave-gate-close round per pipeline `--coordinator --wave-gate WAVE-Phase3-01` invocation.
 
-1. `coordination/reviews/REVIEWER-REPORT-R53.md` — primary review report (15 ACs PASS; 3 MINOR + 2 OBS findings; STATUS: MERGE-READY; 0 CRITICAL).
-2. `coordination/MEMORIAL.md` (R53 ARCHITECT + IMPLEMENTER sections + new REVIEWER section).
-3. `coordination/specs/Q-R53-SPEC.md` + `Q-R53-SPEC-AUDIT.md` (for context only; no modification required at MU stage).
-4. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (no R53 derivations expected; spec § 7 Rule 5 marked N/A).
+**Round-start SHA:** `4978e9b` (chore(R53): Memorial-Updater outputs).
 
-## Architect-emitted inputs (R53 spec at commit `0277f7f`)
+### Operator decision — OQ-P3-9 RESOLVED 2026-05-19: **Path B (DEFER cluster rental)**
 
-The Architect has emitted the R53 spec artifacts. Implementer reads:
+Per PRD § Phase 3 Scope SLICE 1/2 gating moment, operator selected Path B at WAVE-GATE-Phase3-01 close:
 
-1. `coordination/specs/Q-R53-SPEC.md` — primary spec (mechanism, per-file pseudocode, ACs, anti-scope, halt conditions, Rule 1-7 enumeration, P3 ten-axis, grilling output, routing sequence).
-2. `coordination/specs/Q-R53-EMPIRICAL.sh` — Rule 1 sub-class `empirical-command-attestation` verification script (executable; runs at chore-A pre-commit; aggregate exit code = AC-R53-13/14 attestation source).
-3. `coordination/specs/Q-R53-SPEC-AUDIT.md` — Architect ceremony sidecar (Reviewer reads; Implementer may skim for context).
-
-## Architect attestation (R53)
-
-**Empirical baselines verified at session entry (NOT inherited):**
-- `git rev-parse HEAD` = `3744012b2f113d32668160e5a9816323bd7ac901` (abbrev `3744012`; R53 routing chore).
-- `node --test --test-reporter=tap test/*.test.js` summary: `# tests 361 / # pass 356 / # fail 2 / # skipped 3` (failing: `AC-R36-30: round-start-to-chore-A diff path-set ⊆ R36 allowed-set` + `AC-R36-31: chore-A-to-HEAD diff ⊆ R36 post-chore-A allowed set`; both pre-existing R36 forward-protection guards inheriting from Phase 2 close `87e372f`; NOT introduced by R53).
-- `npx tsc -p tsconfig.test.json` exit code: `0` (zero diagnostics).
-
-**Operator dispositions honored:**
-- OQ-Phase3-W1-1 Option A → single unified `engine/topology/neuron-source.ts` (no split into trainium-source.ts + inferentia-source.ts).
-- OQ-Phase3-W1-2 Option B → NO modification of `coordination/SCOPING-MEMO-v0.3.md` (§ 2.3 amendments deferred to Phase 3 SLICE-close walk).
-
-**Architect pre-prediction for Implementer attestation comparison:**
-- AC-R53-13: `npx tsc -p tsconfig.test.json` exit 0; zero diagnostics; no new diagnostics from R53 code.
-- AC-R53-14: `tests=374 / pass=369 / fail=2 / skipped=3` (baseline 361/356/2/3 + 13 new R53 runtime tests).
-- AC-R53-15: round-start-to-chore-A diff ⊆ 12-entry allowed-set (13th IFF HALT fires).
-
-## Round-scope directive (R53 — WU-Phase3-1 AWS Neuron adapter; full-tier cluster dispatch)
-
-R53 is the first Phase 3 SLICE 1 cluster pipeline round per `coordination/WAVE-PLAN-Phase3-01.md` (R52 Coordinator wave plan emission at `f6fd482`). Single-cluster full-tier round implementing the bundled AWS Trainium + AWS Inferentia adapter.
-
-**Round-start SHA:** `3744012` (chore: prepare R53 round directive; verified by Architect via `git rev-parse HEAD` at session entry).
-
-### Operator resolutions (R52 OQ-Phase3-W1 questions)
-
-- **OQ-Phase3-W1-1 RESOLVED:** Option A — single unified `engine/topology/neuron-source.ts` parser. Per Coordinator-empirical confirmation that Trainium + Inferentia2 share NeuronCore-v2 + NeuronLink-v2 architecture, single-file precedent (WU-03 NVLink, WU-04 common-mode) is the structurally correct shape. PRD:434 explicit FR-V1a filename (`trainium-source.ts`) was over-specific drafting; Coordinator's empirical reading supersedes.
-- **OQ-Phase3-W1-2 RESOLVED:** Option B — defer SCOPING-MEMO § 2.3 amendments to Phase 3 SLICE-close walk per R32 MAJOR-1 carry-forward pattern. Architect does NOT amend SCOPING-MEMO during WU-Phase3-1 spec authoring.
-
-### Primary deliverable (per Q-R53-SPEC.md § 1.1 + § 4)
-
-Implement WU-Phase3-1 AWS Neuron adapter as specified in Q-R53-SPEC.md:
-
-1. **Single unified parser** `engine/topology/neuron-source.ts` — concrete `TopologySource` implementation for AWS Neuron family (Trainium + Inferentia2). Parses `neuron-ls --json-output` JSON producing `TopologySnapshot` consumable by `engine/topology-overlay.ts` BFS layer. Three exports: `parseNeuronLsJson` (pure function) + `NeuronTopologySource` (class) + `NeuronParseOpts`/`NeuronParseResult` (types).
-2. **Synthetic fixtures** at `test/_substrate/neuron-fixture-*.json` (Tessera-original) covering Trainium 4×4 2D Torus (16 chips × 4 peers = 32 deduped edges); Inferentia 6-chip ring (6 deduped edges); sparse Trainium (4 chips, empty connected_to, partial=true).
-3. **Schema extensions** to `engine/types/verdict.ts` (vendored-with-deltas pattern; VENDORING-MANIFEST.md note refresh):
-   - `TopologyEdge.relationship` += `'neuron_link_peer'` at line 255
-   - `TopologyNode.kind` += `'trainium_chip'` + `'inferentia_chip'` at line 245
-4. **Test file** `test/q53-neuron-adapter.test.ts` (13 `test()` blocks: AC-R53-1..12 + AC-R53-15; AC-R53-13/14 are attestation-only).
-5. **Q-R53-EMPIRICAL.sh execution** at chore-A pre-commit: runs all empirical AC verification blocks; aggregate exit 0 = pass; exit 1 = HALT + DIAGNOSTIC + ESCALATE.
-
-### Tier rationale
-
-**full-tier** — Architect (DONE) + Implementer (current) + Reviewer (cold-eye after chore-B) + Memorial-Updater (round close). Per Coordinator wave-plan: A1 + A2 + A4 + A7.
-
-### Anti-scope (R53 hard limits; verified in Q-R53-SPEC.md § 3 with 12-entry ALLOWED_SET)
-
-ALLOWED modifications (12 entries; conditional 13th for `coordination/diagnostics/DIAGNOSTIC-R53-*.md` IFF HALT fires):
-
-```
-engine/topology/neuron-source.ts                          (NEW)
-engine/types/verdict.ts                                   (MOD - additive enum extensions)
-test/q53-neuron-adapter.test.ts                           (NEW)
-test/_substrate/neuron-fixture-trainium-2d-torus.json     (NEW)
-test/_substrate/neuron-fixture-inferentia-ring.json       (NEW)
-test/_substrate/neuron-fixture-sparse.json                (NEW)
-coordination/VENDORING-MANIFEST.md                        (MOD - row note refresh)
-coordination/specs/Q-R53-SPEC.md                          (committed at 0277f7f)
-coordination/specs/Q-R53-SPEC-AUDIT.md                    (committed at 0277f7f)
-coordination/specs/Q-R53-EMPIRICAL.sh                     (committed at 0277f7f)
-coordination/NEXT-ROLE.md                                 (MOD; this file)
-coordination/MEMORIAL.md                                  (MOD)
-```
-
-Excluded surfaces (from Architect spec § 3 + NEXT-ROLE.md R53 directive):
-- NO real-cluster access required or attempted.
-- NO modification of `coordination/SCOPING-MEMO-v0.3.md`.
-- NO modification of `coordination/PRD.md`.
-- NO modification of R42-R52 deliverables (frozen).
-- NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md`.
-- NO modification of `coordination/MEMORIAL-PHASE-*.md` (frozen shards).
-- NO modification of `scripts/*` or `run-pipeline.sh` (R45-R51 stable).
-- NO modification of `CLAUDE-*.md` REINFORCEMENTS sections (Memorial-Updater stage applies threshold-aware rule).
-- NO Phase 3 SLICE 2+ work.
-- NO real customer telemetry (A8/A11 inherited).
-- NO hardware-diagnostic territory (A10 inherited).
-- NO opening any GitHub PRs.
-
-### Implementer chore sequence (per established R28-R51 convention)
-
-1. **RED commit** (TDD per R23 IMPL MINOR-1): commit `test/q53-neuron-adapter.test.ts` with the prescribed `test()` blocks; test SHALL fail because `engine/topology/neuron-source.ts` doesn't exist yet. Tag commit `test(R53): RED — failing tests for Neuron adapter`.
-2. **GREEN commit**: add `engine/topology/neuron-source.ts` + 3 fixture JSON files + `engine/types/verdict.ts` enum deltas + `coordination/VENDORING-MANIFEST.md` row note refresh. All AC-R53-1..12 runtime tests pass; AC-R53-15 not yet appended.
-3. **chore-A commit**: run `coordination/specs/Q-R53-EMPIRICAL.sh`; record verbatim output in this NEXT-ROLE.md (replace the "Implementer attestation" stub below). Sweep updates to NEXT-ROLE.md + MEMORIAL.md into this commit. Anti-scope check: `git diff 3744012..chore-A-SHA --name-only` ⊆ the 12-entry ALLOWED_SET.
-4. **chore-B commit**: append AC-R53-15 runtime test (anti-scope diff) to `test/q53-neuron-adapter.test.ts` with the chore-A SHA substituted into the `<INJECTED-AT-CHORE-B>` placeholder. Test runs `git diff ${BASELINE_SHA}..${CHORE_A_SHA} --name-only` and asserts every output path ∈ ALLOWED_SET.
-
-### Halt conditions (from Q-R53-SPEC.md § 6)
-
-If any of the 8 halt conditions fires, write `coordination/diagnostics/DIAGNOSTIC-R53-<topic>.md` BEFORE chore-A; set `STATUS: ESCALATE`; append the 13th ALLOWED_SET entry to AC-R53-15 literal.
-
-Conditions: (1) Q-R53-EMPIRICAL.sh exits non-zero at chore-A; (2) Neuron SDK fixture format ambiguity; (3) D5 schema-write-conflict regression; (4) Phase 1/2 ACs regress; (5) test baseline drift other than +13; (6) JSON parsing requires modifying inherited topology-overlay.ts BFS body; (7) Neuron format requires literal beyond the three R53 additions; (8) binding-command output contradicts AC literal text (Rule 1 sub-class false-compliance prevention).
-
-### Inputs for Implementer
-
-1. `coordination/specs/Q-R53-SPEC.md` — primary spec; READ FIRST.
-2. `coordination/specs/Q-R53-EMPIRICAL.sh` — verification script.
-3. `coordination/WAVE-PLAN-Phase3-01.md` — Coordinator wave plan.
-4. `engine/topology/{slurm,k8s,nvlink}-source.ts` — parallel-class precedent files for structural reference (consult; do NOT modify).
-5. `coordination/PRD.md` § Phase 3 — FR-V1a/b + AC-P5 + AC-P7.
-6. `coordination/SPEC-AUTHORING-CHECKLIST.md` — Rule 7 enumeration directive + Rule 1 sub-class empirical-command-attestation discipline.
-7. AWS Neuron SDK public docs (architect-side verification only; Implementer does NOT need to re-fetch unless fixture format question surfaces):
-   - `https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-ls.html`
-   - `https://awsdocs-neuron.readthedocs-hosted.com/en/v2.26.0/general/nki/arch/trainium_inferentia2_arch.html`
-   - `https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/trn1-arch.html`
-
-### Pipeline invocation
-
-```bash
-cd /Users/johnwarren/concord/tessera
-./run-pipeline.sh --tier full
-```
-
-(Auto-routes Architect → Implementer → Reviewer → Memorial-Updater across fresh subprocess Claude sessions per role. Pipeline pre-checks NEXT-ROLE.md `STATUS: READY` before dispatching Implementer.)
-
-### Implementer attestation (chore-A)
-
-Per Rule 1 sub-class `empirical-command-attestation` (R46 canonical landing): all numbers below are ACTUAL output of running verification commands at chore-A SHA — NOT memorized from spec text.
-
-```
-[chore-A SHA: 2ba7bb4]
-[chore-B SHA: f0b0084]
-[Q-R53-EMPIRICAL.sh aggregate exit (chore-B): 0 — 12 PASS / 0 FAIL]
-[node --test summary at chore-B: tests=374 / pass=369 / fail=2 / skipped=3]
-[npx tsc exit at chore-A: 0 (zero diagnostics)]
-[git diff 3744012..chore-A-SHA --name-only count: 12 paths (all ⊆ ALLOWED_SET)]
-```
-
-**Verbatim Q-R53-EMPIRICAL.sh output (at chore-A):**
-```
-[R53] Empirical-AC verification — Q-R53-EMPIRICAL.sh
-
-FILE-1: engine/topology/neuron-source.ts exists
-  PASS — FILE-1
-FILE-2: test/q53-neuron-adapter.test.ts exists
-  PASS — FILE-2
-FILE-3: test/_substrate/neuron-fixture-trainium-2d-torus.json exists
-  PASS — FILE-3
-FILE-4: test/_substrate/neuron-fixture-inferentia-ring.json exists
-  PASS — FILE-4
-FILE-5: test/_substrate/neuron-fixture-sparse.json exists
-  PASS — FILE-5
-SCHEMA-1: engine/types/verdict.ts contains 'trainium_chip' literal
-  PASS — SCHEMA-1 (actual: 2 >= 1)
-SCHEMA-2: engine/types/verdict.ts contains 'inferentia_chip' literal
-  PASS — SCHEMA-2 (actual: 2 >= 1)
-SCHEMA-3: engine/types/verdict.ts contains 'neuron_link_peer' literal
-  PASS — SCHEMA-3 (actual: 2 >= 1)
-AC-R53-12: verdict.ts retains 'correlational_not_causal: true' literal (A16)
-  PASS — AC-R53-12 (actual: 2 >= 1)
-AC-R53-13: npx tsc -p tsconfig.test.json exits 0
-  PASS — AC-R53-13 (tsc exit) — actual: 0
-AC-R53-14: test summary = 374/368/3/3 (actual at chore-A; see TD-1 below)
-  PASS — AC-R53-14 (test summary) — actual: 374/368/3/3
-AC-R53-15: anti-scope ALLOWED_SET coverage (manual git diff at chore-A)
-  ADVISORY PASS (manual verification confirms 12 paths ⊆ ALLOWED_SET)
-============================================================
-Summary: 12 PASS, 0 FAIL
-```
-
-**AC-R53-13:** `npx tsc -p tsconfig.test.json` exit = 0. Zero diagnostics. No new diagnostics from R53 code. ✓
-
-**AC-R53-14 (TD-1 — structural deviation from predicted 374/369/2/3):**
-Actual at chore-A = 374/368/3/3. 3 fails:
-- AC-R36-30: pre-existing R36 forward-protection guard (inherits Phase 2 close SHA `87e372f`)
-- AC-R36-31: pre-existing R36 forward-protection guard (same root cause)
-- AC-R53-15: anti-scope test fails at chore-A because `CHORE_A_SHA = '<INJECTED-AT-CHORE-B>'` is not a valid git object; `execFileSync` throws — this is the designed chore-B workflow.
-Spec predicted 374/369/2/3, which assumed AC-R53-15 passes at chore-A. That prediction was structurally impossible — the chore-A SHA is not known until AFTER chore-A is committed. Per AC-R53-14: "if actual differs from predicted, attest actual." EMPIRICAL.sh updated to assert 374/368/3/3 at chore-A; will be updated to 374/369/2/3 at chore-B after SHA injection. No implementation defect.
-
-**AC-R53-15:** anti-scope diff verified manually:
-`git diff 3744012..<chore-A-SHA> --name-only` = 12 paths, all ⊆ 12-entry ALLOWED_SET.
-Paths: engine/topology/neuron-source.ts, engine/types/verdict.ts, test/q53-neuron-adapter.test.ts,
-test/_substrate/neuron-fixture-trainium-2d-torus.json, test/_substrate/neuron-fixture-inferentia-ring.json,
-test/_substrate/neuron-fixture-sparse.json, coordination/VENDORING-MANIFEST.md,
-coordination/specs/Q-R53-SPEC.md, coordination/specs/Q-R53-SPEC-AUDIT.md,
-coordination/specs/Q-R53-EMPIRICAL.sh, coordination/NEXT-ROLE.md, coordination/MEMORIAL.md.
-No 13th entry (no HALT fired). ✓
-
-**Spec-deviance disclosure (TD-1):** EMPIRICAL.sh AC-R53-14 block updated from predicted `374/369/2/3` to actual `374/368/3/3` per spec AC-R53-14 instruction ("attest actual"). Root cause is structural — AC-R53-15 placeholder SHA; not an implementation defect. At chore-B: EMPIRICAL.sh updated to `374/369/2/3` alongside SHA injection.
-
----
-
-## Architect-emitted routing directive (THIS FILE)
-
-## Round-scope directive (R53 — WU-Phase3-1 AWS Neuron adapter; full-tier cluster dispatch) — ORIGINAL OPERATOR DIRECTIVE (PRESERVED FOR PROVENANCE)
-
-R53 is the first Phase 3 SLICE 1 cluster pipeline round per `coordination/WAVE-PLAN-Phase3-01.md` (R52 Coordinator wave plan emission at `f6fd482`). Single-cluster full-tier round implementing the bundled AWS Trainium + AWS Inferentia adapter.
-
-**Round-start SHA:** `f6fd482` (chore(R52): Coordinator wave-plan outputs).
-
-### Operator resolutions (R52 OQ-Phase3-W1 questions)
-
-- **OQ-Phase3-W1-1 RESOLVED:** Option A — single unified `engine/topology/neuron-source.ts` parser. Per Coordinator-empirical confirmation that Trainium + Inferentia2 share NeuronCore-v2 + NeuronLink-v2 architecture, single-file precedent (WU-03 NVLink, WU-04 common-mode) is the structurally correct shape. PRD:434 explicit FR-V1a filename (`trainium-source.ts`) was over-specific drafting; Coordinator's empirical reading supersedes.
-- **OQ-Phase3-W1-2 RESOLVED:** Option B — defer SCOPING-MEMO § 2.3 amendments to Phase 3 SLICE-close walk per R32 MAJOR-1 carry-forward pattern. Architect does NOT amend SCOPING-MEMO during WU-Phase3-1 spec authoring.
+- **US-07 DEFERRED.** AC-P6 (rented-GPU DCGM L0 contract validation) marked DEFERRED at Phase 3 close (not failing; not blocking).
+- **FR-V3 (rental scaffolding) DEFERRED.** No `scripts/rent-gpu-validation.sh` or similar artifacts authored at SLICE 2.
+- **FR-V4 (live cluster topology fetch) partial.** SLICE 2 ships INTERFACE design + sparse-data resilience tests (synthetic partial-topology fixtures); real-cluster-fetch validation portion DEFERRED.
+- **WU-Phase3-2C** (real-cluster L0 contract validation) NOT included in SLICE 2 wave plan.
+- Phase 3 progresses to SLICE 3 (DS integration) without further gating on rental decision per PRD OQ-P3-4 resolution (decoupled from rental success).
 
 ### Primary deliverable
 
-Implement WU-Phase3-1 AWS Neuron adapter as specified in `coordination/WAVE-PLAN-Phase3-01.md`:
+Produce two Coordinator artifacts:
 
-1. **Single unified parser** `engine/topology/neuron-source.ts` — concrete `TopologySource` implementation for AWS Neuron family (Trainium + Inferentia2). Parses Neuron Link topology output (format per Neuron SDK public docs) producing `TopologySnapshot` consumable by `engine/topology-overlay.ts` BFS layer.
-2. **Synthetic fixtures** at `test/_substrate/neuron-fixture-*.{txt,json}` (Tessera-original) covering:
-   - Trainium 2D Torus topology (4 NeuronLinks per chip)
-   - Inferentia2 ring topology (2 NeuronLinks per chip)
-   - Sparse/partial topology graceful handling (matches WU-04 LS-4 pre-cleared pattern)
-3. **Schema extensions** to `engine/types/verdict.ts` (vendored-with-deltas pattern; AT_PIN_FILES + VENDORING-MANIFEST.md maintenance):
-   - `TopologyEdge.relationship` += `'neuron_link_peer'`
-   - `TopologyNode.kind` += `'trainium_chip'` + `'inferentia_chip'` (distinct per Coordinator wave-plan; Trainium and Inferentia differ in topology shape despite shared interconnect family)
-4. **Test file** `test/q53-neuron-adapter.test.ts` covering AC enumeration:
-   - Well-formed Neuron topology fixture → expected `TopologySnapshot` structure
-   - Edge-relationship literal correctness (`'neuron_link_peer'` only)
-   - Node-kind literal correctness (both `'trainium_chip'` and `'inferentia_chip'`)
-   - `TopologySource` interface conformance (`fetchSnapshot(ctx?)` + `snapshotHash(s)` delegates to `computeSnapshotHash`)
-   - Sparse-data graceful degradation
-   - `correlational_not_causal: true` invariant preserved at `TopologyCandidate` wire boundary (A16 defensive)
-   - Phase 1 + Phase 2 ACs (AC-P1 through AC-P4) hold unchanged (AC-P7 cross-cutting)
-5. **PRD/spec consistency** — Architect notes the PRD:434 `trainium-source.ts` mention is superseded by operator OQ-Phase3-W1-1 Option A resolution. No PRD amendment in this round (OQ-Phase3-W1-2 Option B defers).
+1. **`coordination/WAVE-GATE-Phase3-01.md`** per `templates/WAVE-GATE-TEMPLATE.md`:
+   - Wave 1 close attestation (WU-Phase3-1 MERGE-READY per Reviewer)
+   - `scripts/verify-wave-aggregate.sh WAVE-Phase3-01` execution + result
+   - Per R50 tier-aware consolidation Reviewer logic: WU-Phase3-1 ran full-tier with cluster-internal Reviewer (3 MINOR + 2 OBS findings already audited) → consolidation Reviewer is OPTIONAL; Coordinator decides invoke-or-not based on cross-cluster integration concerns (none, since single-cluster wave)
+   - Operator decision Path B recorded (OQ-P3-9 RESOLVED)
+   - Pre-flag forward-flags for SLICE 2 work
+2. **`coordination/WAVE-PLAN-Phase3-02.md`** per `templates/WAVE-PLAN-TEMPLATE.md` for SLICE 2:
+   - WU-Phase3-2A: Google TPU / ICI adapter (full-tier; parallel-class with Neuron; synthetic fixtures from JAX + TPU v4/v5 papers)
+   - WU-Phase3-2B: Live topology fetch INTERFACE design — extends Slurm/K8s/NVLink/Neuron/TPU adapters with `TopologySource.fetchSnapshot(ctx)` interface + sparse-data resilience tests (no real-cluster validation; Path B)
+   - WU-Phase3-2C: NOT INCLUDED (Path B deferral)
+   - DAG construction via D1-D5 tests; 2A + 2B dependency analysis (2A introduces `'tpu_ici_peer'` literal + `'tpu_shard'` kind; 2B extends interface across all 6 adapter sources — D1 write-conflict risk warrants single-cluster bundle OR sequential dispatch decision per Coordinator)
+   - Wave sequencing
+   - WAVE-GATE-Phase3-02 criteria
 
 ### Tier rationale
 
-**full-tier** — Architect (spec authoring) + Implementer (production code + tests + chore-A) + Reviewer (cold-eye) + Memorial-Updater (close). Per Coordinator wave-plan: A1 (new vendor dependency: AWS Neuron) + A2 (first-vendor Neuron pattern; AWS first per OQ-P3-1 RESOLVED) + A4 (schema extensions to `engine/types/verdict.ts`) + A7 (parallel-class with WU-01/02/03 Slurm/K8s/NVLink — pattern leverage).
+**coordinator-wave-gate** — `--coordinator --wave-gate WAVE-Phase3-01` mode per pipeline. Produces wave-gate close + next wave plan; cluster dispatch happens in R55+ rounds per the new plan.
 
-### Anti-scope (R53 hard limits)
+### Anti-scope (R54 hard limits)
 
-- NO real-cluster access required or attempted (Phase 3 SLICE 1 is synthetic-fixture-based per Phase 3 PRD; US-07 path A/B gated at WAVE-GATE-Phase3-01 close).
-- NO modification of `coordination/SCOPING-MEMO-v0.3.md` (OQ-Phase3-W1-2 Option B deferral).
-- NO modification of `coordination/PRD.md` Phase 3 sub-section (Architect cites it; doesn't amend).
-- NO modification of R42-R52 deliverables (frozen historical baseline). Specifically: no modification of R52 Coordinator artifacts (WAVE-PLAN-Phase3-01.md, COORDINATOR-MEMORIAL.md).
-- NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Rule 7 anchor-canonical-landing-deferred).
+- NO modification of `engine/*`, `test/*`, `tools/*` files (Coordinator role does not implement code).
+- NO modification of R53 deliverables (`engine/topology/neuron-source.ts`, `test/q53-neuron-adapter.test.ts`, `test/_substrate/neuron-fixture-*.json`, `engine/types/verdict.ts` deltas, R53 spec/audit/empirical files) — frozen historical baseline.
+- NO modification of `CLAUDE-*.md` files.
+- NO modification of `~/.claude/CROSS-PROJECT-MEMORIAL.md`.
 - NO modification of `coordination/MEMORIAL-PHASE-*.md` (frozen shards).
-- NO modification of `scripts/*` (R45-R51 deliverables stable).
-- NO modification of `run-pipeline.sh` (R49-R51 deliverables stable).
-- NO modification of `CLAUDE-*.md` files in REINFORCEMENTS sections (R51 consolidation + re-accretion guard preserved). MU stage applies the new threshold-aware rule.
-- NO Phase 3 SLICE 2+ work (TPU adapter, live cluster fetch, etc.) — strictly SLICE 1.
-- NO real customer telemetry (A8/A11 inherited).
-- NO hardware-diagnostic territory (A10 inherited; live DCGM gated to SLICE 2 conditional).
-- NO opening any GitHub PRs.
+- NO modification of `coordination/PRD.md` (Phase 3 scope already authored; Coordinator reads, doesn't amend).
+- NO modification of `coordination/SCOPING-MEMO-v0.3.md` (OQ-Phase3-W1-2 Option B deferral preserved; SLICE-close walk pattern).
+- NO modification of `coordination/WAVE-PLAN-Phase3-01.md` (R52 deliverable; frozen).
+- NO modification of `scripts/*` or `run-pipeline.sh`.
+- NO cluster dispatch (Coordinator produces wave-gate + next plan; dispatch happens R55+).
+- NO real-cluster work (Path B deferral honored).
+- NO opening GitHub PRs.
 
 ALLOWED modifications:
-- `engine/topology/neuron-source.ts` (NEW — primary deliverable per Option A)
-- `engine/types/verdict.ts` (modify — vendored-with-deltas; add `'neuron_link_peer'` + `'trainium_chip'` + `'inferentia_chip'`)
-- `test/q53-neuron-adapter.test.ts` (NEW — Implementer authors per Architect spec)
-- `test/_substrate/neuron-fixture-*.{txt,json}` (NEW — synthetic Neuron Link topology fixtures)
-- `coordination/VENDORING-MANIFEST.md` (modify if vendored-file deltas added to `engine/types/verdict.ts`)
-- `coordination/specs/Q-R53-SPEC.md` (NEW — Architect-authored spec)
-- `coordination/specs/Q-R53-SPEC-AUDIT.md` (NEW — Architect ceremony sidecar)
-- `coordination/specs/Q-R53-EMPIRICAL.sh` (NEW — Rule 1 sub-class self-application per R46/R51)
-- `coordination/reviews/REVIEWER-REPORT-R53.md` (Reviewer)
-- `coordination/diagnostics/DIAGNOSTIC-R53-*.md` (conditional; only if HALT fires)
-- `coordination/MEMORIAL.md` (Implementer + Reviewer + MU appends)
-- `coordination/NEXT-ROLE.md` (this file; pipeline updates)
+- `coordination/WAVE-GATE-Phase3-01.md` (NEW — primary deliverable 1)
+- `coordination/WAVE-PLAN-Phase3-02.md` (NEW — primary deliverable 2)
+- `coordination/CLUSTER-HANDOFF-Phase3-2A-2B.md` (NEW conditional — only if 2A/2B sub-WUs require explicit handoff per D-test analysis)
+- `coordination/COORDINATOR-MEMORIAL.md` (append)
+- `coordination/MEMORIAL.md` (Coordinator-section append at round close)
+- `coordination/NEXT-ROLE.md` (this file)
 
 ### Apply all 7 cross-project rules UPFRONT
 
-(Per `coordination/SPEC-AUTHORING-CHECKLIST.md` § Rule 7 self-application gate. Canonical short names.)
-
-- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — Q-R53-EMPIRICAL.sh applies R47 Tightenings 1-4 + R48 corrections + R49 conventions to all empirical claims (test counts, file existence, schema extension verification). No memorized values from spec text.
-- **Rule 2 (`branch-binding-coverage-gate`):** ACTIVE GATE — Architect spec must enumerate Neuron Link parser guards/defaults/fallbacks; Acknowledged-gap section documents any unbound branches with non-load-bearing rationale.
-- **Rule 3 (`implementer-spec-test-assertion-coverage`):** ACTIVE GATE — for each AC Then-clause field, test file uses discriminating assertions (strictEqual / deepStrictEqual / regex with line anchoring; not broad substring matches per R30 MINOR-1).
-- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — Architect ALLOWED_SET in Q-R53-SPEC.md at spec-emit time; must include the ALLOWED list above + standard carve-outs (REVIEWER-REPORT + DIAGNOSTIC paths).
-- **Rule 5 (`rule-derivation-without-self-application`):** N/A — no new rule derived at R53.
-- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if Neuron SDK doc-format ambiguity surfaces during implementation (e.g., fixture format unclear), HALT + DIAGNOSTIC + ESCALATE.
-- **Rule 7 (`derived-rule-propagation-mechanism-required`):** ACTIVE GATE per existing surfaces — SPEC-AUTHORING-CHECKLIST.md § Rule 7 gate applies at Architect spec emit; pre-commit-rule-sweep.sh at chore-A; wave-aggregate verifier at WAVE-GATE-Phase3-01.
+- **Rule 1 (`false-compliance-attestation`):** ACTIVE GATE — Coordinator's WAVE-GATE attestation cites specific R53 Reviewer findings (counts; SHAs; AC PASS counts) via empirical re-derivation. SLICE 2 wave plan cites PRD lines + JAX/TPU SDK URLs verbatim with retrieval dates.
+- **Rule 2 (`branch-binding-coverage-gate`):** N/A — Coordinator stage.
+- **Rule 3 (`implementer-spec-test-assertion-coverage`):** N/A — Coordinator stage.
+- **Rule 4 (`anti-scope-allowed-set-forward-coverage`):** ACTIVE GATE — ALLOWED_SET above; no invented files outside list.
+- **Rule 5 (`rule-derivation-without-self-application`):** N/A — no new rule derived.
+- **Rule 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`):** ACTIVE GATE — if WU-Phase3-2A + 2B D-test analysis surfaces an unexpected dependency edge (e.g., 2B's interface extension to 6 sources structurally serializes with 2A's new TPU source addition), HALT + DIAGNOSTIC.
+- **Rule 7 (`derived-rule-propagation-mechanism-required`):** N/A as derivation; existing surfaces (R44 SPEC-AUTHORING-CHECKLIST.md + R45 pre-commit-rule-sweep + R50 wave-aggregate verifier) apply at downstream Architect dispatch.
 
 ### Halt conditions
 
-1. **Q-R53-EMPIRICAL.sh exits non-zero at chore-A:** HALT + DIAGNOSTIC.
-2. **Neuron SDK fixture format ambiguity:** if public docs don't clearly specify the topology output format the adapter parses, HALT + DIAGNOSTIC.
-3. **D5 schema-write-conflict regression:** if Architect spec inadvertently re-introduces split-adapter pattern (creating Trainium + Inferentia source files that both extend `engine/types/verdict.ts`), HALT + DIAGNOSTIC per OQ-Phase3-W1-1 Option A resolution.
-4. **Phase 1/2 ACs regress:** if test baseline changes any of AC-P1 through AC-P4 properties (Ville bound; warm-start; freeze-hook; topology-attribution), HALT + DIAGNOSTIC per AC-P7 cross-cutting.
-5. **Test baseline drift other than R53-additions:** expected baseline shift = R51 baseline + R53 test count delta (Architect specifies expected delta in Q-R53-SPEC.md). Any unexpected shift → HALT + DIAGNOSTIC.
+1. **`scripts/verify-wave-aggregate.sh WAVE-Phase3-01` exits non-zero:** HALT + DIAGNOSTIC. Wave-aggregate verifier surfaces inter-cluster contract drift, aggregate scope creep, or MEMORIAL semantic-conflict — operator decides resolution.
+2. **R53 Reviewer findings include any CRITICAL on re-read:** Coordinator re-reads `coordination/reviews/REVIEWER-REPORT-R53.md` at wave-gate close; if any CRITICAL surfaces, HALT + DIAGNOSTIC + ESCALATE (would change wave-gate close routing).
+3. **D-test edge surfaces unexpected SLICE 2 cross-WU dependency:** if WU-Phase3-2A (TPU) and WU-Phase3-2B (interface extension across all 6 sources) have D1-write-conflict on `engine/types/verdict.ts` (both extending enum) OR D2-AC-reference (2B's AC references 2A's TPU source), HALT + DIAGNOSTIC; Coordinator decides bundle-or-split.
+4. **JAX or TPU public docs unavailable / topology spec ambiguous:** if Coordinator cannot determine via public docs how to construct synthetic TPU ICI fixtures from JAX topology code + TPU v4/v5 papers, HALT + DIAGNOSTIC; operator decides defer TPU adapter to a later SLICE.
 
-### Inputs for Architect
+### Inputs for Coordinator
 
-1. `coordination/WAVE-PLAN-Phase3-01.md` — Coordinator wave plan; READ FIRST as primary input
-2. `coordination/PRD.md` § Phase 3 Scope (esp. FR-V1a/b + AC-P5 + SLICE 1 sub-section)
-3. `coordination/SCOPING-MEMO-v0.3.md` § 2.3 Vendor fungibility table (parallel-class pattern authorization)
-4. `engine/topology-overlay.ts` — inherited BFS layer the adapter feeds into
-5. `engine/types/verdict.ts` — schema target for delta extensions
-6. `engine/topology/slurm-source.ts` + `engine/topology/k8s-source.ts` + `engine/topology/nvlink-source.ts` — parallel-class adapter precedent
-7. `coordination/specs/Q-R28-SPEC.md` (Slurm adapter spec) + `Q-R29-SPEC.md` (K8s) + `Q-R30-SPEC.md` (NVLink) — spec authoring pattern reference
-8. Neuron SDK public docs (Architect reads + cites URLs in Q-R53-SPEC.md):
-   - `https://awsdocs-neuron.readthedocs-hosted.com/en/v2.26.0/general/nki/arch/trainium_inferentia2_arch.html`
-   - `https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/trn1-arch.html`
-9. `coordination/COORDINATOR-MEMORIAL.md` — R52 Coordinator entries
-10. `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` § 1.3 + § 1.4 (AWS Trainium + Inferentia candidate framing)
+1. `coordination/WAVE-PLAN-Phase3-01.md` — R52 wave plan (Wave 1 = WU-Phase3-1 single-cluster bundled)
+2. `coordination/reviews/REVIEWER-REPORT-R53.md` — R53 cold-eye Reviewer report (15 ACs PASS; 3 MINOR + 2 OBS; MERGE-READY)
+3. `coordination/MEMORIAL.md` § R53 entries (Architect + Implementer + Reviewer + MU subsections)
+4. `coordination/specs/Q-R53-SPEC.md` + `Q-R53-SPEC-AUDIT.md` + `Q-R53-EMPIRICAL.sh` — R53 spec triad
+5. `engine/topology/neuron-source.ts` + `test/q53-neuron-adapter.test.ts` + `test/_substrate/neuron-fixture-*.json` — R53 deliverables (Coordinator reads for wave-gate attestation, doesn't modify)
+6. `engine/types/verdict.ts` — schema extensions at R53 (Coordinator reads for SLICE 2 contract verification)
+7. `coordination/PRD.md` § Phase 3 Scope (esp. SLICE 2 sub-section + FR-V2 + FR-V4)
+8. `coordination/SCOPING-MEMO-v0.3.md` § 2.3 Vendor fungibility table (TPU adapter row reference)
+9. `CLAUDE-COORDINATOR.md` (full)
+10. `templates/WAVE-GATE-TEMPLATE.md` + `templates/WAVE-PLAN-TEMPLATE.md`
+11. `scripts/verify-wave-aggregate.sh` (R50; invoke at wave-gate close)
+12. Public JAX topology source code + TPU v4/v5 architectural papers (Coordinator reads + cites URLs in WAVE-PLAN-Phase3-02.md for synthetic fixture design)
+13. `coordination/COORDINATOR-MEMORIAL.md` — R52 + R54 Coordinator entries
 
 ### Pipeline invocation
 
 ```bash
 cd /Users/johnwarren/concord/tessera
-./run-pipeline.sh --tier full
+./run-pipeline.sh --round R54 --coordinator --wave-gate WAVE-Phase3-01
 ```
 
-(Per R49 pipeline-mandatory discipline; full-tier auto-routes Architect → Implementer → Reviewer → Memorial-Updater across fresh subprocess Claude sessions per role. R52 Coordinator wave plan dispatch recommendation.)
+(Per pipeline help: `--wave-gate WAVE-NN` is the Coordinator wave-gate close flow; combined with `--coordinator`. Pipeline overrides tier-derived roles; runs wave-aggregate verifier + tier-aware consolidation Reviewer logic + emits wave-gate doc + next wave plan.)
 
 ---
 
-## Operator-decision flags (carried forward; updated post-R52 Coordinator close)
+## Operator-decision flags (updated post-R53 close)
 
 1. R45 CRITICAL routing accept-vs-escalate (separately tracked).
 2. Rule 7 Surface (c) HARD-GATE candidate (9+ tessera instances; below cross-project 2nd-project threshold).
 3. Cross-project canonical landings (8+ items gated on 2nd-project occurrence).
-4. Anchor PR backflog scheduling (R11-R52 contributions).
-5. **Phase 3 IN PROGRESS at SLICE 1 — R53 first cluster pipeline round.**
+4. Anchor PR backflog scheduling (R11-R53 contributions).
+5. **Phase 3 SLICE 1 substantively complete at R53 close.** WAVE-GATE-Phase3-01 (R54) close + SLICE 2 dispatch (R55+) are next.
 6. R49 MAJOR-1 hybrid-mandate-vs-full-tier mismatch — candidate for future round.
 7. R50 MAJOR-1 + 6 MINOR findings — candidate for future round.
-8. **OQ-P3-9 gating moment at WAVE-GATE-Phase3-01 close** — operator decision Path A vs Path B on cluster rental for US-07.
-9. **OQ-P3-11 SCOPING-MEMO v0.4** — default to extending v0.3; escalate if SLICE 1 Reviewer flags scope-creep.
-10. OQ-Phase3-W1-1 RESOLVED 2026-05-19 (Option A single neuron-source.ts).
-11. OQ-Phase3-W1-2 RESOLVED 2026-05-19 (Option B defer SCOPING-MEMO § 2.3 amendments to SLICE-close walk).
+8. R53 3 MINOR + 2 OBS findings — Memorial-Updater appends documented; standalone fix-round candidate IF operator chooses.
+9. **OQ-P3-9 RESOLVED 2026-05-19: Path B (DEFER cluster rental).** AC-P6 + FR-V3 + WU-Phase3-2C all marked DEFERRED at Phase 3 close.
+10. OQ-P3-11 SCOPING-MEMO v0.4 carry-forward — default extend v0.3 at SLICE-close walks.
+11. OQ-Phase3-W1-1 RESOLVED 2026-05-19 (Option A single neuron-source.ts).
+12. OQ-Phase3-W1-2 RESOLVED 2026-05-19 (Option B defer SCOPING-MEMO § 2.3 amendments to SLICE-close walk).
