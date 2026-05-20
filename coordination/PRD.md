@@ -406,6 +406,110 @@ Full A1-A17 enumeration in SCOPING-MEMO-v0.3.md § 2.1 / § 2.2 / § 2.3. Headli
 - Phase 2 close: HardwareTopologySource concrete impl; event-feed ingestion; PR-F6 + PR-F7 pair-review evidence matrices; Addition #26 D4 RECONFIRMED.
 - Project close: Tessera v1 published to GitHub (`github.com/johnpatrickwarren-oss/tessera`); engine extracted to shared npm package (vendor-first commitment realized).
 
+---
+
+## Phase 3 Scope (added 2026-05-19 per operator-led PRD authoring; post-R51 close)
+
+Phase 3 extends Tessera from Phase 2's synthetic-substrate completeness toward vendor-fungible deployment + real-cluster validation. Per operator answers to OQ-P3-1 through OQ-P3-6 (recorded in `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` § 6):
+
+- **Vendor sequencing** (OQ-P3-1): AWS Trainium / Neuron Link FIRST — publicly-available Neuron SDK documentation + EC2 metadata + topology samples are materially better than Google TPU ICI public data. Google TPU adapter follows once the Trainium parallel-class pattern is proven.
+- **Real-cluster validation environment** (OQ-P3-3): operator does not own a GPU cluster. **Real-cluster access is CONDITIONAL, not mandatory** — Phase 3 SLICE 1's substantive deliverables (vendor adapters against synthetic fixtures) proceed without any cluster access. A gating moment between SLICE 1 close and SLICE 2 dispatch evaluates whether to rent GPU instances for the live-DCGM L0 contract validation; if rental is declined, the corresponding ACs (AC-P6; live-cluster-fetch validation) become DEFERRED rather than blocking Phase 3 progress.
+- **DeploySignal integration sequencing** (OQ-P3-4): SLICE 3 (sequential after SLICE 2 close). No fallback path needed — DS integration is decoupled from real-cluster-rental success.
+- **Methodology + production parallel** (OQ-P3-6): no separate methodology-stabilization chain. Methodology updates fold into Phase 3 SLICE rounds when production work surfaces a gap.
+
+### Phase 3 user stories
+
+US-05: As an AWS-stack AI infrastructure operator, I want per-shard observation on Trainium / Inferentia chip arrays (Neuron Link topology) so that Tessera coverage extends to AWS-native silicon without requiring NVIDIA-specific topology assumptions.
+
+US-06: As a Google-stack AI infrastructure operator (post-AWS), I want per-shard observation on TPU pods (ICI topology) so that Tessera coverage extends to Google Cloud TPU workloads. (Sequenced after US-05 per vendor-sequencing decision.)
+
+US-07 (CONDITIONAL — operator-gated at SLICE 1/2 boundary): As Tessera architect (John), I want optional real-cluster DCGM validation via rented GPU instances (vast.ai / Lambda Labs / RunPod or equivalent) so that Tessera's L0 contract invariants (missed-scrape catchup; 32-bit wraparound; reset-vs-wrap distinction) can be validated against live DCGM scrapes when budget + value justify, without committing to enterprise GPU cluster ownership. If operator declines rental at the SLICE 1/2 gating moment, US-07 is DEFERRED (not blocking; the Trainium / Inferentia / TPU adapters all ship against synthetic fixtures from public-docs sources independently of US-07).
+
+US-08 (sequenced; Phase 3 SLICE 3+): As a DeploySignal operator, I want bi-directional integration (Tessera per-shard observations → DS correlation layer; DS event feed → Tessera freeze-hook) so that fleet event-conditional attribution loops close against real deploy events rather than synthetic VerdictGroups.
+
+### Phase 3 functional requirements
+
+| ID | Requirement | Traces to | SLICE |
+|---|---|---|---|
+| FR-V1a | AWS Trainium / Neuron Link adapter — `engine/topology/trainium-source.ts` parses Neuron SDK topology output + emits `TopologySnapshot`; synthetic fixtures from Neuron SDK + AWS docs | US-05 | SLICE 1 |
+| FR-V1b | AWS Inferentia adapter — bundles with Trainium if Neuron Link topology is shared across both chip families; OR independent module if Inferentia topology differs | US-05 | SLICE 1 |
+| FR-V2 | Google TPU / ICI adapter — `engine/topology/tpu-source.ts` parses TPU pod topology; synthetic fixtures from JAX topology code + TPU v4/v5 papers | US-06 | SLICE 2 |
+| FR-V3 (CONDITIONAL) | Real-cluster DCGM validation scaffolding — rental-provider scripts (vast.ai / Lambda Labs / RunPod or equivalent); DCGM smoke test against L0 contract invariants. Gated on operator decision at SLICE 1/2 boundary; deferred if operator declines rental | US-07 | SLICE 2 (conditional) |
+| FR-V4 | Live cluster topology fetch — `TopologySource.fetchSnapshot(ctx)` interface design + sparse-data tests for Slurm / K8s / NVLink / Trainium / TPU adapters. Interface-design and sparse-data resilience are unconditional; real-cluster-validation of the fetch behavior is gated on US-07 | US-07 (validation portion) | SLICE 2 (interface); SLICE 2C (validation, conditional) |
+| FR-D1 | DeploySignal npm engine extract — `@johnpatrickwarren-oss/deploysignal-engine` package; both Tessera + DS consume same package version (eliminates vendoring drift R-E6) | (project-close commitment) | SLICE 3 |
+| FR-D2 | DS-integration: Tessera → DS — per-shard observations feed DS correlation layer (VerdictGroup → deploy-event context) | US-08 | SLICE 3 |
+| FR-D3 | DS-integration: DS → Tessera — DS event feed gates the Phase 2 freeze-hook against real deploy events (replaces synthetic VerdictGroups in event-conditional attribution) | US-08 | SLICE 3 |
+
+### Phase 3 acceptance criteria
+
+| ID | Given / When / Then | Traces to |
+|---|---|---|
+| AC-P5 | Given an AWS Trainium synthetic topology fixture (constructed from public Neuron SDK + AWS docs), when `engine/topology/trainium-source.ts` runs, then `TopologySnapshot` produced is consumable by inherited `engine/topology-overlay.ts` BFS layer with `neuron_link_peer` edge relationship literal + `trainium_chip` node kind literal. | FR-V1a |
+| AC-P6 (CONDITIONAL on US-07 activation) | Given a rented GPU instance (vast.ai OR Lambda Labs OR RunPod OR equivalent operator-controlled rental, multi-GPU node, DCGM accessible), when L0 contract smoke test runs against live DCGM scrapes, then missed-scrape catchup + 32-bit wraparound + reset-vs-wrap-distinction invariants hold against real-hardware counter behavior (validated empirically; ≥1 successful validation pass). If operator declined rental at SLICE 1/2 gating moment, AC-P6 is DEFERRED — not failing, not blocking Phase 3 close. | FR-V3 |
+| AC-P7 | Given Phase 3 SLICE 1 close, when full Tessera fleet runs in synthetic-substrate mode WITH the AWS Trainium adapter activated for a synthetic AWS Trainium fleet (alongside the inherited NVIDIA-stack support), then all Phase 1 + Phase 2 ACs (AC-P1 through AC-P4) hold unchanged AND the AWS Trainium fleet exhibits expected per-shard observation behavior with the parallel-class topology adapter. | FR-V1a + cross-cutting |
+| AC-P8 | Given the engine extracted to `@johnpatrickwarren-oss/deploysignal-engine` npm package, when both Tessera + DeploySignal repos consume the same version, then vendoring-drift R-E6 risk row is structurally eliminated (no per-file SHA-pin re-vendoring; package-version pin replaces). | FR-D1 |
+
+### Phase 3 anti-scope (extends Phase 1/2)
+
+All A1-A17 anti-scope items remain (inherited from SCOPING-MEMO-v0.3.md § 2.1). Phase 3 specific adjustments:
+
+- **A10 carve-out (Phase 2 amendment preserved; Phase 3 extends):** L0 contract for Tessera (measurement-domain preprocessing) is in scope; Phase 3 extends to LIVE DCGM ingestion at real-cluster validation. Hardware-diagnostic territory (root-causing GPU failures, per-GPU fault attribution) remains anti-scope; Tessera observes counter behavior, does not diagnose hardware.
+- **A8/A11 (no real customer telemetry):** Phase 3 introduces rented GPU validation environments. NOT customer telemetry; OPERATOR-rented infrastructure under operator control. Synthetic fleet-load on rented instance is permitted; real customer telemetry remains anti-scope.
+- **NEW Phase 3 anti-scope:** No real-cluster integration that requires customer access to private clusters (per A8/A11). Only operator-controlled rental environments OR public-cloud trial accounts under operator account.
+- **NEW Phase 3 anti-scope:** No vendor-locked code paths. AWS Trainium adapter MUST use the same `TopologySource` interface as Slurm/K8s/NVLink adapters; no AWS-SDK-internal hooks that prevent vendor-neutral testing. Same constraint applies to TPU adapter.
+
+### Phase 3 SLICE structure (preliminary)
+
+**SLICE 1 — Vendor expansion (AWS), synthetic-fixture-based (parallel-cluster wave; NO cluster access required)**
+
+- WU-Phase3-1A: AWS Trainium adapter (`engine/topology/trainium-source.ts` + synthetic fixtures from Neuron SDK + AWS public docs). Parallel-class pattern matching Slurm/K8s/NVLink adapters. Tier: full. **No real cluster needed.**
+- WU-Phase3-1B: AWS Inferentia adapter. Default expectation per OQ-P3-10: bundled with 1A if Neuron Link topology shared across both chip families (Architect confirms or splits at SLICE 1 dispatch). Tier: full. **No real cluster needed.**
+- Coordinator wave plan applies (per CLAUDE-COORDINATOR.md). R47-R51 methodology framework (pipeline-mandatory; cold-eye Reviewer auto-fires; hybrid Reviewer at close-walk; wave-aggregate verifier; tier-aware consolidation Reviewer at wave-gate) is operational.
+- WAVE-GATE-Phase3-01 closure: aggregate ALLOWED_SET union check via `scripts/verify-wave-aggregate.sh`; tier-aware consolidation Reviewer per R50 design (all sub-WUs full-tier; consolidation Reviewer OPTIONAL).
+
+**Gating moment (SLICE 1 close → SLICE 2 dispatch):** operator decides whether to rent a GPU instance for the conditional US-07 validation path. Two paths forward:
+
+- **Path A (US-07 ACTIVATED — operator rents):** SLICE 2 includes WU-Phase3-2C (real-cluster L0 contract validation; AC-P6 evaluated empirically).
+- **Path B (US-07 DEFERRED — operator declines):** SLICE 2 proceeds without 2C; AC-P6 marked DEFERRED at Phase 3 close (not failing); FR-V4 ships interface + sparse-data resilience only (no live-cluster validation portion).
+
+The Trainium / Inferentia adapters (SLICE 1) and Google TPU adapter (SLICE 2 2A) are independent of this gating decision — they ship in both paths.
+
+**SLICE 2 — Vendor expansion (Google) + live topology fetch interface (sequential after SLICE 1; partially conditional)**
+
+- WU-Phase3-2A: Google TPU / ICI adapter (`engine/topology/tpu-source.ts` + synthetic fixtures from JAX + TPU papers). Parallel-class pattern; uses lessons from SLICE 1 WU-1A. Tier: full. **No real cluster needed.**
+- WU-Phase3-2B: Live topology fetch INTERFACE design. Extend Slurm/K8s/NVLink/Trainium/TPU adapters with `TopologySource.fetchSnapshot(ctx)` interface + sparse-data resilience tests (using synthetic partial-topology fixtures). Tier: full. **No real cluster needed for interface portion.**
+- WU-Phase3-2C (CONDITIONAL — Path A only; gated on operator rental decision at SLICE 1/2 boundary): real-cluster L0 contract validation + real-cluster topology fetch validation. Rental-provider script (vast.ai-first per provider analysis); DCGM smoke test against L0 contract invariants; counter-behavior empirical evidence at real DCGM scale (missed-scrape catchup; 32-bit wraparound; reset-vs-wrap). Tier: full.
+
+**SLICE 3 — DeploySignal integration (sequential after SLICE 2)**
+
+- WU-Phase3-3A: Engine npm package extract (`@johnpatrickwarren-oss/deploysignal-engine`). Vendoring-drift R-E6 structural resolution. Tier: full (architectural restructure).
+- WU-Phase3-3B: Bi-directional DS integration (Tessera → DS feeds correlation layer; DS → Tessera event feed). Tier: full.
+- WU-Phase3-3C: Real-deploy-event freeze-hook (replaces synthetic VerdictGroups in event-conditional attribution). Tier: full.
+
+### Phase 3 open questions
+
+Carried forward from PHASE-3-CANDIDATES-PRELIMINARY.md § 8 (resolution status updated 2026-05-19) + new Phase 3-specific questions:
+
+- **OQ-P3-9 (NEW; operator-decided at SLICE 1/2 gating moment):** Will operator rent a GPU instance for US-07 DCGM validation? Decision deferred until SLICE 1 close. Path A (rent) → SLICE 2 includes WU-Phase3-2C real-cluster validation. Path B (defer) → AC-P6 DEFERRED; SLICE 2 ships interface portions of FR-V4 only. Either path lets Phase 3 progress to SLICE 3 (DS integration) without blocking.
+- **OQ-P3-10 (NEW):** Inferentia adapter — bundle with Trainium (SLICE 1 1A+1B combined) or sequential within SLICE 1? Architect decision at SLICE 1 dispatch once Neuron Link topology spec for both chip families is read. Default expectation: bundled, since Neuron Link is reportedly shared.
+- **OQ-P3-11 (NEW):** SCOPING-MEMO v0.4 needed? Phase 3 introduces scope items (vendor expansion AWS + Google; live cluster integration; DS bi-directional) that materially extend SCOPING-MEMO v0.3. If the Reviewer at SLICE 1 dispatch flags this as scope-creep beyond v0.3 amendments, operator authorizes v0.4 authoring cycle. Suggested default: extend v0.3 with Phase 3 amendments rather than v0.4 unless Reviewer escalates.
+- OQ-P3-1 → RESOLVED 2026-05-19 (operator: AWS Trainium first per better public data; Google TPU second).
+- OQ-P3-2 → RESOLVED 2026-05-19 (operator: no Google Cloud access; relies on public data for synthetic fixture).
+- OQ-P3-3 → REFRAMED as CONDITIONAL — rental is optional path A; tracked at SLICE 1/2 gating moment in OQ-P3-9 above. Phase 3 substantive progress does NOT require it (Trainium/Inferentia/TPU adapters ship from synthetic fixtures).
+- OQ-P3-4 → RESOLVED 2026-05-19 (DS integration in SLICE 3, sequential after SLICE 2; no fallback path needed — DS integration is decoupled from real-cluster rental success).
+- OQ-P3-5 → RESOLVED at R41 (Rule 7 canonical landing confirmed).
+- OQ-P3-6 → RESOLVED 2026-05-19 (parallel methodology + production scope).
+
+### Phase 3 success metrics
+
+- **SLICE 1 close:** AWS Trainium adapter ships against synthetic Neuron Link fixtures; AWS Inferentia adapter ships (bundled with Trainium per default per OQ-P3-10); AC-P5 met; Phase 1/2 ACs unchanged. No real cluster needed.
+- **Gating-moment outcome:** Path A or Path B selected per OQ-P3-9 operator decision.
+- **SLICE 2 close:** Google TPU adapter ships against synthetic ICI fixtures (AC-P5 holds for TPU); `TopologySource.fetchSnapshot(ctx)` interface + sparse-data resilience operational across all 6 adapters (Slurm + K8s + NVLink + Trainium + Inferentia + TPU); IF Path A: AC-P6 validated against rented cluster (real DCGM scrapes confirm L0 contract invariants); IF Path B: AC-P6 marked DEFERRED.
+- **SLICE 3 close:** Engine extracted to npm package; bi-directional DS integration operational; real-deploy-event freeze-hook validated; project-close success metric (npm package published) achieved.
+- **Project close:** Tessera v1 published to `github.com/johnpatrickwarren-oss/tessera`; vendor coverage AWS Trainium + AWS Inferentia + Google TPU + NVIDIA NVLink + Slurm + K8s; real-cluster validation precedent set; engine npm package published.
+
+---
+
 ## Open questions
 
 Six architectural decision-points captured in `ARCHITECT-REPLY-v0.3-PRE-DISPOSITION.md`:
@@ -419,6 +523,7 @@ Six architectural decision-points captured in `ARCHITECT-REPLY-v0.3-PRE-DISPOSIT
 |------|--------|
 | 2026-05-15 | Initial Tessera scoping cycle (v0.1 → Reviewer → v0.2 → project reframe → v0.3) |
 | 2026-05-16 | Q1 spec emitted + Reviewer-amended (v0.2); Mode 2 retrofit (PRD.md / NEXT-ROLE.md / MEMORIAL.md / pipeline scripts) |
+| 2026-05-19 | Phase 3 PRD authored post-R51 close per operator-led OQ-P3-1 through OQ-P3-6 resolution. Adds US-05 (AWS Trainium); US-06 (Google TPU); US-07 (rented-GPU DCGM validation); US-08 (DeploySignal bi-directional integration). FR-V1a/b (AWS); FR-V2 (Google); FR-V3 (validation scaffolding); FR-V4 (live cluster fetch); FR-D1/2/3 (DS integration). AC-P5 through AC-P8. SLICE 1-3 structure. 3 new open questions (OQ-P3-9/10/11). |
 
 ---
 
