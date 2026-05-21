@@ -1,7 +1,93 @@
-CURRENT-ROUND: R79
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R80
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R80 Round-scope directive (Architect — 5-family detector visualization + visual identity pass; Phase 4 SLICE 2 round 2) (2026-05-20)
+
+R80 = 2nd SLICE 2 round. Tessera engine has all 5 detector families vendored: Family A (betting + mixture-supermartingale + page-cusum), Family B (sequential-mmd), Family C (family-c-betting-e-process + family-c-rff + hotelling), Family D (spectral), Family E (conformal). R71 MVP dashboard emphasized only Family A; R80 surfaces all 5.
+
+**Round-start SHA:** `8dd061f` (R79 close); verify at Architect session entry.
+
+### Primary deliverable
+
+1. **`tools/build-canned-demos.ts` extension** — per-window state for ALL 5 families:
+   - Family A: M_t per shard (current)
+   - Family B: sequential-MMD statistic + threshold-crossing
+   - Family C: betting M_t + Hotelling T² + RFF score
+   - Family D: spectral signature + anomaly score
+   - Family E: conformal e-value + Mahalanobis distance
+   - Backward-compat: R71/R79 scenario JSON readable; B/C/D/E additive
+   - **Architect verifies invocation surface for each family via direct file Read at spec-emit**; placeholder + defer to operator if any family non-trivial to invoke
+
+2. **`demos/demo.html` detectors panel** (R79 placeholder; R80 fills):
+   - 5 detector group rows (Family A/B/C/D/E)
+   - Per-group: current state (firing/clean/accumulating); detector-specific summary metric
+   - Tooltips / expand for detector math context
+
+3. **Visual identity pass:**
+   - Header: Tessera title + tagline
+   - Color palette aligned to identity (suggested: blue/teal/slate)
+   - Typography: monospace for numeric + sans for narrative + system stack (no web fonts)
+   - Layout polish: CSS variables; print-friendly stylesheet
+
+4. **Test file** `test/q80-five-family-visualization.test.ts`:
+   - HTML structural ACs (5 detector group rows)
+   - JSON schema ACs (per-window per-family state)
+   - Visual identity ACs (header/tagline/CSS variables)
+   - Anti-regression: R79 structural ACs preserved
+
+5. **Q-R80-EMPIRICAL.sh** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77.
+
+### Tier rationale
+
+**full-tier** — Architect (5-family integration + visual identity; cite-then-walk over engine/detectors/* + R79 dashboard) + Implementer + Reviewer + MU.
+
+### Anti-scope (R80 hard limits)
+
+- NO modification of `engine/*` (Phase 3 frozen)
+- NO modification of R73-R79 deliverables (frozen)
+- NO modification of `tools/demo-scenario.ts` (R70; sibling)
+- **NO new external dependencies** (vanilla HTML/CSS/JS; no web fonts; no charting libraries)
+- NO modification of `run-pipeline.sh` (PR #39 pending)
+- NO real-cluster; NO DS-repo; NO `gh repo` operations
+- NO modification of carry-forward AC fail set; NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `demos/demo.html` (extension)
+- `demos/scenarios/*.json` (regenerated; additive)
+- `tools/build-canned-demos.ts` (extension)
+- `package.json` (no new deps)
+- `README.md` (optional)
+- `test/q80-five-family-visualization.test.ts` (NEW)
+- `coordination/specs/Q-R80-SPEC.md` + `Q-R80-SPEC-AUDIT.md` + `Q-R80-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R80.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE; particularly Rule 7 Surface (a): **all cross-project disciplines load-bearing.** Architect MUST use `--test-reporter=tap`. Claim-then-walk applies to family-invocation claims.
+
+### Halt conditions (R80 Implementer)
+
+1. Q-R80-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R79 close other than R80-additions
+4. R61-class architectural-reality discovery
+5. Architect spec uses round-evolution-fragile AC patterns: HALT
+6. All cross-project disciplines load-bearing
+7. New external dependency: HALT + DIAGNOSTIC + ESCALATE
+8. **Family B/C/D/E invocation surface NOT discoverable**: partial 5-family viz with documented placeholder acceptable; HALT + DIAGNOSTIC if Architect cannot determine invocation API for any family
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R80 --tier full
+```
 
 ---
 
