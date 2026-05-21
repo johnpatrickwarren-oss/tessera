@@ -12,6 +12,18 @@ false-discovery-rate guarantees."
 Pre-open context: `demos/demo.html` in browser, `engine/detectors/` in editor for follow-up
 questions on implementation.
 
+## Contents
+
+- [Minute 0:00 – 2:00 — Clean-baseline (trust establishment)](#minute-000--200--clean-baseline-trust-establishment)
+- [Minute 2:00 – 4:00 — SDC-drift (Family A betting wealth crossing threshold)](#minute-200--400--sdc-drift-family-a-betting-wealth-crossing-threshold)
+- [Minute 4:00 – 6:00 — Common-mode-rack (topology attribution)](#minute-400--600--common-mode-rack-topology-attribution)
+- [Minute 6:00 – 8:00 — Event-conditional (freeze-hook + DS integration)](#minute-600--800--event-conditional-freeze-hook--ds-integration)
+- [Minute 8:00 – 10:00 — Close (methodology + coverage envelope)](#minute-800--1000--close-methodology--coverage-envelope)
+- [Minute 10:00 – 12:00 — Live mode (interactive)](#minute-1000--1200--live-mode-interactive)
+- [Bank of follow-up questions + responses](#bank-of-follow-up-questions--responses)
+- [Pacing notes](#pacing-notes)
+- [What I need to rehearse specifically](#what-i-need-to-rehearse-specifically)
+
 ## Default spine (technical-peer audience)
 
 Clean-baseline → SDC-drift → Common-mode-rack → Event-conditional → close.
@@ -171,6 +183,55 @@ freeze_active = true events.
 
 ---
 
+## Minute 10:00 – 12:00 — Live mode (interactive)
+
+_Optional extension for technical-peer audiences who want to see the engine respond to parameter changes in-browser. For non-technical audiences, skip this beat and go straight to the follow-up bank._
+
+**Click:** flip the "Mode" toggle at the top of the page from **Canned** to **Live**. The scenario selector grays out; the parameter control panel becomes active.
+
+**Say:**
+> Up to now I've been driving the demo from pre-recorded scenario JSON. The same engine
+> code that built those scenarios is also bundled into the page itself — about 60 KB of
+> compiled JavaScript covering Family A through E detectors, the e-BH FDR operator, and
+> the topology overlay. Switching to Live mode wires the parameter panel directly into
+> that bundle via a Web Worker.
+
+**Point at:** the parameter controls — drift magnitude (the residual deviation injected
+on the target shard), window count, α threshold (per-shard Ville bound), target shard,
+topology size (small=6, medium=10, large=25), detector families A through E.
+
+**Click:** Run. Watch the loading spinner appear briefly while the engine bundle loads
+into the Worker. Within ~100 ms the per-window stream starts; the scrubber range
+auto-expands to match the window count; the M_t chart updates per window; the verdict
+banner and provenance receipt update at the terminal window.
+
+**Say:**
+> Each window message from the Worker is the same per-shard payload shape as a canned
+> scenario tick. The main thread treats the Worker stream as a custom scenario — the
+> existing playback / scrubber / renderer machinery runs over the live data without
+> modification. After the terminal message you can scrub backwards through the run,
+> change parameters, and click Run again to recompute.
+
+**Demonstrate two beats:**
+
+1. **Threshold sensitivity:** with drift magnitude = 0.10 (default) and target shard =
+   shard-00, click Run. Shard-00's M_t may not cross threshold — Ville bound holds.
+   Increase drift to 0.30 and click Run again — shard-00 fires reliably.
+2. **Cancel:** during a long run (window count = 200), click Cancel. The worker
+   terminates; the spinner clears; the run-status indicator shows "Run cancelled."
+
+**Say:**
+> The Cancel beat demonstrates that the Worker is real — it's not a pre-computed result
+> being replayed. The engine is computing in the page in real time, and the operator
+> can interrupt it.
+
+**Pause beat (2-3 seconds).**
+
+**Handoff cue:** flip the Mode toggle back to **Canned** to return to scripted scenarios,
+or proceed to the follow-up bank.
+
+---
+
 ## Bank of follow-up questions + responses
 
 **Q: How does Tessera differ from DeploySignal?**
@@ -215,6 +276,10 @@ topologies.
   The core methodology is covered by the first three scenarios.
 - If a question derails the flow, use "Let me park that for the follow-up bank" and
   continue — the bank section above has answers prepared.
+- The Live mode section (minute 10:00–12:00) is optional. Cut it for non-technical
+  audiences. For engineering-director audiences, lead with the Live mode beat instead
+  of clean-baseline if the audience needs immediate proof that "this is a real engine
+  in the browser, not a JSON player."
 
 ## What I need to rehearse specifically
 

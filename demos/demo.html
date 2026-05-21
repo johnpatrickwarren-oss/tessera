@@ -211,6 +211,64 @@
       font-family: var(--tessera-font-mono); font-size: 0.8rem;
     }
     #engine-error-banner[hidden] { display: none; }
+    #engine-error-banner::before { content: '⚠  '; font-size: 0.9rem; }
+
+    /* R85 — mode toggle + loading indicator + run status + per-mode UI clarity */
+    .mode-toggle {
+      display: inline-flex; align-items: center; gap: 10px;
+      border: 1px solid var(--tessera-border); border-radius: 6px;
+      padding: 4px 10px; margin-right: 10px;
+      background: var(--tessera-bg-elevated);
+    }
+    .mode-toggle legend { font-size: 0.75rem; color: var(--tessera-fg-muted); padding: 0 6px; }
+    .mode-toggle label {
+      font-family: var(--tessera-font-mono); font-size: 0.85rem;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    /* Per-mode UI clarity: Canned mode grays out control-panel inputs;
+       Live mode grays out scenario selector. */
+    body[data-mode='canned'] #tessera-control-panel input,
+    body[data-mode='canned'] #tessera-control-panel select,
+    body[data-mode='canned'] #tessera-control-panel button {
+      opacity: 0.45; pointer-events: none;
+    }
+    body[data-mode='canned'] #tessera-control-panel .control-panel-h::after {
+      content: ' — (Live mode required)'; color: var(--tessera-fg-muted);
+      font-style: italic; font-size: 0.75rem;
+    }
+    body[data-mode='live'] #scenario-selector {
+      opacity: 0.45; pointer-events: none;
+    }
+    body[data-mode='live'] #engine-run-status { display: block; }
+    body[data-mode='canned'] #engine-run-status { display: none; }
+    body[data-mode='canned'] #engine-loading-indicator { display: none; }
+
+    /* Loading spinner during Worker bundle load. */
+    .loading-indicator {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 8px; padding: 6px 12px;
+      color: var(--tessera-fg-muted); font-family: var(--tessera-font-mono);
+      font-size: 0.8rem;
+    }
+    .loading-indicator[hidden] { display: none; }
+    .loading-indicator .spinner {
+      display: inline-block; width: 12px; height: 12px;
+      border: 2px solid var(--tessera-border);
+      border-top-color: var(--tessera-fg);
+      border-radius: 50%;
+      animation: tessera-spin 0.8s linear infinite;
+    }
+    @keyframes tessera-spin { to { transform: rotate(360deg); } }
+
+    /* Run-status / "Run again" affordance. */
+    .run-status {
+      margin-top: 8px; padding: 6px 10px;
+      font-family: var(--tessera-font-mono); font-size: 0.8rem;
+      color: var(--tessera-fg-muted);
+      min-height: 1.4em;
+    }
+    .run-status.complete { color: var(--tessera-status-ok, var(--tessera-fg)); }
   </style>
 </head>
 <body>
@@ -221,6 +279,11 @@
   </header>
 
   <section id="tessera-controls">
+    <fieldset id="mode-toggle" class="mode-toggle">
+      <legend>Mode</legend>
+      <label><input type="radio" name="tessera-mode" value="canned" checked> Canned</label>
+      <label><input type="radio" name="tessera-mode" value="live"> Live</label>
+    </fieldset>
     <select id="scenario-selector">
       <option value="clean-baseline">Clean baseline (no firings)</option>
       <option value="sdc-drift">SDC drift on shard-04</option>
@@ -317,6 +380,11 @@
       <button id="btn-reset-params" type="button">Reset parameters</button>
     </div>
     <div id="engine-error-banner" class="error-banner" hidden></div>
+    <div id="engine-loading-indicator" class="loading-indicator" hidden aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <span class="loading-text">Loading engine bundle…</span>
+    </div>
+    <div id="engine-run-status" class="run-status" aria-live="polite"></div>
   </section>
 
   <section id="live-verdict-banner" class="live-banner">
@@ -13020,6 +13088,80 @@
   var engineErrorBanner = document.getElementById('engine-error-banner');
   var r84ActiveWorker   = null;
 
+  // ── R85: mode toggle + loading spinner + run-status affordance ──
+  var modeToggleEl           = document.getElementById('mode-toggle');
+  var modeRadios             = document.querySelectorAll('input[name="tessera-mode"]');
+  var engineLoadingIndicator = document.getElementById('engine-loading-indicator');
+  var engineRunStatus        = document.getElementById('engine-run-status');
+  var currentMode            = 'canned';
+
+  function setMode(mode) {
+    if (mode !== 'canned' && mode !== 'live') return;
+    currentMode = mode;
+    if (document.body && document.body.setAttribute) {
+      document.body.setAttribute('data-mode', mode);
+    }
+    // Sync element-level disabled to match CSS gray-out.
+    var controlPanelIds = [
+      'param-drift-magnitude', 'param-window-count', 'param-alpha-threshold',
+      'param-target-shard', 'param-topology-size',
+      'param-family-a', 'param-family-b', 'param-family-c',
+      'param-family-d', 'param-family-e',
+      'btn-run', 'btn-reset-params',
+    ];
+    for (var ci = 0; ci < controlPanelIds.length; ci++) {
+      var el = document.getElementById(controlPanelIds[ci]);
+      if (el) el.disabled = (mode === 'canned');
+    }
+    if (selector) selector.disabled = (mode === 'live');
+    // Reset run-status when switching modes.
+    if (engineRunStatus) engineRunStatus.textContent = '';
+    if (engineLoadingIndicator) engineLoadingIndicator.setAttribute('hidden', '');
+  }
+
+  function r85ShowLoadingSpinner() {
+    if (engineLoadingIndicator) engineLoadingIndicator.removeAttribute('hidden');
+  }
+  function r85HideLoadingSpinner() {
+    if (engineLoadingIndicator) engineLoadingIndicator.setAttribute('hidden', '');
+  }
+  function updateRunStatus(stage, payload) {
+    if (!engineRunStatus) return;
+    if (stage === 'running') {
+      var idx = (payload && typeof payload.windowIdx === 'number') ? payload.windowIdx : 0;
+      var total = (payload && typeof payload.totalWindows === 'number') ? payload.totalWindows : 0;
+      engineRunStatus.textContent = 'Running window ' + (idx + 1) + ' / ' + total;
+      engineRunStatus.classList.remove('complete');
+    } else if (stage === 'complete') {
+      var scen = (payload && payload.scenario) || {};
+      var nWin = (scen.windows || []).length;
+      var t = scen.terminal_state || {};
+      var k = Array.isArray(t.fdr_selected_indices) ? t.fdr_selected_indices.length : 0;
+      engineRunStatus.textContent =
+        'Run complete — ' + k + ' selected of ' + nWin + ' windows. Click Run to recompute.';
+      engineRunStatus.classList.add('complete');
+    } else if (stage === 'error') {
+      engineRunStatus.textContent = 'Run failed — see error banner. Click Run to retry.';
+      engineRunStatus.classList.remove('complete');
+    } else if (stage === 'cancelled') {
+      engineRunStatus.textContent = 'Run cancelled. Click Run to start a new run.';
+      engineRunStatus.classList.remove('complete');
+    } else if (stage === 'reset') {
+      engineRunStatus.textContent = '';
+      engineRunStatus.classList.remove('complete');
+    }
+  }
+
+  for (var mi = 0; mi < modeRadios.length; mi++) {
+    modeRadios[mi].addEventListener('change', function (ev) {
+      var t = ev && ev.target;
+      if (t && t.value) setMode(t.value);
+    });
+  }
+
+  // Apply initial mode (Canned by default). Idempotent if invoked multiple times.
+  setMode('canned');
+
   function r84ShowError(msg) {
     if (!engineErrorBanner) return;
     engineErrorBanner.textContent = 'Engine error: ' + msg;
@@ -13039,6 +13181,8 @@
     btnRun.addEventListener('click', function () {
       r84HideError();
       r84SetRunning(true);
+      r85ShowLoadingSpinner();
+      updateRunStatus('reset');
       if (r84ActiveWorker) { try { r84ActiveWorker.terminate(); } catch (e) {} r84ActiveWorker = null; }
       var worker;
       try {
@@ -13078,6 +13222,9 @@
             events: data.events || [],
           });
           currentWindowIdx = data.windowIdx;
+          if (windowScrubber) windowScrubber.max = String(Math.max(0, scenarios['custom'].windows.length - 1));
+          if (data.windowIdx === 0) r85HideLoadingSpinner();
+          updateRunStatus('running', { windowIdx: data.windowIdx, totalWindows: scenarios['custom'].params.window_count });
           if (typeof drawFrame === 'function')              drawFrame(scenarios['custom'], currentWindowIdx);
           if (typeof renderBadges === 'function')           renderBadges(scenarios['custom'], currentWindowIdx);
           if (typeof renderMetricsPanel === 'function')     renderMetricsPanel(scenarios['custom'], currentWindowIdx);
@@ -13091,16 +13238,22 @@
             candidates: data.candidates || [],
           };
           if (typeof renderBadges === 'function') renderBadges(scenarios['custom'], currentWindowIdx);
+          r85HideLoadingSpinner();
+          updateRunStatus('complete', { scenario: scenarios['custom'] });
           r84SetRunning(false);
           r84ActiveWorker = null;
         } else if (data.type === 'error') {
           r84ShowError(data.error || 'unknown engine error');
+          r85HideLoadingSpinner();
+          updateRunStatus('error');
           r84SetRunning(false);
           r84ActiveWorker = null;
         }
       };
       worker.onerror = function (err) {
         r84ShowError(String(err && err.message || err));
+        r85HideLoadingSpinner();
+        updateRunStatus('error');
         r84SetRunning(false);
         r84ActiveWorker = null;
       };
@@ -13111,6 +13264,8 @@
   if (btnCancel) {
     btnCancel.addEventListener('click', function () {
       if (r84ActiveWorker) { try { r84ActiveWorker.terminate(); } catch (e) {} r84ActiveWorker = null; }
+      r85HideLoadingSpinner();
+      updateRunStatus('cancelled');
       r84SetRunning(false);
     });
   }
