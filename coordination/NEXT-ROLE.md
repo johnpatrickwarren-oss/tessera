@@ -1,7 +1,77 @@
 CURRENT-ROUND: R87
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § R87 ARCHITECT routing block (2026-05-21)
+
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
+Inputs:
+- coordination/specs/Q-R87-SPEC.md
+- coordination/specs/Q-R87-SPEC-AUDIT.md
+- coordination/specs/Q-R87-EMPIRICAL.sh
+- coordination/MEMORIAL.md (R87 ARCHITECT section — 9 CONFIRMATIONs)
+
+### Architect-committed SHA: 78a25b6
+
+### Spec summary
+R87 = full-tier hygiene round applying R62 Option 1 precedent. Drop AC-R36-30 + AC-R36-31 from `test/q36-phase2-close-walk.test.ts` (structurally-vacuous forward-protection ACs whose pinned SHAs `'36ab019'` and `'c49df0e'` are far older than every subsequent HEAD). Approach B (complete hygiene cleanup) selected — see Q-R87-SPEC.md § 1 + Q-R87-SPEC-AUDIT.md § A1.
+
+### Two directive-empirical discrepancies corrected at spec-emit (Q-R87-SPEC.md § 0)
+1. Directive's claim "CHORE_A_SHA literal is `87e372f`" — empirically the literals in q36 are `'36ab019'` (line 641) + `'c49df0e'` (line 698). EMPIRICAL.sh as pre-staged uses the correct literals.
+2. Directive's claim "6 carry-forward fails" — empirically the round-start baseline is TAP `# fail 18`. Spec uses 18 → 16 (band [15, 16]) for AC-R87-6 fail-band prediction; EMPIRICAL.sh as pre-staged uses the correct band.
+
+### Implementer pseudo-code surface
+- 6 Edits to `test/q36-phase2-close-walk.test.ts` (Q-R87-SPEC.md § 3.1):
+  - Edit 1: Remove `import { execFileSync } from 'node:child_process';` at line 17
+  - Edit 2: Update file docblock (lines 1-11) — range citation, drop AC-R36-31 sentence, drop "anti-scope protection" from Covers
+  - Edit 3: Remove AC-R36-3 self-exclusion line at line 75 (q36 self-exclusion + stale comment)
+  - Edit 4: Remove AC-R36-30 block (lines 639-690 inclusive)
+  - Edit 5: Remove AC-R36-31 block (lines 692-725 inclusive)
+  - Edit 6: Append R87 explanatory comment block (verbatim text in § 3.1; deliberately omits quoted-SHA literals)
+- 1 new test file `test/q87-carry-forward-cleanup.test.ts` with 5 runtime test() blocks (AC-R87-1..AC-R87-5; full pseudocode in Q-R87-SPEC.md § 3.2)
+- No changes to `Q-R87-EMPIRICAL.sh` (already correct as committed)
+- MEMORIAL.md + NEXT-ROLE.md routing-block appends post-chore-A
+
+### Predicted chore-A binding-command outcomes (Q-R87-SPEC-AUDIT.md § A4)
+- `pnpm exec tsc -p tsconfig.test.json` exit: **0**
+- `pnpm exec node --test --test-reporter=tap test/*.test.js` TAP summary:
+  - `# tests`: **692** (strict)
+  - `# pass`: **672 or 673** (band; complement of fail band)
+  - `# fail`: **15 or 16** (band; AC-R84-14 stochastic ±1 per R85 REVIEWER MINOR-2)
+  - `# skipped`: **4** (strict)
+- `bash coordination/specs/Q-R87-EMPIRICAL.sh` exit: **0**
+- `git diff 0eb8a51 HEAD --name-only` line count: ~8-12 (q36 + q87 + 4 spec/memorial/next-role files + optional reviewer-report + optional logs)
+
+### Halt conditions for Implementer (Q-R87-SPEC.md § 6)
+1. Q-R87-EMPIRICAL.sh non-zero exit at chore-A
+2. tsc non-zero exit
+3. TAP counts outside predicted bands (single re-run permitted per multi-run-discipline)
+4. Any pre-R87 test other than AC-R36-30 + AC-R36-31 transitions PASS → FAIL
+5. R61-class architectural-reality discovery (line-number citations don't match)
+6. Spec-vs-impl semantic conflict
+7. New external dependency required
+8. Another test file structurally depends on AC-R36-30 / AC-R36-31 existence (Architect grep verified none; if Implementer finds one, HALT)
+9. EMPIRICAL.sh discovered to encode a wrong prediction
+10. Unauthorized path in `git diff 0eb8a51 HEAD --name-only`
+
+### Cross-project rules applied UPFRONT (per round directive)
+- Rule 1 sub-class `empirical-command-attestation` — AC-R87-6 binds verbatim values
+- Rule 2 `architect-encoded-regex-with-hardcoded-bounds` — self-application gate caught Edit 6 SHA collision (spec § 9.5)
+- Rule 3 self-application — applied to all AC regex patterns
+- Rule 4 multi-run-discipline — halt condition 3 allows single re-run for flake
+- Rule 5 `spec-amendment-ALL-gate-artifacts-propagation` — spec § 5.2 ALLOWED_SET ↔ EMPIRICAL.sh Block 5 byte-identical
+- Rule 6 `Architect-claim-without-empirical-walk` — spec § 0 corrections; § 9.1 baseline verification
+- Rule 7 fail-count band for flaky AC — AC-R87-6 fail band [15, 16]
+
+### Pipeline resume
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R87 --tier full --start-at IMPLEMENTER
+```
 
 ---
 
