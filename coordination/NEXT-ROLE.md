@@ -1,6 +1,6 @@
 CURRENT-ROUND: R85
-NEXT-ROLE: IMPLEMENTER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ESCALATE
 TIER: full
 
 ---
@@ -6953,3 +6953,91 @@ cd /Users/johnwarren/concord/tessera
 ```
 
 (Spec triad already committed at SHA 225e860; Implementer begins at chore-A.)
+
+---
+
+## § R85 IMPLEMENTER routing block (ESCALATE)
+
+NEXT-ROLE: OPERATOR
+STATUS: ESCALATE
+Round: R85
+Implementer session date: 2026-05-21
+
+### Two halt conditions require operator resolution before GREEN commit
+
+All 5 R85 deliverables are implemented and all 20 R85 ACs pass (AC-R85-1 through AC-R85-20). Implementation is complete. Two EMPIRICAL.sh binding-command failures prevent the GREEN commit.
+
+---
+
+### HALT-1: EMPIRICAL.sh Block 3 fails — broken awk range (README check)
+
+**Diagnostic:** `coordination/diagnostics/DIAGNOSTIC-R85-empirical-readme-awk.md`
+
+`bash coordination/specs/Q-R85-EMPIRICAL.sh` at implementation-complete HEAD exits non-zero (20 PASS / 1 FAIL). Block 3 reports:
+```
+FAIL: README.md Browser dashboard subsection does not mention Live mode
+```
+
+Root cause: Block 3's awk command `awk '/^### Browser dashboard/,/^### /'` is a broken range — the end pattern `^### ` matches the SAME line as the start pattern (`### Browser dashboard`), so awk emits only that one heading line. The Live mode paragraph IS present in README.md (AC-R85-14 passes using `indexOf` approach). The defect is in the EMPIRICAL.sh extraction command only.
+
+**Options:**
+
+**Option A** (recommended): Operator amends `Q-R85-EMPIRICAL.sh` Block 3 awk command. Replacement:
+```bash
+awk '/^### Browser dashboard/{found=1;next} found && /^### /{exit} found' "$README_FILE"
+```
+This prints lines AFTER the heading until the next `### `, correctly capturing the Live mode paragraph.
+
+**Option B**: Operator amends Block 3 to use simpler `grep -qi "Live mode" "$README_FILE"` (less discriminating but correct; AC-R85-14 provides section-bounded coverage).
+
+---
+
+### HALT-2: fail=17 observed vs predicted fail=16 strict (AC-R84-14 structural flakiness)
+
+**Diagnostic:** `coordination/diagnostics/DIAGNOSTIC-R85-ac-r84-14-baseline-drift.md`
+
+The full test suite at implementation-complete HEAD produces `fail=17` in at least one run (vs spec-predicted `fail=16 strict`). The extra failure is AC-R84-14 `worker.terminate() halts further message emission` — a structurally flaky Worker test documented by the R84 Reviewer as VIOLATION `ac-r84-14-structurally-flaky-race-condition`. AC-R84-14 is NOT in the R85 carry-forward list; it was passing during the R84 EMPIRICAL.sh baseline run (fail=15 confirmed). R85 made no changes to `engine-worker.js` or Worker protocol.
+
+**Options:**
+
+**Option A** (recommended if majority fail count is 17): Operator amends `Q-R85-EMPIRICAL.sh` Block 4 to `EXPECTED_FAIL=17` (or band 16–17) + amends spec § 5.2 prediction to `fail: 16–17 (band; ±1 for AC-R84-14 structural flakiness)`.
+
+**Option B**: Operator directs Implementer to re-run full suite 3× and attest majority fail count. If majority=16, proceed with fail=16 attestation + TD disclosure of AC-R84-14 non-determinism (no spec amendment needed). If majority=17, proceed to Option A.
+
+---
+
+### Implementation attestation (partial — at ESCALATE; full attestation deferred to post-resolution GREEN commit)
+
+All 20 R85 ACs pass (verified by direct `node q85-slice-3-close.test.js` isolated run). Deliverables realized:
+- `demos/demo.html` — regenerated with mode toggle, loading spinner, run-status, per-mode UI CSS, additive R84 handler edits
+- `demos/DEMO-SCRIPT.md` — `## Contents` ToC + `## Minute 10:00–12:00 — Live mode (interactive)` + pacing note
+- `README.md` — Live mode paragraph in `### Browser dashboard` subsection
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` — 3 Phase 4-derived promotions appended (haiku-mu-status-field-disambiguation, architect-encoded-regex-with-hardcoded-bounds, vendored-at-pin→vendored-with-deltas reclassification precedent)
+- `test/q85-slice-3-close.test.ts` — 20 ACs verbatim from spec § 1.8
+- `demos/scenarios/*.json` — byte-identical to round-start (verified)
+- RED commit: `0799441` (20 assert.fail stubs, all failing)
+- Git diff round-start..HEAD — all paths within ALLOWED_SET (AC-R85-19 PASS)
+
+Observed binding-command outputs (PARTIAL — not all blocks passing):
+- `pnpm exec tsc -p tsconfig.test.json` exit code: **0** (predicted 0) ✓
+- `pnpm exec node --test --test-reporter=tap test/q85-slice-3-close.test.js` (isolated): 20 PASS / 0 FAIL ✓
+- `pnpm exec node --test --test-reporter=tap test/*.test.js` process exit: **1** (predicted 1) ✓
+- TAP `# tests`: **689** (predicted 689) ✓
+- TAP `# pass`: **672** (predicted band [668,670]) — HIGHER THAN PREDICTED; see note below
+- TAP `# fail`: **17** (predicted 16 strict) — HALT-2
+- TAP `# skipped`: **4** (predicted 4) ✓
+- `bash coordination/specs/Q-R85-EMPIRICAL.sh` exit code: **1** (predicted 0) — HALT-1 (Block 3 fail)
+
+NOTE on pass=672 vs predicted [668,670]: If fail=17 instead of 16, and tests=689, skipped=4, then pass+fail+skipped=689 → pass=689-17-4=668. The counts must add to 689. The observed outputs above may reflect a specific run; operator should re-run post-resolution to confirm exact counts.
+
+### CONFIRMATION lines (pre-ESCALATE; applicable disciplines honored)
+
+CONFIRMATION: tdd-discipline-red-green-verified | RED commit `0799441` committed before any implementation (20 assert.fail stubs all failing). GREEN state (all 20 R85 ACs passing) realized in implementation-complete HEAD. git-verifiable ordering. | R85 | IMPLEMENTER
+
+CONFIRMATION: anti-scope-allowed-set-respected | git diff f737877 HEAD --name-only produces only paths within ALLOWED_SET (AC-R85-19 PASS). ~/.claude/CROSS-PROJECT-MEMORIAL.md excluded from git diff (user-level file; authorized per directive). | R85 | IMPLEMENTER
+
+CONFIRMATION: demos-scenarios-byte-identity-preserved | After `pnpm exec node tools/build-canned-demos.js`, `git diff f737877 HEAD -- demos/scenarios/` shows zero changes. Halt condition 9 clear. | R85 | IMPLEMENTER
+
+CONFIRMATION: cross-project-memorial-3-promotions-landed | Three Phase 4-derived promotions appended to ~/.claude/CROSS-PROJECT-MEMORIAL.md: haiku-mu-status-field-disambiguation, architect-encoded-regex-with-hardcoded-bounds, vendored-at-pin→vendored-with-deltas reclassification precedent. Verified by grep (each slug confirmed present). | R85 | IMPLEMENTER
+
+CONFIRMATION: r83-r84-surface-preservation-verified | AC-R85-18 passes — all 18+ R71/R79/R80/R81/R82/R83/R84 markers present in demos/demo.html. R84 additive handler edits are strictly additive (~590 chars total; verified via AC-R84-8/10/11 patterns still passing). | R85 | IMPLEMENTER

@@ -82,6 +82,14 @@ open demos/demo.html      # opens in default browser; no install / no server req
 
 The dashboard pages through 8 pre-recorded scenarios (clean baseline, single-shard SDC drift, rack-localized common mode, event-conditional freeze, FDR control, hierarchical e-value combination, sparse-data resilience, and topology-spanning common mode) with Play / Pause / Reset / Speed controls, an audit-trail panel, a reasoning panel, and a suggested-next-actions panel. All scenarios are deterministic and regeneratable via `pnpm build:demos`. The dashboard ships as a single static HTML file with vanilla CSS/JS — no external dependencies, opens from `file://`.
 
+The dashboard ships a **Live mode toggle** at the top of the page (R85). Switching to
+**Live** activates the parameter control panel (drift magnitude, window count, α
+threshold, target shard, topology size, detector families) and routes the Run button
+through a Web Worker that loads the engine bundle in-browser and streams per-window
+state back to the UI. Use the scrubber to replay the run at any speed; click Cancel to
+terminate mid-stream. See [`demos/DEMO-SCRIPT.md` § Minute 10:00 – 12:00](./demos/DEMO-SCRIPT.md#minute-1000--1200--live-mode-interactive)
+for the live-mode walkthrough.
+
 ### CLI scenarios
 
 Run any of four canned scenarios in the terminal:
