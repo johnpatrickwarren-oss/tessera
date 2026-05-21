@@ -1,7 +1,108 @@
-CURRENT-ROUND: R87
-NEXT-ROLE: MEMORIAL-UPDATER
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R88
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R87 close attestation (2026-05-21)
+
+R87 closed clean post-Option A. Test baseline: `692/673/15/4`. R36-30 + R36-31 dropped (structurally-vacuous forward-protection class; R62 Option 1 precedent applied). 5 new q87 tests pass. Carry-forward fail set: 17 → 15. 8th instance of architect-claim-without-empirical-walk memorialized (sub-pattern: prose-claim-about-post-edit-state).
+
+---
+
+## § R88 Round-scope directive (Architect — operator-minimal baseline curation flow; Phase 5 SLICE 1) (2026-05-21)
+
+R88 opens Phase 5 (production-readiness investments). Goal: replace Tessera's multi-step manual curation flow with a one-command operator entry point.
+
+**Motivation:** Tessera's Stage 2a/2b/orchestrator curation pipeline is mechanically rigorous (MCD + Mahalanobis + sequential e-process; per-decision audit records) but lacks operator-facing ergonomics. Today an operator would have to compose Stage 2a + Stage 2b + orchestrator manually. R88 ships the one-shot wrapper + auto-validation + threshold gates + conservative defaults.
+
+**Round-start SHA:** SHA of this commit; verify at Architect session entry.
+
+### Primary deliverable
+
+1. **`tools/curate-baseline.ts`** (NEW) — one-command operator entry point:
+   - CLI: `pnpm curate-baseline <raw-data-path> [--out <validated-baseline-path>]`
+   - Wraps existing Stage 2a + Stage 2b + orchestrator pipeline
+   - Conservative defaults: α_fleet=1e-3, χ²ₚ=0.975 (current Tessera defaults); corpus-window=include all provided data
+   - Emits validated baseline + curation report
+   - Exit 0 if validation passes; non-zero if review needed
+
+2. **Auto-validation pass:** after curation, re-runs Family A/C detectors on the curated baseline; verifies detectors quiescent (Architect picks exact criteria at spec § 0)
+
+3. **Threshold-based human-review gates:**
+   - **<5% dropped:** ship; exit 0
+   - **5-15% dropped:** print summary; exit 0 with warning; operator can proceed
+   - **>15% dropped:** HALT; exit non-zero
+   - Validation failure: HALT regardless of drop-rate
+
+4. **Curation report** `<out-dir>/curation-report.md`:
+   - Headline: "Baseline ready" / "Review needed" / "Heterogeneous corpus"
+   - Drop statistics; top-K dropped windows with reasons
+   - Validation summary (detectors quiescent ✓ / fired ✗)
+   - Threshold defaults + override flags documented
+   - Audit-trail pointer: `<out-dir>/curation-decisions.jsonl`
+
+5. **`package.json`:** `"curate-baseline": "pnpm exec node tools/curate-baseline.js"`
+
+6. **README.md** "Baseline curation" section update
+
+7. **Test file** `test/q88-baseline-curation-flow.test.ts`:
+   - One-command flow ACs; threshold-gate ACs; auto-validation ACs; conservative-defaults ACs
+   - Anti-regression: existing Stage 2a/2b/orchestrator behavior preserved
+
+8. **Q-R88-EMPIRICAL.sh** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77.
+
+### Tier rationale
+
+**full-tier** — Architect (operator-flow design + threshold gates + conservative defaults; cite-then-walk over existing tools/curate-baseline-*.ts + tools/calibrators/*) + Implementer + Reviewer + MU.
+
+### Anti-scope (R88 hard limits)
+
+- NO modification of `engine/*` (frozen)
+- NO modification of `tools/curate-baseline-pre-pass.ts` / `curate-baseline-fleet-correlated.ts` / `curate-baseline-pipeline.ts` (R88 WRAPS them; does NOT modify)
+- NO modification of `tools/calibrators/*` (vendored at SHA `5a72371`)
+- NO modification of R73-R87 deliverables (frozen)
+- NO modification of `demos/*` (R71-R85 frozen)
+- NO new external dependencies
+- NO modification of `run-pipeline.sh` (byte-equal to Anchor canonical post-PR #39 merge)
+- NO real-cluster; NO DS-repo; NO `gh repo` operations beyond push to Tessera public
+- NO modification of carry-forward AC fail set; NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `tools/curate-baseline.ts` (NEW; wrapper)
+- `tools/curate-baseline-report.ts` (optional NEW; report helper)
+- `package.json` (add `curate-baseline` script; no new deps)
+- `README.md` (Baseline curation section)
+- `test/q88-baseline-curation-flow.test.ts` (NEW)
+- `test/_substrate/curation-corpus-*.json` (NEW; synthetic fixtures at various contamination levels)
+- `coordination/specs/Q-R88-SPEC.md` + `Q-R88-SPEC-AUDIT.md` + `Q-R88-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R88.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE. **Architect MUST use `--test-reporter=tap`** per R77.
+- **R86 prophylactic + R87 sub-pattern variant load-bearing:** Architect MUST grep prescribed pseudocode AND any prose claims about codebase property at spec-emit. Stage 2a/2b function signatures MUST be verified by direct file Read before wrapper prescription.
+
+### Halt conditions (R88 Implementer)
+
+1. Q-R88-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R87 close (692/673/15/4) other than R88-additions
+4. R61-class architectural-reality discovery (Stage 2a/2b function signatures don't match wrapper prescription)
+5. Architect spec uses round-evolution-fragile AC patterns: HALT
+6. All cross-project disciplines load-bearing
+7. New external dependency: HALT + DIAGNOSTIC + ESCALATE
+8. Stage 2a/2b modification required: HALT + DIAGNOSTIC + ESCALATE (anti-scope expansion)
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R88 --tier full
+```
 
 ---
 
