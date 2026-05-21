@@ -5,7 +5,7 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "ignoreDeprecations": "5.0",
-    "outDir": "dist/engine",
+    "outDir": "engine/dist",
     "rootDir": "engine",
     "declaration": true,
     "declarationMap": true,

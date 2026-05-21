@@ -3,6 +3,14 @@
 _Authoritative record of files vendored from DeploySignal **and from anchor methodology canonical** into Tessera with source SHA + sync policy._
 _DeploySignal engine files maintained by `tools/vendor-from-deploysignal.sh`. Anchor methodology files vendored manually per MR-1 (methodology round). Re-pin via `PINNED_SHA=<new-sha> ./tools/vendor-from-deploysignal.sh ...` per SCOPING-MEMO-v0.3 § 9 re-pinning policy (engine files); anchor methodology re-pin per operator decision (no automated script yet)._
 
+---
+
+## R90 extraction note (2026-05-21)
+
+Phase 5 SLICE 3 round 1 (R90) extracted the engine to the `@johnpatrickwarren-oss/deploysignal-engine` npm package per `engine/package.json`. Layout: Option A — engine remains at `engine/`; standalone sub-package. Build artifact emitted to `engine/dist/` (root tsconfig.json `outDir` changed from `dist/engine` to `engine/dist`). Consumption migration (Tessera-internal in R91, DS-side in R92) is deferred to subsequent rounds. Per-row vendored-at-pin / vendored-with-deltas SHAs below are UNCHANGED by R90 (the extraction is structural; engine source content is byte-identical to round-start SHA `65edb85` — verified by AC-R90-14).
+
+---
+
 ## DeploySignal engine vendoring
 
 | Target (tessera/) | Source (deploysignal/) | SHA | Sync policy | Vendored | Notes |
