@@ -75,7 +75,11 @@ RESET_NEXT_ROLE=false
 MODEL_ARCHITECT="claude-opus-4-7"
 MODEL_IMPLEMENTER="claude-sonnet-4-6"
 MODEL_REVIEWER="claude-opus-4-7"
-MODEL_MEMORIAL="claude-sonnet-4-6"
+# Two model candidates for MU; selector chooses between them per directive content.
+MODEL_MEMORIAL_DEFAULT="claude-haiku-4-5-20251001"   # ~3× cost reduction vs Sonnet (R74)
+MODEL_MEMORIAL_SONNET="claude-sonnet-4-6"             # fallback for substantive cross-round work
+MODEL_MEMORIAL=""                                     # resolved at TIER-decision time
+MU_FALLBACK_RATIONALE=""
 MODEL_COORDINATOR="claude-opus-4-7"
 MODEL_DEFAULT="claude-sonnet-4-6"
 
@@ -115,6 +119,10 @@ WAVE_GATE_ID=""
 CONSOLIDATION_REVIEWER=false
 AUTO_TIER=false
 TIER_EXPLICIT=false
+MU_SONNET=false
+REVIEWER_SCOPE_EXPLICIT=""   # set by --reviewer-scope flag
+REVIEWER_SCOPE=""            # resolved after TIER is finalized
+ROUTER_OUT=""                # populated by --auto-tier block; empty otherwise
 while [[ $# -gt 0 ]]; do
   case $1 in
     --round)            ROUND="$2";        shift 2 ;;
@@ -128,6 +136,8 @@ while [[ $# -gt 0 ]]; do
     --coordinator)      COORDINATOR_MODE=true; shift ;;
     --wave-gate)        WAVE_GATE_MODE=true; WAVE_GATE_ID="$2"; shift 2 ;;
     --auto-tier)        AUTO_TIER=true;    shift   ;;
+    --mu-sonnet)        MU_SONNET=true;    shift   ;;
+    --reviewer-scope)   REVIEWER_SCOPE_EXPLICIT="$2"; shift 2 ;;
     --consolidation-reviewer) CONSOLIDATION_REVIEWER=true; shift ;;
     -h|--help)
       cat <<'EOF'
@@ -188,7 +198,6 @@ done
 # against coordination/NEXT-ROLE.md and set TIER from the router output.
 # Explicit --tier always wins; auto-tier is advisory when no explicit tier is given.
 if [[ "$AUTO_TIER" == "true" && "$TIER_EXPLICIT" != "true" ]]; then
-  ROUTING_LOG="coordination/logs/ROUND-${ROUND}-ROUTING.md"
   ROUTER_OUT="$(node scripts/tier-router.js --mode hybrid 2>/dev/null)" || true
   if [[ -n "$ROUTER_OUT" ]]; then
     ROUTER_TIER="$(echo "$ROUTER_OUT" | node -e \
@@ -199,14 +208,92 @@ if [[ "$AUTO_TIER" == "true" && "$TIER_EXPLICIT" != "true" ]]; then
       implementer-only) TIER="solo" ;;
       coordinator-only) COORDINATOR_MODE=true ;;
     esac
-    mkdir -p coordination/logs
-    printf '# Round %s auto-tier routing\n\n' "$ROUND" > "$ROUTING_LOG"
-    echo "$ROUTER_OUT" >> "$ROUTING_LOG"
     echo "INFO:  --auto-tier: router recommended '$ROUTER_TIER'; TIER set to '$TIER'" >&2
   else
     echo "WARN:  --auto-tier: router failed or unavailable; defaulting to TIER='full'" >&2
   fi
 fi
+
+# ── MU model selection (R74) ──────────────────────────────────────────────────
+# Default: Haiku 4.5 (~3× cost vs Sonnet for routine pattern-matching MU work).
+# Sonnet fallback when (a) --mu-sonnet flag set OR (b) tier=full AND directive
+# contains cross-round-pattern marker. Selector mechanism at scripts/mu-model-select.ts.
+MU_SELECT_OUT=""
+if [[ "$TIER" == "solo" ]] || $COORDINATOR_MODE; then
+  MODEL_MEMORIAL="$MODEL_MEMORIAL_DEFAULT"   # MU not dispatched; value irrelevant but set for log
+  MU_FALLBACK_RATIONALE="MU not dispatched on this tier"
+else
+  MU_SELECT_OUT="$(node scripts/mu-model-select.js --directive "$COORD/NEXT-ROLE.md" --tier "$TIER" ${MU_SONNET:+--mu-sonnet} 2>/dev/null)" || true
+  if [[ -n "$MU_SELECT_OUT" ]]; then
+    MU_MODEL_RAW="$(echo "$MU_SELECT_OUT" | node -e \
+      "process.stdin.resume(); let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{ try{const j=JSON.parse(d); console.log(j.model+'|'+(j.rationale||''))}catch{} })" 2>/dev/null)" || true
+    MU_MODEL_FIELD="${MU_MODEL_RAW%%|*}"
+    MU_FALLBACK_RATIONALE="${MU_MODEL_RAW#*|}"
+    case "$MU_MODEL_FIELD" in
+      claude-haiku-*)  MODEL_MEMORIAL="$MODEL_MEMORIAL_DEFAULT" ;;
+      claude-sonnet-*) MODEL_MEMORIAL="$MODEL_MEMORIAL_SONNET"  ;;
+      *)               MODEL_MEMORIAL="$MODEL_MEMORIAL_DEFAULT"
+                       MU_FALLBACK_RATIONALE="selector returned unexpected model; fallback haiku"
+                       ;;
+    esac
+  else
+    MODEL_MEMORIAL="$MODEL_MEMORIAL_DEFAULT"
+    MU_FALLBACK_RATIONALE="selector unavailable; fallback haiku"
+  fi
+fi
+
+# ── Reviewer scope selection (R74) ────────────────────────────────────────────
+if [[ -n "$REVIEWER_SCOPE_EXPLICIT" ]]; then
+  case "$REVIEWER_SCOPE_EXPLICIT" in
+    full|structural) REVIEWER_SCOPE="$REVIEWER_SCOPE_EXPLICIT" ;;
+    *) echo "ERROR: --reviewer-scope must be 'full' or 'structural'; got '$REVIEWER_SCOPE_EXPLICIT'" >&2; exit 1 ;;
+  esac
+else
+  case "$TIER" in
+    full)  REVIEWER_SCOPE="full" ;;
+    audit) REVIEWER_SCOPE="structural" ;;
+    *)     REVIEWER_SCOPE="" ;;   # solo / coordinator-only: Reviewer not invoked; empty
+  esac
+fi
+
+# ── Routing log (R74; extends R73 auto-tier log) ──────────────────────────────
+mkdir -p coordination/logs
+ROUTING_LOG="coordination/logs/ROUND-${ROUND}-ROUTING.md"
+{
+  echo "# Round ${ROUND} routing"
+  echo ""
+  echo "## Tier"
+  if $AUTO_TIER && [[ "$TIER_EXPLICIT" != "true" ]]; then
+    echo "Source: --auto-tier"
+  elif [[ "$TIER_EXPLICIT" == "true" ]]; then
+    echo "Source: explicit --tier ${TIER}"
+  else
+    echo "Source: pipeline default"
+  fi
+  echo "Final TIER: ${TIER}"
+  if [[ -n "${ROUTER_OUT:-}" ]]; then
+    echo "Router output: ${ROUTER_OUT}"
+  fi
+  echo ""
+  echo "## MU model"
+  echo "Model: ${MODEL_MEMORIAL}"
+  echo "Rationale: ${MU_FALLBACK_RATIONALE}"
+  if [[ -n "${MU_SELECT_OUT:-}" ]]; then
+    echo "Selector output: ${MU_SELECT_OUT}"
+  fi
+  echo ""
+  echo "## Reviewer scope"
+  if [[ -z "$REVIEWER_SCOPE" ]]; then
+    echo "Scope: (not invoked on this tier)"
+  else
+    echo "Scope: ${REVIEWER_SCOPE}"
+    if [[ -n "$REVIEWER_SCOPE_EXPLICIT" ]]; then
+      echo "Source: explicit --reviewer-scope ${REVIEWER_SCOPE_EXPLICIT}"
+    else
+      echo "Source: default for tier=${TIER}"
+    fi
+  fi
+} > "$ROUTING_LOG"
 
 # ── Tier configuration ────────────────────────────────────────────────────────
 # full (default): full Anchor — Architect writes spec, Implementer executes,
@@ -1083,6 +1170,20 @@ build_reviewer_prompt() {
   local prompt_file
   local report_path
   local routing_block
+  local scope_note=""
+  if [[ "$REVIEWER_SCOPE" == "structural" ]]; then
+    scope_note="
+**MODE: STRUCTURAL-ONLY REVIEWER (R74).**
+Per CLAUDE-REVIEWER.md \"## Mode: Structural-only Reviewer\" section, this
+audit is scoped to: (1) binding-command re-runs verbatim, (2) AC-binding
+structural integrity walk, (3) ALLOWED_SET diff verification. DO NOT perform
+adversarial counterfactual reasoning. DO NOT perform a right-reasons audit.
+The \"find what the Implementer got wrong\" mandate is SUSPENDED in this
+mode — you are verifying structural compliance, not assuming a mistake.
+
+Routing unchanged: CRITICAL → ESCALATE; MAJOR or below → MERGE-READY.
+"
+  fi
   if [[ -n "$tag" ]]; then
     prompt_file="$COORD/.prompt-reviewer-${tag}.md"
     report_path="coordination/reviews/REVIEWER-REPORT-${ROUND}-${tag}.md"
@@ -1112,7 +1213,7 @@ ROLE BOUNDARY: Document findings. Do not fix. Do not re-implement."
 
   cat > "$prompt_file" << PROMPT
 You are the REVIEWER for round $ROUND.
-
+${scope_note}
 Read ALL of these before writing a single word of your report:
   - $PRD_PATH
   - coordination/specs/Q-${ROUND}-SPEC.md
