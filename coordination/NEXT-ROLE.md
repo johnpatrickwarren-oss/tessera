@@ -1,7 +1,106 @@
 CURRENT-ROUND: R74
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
+
+---
+
+## § Implementer R74 routing block (2026-05-20)
+
+### Implementer attestation
+
+- **Chore-A HEAD SHA:** `5024b7f1159e6327fe6f92c414357dbb7661dfd5`
+- **Round-start SHA (anti-scope diff lower bound):** `bac83e4` (spec-triad commit; read from Architect routing block; NOT git rev-parse HEAD per R70 MINOR-1)
+- **RED commit SHA:** `3baad60` — `red(R74): q74 mu-haiku + reviewer-scope stub fails — assert.fail at AC-R74-1..22`
+- **GREEN commit SHA:** `5024b7f` — `feat(R74): mu-model-select selector + run-pipeline.sh integration + CLAUDE-REVIEWER.md Mode docs`
+
+#### Binding commands (VERBATIM observed output; Rule 1 ACTIVE GATE)
+
+**`pnpm exec tsc -p tsconfig.test.json`:** exit 0, zero diagnostics.
+
+**`pnpm exec node --test --test-reporter=tap test/*.test.js`:**
+```
+# tests 538
+# pass 530
+# fail 5
+# skipped 3
+```
+Process exit: non-zero (fail=5 carry-forward; test runner exits non-zero when fail > 0).
+
+**`Q-R74-EMPIRICAL.sh` (PASS 17 / FAIL 0, exit 0):**
+```
+PASS  Block: round-start-sha-injected
+PASS  Block: round-start-sha-valid-commit
+PASS  Block: tsc-exit-0
+  observed: # tests 538
+  observed: # pass 530
+  observed: # fail 5
+  observed: # skipped 3
+PASS  Block: node-test-pass-fail-counts
+PASS  Block: carry-forward-fail-identities
+PASS  Block: mu-select-F1-default-haiku
+PASS  Block: mu-select-F2-class-A-promotion
+PASS  Block: mu-select-F3-class-B-batch
+PASS  Block: mu-select-F4-class-C-reviewer2
+PASS  Block: mu-select-F5-class-D-option
+PASS  Block: mu-select-F6-audit-no-anchor
+PASS  Block: anti-scope-allowed-set
+PASS  Block: no-engine-or-demos-or-tier-router-modifications
+PASS  Block: no-reinforcements-modifications
+PASS  Block: no-prior-spec-modifications
+PASS  Block: r73-anti-regression-tier-router-validate
+  observed R74 self-classification model: claude-sonnet-4-6
+PASS  Block: mu-select-self-classification-r74
+─────────────────────────────────────────
+PASS: 17  /  FAIL: 0
+─────────────────────────────────────────
+```
+
+**AC-R74-31 self-classification observed:** `claude-sonnet-4-6`. The R74 directive section in NEXT-ROLE.md contains a Class C co-occurrence (Reviewer-2 + ESCALATE appear together in the embedded R73 Reviewer prose within the directive). Spec prediction was `claude-haiku-4-5-20251001` (per Q.6 manual walk at spec-emit time); empirical observation is `claude-sonnet-4-6`. Matches: AC binds the OBSERVED empirical output per § 6.2 TACTICAL AUTONOMY.
+
+**`pnpm tier-router:validate`:** exit 0 (R73 anti-regression; Safety violations: 0).
+
+**`git diff bac83e4..HEAD --name-only`:** 15 paths (all in ALLOWED_SET):
+```
+CLAUDE-REVIEWER.md
+coordination/MEMORIAL.md
+coordination/NEXT-ROLE.md
+coordination/specs/Q-R74-EMPIRICAL.sh
+package.json
+run-pipeline.sh
+scripts/mu-model-select-fixtures/F1-default-haiku.md
+scripts/mu-model-select-fixtures/F2-class-A-promotion.md
+scripts/mu-model-select-fixtures/F3-class-B-batch.md
+scripts/mu-model-select-fixtures/F4-class-C-reviewer2.md
+scripts/mu-model-select-fixtures/F5-class-D-option.md
+scripts/mu-model-select-fixtures/F6-audit-no-anchor.md
+scripts/mu-model-select-fixtures/corpus.json
+scripts/mu-model-select.ts
+test/q74-mu-haiku-reviewer-scope.test.ts
+```
+
+#### Tactical deviations (no HALT required)
+
+- **TD-1:** `loadDirective` in `scripts/mu-model-select.ts` uses the same boundary-search pattern as `scripts/tier-router.ts` (`fromHeading.search(/\n(?=## § |\n---[ \t]*(?:\n|$))/m)`) instead of the spec pseudocode's `\Z` (not a valid JavaScript regex). TACTICAL AUTONOMY: spec import path / API signature mismatch fix.
+- **TD-2:** Spec § 2.5 pseudocode builds `mu_select_args` array then passes `"${mu_select_args[@]}"`. Inline form used instead (`--directive "$COORD/NEXT-ROLE.md" --tier "$TIER"`) so AC-R74-16 regex `/scripts\/mu-model-select\.js[\s\S]{0,400}--directive/` matches (args array placed --directive before the script path in file text, which would fail the regex). Semantic behavior identical.
+- **TD-3:** `ROUTER_OUT=""` initialized before the while loop (so `${ROUTER_OUT:-}` works in the routing log block when auto-tier is not used); not in spec pseudocode. Internal naming; no AC binds to presence/absence of this default.
+
+#### Spec-deviance disclosure
+
+None beyond TD-1..3 above. No HALT conditions triggered. Q-R74-EMPIRICAL.sh exit 0 confirms all 17 blocks.
+
+### Reviewer inputs for R74
+
+1. `coordination/specs/Q-R74-SPEC.md` (spec proper)
+2. `coordination/specs/Q-R74-SPEC-AUDIT.md` (Architect ceremony sidecar; authorized for Reviewer)
+3. `coordination/specs/Q-R74-EMPIRICAL.sh` (chore-A verifier; re-run at Reviewer HEAD)
+4. `scripts/mu-model-select.ts` + `scripts/mu-model-select-fixtures/` (implementation)
+5. `test/q74-mu-haiku-reviewer-scope.test.ts` (22 runtime ACs)
+6. `run-pipeline.sh` (modified: --mu-sonnet, --reviewer-scope, MODEL_MEMORIAL_DEFAULT/SONNET, routing log)
+7. `CLAUDE-REVIEWER.md` (modified: Mode docs section inserted)
+8. `package.json` (modified: mu-model-select script added)
+9. `coordination/MEMORIAL.md` (Implementer entries appended)
+10. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Reviewer section)
 
 ---
 

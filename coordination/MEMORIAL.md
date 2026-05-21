@@ -1651,3 +1651,19 @@ CONFIRMATION: role-boundary | Architect produced spec proper + spec-audit sideca
 
 CONFIRMATION: anti-scope | Spec § 5.1 enumerates 17 ALLOWED_SET paths + 3 regex carve-outs + 7 NOT-IN-ALLOWED categories. R73 frozen files (`scripts/tier-router*`, `scripts/tier-router-fixtures/**`) explicitly anti-scope per directive. CLAUDE-{ARCHITECT,IMPLEMENTER,MEMORIAL,COMMON,COORDINATOR}.md REINFORCEMENTS sections frozen. CLAUDE-REVIEWER.md REINFORCEMENTS section (lines 44-98 at round-start) frozen — only pre-REINFORCEMENTS area is modifiable for the Mode docs insertion. No engine/, demos/, tools/coverage-saturation.ts/build-canned-demos.ts/demo-scenario.ts modifications permitted. CROSS-PROJECT-MEMORIAL.md frozen (Memorial-Updater-stage decision). | R74 | ARCHITECT
 
+
+---
+
+## R74 — IMPLEMENTER (2026-05-20)
+
+CONFIRMATION: TDD-discipline | RED commit (`3baad60`) landed BEFORE GREEN commit (`5024b7f`). 22 test stubs with `assert.fail('R74 RED — implementation pending')` confirmed failing (22/22 fail, 0 pass) at RED state. GREEN commit implements all ACs; 22/22 pass. R23 IMPL MINOR-1 discipline satisfied. | R74 | IMPLEMENTER
+
+CONFIRMATION: halt-discipline | No halt conditions triggered. `\Z` regex fix (TD-1) and inline-args form (TD-2) are spec import-path / API-signature mismatches covered by TACTICAL AUTONOMY. No spec-vs-impl semantic conflict. No ALLOWED_SET expansion (EMPIRICAL.sh Block 12: 15 paths in diff, all in ALLOWED_SET). | R74 | IMPLEMENTER
+
+CONFIRMATION: binding-command-attestation | Rule 1 ACTIVE GATE applied. Observed verbatim: `pnpm exec tsc -p tsconfig.test.json` → exit 0. `pnpm exec node --test` → tests=538 / pass=530 / fail=5 / skipped=3 (process exit non-zero; fail=5 carry-forward). `Q-R74-EMPIRICAL.sh` → PASS 17 / FAIL 0, exit 0. `pnpm tier-router:validate` → exit 0. AC-R74-31 self-classification → `claude-sonnet-4-6` (empirical; diverges from Architect prediction of haiku — directive section contains Class C co-occurrence in R72/R73 Reviewer prose). All verbatim per Rule 1 sub-class `empirical-command-attestation`. | R74 | IMPLEMENTER
+
+CONFIRMATION: anti-scope | `git diff bac83e4..HEAD --name-only` → 15 paths, all in ALLOWED_SET. No tier-router files modified. No engine/demos/tools frozen files modified. CLAUDE-{ARCHITECT,IMPLEMENTER,MEMORIAL,COMMON,COORDINATOR}.md REINFORCEMENTS sections unchanged (EMPIRICAL.sh Block 14: exit 0). CLAUDE-REVIEWER.md REINFORCED count = 3 (unchanged; Mode docs section is NOT a REINFORCED line). | R74 | IMPLEMENTER
+
+CONFIRMATION: tessera-temporary-divergence | `run-pipeline.sh` R74 extensions documented: added `--mu-sonnet` and `--reviewer-scope` flags; replaced static `MODEL_MEMORIAL="claude-sonnet-4-6"` with dynamic `MODEL_MEMORIAL_DEFAULT`/`MODEL_MEMORIAL_SONNET` + selector invocation; plumbed `$REVIEWER_SCOPE` into `build_reviewer_prompt`; extended routing log to structured Markdown (unconditional). Tessera-temporary nature acknowledged; R76 Anchor rebase plan preserved per directive. | R74 | IMPLEMENTER
+
+CONFIRMATION: spec-prescription-fidelity | selector decision tree matches spec § 2.4 pseudocode exactly (four branches in correct priority order). `loadDirective` uses tier-router.ts boundary pattern (TACTICAL AUTONOMY: \Z not valid in JavaScript). corpus.json matches spec § 3.2 exactly (6 entries, correct names + expected_models). CLAUDE-REVIEWER.md Mode docs inserted verbatim from spec § 2.6 between role-boundary block and REINFORCEMENTS divider. | R74 | IMPLEMENTER
