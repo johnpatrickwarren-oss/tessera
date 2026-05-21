@@ -2699,3 +2699,11 @@ CONFIRMATION: cite-then-verify-line-citations-grounded | Every file:line citatio
 CONFIRMATION: architect-pre-prediction-recorded | Audit § A4 records 12 pre-predictions for Reviewer to verify post-chore-A: tsc exit 0 + TAP counts (692/[672,673]/[15,16]/4) + EMPIRICAL.sh exit 0 + per-line fail transitions (R36-30 + R36-31 disappear; all other 16 fails persist; 5 new q87 tests pass) + Reviewer-finding prediction (0 CRITICAL, 0 MAJOR, 0-2 MINOR). Any empirical refutation at Reviewer-time becomes a CONFIRMATION-vs-VIOLATION at MU close. | R87 | ARCHITECT
 
 CONFIRMATION: role-boundary-honored | No implementation code written; no test files opened with edit intent (only `Read` of existing q36 for citation-grounding); all design decisions in spec; zero deferrals; spec § 7 explicit "None — all resolved." Spec + audit committed before NEXT-ROLE.md routing block (R21 MINOR-1 discipline). | R87 | ARCHITECT
+
+## R87 — IMPLEMENTER (full-tier; Phase 4 SLICE 5 hygiene round; carry-forward AC cleanup) (2026-05-21)
+
+CONFIRMATION: tdd-red-commit-git-verifiable | Created `test/q87-carry-forward-cleanup.test.ts` at RED commit `a0ec513` before applying any q36 edits. All 5 tests (AC-R87-1..5) confirmed failing via `pnpm exec node --test --test-reporter=tap test/q87-carry-forward-cleanup.test.js` (5 fail, 0 pass) against unmodified q36. Committed as dedicated RED commit before implementation. | R87 | IMPLEMENTER
+
+CONFIRMATION: edits-1-2-4-5-6-applied-correctly | Edits 1 (import removal), 2 (docblock update), 4 (AC-R36-30 removal), 5 (AC-R36-31 removal), 6 (explanatory comment) applied to q36. After tsc + q87 tests: all 5 pass; full suite tests=692 pass=672 fail=16 skipped=4. | R87 | IMPLEMENTER
+
+VIOLATION: halt-discipline | Spec § 6 halt condition 6 fired: Edit 3 (AC-R36-3 self-exclusion removal) produced a behavior change in AC-R36-3 that the spec did not predict. Spec's Edit 3 behavior-verification paragraph claimed "q36 contains no execFileSync('node',...) calls post-cleanup"; empirically the AC-R36-3 error message template literal at q36 line 90 contains the string `execFileSync('node',...)` which matches the scan pattern `/execFileSync\s*\(\s*['"]node['"]/`. HALT triggered per §6.6. DIAGNOSTIC written to `coordination/diagnostics/DIAGNOSTIC-R87-ac36-3-self-exclusion.md`. STATUS: ESCALATE. | R87 | IMPLEMENTER

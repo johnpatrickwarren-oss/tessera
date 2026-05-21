@@ -1,6 +1,6 @@
 CURRENT-ROUND: R87
-NEXT-ROLE: IMPLEMENTER
-STATUS: READY
+NEXT-ROLE: ESCALATE
+STATUS: ESCALATE
 TIER: full
 
 ---
@@ -7320,3 +7320,63 @@ CRITICAL-1 is **attestation-level** (substantive deliverable sound; all 20 R85 A
 ### CONFIRMATION + VIOLATION lines appended to coordination/MEMORIAL.md
 
 See R85 — REVIEWER section appended below the IMPLEMENTER section.
+
+---
+
+## § R87 IMPLEMENTER routing block (2026-05-21) — ESCALATE
+
+NEXT-ROLE: ESCALATE
+STATUS: ESCALATE
+
+### Chore-A progress at HALT
+
+**TDD RED commit:** `a0ec513` — `test/q87-carry-forward-cleanup.test.ts` created; all 5 tests fail against unmodified q36.
+
+**Edits applied to `test/q36-phase2-close-walk.test.ts` before HALT:**
+- Edit 1 (import removal): ✅ applied — `import { execFileSync } from 'node:child_process'` removed
+- Edit 2 (docblock update): ✅ applied — range updated "1 through 31" → "1 through 29"; R87 citation block added
+- Edit 3 (self-exclusion removal): ✅ applied — BUT caused halt condition 6 (see below)
+- Edit 4 + 5 (AC-R36-30 + AC-R36-31 block removal): ✅ applied
+- Edit 6 (R87 explanatory comment): ✅ applied
+
+### Halt condition triggered: §6 halt condition 6
+
+> "if any Edit produces… a behavior change in AC-R36-3 that this spec did not predict, HALT + DIAGNOSTIC"
+
+After applying Edit 3 (removing the `f !== 'q36-phase2-close-walk.test.ts'` self-exclusion from AC-R36-3's filter), AC-R36-3 **fails**:
+
+```
+AssertionError: These test files carry execFileSync('node',...) — transitive hang risk: q36-phase2-close-walk.test.ts
+actual: [ 'q36-phase2-close-walk.test.ts' ]
+expected: []
+```
+
+**Root cause:** The spec's Edit 3 behavior verification paragraph (§ 3.1) claimed: "Post-R87, q36 contains no `execFileSync` call." This claim was empirically wrong. The AC-R36-3 test body at q36 line 90 contains the template literal:
+
+```typescript
+`These test files carry execFileSync('node',...) — transitive hang risk: ${violations.join(', ')}`,
+```
+
+This string contains `execFileSync('node'` which matches the pattern `/execFileSync\s*\(\s*['"]node['"]/`. The spec analysis said q36's only remaining `execFileSync` references were in AC-R36-11 and AC-R36-12 (looking for `execFileSync('git'`), but missed the error message in AC-R36-3 itself.
+
+### Diagnostic file
+
+`coordination/diagnostics/DIAGNOSTIC-R87-ac36-3-self-exclusion.md`
+
+### Resolution options (for operator)
+
+**Option A (Recommended):** Revert Edit 3 — restore the self-exclusion line with an updated comment reflecting the actual reason:
+```typescript
+f !== 'q36-phase2-close-walk.test.ts',  // exclude self: AC-R36-3's error message contains execFileSync('node',...)
+```
+Consequence: Edit 3 is not applied; all other edits stand; AC-R36-3 continues to pass; all 5 q87 tests pass.
+
+**Option B:** Keep Edit 3 removal, modify AC-R36-3's error message to not contain `execFileSync('node',...)`.
+Consequence: Edit 3 as prescribed applied; error message changes; slightly less informative.
+
+### Escalation items
+- `coordination/diagnostics/DIAGNOSTIC-R87-ac36-3-self-exclusion.md`
+
+### State of q87 tests at HALT
+With Edits 1, 2, 4, 5, 6 applied (not Edit 3), q87 tests: **pass 5 / fail 0**
+With Edit 3 also applied (current state): q36 AC-R36-3 fails; full suite: **tests=692 pass=672 fail=16 skipped=4** BUT includes AC-R36-3 failing (was previously passing pre-R87).
