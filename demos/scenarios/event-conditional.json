@@ -21,10 +21,18 @@
         {
           "shard_id": "shard-00",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": null,
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 1,
@@ -32,10 +40,18 @@
         {
           "shard_id": "shard-00",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": null,
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 2,
@@ -43,7 +59,8 @@
         {
           "shard_id": "shard-00",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         }
       ],
       "events": [
@@ -53,7 +70,14 @@
           "event_class": "firmware_push",
           "event_ts": 1700000180
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": null,
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 3,
@@ -61,7 +85,8 @@
         {
           "shard_id": "shard-00",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         }
       ],
       "events": [
@@ -70,7 +95,14 @@
           "freeze_active": true,
           "absorbed": false
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": null,
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 4,
@@ -78,10 +110,18 @@
         {
           "shard_id": "shard-00",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": null,
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     }
   ],
   "terminal_state": {
@@ -99,5 +139,8 @@
     "No immediate action — event-conditional attribution is suppressing this drift by design",
     "Verify the deploy event window matches the observed drift envelope (sanity check)",
     "If the freeze window proves too short / too long under live load, tune activation_window_seconds at the freeze-hook factory"
-  ]
+  ],
+  "detector_families": [],
+  "threshold_crossing_log": [],
+  "provenance_receipts": []
 }
