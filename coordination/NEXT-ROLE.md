@@ -1,7 +1,121 @@
-CURRENT-ROUND: R81
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R82
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § Phase 4 SLICE 2 CLOSE + R81 close attestation (2026-05-21)
+
+Phase 4 SLICE 2 COMPLETE. R71 MVP 7,518 → R81 final 13,207 lines; structural commensurability with DS achieved (gap closed from 9× to ~5×). DEMO-SCRIPT.md 226 lines.
+
+Haiku-MU correctly executed STATUS at R81 (R79+R81 correct; R75+R78+R80 missed in 3 variants — 3 Tessera instances; cross-project promotion candidate).
+
+---
+
+## § Phase 4 SLICE 3 framing — Live in-browser engine (4 rounds) (2026-05-21)
+
+SLICE 3 = "tune knobs and watch the engine run" destination.
+
+| Round | Work |
+|---|---|
+| **R82** (this round) | Engine browser-bundling + ES modules port + Web Crypto adapter |
+| R83 | Interactive knobs + control surface |
+| R84 | Live engine compute + Web Worker |
+| R85 | SLICE 3 close + Phase 4 close memorialization |
+
+---
+
+## § R82 Round-scope directive (Architect — engine browser-bundling + ES modules port; Phase 4 SLICE 3 round 1) (2026-05-21)
+
+R82 = foundation for live in-browser engine. Bundler + Web Crypto adapter for `engine/topology-overlay.ts` Node-only `node:crypto` dep + ES modules consumable from `demos/demo.html` via `<script type="module">`.
+
+**Round-start SHA:** SHA of this commit; verify at Architect session entry.
+
+### Engine portability scan (verified at directive authoring)
+
+Node-only API deps in `engine/`:
+1. `engine/topology-overlay.ts` uses `node:crypto`. **Browser fix: Web Crypto API** — async; needs adapter
+2. `engine/ds-integration/feed.ts` + `event-consumer.ts` use `node:http` + `node:events`. **EXCLUDE from browser bundle**
+
+Browser-safe subset: detectors/* (all 5 families) + topology/common-mode-attribution + per-shard/* + fleet/e-bh + types/* + events/freeze-hook.
+
+Excluded: topology-overlay.ts (until R82 adapter) + ds-integration/* (server-side).
+
+### Primary deliverable
+
+1. **`tools/build-browser-bundle.ts`** (NEW):
+   - Bundles browser-safe engine subset into ES modules
+   - **Bundler choice:** Architect picks at spec § 0: (a) esbuild (recommended; single binary; +1 dep), (b) tsc --module esnext + manual concat (zero-new-deps; more manual). Architect surfaces tradeoffs.
+   - Output: `demos/engine-bundle.mjs`
+
+2. **`engine/topology-overlay.ts` Web Crypto adapter** — Architect picks:
+   - **Option (i) RECOMMENDED:** Dependency-inject hash function; non-breaking for Node consumers with default = node:crypto wrapper
+   - **Option (ii):** Runtime detection inside function
+   - **Option (iii):** Two parallel files
+
+3. **`package.json` scripts:** `"build:browser": "pnpm exec node tools/build-browser-bundle.js"`
+
+4. **`demos/demo.html` extension:**
+   - Add `<script type="module">` import of `engine-bundle.mjs`
+   - Smoke test only (R83 adds knobs; R84 adds live compute)
+
+5. **Test file** `test/q82-engine-browser-bundle.test.ts`:
+   - Bundle structural ACs (file exists; expected exports)
+   - Web Crypto adapter ACs (deterministic hash across Node + browser; byte-identical)
+   - Bundle-loads smoke test
+   - Anti-regression: existing Node-side tests pass
+
+6. **Q-R82-EMPIRICAL.sh** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77.
+
+### Tier rationale
+
+**full-tier** — Architect (bundler + adapter + browser-safe subset; cite-then-walk over engine/*) + Implementer + Reviewer + MU.
+
+### Anti-scope (R82 hard limits)
+
+- NO modification of `engine/*` EXCEPT `topology-overlay.ts` (Architect-picked Web Crypto adapter)
+- NO modification of `demos/scenarios/*.json` (R71/R79/R80 frozen)
+- NO modification of R73-R81 deliverables (frozen)
+- **CONDITIONAL new external dependency** (esbuild OR equivalent): ESCALATE for operator decision
+- NO modification of `run-pipeline.sh` (PR #39 pending)
+- NO real-cluster; NO DS-repo; NO `gh repo` operations
+- NO modification of carry-forward AC fail set; NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `tools/build-browser-bundle.ts` (NEW)
+- `engine/topology-overlay.ts` (bounded; Web Crypto adapter)
+- `demos/demo.html` (script type=module import)
+- `demos/engine-bundle.mjs` (NEW; generated; may be gitignored)
+- `package.json` (add script; possibly esbuild dep)
+- `pnpm-lock.yaml` (if new dep)
+- `test/q82-engine-browser-bundle.test.ts` (NEW)
+- `coordination/specs/Q-R82-SPEC.md` + `Q-R82-SPEC-AUDIT.md` + `Q-R82-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R82.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE. **Architect MUST use `--test-reporter=tap`** per R77. Claim-then-walk applies to "engine subset X is browser-safe" — grep every proposed-bundle file for Node-only API before spec-emit.
+
+### Halt conditions (R82 Implementer)
+
+1. Q-R82-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R81 close other than R82-additions
+4. R61-class architectural-reality discovery
+5. Architect spec uses round-evolution-fragile AC patterns: HALT
+6. All cross-project disciplines load-bearing
+7. **New external dependency required:** ESCALATE for operator decision
+8. **Engine surface beyond topology-overlay.ts needs modification:** ESCALATE before chore-A
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R82 --tier full
+```
 
 ---
 
