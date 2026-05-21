@@ -1,6 +1,6 @@
 CURRENT-ROUND: R87
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
 TIER: full
 
 ---
@@ -7475,3 +7475,51 @@ All 8 paths within ALLOWED_SET (§ 5.2). No unauthorized paths.
 - Branch: `main` (all commits on main)
 - Test file: `test/q87-carry-forward-cleanup.test.ts`
 - Modified: `test/q36-phase2-close-walk.test.ts`
+
+---
+
+## § R87 REVIEWER routing block (2026-05-21)
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+
+### Reviewer-HEAD SHA
+`46fa41f` (= Implementer's chore-A final SHA at routing-to-Reviewer time).
+
+### Inputs to Memorial Updater
+- Reviewer report: `coordination/reviews/REVIEWER-REPORT-R87.md`
+- Spec: `coordination/specs/Q-R87-SPEC.md`
+- Spec audit (for OBS-1 pre-prediction refutation cross-check): `coordination/specs/Q-R87-SPEC-AUDIT.md` § A4
+- EMPIRICAL.sh: `coordination/specs/Q-R87-EMPIRICAL.sh`
+- MEMORIAL.md (R87 REVIEWER section appended below the Implementer section)
+- DIAGNOSTIC: `coordination/diagnostics/DIAGNOSTIC-R87-ac36-3-self-exclusion.md` (Memorial-Updater is permitted to read diagnostics per CLAUDE.md)
+
+### Findings summary
+- **CRITICAL:** 0
+- **MAJOR:** 2 (architect-claim-without-empirical-walk; self-application gate gap)
+- **MINOR:** 2 (MEMORIAL VIOLATION mis-classification + role-mistag; spec-not-amended-post-disposition)
+- **OBS:** 2 (Architect pre-prediction partially refuted; carry-forward fails 18 → 15/16)
+
+### Per-AC verdict
+7/7 PASS (AC-R87-1..AC-R87-7).
+
+### Reviewer-replicated binding-command outputs (encode-actual-results-verbatim)
+- `pnpm exec tsc -p tsconfig.test.json` → exit **0**
+- `pnpm exec node --test --test-reporter=tap test/*.test.js` → `# tests 692 / # pass 673 / # fail 15 / # skipped 4`
+- `bash coordination/specs/Q-R87-EMPIRICAL.sh` → 10 PASS / 0 FAIL, exit **0**
+- `git diff 0eb8a51 HEAD --name-only` → 8 paths, all in § 5.2 ALLOWED_SET
+
+### MU action items
+1. Memorialize MAJOR-1 as **8th Tessera-instance of architect-claim-without-empirical-walk** with R87-novel sub-pattern variant `prose-claim-about-post-edit-state` (vs in-AC-pattern-encoding the R86 SPEC-AUTHORING-CHECKLIST tightening covered). Consider cross-project canonical sharpening.
+2. Re-classify the Implementer's pre-existing `VIOLATION: halt-discipline | … | R87 | IMPLEMENTER` MEMORIAL entry per MINOR-1: split into (a) `architect-claim-without-empirical-walk | … | R87 | ARCHITECT` VIOLATION; (b) `halt-discipline | Implementer correctly halted; wrote DIAGNOSTIC; ESCALATE | R87 | IMPLEMENTER` CONFIRMATION. The Reviewer MEMORIAL section already records the corrected entries; MU's task is to either annotate or supersede the Implementer's mis-classified line.
+3. Record OBS-1 Architect-pre-prediction refutation against Q-R87-SPEC-AUDIT.md § A4 predictions #10 ("Reviewer finds zero MAJOR findings") and #12 ("Implementer encounters no HALT conditions").
+4. **Optional (operator-discretionary):** amend Q-R87-SPEC.md § 3.1 Edit 3 with a `[R87 Option A: superseded]` marker per MINOR-2. The in-tree audit trail exists without this amendment but the spec staleness remains.
+
+### Routing
+**STATUS: MERGE-READY.** No CRITICAL findings; per CLAUDE-REVIEWER.md routing rule, MAJOR-or-below → MERGE-READY. Substantive R87 deliverable is sound; the two MAJOR findings are spec-authoring-discipline defects fully mitigated by Implementer halt-discipline + Operator Option A chain.
+
+### Pipeline resume
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R87 --tier full --start-at MEMORIAL-UPDATER
+```
