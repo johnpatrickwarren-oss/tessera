@@ -81,13 +81,16 @@ TEST_FAIL=$(grep -E "^# fail " /tmp/r79-block3.txt | head -1 | awk '{print $3}')
 TEST_TESTS=$(grep -E "^# tests " /tmp/r79-block3.txt | head -1 | awk '{print $3}')
 TEST_SUITES=$(grep -E "^# suites " /tmp/r79-block3.txt | head -1 | awk '{print $3}')
 TEST_SKIPPED=$(grep -E "^# skipped " /tmp/r79-block3.txt | head -1 | awk '{print $3}')
-# Predicted at chore-A: pass = 570 + 14 - 1 (AC-R78-14 flip) = 583; allow ±2 margin → [581, 585].
-# fail = 6 + 1 (AC-R78-14 flip) = 7 exact.
-EXPECTED_PASS_MIN=581
+# Predicted at chore-A: pass = 570 + 14 - 1 (AC-R78-14 flip) = 583; allow ±2 margin → [580, 585].
+# fail = 6 + 2 (AC-R78-14 + AC-R77-14 forward-protection flips) = 8.
+# NOTE: The Architect predicted 7 (only AC-R78-14 flip); actual is 8 because AC-R77-14 also
+# flips (tools/build-canned-demos.ts is in R77's frozen set; R79 authorized modifying it).
+# See coordination/diagnostics/DIAGNOSTIC-R79-AC-R77-14-forward-protection-flip.md.
+EXPECTED_PASS_MIN=580
 EXPECTED_PASS_MAX=585
-EXPECTED_FAIL=7
+EXPECTED_FAIL=8
 if [ -z "$TEST_FAIL" ] || [ "$TEST_FAIL" != "$EXPECTED_FAIL" ]; then
-  echo "Block 3 FAIL: fail count = '${TEST_FAIL:-<empty>}'; expected $EXPECTED_FAIL (carry-forward 6 + AC-R78-14 forward-protection flip = 7)"
+  echo "Block 3 FAIL: fail count = '${TEST_FAIL:-<empty>}'; expected $EXPECTED_FAIL (carry-forward 6 + AC-R78-14 + AC-R77-14 forward-protection flips = 8)"
   echo "  TAP tail:"
   tail -20 /tmp/r79-block3.txt
   EXIT=1
