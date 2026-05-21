@@ -1,7 +1,136 @@
 CURRENT-ROUND: R74
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Architect R74 routing block (2026-05-20)
+
+### Architect attestation summary
+
+- **Round-start SHA (anti-scope diff lower bound for Implementer's chore-A):** `bac83e42b10450e3107156556cdb42cf3858558b` (`spec(R74): Q-R74-SPEC + audit sidecar + EMPIRICAL.sh — Haiku-for-MU + Reviewer scope differentiation`). Captured via `git rev-parse HEAD` AFTER the spec triad landed and BEFORE this routing-block commit. Per CLAUDE-ARCHITECT.md REINFORCED 2026-05-17 R15 MINOR-1, the empirical anti-scope diff lower bound is the most recent spec-triad commit (= what Implementer injects into `Q-R74-EMPIRICAL.sh` `$ROUND_START_SHA` via sed). The R74 directive commit `0a81fa9` is the pre-prep SHA but NOT the load-bearing diff lower bound.
+- **Spec triad commit (pre-Implementer chore-A):** `bac83e4` (spec triad). Per R21 ARCH MINOR-1 spec-commit-sequencing discipline; spec triad landed in its OWN commit BEFORE this routing block update.
+- **Empirical baseline at Architect session entry (verified by direct command runs; NOT inherited from R73 attestation per R25 MINOR-1):**
+  - `pnpm exec node --test --test-reporter=tap test/*.test.js` → `tests=516 / pass=508 / fail=5 / skipped=3`. 5 fails identity-verified: `AC-R36-21`, `AC-R36-30`, `AC-R36-31`, `AC-R65-2`, `AC-R66-14`.
+  - `pnpm exec tsc -p tsconfig.test.json` → exit 0, zero diagnostics.
+  - `git status --short` → clean working tree at session entry.
+  - `git rev-parse HEAD` at session entry → `0a81fa9` (R74 directive commit).
+- **Pipeline + codebase inspection at session entry (R72 claim-then-walk discipline applied):**
+  - `run-pipeline.sh:75-80` model assignments verified by direct read; `MODEL_MEMORIAL="claude-sonnet-4-6"` at line 78 confirmed (load-bearing for R74's static→dynamic replacement).
+  - `run-pipeline.sh:118-184` argument-parsing loop verified by direct read; existing `case $1 in ... esac` pattern with `shift 2` / `shift 1` mechanics confirmed; existing `--auto-tier` flag at line 130 confirmed (R73 precedent for the new R74 flags).
+  - `run-pipeline.sh:186-209` --auto-tier integration block + routing-log emission at line 191 verified by direct read; R74 extends this block to a structured Markdown log with three sections.
+  - `run-pipeline.sh:1076` `build_reviewer_prompt()` function definition confirmed; R74 plumbs `$REVIEWER_SCOPE` into this function's heredoc body.
+  - `run-pipeline.sh:1255` `build_memorial_prompt()` function definition confirmed; R74 does NOT modify it (MU model selection happens at dispatch time via `get_model`, not in the prompt body).
+  - `run-pipeline.sh:1332-1344` `get_model()` function verified; MEMORIAL-UPDATER case returns `$MODEL_MEMORIAL` — by setting `$MODEL_MEMORIAL` dynamically before main loop, R74 needs no change to `get_model()` itself.
+  - `run-pipeline.sh:1802-1836` main dispatch loop verified; R74 needs no change here (the loop dispatches each role via `run_role` with model resolved at call-time).
+  - `run-pipeline.sh:1531-1543` flag construction in `run_role` verified; `--model "$model"` is the existing mechanism — R74 reuses it.
+  - `ROLES` per tier verified at lines 244-250: full = (ARCHITECT IMPLEMENTER REVIEWER MEMORIAL-UPDATER); audit = (IMPLEMENTER REVIEWER MEMORIAL-UPDATER); solo = (IMPLEMENTER). solo + coordinator-only do NOT dispatch MEMORIAL-UPDATER — confirms the `tier_no_mu` branch design.
+  - `tsconfig.test.json` line 16 confirmed `"scripts/**/*.ts"` already in `include` (added by R73 chore-A). R74 does NOT modify tsconfig.test.json.
+  - `CLAUDE-REVIEWER.md` 98 lines; line 41-42 = `## Reviewer role boundary` block; line 43 blank; line 44 = `# ── REVIEWER REINFORCEMENTS ───...` divider. R74 inserts the new Mode docs section at line 43 (between role-boundary and REINFORCEMENTS divider). Baseline `# REINFORCED` count = 3.
+  - REINFORCED line counts at session entry: ARCHITECT=39, IMPLEMENTER=33, REVIEWER=3, MEMORIAL=0, COMMON=7, COORDINATOR=2. R74 EMPIRICAL.sh Block 14 enforces all six unchanged at chore-A HEAD.
+  - R73 tier-router self-classifies R74 directive: `node scripts/tier-router.js --directive coordination/NEXT-ROLE.md --mode heuristic` → `{"tier":"full","rationale":"full anchor: architectural-decision, R61-class"}`. R73 anti-regression baseline verified.
+- **Toolchain at session entry:** pnpm 11.x, Node v25.x, TypeScript per devDependencies `^5.4.0`.
+- **Pre-emit grilling outcome:** PASS. Claim-then-walk discipline (R72 lesson; CROSS-PROJECT-MEMORIAL.md:38) applied to every load-bearing factual claim (17 claims; Q-R74-SPEC § 9.1 Q.6 table). Cross-section consistency sweep (R34 + R65 MINOR-2) ran clean (model literals, anchor class labels, ALLOWED_SET count, decision_path values cross-checked). R72 ALLOWED_SET-amendment-propagation cross-project canonical applied: 17-path set enumerated identically at spec § 1.1 (component inventory), § 5.1 (ALLOWED_SET), § 7 (Rule 4 row), and `Q-R74-EMPIRICAL.sh` Block 12. No forward-protection / live-file-count / anti-scope-diff-against-prior-round patterns (R62+R66+R68+R72 cumulative; 6th-instance avoidance since R71). R71 EMPIRICAL-PREMISE-VERIFICATION sub-variants applied: all anchor regex patterns + selector decision-tree branches traced against expected fixture outputs at spec-emit time.
+- **R72 claim-then-walk specific application (Architect-side; cross-project canonical):** every codebase claim in spec § 9.1 Q.6 verified via direct command at spec-emit time, NOT inherited from R73 attestation or mental model. Critical check: confirmed `tsconfig.test.json` already includes `scripts/**/*.ts` (no R73-style "tsconfig must be added to ALLOWED_SET" amendment needed).
+- **Round-evolution-fragility avoidance (R62 + R66 + R68 + R72 cumulative; 6th-instance since R71):** Spec § 5.1 ALLOWED_SET uses historical-only diff (`round-start-SHA..HEAD`); carry-forward fail set bound by AC ID identity (not raw count alone); NO forward-protection AC; NO live-file-count AC; NO anti-scope-diff-against-prior-round AC; NO chore-B (single-state spec); AC-R74-31 self-classification empirically bound (no predicted literal).
+
+### Implementer inputs for R74
+
+1. `coordination/specs/Q-R74-SPEC.md` (spec proper; prescriptive)
+2. `coordination/specs/Q-R74-SPEC-AUDIT.md` (Architect ceremony sidecar; Reviewer-authorized read; Implementer MAY read for context but it is NOT load-bearing for chore-A)
+3. `coordination/specs/Q-R74-EMPIRICAL.sh` (chore-A verification harness; executable; **Implementer injects `$ROUND_START_SHA` literal at chore-A pre-commit per Q-R74-SPEC § 5.2 sed-substitution mechanism — read SHA `bac83e4` from THIS routing block; do NOT use `git rev-parse HEAD` at sed time per CLAUDE-COMMON.md REINFORCED 2026-05-18 / R70 MINOR-1**)
+4. `coordination/PRD.md` (Phase 3 PRD; no Phase 4 PRD yet; Phase 4 SLICE 1 framing is in this NEXT-ROLE.md § Phase 4 SLICE 1 block from R73)
+5. `coordination/NEXT-ROLE.md` § R74 Round-scope directive (operator scope-setting; preserved below this routing block)
+6. `run-pipeline.sh` (READ-ONLY for current arg-parse + role-dispatch + model-routing patterns; MODIFY for `--mu-sonnet` + `--reviewer-scope` flags + dynamic `MODEL_MEMORIAL` + routing-log schema extension per Q-R74-SPEC § 2.5)
+7. `CLAUDE-REVIEWER.md` (READ-ONLY for current structure; MODIFY by inserting `## Mode: Structural-only Reviewer` section between role-boundary block and REINFORCEMENTS divider per Q-R74-SPEC § 2.6 — verbatim insertion content)
+8. R63-R72 directive sections + R45/R46/R66 directive history (TACTICAL AUTONOMY input for fixture composition reasoning; Implementer composes F1..F6 fixtures per § 3.3 guidance)
+
+### Implementer chore-A sequence (per Q-R74-SPEC § 5.2 + § 6.1)
+
+1. **RED commit (separate from GREEN per R23 IMPL MINOR-1):**
+   - Land `test/q74-mu-haiku-reviewer-scope.test.ts` with `assert.fail('R74 RED — implementation pending')` stubs at AC-R74-1..22 positions (the runtime ACs; empirical-bound ACs live in EMPIRICAL.sh).
+   - `scripts/mu-model-select.ts`, `scripts/mu-model-select-fixtures/`, fixture .md files, and `package.json` `mu-model-select` script do NOT yet exist; tsc emits TS2307 module-resolution errors at the test's `import` and `existsSync` lines (fixture paths missing).
+   - Commit message format: `red(R74): q74 mu-haiku + reviewer-scope stub fails — TS2307 + AC-R74-1..22 RED assertion stubs`.
+
+2. **GREEN commit (chore-A):**
+   - Land `scripts/mu-model-select.ts` per Q-R74-SPEC § 3.1 pseudocode.
+   - Land `scripts/mu-model-select-fixtures/corpus.json` per Q-R74-SPEC § 3.2.
+   - Land 6 fixture files `scripts/mu-model-select-fixtures/F{1-default-haiku,2-class-A-promotion,3-class-B-batch,4-class-C-reviewer2,5-class-D-option,6-audit-no-anchor}.md` per Q-R74-SPEC § 3.3 guidance — minimal directive-content satisfying anchor semantics. **Verify each fixture's selector output BEFORE committing chore-A** by running `node scripts/mu-model-select.js --directive <fixture> --tier <tier>` (use tier=full for F1..F5; tier=audit for F6) and confirming the expected model.
+   - Modify `package.json`: add `mu-model-select` script per Q-R74-SPEC § 2.7 (preserve all other entries verbatim).
+   - Modify `run-pipeline.sh` per Q-R74-SPEC § 2.5 — five blocks (a/b/c/d/e):
+     - (a) Add `--mu-sonnet` + `--reviewer-scope` flag parsing in the existing arg-parse case statement.
+     - (b) Replace static `MODEL_MEMORIAL="claude-sonnet-4-6"` at line 78 with `MODEL_MEMORIAL_DEFAULT` + `MODEL_MEMORIAL_SONNET` + empty `MODEL_MEMORIAL` (resolved at TIER-decision time).
+     - (c) Add MU model selection block + Reviewer scope resolution block AFTER `--auto-tier` integration (after current line 209).
+     - (d) Plumb `$REVIEWER_SCOPE` into `build_reviewer_prompt` heredoc via a conditional `scope_note` block.
+     - (e) Replace the existing routing-log emission (currently inside the `--auto-tier` block) with the structured Markdown emission outside the conditional, so the log is always emitted.
+   - Modify `CLAUDE-REVIEWER.md`: insert the literal Mode docs section text per Q-R74-SPEC § 2.6 between current line 42 and line 44. **MUST NOT** add a `# REINFORCED` line (AC-R74-20 enforces; EMPIRICAL.sh Block 14 enforces).
+   - Replace all RED stubs in `test/q74-mu-haiku-reviewer-scope.test.ts` with real assertions per Q-R74-SPEC § 3.4.
+   - **BEFORE committing**: inject `$ROUND_START_SHA` into `Q-R74-EMPIRICAL.sh`:
+     ```bash
+     sed -i.bak "s|<INJECTED-AT-CHORE-A>|bac83e4|g" coordination/specs/Q-R74-EMPIRICAL.sh
+     rm coordination/specs/Q-R74-EMPIRICAL.sh.bak
+     ```
+     (`bac83e4` is the spec-triad commit SHA captured above — read this routing block; do NOT use `git rev-parse HEAD`).
+   - Verify `bash -n run-pipeline.sh` exits 0 (bash syntax check) before committing the script modifications.
+   - Commit message format: `feat(R74): mu-model-select selector + run-pipeline.sh integration + CLAUDE-REVIEWER.md Mode docs`.
+
+3. **Verify chore-A:**
+   - `pnpm exec tsc -p tsconfig.test.json` → exit 0; zero diagnostics.
+   - `pnpm exec node --test --test-reporter=tap test/*.test.js` → record VERBATIM the actual `# tests N / # pass M / # fail K / # skipped J` lines. Predicted: tests ≈ 516+22 = 538 / pass ≈ 508+22 / fail 5 / skipped 3.
+   - `bash coordination/specs/Q-R74-EMPIRICAL.sh` → all 17 blocks PASS, exit 0.
+   - `pnpm tier-router:validate` → exit 0 (R73 anti-regression; also bound by EMPIRICAL.sh Block 16).
+
+4. **Attestation in NEXT-ROLE.md (Implementer adds § Implementer R74 routing block above this Architect block):** encode ACTUAL chore-A summary VERBATIM per Rule 1 sub-class `empirical-command-attestation`. Do NOT reframe to match Architect prediction. Acknowledge any divergence in a spec-deviance section. **Per R73 MAJOR-1 lesson:** when reporting `git diff bac83e4..<GREEN-SHA> --name-only`, count the OBSERVED paths by re-running the command — do NOT estimate. **Per R73 MAJOR-2 lesson:** any control-flow rewrite to a spec-authored script (Q-R74-EMPIRICAL.sh, scripts/mu-model-select.ts) without HALT + DIAGNOSTIC is a halt-discipline violation. TD-1 disclosure is NOT a substitute for the methodology gate.
+
+5. **NO chore-B step.** R74 is single-state. Implementer routes directly to Reviewer after chore-A verification + attestation.
+
+### TACTICAL AUTONOMY scope (per Q-R74-SPEC § 6.2)
+
+Implementer MAY:
+- Choose `.js` extension imports per R70/R71/R73 precedent (default: `.js`).
+- Adjust JSDoc wording, blank lines, import order, internal helper names — no semantic change.
+- Adjust bash variable names in run-pipeline.sh additions IF collision with existing names is observed at chore-A (rename and document; internal naming is not load-bearing).
+- Adjust routing-log section wording (preserve the three required logical sections: `## Tier`, `## MU model`, `## Reviewer scope`).
+- Compose F1..F6 fixture content per Q-R74-SPEC § 3.3 guidance, minimal anchor-satisfying.
+- The AC-R74-31 self-classification expected model — empirically determine; the AC binds the OBSERVED output, not a predicted literal.
+- Order of JSON fields in selector output (key order is not significant for AC-R74-1).
+
+Implementer MAY NOT (without HALT + DIAGNOSTIC per Q-R74-SPEC § 6.1):
+- Modify any anti-scope file (§ 5.1 NOT in ALLOWED_SET; particularly `scripts/tier-router*` — R73 frozen).
+- Expand the ALLOWED_SET in-spec at chore-A (R36 MAJOR-2 NEVER violation).
+- Introduce a chore-B step or any forward-protection / live-file-count / anti-scope-diff-against-prior-round AC pattern (R62+R66+R68+R72 cumulative lesson; R72 cross-project canonical).
+- Add an external npm dependency to package.json (anti-scope directive § Anti-scope item).
+- Skip the RED commit (R23 IMPL MINOR-1).
+- Cite spec-predicted values as observed in attestation (Rule 1 sub-class; R73 MAJOR-1 / R26 MAJOR-1 / R45 CRITICAL-1 chain).
+- Tune the anchor class regexes in Q-R74-SPEC § 2.3 (anchor priorities + patterns are load-bearing for the calibration documented in spec § 0).
+- Add a `# REINFORCED` line to CLAUDE-REVIEWER.md (directive explicitly excludes; AC-R74-20 enforces; EMPIRICAL.sh Block 14 enforces).
+- Modify CLAUDE-REVIEWER.md content BELOW the `# ── REVIEWER REINFORCEMENTS ───────────────────────────────────────────────────` divider (line 44 at round-start; ALL existing REINFORCED entries frozen).
+- Rewrite control flow in `Q-R74-EMPIRICAL.sh` or `scripts/mu-model-select.ts` without HALT + DIAGNOSTIC (R73 MAJOR-2 reinforcement: TACTICAL AUTONOMY scope is bounded to spec § 6.2 explicit enumeration; control-flow rewrites in spec-authored scripts are § 6.1 halt #5 R61-class triggers).
+
+### Halt conditions for the Implementer (per Q-R74-SPEC § 6.1)
+
+10 halt conditions enumerated; do NOT proceed with a silent workaround. Write `coordination/diagnostics/DIAGNOSTIC-R74-<topic>.md` with ≥ 3 bounded options + set `STATUS: ESCALATE` + await operator disposition. The LOAD-BEARING SAFETY halt is #4: R73 router validation regression (any of R45/R61/R62/R66/R72 routes to anything other than `full`) → immediate HALT.
+
+### Cross-project rule dispositions (per Q-R74-SPEC § 7)
+
+| Rule | Disposition |
+|---|---|
+| 1 (`empirical-command-attestation`) | ACTIVE GATE — Q-R74-EMPIRICAL.sh Blocks 3+4+5 require VERBATIM attestation; AC-R74-23/24/26 bind observed values |
+| 2 (`architect-branch-binding-coverage`) | ACTIVE GATE — every branch in scripts/mu-model-select.ts bound to an AC (AC-R74-4..13 + AC-R74-2/3 for error paths) |
+| 3 (`implementer-spec-test-assertion-coverage`) | ACTIVE GATE — AC-R74-4..13 discriminating; § 5.3 acknowledged 2 non-load-bearing gaps with rationale |
+| 4 (`anti-scope-allowed-set-forward-coverage`) | ACTIVE GATE — 17-path ALLOWED_SET + 3 regex carve-outs; historical-only diff bounded by spec-triad SHA `bac83e4` |
+| 5 (`rule-derivation-without-self-application`) | N/A at spec emit (no new rule derived this round; R72 claim-then-walk applied at session entry) |
+| 6 (`halt-discipline-no-DIAGNOSTIC-for-workaround`) | ACTIVE GATE — 10 halt conditions; single-state spec |
+| 7 (`derived-rule-propagation-mechanism-required`) | ACTIVE GATE Surface (a) — spec § 7 + this row |
+
+### Routing
+
+**NEXT-ROLE: IMPLEMENTER | STATUS: READY**
+
+Implementer reads `Q-R74-SPEC.md` proper as load-bearing input; `Q-R74-SPEC-AUDIT.md` is Reviewer-authorized but Implementer MAY read for context.
+
+**Coordination chore SHA:** (Architect routing-block commit SHA to be stamped at chore time)
 
 ---
 
