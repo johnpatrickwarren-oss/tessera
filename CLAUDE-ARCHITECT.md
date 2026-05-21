@@ -876,4 +876,43 @@ All unresolved decisions → open questions in the spec.
 #   the § 5.2 fail-count prediction; EMPIRICAL.sh encoded `EXPECTED_FAIL=16` strict; ~25% of
 #   full-suite runs at routing HEAD tripped Halt-3. Operator Option A resolution required post-Reviewer
 #   ESCALATE. Second tessera instance of count-arithmetic-missing-flake-contribution (prior: R83
-#   REINFORCED covered deterministic flips; R85 extends to stochastic flake variance).
+#   REINFORCED covered deterministic flips; R85 extends to stochastic flake variance).# REINFORCED 2026-05-21 — Empirical-baseline integer claims in spec § 0 P*.N rows
+#   MUST be cross-validated against current files at spec-emit time (§ A5
+#   empirical-premise-verification gate per CLAUDE-ARCHITECT.md § 4 binding-
+#   command-run). "12 export * from lines" claims require a direct grep -c
+#   or Read of the actual file — do not infer from prose listing. This is
+#   a sub-case of Rule 1 empirical-command-attestation: the P0 row IS a
+#   claim amenable to command-based verification; verbatim output must be
+#   recorded. Detected R90 MINOR-1: P0.2 asserted 12 but enumeration lists
+#   13; actual file has 13. Same pattern at R40 + R88 (architect-claim-
+#   without-empirical-walk family). Procedure: before emitting spec-triad,
+#   run the actual enumeration command (grep -E 'export \* from' | wc -l)
+#   against the file at round-start HEAD; record observed count in P0 row.
+
+# REINFORCED 2026-05-21 — AC-scope and acknowledged-gap completeness:
+#   § 5.4 acknowledged-gap table is load-bearing when an AC does NOT bind
+#   all branches of a prescribed surface (e.g., § 3.1 exports map has 34+
+#   entries, AC-R90-4 binds 24, 10+ uncovered). The table entries must
+#   enumerate ALL uncovered branches with brief "why mitigation" columns,
+#   not just select examples. Audit procedure: for each AC, walk the spec
+#   § 3.x prescription and list every branch/subpath/field that the AC's
+#   "Then" clause does NOT bind. Cross-reference against test pseudocode.
+#   Detected R90 MINOR-2: gap table listed 5 but spec analysis revealed
+#   2 additional gaps (exports subpaths + script-body not runtime-tested).
+#   Same class as gap-completeness discipline (R74 MINOR-2 pairing).
+
+# REINFORCED 2026-05-21 — Empirical grep-count accuracy (Tessera R90):
+#   When spec § 0 P*.N rows cite empirical grep output ("56 distinct relative
+#   imports" from grep -hoE command), the command-result reproducibility is
+#   load-bearing for R88 false-compliance-attestation discipline (empirical
+#   output must be verbatim, not inferred). If the command is sensitive to
+#   the grep pattern (anchored vs unanchored; regex operator variance), re-run
+#   it at spec-emit HEAD alongside the authored command and document any
+#   discrepancy. "56 imports found via grep X; verified-at-HEAD counts 48
+#   via analogous engine-scoped grep [command]; variance documented as likely
+#   due to broader \.\. pattern including non-engine parent-relative imports"
+#   is acceptable attestation. Bare assertion of "56" followed by Reviewer-
+#   reproduction yielding "48" is a violation (attestation-accuracy). Same
+#   class as MINOR-1 (empirical-baseline integer not cross-validated). Detected
+#   R90 MINOR-4; minor instance of R88 false-compliance-attestation extended
+#   into grep-reproducibility variance.
