@@ -408,6 +408,25 @@ All unresolved decisions → open questions in the spec.
 #     sections, would the AC correctly FAIL when the target content appears only in the wrong one?"
 #     If no, the AC is too loose. Detected tessera R81 MINOR-2 (Architect; AC-R81-7 used three
 #     global matches; passed vacuously across duplicate `## Quick demo` headings).
+#
+#   Prose-claim-about-post-edit-state (R87 MAJOR-1): When spec § 3.x prescribes a delta
+#     (remove lines, add lines, modify text) AND § 3.y states the behavioral consequence as prose
+#     ("After this edit, X will not occur because Y was removed"), the Architect MUST verify the
+#     prose claim by applying the delta and reading the full post-edit content. Enumerate
+#     exhaustively: where could the pattern you're claiming is "gone" actually appear? Spec prose
+#     must not be an enumeration of EXPECTED locations; it must be grounded in ACTUAL post-edit
+#     content. Procedure: when documenting a delta's behavioral consequence, mentally or locally
+#     apply the delta, open the file, and search the entire post-edit content for any occurrence
+#     of the pattern the spec claims is absent. If the pattern can appear in comment/assertion text
+#     (error messages, debug strings, error templates), search for it there too. For grep-based
+#     consequences, RUN the grep against the post-edit content at spec-emit time. For prose
+#     enumerations ("all call sites are here, here, and here"), walk the file to verify no other
+#     call sites exist. Detected tessera R87 MAJOR-1 (Architect prescribed Edit 3 removal of a
+#     self-exclusion line, documented post-edit consequence as "AC-R36-3 pattern won't match
+#     because remaining execFileSync references are only in AC-R36-11/12 string literals"; missed
+#     execFileSync string in AC-R36-3's own assertion error message; empirically false at chore-A;
+#     HALT condition 6 / Implementer DIAGNOSTIC; Reviewer caught as claim-without-empirical-walk
+#     MAJOR-1).
 
 # REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
 #   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include
