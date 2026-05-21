@@ -177,11 +177,11 @@ echo ""
 # ── Block 8: test baseline (binding command) ─────────────────────────────────
 echo "--- Block 8: test baseline (TAP) ---"
 
-TAP_OUTPUT=$(node --test test/*.test.js --test-reporter=tap 2>&1 || true)
-TESTS_COUNT=$(echo "$TAP_OUTPUT" | grep '^# tests' | awk '{print $3}')
-PASS_COUNT=$(echo "$TAP_OUTPUT" | grep '^# pass' | awk '{print $3}')
-FAIL_COUNT=$(echo "$TAP_OUTPUT" | grep '^# fail' | awk '{print $3}')
-SKIP_COUNT=$(echo "$TAP_OUTPUT" | grep '^# skipped' | awk '{print $3}')
+TAP_OUTPUT=$(node --test --test-reporter=tap test/*.test.js 2>&1 | tail -20 || true)
+TESTS_COUNT=$(echo "$TAP_OUTPUT" | grep '^# tests' | awk '{print $3}' || echo "0")
+PASS_COUNT=$(echo "$TAP_OUTPUT" | grep '^# pass' | awk '{print $3}' || echo "0")
+FAIL_COUNT=$(echo "$TAP_OUTPUT" | grep '^# fail' | awk '{print $3}' || echo "0")
+SKIP_COUNT=$(echo "$TAP_OUTPUT" | grep '^# skipped' | awk '{print $3}' || echo "0")
 
 echo "Observed: tests=$TESTS_COUNT pass=$PASS_COUNT fail=$FAIL_COUNT skip=$SKIP_COUNT"
 
