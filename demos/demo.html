@@ -13203,5 +13203,29 @@
   loadScenario(currentName);
 })();
   </script>
+<script type="module">
+  // R82 smoke test — load engine-bundle.mjs + exercise computeSnapshotHash sync surface.
+  // R83/R84 expand this to live engine computation; R82 is bundle-loads + hash-runs only.
+  try {
+    const engine = await import('./engine-bundle.mjs');
+    const snapshot = {
+      nodes: [{ id: 'a' }, { id: 'b' }],
+      edges: [{ from: 'a', to: 'b', relationship: 'contains' }],
+      fetched_at_ts: 0,
+      source_id: 'r82-smoke',
+      source_version: 'r82',
+    };
+    const hash = engine.computeSnapshotHash(snapshot);
+    // Side-channel for Reviewer manual verification (§ 5.3 acknowledged gap mitigation):
+    // open browser devtools console; expect:
+    //   - one log line prefixed "R82 smoke:" with a 64-char hex hash
+    //   - window.__tessera_r82_smoke__ === { loaded: true, hash: '<64-char hex>' }
+    window.__tessera_r82_smoke__ = { loaded: true, hash };
+    console.log('R82 smoke: computeSnapshotHash =', hash);
+  } catch (err) {
+    window.__tessera_r82_smoke__ = { loaded: false, error: String(err) };
+    console.error('R82 smoke: bundle failed to load:', err);
+  }
+</script>
 </body>
 </html>

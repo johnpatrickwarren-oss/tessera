@@ -13,6 +13,7 @@
     "build": "tsc",
     "predemo": "tsc -p tsconfig.test.json",
     "demo": "node tools/demo-scenario.js",
+    "build:browser": "node tools/build-browser-bundle.js",
     "prebuild:demos": "tsc -p tsconfig.test.json",
     "build:demos": "node tools/build-canned-demos.js",
     "prebuild:coverage": "tsc -p tsconfig.test.json",
@@ -32,7 +33,11 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "esbuild": "^0.28.0",
     "typescript": "^5.4.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
   },
   "repository": {
     "type": "git",

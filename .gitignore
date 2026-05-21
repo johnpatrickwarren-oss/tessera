@@ -16,6 +16,11 @@ build/
 coverage/
 *.tsbuildinfo
 
+# R82: engine browser-bundle (build output of `pnpm build:browser`)
+demos/engine-bundle.mjs
+# R82: pnpm v11 build-approval file (auto-created by pnpm; project-local; not tracked)
+pnpm-workspace.yaml
+
 # Anchor Mode 2 pipeline artifacts (gitignored per new-project.sh convention)
 coordination/.prompt-*.md
 coordination/.pipeline-*.lock
