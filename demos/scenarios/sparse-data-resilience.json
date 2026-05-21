@@ -20,35 +20,48 @@
         {
           "shard_id": "shard-00",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-01",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-02",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-03",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-04",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-05",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": null,
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 1,
@@ -56,35 +69,48 @@
         {
           "shard_id": "shard-00",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-01",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-02",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-03",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-04",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-05",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": null,
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 2,
@@ -92,32 +118,38 @@
         {
           "shard_id": "shard-00",
           "M_t": null,
-          "fired": true
+          "fired": true,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-01",
           "M_t": null,
-          "fired": true
+          "fired": true,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-02",
           "M_t": null,
-          "fired": true
+          "fired": true,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-03",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-04",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         },
         {
           "shard_id": "shard-05",
           "M_t": null,
-          "fired": false
+          "fired": false,
+          "residual_proxy": null
         }
       ],
       "events": [
@@ -126,7 +158,14 @@
           "candidate_count": 0,
           "note": "BFS over empty adjacency returns 0 candidates without throwing"
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": null,
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     }
   ],
   "terminal_state": {
@@ -147,6 +186,9 @@
   "suggested_actions": [
     "Fall back to per-shard alerts: 3 independent firings on shards 0/1/2 require individual investigation",
     "Investigate the topology data source: why are edges missing? Re-fetch the snapshot before re-running attribution",
-    "Audit whether the topology source’s sparse-data path is correctly identifying this as ‘incomplete’ rather than ‘no common-mode found’"
-  ]
+    "Audit whether the topology source's sparse-data path is correctly identifying this as 'incomplete' rather than 'no common-mode found'"
+  ],
+  "detector_families": [],
+  "threshold_crossing_log": [],
+  "provenance_receipts": []
 }

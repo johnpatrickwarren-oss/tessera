@@ -27,27 +27,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-01",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-02",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-03",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-04",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         }
       ],
       "events": [
@@ -58,7 +63,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 1,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 1,
@@ -66,27 +82,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.779498,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.220502
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.841278,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.158722
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.594113,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.594113
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.336466,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.336466
         },
         {
           "shard_id": "shard-04",
           "M_t": 1.470522,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.470522
         }
       ],
       "events": [
@@ -97,7 +118,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 1.594113,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 2,
@@ -105,27 +137,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.480928,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.519072
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.548844,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.451156
         },
         {
           "shard_id": "shard-02",
           "M_t": 2.072005,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.072005
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.659841,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.659841
         },
         {
           "shard_id": "shard-04",
           "M_t": 1.834332,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.834332
         }
       ],
       "events": [
@@ -136,7 +173,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 2.072005,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 3,
@@ -144,27 +192,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.417158,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.582842
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.563199,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.436801
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.913732,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.913732
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.512351,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.487649
         },
         {
           "shard_id": "shard-04",
           "M_t": 2.328438,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.328438
         }
       ],
       "events": [
@@ -175,7 +228,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 2.328438,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 4,
@@ -183,27 +247,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.425035,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.574965
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.686274,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.313726
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.186996,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.186996
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.52751,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.47249
         },
         {
           "shard_id": "shard-04",
           "M_t": 2.200252,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.200252
         }
       ],
       "events": [
@@ -214,7 +283,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 2.200252,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 5,
@@ -222,27 +302,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.485141,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.514859
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.703126,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.296874
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.565856,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.565856
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.590368,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.409632
         },
         {
           "shard_id": "shard-04",
           "M_t": 3.148157,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.148157
         }
       ],
       "events": [
@@ -253,7 +338,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 3.148157,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 6,
@@ -261,27 +357,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.580521,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.419479
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.446938,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.553062
         },
         {
           "shard_id": "shard-02",
           "M_t": 2.109104,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.109104
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.441043,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.558957
         },
         {
           "shard_id": "shard-04",
           "M_t": 3.715221,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.715221
         }
       ],
       "events": [
@@ -292,7 +393,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 3.715221,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 7,
@@ -300,27 +412,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.347625,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.652375
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.293933,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.706067
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.59103,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.59103
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.426117,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.573883
         },
         {
           "shard_id": "shard-04",
           "M_t": 3.860078,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.860078
         }
       ],
       "events": [
@@ -331,7 +448,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 3.860078,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 8,
@@ -339,27 +467,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.252924,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.747076
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.328641,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.671359
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.730372,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.730372
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.432754,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.567246
         },
         {
           "shard_id": "shard-04",
           "M_t": 4.550377,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 3.550377
         }
       ],
       "events": [
@@ -370,7 +503,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 4.550377,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 9,
@@ -378,27 +522,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.251606,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.748394
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.367406,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.632594
         },
         {
           "shard_id": "shard-02",
           "M_t": 0.875271,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.124729
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.430082,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.569918
         },
         {
           "shard_id": "shard-04",
           "M_t": 6.130147,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 5.130147
         }
       ],
       "events": [
@@ -409,7 +558,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 6.130147,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 10,
@@ -417,27 +577,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.275681,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.724319
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.36823,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.63177
         },
         {
           "shard_id": "shard-02",
           "M_t": 0.680503,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.319497
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.310157,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.689843
         },
         {
           "shard_id": "shard-04",
           "M_t": 9.512286,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 8.512286
         }
       ],
       "events": [
@@ -448,7 +613,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 9.512286,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 11,
@@ -456,27 +632,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.383508,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.616492
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.484548,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.515452
         },
         {
           "shard_id": "shard-02",
           "M_t": 0.651354,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.348646
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.334821,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.665179
         },
         {
           "shard_id": "shard-04",
           "M_t": 17.584434,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 16.584434
         }
       ],
       "events": [
@@ -487,7 +668,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 17.584434,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 12,
@@ -495,27 +687,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.637241,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.362759
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.854608,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.145392
         },
         {
           "shard_id": "shard-02",
           "M_t": 0.712722,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.287278
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.35879,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.64121
         },
         {
           "shard_id": "shard-04",
           "M_t": 23.550436,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 22.550436
         }
       ],
       "events": [
@@ -526,7 +723,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 23.550436,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 13,
@@ -534,27 +742,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.906707,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.093293
         },
         {
           "shard_id": "shard-01",
           "M_t": 1.269492,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.269492
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.028424,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.028424
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.389592,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.610408
         },
         {
           "shard_id": "shard-04",
           "M_t": 23.620249,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 22.620249
         }
       ],
       "events": [
@@ -565,7 +778,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 23.620249,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 14,
@@ -573,27 +797,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 1.40069,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.40069
         },
         {
           "shard_id": "shard-01",
           "M_t": 2.21489,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.21489
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.682988,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.682988
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.522631,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.477369
         },
         {
           "shard_id": "shard-04",
           "M_t": 26.80347,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 25.80347
         }
       ],
       "events": [
@@ -604,7 +833,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 26.80347,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 15,
@@ -612,27 +852,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 2.110302,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.110302
         },
         {
           "shard_id": "shard-01",
           "M_t": 4.392665,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 3.392665
         },
         {
           "shard_id": "shard-02",
           "M_t": 2.560412,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.560412
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.742879,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.257121
         },
         {
           "shard_id": "shard-04",
           "M_t": 44.788689,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 43.788689
         }
       ],
       "events": [
@@ -643,7 +888,18 @@
           "fleet_fired": false,
           "tick_at_first_fire": null
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 44.788689,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 16,
@@ -651,27 +907,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 3.711752,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.711752
         },
         {
           "shard_id": "shard-01",
           "M_t": 8.785325,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 7.785325
         },
         {
           "shard_id": "shard-02",
           "M_t": 4.62943,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 3.62943
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.144032,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.144032
         },
         {
           "shard_id": "shard-04",
           "M_t": 89.577333,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 88.577333
         }
       ],
       "events": [
@@ -682,7 +943,18 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 89.577333,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 17,
@@ -690,27 +962,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 7.036835,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 6.036835
         },
         {
           "shard_id": "shard-01",
           "M_t": 9.569836,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 8.569836
         },
         {
           "shard_id": "shard-02",
           "M_t": 7.615386,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 6.615386
         },
         {
           "shard_id": "shard-03",
           "M_t": 2.234848,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.234848
         },
         {
           "shard_id": "shard-04",
           "M_t": 171.154798,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 170.154798
         }
       ],
       "events": [
@@ -721,7 +998,18 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 171.154798,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 18,
@@ -729,27 +1017,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 14.073663,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 13.073663
         },
         {
           "shard_id": "shard-01",
           "M_t": 15.438734,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 14.438734
         },
         {
           "shard_id": "shard-02",
           "M_t": 14.386513,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 13.386513
         },
         {
           "shard_id": "shard-03",
           "M_t": 4.391351,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 3.391351
         },
         {
           "shard_id": "shard-04",
           "M_t": 325.263176,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 324.263176
         }
       ],
       "events": [
@@ -760,7 +1053,20 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 1,
+          "max_M_t": 325.263176,
+          "fired_shard_ids": [
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 19,
@@ -768,27 +1074,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 21.542088,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 20.542088
         },
         {
           "shard_id": "shard-01",
           "M_t": 30.877452,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 29.877452
         },
         {
           "shard_id": "shard-02",
           "M_t": 27.406845,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 26.406845
         },
         {
           "shard_id": "shard-03",
           "M_t": 8.659191,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 7.659191
         },
         {
           "shard_id": "shard-04",
           "M_t": 642.2352,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 641.2352
         }
       ],
       "events": [
@@ -799,7 +1110,20 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 1,
+          "max_M_t": 642.2352,
+          "fired_shard_ids": [
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 20,
@@ -807,27 +1131,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 43.084154,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 42.084154
         },
         {
           "shard_id": "shard-01",
           "M_t": 52.296996,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 51.296996
         },
         {
           "shard_id": "shard-02",
           "M_t": 52.537507,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 51.537507
         },
         {
           "shard_id": "shard-03",
           "M_t": 17.115028,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 16.115028
         },
         {
           "shard_id": "shard-04",
           "M_t": 1116.765114,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1115.765114
         }
       ],
       "events": [
@@ -838,7 +1167,20 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 1,
+          "max_M_t": 1116.765114,
+          "fired_shard_ids": [
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 21,
@@ -846,27 +1188,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 86.168265,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 85.168265
         },
         {
           "shard_id": "shard-01",
           "M_t": 104.593939,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 103.593939
         },
         {
           "shard_id": "shard-02",
           "M_t": 91.948948,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 90.948948
         },
         {
           "shard_id": "shard-03",
           "M_t": 33.885067,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 32.885067
         },
         {
           "shard_id": "shard-04",
           "M_t": 2233.529112,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 2232.529112
         }
       ],
       "events": [
@@ -877,7 +1224,20 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 1,
+          "max_M_t": 2233.529112,
+          "fired_shard_ids": [
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 22,
@@ -885,27 +1245,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 167.535384,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 166.535384
         },
         {
           "shard_id": "shard-01",
           "M_t": 174.203858,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 173.203858
         },
         {
           "shard_id": "shard-02",
           "M_t": 179.044845,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 178.044845
         },
         {
           "shard_id": "shard-03",
           "M_t": 67.171864,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 66.171864
         },
         {
           "shard_id": "shard-04",
           "M_t": 4372.774607,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 4371.774607
         }
       ],
       "events": [
@@ -916,7 +1281,20 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 1,
+          "max_M_t": 4372.774607,
+          "fired_shard_ids": [
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 23,
@@ -924,27 +1302,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 335.0706,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 334.0706
         },
         {
           "shard_id": "shard-01",
           "M_t": 348.407541,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 347.407541
         },
         {
           "shard_id": "shard-02",
           "M_t": 348.180813,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 347.180813
         },
         {
           "shard_id": "shard-03",
           "M_t": 133.288669,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 132.288669
         },
         {
           "shard_id": "shard-04",
           "M_t": 8745.544841,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 8744.544841
         }
       ],
       "events": [
@@ -955,7 +1338,23 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 4,
+          "max_M_t": 8745.544841,
+          "fired_shard_ids": [
+            "shard-00",
+            "shard-01",
+            "shard-02",
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 24,
@@ -963,27 +1362,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 670.140865,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 669.140865
         },
         {
           "shard_id": "shard-01",
           "M_t": 696.814735,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 695.814735
         },
         {
           "shard_id": "shard-02",
           "M_t": 681.359878,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 680.359878
         },
         {
           "shard_id": "shard-03",
           "M_t": 264.691922,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 263.691922
         },
         {
           "shard_id": "shard-04",
           "M_t": 17491.080936,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 17490.080936
         }
       ],
       "events": [
@@ -994,7 +1398,24 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 5,
+          "max_M_t": 17491.080936,
+          "fired_shard_ids": [
+            "shard-00",
+            "shard-01",
+            "shard-02",
+            "shard-03",
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 25,
@@ -1002,27 +1423,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 1340.28106,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1339.28106
         },
         {
           "shard_id": "shard-01",
           "M_t": 1393.628772,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1392.628772
         },
         {
           "shard_id": "shard-02",
           "M_t": 1335.690171,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1334.690171
         },
         {
           "shard_id": "shard-03",
           "M_t": 525.978251,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 524.978251
         },
         {
           "shard_id": "shard-04",
           "M_t": 34982.144381,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 34981.144381
         }
       ],
       "events": [
@@ -1033,7 +1459,24 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 5,
+          "max_M_t": 34982.144381,
+          "fired_shard_ids": [
+            "shard-00",
+            "shard-01",
+            "shard-02",
+            "shard-03",
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 26,
@@ -1041,27 +1484,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 2680.56078,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 2679.56078
         },
         {
           "shard_id": "shard-01",
           "M_t": 2787.256151,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 2786.256151
         },
         {
           "shard_id": "shard-02",
           "M_t": 2622.285838,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 2621.285838
         },
         {
           "shard_id": "shard-03",
           "M_t": 1045.750329,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1044.750329
         },
         {
           "shard_id": "shard-04",
           "M_t": 69964.25378,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 69963.25378
         }
       ],
       "events": [
@@ -1072,7 +1520,24 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 5,
+          "max_M_t": 69964.25378,
+          "fired_shard_ids": [
+            "shard-00",
+            "shard-01",
+            "shard-02",
+            "shard-03",
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 27,
@@ -1080,27 +1545,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 5361.11888,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 5360.11888
         },
         {
           "shard_id": "shard-01",
           "M_t": 5574.509514,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 5573.509514
         },
         {
           "shard_id": "shard-02",
           "M_t": 5154.783022,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 5153.783022
         },
         {
           "shard_id": "shard-03",
           "M_t": 2080.106429,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 2079.106429
         },
         {
           "shard_id": "shard-04",
           "M_t": 139928.437595,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 139927.437595
         }
       ],
       "events": [
@@ -1111,7 +1581,24 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 5,
+          "max_M_t": 139928.437595,
+          "fired_shard_ids": [
+            "shard-00",
+            "shard-01",
+            "shard-02",
+            "shard-03",
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 28,
@@ -1119,27 +1606,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 10722.232399,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 10721.232399
         },
         {
           "shard_id": "shard-01",
           "M_t": 11149.013454,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 11148.013454
         },
         {
           "shard_id": "shard-02",
           "M_t": 10144.368083,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 10143.368083
         },
         {
           "shard_id": "shard-03",
           "M_t": 4139.160655,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 4138.160655
         },
         {
           "shard_id": "shard-04",
           "M_t": 279856.735262,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 279855.735262
         }
       ],
       "events": [
@@ -1150,7 +1642,24 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 5,
+          "max_M_t": 279856.735262,
+          "fired_shard_ids": [
+            "shard-00",
+            "shard-01",
+            "shard-02",
+            "shard-03",
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 29,
@@ -1158,27 +1667,32 @@
         {
           "shard_id": "shard-00",
           "M_t": 21444.454077,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 21443.454077
         },
         {
           "shard_id": "shard-01",
           "M_t": 22298.015759,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 22297.015759
         },
         {
           "shard_id": "shard-02",
           "M_t": 19983.203644,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 19982.203644
         },
         {
           "shard_id": "shard-03",
           "M_t": 8239.211813,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 8238.211813
         },
         {
           "shard_id": "shard-04",
           "M_t": 559713.190668,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 559712.190668
         }
       ],
       "events": [
@@ -1189,7 +1703,24 @@
           "fleet_fired": true,
           "tick_at_first_fire": 16
         }
-      ]
+      ],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 5,
+          "max_M_t": 559713.190668,
+          "fired_shard_ids": [
+            "shard-00",
+            "shard-01",
+            "shard-02",
+            "shard-03",
+            "shard-04"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     }
   ],
   "terminal_state": {
@@ -1213,5 +1744,112 @@
     "Investigate at the fleet level (deploy / firmware / config rollout) — per-shard individual investigations will be inconclusive",
     "Cross-reference the tick_at_first_fire against deploy event audit logs for a fleet-wide cause",
     "If correlated drift cannot be ruled out, prefer combineAverage over combineProduct (the current default already does this)"
+  ],
+  "detector_families": [
+    "A"
+  ],
+  "threshold_crossing_log": [
+    {
+      "window": 18,
+      "shard_id": "shard-04",
+      "family": "A",
+      "M_t_at_crossing": 325.263176,
+      "threshold": 200
+    },
+    {
+      "window": 23,
+      "shard_id": "shard-00",
+      "family": "A",
+      "M_t_at_crossing": 335.0706,
+      "threshold": 200
+    },
+    {
+      "window": 23,
+      "shard_id": "shard-01",
+      "family": "A",
+      "M_t_at_crossing": 348.407541,
+      "threshold": 200
+    },
+    {
+      "window": 23,
+      "shard_id": "shard-02",
+      "family": "A",
+      "M_t_at_crossing": 348.180813,
+      "threshold": 200
+    },
+    {
+      "window": 24,
+      "shard_id": "shard-03",
+      "family": "A",
+      "M_t_at_crossing": 264.691922,
+      "threshold": 200
+    }
+  ],
+  "provenance_receipts": [
+    {
+      "event_id": "r79-prov-hierarchical-evalue-1",
+      "window": 29,
+      "shard_id": "shard-00",
+      "family": "A",
+      "reasoning": "Shard shard-00 accumulated wealth M_t = 21444.454077 at window 29, crossing the 1/α = 200 threshold. Under H₀, Pr(M_t ≥ 1/α) ≤ α = 0.005 by Ville's inequality on the betting e-process martingale.",
+      "evidence": {
+        "M_t": 21444.454077,
+        "threshold": 200,
+        "alpha": 0.005,
+        "ville_bound": "Pr(M_t ≥ 1/α) ≤ α under H_0"
+      }
+    },
+    {
+      "event_id": "r79-prov-hierarchical-evalue-2",
+      "window": 29,
+      "shard_id": "shard-01",
+      "family": "A",
+      "reasoning": "Shard shard-01 accumulated wealth M_t = 22298.015759 at window 29, crossing the 1/α = 200 threshold. Under H₀, Pr(M_t ≥ 1/α) ≤ α = 0.005 by Ville's inequality on the betting e-process martingale.",
+      "evidence": {
+        "M_t": 22298.015759,
+        "threshold": 200,
+        "alpha": 0.005,
+        "ville_bound": "Pr(M_t ≥ 1/α) ≤ α under H_0"
+      }
+    },
+    {
+      "event_id": "r79-prov-hierarchical-evalue-3",
+      "window": 29,
+      "shard_id": "shard-02",
+      "family": "A",
+      "reasoning": "Shard shard-02 accumulated wealth M_t = 19983.203644 at window 29, crossing the 1/α = 200 threshold. Under H₀, Pr(M_t ≥ 1/α) ≤ α = 0.005 by Ville's inequality on the betting e-process martingale.",
+      "evidence": {
+        "M_t": 19983.203644,
+        "threshold": 200,
+        "alpha": 0.005,
+        "ville_bound": "Pr(M_t ≥ 1/α) ≤ α under H_0"
+      }
+    },
+    {
+      "event_id": "r79-prov-hierarchical-evalue-4",
+      "window": 29,
+      "shard_id": "shard-03",
+      "family": "A",
+      "reasoning": "Shard shard-03 accumulated wealth M_t = 8239.211813 at window 29, crossing the 1/α = 200 threshold. Under H₀, Pr(M_t ≥ 1/α) ≤ α = 0.005 by Ville's inequality on the betting e-process martingale.",
+      "evidence": {
+        "M_t": 8239.211813,
+        "threshold": 200,
+        "alpha": 0.005,
+        "ville_bound": "Pr(M_t ≥ 1/α) ≤ α under H_0"
+      }
+    },
+    {
+      "event_id": "r79-prov-hierarchical-evalue-5",
+      "window": 29,
+      "shard_id": "shard-04",
+      "family": "A",
+      "reasoning": "Shard shard-04 accumulated wealth M_t = 559713.190668 at window 29, crossing the 1/α = 200 threshold. Under H₀, Pr(M_t ≥ 1/α) ≤ α = 0.005 by Ville's inequality on the betting e-process martingale.",
+      "evidence": {
+        "M_t": 559713.190668,
+        "threshold": 200,
+        "alpha": 0.005,
+        "ville_bound": "Pr(M_t ≥ 1/α) ≤ α under H_0"
+      }
+    }
   ]
 }

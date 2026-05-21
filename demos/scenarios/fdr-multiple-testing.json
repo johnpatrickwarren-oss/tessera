@@ -29,55 +29,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-01",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-02",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-03",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-04",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-05",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-06",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-07",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-08",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         },
         {
           "shard_id": "shard-09",
           "M_t": 1,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 1,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 1,
@@ -85,55 +106,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.520992,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.479008
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.595003,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.404997
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.307062,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.307062
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.44736,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.44736
         },
         {
           "shard_id": "shard-04",
           "M_t": 0.957227,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.042773
         },
         {
           "shard_id": "shard-05",
           "M_t": 1.606625,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.606625
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.628744,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.628744
         },
         {
           "shard_id": "shard-07",
           "M_t": 1.495452,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.495452
         },
         {
           "shard_id": "shard-08",
           "M_t": 1.1922,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.1922
         },
         {
           "shard_id": "shard-09",
           "M_t": 1.518649,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.518649
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 1.628744,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 2,
@@ -141,55 +183,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.451622,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.548378
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.629186,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.370814
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.786873,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.786873
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.169959,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.169959
         },
         {
           "shard_id": "shard-04",
           "M_t": 0.000001,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.999999
         },
         {
           "shard_id": "shard-05",
           "M_t": 1.155349,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.155349
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.598944,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.598944
         },
         {
           "shard_id": "shard-07",
           "M_t": 1.219051,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.219051
         },
         {
           "shard_id": "shard-08",
           "M_t": 1.166663,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.166663
         },
         {
           "shard_id": "shard-09",
           "M_t": 1.600091,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.600091
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 1.786873,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 3,
@@ -197,55 +260,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.485318,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.514682
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.721927,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.278073
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.795854,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.795854
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.245489,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.245489
         },
         {
           "shard_id": "shard-04",
           "M_t": 0.000001,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.999999
         },
         {
           "shard_id": "shard-05",
           "M_t": 0.941454,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.058546
         },
         {
           "shard_id": "shard-06",
           "M_t": 2.119335,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.119335
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.109641,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.890359
         },
         {
           "shard_id": "shard-08",
           "M_t": 0.943092,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.056908
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.458628,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.458628
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 2.458628,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 4,
@@ -253,55 +337,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.740042,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.259958
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.469343,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.530657
         },
         {
           "shard_id": "shard-02",
           "M_t": 2.299852,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.299852
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.209951,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.209951
         },
         {
           "shard_id": "shard-04",
           "M_t": 0.000001,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.999999
         },
         {
           "shard_id": "shard-05",
           "M_t": 0.707368,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.292632
         },
         {
           "shard_id": "shard-06",
           "M_t": 2.670867,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.670867
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.104322,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.895678
         },
         {
           "shard_id": "shard-08",
           "M_t": 0.869231,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.130769
         },
         {
           "shard_id": "shard-09",
           "M_t": 3.315092,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.315092
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 3.315092,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 5,
@@ -309,55 +414,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.78306,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.21694
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.409299,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.590701
         },
         {
           "shard_id": "shard-02",
           "M_t": 1.948316,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.948316
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.919801,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.080199
         },
         {
           "shard_id": "shard-04",
           "M_t": 0.000001,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.999999
         },
         {
           "shard_id": "shard-05",
           "M_t": 0.582076,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.417924
         },
         {
           "shard_id": "shard-06",
           "M_t": 2.502478,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.502478
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.111126,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.888874
         },
         {
           "shard_id": "shard-08",
           "M_t": 0.609555,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.390445
         },
         {
           "shard_id": "shard-09",
           "M_t": 3.291176,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.291176
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 3.291176,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 6,
@@ -365,55 +491,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.649191,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.350809
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.408934,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.591066
         },
         {
           "shard_id": "shard-02",
           "M_t": 2.214804,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.214804
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.031398,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.031398
         },
         {
           "shard_id": "shard-04",
           "M_t": 0.000001,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.999999
         },
         {
           "shard_id": "shard-05",
           "M_t": 0.567014,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.432986
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.932186,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.932186
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.104168,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.895832
         },
         {
           "shard_id": "shard-08",
           "M_t": 0.634279,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.365721
         },
         {
           "shard_id": "shard-09",
           "M_t": 3.458499,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.458499
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 3.458499,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 7,
@@ -421,55 +568,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.58017,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.41983
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.405254,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.594746
         },
         {
           "shard_id": "shard-02",
           "M_t": 4.429606,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 3.429606
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.762258,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.237742
         },
         {
           "shard_id": "shard-04",
           "M_t": 0.000001,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.999999
         },
         {
           "shard_id": "shard-05",
           "M_t": 0.72548,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.27452
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.895582,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.895582
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.090011,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.909989
         },
         {
           "shard_id": "shard-08",
           "M_t": 0.845464,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.154536
         },
         {
           "shard_id": "shard-09",
           "M_t": 3.795195,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.795195
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 4.429606,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 8,
@@ -477,55 +645,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.63061,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.36939
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.372958,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.627042
         },
         {
           "shard_id": "shard-02",
           "M_t": 4.881034,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 3.881034
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.695202,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.304798
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 1.063362,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.063362
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.348864,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.348864
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.090186,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.909814
         },
         {
           "shard_id": "shard-08",
           "M_t": 1.116421,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.116421
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.967538,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.967538
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 4.881034,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 9,
@@ -533,55 +722,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.793407,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.206593
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.349745,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.650255
         },
         {
           "shard_id": "shard-02",
           "M_t": 9.762063,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 8.762063
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.702003,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.297997
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 1.487941,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.487941
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.207404,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.207404
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.092335,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.907665
         },
         {
           "shard_id": "shard-08",
           "M_t": 1.832534,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.832534
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.057697,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.057697
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 9.762063,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 10,
@@ -589,55 +799,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.710653,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.289347
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.377359,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.622641
         },
         {
           "shard_id": "shard-02",
           "M_t": 14.137104,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 13.137104
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.769456,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.230544
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 2.775957,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.775957
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.93181,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.06819
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.106419,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.893581
         },
         {
           "shard_id": "shard-08",
           "M_t": 3.665065,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.665065
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.018271,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.018271
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 14.137104,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 11,
@@ -645,55 +876,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.489,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.511
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.334891,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.665109
         },
         {
           "shard_id": "shard-02",
           "M_t": 28.274195,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 27.274195
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.579996,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.420004
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 5.320717,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 4.320717
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.963971,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.036029
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.150619,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.849381
         },
         {
           "shard_id": "shard-08",
           "M_t": 7.330127,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 6.330127
         },
         {
           "shard_id": "shard-09",
           "M_t": 1.696127,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.696127
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 28.274195,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 12,
@@ -701,55 +953,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.48026,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.51974
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.365605,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.634395
         },
         {
           "shard_id": "shard-02",
           "M_t": 56.548361,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 55.548361
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.576372,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.423628
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 10.28939,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 9.28939
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.879482,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.120518
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.168255,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.831745
         },
         {
           "shard_id": "shard-08",
           "M_t": 14.660247,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 13.660247
         },
         {
           "shard_id": "shard-09",
           "M_t": 1.353187,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.353187
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 56.548361,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 13,
@@ -757,55 +1030,76 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.428757,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.571243
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.373455,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.626545
         },
         {
           "shard_id": "shard-02",
           "M_t": 113.096666,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 112.096666
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.633563,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.366437
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 20.01407,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 19.01407
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.856006,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.143994
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.149363,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.850637
         },
         {
           "shard_id": "shard-08",
           "M_t": 29.32048,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 28.32048
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.264849,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.264849
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 0,
+          "max_M_t": 113.096666,
+          "fired_shard_ids": []
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 14,
@@ -813,55 +1107,78 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.48894,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.51106
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.347571,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.652429
         },
         {
           "shard_id": "shard-02",
           "M_t": 226.193219,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 225.193219
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.922338,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.077662
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 39.089724,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 38.089724
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.852125,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.147875
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.160745,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.839255
         },
         {
           "shard_id": "shard-08",
           "M_t": 58.64093,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 57.64093
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.58712,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.58712
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 1,
+          "max_M_t": 226.193219,
+          "fired_shard_ids": [
+            "shard-02"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 15,
@@ -869,55 +1186,78 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.41746,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.58254
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.384128,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.615872
         },
         {
           "shard_id": "shard-02",
           "M_t": 452.386211,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 451.386211
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.670396,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.329604
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 76.579663,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 75.579663
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.856326,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.143674
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.120423,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.879577
         },
         {
           "shard_id": "shard-08",
           "M_t": 117.281802,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 116.281802
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.145347,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.145347
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 1,
+          "max_M_t": 452.386211,
+          "fired_shard_ids": [
+            "shard-02"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 16,
@@ -925,55 +1265,79 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.462922,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.537078
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.384368,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.615632
         },
         {
           "shard_id": "shard-02",
           "M_t": 904.77197,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 903.77197
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.770453,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.229547
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 150.37878,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 149.37878
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.752347,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.247653
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.110876,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.889124
         },
         {
           "shard_id": "shard-08",
           "M_t": 234.563486,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 233.563486
         },
         {
           "shard_id": "shard-09",
           "M_t": 3.197331,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.197331
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 2,
+          "max_M_t": 904.77197,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 17,
@@ -981,55 +1345,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.420194,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.579806
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.377574,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.622426
         },
         {
           "shard_id": "shard-02",
           "M_t": 1809.543035,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1808.543035
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.885111,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.114889
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 295.850934,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 294.850934
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.960347,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.039653
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.114378,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.885622
         },
         {
           "shard_id": "shard-08",
           "M_t": 469.126737,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 468.126737
         },
         {
           "shard_id": "shard-09",
           "M_t": 5.486723,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 4.486723
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 1809.543035,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 18,
@@ -1037,55 +1426,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.48674,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.51326
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.3378,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.6622
         },
         {
           "shard_id": "shard-02",
           "M_t": 3619.084261,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 3618.084261
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.891233,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.108767
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 582.937203,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 581.937203
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.958172,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.041828
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.089671,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.910329
         },
         {
           "shard_id": "shard-08",
           "M_t": 938.253005,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 937.253005
         },
         {
           "shard_id": "shard-09",
           "M_t": 3.312868,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.312868
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 3619.084261,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 19,
@@ -1093,55 +1507,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.461562,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.538438
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.423458,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.576542
         },
         {
           "shard_id": "shard-02",
           "M_t": 7238.164904,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 7237.164904
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.172423,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.172423
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 1150.060289,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1149.060289
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.863062,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.136938
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.09761,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.90239
         },
         {
           "shard_id": "shard-08",
           "M_t": 1876.505072,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1875.505072
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.825182,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.825182
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 7238.164904,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 20,
@@ -1149,55 +1588,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.458679,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.541321
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.551649,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.448351
         },
         {
           "shard_id": "shard-02",
           "M_t": 14476.322569,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 14475.322569
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.437377,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.437377
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 2271.346548,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 2270.346548
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.071174,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.071174
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.11085,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.88915
         },
         {
           "shard_id": "shard-08",
           "M_t": 3753.008268,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 3752.008268
         },
         {
           "shard_id": "shard-09",
           "M_t": 3.79534,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.79534
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 14476.322569,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 21,
@@ -1205,55 +1669,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.466537,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.533463
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.403928,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.596072
         },
         {
           "shard_id": "shard-02",
           "M_t": 28952.630662,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 28951.630662
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.604653,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.604653
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 4489.963735,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 4488.963735
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.066209,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.066209
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.133129,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.866871
         },
         {
           "shard_id": "shard-08",
           "M_t": 7506.012782,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 7505.012782
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.82868,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.82868
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 28952.630662,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 22,
@@ -1261,55 +1750,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.376776,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.623224
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.461136,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.538864
         },
         {
           "shard_id": "shard-02",
           "M_t": 57905.232372,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 57904.232372
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.762469,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.237531
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 8882.705113,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 8881.705113
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.077887,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.077887
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.180391,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.819609
         },
         {
           "shard_id": "shard-08",
           "M_t": 15012.018059,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 15011.018059
         },
         {
           "shard_id": "shard-09",
           "M_t": 3.360407,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 2.360407
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 57905.232372,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 23,
@@ -1317,55 +1831,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.376785,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.623215
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.699387,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.300613
         },
         {
           "shard_id": "shard-02",
           "M_t": 115810.406839,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 115809.406839
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.659589,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.340411
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 17585.194483,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 17584.194483
         },
         {
           "shard_id": "shard-06",
           "M_t": 1.044031,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.044031
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.225714,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.774286
         },
         {
           "shard_id": "shard-08",
           "M_t": 30024.021105,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 30023.021105
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.914546,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.914546
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 115810.406839,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 24,
@@ -1373,55 +1912,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.383239,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.616761
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.820114,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.179886
         },
         {
           "shard_id": "shard-02",
           "M_t": 231620.697867,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 231619.697867
         },
         {
           "shard_id": "shard-03",
           "M_t": 0.889671,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.110329
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 34834.768991,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 34833.768991
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.838239,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.161761
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.338255,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.661745
         },
         {
           "shard_id": "shard-08",
           "M_t": 60048.012186,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 60047.012186
         },
         {
           "shard_id": "shard-09",
           "M_t": 2.744641,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 1.744641
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 231620.697867,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 25,
@@ -1429,55 +1993,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.407284,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.592716
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.611994,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.388006
         },
         {
           "shard_id": "shard-02",
           "M_t": 463241.164113,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 463240.164113
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.181239,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.181239
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 69041.918576,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 69040.918576
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.793227,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.206773
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.365166,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.634834
         },
         {
           "shard_id": "shard-08",
           "M_t": 120095.964324,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 120094.964324
         },
         {
           "shard_id": "shard-09",
           "M_t": 1.699975,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.699975
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 463241.164113,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 26,
@@ -1485,55 +2074,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.409657,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.590343
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.346498,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.653502
         },
         {
           "shard_id": "shard-02",
           "M_t": 926481.864984,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 926480.864984
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.510342,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.510342
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 136905.846008,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 136904.846008
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.787486,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.212514
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.23131,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.76869
         },
         {
           "shard_id": "shard-08",
           "M_t": 240191.808553,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 240190.808553
         },
         {
           "shard_id": "shard-09",
           "M_t": 1.582515,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.582515
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 926481.864984,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 27,
@@ -1541,55 +2155,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.421579,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.578421
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.377757,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.622243
         },
         {
           "shard_id": "shard-02",
           "M_t": 1852962.803486,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1852961.803486
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.152203,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.152203
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 271593.398609,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 271592.398609
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.625038,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.374962
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.202104,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.797896
         },
         {
           "shard_id": "shard-08",
           "M_t": 480383.376914,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 480382.376914
         },
         {
           "shard_id": "shard-09",
           "M_t": 1.500706,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.500706
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 1852962.803486,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 28,
@@ -1597,55 +2236,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.519909,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.480091
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.315626,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.684374
         },
         {
           "shard_id": "shard-02",
           "M_t": 3705923.754009,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 3705922.754009
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.242561,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.242561
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 538997.06751,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 538996.06751
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.522219,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.477781
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.195419,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.804581
         },
         {
           "shard_id": "shard-08",
           "M_t": 960766.273445,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 960765.273445
         },
         {
           "shard_id": "shard-09",
           "M_t": 1.646724,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.646724
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 3705923.754009,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     },
     {
       "t": 29,
@@ -1653,55 +2317,80 @@
         {
           "shard_id": "shard-00",
           "M_t": 0.473163,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.526837
         },
         {
           "shard_id": "shard-01",
           "M_t": 0.304959,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.695041
         },
         {
           "shard_id": "shard-02",
           "M_t": 7411843.802094,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 7411842.802094
         },
         {
           "shard_id": "shard-03",
           "M_t": 1.569823,
-          "fired": false
+          "fired": false,
+          "residual_proxy": 0.569823
         },
         {
           "shard_id": "shard-04",
           "M_t": 0,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -1
         },
         {
           "shard_id": "shard-05",
           "M_t": 1070059.59487,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1070058.59487
         },
         {
           "shard_id": "shard-06",
           "M_t": 0.52594,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.47406
         },
         {
           "shard_id": "shard-07",
           "M_t": 0.146432,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.853568
         },
         {
           "shard_id": "shard-08",
           "M_t": 1921531.586124,
-          "fired": true
+          "fired": true,
+          "residual_proxy": 1921530.586124
         },
         {
           "shard_id": "shard-09",
           "M_t": 0.579352,
-          "fired": false
+          "fired": false,
+          "residual_proxy": -0.420648
         }
       ],
-      "events": []
+      "events": [],
+      "per_window_detectors": {
+        "family_a": {
+          "shards_fired_count": 3,
+          "max_M_t": 7411843.802094,
+          "fired_shard_ids": [
+            "shard-02",
+            "shard-05",
+            "shard-08"
+          ]
+        },
+        "family_b": null,
+        "family_c": null,
+        "family_d": null,
+        "family_e": null
+      }
     }
   ],
   "terminal_state": {
@@ -1722,10 +2411,77 @@
     "fleet_fired": null,
     "fleet_tick_at_first_fire": null
   },
-  "reasoning": "Ten shards’ per-shard e-values (terminal M_t) are submitted to the e-Benjamini-Hochberg procedure at FDR target q = 0.10. Three shards (02, 05, 08) carried sustained drift; the e-BH procedure selects the subset whose e-values satisfy k · e_(k) ≥ N / q under the Ren-Barber 2024 / Wang-Ramdas 2022 fixed-time guarantee. Expected falsely-flagged-shard count ≤ q · K — a formal bound that holds even under correlated drift.",
+  "reasoning": "Ten shards' per-shard e-values (terminal M_t) are submitted to the e-Benjamini-Hochberg procedure at FDR target q = 0.10. Three shards (02, 05, 08) carried sustained drift; the e-BH procedure selects the subset whose e-values satisfy k * e_(k) >= N / q under the Ren-Barber 2024 / Wang-Ramdas 2022 fixed-time guarantee. Expected falsely-flagged-shard count <= q * K -- a formal bound that holds even under correlated drift.",
   "suggested_actions": [
     "Triage the e-BH-selected shards as a batch (FDR bound makes this safe at q=0.10)",
     "Do NOT inspect non-selected shards individually unless their e-value is independently interesting",
     "Adjust qLevel down (toward 0.05) for higher-precision but lower-recall flagging in production"
+  ],
+  "detector_families": [
+    "A"
+  ],
+  "threshold_crossing_log": [
+    {
+      "window": 14,
+      "shard_id": "shard-02",
+      "family": "A",
+      "M_t_at_crossing": 226.193219,
+      "threshold": 200
+    },
+    {
+      "window": 16,
+      "shard_id": "shard-08",
+      "family": "A",
+      "M_t_at_crossing": 234.563486,
+      "threshold": 200
+    },
+    {
+      "window": 17,
+      "shard_id": "shard-05",
+      "family": "A",
+      "M_t_at_crossing": 295.850934,
+      "threshold": 200
+    }
+  ],
+  "provenance_receipts": [
+    {
+      "event_id": "r79-prov-fdr-multiple-testing-1",
+      "window": 29,
+      "shard_id": "shard-02",
+      "family": "A",
+      "reasoning": "Shard shard-02 accumulated wealth M_t = 7411843.802094 at window 29, crossing the 1/α = 200 threshold. Under H₀, Pr(M_t ≥ 1/α) ≤ α = 0.005 by Ville's inequality on the betting e-process martingale.",
+      "evidence": {
+        "M_t": 7411843.802094,
+        "threshold": 200,
+        "alpha": 0.005,
+        "ville_bound": "Pr(M_t ≥ 1/α) ≤ α under H_0"
+      }
+    },
+    {
+      "event_id": "r79-prov-fdr-multiple-testing-2",
+      "window": 29,
+      "shard_id": "shard-05",
+      "family": "A",
+      "reasoning": "Shard shard-05 accumulated wealth M_t = 1070059.59487 at window 29, crossing the 1/α = 200 threshold. Under H₀, Pr(M_t ≥ 1/α) ≤ α = 0.005 by Ville's inequality on the betting e-process martingale.",
+      "evidence": {
+        "M_t": 1070059.59487,
+        "threshold": 200,
+        "alpha": 0.005,
+        "ville_bound": "Pr(M_t ≥ 1/α) ≤ α under H_0"
+      }
+    },
+    {
+      "event_id": "r79-prov-fdr-multiple-testing-3",
+      "window": 29,
+      "shard_id": "shard-08",
+      "family": "A",
+      "reasoning": "Shard shard-08 accumulated wealth M_t = 1921531.586124 at window 29, crossing the 1/α = 200 threshold. Under H₀, Pr(M_t ≥ 1/α) ≤ α = 0.005 by Ville's inequality on the betting e-process martingale.",
+      "evidence": {
+        "M_t": 1921531.586124,
+        "threshold": 200,
+        "alpha": 0.005,
+        "ville_bound": "Pr(M_t ≥ 1/α) ≤ α under H_0"
+      }
+    }
   ]
 }
