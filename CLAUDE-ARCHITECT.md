@@ -182,7 +182,7 @@ All unresolved decisions → open questions in the spec.
 #   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
 #   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
 
-# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 7 sub-variants observed at Tessera)
+# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 10 sub-variants observed at Tessera)
 #
 #   Fixture accumulation adequacy (R07 MAJOR-1): When grilling catches that an e-process or
 #     statistical-detector AC's fixture needs N windows of accumulation to cross a detection
@@ -295,6 +295,50 @@ All unresolved decisions → open questions in the spec.
 #     the gap in spec §5.3 (acknowledged gaps) with explicit rationale. Do NOT substitute
 #     "≠ implementer-only" as a positive binding for a rule that routes to 'audit'. Detected
 #     tessera R73 MINOR-1 (Reviewer-1); safety contract still held (fail-safe direction).
+#
+#   Incomplete alternation enumeration in "no-match" claim (R74 MINOR-1): When spec § 9.1
+#     (or any pre-emit grilling table) claims "Class X fires: no (no '<pattern>' etc.)" for
+#     a regex class that has MULTIPLE alternations, EVERY alternation must be individually
+#     verified — not elided via "etc." The R74 Q.6 table enumerated only /cross-project
+#     promotion/ for Class A and concluded "Class A: no" via shorthand "etc."; it missed
+#     /cross-project canonical/i which matched the directive's Rule 4 disposition row at
+#     NEXT-ROLE.md:305 ("cross-project canonical at R72"). Architect's § 10 prediction of
+#     haiku for AC-R74-31 was empirically refuted at chore-A. Discriminability discipline:
+#     for each regex alternation in a multi-pattern class (Class A has 5 patterns; Class B
+#     has 5; Classes C and D are co-occurrence), test each one individually. Record "NO:
+#     /pattern1/ — null, /pattern2/ — null, /pattern3/ — null, ..." per alternation; a
+#     trailing "etc." is not a pass. Detected tessera R74 MINOR-1 (Reviewer-1).
+#
+#   AC regex must be self-consistent with spec pseudocode (R74 MINOR-5): When a spec § 5.x
+#     AC prescribes a regex that tests for a pattern in a script's file text (e.g., AC-R74-16
+#     /scripts\/mu-model-select\.js[\s\S]{0,400}--directive/), apply the Rule 3 self-application
+#     gate: "would the spec's own § 2.x pseudocode pass this AC if implemented verbatim?" At R74,
+#     the spec § 2.5 (c) pseudocode placed --directive first in an array (mu_select_args=("--directive"
+#     ...) then ${mu_select_args[@]}), which would have placed --directive BEFORE the script path in
+#     run-pipeline.sh — failing the AC's directional regex. The Implementer was forced to inline the
+#     args (placing the script path first, then --directive) to satisfy the AC. The inline
+#     substitution used ${MU_SONNET:+--mu-sonnet} which was semantically non-equivalent to the
+#     spec's $MU_SONNET && ... form. Procedure: for each AC that asserts a regex pattern over a
+#     script's source text, paste the spec's own pseudocode pattern into the regex and verify it
+#     produces a match — before routing to Implementer. If it doesn't, either revise the regex to
+#     match the pseudocode's actual output form, or revise the pseudocode to produce the regex's
+#     expected form. Do NOT leave the Implementer to discover the mismatch as a forced deviation.
+#     Detected tessera R74 MINOR-5 (Reviewer-1); proximate cause of CRITICAL-1.
+#
+#   Spec-acknowledged gap must pair with minimum mitigation, not just Reviewer-reliance (R74 MINOR-2):
+#     When spec § 5.3 "Acknowledged AC gaps" documents an absence of verification coverage for a
+#     load-bearing integration path (e.g., "End-to-end pipeline-dispatch AC absent"), the
+#     acknowledgment MUST pair with a minimum mitigation specification — either (a) a concrete plan
+#     for how the Reviewer verifies the uncovered path (e.g., "Reviewer must manually simulate the
+#     bash expansion for both MU_SONNET=true and MU_SONNET=false"), or (b) a recommendation to add
+#     a minimal end-to-end AC that can be implemented without the problematic dependency. Writing
+#     only "Rule 3 self-application gate verified: the Reviewer is in a position to catch this gap"
+#     accepts the gap as a permanent waiver. At R74, CRITICAL-1 (${MU_SONNET:+--mu-sonnet} always
+#     expands) landed in exactly the acknowledged gap — the Reviewer DID catch it, confirming the
+#     framing was structurally valid, but the gap-as-permanent-waiver pattern allows structural bugs
+#     to accumulate across rounds without incentivizing closure. Pre-emit gate: for each § 5.3 entry,
+#     specify the verification method the Reviewer will use to compensate, OR add a minimal AC.
+#     Detected tessera R74 MINOR-2 (Reviewer-1; AC-R74-32 added post-fix to close the gap).
 
 # REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
 #   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include

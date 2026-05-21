@@ -1,7 +1,50 @@
 CURRENT-ROUND: R74
-NEXT-ROLE: MEMORIAL-UPDATER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 TIER: full
+
+---
+
+## § Reviewer-2 routing block — post-Option-A cold-eye re-audit (2026-05-20)
+
+### Report
+
+`coordination/reviews/REVIEWER-REPORT-R74-2.md` (preserves Reviewer-1 at REVIEWER-REPORT-R74.md). **0 CRITICAL + 1 MAJOR + 2 MINOR + 7 OBS.** 32/32 ACs PASS at HEAD `ebe1140`. EMPIRICAL.sh 17/17 PASS. Both MU_SONNET=true and MU_SONNET=false bash paths empirically verified under `set -uo pipefail`. Reviewer-1 CRITICAL-1 + MAJOR-1 fixes are sound (not re-raised). The substantive Option-A fix-cycle is functionally complete.
+
+### Findings (NEW; Reviewer-1's are fixed and not re-raised)
+
+- **MAJOR-1 (IMPLEMENTER):** spec-amendment-ALL-gate-artifacts-propagation. AC-R74-32 added to test file per operator Option A but spec § 4 AC table (last row AC-R74-31; no AC-R74-32 entry), § 5.3 acknowledged-gap narrative ("end-to-end pipeline-dispatch AC absent" — the closed gap), and § 10 Architect predictions (N_new=22 / tests=538 / pass=530 / AC-R74-31 expected haiku) all stale. R72 MAJOR-2 cross-project canonical rule applies symmetrically (test ecosystem vs spec narrative are both gate artifacts for the same invariant). Remediation: same-chain spec amendment OR R75 inventory item — operator decision.
+- **MINOR-1 (IMPLEMENTER):** `test/q74-mu-haiku-reviewer-scope.test.ts:3,6` unused imports `describe` + `existsSync`. Code-cleanliness only; tsc passes.
+- **MINOR-2 (IMPLEMENTER):** AC-R74-32 covers only `MU_SONNET=false → Haiku` branch; complementary `MU_SONNET=true → Sonnet` end-to-end bash path uncovered. Manual reproduction confirms both work at HEAD; regression-coverage asymmetry, not current-behavior defect.
+- **OBS-1..7:** routing-log uncommitted with "selector unavailable" rationale (environmental, not code-attributable); TDD discipline preserved; spec-triad commit-sequencing preserved + EMPIRICAL.sh SHA injection correct; anti-scope diff = 17 paths exact ALLOWED_SET match; fix-cycle hygiene sound (no halt-discipline shortcut); CLAUDE-REVIEWER.md Mode section byte-equivalent to spec § 2.6; Reviewer-scope plumbing correctly defaults to full for tier=full this session.
+
+### Routing
+
+**STATUS: MERGE-READY** per strict routing rule (0 CRITICAL → MERGE-READY). Route to MEMORIAL-UPDATER (matches existing NEXT-ROLE state per the post-Option-A directive). MAJOR-1 is recordable as IMPLEMENTER VIOLATION (entered in MEMORIAL.md per Reviewer-2 section) — spec § 4/§ 5.3/§ 10 propagation is a discrete coordination chore deferrable to R75-prelude or absorbable into R75 directive scope.
+
+### Reviewer-2 attested HEAD
+
+`ebe1140` (`chore(R74): coordination update — set-u correction note in NEXT-ROLE.md + MEMORIAL`).
+
+### Inputs
+
+1. `coordination/PRD.md`
+2. `coordination/specs/Q-R74-SPEC.md` (full)
+3. `scripts/mu-model-select.ts` + `scripts/mu-model-select-fixtures/`
+4. `test/q74-mu-haiku-reviewer-scope.test.ts` (full; 23 AC test cases including AC-R74-32)
+5. `run-pipeline.sh` (lines 1-301, 1167-1240; full bash -n syntax check)
+6. `CLAUDE-REVIEWER.md` (full)
+7. `package.json`
+8. `coordination/MEMORIAL.md` (R74 entries + R72-related cross-round lines)
+9. `coordination/NEXT-ROLE.md` (Option A directive + post-fix Implementer + Reviewer-1 routing blocks)
+10. `coordination/specs/Q-R74-EMPIRICAL.sh` (re-run at Reviewer-2 HEAD: PASS 17 / FAIL 0)
+11. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Reviewer + R72 ALLOWED_SET-amendment-propagation rule lookup)
+12. `coordination/logs/ROUND-R74-ROUTING.md` (deliverable per spec § 2.5 (e); surfaces OBS-1)
+13. `coordination/reviews/REVIEWER-REPORT-R74.md` (Reviewer-1 header only — cold-eye preserved)
+
+### Output
+
+`coordination/reviews/REVIEWER-REPORT-R74-2.md`.
 
 ---
 

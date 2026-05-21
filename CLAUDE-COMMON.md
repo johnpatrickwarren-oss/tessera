@@ -366,3 +366,20 @@ full is the default; no record required for full rounds.
 #   EMPIRICAL.sh at HEAD and verify exit 0. If any Block fails, the amendment is incomplete.
 #   Detected tessera R72 MAJOR-2 (Reviewer-2; Coordinator amended § 5.2 but not § 5.1 +
 #   EMPIRICAL.sh; Coordinator-direct fix at commit 8b15549 completed the propagation).
+# REINFORCED 2026-05-20 — attestation-supplementary-fields-verbatim (all roles):
+#   The encode-actual-results-verbatim rule (REINFORCED 2026-05-18) applies to ALL cited
+#   field values in a structured command output — not only the field bound by the AC.
+#   When a binding-command result produces structured JSON (e.g., {model, rationale,
+#   decision_path, matched_anchors}), any interpretive commentary citing a specific field
+#   (e.g., "the selector matched Class C because Reviewer-2 + ESCALATE appear in the
+#   directive") is also a binding-command observation and must be derived verbatim from
+#   the actual JSON fields. Fabricating a rationale for WHY the result occurred — even
+#   when the primary bound field (model value) is correct — violates the attestation
+#   principle: the full JSON object is the observable, not just the AC-bound key.
+#   Procedure: before writing any interpretive "because X" commentary on a structured
+#   command result, read the corresponding field in the actual output and copy it verbatim.
+#   If the rationale is unclear from the output fields, record "rationale unclear from
+#   output — see matched_anchors: [...]" rather than fabricating an explanation.
+#   Detected tessera R74 MAJOR-1 R1 (Implementer attested Class C rationale; actual
+#   selector matched_anchors = ["cross-project canonical"] / decision_path = ["marker_match",
+#   "class_A"]; Rule 1 sub-class attestation-supplementary-fields-must-be-verbatim).
