@@ -5690,3 +5690,132 @@ All 14 AC-R81-* tests PASS. Implicit chore-A attestation (encode-actual-results-
 2. **Per CLAUDE-REVIEWER.md REINFORCED 2026-05-17:** append VIOLATION entries to MEMORIAL.md for the 6 MINOR-and-above findings (MAJOR-1/2/3 + MINOR-1/2/3) with [role] = COMMITTING role per REINFORCED 2026-05-19 (NOT detecting role).
 3. **Reinforcement-rule candidates for CLAUDE-IMPLEMENTER.md / CLAUDE-ARCHITECT.md:** consider new reinforcement on (a) narrative-content empirical-verification (DEMO-SCRIPT-style files must grep-verify engine paths + literal values before commit), and (b) README spec-application cite-then-walk (Architect must read existing README structure for heading collisions before prescribing append).
 
+
+---
+
+## § R82 ARCHITECT routing block (2026-05-21)
+
+**NEXT-ROLE: OPERATOR (then IMPLEMENTER pending operator disposition)**
+**STATUS: ESCALATE**
+**Round: R82 (Phase 4 SLICE 3 first round)**
+**Tier: full**
+
+### Inputs
+
+- `coordination/specs/Q-R82-SPEC.md` (the spec; load-bearing input for Implementer once operator dispositions)
+- `coordination/specs/Q-R82-SPEC-AUDIT.md` (audit sidecar; Reviewer-only — Implementer does NOT need to read)
+- `coordination/specs/Q-R82-EMPIRICAL.sh` (binding-command harness)
+- Spec-triad commit: `b4d0ecf`
+- Round-start SHA (anti-scope baseline): `5c3e0d9`
+
+### Spec summary
+
+- **14 ACs** in `Q-R82-SPEC.md § 5.1` covering: build-tool existence (AC-R82-1); package.json script + esbuild devDep (AC-R82-2); demos/engine-bundle.mjs output ≥ 5000 bytes (AC-R82-3); bundle contains expected symbols + excludes ds-integration (AC-R82-4); engine/topology-overlay.ts removed static `import { createHash } from 'node:crypto';` (AC-R82-5); computeSnapshotHash sync surface preserved (AC-R82-6); pureJsSha256 byte-identical to node:crypto on 3 FIPS 180-2 test vectors (AC-R82-7); bundle excludes node-internal polyfills (AC-R82-8); demos/demo.html has `<script type="module">` smoke block (AC-R82-9); .gitignore lists `demos/engine-bundle.mjs` (AC-R82-10); pnpm build:browser is idempotent (AC-R82-11); typecheck-clean sentinel (AC-R82-12); EMPIRICAL.sh block-presence markers (AC-R82-13); anti-scope diff ⊆ ALLOWED_SET regex anchored at round-start `5c3e0d9` (AC-R82-14).
+- **Round-start baseline** (verified at Architect session entry via direct command-runs):
+  - `pnpm exec tsc -p tsconfig.test.json` exit 0
+  - `pnpm exec node --test --test-reporter=tap test/*.test.js` produced `# tests=622 / # pass=607 / # fail=11 / # skipped=4`
+  - 11 carry-forward failing ACs (AC-R36-21, AC-R36-30, AC-R36-31, R65 sibling-dep, R66 sibling-dep, AC-R77-14, AC-R77-17, AC-R78-14, AC-R79-8, AC-R79-14, AC-R80-14) — matches R81 close attestation.
+- **Predicted at R82 chore-A**: `tests=638 ± 3` (band [635, 641]); `pass` in band [620, 625]; `fail = 12` (strict — R81-close 11 + R81 AC-R81-14 forward-protection flip = 12); `skipped = 4`; `tsc` exit 0; `Q-R82-EMPIRICAL.sh` exit 0; `git diff 5c3e0d9 HEAD --name-only` = 13-16 paths; `demos/engine-bundle.mjs` size in 35,000-80,000 bytes.
+- **EMPIRICAL.sh probe-run at round-start completed** (Q-R82-SPEC-AUDIT.md § C.3 records verbatim observed output; exit 1 by construction — Block 2/3/4 fail because Implementer artifacts absent; Block 1/5 pass; matches design). R77+R47+R72+R81 3rd-instance probe-run discipline satisfied.
+
+### Why ESCALATE (operator decision required before chore-A)
+
+The directive `coordination/NEXT-ROLE.md § R82 Round-scope directive` enumerates this halt condition under anti-scope:
+
+> **CONDITIONAL new external dependency** (esbuild OR equivalent): ESCALATE for operator decision
+
+The Architect's brainstorm in `Q-R82-SPEC.md § 0` evaluated three approaches:
+
+- **Approach A** (Architect-recommended): add `esbuild` (~10 MB single binary, no transitive deps) as devDependency; clean ESM bundling.
+- **Approach B**: hand-rolled ~200-line transitive-import walker; no new dep but brittle (regex-based TS parsing; future engine refactors silently break it; bundle ~3-5× larger).
+- **Approach C**: separate `tsconfig.browser.json` emitting per-file ESM into `demos/engine/`; **DISQUALIFIED by anti-scope** (would require modifying every import in `engine/*` to add `.js` extensions, violating "NO modification of engine/* EXCEPT topology-overlay.ts").
+
+The Architect cannot proceed unilaterally on Approach A because the directive explicitly says "ESCALATE for operator decision." Approach C is structurally disqualified. Approach B is the only no-new-dep path but is brittle.
+
+### Bounded operator options
+
+**Option A (Architect-recommended) — Authorize `esbuild` as devDependency.**
+
+- Operator authorizes `esbuild ^0.24.0` in `package.json` devDependencies + `"build:browser": "pnpm exec node tools/build-browser-bundle.js"` script.
+- Implementer proceeds with `Q-R82-SPEC.md` verbatim.
+- Pipeline resumes with Implementer dispatch.
+- Pros: industry-standard tooling; transparent single-binary install; fast (~5s bundle build); maintenance burden minimal across R83/R84.
+- Cons: +1 external dep (well-known, audited, single-binary; no transitive deps).
+- Confidence Architect would re-pick under operator scrutiny: HIGH.
+
+**Option B — No new dep; hand-rolled walker.**
+
+- Operator declines esbuild; Architect re-authors `Q-R82-SPEC.md §§ 2.2 + 4.2 + 5.1 (subset of ACs)` to remove the esbuild prescription and add a ~200-line tools/build-browser-bundle.ts that walks transitive imports + concatenates source bodies into one ESM via custom logic.
+- Pipeline pauses one round for spec amendment; Implementer dispatches against amended spec.
+- Pros: zero new dep; tool-owned.
+- Cons: brittle regex-based TS parsing fails on edge cases; ~3-5× spec re-authoring cost; future engine refactors (R83/R84+) silently break the walker; bundle output ~3-5× larger than esbuild output; no tree-shaking.
+- Brainstorm re-evaluation note (per CLAUDE-ARCHITECT.md § Fix-cycle considerations): Approach B was explicitly rejected at brainstorm for brittleness. Selecting B requires the Architect to author a "Brainstorm re-evaluation" subsection in the re-spec acknowledging the trade-off + naming the compensating control (ongoing Reviewer maintenance + bundle-output-size band loosening).
+
+**Option C — Descope R82.**
+
+- Operator declines both Option A and Option B. R82 is descoped; SLICE 3 directive re-authored.
+- Consequence: SLICE 3 foundation round is delayed; R83/R84 cannot dispatch (they depend on the bundle).
+- Cost: one round-cycle of operator time on re-scoping; multi-round downstream delay.
+
+### Implementer-actionable steps (post-Option-A disposition)
+
+When the operator dispositions Option A and the pipeline resumes the R82 Implementer phase:
+
+1. **Run** `pnpm install esbuild --save-dev` (refreshes `pnpm-lock.yaml` automatically).
+2. **Read** `coordination/specs/Q-R82-SPEC.md` in full (load-bearing). Do NOT read `Q-R82-SPEC-AUDIT.md` (Reviewer-only; cold-eye preservation).
+3. **RED commit first** (per R23 IMPL MINOR-1; streak continues R69, R75, R78-R81):
+   - Create `test/q82-engine-browser-bundle.test.ts` with 14 `test()` blocks each containing `assert.fail('AC-R82-N RED stub')` — no implementation.
+   - Verify `pnpm exec tsc -p tsconfig.test.json` exits 0 (or expected drift if compiled .js absent).
+   - Commit with message naming RED stubs.
+4. **GREEN commit (chore-A)**:
+   - Implement `tools/build-browser-bundle.ts` per spec § 2.2 / § 4.2 (esbuild API call; inline `stdin` entry).
+   - Implement `engine/topology-overlay.ts` Web Crypto adapter per spec § 2.1 / § 4.1 (3 deltas: remove line 30 static import; add `pureJsSha256` + `_sha256Hex` adapter region; change `computeSnapshotHash` body to call `_sha256Hex`).
+   - Append `<script type="module">` smoke block to `demos/demo.html` per spec § 2.3 / § 4.3 (before `</body>`).
+   - Append `demos/engine-bundle.mjs` line to `.gitignore` per spec § 2.4 / § 4.4.
+   - Modify `package.json` per spec § 2.5 / § 4.5 (esbuild devDep + build:browser script).
+   - Run `pnpm install` to refresh `pnpm-lock.yaml`.
+   - Run `pnpm build:browser` to generate `demos/engine-bundle.mjs`.
+   - Replace q82 `assert.fail` stubs with real assertions per spec § 4.6.
+   - Run `bash coordination/specs/Q-R82-EMPIRICAL.sh` and verify exit 0; if exit non-zero for any reason OTHER than the pre-documented chore-A pass condition, HALT + DIAGNOSTIC per § 6.1.
+   - Run `pnpm exec node --test --test-reporter=tap test/*.test.js | tail -10` and record actual `# tests` / `# pass` / `# fail` / `# skipped` verbatim.
+   - Commit chore-A.
+5. **Routing**: append `## § R82 IMPLEMENTER routing block` to `coordination/NEXT-ROLE.md`. Set header `NEXT-ROLE: REVIEWER` + `STATUS: READY`. Attest OBSERVED binding-command outputs verbatim (per Rule 1; do NOT propagate predictions). Append CONFIRMATION lines to `coordination/MEMORIAL.md`.
+
+### Halt conditions (extending directive's 8 conditions; recap from spec § 6.1)
+
+1. `bash Q-R82-EMPIRICAL.sh` exits non-zero at chore-A for any reason OTHER than the pre-documented carry-forward 11 + R81 AC-R81-14 forward-protection flip = 12.
+2. `pnpm exec tsc -p tsconfig.test.json` exit ≠ 0.
+3. Test baseline drift: `# fail` ≠ 12 OR `# pass` outside `[620, 625]`.
+4. R61-class architectural-reality discovery (Web Crypto adapter pattern doesn't work as designed in either Node or browser).
+5. New external dependency required beyond `esbuild` (e.g., transitive sha256 polyfill).
+6. Engine surface modification needed beyond `engine/topology-overlay.ts`.
+7. `demos/scenarios/*.json` content modification needed.
+8. esbuild's bundle output is structurally non-loadable in a browser.
+9. Lazy `require('node:crypto')` adapter causes Node tests to regress (`# fail` > 12 unexpectedly).
+10. `.gitignore` `demos/engine-bundle.mjs` line collides with an existing same-line entry (Architect pre-checked at spec-emit — absent; Implementer re-verifies before append).
+11. Any cross-project discipline (Rules 1-7) violated.
+
+### Cross-project disciplines load-bearing at R82
+
+- **Rule 1** (empirical-command-attestation): Implementer attests ACTUAL observed values; no reframing as compliance. Lineage R26+R72+R77+R79+R70+R81.
+- **Rule 3** (anti-self-application gate): spec § 9.6 walks all 14 ACs against prescribed pseudocode; all PASS. R74 MINOR-5 lesson.
+- **Rule 4** (anti-scope ALLOWED_SET forward-coverage): § 3.2 anchored regex; forward-protective R-number wildcards for ROUND-summary + DIAGNOSTIC paths.
+- **Rule 6** (encode-actual-results-verbatim): § 5.2 explicit; `# pass` band has ±2 PRNG-environment padding; `# fail` is strict-equality 12.
+- **Rule 7** (cross-project canonical: claim-then-walk): applied at spec-emit on the engine portability scan (`grep -rn "from 'node:"` enumerated), 7 `computeSnapshotHash` callers, FIPS 180-2 vectors verified, `.gitignore` collision pre-check (R81 MAJOR-3 lesson).
+
+### TDD discipline reminder
+
+R23 IMPL MINOR-1 streak: R69-R75 (9 rounds), R77 break, R78-R81 (4 rounds) reinstated; R82 continues. Reviewer will verify the RED commit lands separately via `git log --oneline`.
+
+### Tactical autonomy + halt-discipline reminder
+
+TACTICAL AUTONOMY at R82 covers: variable names inside esbuild API call's `BuildOptions` literal; comment-style choices; pure-JS SHA-256 internal naming (`K`, `H`, etc. — standard FIPS notation expected but not required); ordering of devDependencies entries in package.json (insertion alphabetical-ish acceptable).
+
+TACTICAL AUTONOMY does NOT cover: (a) substitution of esbuild `external` array entries (R72 CRITICAL-1 lesson — closed-set discriminators); (b) refactoring `Q-R82-EMPIRICAL.sh` control-flow shape (R73 MAJOR-2); (c) skipping the RED commit (R23 IMPL MINOR-1); (d) silently amending EXPECTED_FAIL or EXPECTED_PASS_MIN/MAX in EMPIRICAL.sh to absorb chore-A drift (R79 MAJOR-1); (e) modifying `engine/*` beyond the prescribed 3 deltas in `engine/topology-overlay.ts`; (f) modifying `demos/scenarios/*.json` content; (g) substituting any node:* external entry name.
+
+If a tactical deviation is contemplated, disclose as `TD-N` in the IMPLEMENTER routing block with: WHAT was deviated, WHY the spec prescription was infeasible verbatim, EMPIRICAL EQUIVALENCE EVIDENCE that the deviation preserves the AC's intent.
+
+### Operator decision flag (blocking; this round)
+
+**BLOCKING:** OQ-R82-1 — operator picks Option A / B / C above before chore-A. The pipeline pauses at STATUS: ESCALATE until operator dispositions. Architect recommendation: **Option A (esbuild)**. Confidence HIGH.
+
