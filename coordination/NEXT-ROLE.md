@@ -3698,7 +3698,7 @@ STATUS: READY
 - **RED commit SHA:** `6a6689a` — `test(R75 RED): q75-cache-prefix.test.ts — 10 ACs, 7 fail (builder/measurer missing)`
 - **GREEN commit SHA:** `dc86e24` — `feat(R75 GREEN): scripts/build-role-context.ts + measure-cache-effect.ts`
 - **Additional changes commit SHA:** `95519ed` — `feat(R75): run-pipeline.sh integration + CLAUDE-COMMON.md Mode docs + package.json scripts`
-- **Chore-A coordination commit SHA (attested HEAD for Reviewer):** [UPDATED BELOW — see final chore-A commit]
+- **Chore-A coordination commit SHA (attested HEAD for Reviewer):** `c6f33a2`
 - **Round-start SHA (anti-scope diff lower bound):** `6002dd6`
 
 ### Tactical deviations (TD)
