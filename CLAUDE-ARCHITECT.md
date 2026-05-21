@@ -780,3 +780,41 @@ All unresolved decisions → open questions in the spec.
 # REINFORCED 2026-05-21 — Pass-count arithmetic when forward-protection-AC flips present (Tessera R83): When computing predicted test pass count at a round where a forward-protection-AC is expected to flip (i.e., EXPECTED_FAIL increases by 1), subtract that flip from BOTH the predicted pass count AND the predicted pass-count band lower edge. Predicted pass = (prior-close PASS) - (forward-protection flip count) + (new ACs passing). Predicted band = [prior-close PASS - flip - 1, prior-close PASS - flip + 1] accounting for the delta direction. At R83: R82-close = 620 pass, AC-R82-14 flips (predicted), R83 adds 16 ACs all passing → prediction should be 620 - 1 + 16 = 635, band [634, 636]. Spec predicted 636 (missing the -1), band [635, 637], which masked the arithmetic error. Observation 635 fell at band lower edge; the gap between prediction and observation was attributed to "PRNG/environment variance" when it was actually systematic arithmetic. Fix: carry the forward-protection flip through the entire pass arithmetic. First tessera instance (prior: R79 MINOR-3 had similar gap but different structure).
 # REINFORCED 2026-05-21 — End-to-end-test-race-conditions: AC-R84-14 structurally flaky (Tessera R84 MINOR-2): When a spec prescribes an end-to-end test where an async operation (e.g., `worker.terminate()`) must halt a synchronous message stream, the test-harness timing is inherently racy: the worker thread may emit the final message between the async terminate() call and when the worker process is torn down. This is NOT an implementation bug; it is a fundamental concurrency property of async termination. When spectating this pattern, either (a) accept flakiness as a documented AC limitation in § 5.3 with explicit rationale ("terminate() is async; late-arriving messages are tolerated; AC asserts a lower bound not an exact count"), OR (b) restructure the test to not depend on race outcomes (e.g., measure the cumulative message count post-terminate across N test runs and assert a distribution, not a hard count). Procedure: if spec has a test of the form "invoke async operation X; assert that subsequent synchronous stream halts," audit whether X's completion is causally necessary for the halt assertion to be true. If the assertion is probabilistic (e.g., ">90% of runs observe ≤N messages"), document the flakiness as a known limitation; if the assertion is deterministic (e.g., "exactly K messages"), restructure. Spec R84 AC-R84-14 prescribed a deterministic assertion on an async race; observation: test passed in CI but exhibited transient local flakiness; Reviewer noted flakiness. Detected Tessera R84 MINOR-2 (first instance of this specific structure; related async-determinism pattern at R48 MINOR-3 / R53 MAJOR-2).
 # REINFORCED 2026-05-21 — Spec-AC-count-consistency discipline (Tessera R84 MINOR-3): When spec § 5 (Acceptance criteria) enumerates AC count as N and quotes "N ACs" or "# fail = N" in predictions, all concrete assertions of "AC count = N" must be binding. At spec-emit time, verify: (a) count the actual test() blocks in the spec's verbatim test-file section; (b) count the assertions in the enumerated AC table; (c) count assertions in the anti-regression AC region (e.g., "AC-R84-15: 14 marker-regex matches" must have exactly 14 assert.match calls in the test file). When these counts diverge, update the spec documentation to match the actual code. Procedure: before pre-emit grilling, create a [AC-ID, assertion-count] table: for each AC that claims a specific count ("4 message types", "14 markers"), grep the test file's final version and count the matching assert calls. If assertion-count > claimed-count, update the spec. If assertion-count < claimed-count, decide whether to add missing asserts or reduce the spec claim. Spec R84 AC-R84-15 claimed "14 marker regex matches"; test file contained 16 assert.match calls (R71 markers: 2, R79: 2, R80: 1, R81: 1, R82: 2, R83: 8) — spec prediction undercounted by 2. Detected Tessera R84 MINOR-3 (first instance of this sub-variant; prior instance: R74 MINOR-3 similar structure but on timeout values).
+# REINFORCED 2026-05-21 — Fail-count prediction against known-flaky prior AC (Tessera R85 CRITICAL-1;
+#   composite fold of R83 pass-count-arithmetic + R84 end-to-end-test-race-conditions REINFORCED):
+#   When encoding a fail-count prediction (`EXPECTED_FAIL=N` strict in EMPIRICAL.sh; `# fail = N`
+#   in § 5.2), scan MEMORIAL.md for prior-round ACs documented as structurally flaky (grep for
+#   "flaky", "race condition", "MINOR-2", or "non-deterministic" adjacent to any active AC ID). Any
+#   such AC contributes stochastic variance to the fail count independent of the round's own changes.
+#   If a flaky AC remains in the suite (not removed or restructured), EXPECTED_FAIL MUST be a band
+#   (`EXPECTED_FAIL_MIN=N`/`EXPECTED_FAIL_MAX=N+1` in EMPIRICAL.sh; `fail: N–N+1 (band; ±1 for
+#   AC-RXX-YY structural flakiness)` in § 5.2), never a strict value. The same band-accounting
+#   principle applies for STOCHASTIC FLAKES as for deterministic forward-protection flips (R83
+#   sub-variant). Procedure: before emitting § 5.2 prediction table, (a) grep MEMORIAL.md for flaky
+#   AC patterns; (b) for each flaky AC still active, add +1 to EXPECTED_FAIL_MAX; (c) document the
+#   AC name and historical flake rate in the rationale column. R85 CRITICAL-1: AC-R84-14 structural
+#   flakiness (~25% rate; R84 REVIEWER MINOR-2 at MEMORIAL.md:2583) was not carried forward into
+#   the § 5.2 fail-count prediction; EMPIRICAL.sh encoded `EXPECTED_FAIL=16` strict; ~25% of
+#   full-suite runs at routing HEAD tripped Halt-3. Operator Option A resolution required post-Reviewer
+#   ESCALATE. Second tessera instance of count-arithmetic-missing-flake-contribution (prior: R83
+#   REINFORCED covered deterministic flips; R85 extends to stochastic flake variance).
+# REINFORCED 2026-05-21 — Self-application gate must cover EMPIRICAL.sh shell-command patterns
+#   (Tessera R85 MAJOR-2; composite fold of R75 self-application-gate series):
+#   The § 8.17 Q.17 self-application gate walk is complete only when it covers ALL spec-triad
+#   artifacts: (a) in-test regex patterns in `test/q*-*.test.ts` [already in Q.17]; AND (b) shell
+#   command patterns in Q-RNN-EMPIRICAL.sh — awk range patterns, grep patterns, sed ranges, and
+#   variable-assertion logic. Shell range-matching patterns (`awk '/start/,/end/'`) match BOTH the
+#   start line and every subsequent line until (and including) a line matching the end pattern. If
+#   start-pattern and end-pattern can both match the SAME line (e.g., `/^### Browser dashboard/`
+#   and `/^### /` both match any `###`-prefixed heading), the range produces only the start line —
+#   not the section body the block was intended to extract. Procedure: for each awk/sed range in
+#   EMPIRICAL.sh, run the command against the prescribed implementation text verbatim at spec-emit;
+#   verify the output is non-empty and contains the expected assertion target. If start and end
+#   patterns can overlap on the same line, use flag-toggling awk (`/start/{flag=1;next} flag &&
+#   /end/{exit} flag`) instead of a simple `/X/,/Y/` range. This sub-variant extends the R75
+#   stdio-flush / bash-context / cross-module-import series: the self-application gate must walk
+#   EACH type of executable prescription in the spec triad, not only in-test TypeScript patterns.
+#   R85 MAJOR-2: `awk '/^### Browser dashboard/,/^### /'` in Block 3 produced one-line output;
+#   Implementer HALT-1 at chore-A; Coordinator-direct fix required. 7th tessera instance of the
+#   canonically-landed `architect-encoded-pattern-not-verified-against-prescribed-implementation`
+#   Rule 1 sub-class (R62+R66+R68+R72+R83+R84+R85).
