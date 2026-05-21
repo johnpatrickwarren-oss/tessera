@@ -1,7 +1,131 @@
-CURRENT-ROUND: R78
-NEXT-ROLE: IMPLEMENTER
-STATUS: READY
+CURRENT-ROUND: R79
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § Phase 4 SLICE 1 CLOSE + R78 close attestation (2026-05-20)
+
+**Phase 4 SLICE 1 complete.** R73-R78 = 6-round Anchor cost efficiency + detector tuning chain.
+
+| Round | Outcome |
+|---|---|
+| R73 | Tier-routing classifier; 0 safety violations |
+| R74 | Haiku-for-MU + Reviewer scope; 1 CRITICAL caught (bash `${VAR:+word}`); Option A fix |
+| R75 | Cross-session prompt-cache; 3 Architect pre-emit gaps caught + Implementer-fixed |
+| R76 | Anchor PR #39 opened |
+| R77 | Detector envelope gap 1: W≥50 → 5/5 detection at magnitude 0.05 (closes 90% gap) |
+| R78 | Topology-walk gap 2: max_hop=2 + min_member=2 → 5/5 detection + 0 false positives (closes 80% gap) |
+
+**R78 substantive close:** 0C/0M/2m/4O. R48-R78 = **31 consecutive 0-CRITICAL streak**.
+
+**R78 Coordinator-direct STATUS fix (2nd Haiku-MU instance):** MU outputs at `1228d06` but STATUS field stuck at `READY`. Same pattern as R75. CLAUDE-MEMORIAL.md REINFORCED entry landed this commit (Haiku competent at substantive work; consistently misses process-discipline details).
+
+**Both R72 gaps are tunable, not architectural:**
+- Gap 1: extend window count ≥ 50
+- Gap 2: max_hop=2, min_member=2
+
+Tessera's detection envelope is materially wider than R72 saturation matrix suggested.
+
+**Pending operator-decision items:**
+1. Anchor PR #39 review + merge
+2. CLAUDE-IMPLEMENTER.md consolidation (36 entries)
+3. CLAUDE-ARCHITECT.md consolidation (45 entries)
+4. Detector tuning operationalization (W≥50 + max_hop=2 + min_member=2 as engine defaults vs operator-configurable)
+
+---
+
+## § Phase 4 SLICE 2 framing — Dashboard polish (Path A; 3 rounds) (2026-05-20)
+
+Operator selected Path C: dashboard polish (SLICE 2) → live in-browser engine (SLICE 3).
+
+**SLICE 2 scope (canned-architecture preserved):**
+
+| Round | Work |
+|---|---|
+| **R79** (this round) | Front-panel split + provenance panel + live verdict banner |
+| R80 | 5-family detector visualization + visual identity pass |
+| R81 | Polish + close (scrubber, animation, 10-minute demo script) |
+
+**SLICE 3 scope (live in-browser; queued):** R82 engine browser-bundling → R83 interactive knobs → R84 live engine compute + Web Worker → R85 SLICE 3 close + Phase 4 close.
+
+---
+
+## § R79 Round-scope directive (Architect — front-panel split + provenance + live verdict banner; Phase 4 SLICE 2 round 1) (2026-05-20)
+
+R79 brings Tessera demo.html toward DS-level structural richness (currently 9× smaller). R79 targets ~50% of the structural gap; R80 finishes.
+
+**Round-start SHA:** SHA of this commit; verify via `git rev-parse HEAD` at Architect session entry.
+
+### Primary deliverable
+
+1. **`demos/demo.html` extension:**
+   - **Front panel split:** metrics panel (left; per-shard signal rows) + detectors panel (right; per-family detector groups)
+   - **Provenance panel:** expandable per-window detail; "self-explaining verdicts" framing
+   - **Live verdict banner:** top-of-page summary updating per tick (scenario / window index / verdict status)
+   - Architect picks layout at spec § 0; suggested: 3-column main grid with verdict banner above
+
+2. **`tools/build-canned-demos.ts` extension** — additive scenario JSON fields:
+   - Per-window per-detector verdict state (Family A betting M_t; future Family B/C/D/E placeholders)
+   - Per-window per-shard residual values
+   - Threshold-crossing event log
+   - Provenance "receipt" structured data per firing event
+   - Backward-compat: existing JSON readable; new fields additive
+
+3. **Test file** `test/q79-dashboard-structure.test.ts`:
+   - HTML structural ACs (front-panel-metrics, front-panel-detectors, provenance-panel, verdict-banner IDs/classes)
+   - JSON schema ACs (new per-tick fields)
+   - Anti-regression: R71 scenario JSON readable by extended dashboard
+
+4. **Q-R79-EMPIRICAL.sh** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77 lesson.
+
+### Tier rationale
+
+**full-tier** — Architect (front-panel layout + provenance schema + verdict banner update mechanism; cite-then-walk over R71 dashboard + DS demo.html reference) + Implementer + Reviewer + MU.
+
+### Anti-scope (R79 hard limits)
+
+- NO modification of `engine/*` (Phase 3 frozen)
+- NO modification of R73-R78 deliverables (frozen)
+- NO modification of `tools/demo-scenario.ts` (R70 CLI; sibling to dashboard)
+- **NO new external dependencies** (R68 anti-worm; vanilla HTML/CSS/JS only)
+- NO modification of `run-pipeline.sh` (PR #39 pending)
+- NO real-cluster; NO DS-repo; NO `gh repo` operations
+- NO modification of carry-forward AC fail set; NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `demos/demo.html` (extension)
+- `demos/scenarios/*.json` (regenerated; additive fields only)
+- `tools/build-canned-demos.ts` (extension)
+- `package.json` (no new deps; possibly new script entries)
+- `README.md` (optional Coverage / Quick demo section update)
+- `test/q79-dashboard-structure.test.ts` (NEW)
+- `coordination/specs/Q-R79-SPEC.md` + `Q-R79-SPEC-AUDIT.md` + `Q-R79-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R79.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE; particularly Rule 7 Surface (a): **all cross-project disciplines load-bearing** (claim-then-walk + TACTICAL-AUTONOMY-without-re-verification + empirical-script-defect + Haiku-MU-STATUS-update-miss just landed).
+
+### Halt conditions (R79 Implementer)
+
+1. Q-R79-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R78 close other than R79-additions
+4. R61-class architectural-reality discovery
+5. Architect spec uses round-evolution-fragile AC patterns: HALT
+6. All cross-project disciplines load-bearing
+7. **New external dependency required: HALT + DIAGNOSTIC + ESCALATE** (zero-new-deps posture inviolate)
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R79 --tier full
+```
 
 ---
 
