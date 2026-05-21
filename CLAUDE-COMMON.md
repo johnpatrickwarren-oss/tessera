@@ -109,6 +109,47 @@ Read protocol:
   - At next phase close: active content rolls to a new `MEMORIAL-PHASE-N.md`;
     the active file resets to header + index + new-phase rounds.
 
+## Cache-prefix mechanism (Mode docs — informational; not a REINFORCED rule)
+
+The pipeline structures each role-session's appended system prompt as a stable
+PREFIX + per-role TAIL so Anthropic's prompt cache hits the prefix across
+sequential role sessions within a 5-minute TTL.
+
+PREFIX (byte-identical across IMPLEMENTER / REVIEWER / MEMORIAL-UPDATER within
+a single round):
+  - CLAUDE-COMMON.md
+  - coordination/specs/Q-${round}-SPEC.md
+  - coordination/specs/Q-${round}-SPEC-AUDIT.md
+  - coordination/specs/Q-${round}-EMPIRICAL.sh
+  - The ## § R${round} Round-scope directive section of coordination/NEXT-ROLE.md
+
+TAIL (varies per role):
+  - CLAUDE-<ROLE>.md  (role-specific discipline file)
+  - Role-stamp lines naming THIS SESSION ROLE + Round
+
+Construction: scripts/build-role-context.ts is the single source of truth. The
+pipeline invokes node scripts/build-role-context.js --emit full --role <ROLE>
+--round R<N> at each role dispatch. If the compiled .js is absent (fresh
+clone or first run of the round that introduces it), the pipeline falls back
+to the legacy cat-bundle construction; correctness is preserved, cache
+savings are not realized.
+
+Architect session note: the spec triad does not exist at Architect-dispatch
+time (the Architect creates it). The Architect's prefix omits those files,
+so the Architect's bundle is not byte-identical to the Impl/Rev/MU prefix.
+The cache benefit applies to the IMPL → REV → MU chain.
+
+Within-round prefix-continuity invariant: once the Architect commits the
+spec triad, no role may modify the contents of Q-${round}-SPEC.md,
+Q-${round}-SPEC-AUDIT.md, Q-${round}-EMPIRICAL.sh (beyond pre-prescribed
+placeholder substitutions such as SHA injection blocks), nor the
+## § R${round} Round-scope directive section of NEXT-ROLE.md, nor
+CLAUDE-COMMON.md itself. Routing blocks for downstream roles are appended
+below the directive section, preserving its byte-identity.
+
+This Mode docs section is informational. It is not a REINFORCED rule and
+does not extend any prior REINFORCED rule.
+
 ## Pre-emit grilling (non-negotiable for all roles)
 Before setting STATUS: READY in NEXT-ROLE.md, run adversarial self-review:
   1. Is every claim in my artifact backed by something verifiable?
