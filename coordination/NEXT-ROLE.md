@@ -1,7 +1,96 @@
-CURRENT-ROUND: R82
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R83
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R82 close attestation (2026-05-21)
+
+R82 closed clean post-Option A resolution. `demos/engine-bundle.mjs` (58 KB ES module) shipped; esbuild ^0.28.0 added as devDep with explicit `onlyBuiltDependencies` allowlist per pnpm v11 security model. Web Crypto adapter (dependency-injection pattern) in topology-overlay.ts; topology-overlay.ts reclassified vendored-at-pin → vendored-with-deltas (2nd Tessera reclassification after verdict.ts).
+
+---
+
+## § R83 Round-scope directive (Architect — interactive knobs + control surface; Phase 4 SLICE 3 round 2) (2026-05-21)
+
+R83 = second SLICE 3 round. Interactive HTML controls for fault-injection parameters. R83 ships UI surface + state management; R84 wires to live engine compute.
+
+**Round-start SHA:** SHA of this commit; verify at Architect session entry.
+
+### Primary deliverable
+
+1. **`demos/demo.html` control panel** (Architect picks layout):
+   - Scenario selector dropdown (R71 preserved; extended with "custom" option)
+   - Drift magnitude slider (0.05 → 0.40 in 0.025 steps; R77 envelope)
+   - Window count slider (30 → 200; default 50; R77 envelope)
+   - α threshold dropdown (0.001 / 0.005 / 0.01)
+   - Target shard selector
+   - Topology size dial (small 6-shard / medium 10 / large 25)
+   - Detector family toggles (5 checkboxes: Family A/B/C/D/E)
+   - Run button (R83 ships UI; R84 wires to engine)
+   - Reset button
+
+2. **State management** (vanilla JS):
+   - Global `controlState` object
+   - Event listeners → controlState + emit `tessera:control-change`
+   - Decoupled from rendering (R84 Web Worker prep)
+   - Console log on Run (R83 placeholder; R84 invokes engine)
+
+3. **Visual identity** — R80 palette consistency; responsive narrow viewport
+
+4. **Test file** `test/q83-interactive-knobs.test.ts`:
+   - HTML structural ACs (control elements; IDs/classes)
+   - State management ACs (controlState shape; event emission)
+   - Reset behavior ACs
+   - Anti-regression: R71/R79/R80/R81/R82 preserved
+
+5. **Q-R83-EMPIRICAL.sh** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77.
+
+### Tier rationale
+
+**full-tier** — Architect (control layout + state-management + event-emit shape; cite-then-walk over R82 bundle + R81 demo.html) + Implementer + Reviewer + MU.
+
+### Anti-scope (R83 hard limits)
+
+- NO modification of `engine/*` (Phase 3 + R82 frozen)
+- NO modification of R73-R82 deliverables (frozen)
+- NO new external dependencies (vanilla HTML/CSS/JS only)
+- NO modification of `run-pipeline.sh` (PR #39 pending)
+- NO real-cluster; NO DS-repo; NO `gh repo` operations
+- NO modification of carry-forward AC fail set; NO modification of prior-round Q-RNN-SPEC.md files
+- **NO live engine compute at R83** — UI surface + state management ONLY; R84 wires to engine
+
+ALLOWED modifications:
+- `demos/demo.html` (control panel + state management)
+- `tools/build-canned-demos.ts` (extension if R82 smoke-block pattern needs widening)
+- `package.json` (no new deps)
+- `test/q83-interactive-knobs.test.ts` (NEW)
+- `coordination/specs/Q-R83-SPEC.md` + `Q-R83-SPEC-AUDIT.md` + `Q-R83-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R83.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE; **Architect MUST use `--test-reporter=tap`** per R77. Claim-then-walk applies to anti-scope ALLOWED_SET completeness (R82 lesson).
+
+### Halt conditions (R83 Implementer)
+
+1. Q-R83-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R82 close other than R83-additions
+4. R61-class architectural-reality discovery
+5. Architect spec uses round-evolution-fragile AC patterns: HALT
+6. All cross-project disciplines load-bearing
+7. New external dependency: HALT + DIAGNOSTIC + ESCALATE
+8. **Anti-scope ALLOWED_SET incomplete** (R82 lesson): file requires modification not in ALLOWED_SET → HALT + DIAGNOSTIC
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R83 --tier full
+```
 
 ---
 
