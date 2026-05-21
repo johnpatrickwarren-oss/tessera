@@ -1,7 +1,110 @@
 CURRENT-ROUND: R75
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+ROUND-START-SHA: 6002dd6
+SPEC-TRIAD-SHA: a466aa4
+
+---
+
+## § R75 ARCHITECT routing block (2026-05-20)
+
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
+
+Inputs:
+  - coordination/specs/Q-R75-SPEC.md  (read every word — load-bearing for all 15 ACs)
+  - coordination/specs/Q-R75-SPEC-AUDIT.md  (Reviewer reads; Implementer optional)
+  - coordination/specs/Q-R75-EMPIRICAL.sh  (run at chore-A pre-commit)
+
+Round-start SHA: `6002dd6` (parent of R75 directive commit `ad478fb`)
+Spec-triad SHA: `a466aa4` (this Architect's commit; spec triad frozen at this SHA per § 6.2 invariant)
+
+Spec deliverables for IMPLEMENTER (Q-R75-SPEC.md § 2.1):
+  1. scripts/build-role-context.ts (full pseudocode at § 3.1)
+  2. scripts/measure-cache-effect.ts (full pseudocode at § 3.2)
+  3. run-pipeline.sh delta (3 sub-deltas at § 3.3: A, B, C)
+  4. test/q75-cache-prefix.test.ts (full pseudocode at § 3.4)
+  5. CLAUDE-COMMON.md Mode docs section (verbatim insertion content at § 3.5)
+  6. package.json scripts entries (verbatim JSON at § 3.6)
+
+Acceptance criteria: 15 ACs at § 5.2. ALLOWED_SET at § 5.1 (14 paths).
+
+Load-bearing reminders (from this round's directive + cross-project lineage):
+
+1. **Rule 1 (empirical-command-attestation):** Q-R75-EMPIRICAL.sh blocks
+   `echo "observed: …"` BEFORE the PASS/FAIL determination. The Implementer's
+   chore-A attestation in this NEXT-ROLE.md MUST encode the ACTUAL observed
+   tsc exit code + test counts + diff path count — NEVER spec predictions.
+   Origin: R26 MAJOR-1, R72 CRITICAL-1.
+
+2. **Rule 3 / R74 MINOR-5 (spec self-application):** would the spec pseudocode
+   at § 3 PASS each AC verbatim? Yes per § 9.6 walk. Implementer: if any
+   deviation from § 3 pseudocode is genuinely tactical, apply the Q-R75-SPEC.md
+   § 6.4 guard rails (4 prohibited TACTICAL-AUTONOMY categories enumerated).
+
+3. **Rule 4 (anti-scope-allowed-set):** ALLOWED_SET is SHA-pinned to
+   ROUND_START_SHA = `6002dd6`. AC-R75-13 asserts MEMBERSHIP (subset),
+   NOT a live count. No order-constraining regex patterns. No
+   forward-protection ACs.
+
+4. **Rule 5 / R72 + R73 + R74 cite-then-verify lineage:** every file:line
+   citation in the spec was verified by direct file read at spec-emit;
+   summary at § 9.10. Implementer: extend this discipline to your chore-A
+   attestation — cite test() declaration lines via grep-verification, not
+   from memory.
+
+5. **R72 + R73 + R74 TACTICAL-AUTONOMY-without-re-verification guard
+   rails (Q-R75-SPEC.md § 6.4):** TACTICAL AUTONOMY does NOT cover:
+     (a) control-flow construct rewrites in spec-authored bash/TS;
+     (b) bash boolean-semantics changes without empirical equivalence
+         check for BOTH flag-set and flag-unset cases (R74 CRITICAL-1
+         `${VAR:+word}` lineage);
+     (c) substitution of spec-prescribed TypeScript literals;
+     (d) changes to the prefix-construction logic in build-role-context.ts.
+   If any of (a)–(d) appears tactically required → HALT + DIAGNOSTIC + ESCALATE.
+
+6. **R74 MINOR-1 / Class A regex completeness:** any regex-based AC
+   alternation must enumerate each branch individually — not via "etc.".
+   R75 spec has NO regex-alternation ACs; the only grep-based ACs
+   (AC-R75-14, AC-R75-15) test substring presence, not alternation.
+
+7. **R21 ARCH MINOR-1 spec-commit-sequencing:** Architect committed the
+   spec triad (SHA `a466aa4`) BEFORE writing this routing block. Implementer:
+   commit your RED stub commit before the GREEN implementation commit
+   (R23 IMPL MINOR-1 separate-RED-commit discipline). Then chore-A.
+
+8. **R75 § 6.2 within-round prefix-continuity invariant:** Once committed,
+   the spec triad files (Q-R75-SPEC.md + AUDIT + EMPIRICAL.sh), the
+   `## § R75 Round-scope directive` section of NEXT-ROLE.md, and
+   CLAUDE-COMMON.md are FROZEN for the rest of the round. Modifications
+   to any of these mid-round break the prefix-cache hit. This is a halt
+   condition (Implementer halts with DIAGNOSTIC; Reviewer flags as MAJOR
+   if observed).
+
+Pre-emptive resolution for R73 fixture availability (Q-R75-SPEC.md § 5
+empirical-premise verification): Implementer at chore-A MUST verify
+`scripts/tier-router-fixtures/R72-directive.md` exists via `ls`. If
+absent, substitute any tracked fixture (R45/R49/R50/R51-directive.md);
+AC-R75-9 binds the substantive property (router emits valid
+classification on a known fixture), not the literal fixture path. This
+is a spec-pre-authorized substitution — NOT a TACTICAL deviation, NOT a
+halt trigger.
+
+Halt conditions: see Q-R75-SPEC.md § 10 (mirrors directive § halt #1-7).
+
+Pipeline invocation (after Implementer's routing block routes to REVIEWER):
+```
+./run-pipeline.sh --round R75 --tier full
+```
+
+(R75 self-pipeline note: scripts/build-role-context.js doesn't exist yet
+at Architect dispatch and at the Implementer's INITIAL dispatch — the .js
+is compiled by `pnpm exec tsc` only after the Implementer's first chore-A
+pretest run. The pipeline gate in run-pipeline.sh § 3.3 Delta A falls
+back to legacy cat-bundle when .js absent; correctness preserved. Cache
+hit benefit activates from the Reviewer dispatch onward for R75 itself,
+and from Architect onward for R76+.)
 
 ---
 
