@@ -103,7 +103,10 @@ fi
 
 if [ -f "$README_FILE" ]; then
   # Section-bounded check: Browser dashboard subsection mentions Live mode.
-  if awk '/^### Browser dashboard/,/^### /' "$README_FILE" \
+  # Fixed at R85 ESCALATE Coordinator-direct fix: awk range '/start/,/end/'
+  # matches BOTH on the same line; use explicit flag toggling to skip start
+  # line itself before terminating on next ### heading.
+  if awk '/^### Browser dashboard/{flag=1;next} flag && /^### /{exit} flag' "$README_FILE" \
      | grep -qi "Live mode"; then
     block_ok "README.md Browser dashboard subsection mentions Live mode"
   else

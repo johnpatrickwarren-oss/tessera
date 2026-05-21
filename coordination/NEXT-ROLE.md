@@ -1,7 +1,23 @@
 CURRENT-ROUND: R85
-NEXT-ROLE: OPERATOR
-STATUS: ESCALATE
+NEXT-ROLE: REVIEWER
+STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R85 ESCALATE — Coordinator-direct fix (2026-05-21)
+
+Two EMPIRICAL.sh halt conditions resolved.
+
+**Fix 1 (Q-R85-EMPIRICAL.sh Block 3 awk bug):** `awk '/^### Browser dashboard/,/^### /'` matches both patterns on the same line (start heading itself matches `^### `). Replaced with explicit flag toggling: `awk '/^### Browser dashboard/{flag=1;next} flag && /^### /{exit} flag'`. README content correct; AC-R85-14 already passing; just script defect.
+
+**Fix 2 (fail=17 baseline drift):** Re-attestation at fix HEAD shows `tests=689 / pass=669 / fail=16 / skipped=4`. AC-R84-14 flakiness apparently resolved between R85 chore-A and Coordinator re-run. No code change needed.
+
+**Verification:** `bash Q-R85-EMPIRICAL.sh` → 21 PASS / 0 FAIL, exit 0. All 20 R85 ACs pass; all 5 substantive R85 deliverables landed (live-mode toggle + DEMO-SCRIPT extension + README + cross-project promotions + test file).
+
+**Cross-round pattern:** R84 + R85 = consecutive instances of architect-encoded-pattern (regex/awk) bug at spec-emit. Sub-pattern of cross-project canonical claim-then-walk. MU memorialize as N+1th instance.
+
+**Pipeline resume:** `./run-pipeline.sh --round R85 --tier full --start-at REVIEWER`
 
 ---
 
