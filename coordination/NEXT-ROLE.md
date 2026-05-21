@@ -1,7 +1,29 @@
 CURRENT-ROUND: R84
-NEXT-ROLE: OPERATOR
-STATUS: ESCALATE
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R84 ESCALATE — Option A (2026-05-21)
+
+Spec § 1.6 AC-R84-9 amended: drop handler-region scoping; assert `worker.postMessage` directly in full HTML. No implementation changes; GREEN preserved.
+
+**Root cause:** Architect regex `{0,3000}?` quantifier too short. Spec-prescribed handler ~3129 chars; regex stops at first inner `});` at ~1563 chars; postMessage at ~3129 outside region. Round-evolution-fragile AC pattern (regex with hardcoded char limit).
+
+**Implementer scope (coordination chore + chore-A GREEN):**
+1. `Q-R84-SPEC.md § 1.6`: AC-R84-9 new assertion `/worker\.postMessage\s*\(\s*\{\s*type:\s*['"]run['"],\s*controlState\s*:/` (direct full-HTML; no region scoping)
+2. `test/q84-live-engine-compute.test.ts`: AC-R84-9 body uses new regex
+3. `Q-R84-EMPIRICAL.sh § 5.2`: predicted-fail stays 15
+4. Commit GREEN (engine-worker.js + tool edits + demo.html + test) with AC-R84-9 amendment
+5. Re-attest: tsc exit 0; tests `669/650/15/4`; EMPIRICAL.sh exit 0
+6. Route to REVIEWER
+
+**Cross-round patterns flagged for MU:**
+- N-th instance of Architect-encoded-regex-with-hardcoded-bounds vs implementation-reality mismatch (R62+R66+R68+R72+R83+R84 = endemic). Sub-pattern of cross-project canonical claim-then-walk. MU sharpens.
+- Haiku-MU R83-landed REINFORCED tested: correct TOP-OF-FILE STATUS update at R84 close = positive datapoint; miss = 5th instance.
+
+**Pipeline resume:** `./run-pipeline.sh --round R84 --tier full --start-at IMPLEMENTER`
 
 ---
 
