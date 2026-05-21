@@ -1,7 +1,148 @@
-CURRENT-ROUND: R89
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
-TIER: audit
+CURRENT-ROUND: R90
+NEXT-ROLE: ARCHITECT
+STATUS: READY
+TIER: full
+
+---
+
+## § R89 close attestation (2026-05-21)
+
+R89 closed clean. 4 queued items shipped: NEXT-ROLE.md archival (7961→145 active lines; single `NEXT-ROLE-PHASE-4.md` shard), MEMORIAL.md archival (2825→132 active; PHASE-3 + PHASE-4 shards byte-identical), CLAUDE-*.md composite folding (ARCH 51→24; IMPL 41→30, AC-R36-21 FLIPPED FAIL→PASS), sustaining mechanism (`scripts/check-claude-md-thresholds.sh` wired into `scripts/finalize-round.sh` Step 7b — load-bearing at every round close). Reviewer MERGE-READY (0 CRITICAL / 2 MAJOR / 1 MINOR / 4 OBS). 2 MAJORs preserved as operator-decision flags (prefix-continuity-invariant deviation in EMPIRICAL.sh Block 8; AC-R89-8 vs R83 spec-design tension). Phase 5 SLICE 2 closed. Tessera at cleanest methodology state to date.
+
+---
+
+## § R90 Round-scope directive (Architect — engine npm extract; Phase 5 SLICE 3 round 1 of 4-round chain) (2026-05-21)
+
+R90 opens **Phase 5 SLICE 3** (engine npm extract). 4-round chain budget: R90 = engine package extraction; R91 = Tessera-internal consumption migration; R92 = DS-side adoption PR; R93 = SLICE 3 close + hygiene. R90 ships the package boundary + types-barrel decoupling + build artifact. NO Tessera-internal consumption migration this round (R91 scope); NO DS-side work this round (R92 scope).
+
+**Motivation:** `engine/types/index.ts:4` explicitly names the extract target (`@johnpatrickwarren-oss/deploysignal-engine`) and frames it as a "Tessera Phase 2 close commitment." R61 ESCALATE #2 Option F deferred the work as a "Phase 4 candidate / dedicated cycle" pending operator strategic decisions. Per 2026-05-21 operator decision (this directive), those decisions are now locked:
+- **Package scope:** Tessera-evolved engine (vendored-with-deltas at R90-start HEAD; not pure-DS-at-pin)
+- **Consumption mechanism:** git-dependency via git+ssh URL with version tags (npm-registry-free for first cycle; lower friction; reversible)
+- **Round budget:** 4-round chain (R90-R93)
+- **Backwards-compat:** Tessera-internal consumers (`test/*`, `tools/*`, root `tsconfig.json`) MUST continue working post-R90 (no breaking changes; consumption migration is R91 scope)
+
+**Round-start SHA:** SHA of this directive commit; verify at Architect session entry.
+
+### Primary deliverables (R90 extraction only)
+
+1. **Engine package boundary declared.** Architect picks the structural approach via cite-then-walk over current `engine/` + `pnpm-workspace.yaml`:
+   - **Option A (lower-disruption):** `engine/package.json` declares the engine as a standalone publishable sub-package; root `pnpm-workspace.yaml` adds `engine` to `packages:`. Engine stays at `engine/`. Pro: minimal git-history churn; no path rewrites. Con: less conventional layout.
+   - **Option B (monorepo-standard):** Move `engine/` → `packages/engine/`; restructure `pnpm-workspace.yaml`; update root `tsconfig.json` paths. Pro: standard convention. Con: large git rename diff; touches root `tsconfig.json` (which currently has `outDir: dist/engine` + `rootDir: engine`); risk of breaking `tools/*` + `test/*` imports.
+   - Architect picks ONE; documents trade-offs in spec § A1 with empirical Read of current state; commits to choice at spec-emit.
+
+2. **Package metadata.** Engine package.json includes:
+   - `name`: `@johnpatrickwarren-oss/deploysignal-engine` (per `engine/types/index.ts:4`)
+   - `version`: `0.1.0-pre` (matches root Tessera pre-release versioning)
+   - `main` + `types`: point to compiled `.js` + `.d.ts` (already produced by current `tsc` per root `tsconfig.json:outDir=dist/engine`)
+   - `files`: enumerate publishable surface; exclude tests + tools + coordination
+   - `license`: Apache-2.0
+   - `repository`: git URL pointing at Tessera repo with `directory` field per chosen layout
+   - `exports`: explicit subpath exports for `.`, `./types`, `./types/families/*`, `./detectors/*`, `./topology/*`, `./ds-integration` (Architect enumerates via grep over current external-consumption surface)
+
+3. **Types-barrel decoupling discipline preserved.** `engine/types/index.ts` re-export barrel pattern (lines 22-32) MUST NOT be broken. Algorithm files currently import from `../types` (relative path within engine). Post-R90: those relative imports still resolve correctly within the package. External consumers (out of R90 scope; R91/R92) will use `@johnpatrickwarren-oss/deploysignal-engine` package subpath exports.
+
+4. **Build artifact verifiable.** Architect prescribes a binding-command attestation that produces an installable artifact:
+   - `pnpm exec tsc` (or equivalent) emits to chosen `dist/` location
+   - `pnpm pack` from the engine package root produces a `.tgz` that contains the expected files (verify via `tar -tzf` grep)
+   - The `.tgz` filename + checksum is empirically captured (Rule 1 sub-class `empirical-command-attestation`)
+
+5. **Backwards-compat smoke test.** Tessera-internal consumers (`test/*`, `tools/*`) continue to work post-R90:
+   - Full test suite passes: `pnpm test` → tests=710+R90-additions, pass≥691, fail≤16, skip=4 (band carry-forward from R89)
+   - `pnpm exec tsc -p tsconfig.test.json` → exit 0
+   - `pnpm curate-baseline` (R88 wrapper) still executable (no compilation regression)
+   - Pipeline-relevant scripts (`scripts/tier-router.js`, `scripts/build-role-context.js`, etc.) unchanged
+
+6. **VENDORING-MANIFEST.md updated.** Add a header note that documents the R90 extraction event + chosen layout + extract package name. DO NOT rewrite per-row entries (vendored-at-pin SHAs preserved).
+
+7. **README at engine package root** — minimal `engine/README.md` (or `packages/engine/README.md` per chosen layout). Explains: what the package is (statistical detector engine derived from DeploySignal), Tessera-evolved vendoring status, install path (git+ssh URL placeholder for R91/R92 consumption), pointer to canonical DS-side documentation.
+
+8. **`test/q90-engine-package-extract.test.ts`** (NEW; full-tier) — at least 10 ACs:
+   - Package.json schema valid (name + version + main + types + exports + license + repository)
+   - `tsc` build produces expected `.js` + `.d.ts` + `.d.ts.map` files at chosen `dist/` location
+   - `pnpm pack` produces tarball; tarball contains engine files; tarball excludes test/coordination/tools
+   - Backwards-compat: full test suite passes; tsc exits 0; key tools/* still build
+   - VENDORING-MANIFEST.md header note present
+   - README present at package root
+   - Subpath exports resolve correctly (use `require.resolve` or equivalent against the prepared package)
+
+9. **`Q-R90-EMPIRICAL.sh`** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77 reinforced (flag-ordering: `--test-reporter=tap` BEFORE test files; R89 MAJOR-1 sub-pattern lesson).
+
+### Tier rationale
+
+**full-tier** — Architect (per-file pseudocode for package boundary + tsconfig changes + types-barrel verification) + Implementer + Reviewer (cold-eye on backwards-compat) + MU. Substantial architectural change touching root build infrastructure; warrants full discipline.
+
+### Anti-scope (R90 hard limits)
+
+- **NO modification of engine algorithm files** (`engine/detectors/*`, `engine/fleet/*`, `engine/l0/*`, `engine/o0/*`, `engine/per-shard/*`, `engine/topology/*` content) — extraction is structural-only this round
+- **NO modification of `engine/types/*.ts` content** (barrel + re-exports preserved); only `engine/types/index.ts` if subpath-export configuration requires it (document explicitly)
+- **NO modification of Tessera-internal consumers** (`test/*`, `tools/*`, `demos/*`) — backwards-compat is the goal; consumption migration is R91 scope
+- **NO modification of `tools/curate-baseline.ts` or any R88 deliverable** (frozen)
+- **NO modification of R73-R89 substantive deliverables** (frozen)
+- **NO new external dependencies** (extraction uses existing tsc + pnpm tooling)
+- **NO npm publish** (git-dependency is the consumption mechanism; R91/R92 scope anyway)
+- **NO git tag creation** (semver tagging is R91/R92 scope)
+- **NO real-cluster; NO DS-repo; NO `gh repo` operations beyond push to Tessera public**
+- **NO modification of pre-R90 carry-forward AC fail set** (AC-R84-14 stochastic flake band [14,15] preserved; AC-R89-8 acknowledged-failing per R89 MAJOR-2)
+- **NO modification of `CLAUDE-*.md` files** (R89 composite folding stands; sustaining mechanism enforces)
+- **NO modification of `coordination/MEMORIAL-PHASE-*.md` shards** (R89 archival stands; back-references preserved)
+
+ALLOWED modifications:
+- `engine/package.json` (NEW; or `packages/engine/package.json` per chosen layout)
+- `engine/README.md` (NEW; minimal)
+- `pnpm-workspace.yaml` (update `packages:` list)
+- `tsconfig.json` (if path changes required; document each line-diff in spec § A1)
+- `package.json` root (workspace + scripts adjustment if needed; do NOT remove existing scripts)
+- `coordination/VENDORING-MANIFEST.md` (header note only; no row rewrites)
+- `test/q90-engine-package-extract.test.ts` (NEW)
+- `coordination/specs/Q-R90-SPEC.md` + `Q-R90-SPEC-AUDIT.md` + `Q-R90-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R90.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends; threshold check at MU per R89 sustaining mechanism)
+- `coordination/NEXT-ROLE.md` (this file)
+- `coordination/logs/ROUND-R90-*.md`
+
+If Option B chosen (monorepo restructure): `git mv engine packages/engine` is permitted; the rename diff is structural-only and MUST NOT touch file content. Architect MUST audit every `import` line in Tessera-internal consumers for path correctness post-rename.
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE. **Architect MUST use `--test-reporter=tap` BEFORE test files** per R77 + R89 MAJOR-1 sub-pattern lesson (flag-ordering verified at spec-emit).
+- **R86 prophylactic + R87 sub-pattern + R88 sub-pattern-2 (grep-semantics) + R89 sub-pattern (Q-RNN-EMPIRICAL.sh probe-run at spec-emit)** load-bearing:
+  - Architect MUST execute Q-R90-EMPIRICAL.sh at round-start HEAD pre-routing and verify every block reaches its expected pre-impl state (some blocks PASS, some FAIL with expected error per spec § 0)
+  - Architect MUST verify any empirical premise about file state by direct Read or running the actual command
+  - For subpath-exports prescription: Architect MUST verify the existing import surface via grep over `test/*`, `tools/*` before prescribing `exports` field
+- **R83 routing discipline:** top-of-file `STATUS: READY` updates MUST land in the same commit as the routing block.
+- **R89 MAJOR-2 lesson applied:** NO "first N lines byte-identical" ACs against working-tree files. If byte-identity assertion is required, use `git show <SHA>:...` anchored to a specific chore-A SHA, OR exclude lines 1–4 (top routing block).
+- **R85 stochastic-flake band [15,16] preserved.** AC-R84-14 unchanged; R90 introduces no fix.
+- **R88 sub-pattern (gitignore-global-rule check):** if any spec premise depends on a file being / not being committed, Architect MUST run `git ls-files <path>` (not just grep over `.gitignore`).
+
+### Halt conditions (R90 Implementer)
+
+1. Q-R90-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Full test suite drift beyond R89 close band (fail ∉ [14,16] excluding AC-R89-8's known-failing per R89 MAJOR-2; pass ∉ [690,692]; tests ≥ 710 with R90-additions)
+4. Tessera-internal consumer broken (any `test/*` failing post-R90 that passed pre-R90, other than AC-R89-8's documented R83-routing-flip)
+5. `pnpm pack` (or equivalent) fails OR produces tarball missing engine files
+6. Subpath-export resolution fails for any enumerated export
+7. New external dependency required: HALT + DIAGNOSTIC + ESCALATE
+8. Architect-spec-prescribed pseudocode missing function/file-name signature verified by direct Read at spec-emit: HALT
+9. R88-or-prior substantive deliverable modified (anti-scope violation): HALT + DIAGNOSTIC + ESCALATE
+10. Engine algorithm file content modified (anti-scope): HALT + DIAGNOSTIC + ESCALATE
+11. Monorepo restructure (Option B) creates rename-diff that includes content changes: HALT (rename must be pure)
+12. Architect-claim-without-empirical-walk (10th Tessera instance would trigger): HALT at MU review
+
+### Predicted post-R90 state
+
+- `pnpm test` exit non-zero (fails > 0 are pre-existing); test counts: `tests=720±, pass=701±, fail=15-16, skip=4`
+- `pnpm pack` (from engine root): produces `johnpatrickwarren-oss-deploysignal-engine-0.1.0-pre.tgz` (or platform-equivalent name)
+- `git diff <round-start-SHA> HEAD --name-only`: 10-20 paths (Option A) or 50+ paths (Option B, dominated by pure renames)
+- `engine/package.json` exists with required fields
+- Tessera-internal `import` paths unchanged (Option A) or mechanically updated (Option B)
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R90 --tier full
+```
 
 ---
 
