@@ -12,7 +12,7 @@
 
 set -u  # nounset; do NOT set -e — every block runs for full reporting
 
-ROUND_START_SHA="<INJECTED-AT-CHORE-A>"
+ROUND_START_SHA="bac83e4"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
