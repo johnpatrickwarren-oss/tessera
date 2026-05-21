@@ -1,6 +1,6 @@
 CURRENT-ROUND: R84
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 TIER: full
 
 ---
@@ -6733,3 +6733,50 @@ All non-pass outcomes are pre-documented in Q-R84-SPEC-AUDIT.md § C.3 as "Imple
 - spec-triad-committed-BEFORE-routing-block-R21-ARCH-MINOR-1
 - discriminating-AC-walkthrough-all-17-section-8-10
 
+
+---
+
+## § R84 REVIEWER routing block (2026-05-21)
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+Inputs: coordination/specs/Q-R84-SPEC.md
+        coordination/specs/Q-R84-SPEC-AUDIT.md
+        coordination/specs/Q-R84-EMPIRICAL.sh
+        coordination/reviews/REVIEWER-REPORT-R84.md (this Reviewer authored)
+        coordination/MEMORIAL.md
+        ~/.claude/CROSS-PROJECT-MEMORIAL.md
+
+### Reviewer report path
+
+`coordination/reviews/REVIEWER-REPORT-R84.md` (17 ACs verified PASS at HEAD; 1 MAJOR + 3 MINOR + 4 OBS findings; routing MERGE-READY)
+
+### Findings tally
+
+- CRITICAL: 0
+- MAJOR:    1 (MAJOR-1: spec-amendment-ALL-gate-artifacts-propagation — operator resolution step 1 not executed; Q-R84-SPEC.md § 1.6 + SPEC-AUDIT § E not amended to match test file; 5th tessera instance of spec-not-amended-post-disposition)
+- MINOR:    3 (MINOR-1: operator-prescribed regex strictness not applied; MINOR-2: AC-R84-14 structurally flaky in worker_threads race; MINOR-3: AC-R84-15 spec claims 14 markers, test asserts 16)
+- OBS:      4 (OBS-1: .gitignore *.js latent trap; OBS-2: stale smoke-block line citation post-R84 regen; OBS-3: forward-protection flips correctly predicted; OBS-4: diff line-count Implementer-attested 10 vs Reviewer-observed 11, in-band)
+
+### Reviewer binding-command attestation (verbatim; for MU cross-verification)
+
+- `pnpm exec tsc -p tsconfig.test.json` exit: **0**  (Implementer-attested 0)
+- `pnpm exec node --test --test-reporter=tap test/*.test.js` exit: **1**  (Implementer-attested 1)
+- TAP # tests: **669**  (Implementer-attested 669; spec strict prediction 669)
+- TAP # pass: **650**   (Implementer-attested 650; spec band [649, 651])
+- TAP # fail: **15**    (Implementer-attested 15; spec strict 15)
+- TAP # skipped: **4**  (Implementer-attested 4)
+- `bash Q-R84-EMPIRICAL.sh` exit: **0**  (15 block PASS / 0 FAIL; Implementer-attested 0)
+- `git diff 0e93c15 HEAD --name-only` line count: **11** (Implementer-attested 10; spec band 9-14; difference is `coordination/diagnostics/DIAGNOSTIC-R84-ac9-regex-limit.md` — see OBS-4)
+
+### CONFIRMATION/VIOLATION pre-formatted entries
+
+See REVIEWER-REPORT-R84.md § 7 for pre-formatted MEMORIAL append text (7 CONFIRMATIONs, 4 VIOLATIONs). VIOLATION [role] tags reflect committing-role-not-detecting-role convention per CLAUDE-REVIEWER.md REINFORCED 2026-05-19 second entry.
+
+### Operator-decision flag (MAJOR-1 amendment chore)
+
+MAJOR-1 is audit-trail-correctness (spec body diverges from test file post-ESCALATE). Two options:
+- **Option A (recommended):** Coordination chore retro-amends Q-R84-SPEC.md § 1.6 + Q-R84-SPEC-AUDIT.md § E to match the test file as committed. Bounded, ~10 lines.
+- **Option B:** Fold into R85 spec-emission audit; document as known carry-forward.
+
+No operator-blocking issue; this is a discipline / audit-trail clean-up. MU may flag for operator attention; Reviewer routes MERGE-READY per routing rule.
