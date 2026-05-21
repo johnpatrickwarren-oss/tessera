@@ -1,7 +1,114 @@
-CURRENT-ROUND: R80
-NEXT-ROLE: MEMORIAL-UPDATER
-STATUS: MERGE-READY
+CURRENT-ROUND: R81
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R80 close attestation (Coordinator-direct STATUS fix — 3rd Haiku-MU instance) (2026-05-21)
+
+R80 substantively closed (MU outputs at `0f71728`). Dashboard 10,615 → 13,099 lines (+23%); 492 Family-references; 5-family detector visualization shipped.
+
+**3rd Tessera instance of Haiku-MU process-discipline-miss:**
+- R75: STATUS stuck at `READY` (1st)
+- R78: STATUS stuck at `READY` (2nd; memorialized; R79 correctly remediated)
+- R80: STATUS at `MERGE-READY` with `NEXT-ROLE: MEMORIAL-UPDATER` (3rd; different variant — MU updated STATUS to wrong value rather than failed to update)
+
+**3-instance Rule 5 threshold CROSSED.** Operator-decision flag: promote `haiku-mu-process-discipline-miss` to `~/.claude/CROSS-PROJECT-MEMORIAL.md` at R81 MU close, OR defer to Phase 4 close.
+
+**Coordinator-direct STATUS fix at this commit.** R80 substantive deliverable preserved.
+
+**SLICE 2 trajectory:**
+- R71 MVP: 7,518 lines
+- R79: 10,615 (+41%)
+- R80: 13,099 (+23%)
+- DS comparison: 67,880 (Tessera now ~5× smaller; was 9× pre-R79)
+
+R81 closes SLICE 2 with polish + scrubber + animation + demo-script.
+
+---
+
+## § R81 Round-scope directive (Architect — SLICE 2 close polish; Phase 4 SLICE 2 final) (2026-05-21)
+
+R81 = SLICE 2 final round. Polish + scrubber UI + animation + 10-minute demo script (analogous to DS DEMO-SCRIPT-10MIN.md).
+
+**Round-start SHA:** SHA of this commit; verify at Architect session entry.
+
+### Primary deliverable
+
+1. **`demos/demo.html` polish:**
+   - **Scrubber UI:** slider for tick playback; drag to any window; engine state reflects scrubbed position; play/pause/reset/speed preserved
+   - **Animation polish:** 200ms CSS transitions on M_t changes; verdict-badge state transitions; provenance panel updates; instant for scrubbing
+   - **Expandable panels:** provenance receipts collapsible per firing event; click-to-expand for detector-math context
+   - **Interactions:** keyboard shortcuts (space=play/pause; arrows=step; r=reset)
+   - **Per-family color coding:** Family A/B/C/D/E distinct accent colors within R80 visual identity palette
+
+2. **`demos/DEMO-SCRIPT.md`** (NEW; 10-minute narrative analogous to DS DEMO-SCRIPT-10MIN.md):
+   - Minute-by-minute speaking notes
+   - Clean-baseline (Min 0-2: trust establishment)
+   - SDC-drift (Min 2-4: Family A betting wealth)
+   - Common-mode-rack (Min 4-6: topology attribution)
+   - Event-conditional (Min 6-8: freeze-hook DS integration)
+   - Close (Min 8-10: methodology + coverage envelope)
+
+3. **README "Quick demo"** — extend with scrubber instructions + DEMO-SCRIPT.md reference
+
+4. **Test file** `test/q81-slice-2-close.test.ts`:
+   - Scrubber UI ACs; keyboard shortcut ACs; demo-script structural ACs
+   - Anti-regression: R79 + R80 structural ACs preserved
+
+5. **Q-R81-EMPIRICAL.sh** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77.
+
+### Tier rationale
+
+**full-tier** — Architect (scrubber UI + animation timing + demo-script narrative; cite-then-walk over R71/R79/R80 dashboard + DS DEMO-SCRIPT reference) + Implementer + Reviewer + MU. SLICE 2 final.
+
+### Anti-scope (R81 hard limits)
+
+- NO modification of `engine/*` (Phase 3 frozen)
+- NO modification of R73-R80 deliverables (frozen except dashboard extension)
+- NO new external dependencies (vanilla HTML/CSS/JS only)
+- NO modification of `run-pipeline.sh` (PR #39 pending)
+- NO real-cluster; NO DS-repo; NO `gh repo` operations
+- NO modification of carry-forward AC fail set; NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `demos/demo.html` (polish extensions)
+- `demos/scenarios/*.json` (regenerated; additive only)
+- `demos/DEMO-SCRIPT.md` (NEW)
+- `tools/build-canned-demos.ts` (minor extension if needed)
+- `package.json` (no new deps)
+- `README.md` (extend Quick demo)
+- `test/q81-slice-2-close.test.ts` (NEW)
+- `coordination/specs/Q-R81-SPEC.md` + `Q-R81-SPEC-AUDIT.md` + `Q-R81-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R81.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends; SLICE 2 close memorial)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE; all cross-project disciplines load-bearing. **Architect MUST use `--test-reporter=tap`** per R77. **Haiku-MU 3rd-instance flagged for Memorial-Updater attention at R81 close** (cross-project promotion candidate).
+
+### Halt conditions (R81 Implementer)
+
+1. Q-R81-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R80 close other than R81-additions
+4. R61-class architectural-reality discovery
+5. Architect spec uses round-evolution-fragile AC patterns: HALT
+6. All cross-project disciplines load-bearing
+7. New external dependency: HALT + DIAGNOSTIC + ESCALATE
+
+### SLICE 2 close at R81
+
+R81 closes Phase 4 SLICE 2. Dashboard structural commensurability with DS achieved. SLICE 3 (live in-browser engine; R82-R85) begins next.
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R81 --tier full
+```
 
 ---
 
