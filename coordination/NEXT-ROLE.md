@@ -1,6 +1,6 @@
 CURRENT-ROUND: R88
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision for R89)
+STATUS: ROUND-COMPLETE
 TIER: full
 
 ---
@@ -7794,4 +7794,49 @@ None beyond TD-1 and TD-2 (both are tactical and spec-allowed per TACTICAL AUTON
 ```bash
 cd /Users/johnwarren/concord/tessera
 ./run-pipeline.sh --round R88 --tier full --start-at REVIEWER
+```
+
+## § R88 REVIEWER routing block (2026-05-21)
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+
+### Reviewer report
+
+`coordination/reviews/REVIEWER-REPORT-R88.md`
+
+### Findings summary
+
+- 0 CRITICAL
+- 1 MAJOR (architect-claim-without-empirical-walk in Q-R88-SPEC.md § 9.2 + § 9.7 — 9th Tessera instance of REINFORCED-rule pattern; Implementer caught at TD-1; ALLOWED_SET .js carve-outs harmlessly over-permissive)
+- 4 MINOR (branch-binding coverage gaps for 4 exported surfaces; shallow report-content assertion in AC-R88-9; AC-R88-5 threshold_band assertion gap + missing high-drop+validation-failed combo; library-mode no-outDir branch untested)
+- 3 OBS (exit_code type widening unreachable; defensive `?? 0` in runAutoValidation; fixture-geometry calibration history from TD-2)
+
+### Empirical re-runs
+
+- `bash coordination/specs/Q-R88-EMPIRICAL.sh` → 12 PASS / 0 FAIL, exit 0
+- `pnpm exec node --test test/q88-baseline-curation-flow.test.js` → 10/10 PASS
+- TAP at Reviewer HEAD: `tests=702 pass=682 fail=16 skipped=4` (Implementer observed fail=15/pass=683; both runs inside [15,16]/[682,683] documented bands — AC-R84-14 stochastic flake fired differently across runs, validating the R85/R87 band approach)
+
+### Routing rationale
+
+CRITICAL exists? No. → STATUS: MERGE-READY per CLAUDE-REVIEWER.md routing rule.
+
+Recommended Memorial-Updater attention: MAJOR-1 is the 9th Tessera instance of architect-claim-without-empirical-walk pattern (chain: R71, R72, R74, R86, R87). At 9 instances, the pattern is well above any new-rule-derivation threshold; Memorial-Updater should consider whether (a) the existing REINFORCED rules need a stricter empirical-verification sub-class (e.g., "Architect 'verified by' claims must quote the actual command output verbatim, not just the result interpretation"), or (b) this round's instance is a routine inheritance of the existing rule. The Reviewer recommends (a) given the pattern's persistence despite multiple prior reinforcements.
+
+### Inputs to Memorial-Updater
+
+- Spec: `coordination/specs/Q-R88-SPEC.md`
+- Spec audit: `coordination/specs/Q-R88-SPEC-AUDIT.md`
+- EMPIRICAL.sh: `coordination/specs/Q-R88-EMPIRICAL.sh`
+- Reviewer report: `coordination/reviews/REVIEWER-REPORT-R88.md`
+- MEMORIAL.md (R88 sections: ARCHITECT + IMPLEMENTER + REVIEWER appended)
+- CROSS-PROJECT-MEMORIAL.md
+- NEXT-ROLE.md (this file)
+
+### Pipeline resume
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R88 --tier full --start-at MEMORIAL-UPDATER
 ```

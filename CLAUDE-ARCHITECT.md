@@ -837,3 +837,19 @@ All unresolved decisions → open questions in the spec.
 #   Implementer HALT-1 at chore-A; Coordinator-direct fix required. 7th tessera instance of the
 #   canonically-landed `architect-encoded-pattern-not-verified-against-prescribed-implementation`
 #   Rule 1 sub-class (R62+R66+R68+R72+R83+R84+R85).
+
+# REINFORCED 2026-05-21 — Empirical command verification must distinguish global vs. anchored patterns
+#   in infrastructure files (Tessera R88 MAJOR-1; extension of architect-claim-without-empirical-walk):
+#   When claiming that a codebase file (e.g., .gitignore) does or does not contain a pattern, the
+#   Architect MUST run the actual tool that respects the pattern semantics (e.g., `git check-ignore`
+#   for .gitignore matching, or `git ls-files` to verify file tracking). A partial check (e.g.,
+#   `grep tools .gitignore`) that assumes the pattern is anchored or namespaced will miss global
+#   patterns (e.g., `*.js` which matches all .js files, not just ones named "tools...js"). Procedure:
+#   (1) identify the pattern language (glob, regex, sed, awk, shell glob); (2) run the COMMAND that
+#   interprets that language correctly (git check-ignore for gitignore, not grep; git ls-files for
+#   tracking status, not `test -f`); (3) record the OBSERVED output in § 9.7 empirical-premise row.
+#   R88 MAJOR-1: Architect claimed ".gitignore does NOT exclude tools/*.js" and verified via
+#   `grep tools .gitignore`; empirically false (global `*.js` pattern at line 8). The verification
+#   method was structurally wrong — grep of "tools" does not capture global patterns. Correct method:
+#   `git ls-files 'tools/*.js'` (empty output confirms exclusion) or `git check-ignore tools/foo.js`
+#   (exit code confirms exclusion). 9th tessera instance of architect-claim-without-empirical-walk.
