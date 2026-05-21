@@ -1,5 +1,5 @@
 CURRENT-ROUND: R90
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
 
@@ -180,6 +180,73 @@ AC-R90-1, AC-R90-2, AC-R90-3, AC-R90-4, AC-R90-5, AC-R90-6, AC-R90-7, AC-R90-8, 
 Per § A5: all binding commands predicted exit 0 at chore-A; test fail band [16,17] strict; pass band [702,707]; tests band [720,724]; Q-R90-EMPIRICAL.sh 9/9 PASS exit 0; predicted Reviewer findings 0 CRITICAL / 0-1 MAJOR / 0-3 MINOR.
 
 ROUND_START_SHA-A: `65edb85` (R90 directive commit; pre-spec-triad; same SHA used throughout the R90 cycle)
+
+---
+
+## § R90 IMPLEMENTER routing block (2026-05-21)
+
+NEXT-ROLE: REVIEWER
+STATUS: READY
+TIER: full
+
+Inputs:
+- coordination/specs/Q-R90-SPEC.md
+- coordination/specs/Q-R90-SPEC-AUDIT.md
+- coordination/specs/Q-R90-EMPIRICAL.sh
+- coordination/MEMORIAL.md (R90 IMPLEMENTER section — CONFIRMATIONs appended)
+
+### Binding-command attestation
+
+- `pnpm exec tsc` → exit 0 (engine/dist/ populated; 10 subdirs)
+- `pnpm exec tsc -p tsconfig.test.json` → exit 0
+- `cd engine && pnpm pack --pack-destination .` → exit 0; tarball `johnpatrickwarren-oss-deploysignal-engine-0.1.0-pre.tgz` produced
+- `node --test --test-reporter=tap test/q90-engine-package-extract.test.js` → tests=14, pass=14, fail=0, skip=0
+- `node --test --test-reporter=tap test/*.test.js` → tests=724, pass=704, fail=16, skip=4 (within band [16,17] per spec § 1.7)
+- `bash coordination/specs/Q-R90-EMPIRICAL.sh` → 9 PASS / 0 FAIL, exit 0
+
+### AC coverage summary
+
+| AC | Result |
+|---|---|
+| AC-R90-1: engine/package.json exists with required keys | PASS |
+| AC-R90-2: name === "@johnpatrickwarren-oss/deploysignal-engine" | PASS |
+| AC-R90-3: version === "0.1.0-pre" AND license === "Apache-2.0" | PASS |
+| AC-R90-4: exports map includes prescribed subpath enumeration | PASS |
+| AC-R90-5: repository.directory === "engine" | PASS |
+| AC-R90-6: tsconfig.json outDir === "engine/dist" | PASS |
+| AC-R90-7: engine/dist/ sentinel files present | PASS |
+| AC-R90-8: pnpm pack produces expected tarball | PASS |
+| AC-R90-9: tarball content gate (required entries present; anti-content absent; no raw .ts) | PASS |
+| AC-R90-10: engine/README.md present with required sections | PASS |
+| AC-R90-11: VENDORING-MANIFEST.md head has R90 extraction note | PASS |
+| AC-R90-12: root package.json has pack:engine + existing scripts preserved | PASS |
+| AC-R90-13: anti-scope diff round-start..HEAD ⊆ ALLOWED_SET | PASS |
+| AC-R90-14: engine sentinels byte-identical to round-start SHA | PASS |
+
+### Tactical deviations
+
+None. All implementation follows spec § 3 pseudocode verbatim. No spec/reality conflicts encountered; no halt conditions fired.
+
+### Anti-scope verification
+
+`git diff 65edb85 HEAD --name-only` at chore-A HEAD (`0353553`):
+```
+.gitignore
+coordination/MEMORIAL.md
+coordination/NEXT-ROLE.md
+coordination/VENDORING-MANIFEST.md
+coordination/specs/Q-R90-EMPIRICAL.sh
+coordination/specs/Q-R90-SPEC-AUDIT.md
+coordination/specs/Q-R90-SPEC.md
+engine/README.md
+engine/package.json
+package.json
+test/q90-engine-package-extract.test.ts
+tsconfig.json
+```
+12 paths; all in ALLOWED_SET per spec § 5.3 (AC-R90-13 PASS; EMPIRICAL.sh Block 9 PASS).
+
+SHA-A: `0353553`
 
 ---
 
