@@ -179,6 +179,8 @@ Inputs:
 
 **TD-2** (byte-identity test normalization): `tailLines()` produces trailing `\n` (file's trailing empty element after split); `sedLines()` does not. bash `$()` strips trailing newlines but JavaScript doesn't. Fix: `norm()` helper strips trailing newlines from both sides before `assert.equal`, matching bash `$()` semantics. Tactical fix to self-authored test; no spec content change.
 
+SHA-A: dbc529d
+
 ### Anti-scope verification
 
 `git diff db232d9 HEAD --name-only` at chore-A:
