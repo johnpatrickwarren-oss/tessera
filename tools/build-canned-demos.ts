@@ -11,6 +11,7 @@
 // ── Engine imports (same .js extension convention as tools/demo-scenario.ts) ──
 import { freshBettingState, updateBettingState }
   from '../engine/detectors/betting-e-process.js';
+import { peakACF } from '../engine/detectors/spectral.js';
 import { attributeCommonMode, type FiredShardEvent, DEFAULT_MIN_MEMBER_COUNT }
   from '../engine/topology/common-mode-attribution.js';
 import { DsEventConsumer } from '../engine/ds-integration/event-consumer.js';
@@ -68,12 +69,19 @@ interface FamilyAWindowDetectors {
   max_M_t: number | null;
   fired_shard_ids: ReadonlyArray<string>;
 }
+// R80: Family B/C/D/E now populated for Family-A-active scenarios.
+interface FamilyBCDEWindowDetectors {
+  statistic: number;
+  threshold: number;
+  fired: boolean;
+  derivation: string;
+}
 interface PerWindowDetectors {
   family_a: FamilyAWindowDetectors | null;
-  family_b: null;
-  family_c: null;
-  family_d: null;
-  family_e: null;
+  family_b: FamilyBCDEWindowDetectors | null;
+  family_c: FamilyBCDEWindowDetectors | null;
+  family_d: FamilyBCDEWindowDetectors | null;
+  family_e: FamilyBCDEWindowDetectors | null;
 }
 
 // R79: top-level new fields
@@ -166,6 +174,68 @@ function round6(x: number): number {
 const NULL_PER_WINDOW_DETECTORS: PerWindowDetectors = {
   family_a: null, family_b: null, family_c: null, family_d: null, family_e: null,
 };
+
+// ── R80: Family B/C/D/E synthetic derivation helpers ──
+function deriveFamilyBState(m: number[]): FamilyBCDEWindowDetectors {
+  let max_dev = 0;
+  for (const v of m) {
+    const d = Math.abs(v - 1);
+    if (d > max_dev) max_dev = d;
+  }
+  return {
+    statistic: round6(max_dev),
+    threshold: 1.0,
+    fired: max_dev > 1.0,
+    derivation: 'demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)',
+  };
+}
+
+function deriveFamilyCState(m: number[]): FamilyBCDEWindowDetectors {
+  const S = m.length;
+  let mean = 0;
+  for (const v of m) mean += v;
+  mean /= S;
+  let sumsq = 0;
+  for (const v of m) sumsq += (v - mean) * (v - mean);
+  return {
+    statistic: round6(sumsq),
+    threshold: 1.0,
+    fired: sumsq > 1.0,
+    derivation: 'demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)',
+  };
+}
+
+function deriveFamilyDState(topShardSeries: number[]): FamilyBCDEWindowDetectors {
+  const result = peakACF(topShardSeries, 3, 10);
+  return {
+    statistic: round6(result.peak),
+    threshold: 0.6,
+    fired: result.peak > 0.6,
+    derivation: 'real engine peakACF() over the highest-wealth shard\'s M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)',
+  };
+}
+
+function deriveFamilyEState(m: number[]): FamilyBCDEWindowDetectors {
+  const S = m.length;
+  let mean = 0;
+  for (const v of m) mean += v;
+  mean /= S;
+  let var_sum = 0;
+  for (const v of m) var_sum += (v - mean) * (v - mean);
+  const sigma = Math.sqrt(var_sum / S);
+  const denom = Math.max(sigma, 1e-6);
+  let max_z = 0;
+  for (const v of m) {
+    const z = Math.abs(v - mean) / denom;
+    if (z > max_z) max_z = z;
+  }
+  return {
+    statistic: round6(max_z),
+    threshold: 3.0,
+    fired: max_z > 3.0,
+    derivation: 'demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)',
+  };
+}
 
 // Scan completed windows array for first crossing per shard in Family-A scenarios.
 function computeThresholdCrossingLog(
@@ -260,6 +330,16 @@ function runCleanBaselineRecording(): ScenarioJson {
       updateBettingState(states[s], draw, 0, 1, DEMO_ALPHA);
     }
     const firedShardsW = shardIds.filter((_, s) => states[s].M >= DEMO_THRESHOLD).sort();
+    const m = states.map(st => st.M);
+    const topShardIdx = m.indexOf(Math.max(...m));
+    const topShardSeries: number[] = [];
+    for (let prevW = 0; prevW <= w; prevW++) {
+      const prev = prevW < windows.length ? windows[prevW].per_shard[topShardIdx].M_t : states[topShardIdx].M;
+      if (prev !== null) topShardSeries.push(prev);
+    }
+    if (topShardSeries.length === 0 || topShardSeries[topShardSeries.length - 1] !== m[topShardIdx]) {
+      topShardSeries.push(m[topShardIdx]);
+    }
     windows.push({
       t: w,
       per_shard: states.map((st, s) => ({
@@ -275,7 +355,10 @@ function runCleanBaselineRecording(): ScenarioJson {
           max_M_t: round6(Math.max(...states.map(st => st.M))),
           fired_shard_ids: firedShardsW,
         },
-        family_b: null, family_c: null, family_d: null, family_e: null,
+        family_b: deriveFamilyBState(m),
+        family_c: deriveFamilyCState(m),
+        family_d: deriveFamilyDState(topShardSeries),
+        family_e: deriveFamilyEState(m),
       },
     });
   }
@@ -306,7 +389,7 @@ function runCleanBaselineRecording(): ScenarioJson {
     },
     reasoning: 'Under H₀ (no drift), the betting e-process is a martingale; wealth M_t fluctuates around 1.0 without crossing the 1/α = 200 threshold over any 30-window window. This scenario demonstrates no-false-positives on a healthy fleet.',
     suggested_actions: [],
-    detector_families: ['A'],
+    detector_families: ['A', 'B', 'C', 'D', 'E'],
     threshold_crossing_log: computeThresholdCrossingLog(windows, DEMO_THRESHOLD),
     provenance_receipts: computeProvenanceReceipts('clean-baseline', firingShards, windows, DEMO_THRESHOLD, DEMO_ALPHA),
   });
@@ -342,6 +425,16 @@ function runSdcDriftRecording(): ScenarioJson {
       ? [{ type: 'threshold_crossed', shard_id: shardIds[SDC_SHARD], window: w, M_t: round6(states[SDC_SHARD].M) }]
       : [];
     const firedShardsW = shardIds.filter((_, s) => states[s].M >= DEMO_THRESHOLD).sort();
+    const m = states.map(st => st.M);
+    const topShardIdx = m.indexOf(Math.max(...m));
+    const topShardSeries: number[] = [];
+    for (let prevW = 0; prevW <= w; prevW++) {
+      const prev = prevW < windows.length ? windows[prevW].per_shard[topShardIdx].M_t : states[topShardIdx].M;
+      if (prev !== null) topShardSeries.push(prev);
+    }
+    if (topShardSeries.length === 0 || topShardSeries[topShardSeries.length - 1] !== m[topShardIdx]) {
+      topShardSeries.push(m[topShardIdx]);
+    }
     windows.push({
       t: w,
       per_shard: states.map((st, s) => ({
@@ -357,7 +450,10 @@ function runSdcDriftRecording(): ScenarioJson {
           max_M_t: round6(Math.max(...states.map(st => st.M))),
           fired_shard_ids: firedShardsW,
         },
-        family_b: null, family_c: null, family_d: null, family_e: null,
+        family_b: deriveFamilyBState(m),
+        family_c: deriveFamilyCState(m),
+        family_d: deriveFamilyDState(topShardSeries),
+        family_e: deriveFamilyEState(m),
       },
     });
   }
@@ -395,7 +491,7 @@ function runSdcDriftRecording(): ScenarioJson {
       'Verify the drift window timestamp against deploy / firmware audit logs',
       'Quarantine shard-04 from new workload placements pending hardware triage',
     ],
-    detector_families: ['A'],
+    detector_families: ['A', 'B', 'C', 'D', 'E'],
     threshold_crossing_log: computeThresholdCrossingLog(windows, DEMO_THRESHOLD),
     provenance_receipts: computeProvenanceReceipts('sdc-drift', firingShards, windows, DEMO_THRESHOLD, DEMO_ALPHA),
   });
@@ -651,6 +747,16 @@ function runFdrMultipleTestingRecording(): ScenarioJson {
       updateBettingState(states[s], draw, 0, 1, DEMO_ALPHA);
     }
     const firedShardsW = shardIds.filter((_, s) => states[s].M >= DEMO_THRESHOLD).sort();
+    const m = states.map(st => st.M);
+    const topShardIdx = m.indexOf(Math.max(...m));
+    const topShardSeries: number[] = [];
+    for (let prevW = 0; prevW <= w; prevW++) {
+      const prev = prevW < windows.length ? windows[prevW].per_shard[topShardIdx].M_t : states[topShardIdx].M;
+      if (prev !== null) topShardSeries.push(prev);
+    }
+    if (topShardSeries.length === 0 || topShardSeries[topShardSeries.length - 1] !== m[topShardIdx]) {
+      topShardSeries.push(m[topShardIdx]);
+    }
     windows.push({
       t: w,
       per_shard: states.map((st, s) => ({
@@ -666,7 +772,10 @@ function runFdrMultipleTestingRecording(): ScenarioJson {
           max_M_t: round6(Math.max(...states.map(st => st.M))),
           fired_shard_ids: firedShardsW,
         },
-        family_b: null, family_c: null, family_d: null, family_e: null,
+        family_b: deriveFamilyBState(m),
+        family_c: deriveFamilyCState(m),
+        family_d: deriveFamilyDState(topShardSeries),
+        family_e: deriveFamilyEState(m),
       },
     });
   }
@@ -708,7 +817,7 @@ function runFdrMultipleTestingRecording(): ScenarioJson {
       'Do NOT inspect non-selected shards individually unless their e-value is independently interesting',
       'Adjust qLevel down (toward 0.05) for higher-precision but lower-recall flagging in production',
     ],
-    detector_families: ['A'],
+    detector_families: ['A', 'B', 'C', 'D', 'E'],
     threshold_crossing_log: computeThresholdCrossingLog(windows, DEMO_THRESHOLD),
     provenance_receipts: computeProvenanceReceipts('fdr-multiple-testing', firingShards, windows, DEMO_THRESHOLD, DEMO_ALPHA),
   });
@@ -744,6 +853,16 @@ function runHierarchicalEvalueRecording(): ScenarioJson {
     updateFleetEProcessState(fleetState, combineResult.log_fleet_e, LOG_FLEET_THRESHOLD);
 
     const firedShardsW = shardIds.filter((_, s) => states[s].M >= DEMO_THRESHOLD).sort();
+    const m = states.map(st => st.M);
+    const topShardIdx = m.indexOf(Math.max(...m));
+    const topShardSeries: number[] = [];
+    for (let prevW = 0; prevW <= w; prevW++) {
+      const prev = prevW < windows.length ? windows[prevW].per_shard[topShardIdx].M_t : states[topShardIdx].M;
+      if (prev !== null) topShardSeries.push(prev);
+    }
+    if (topShardSeries.length === 0 || topShardSeries[topShardSeries.length - 1] !== m[topShardIdx]) {
+      topShardSeries.push(m[topShardIdx]);
+    }
     windows.push({
       t: w,
       per_shard: states.map((st, s) => ({
@@ -765,7 +884,10 @@ function runHierarchicalEvalueRecording(): ScenarioJson {
           max_M_t: round6(Math.max(...states.map(st => st.M))),
           fired_shard_ids: firedShardsW,
         },
-        family_b: null, family_c: null, family_d: null, family_e: null,
+        family_b: deriveFamilyBState(m),
+        family_c: deriveFamilyCState(m),
+        family_d: deriveFamilyDState(topShardSeries),
+        family_e: deriveFamilyEState(m),
       },
     });
   }
@@ -804,7 +926,7 @@ function runHierarchicalEvalueRecording(): ScenarioJson {
       'Cross-reference the tick_at_first_fire against deploy event audit logs for a fleet-wide cause',
       'If correlated drift cannot be ruled out, prefer combineAverage over combineProduct (the current default already does this)',
     ],
-    detector_families: ['A'],
+    detector_families: ['A', 'B', 'C', 'D', 'E'],
     threshold_crossing_log: computeThresholdCrossingLog(windows, DEMO_THRESHOLD),
     provenance_receipts: computeProvenanceReceipts('hierarchical-evalue', firingShards, windows, DEMO_THRESHOLD, DEMO_ALPHA),
   });
@@ -1057,6 +1179,33 @@ const HTML_TEMPLATE_HEAD = `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tessera — Demo Dashboard</title>
   <style>
+    :root {
+      --tessera-bg:               #0d1117;
+      --tessera-bg-elevated:      #161b22;
+      --tessera-bg-control:       #21262d;
+      --tessera-fg:               #e6edf3;
+      --tessera-fg-emphasis:      #f0f6fc;
+      --tessera-fg-muted:         #8b949e;
+      --tessera-fg-comment:       #6e7681;
+      --tessera-border:           #30363d;
+      --tessera-border-strong:    #21262d;
+      --tessera-accent-blue:      #58a6ff;
+      --tessera-accent-teal:      #79c0ff;
+      --tessera-accent-slate:     #c9d1d9;
+      --tessera-status-clean:     #3fb950;
+      --tessera-status-fire:      #f78166;
+      --tessera-status-warn:      #d29922;
+      --tessera-status-info:      #58a6ff;
+      --tessera-status-frozen:    #79c0ff;
+      --tessera-status-fdr:       #a371f7;
+      --tessera-fam-a:            #58a6ff;
+      --tessera-fam-b:            #3fb950;
+      --tessera-fam-c:            #a371f7;
+      --tessera-fam-d:            #d29922;
+      --tessera-fam-e:            #f78166;
+      --tessera-font-mono:        'SF Mono', Menlo, Consolas, monospace;
+      --tessera-font-sans:        system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
     header { padding: 16px 24px; border-bottom: 1px solid #30363d; }
@@ -1145,11 +1294,22 @@ const HTML_TEMPLATE_HEAD = `<!DOCTYPE html>
     .provenance-receipt .pr-header    { color: #e6edf3; font-weight: 500; margin-bottom: 4px; }
     .provenance-receipt .pr-reasoning { color: #c9d1d9; line-height: 1.5; margin-bottom: 6px; }
     .provenance-receipt .pr-evidence  { color: #8b949e; font-family: 'SF Mono', Menlo, monospace; font-size: 0.72rem; }
+    @media print {
+      body { background: #ffffff; color: #000000; }
+      #tessera-controls { display: none; }
+      #live-verdict-banner { background: #f5f5f5; color: #000000; border-color: #999999; }
+      .det-fam, .provenance-receipt { background: #ffffff; color: #000000; border-color: #999999; }
+      details { display: block; }
+      details > summary { cursor: default; }
+      details[open] > summary,
+      details > *:not(summary) { display: block; }
+    }
   </style>
 </head>
 <body>
   <header id="tessera-header">
     <h1>Tessera Demo</h1>
+    <p class="tessera-tagline">Per-shard observation for AI clusters — statistically-rigorous fleet-FPR guarantees over canned scenarios</p>
     <p>Pre-recorded scenarios — opens from file:// (no server required)</p>
   </header>
 
@@ -1491,15 +1651,45 @@ const HTML_TEMPLATE_FOOTER = `
   }
 
   function renderDetectorsPanel(scenarioData, windowIdx) {
-    var famAEl = detectorsBodyEl.querySelector('.det-fam-A');
-    if (!famAEl) return;
+    var famA = detectorsBodyEl.querySelector('.det-fam-A');
+    var famB = detectorsBodyEl.querySelector('.det-fam-B');
+    var famC = detectorsBodyEl.querySelector('.det-fam-C');
+    var famD = detectorsBodyEl.querySelector('.det-fam-D');
+    var famE = detectorsBodyEl.querySelector('.det-fam-E');
+    if (!famA) return;
     var wIdx = Math.min(windowIdx, scenarioData.windows.length - 1);
     var w = scenarioData.windows[wIdx];
-    var pwd = w && w.per_window_detectors ? w.per_window_detectors.family_a : null;
-    if (pwd === null || pwd === undefined) {
-      famAEl.textContent = 'Family A — (not exercised in this scenario)';
+    var pwd = w && w.per_window_detectors ? w.per_window_detectors : null;
+
+    // Family A — real engine updateBettingState per-shard (unchanged from R79)
+    var a = pwd ? pwd.family_a : null;
+    if (a === null || a === undefined) {
+      famA.textContent = 'Family A — (not exercised in this scenario)';
+      famA.removeAttribute('title');
     } else {
-      famAEl.textContent = 'Family A — fired ' + pwd.shards_fired_count + ' shards; max M_t = ' + (pwd.max_M_t === null ? '—' : pwd.max_M_t.toFixed(3));
+      famA.textContent = 'Family A — fired ' + a.shards_fired_count + ' shards; max M_t = ' + (a.max_M_t === null ? '—' : a.max_M_t.toFixed(3));
+      famA.setAttribute('title', 'real engine updateBettingState() per-shard');
+    }
+
+    // Families B/C/D/E — common shape
+    var bcde = [
+      { el: famB, key: 'family_b', label: 'B', stat_unit: 'max|M-1|' },
+      { el: famC, key: 'family_c', label: 'C', stat_unit: 'Σ(M-μ)²'  },
+      { el: famD, key: 'family_d', label: 'D', stat_unit: 'peakACF'  },
+      { el: famE, key: 'family_e', label: 'E', stat_unit: 'max-z'    },
+    ];
+    for (var k = 0; k < bcde.length; k++) {
+      var row = bcde[k];
+      var s = pwd ? pwd[row.key] : null;
+      if (!row.el) continue;
+      if (s === null || s === undefined) {
+        row.el.textContent = 'Family ' + row.label + ' — (not exercised in this scenario)';
+        row.el.removeAttribute('title');
+      } else {
+        var statusWord = s.fired ? 'FIRING' : 'clean';
+        row.el.textContent = 'Family ' + row.label + ' — ' + statusWord + '; ' + row.stat_unit + ' = ' + s.statistic.toFixed(3) + ' (threshold = ' + s.threshold.toFixed(3) + ')';
+        row.el.setAttribute('title', s.derivation);
+      }
     }
   }
 
