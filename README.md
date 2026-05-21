@@ -199,6 +199,29 @@ Key findings: at the Tessera default `max_hop_distance=1`, the cooling_zone node
 
 Operator tuning guidance: see `scripts/topology-walk-tuning-recommendation.md`.
 
+## Baseline curation
+
+Tessera R88 ships a one-command operator entry point that composes the baseline curation pipeline (Stage 2a per-shard MCD-Mahalanobis screening + Stage 2b FCP-1 fleet-correlated e-process) and produces a validated baseline corpus plus a human-readable report.
+
+```bash
+pnpm curate-baseline path/to/raw-baseline.json
+# defaults to writing curated-baseline/ in the cwd
+# add --out <dir> to change; --allow-high-drop to override the >15% HALT
+```
+
+The wrapper applies conservative defaults inherited from `tools/curate-baseline-fleet-correlated.ts` (α_fleet=1e-3, χ²ₚ=0.975, MCD α=0.75), runs an auto-validation pass (Family C detector quiescence on the curated baseline via Stage 2a/2b idempotency), and gates the exit code on drop rate:
+
+| Drop rate | Headline | Exit |
+|---|---|---|
+| `< 5%` | Baseline ready | 0 |
+| `5–15%` | Baseline ready (with warning) | 0 |
+| `≥ 15%` | Heterogeneous corpus | 1 (use `--allow-high-drop` to override) |
+| validation failed | Review needed | 1 (never overridable) |
+
+Three artifacts land under `<out-dir>/`: the curated `curated-baseline.json`, the markdown `curation-report.md`, and the per-decision audit trail `curation-decisions.jsonl` (one JSON line per `BaselineCurationDecision` record — D11 Stage 2a, D12 Stage 2b, D13 Stage 3b wire format).
+
+Source: [`tools/curate-baseline.ts`](./tools/curate-baseline.ts).
+
 ## Quick demo
 
 Open `demos/demo.html` directly in any modern browser — no server required. Eight pre-recorded
