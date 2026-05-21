@@ -1,5 +1,5 @@
 CURRENT-ROUND: R74
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: MEMORIAL-UPDATER
 STATUS: READY
 TIER: full
 
@@ -45,6 +45,54 @@ TIER: full
 - Memorialize R74 Option A as 4th amend-in-round resolution archetype (R61 ESCALATE #1 Option B + R66 Option A + R72 Option B + R74 Option A).
 
 **Pipeline resume:** `./run-pipeline.sh --round R74 --tier full --start-at IMPLEMENTER`
+
+---
+
+## § Implementer R74 Option A routing block (2026-05-20)
+
+### Scope
+
+CRITICAL-1 bash expansion fix + AC-R74-32 end-to-end test + MAJOR-1 attestation correction.
+
+Per operator directive: Route to MEMORIAL-UPDATER (NOT back to Reviewer).
+
+### Implementation attestation
+
+- **Option A fix commit SHA:** `796d3bfa47cff9e2f1c98e7bb48e85d08a5f9bcb`
+- **Fix applied:** `run-pipeline.sh:226` — replaced `${MU_SONNET:+--mu-sonnet}` (always-expands because MU_SONNET=false is non-empty string) with explicit conditional:
+  ```bash
+  if [ "$MU_SONNET" = "true" ]; then MU_SONNET_FLAG=(--mu-sonnet); else MU_SONNET_FLAG=(); fi
+  MU_SELECT_OUT="$(node scripts/mu-model-select.js ... "${MU_SONNET_FLAG[@]}" ...)"
+  ```
+- **AC-R74-32 added** to `test/q74-mu-haiku-reviewer-scope.test.ts`: bash subprocess test verifying `MU_SONNET=false` → `claude-haiku-4-5-20251001` (not Sonnet). Closes spec § 5.3 acknowledged gap.
+- **MAJOR-1 corrected:** AC-R74-31 attestation at line 168 updated; Class C rationale replaced with Class A (`matched_anchors: ["cross-project canonical"]`).
+
+### Binding commands (VERBATIM observed output; Rule 1 ACTIVE GATE)
+
+**`pnpm exec tsc -p tsconfig.test.json`:** exit 0, zero diagnostics.
+
+**`pnpm exec node --test --test-reporter=tap test/*.test.js`:**
+```
+# tests 539
+# pass 531
+# fail 5
+# skipped 3
+```
+Process exit: non-zero (fail=5 carry-forward unchanged). 5 carry-forward identities: AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14.
+
+**`Q-R74-EMPIRICAL.sh`:** PASS 17 / FAIL 0, exit 0. (No EMPIRICAL.sh blocks reference the old 538/530 counts; Block 4 uses relative `> 516` / `> 508` comparisons which still hold.)
+
+**`pnpm exec node scripts/tier-router-validate.js`:** exit 0 (R73 anti-regression; Safety violations: 0).
+
+**`MU_SONNET=false` verification (new AC-R74-32 also covers this):**
+```
+{"round":"R99","model":"claude-haiku-4-5-20251001","rationale":"default haiku (no cross-round-pattern marker)","decision_path":["default_haiku"],"selector_version":"0.1.0","matched_anchors":[]}
+```
+Haiku selected when MU_SONNET=false. Operator override (Sonnet) NOT fired. ✓
+
+### Routing
+
+**NEXT-ROLE: MEMORIAL-UPDATER | STATUS: READY** (per operator directive; NOT back to Reviewer)
 
 ---
 
@@ -165,7 +213,7 @@ PASS: 17  /  FAIL: 0
 ─────────────────────────────────────────
 ```
 
-**AC-R74-31 self-classification observed:** `claude-sonnet-4-6`. The R74 directive section in NEXT-ROLE.md contains a Class C co-occurrence (Reviewer-2 + ESCALATE appear together in the embedded R73 Reviewer prose within the directive). Spec prediction was `claude-haiku-4-5-20251001` (per Q.6 manual walk at spec-emit time); empirical observation is `claude-sonnet-4-6`. Matches: AC binds the OBSERVED empirical output per § 6.2 TACTICAL AUTONOMY.
+**AC-R74-31 self-classification observed:** `claude-sonnet-4-6`. [MAJOR-1 CORRECTION per Option A operator directive:] The R74 directive section in NEXT-ROLE.md matches Class A via `/cross-project canonical/i` at the Rule 4 disposition row (NEXT-ROLE.md:305, "cross-project canonical at R72"). The prior attestation's Class C rationale ("Reviewer-2 + ESCALATE appear in embedded R73 Reviewer prose") was empirically false: the Reviewer verified `/Reviewer-2/` → null AND `/\bESCALATE\b/` → null in the R74 directive section (the R73 Reviewer routing block is after the directive's `---` boundary and excluded by `loadDirective`). Spec prediction was `claude-haiku-4-5-20251001` (per Q.6 manual walk at spec-emit time; MINOR-1 — Class A `/cross-project canonical/i` missed by "etc." elision); empirical observation is `claude-sonnet-4-6`. AC binds the OBSERVED empirical output per § 6.2 TACTICAL AUTONOMY.
 
 **`pnpm tier-router:validate`:** exit 0 (R73 anti-regression; Safety violations: 0).
 
