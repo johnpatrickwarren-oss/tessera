@@ -1,7 +1,79 @@
-CURRENT-ROUND: R77
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R78
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R78 Round-scope directive (Architect — detector tuning gap 2: multi-level topology walk; Phase 4 SLICE 1 FINAL round) (2026-05-20)
+
+R78 = Phase 4 SLICE 1 FINAL round. Addresses R72 gap 2 (topology-spanning common-mode 80% detection; 4/20 missed on small rack sets). Characterize topology-walk tuning envelope (depth 1/2/3 × member-count threshold 3/2) + document false-positive trade-off.
+
+**Round-start SHA:** `f592737` (R77 close); verify at Architect session entry.
+
+### Primary deliverable
+
+1. **`tools/topology-walk-tuning.ts`** (NEW): parameter sweep (walk depth × member-count × scenario type × 5 trials)
+2. **`engine/topology/common-mode-attribution.ts` extension** — Architect picks Option (i) walk-depth param / (ii) separate function / (iii) defer to Phase 5. **Conservative: Option (iii).** If (i)/(ii): ESCALATE for operator decision before chore-A (Phase 3 frozen engine surface).
+3. **`scripts/topology-walk-tuning-recommendation.md`** (NEW): operator-actionable settings
+4. **README.md** Coverage section extension
+5. **Test file** `test/q78-topology-walk-tuning.test.ts`: matrix structural + per-depth detection-rate + false-positive-rate ACs + anti-regression
+6. **Q-R78-EMPIRICAL.sh** at chore-A pre-commit. **Architect MUST use `--test-reporter=tap`** per R77 lesson.
+
+### Tier rationale
+
+**full-tier** — Architect + Implementer + Reviewer + MU. Phase 4 SLICE 1 final.
+
+### Anti-scope (R78 hard limits)
+
+- **CONDITIONAL `engine/topology/common-mode-attribution.ts`** modification permitted ONLY for Architect-picked Option (i)/(ii) + Reviewer-blessed non-breaking; conservative = Option (iii)
+- NO modification of OTHER engine files (Phase 3 frozen)
+- NO modification of `demos/*` / R70-R77 tools (frozen)
+- NO modification of `scripts/tier-router*.ts` / `mu-model-select*.ts` / `build-role-context.ts` / `measure-cache-effect.ts` / `detector-envelope.ts` (R73-R77 frozen)
+- NO modification of `run-pipeline.sh` (PR #39 pending)
+- NO new external dependencies; NO real-cluster work; NO DS-repo modifications; NO additional `gh repo` operations
+- NO modification of carry-forward AC fail set; NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `tools/topology-walk-tuning.ts` (NEW)
+- `engine/topology/common-mode-attribution.ts` (CONDITIONAL)
+- `coordination/coverage/R78-*` (NEW; generated)
+- `scripts/topology-walk-tuning-recommendation.md` (NEW)
+- `package.json` (add script)
+- `README.md` (extend Coverage section)
+- `test/q78-topology-walk-tuning.test.ts` (NEW)
+- `coordination/specs/Q-R78-SPEC.md` + `Q-R78-SPEC-AUDIT.md` + `Q-R78-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R78.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends; Phase 4 SLICE 1 close memorialization)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE; particularly Rule 7 Surface (a): **cross-project claim-then-walk + R74 TACTICAL-AUTONOMY-without-re-verification + R77 empirical-script-defect (3rd Tessera instance).** Architect MUST use `--test-reporter=tap` in EMPIRICAL.sh.
+
+### Halt conditions (R78 Implementer)
+
+1. Q-R78-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R77 close other than R78-additions
+4. R61-class architectural-reality discovery
+5. Engine modification beyond Architect scope: HALT + DIAGNOSTIC + ESCALATE
+6. Claim-then-walk / TACTICAL-AUTONOMY-without-re-verification / R77-empirical-script-defect discipline violation
+7. Round-evolution-fragile AC patterns: HALT
+8. **False-positive rate exceeds Architect-specified threshold** at any tested depth: HALT + DIAGNOSTIC
+
+### Phase 4 SLICE 1 close at R78
+
+After R78: R73-R75 cost-savings shipped in Tessera; Anchor PR #39 pending operator review; R77+R78 detector tuning envelopes characterized for both R72 gaps.
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R78 --tier full
+```
+
+---
 
 Inputs:
   - `coordination/reviews/REVIEWER-REPORT-R77.md` (this Reviewer's report)
