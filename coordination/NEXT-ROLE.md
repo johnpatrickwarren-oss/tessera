@@ -1,7 +1,115 @@
 CURRENT-ROUND: R74
-NEXT-ROLE: REVIEWER
+NEXT-ROLE: IMPLEMENTER
 STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R74 ESCALATE — Option A (2026-05-20)
+
+**Decision:** Option A approved. Same-round in-place fix + minimal coordination chore. Matches R66 Option A + R72 Option B precedent.
+
+**Root cause:** Bash parameter-expansion gotcha. `${VAR:+word}` triggers on set-and-non-null regardless of value. `MU_SONNET=false` is a non-empty string, so `${MU_SONNET:+--mu-sonnet}` always expands to `--mu-sonnet` — Haiku-default unreachable. Implementer TACTICAL AUTONOMY substituted spec § 2.5 (c) array-args form without empirical re-verification of bash semantics.
+
+**Implementer scope:**
+
+1. **`run-pipeline.sh:226` fix.** Replace with explicit conditional block; matches spec § 2.5 (c) intent:
+   ```bash
+   if [ "$MU_SONNET" = "true" ]; then
+     MU_SONNET_FLAG=(--mu-sonnet)
+   else
+     MU_SONNET_FLAG=()
+   fi
+   ```
+   Invoke selector with `"${MU_SONNET_FLAG[@]}"`.
+
+2. **New AC-R74-32: end-to-end pipeline-dispatch.** Verifies `MU_SONNET=false` → Haiku selected for non-marker directive. Closes spec § 5.3 gap.
+
+3. **MAJOR-1 attestation correction.** Update Implementer attestation: AC-R74-31 = Class A (`matched_anchors: ["cross-project canonical"]`), not Class C. Model value Sonnet correct; rationale was misattributed.
+
+4. **MINOR-5 acknowledgment:** spec § 2.5 (c) pseudocode would fail AC-R74-16 regex-ordering if implemented verbatim; Implementer TD-2 was forced by this gap. Architect pre-emit Rule 3 self-application gap; defer fix to R75+.
+
+5. **Re-attest binding commands:**
+   - tsc exit 0; tests `539/531/5/3` (AC-R74-32 added; carry-forward 5 unchanged); EMPIRICAL.sh exit 0
+   - R73 anti-regression: `tier-router-validate.js` exit 0
+   - NEW verification: `MU_SONNET=false` → Haiku selected for non-marker directive
+
+6. **Commit:** single coordination chore; chore-A SHA `5024b7f` preserved.
+
+7. **Route to MEMORIAL-UPDATER** (NOT back to Reviewer).
+
+**MU scope at R74 close:**
+
+- Memorialize bash-expansion gotcha as 2nd Tessera instance of TACTICAL-AUTONOMY-without-re-verification (R72 `git add -f` = 1st; R74 `${VAR:+word}` = 2nd). Implementer-side sub-pattern at chore-A (distinct from Architect-side at spec-emit).
+- Add CLAUDE-IMPLEMENTER.md REINFORCED: "When TACTICAL AUTONOMY substitutes spec pseudocode, the substitute MUST be empirically verified against spec's binding-AC semantics BEFORE chore-A commit. Bash parameter-expansion semantics, `git` flags, file-system patterns NOT in scope unless spec § 6.2 explicitly enumerates them." Re-accretion guard per R51.
+- Memorialize R74 Option A as 4th amend-in-round resolution archetype (R61 ESCALATE #1 Option B + R66 Option A + R72 Option B + R74 Option A).
+
+**Pipeline resume:** `./run-pipeline.sh --round R74 --tier full --start-at IMPLEMENTER`
+
+---
+
+## § Reviewer R74 routing block (2026-05-20)
+
+### Report
+
+`coordination/reviews/REVIEWER-REPORT-R74.md` — **1 CRITICAL + 1 MAJOR + 5 MINOR + 6 OBS.** All 31 ACs PASS structurally; substantive deliverable (mu-model-select selector + 22 R74 ACs + EMPIRICAL.sh 17/17 + CLAUDE-REVIEWER.md Mode docs) is functionally complete in isolation. CRITICAL-1 is in the bash glue at `run-pipeline.sh:226` and defeats R74's load-bearing Haiku-default cost-savings mechanism in every real pipeline invocation. MAJOR-1 is an Implementer attestation rationale fabrication for AC-R74-31. Architect MINOR-1 + MINOR-5 enabled the gap.
+
+### Per-AC verdict summary
+
+All 31 ACs PASS structurally. Verified by direct command rerun at HEAD:
+- `pnpm exec tsc -p tsconfig.test.json` → exit 0, zero diagnostics
+- `pnpm exec node --test --test-reporter=tap test/*.test.js` → tests=538 / pass=530 / fail=5 / skipped=3; 5 carry-forward identities preserved (AC-R36-21, AC-R36-30, AC-R36-31, AC-R65-2, AC-R66-14)
+- `bash coordination/specs/Q-R74-EMPIRICAL.sh` → PASS 17 / FAIL 0, exit 0
+- `pnpm exec node scripts/tier-router-validate.js` → exit 0 (R73 anti-regression)
+- `git diff bac83e4..HEAD --name-only` → 15 paths; ALL ⊆ ALLOWED_SET (per EMPIRICAL.sh Block 12 PASS)
+- `pnpm exec node scripts/mu-model-select.js --directive coordination/NEXT-ROLE.md --tier full` → `{"round":"R74","model":"claude-sonnet-4-6","rationale":"cross-round-pattern marker (class A): cross-project canonical","decision_path":["marker_match","class_A"],"selector_version":"0.1.0","matched_anchors":["cross-project canonical"]}` (Class A, NOT Class C as Implementer attested)
+
+### Findings (severities; full evidence in REVIEWER-REPORT-R74.md)
+
+- **CRITICAL-1 (IMPLEMENTER):** `${MU_SONNET:+--mu-sonnet}` at `run-pipeline.sh:226` ALWAYS expands to `--mu-sonnet` because the default `MU_SONNET=false` (line 122) is a non-empty bash string. `${VAR:+word}` triggers on set-and-non-null regardless of value. Selector routes through `operator_override` branch in BOTH `MU_SONNET=false` AND `MU_SONNET=true` cases, returning Sonnet. R74's load-bearing Haiku-default cost-savings mechanism is structurally unreachable from the pipeline. TD-2 disclosure claimed "Semantic behavior identical" — empirically false. Spec § 5.3 acknowledged "End-to-end pipeline-dispatch AC absent" — exactly the gap the bug landed in.
+- **MAJOR-1 (IMPLEMENTER):** Rule 1 false-compliance-attestation. `MEMORIAL.md:1663` + `NEXT-ROLE.md:60` Implementer attestation says AC-R74-31 self-classification matched "Class C co-occurrence in R72/R73 Reviewer prose"; actual selector `matched_anchors` is `["cross-project canonical"]` (Class A); `/Reviewer-2/` and `/\bESCALATE\b/` do NOT appear in the R74 directive section (verified by reproducing the selector's `loadDirective` boundary regex). Model value attested correctly; interpretive rationale empirically false.
+- **MINOR-1 (ARCHITECT):** Spec § 9.1 Q.6 claim-then-walk incomplete; "Class A: no (no 'cross-project promotion' etc.)" enumerates only 1 of 5 Class A regex alternations; `/cross-project canonical/i` matches the directive's Rule 4 row at NEXT-ROLE.md:305 ("cross-project canonical at R72"). § 10 haiku prediction empirically refuted.
+- **MINOR-2 (ARCHITECT):** Spec § 5.3 acknowledged gap (end-to-end pipeline-dispatch AC absent) is the exact gap CRITICAL-1 landed in. Future round should add a minimal end-to-end bash-expansion AC.
+- **MINOR-3 (IMPLEMENTER):** `run-pipeline.sh:235-236` selector-unexpected-model catch-all arm structurally unreachable through valid selector output.
+- **MINOR-4 (IMPLEMENTER):** TD-2 disclosure mischaracterizes its semantic effect; equivalence check on substitute bash construct was skipped.
+- **MINOR-5 (ARCHITECT):** AC-R74-16 regex ordering constraint forced TD-2; spec § 2.5 (c) pseudocode would FAIL its own AC-R74-16 if implemented verbatim. Rule 3 self-application gate not exercised at pre-emit.
+- **OBS-1..6:** EMPIRICAL.sh 17/17 PASS verbatim; TDD discipline preserved (RED→GREEN→chore-A); spec-triad commit-sequencing preserved; routing log untracked per carve-out; diff count = 15 verbatim correct; CLAUDE-REVIEWER.md Mode section byte-equivalent to spec § 2.6.
+
+### Operator decision space (bounded options for CRITICAL-1 resolution)
+
+- **Option A (RECOMMENDED) — In-place fix + minimal coordination chore.** Replace `${MU_SONNET:+--mu-sonnet}` at `run-pipeline.sh:226` with the spec § 2.5 (c) array-args form OR an explicit `if $MU_SONNET; then ...; fi` block. Add a minimal end-to-end AC verifying flag behavior. Update Implementer attestation + MEMORIAL to record the correct Class A match for AC-R74-31. R74 closes with the cost-savings mechanism actually working. Estimated work: 1-2 line bash fix + attestation correction + 1 new AC + chore-A re-run.
+- **Option B — Promote to R75.** Land R74 as MERGE-READY-with-reservations; address CRITICAL-1 + MAJOR-1 as the first item of R75. Risk: R75+ pipelines dispatch Sonnet on every MU role, defeating the cost-savings goal until R75 closes. R75 directive must explicitly halt-then-fix before any other MU work.
+- **Option C — Reframe + accept (NOT RECOMMENDED).** Argue that the substantive selector deliverable is sound and only the bash glue is wrong. Matches the R45 attestation-vs-deliverable reframing pattern that REINFORCED 2026-05-19 explicitly cautions against; defeats directive's stated cost-reduction goal.
+
+### Routing
+
+**STATUS: ESCALATE — operator decision required.**
+
+CRITICAL-1 is substantive script-correctness (not attestation-level), so the strict-routing reading applies per CLAUDE-REVIEWER.md REINFORCED 2026-05-19: "When the Reviewer judges a CRITICAL finding to be attestation-level (substantive deliverable is sound; only attested values are empirically wrong), the strict-routing reading is ESCALATE; the pragmatic-routing reading is MERGE-READY-with-reservations plus operator notification." Here the substantive deliverable's bash glue IS the wrong thing — Haiku-default is unreachable in real pipeline runs — so ESCALATE.
+
+**Recommendation: Option A.** Rationale: the bug is a one-line bash fix; the spec already contains the correct pseudocode; the discipline lesson (TACTICAL AUTONOMY without re-verification of bash-syntax substitutes) is freshest if recorded in R74's own MEMORIAL, not deferred. MAJOR-1 attestation correction is also a same-chain fix.
+
+### Reviewer-attested HEAD
+
+`f588ed5` (`chore(R74 IMPLEMENTER): record chore-A coordination SHA in routing block`).
+
+### Inputs
+
+1. `coordination/PRD.md`
+2. `coordination/specs/Q-R74-SPEC.md`
+3. `coordination/specs/Q-R74-SPEC-AUDIT.md`
+4. `coordination/specs/Q-R74-EMPIRICAL.sh` (re-run at Reviewer HEAD; PASS 17 / FAIL 0)
+5. `scripts/mu-model-select.ts` + `scripts/mu-model-select-fixtures/`
+6. `test/q74-mu-haiku-reviewer-scope.test.ts` (22 ACs run; 22/22 pass)
+7. `run-pipeline.sh` (modifications cold-read at lines 79-82, 122-124, 139-140, 217-296, 1173-1186)
+8. `CLAUDE-REVIEWER.md` (Mode section at lines 44-76)
+9. `package.json` (line 22)
+10. `coordination/MEMORIAL.md` (Architect + Implementer entries at lines 1632-1672)
+11. `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Reviewer + Architect + Implementer sections; attestation-vs-deliverable + structural-grep patterns surfaced)
+
+### Output
+
+`coordination/reviews/REVIEWER-REPORT-R74.md` (this report).
 
 ---
 
