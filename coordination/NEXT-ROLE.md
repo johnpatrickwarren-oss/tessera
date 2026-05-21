@@ -1,6 +1,6 @@
 CURRENT-ROUND: R84
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
 
 ---
@@ -6501,3 +6501,107 @@ STATUS: ROUND-COMPLETE
 - All 3 MINOR violations resolved with REINFORCED lines appended
 - Carry-forward state documented for operator / R84 Architect
 - Round R83 substantively complete; next round (R84 engine wiring) can proceed
+
+## § R84 ARCHITECT routing block (2026-05-21)
+
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
+TIER: full
+
+### Spec triad committed BEFORE this routing block (R21 ARCH MINOR-1 discipline)
+
+Spec triad commit: `588031a` ("spec(R84): live engine compute + Web Worker (Architect routing → Implementer)").
+
+- `coordination/specs/Q-R84-SPEC.md` — load-bearing artifact; ~1100 lines; 10 sections; 17 ACs verbatim in § 1.6
+- `coordination/specs/Q-R84-SPEC-AUDIT.md` — audit sidecar; § A P3 ten-axis + § B discipline ceremony + § C predictions + § D rationale
+- `coordination/specs/Q-R84-EMPIRICAL.sh` — 5-block binding-command harness; uses `--test-reporter=tap` per R77 OBS-4
+
+### Inputs for Implementer
+
+```
+coordination/specs/Q-R84-SPEC.md           (load-bearing — read in full)
+coordination/specs/Q-R84-SPEC-AUDIT.md     (audit sidecar — optional context)
+coordination/specs/Q-R84-EMPIRICAL.sh      (binding-command harness)
+demos/engine-bundle.mjs                    (R82 ESM bundle — gitignored; pre-build if absent: `pnpm exec node tools/build-browser-bundle.js`)
+demos/demo.html                            (round-start state; R83 controlState surface to preserve)
+tools/build-canned-demos.ts                (source of truth for demo.html regeneration)
+```
+
+### Round-start SHA
+
+`0e93c15` (`0e93c154737dab5c68db23cce9babb21f9634895`)
+
+### Implementer chore-A sequence (recap from spec § 4)
+
+1. **RED commit:** create `test/q84-live-engine-compute.test.ts` with 17 `assert.fail` stubs; verify 17 fails; commit as `test(R84 RED): 17 assert.fail stubs for live engine compute ACs`.
+2. **GREEN commit:**
+   - Create `demos/engine-worker.js` verbatim from spec § 1.5.
+   - Apply spec § 1.2 markup + § 1.3 CSS edits to `tools/build-canned-demos.ts` `HTML_TEMPLATE_HEAD`.
+   - Apply spec § 1.4 JS edits to `HTML_TEMPLATE_FOOTER` (REPLACE R83 btnRun handler body + ADD btnCancel handler + helpers).
+   - Pre-build the engine bundle if absent: `pnpm exec node tools/build-browser-bundle.js`.
+   - Recompile: `pnpm exec tsc -p tsconfig.test.json`.
+   - Regenerate demo.html: `pnpm exec node tools/build-canned-demos.js`.
+   - Verify `git status`: ONLY allowed paths modified; `demos/scenarios/*.json` UNCHANGED (halt condition 9).
+   - Replace q84 test stubs with verbatim § 1.6 test body.
+   - Recompile, run full suite, record OBSERVED counts verbatim per Rule 1 (`empirical-command-attestation`).
+   - Commit as `feat(R84 GREEN): live engine compute via Web Worker — chore-A`.
+3. **Routing:** append `## § R84 IMPLEMENTER routing block (chore-A)` per spec § 6.2 template; set header `NEXT-ROLE: REVIEWER` + `STATUS: READY`; attest OBSERVED binding-command outputs verbatim; append CONFIRMATION lines to `coordination/MEMORIAL.md`.
+
+### Architect pre-prediction (per spec § 5.2; Implementer attests OBSERVED verbatim — do NOT silently amend per R79 MAJOR-1)
+
+| Observable | Predicted | Band / strictness |
+|---|---|---|
+| `pnpm exec tsc -p tsconfig.test.json` exit | 0 | strict |
+| `pnpm exec node --test --test-reporter=tap test/*.test.js` process exit | 1 | strict |
+| TAP `# tests` | 669 | strict (R83 close 652 + 17 new R84 ACs) |
+| TAP `# pass` | 650 | band [649, 651] |
+| TAP `# fail` | 15 | strict (R83 close 13 + AC-R83-15 allowed-set flip + AC-R83-12 handler-replacement flip) |
+| TAP `# skipped` | 4 | strict |
+| `bash coordination/specs/Q-R84-EMPIRICAL.sh` exit | 0 | strict (all 5 blocks pass at GREEN) |
+| `git diff 0e93c15 HEAD --name-only` line count | 9-14 | band |
+| `demos/scenarios/*.json` content vs round-start | byte-identical | strict (halt condition 9) |
+
+### Halt conditions (per spec § 6.1)
+
+1. EMPIRICAL.sh non-zero for any reason OTHER than pre-documented carry-forward.
+2. `tsc` exit ≠ 0.
+3. Test baseline drift outside § 5.2 bands.
+4. R61-class architectural-reality discovery.
+5. Spec uses round-evolution-fragile AC patterns → HALT + DIAGNOSTIC (do NOT silently amend per R79 MAJOR-1).
+6. Cross-project discipline violated → HALT + DIAGNOSTIC.
+7. New external dependency required → HALT + DIAGNOSTIC + ESCALATE.
+8. ALLOWED_SET incomplete → HALT + DIAGNOSTIC (R82 MAJOR-1 lesson).
+9. `demos/scenarios/*.json` drift post-regen → HALT + DIAGNOSTIC.
+10. R82 smoke block lost post-regen → HALT + DIAGNOSTIC.
+11. R83 control panel surface regressed → HALT + DIAGNOSTIC (AC-R84-15 enforces structurally).
+12. Web Worker not testable in Node (directive halt-condition 8 fallback) → HALT + DIAGNOSTIC for operator. NOTE: Architect empirically verified Node Worker viability at spec § 8.6 Q.6; this halt is the safety net.
+
+### Architect's empirical Node-Worker verification at spec-emit (resolves directive halt-condition 8 a priori)
+
+Per spec § 8.6 Q.6: a Node v25.9.0 `worker_threads.Worker` loaded a CJS-style `.js` file using `require('worker_threads').parentPort` + dynamic `import('./engine-bundle.mjs')` and returned all 12 expected exports (`StaticTopologySource`, `TopologyEnricher`, `commonMode`, `computeSnapshotHash`, `detectors`, `eBH`, `familyA`, `familyC`, `freezeHook`, `pureJsSha256`, `runtime`, `types`). AC-R84-13 + AC-R84-14 end-to-end Node Worker round-trip is unblocked.
+
+### EMPIRICAL.sh probe-run result at round-start HEAD `0e93c15` (per spec § 8.6)
+
+```
+── Block 1: typecheck ──                                PASS
+── Block 2: engine-worker.js structural presence ──     FAIL (file not built yet — expected)
+── Block 3: demo.html worker wiring presence ──         FAIL (wiring not built yet — expected)
+── Block 4: test counts ──                              FAIL on tests/pass/fail (R83-close baseline — expected); PASS on skipped
+── Block 5: anti-scope diff ──                          PASS (empty diff at round-start)
+── Scenarios byte-identity sentinel ──                  PASS
+Summary: PASS 4 / FAIL 8
+```
+
+All non-pass outcomes are pre-documented in Q-R84-SPEC-AUDIT.md § C.3 as "Implementer hasn't built yet" — no surprises.
+
+### CONFIRMATION lines appended to coordination/MEMORIAL.md (Architect)
+
+- pre-emit-grilling-16-subsections-all-PASS-spec-section-8
+- empirical-premise-verification-node-worker-viability-confirmed-at-spec-emit-section-8-6
+- allowed-set-4-gate-lockstep-applied-UPFRONT-section-8-11
+- forward-protection-AC-audit-exhaustive-R83-AC-15-AC-12-both-predicted-flip
+- cite-then-verify-9-line-citations-verified-section-8-14
+- architect-claim-without-empirical-walk-discipline-section-8-15
+- spec-triad-committed-BEFORE-routing-block-R21-ARCH-MINOR-1
+- discriminating-AC-walkthrough-all-17-section-8-10
+
