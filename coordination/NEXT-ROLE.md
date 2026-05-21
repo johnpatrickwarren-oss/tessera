@@ -1,6 +1,6 @@
 CURRENT-ROUND: R84
-NEXT-ROLE: IMPLEMENTER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ESCALATE
 TIER: full
 
 ---
@@ -90,6 +90,55 @@ ALLOWED modifications:
 cd /Users/johnwarren/concord/tessera
 ./run-pipeline.sh --round R84 --tier full
 ```
+
+---
+
+## § R84 IMPLEMENTER routing block (chore-A — ESCALATE) (2026-05-21)
+
+NEXT-ROLE: OPERATOR
+STATUS: ESCALATE
+Halt condition: #3 (fail ≠ 15 strict: observed 16) AND #5 (Architect spec uses round-evolution-fragile AC pattern)
+Diagnostic: `coordination/diagnostics/DIAGNOSTIC-R84-ac9-regex-limit.md`
+
+### Bounded question for operator / Architect
+
+**Spec claim (Q-R84-SPEC.md § 1.6 AC-R84-9):** prescribes the regex
+`/btnRun\.addEventListener\s*\(\s*['"]click['"][\s\S]{0,3000}?\}\s*\)\s*;/`
+to extract the btnRun handler region, then verifies `worker.postMessage(...)` is within that region.
+
+**Reality:** The spec-prescribed handler body (§ 1.4) is ~3129 chars when rendered. The regex's `{0,3000}?` non-greedy quantifier stops at the first inner `});` at ~1563 chars (`scenarios['custom'].windows.push({...});` close). `worker.postMessage(...)` is at ~3129 chars — outside the captured region. AC-R84-9 fails with `AssertionError: btnRun handler must postMessage(...)`.
+
+**Options:**
+
+- **Option A** (Recommended): Architect amends spec § 1.6 AC-R84-9 to drop handler-region scoping — assert `worker.postMessage({type:'run', controlState:...})` directly in full HTML. No implementation changes needed. Discrimination remains adequate (AC-R84-8 verifies Worker spawn is inside btnRun handler; AC-R84-9 verifies correct postMessage shape exists). Once Architect amends, Implementer re-runs tests; fail count returns to 15 and GREEN commit proceeds.
+
+- **Option B**: Architect amends spec § 1.4 to move `worker.postMessage(...)` BEFORE `worker.onmessage = function...` in the handler body (places it within ~1100 chars). Implementation must be regenerated. Timing risk: postMessage before onmessage setup is safe but unconventional.
+
+- **Option C**: Architect amends spec § 1.6 AC-R84-9 to use `indexOf` + 4000-char `substring` instead of regex for handler extraction. No implementation changes needed. Same round-evolution fragility risk at higher char count.
+
+### Observed binding-command outputs at halt (verbatim; RED commit SHA `3056bc4` as baseline + GREEN changes uncommitted)
+
+GREEN changes present but NOT committed at halt (engine-worker.js, tool edits, demo.html regen, GREEN test body — all in working tree):
+
+| Binding command | Observed (GREEN working tree, tsc compiled) |
+|---|---|
+| `pnpm exec tsc -p tsconfig.test.json` exit | **0** |
+| `pnpm exec node --test --test-reporter=tap test/*.test.js` process exit | **1** |
+| TAP `# tests` | **669** (correct: 652 + 17 new R84) |
+| TAP `# pass` | **652** (band [649,651] — over band by 1; see note below) |
+| TAP `# fail` | **16** (predicted 15 strict — halt triggered) |
+| TAP `# skipped` | **4** |
+
+**Note on pass=652:** Pass count 652 is above the predicted band [649,651]. Investigation: AC-R83-12 (predicted as a R83→R84 forward-protection flip, contributing to fail=15 prediction) is apparently PASSING despite the handler replacement. The Architect predicted AC-R83-12 would fail because its regex has a 400-char limit and would not match the new handler; however, the region it captures (the early part of the handler) still satisfies the `console.log` absence check OR the regex doesn't match the new handler at all, causing `runRegion` to be null and the `assert.match(runRegion![0], ...)` to PASS vacuously / throw differently. Either way, the actual fail=16 is: 13 carry-forward + AC-R84-9 (1 new fail) + possibly AC-R83-15 (1) but not AC-R83-12. This is a secondary observation only — the primary halt trigger is fail=16 ≠ 15 strict via AC-R84-9.
+
+### Uncommitted GREEN artifact state at halt
+
+- `demos/engine-worker.js` — fully implemented (spec § 1.5 verbatim); `git add -f` required (caught by `*.js` .gitignore rule)
+- `tools/build-canned-demos.ts` — markup + CSS + JS edits applied (spec §§ 1.2, 1.3, 1.4)
+- `demos/demo.html` — regenerated; contains all R84 wiring (R82 smoke block verified preserved)
+- `test/q84-live-engine-compute.test.ts` — GREEN body; AC-R84-9 regex is verbatim from spec (the failing regex)
+
+All GREEN changes preserved in working tree. After operator/Architect resolution, Implementer resumes from this state.
 
 ---
 
