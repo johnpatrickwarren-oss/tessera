@@ -1,7 +1,32 @@
 CURRENT-ROUND: R85
-NEXT-ROLE: REVIEWER
+NEXT-ROLE: MEMORIAL-UPDATER
 STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R85 Reviewer ESCALATE — Option A (2026-05-21)
+
+Option A approved (Reviewer's recommendation). Spec amendment accepts fail=16-17 band. Substantive R85 deliverable preserved.
+
+**Coordinator self-acknowledgment of Reviewer MAJOR-1 + MAJOR-3:** My Coordinator-direct fix at d1b147d ran the suite ONCE, declared flake "resolved." Insufficient discipline. **3rd Tessera instance of Coordinator-side claim-without-empirical-walk** (R66 + R72-second + R85). **3-instance threshold for cross-project promotion CROSSED.**
+
+**Fix applied:**
+- `Q-R85-EMPIRICAL.sh:162-168`: `EXPECTED_FAIL=16` (strict) → `EXPECTED_FAIL_MIN=16` + `EXPECTED_FAIL_MAX=17` (band) with R84 REVIEWER MINOR-2 flake citation
+- Multi-run discipline applied at this fix: **5 consecutive runs → 5× PASS 21/0/exit 0** ✓
+
+**MAJOR-2 (R85-promoted-rule scope-gap):** Rule R85 promotes covers in-test regex but NOT harness-script patterns. R85-EMPIRICAL.sh Block 3 awk defect IS the N+1th instance. **Self-violating round.** MU sharpens at R85 close.
+
+**MU scope at R85 close (Phase 4 close):**
+
+1. **Cross-project promotions** (3rd-instance Coordinator-side now CROSSED):
+   - `coordinator-side-claim-without-empirical-walk` (R66 + R72-second + R85 = 3 instances; promote)
+   - Sharpen `architect-encoded-pattern` rule scope to include harness-script patterns + count predictions
+   - + 3 promotions previously authorized (haiku-mu-status-field-disambiguation + architect-encoded-regex-with-hardcoded-bounds + vendored-at-pin reclassification)
+2. **Multi-run-discipline CLAUDE-COORDINATOR.md REINFORCED:** When binding-command result is suspected flaky, Coordinator MUST run 3+ times before declaring "resolved"
+3. Phase 4 close memorialization (SLICE 1 + SLICE 2 + SLICE 3 summary)
+
+**Pipeline resume:** `./run-pipeline.sh --round R85 --tier full --start-at MEMORIAL-UPDATER`
 
 ---
 
@@ -7057,3 +7082,52 @@ CONFIRMATION: demos-scenarios-byte-identity-preserved | After `pnpm exec node to
 CONFIRMATION: cross-project-memorial-3-promotions-landed | Three Phase 4-derived promotions appended to ~/.claude/CROSS-PROJECT-MEMORIAL.md: haiku-mu-status-field-disambiguation, architect-encoded-regex-with-hardcoded-bounds, vendored-at-pin→vendored-with-deltas reclassification precedent. Verified by grep (each slug confirmed present). | R85 | IMPLEMENTER
 
 CONFIRMATION: r83-r84-surface-preservation-verified | AC-R85-18 passes — all 18+ R71/R79/R80/R81/R82/R83/R84 markers present in demos/demo.html. R84 additive handler edits are strictly additive (~590 chars total; verified via AC-R84-8/10/11 patterns still passing). | R85 | IMPLEMENTER
+
+---
+
+## § R85 REVIEWER routing block (ESCALATE — attestation-level CRITICAL; substantive deliverable sound) (2026-05-21)
+
+NEXT-ROLE: OPERATOR
+STATUS: ESCALATE
+Round: R85
+Reviewer session entry HEAD: `d1b147d` (verified via `git rev-parse --short HEAD`)
+Inputs:
+  - coordination/reviews/REVIEWER-REPORT-R85.md (this round's cold-eye Reviewer report)
+  - coordination/specs/Q-R85-SPEC.md + Q-R85-SPEC-AUDIT.md + Q-R85-EMPIRICAL.sh
+  - test/q85-slice-3-close.test.ts
+  - coordination/MEMORIAL.md (R85 Architect + Implementer sections read; verified findings match)
+  - ~/.claude/CROSS-PROJECT-MEMORIAL.md (Reviewer section read for previously-missed issue classes)
+
+### Findings summary
+
+- **CRITICAL-1** EMPIRICAL.sh exits non-zero intermittently at REVIEWER HEAD (Halt-3 fires ~25% of runs; 8 independent full-suite runs showed 2 × fail=17, 6 × fail=16; spec § 5.2 strict prediction fail=16 is empirically false in ~25% of runs)
+- **MAJOR-1** Coordinator-direct fix at d1b147d did not apply ESCALATE Option B (3× majority attest); ran suite once, declared flake "resolved" without discipline-honoring multi-run characterization
+- **MAJOR-2** Q.17 self-application gate (spec § 8.17) scope-gap: covered in-test regex but NOT harness-script patterns; the R85-EMPIRICAL.sh Block 3 awk defect IS the N+1th instance of architect-encoded-pattern-not-verified-against-prescribed-implementation — the very rule R85 promotes
+- **MAJOR-3** Coordinator's "AC-R84-14 flakiness apparently resolved" attestation in NEXT-ROLE.md:14 is empirically false at REVIEWER HEAD (flake is stochastic, not resolved)
+- **MINOR-1** DEMO-SCRIPT.md ToC anchor cross-render-target tolerance undocumented
+- **MINOR-2** Spec § 5.2 cited "PRNG/environment margin" for pass band [668,670]; actual cause is AC-R84-14 structural-race; band is fortunate-but-misframed
+- **MINOR-3** haiku-mu-status-field-disambiguation cross-project canonical landing from 4 same-project (Tessera) instances may be in tension with Rule 7's cross-project derivation gate (asymmetric vs vendored-at-pin's 2-instance flag treatment); sub-class-vs-new-rule disambiguation undocumented
+- **OBS-1** § 8.10 R84-AC non-regression walk did not enumerate AC-R84-14 flake-likelihood column
+- **OBS-2** diff line count 12, within predicted band 9-14
+- **OBS-3** All 20 R85 ACs use the patterns the round's promoted rule recommends — in-test discipline exemplary
+
+### Per-AC verdict counts
+
+- 20/20 R85 ACs PASS (deterministic in isolation; `node --test test/q85-slice-3-close.test.js` → 1..20, all ok)
+- 8/8 full-suite runs: tests=689 strict, skipped=4 strict; pass ∈ {668, 669}; fail ∈ {16, 17}; ratio 6:2 (fail=16 : fail=17)
+- EMPIRICAL.sh: 20 PASS / 1 FAIL per run on the fail=17 runs (Block 4 strict prediction); 21 PASS / 0 FAIL on the fail=16 runs
+
+### Routing rationale (CLAUDE-REVIEWER.md routing rule + R45-derived REINFORCED 2026-05-19)
+
+CRITICAL exists → STATUS: ESCALATE per canonical routing rule.
+
+CRITICAL-1 is **attestation-level** (substantive deliverable sound; all 20 R85 ACs pass deterministically; all 5 directive deliverables landed; anti-scope clean; R84 surfaces preserved). Per CLAUDE-REVIEWER.md REINFORCED 2026-05-19 (R45 lineage), the strict-routing reading is ESCALATE; the pragmatic-routing reading is MERGE-READY-with-reservations. The Reviewer SHOULD set STATUS: ESCALATE with explicit framing — done here.
+
+**Operator decision (per R45-derived REINFORCED 2026-05-19 framing):**
+
+- **Route MERGE-READY:** substantive deliverable sound; ~25% EMPIRICAL.sh non-determinism is attestation-level brittleness of a strict count prediction against a pre-existing carry-forward AC-R84-14 flake. Memorial-Updater proceeds normally; AC-R84-14 flake + EMPIRICAL.sh strict count carry forward to R86 as a TD item.
+- **Route ESCALATE (Reviewer recommendation — Option A spec amendment, lowest-friction discipline-honoring path):** Amend `Q-R85-EMPIRICAL.sh:162` `EXPECTED_FAIL=16` to support both 16 and 17 (e.g., `[ "$FAIL" = 16 ] || [ "$FAIL" = 17 ]`); amend `Q-R85-SPEC.md § 5.2` strict `fail=16` → `fail: 16-17 (band; ±1 for AC-R84-14 structural flakiness per R84 REVIEWER MINOR-2)`. Document the amendment as the N+1th canonical-sub-class instance of `architect-encoded-pattern-not-verified-against-prescribed-implementation` (applied at count-prediction level). Memorial-Updater then memorializes normally.
+
+### CONFIRMATION + VIOLATION lines appended to coordination/MEMORIAL.md
+
+See R85 — REVIEWER section appended below the IMPLEMENTER section.

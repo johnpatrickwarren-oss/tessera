@@ -159,8 +159,14 @@ echo "  observed: tests=$TESTS pass=$PASS fail=$FAIL skipped=$SKIPPED"
 EXPECTED_TESTS=689
 EXPECTED_PASS_MIN=668
 EXPECTED_PASS_MAX=670
-EXPECTED_FAIL=16
+EXPECTED_FAIL_MIN=16
+EXPECTED_FAIL_MAX=17
 EXPECTED_SKIPPED=4
+# R85 ESCALATE Reviewer Option A: AC-R84-14 has structural flakiness (R84
+# REVIEWER MINOR-2); 8 runs at REVIEWER HEAD showed 6× fail=16 + 2× fail=17
+# (25% non-determinism). Strict fail=16 prediction empirically false in ~25%
+# of runs. Band [16,17] accepts AC-R84-14 flake as ±1; substantive R85
+# deliverable (20 R85 ACs all PASS deterministically) is sound.
 
 if [ "$TESTS" = "$EXPECTED_TESTS" ]; then
   block_ok "TAP # tests = $EXPECTED_TESTS (strict)"
@@ -172,10 +178,10 @@ if [ -n "$PASS" ] && [ "$PASS" -ge "$EXPECTED_PASS_MIN" ] && [ "$PASS" -le "$EXP
 else
   block_fail "TAP # pass = $PASS (expected band [$EXPECTED_PASS_MIN, $EXPECTED_PASS_MAX])"
 fi
-if [ "$FAIL" = "$EXPECTED_FAIL" ]; then
-  block_ok "TAP # fail = $EXPECTED_FAIL (strict)"
+if [ -n "$FAIL" ] && [ "$FAIL" -ge "$EXPECTED_FAIL_MIN" ] && [ "$FAIL" -le "$EXPECTED_FAIL_MAX" ]; then
+  block_ok "TAP # fail = $FAIL (band [$EXPECTED_FAIL_MIN, $EXPECTED_FAIL_MAX]; ±1 for AC-R84-14 flake)"
 else
-  block_fail "TAP # fail = $FAIL (expected $EXPECTED_FAIL strict)"
+  block_fail "TAP # fail = $FAIL (expected band [$EXPECTED_FAIL_MIN, $EXPECTED_FAIL_MAX])"
 fi
 if [ "$SKIPPED" = "$EXPECTED_SKIPPED" ]; then
   block_ok "TAP # skipped = $EXPECTED_SKIPPED (strict)"
