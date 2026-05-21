@@ -1,5 +1,5 @@
 CURRENT-ROUND: R90
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: IMPLEMENTER
 STATUS: READY
 TIER: full
 
@@ -143,6 +143,43 @@ If Option B chosen (monorepo restructure): `git mv engine packages/engine` is pe
 cd /Users/johnwarren/concord/tessera
 ./run-pipeline.sh --round R90 --tier full
 ```
+
+---
+
+## § R90 ARCHITECT routing block (2026-05-21)
+
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
+TIER: full
+
+Inputs:
+- coordination/specs/Q-R90-SPEC.md (primary; § 0 P0.1-P0.14 empirical baseline + § 1 Mechanism + § 2 Component inventory + § 3 Per-file pseudocode + § 5 ACs (14 total) + § 6 anti-scope + § 7 EMPIRICAL.sh block enumeration + § 8 grilling + § 9 P3 ten-axis)
+- coordination/specs/Q-R90-SPEC-AUDIT.md (audit sidecar; brainstorm § A1 + design § A2 + grilling § A3 + decision rationale § A4 + Architect pre-prediction § A5 + empirical-premise-verification § A8)
+- coordination/specs/Q-R90-EMPIRICAL.sh (9 blocks; probe-run at round-start `65edb85` produced 1 PASS / 8 FAIL — expected per spec § 0 P0.14; Implementer chore-A flips Blocks 1-8 PASS)
+- coordination/MEMORIAL.md (R90 ARCHITECT section — confirmations + violations TBD per next commit)
+
+### Architectural decisions locked at spec-emit
+
+- **Layout: Option A** (engine remains at `engine/`; standalone sub-package; `engine/package.json` is NEW; `pnpm-workspace.yaml` NOT modified per P0.8 gitignore conflict).
+- **tsconfig.json outDir: `dist/engine` → `engine/dist`** (1-line change; zero runtime impact on Tessera-internal consumers per P0.9).
+- **ROUND_START_SHA: `65edb85`** (hard-coded; no placeholder injection; § A4.5 rationale).
+- **Fail-count band: [16, 17]** (R85 discipline; AC-R89-8 routing-flip + AC-R84-14 stochastic; § 1.7 + § 5.2 + § 7 Block 8).
+- **ALLOWED_SET propagated to 3 surfaces:** spec § 5.3 narrative table + spec § 3.3 test pseudocode regex + EMPIRICAL.sh Block 9 (R82 propagation discipline verified at § 8.6).
+- **Scope extensions documented:** `pack:engine` script (1 line in root package.json) + `engine/*.tgz` in `.gitignore` (1 line). Both Architect-justified at § 8.3 + § A4.8 + § A4.9.
+
+### Halt conditions (carried verbatim from directive + spec § 8 grilling)
+
+Per directive halt conditions 1-12 (NEXT-ROLE.md lines 119-130) + spec § 6 anti-scope hard limits. Notable: HALT if `pnpm pack` produces filename other than `johnpatrickwarren-oss-deploysignal-engine-0.1.0-pre.tgz` (pnpm workspace-mode behavior may surface here; AC-R90-8 enforces).
+
+### Carve-out ACs (AC numbers cited from spec § 5.1 verbatim — R65 MINOR-1 cite-then-verify)
+
+AC-R90-1, AC-R90-2, AC-R90-3, AC-R90-4, AC-R90-5, AC-R90-6, AC-R90-7, AC-R90-8, AC-R90-9, AC-R90-10, AC-R90-11, AC-R90-12, AC-R90-13, AC-R90-14 (14 total; matches q90 test pseudocode test() count per § 8.9 R05 cross-check).
+
+### Architect pre-prediction (load-bearing for Reviewer)
+
+Per § A5: all binding commands predicted exit 0 at chore-A; test fail band [16,17] strict; pass band [702,707]; tests band [720,724]; Q-R90-EMPIRICAL.sh 9/9 PASS exit 0; predicted Reviewer findings 0 CRITICAL / 0-1 MAJOR / 0-3 MINOR.
+
+ROUND_START_SHA-A: `65edb85` (R90 directive commit; pre-spec-triad; same SHA used throughout the R90 cycle)
 
 ---
 
