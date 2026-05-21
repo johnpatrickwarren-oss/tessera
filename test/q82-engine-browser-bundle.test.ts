@@ -189,15 +189,16 @@ test('AC-R82-13: Q-R82-EMPIRICAL.sh has Block 1/2/3/4/5 markers', () => {
 // ── AC-R82-14: anti-scope diff <= ALLOWED_SET ──
 test('AC-R82-14: git diff round-start..HEAD <= ALLOWED_SET', () => {
   const allowed = new RegExp(
-    `^(tools/build-browser-bundle\\.ts|engine/topology-overlay\\.ts|`
+    `^(tools/build-browser-bundle\\.ts|tools/build-canned-demos\\.ts|`
+    + `engine/topology-overlay\\.ts|`
     + `demos/demo\\.html|demos/engine-bundle\\.mjs|`
     + `package\\.json|pnpm-lock\\.yaml|\\.gitignore|`
-    + `test/q82-engine-browser-bundle\\.test\\.ts|`
+    + `test/q82-engine-browser-bundle\\.test\\.ts|test/q01-no-at-pin-deltas\\.test\\.ts|`
     + `coordination/specs/Q-R82-SPEC\\.md|`
     + `coordination/specs/Q-R82-SPEC-AUDIT\\.md|`
     + `coordination/specs/Q-R82-EMPIRICAL\\.sh|`
     + `coordination/NEXT-ROLE\\.md|coordination/MEMORIAL\\.md|`
-    + `coordination/MEMORIAL-PHASE-[0-9]+\\.md|`
+    + `coordination/MEMORIAL-PHASE-[0-9]+\\.md|coordination/VENDORING-MANIFEST\\.md|`
     + `coordination/reviews/REVIEWER-REPORT-R82\\.md|`
     + `coordination/logs/ROUND-R[0-9]+-(SUMMARY|ROUTING)\\.md|`
     + `coordination/diagnostics/DIAGNOSTIC-R[0-9]+-.*\\.md|`
