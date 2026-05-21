@@ -1,7 +1,44 @@
 CURRENT-ROUND: R82
-NEXT-ROLE: ARCHITECT
-STATUS: ESCALATE
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R82 DUAL ESCALATE (2026-05-21)
+
+Two ESCALATEs resolved.
+
+### Resolution 1: Bundler choice — Option A (esbuild)
+
+esbuild approved as devDependency (^0.28.0 per Implementer TD-1). Smallest attack surface among modern bundlers; dev-only; matches R68 anti-worm posture. Already de-facto installed.
+
+### Resolution 2: Halt response — Option A + vendored-with-deltas reclassification
+
+**Failure 1 (AC-Q1-7 vendored-at-pin):** Reclassify `engine/topology-overlay.ts` from **vendored-at-pin → vendored-with-deltas** (analogous to verdict.ts at R53/R56). Honors A12 for ALL OTHER AT_PIN files; acknowledges R82 deliberately Tessera-evolves topology-overlay for browser portability.
+
+**Failure 2 (AC-R71-3 buildAllCannedDemos idempotency):** Modify `tools/build-canned-demos.ts` to preserve `<!-- R82-SMOKE-BLOCK -->`-delimited section in demo.html across regenerations. EXPECTED_FAIL stays 12.
+
+### Implementer scope
+
+1. **Coordination chore (before resuming):**
+   - Spec § 3.2 ALLOWED_SET adds: `tools/build-canned-demos.ts` + `test/q01-no-at-pin-deltas.test.ts` + `coordination/VENDORING-MANIFEST.md` (if applicable)
+   - `Q-R82-EMPIRICAL.sh` ALLOWED_SET hard-coded list updated to match
+   - `coordination/VENDORING-MANIFEST.md` documents reclassification
+
+2. **Chore-A continuation:**
+   - `test/q01-no-at-pin-deltas.test.ts`: remove `engine/topology-overlay.ts` from AT_PIN_FILES; inline comment cites R82 reclassification
+   - `tools/build-canned-demos.ts`: preserve `<!-- R82-SMOKE-BLOCK-START/END -->` section in demo.html regeneration
+   - `demos/demo.html`: wrap smoke block in markers
+   - Re-attest: tsc exit 0; tests `636/620/12/4`; EMPIRICAL.sh exit 0
+   - Commit + route to REVIEWER
+
+### Cross-round patterns flagged
+
+- **Vendoring-reclassification precedent:** topology-overlay.ts is 2nd Tessera reclassification vendored-at-pin → vendored-with-deltas (verdict.ts at R53/R56 was 1st). MU memorial at Phase 4 close.
+- **Architect-spec-anti-scope-incomplete:** R82 spec § 3.2 ALLOWED_SET missed tools/build-canned-demos.ts. Sub-pattern of Architect-claim-without-empirical-walk. MU memorial.
+
+**Pipeline resume:** `./run-pipeline.sh --round R82 --tier full --start-at IMPLEMENTER`
 
 ---
 
