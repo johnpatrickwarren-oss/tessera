@@ -198,6 +198,19 @@
     #tessera-control-panel input[type="checkbox"] { margin-right: 4px; cursor: pointer; }
     #btn-run { color: var(--tessera-accent-blue); border-color: var(--tessera-accent-blue); }
     #btn-reset-params { color: var(--tessera-status-warn); border-color: var(--tessera-status-warn); }
+    /* R84 — Cancel button + engine error banner */
+    #btn-cancel { color: var(--tessera-status-warn); border-color: var(--tessera-status-warn); }
+    #btn-cancel:disabled {
+      opacity: 0.4; cursor: not-allowed; color: var(--tessera-fg-muted);
+      border-color: var(--tessera-border);
+    }
+    #engine-error-banner {
+      margin-top: 8px; padding: 8px 12px; border-radius: 6px;
+      background: var(--tessera-bg-elevated); color: var(--tessera-status-warn);
+      border: 1px solid var(--tessera-status-warn);
+      font-family: var(--tessera-font-mono); font-size: 0.8rem;
+    }
+    #engine-error-banner[hidden] { display: none; }
   </style>
 </head>
 <body>
@@ -300,8 +313,10 @@
     </div>
     <div class="control-row">
       <button id="btn-run" type="button">Run</button>
+      <button id="btn-cancel" type="button" disabled>Cancel</button>
       <button id="btn-reset-params" type="button">Reset parameters</button>
     </div>
+    <div id="engine-error-banner" class="error-banner" hidden></div>
   </section>
 
   <section id="live-verdict-banner" class="live-banner">
@@ -13000,10 +13015,103 @@
   wireFamilyCheckbox(ctrlFamilyD, 'd');
   wireFamilyCheckbox(ctrlFamilyE, 'e');
 
+  // ── R84: live engine compute via Web Worker (replaces R83 placeholder) ──
+  var btnCancel         = document.getElementById('btn-cancel');
+  var engineErrorBanner = document.getElementById('engine-error-banner');
+  var r84ActiveWorker   = null;
+
+  function r84ShowError(msg) {
+    if (!engineErrorBanner) return;
+    engineErrorBanner.textContent = 'Engine error: ' + msg;
+    engineErrorBanner.removeAttribute('hidden');
+  }
+  function r84HideError() {
+    if (!engineErrorBanner) return;
+    engineErrorBanner.setAttribute('hidden', '');
+    engineErrorBanner.textContent = '';
+  }
+  function r84SetRunning(isRunning) {
+    if (btnRun)    btnRun.disabled    = isRunning;
+    if (btnCancel) btnCancel.disabled = !isRunning;
+  }
+
   if (btnRun) {
     btnRun.addEventListener('click', function () {
-      // R83: placeholder; R84 invokes the engine bundle here.
-      console.log('R83 controlState (placeholder for R84 engine wiring):', JSON.stringify(controlState));
+      r84HideError();
+      r84SetRunning(true);
+      if (r84ActiveWorker) { try { r84ActiveWorker.terminate(); } catch (e) {} r84ActiveWorker = null; }
+      var worker;
+      try {
+        worker = new Worker('./engine-worker.js');
+      } catch (err) {
+        r84ShowError('failed to spawn Worker — ' + String(err));
+        r84SetRunning(false);
+        return;
+      }
+      r84ActiveWorker = worker;
+      // Reserve scenarios.custom slot for incremental window population.
+      scenarios['custom'] = {
+        schema_version: 'tessera-demo-v1',
+        scenario: 'custom',
+        description: 'Live engine compute (R84) — runtime-generated from controlState',
+        params: {
+          shard_count: ({ small: 6, medium: 10, large: 25 })[controlState.topologySize] || 6,
+          window_count: controlState.windowCount,
+          alpha: controlState.alphaThreshold,
+          threshold: 1 / controlState.alphaThreshold,
+        },
+        engine_surfaces: ['freshBettingState', 'updateBettingState', 'eBenjaminiHochberg'],
+        windows: [],
+        terminal_state: null,
+      };
+      currentName = 'custom';
+      currentWindowIdx = 0;
+      if (selector) selector.value = 'custom';
+
+      worker.onmessage = function (ev) {
+        var data = ev.data;
+        if (!data || !data.type) return;
+        if (data.type === 'window') {
+          scenarios['custom'].windows.push({
+            t: data.windowIdx,
+            per_shard: data.perShard,
+            events: data.events || [],
+          });
+          currentWindowIdx = data.windowIdx;
+          if (typeof drawFrame === 'function')              drawFrame(scenarios['custom'], currentWindowIdx);
+          if (typeof renderBadges === 'function')           renderBadges(scenarios['custom'], currentWindowIdx);
+          if (typeof renderMetricsPanel === 'function')     renderMetricsPanel(scenarios['custom'], currentWindowIdx);
+          if (typeof renderDetectorsPanel === 'function')   renderDetectorsPanel(scenarios['custom'], currentWindowIdx);
+          if (typeof updateLiveVerdictBanner === 'function') updateLiveVerdictBanner(scenarios['custom'], currentWindowIdx);
+        } else if (data.type === 'terminal') {
+          scenarios['custom'].terminal_state = {
+            fdr_K: data.fdr_K,
+            fdr_qLevel: data.fdr_qLevel,
+            fdr_selected_indices: data.fdr_selected_indices,
+            candidates: data.candidates || [],
+          };
+          if (typeof renderBadges === 'function') renderBadges(scenarios['custom'], currentWindowIdx);
+          r84SetRunning(false);
+          r84ActiveWorker = null;
+        } else if (data.type === 'error') {
+          r84ShowError(data.error || 'unknown engine error');
+          r84SetRunning(false);
+          r84ActiveWorker = null;
+        }
+      };
+      worker.onerror = function (err) {
+        r84ShowError(String(err && err.message || err));
+        r84SetRunning(false);
+        r84ActiveWorker = null;
+      };
+      worker.postMessage({ type: 'run', controlState: JSON.parse(JSON.stringify(controlState)) });
+    });
+  }
+
+  if (btnCancel) {
+    btnCancel.addEventListener('click', function () {
+      if (r84ActiveWorker) { try { r84ActiveWorker.terminate(); } catch (e) {} r84ActiveWorker = null; }
+      r84SetRunning(false);
     });
   }
 
