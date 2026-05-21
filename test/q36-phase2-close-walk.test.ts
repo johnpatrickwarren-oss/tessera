@@ -74,7 +74,8 @@ test('AC-R36-3: no other test files carry execFileSync node --test pattern', () 
   const testFiles = readdirSync(testDir).filter(
     (f) => f.match(/^q\d+.*\.test\.ts$/) &&
       f !== 'q29-k8s-adapter.test.ts' &&
-      f !== 'q34-event-conditional-attribution.test.ts',
+      f !== 'q34-event-conditional-attribution.test.ts' &&
+      f !== 'q36-phase2-close-walk.test.ts',  // exclude self: this AC's error message literal contains execFileSync('node',...) (R87 Option A resolution preserves this line; spec Edit 3 was empirically infeasible per DIAGNOSTIC-R87-ac36-3-self-exclusion.md)
   );
   const pattern = /execFileSync\s*\(\s*['"]node['"]/;
   const violations: string[] = [];
