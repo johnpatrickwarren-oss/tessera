@@ -67,3 +67,23 @@ with `git diff SHA-A HEAD -- src/ tests/ prisma/` exits 0.
 # # REINFORCED 2026-05-08 — Memorial entries must name the specific incident
 # #   ("Reviewer caught the missing AC-4 evidence column"), not the discipline
 # #   in the abstract ("Reviewer applied right-reasons audit").
+
+# REINFORCED 2026-05-20 — MU final action MUST update NEXT-ROLE.md STATUS field
+#   to ROUND-COMPLETE before exiting. The MU's last commit is the round-close
+#   commit; it must leave NEXT-ROLE.md in a coherent state for the next round's
+#   operator/coordinator to read. Specific failure mode: when the prior role
+#   (typically Implementer→Reviewer routing) left STATUS: READY, and MU appends
+#   its outputs without updating STATUS, the pipeline's post-MU state check
+#   sees STATUS: READY and exits 1 even though the round substantively closed.
+#   Detected tessera 2026-05-20 at R75 (1st instance; STATUS left as READY after
+#   Implementer→Reviewer routing; Coordinator-direct fix landed) + R78 (2nd
+#   instance; same pattern; same fix). Both rounds used Haiku-class MU model
+#   (R74 mechanism). Pattern: Haiku is competent at substantive memorial work
+#   (REINFORCED appends, cross-project promotion entries, threshold-aware
+#   composite folding) but consistently misses small process-discipline details
+#   like the NEXT-ROLE.md STATUS field transition. Add to MU exit-criteria
+#   checklist: (1) MEMORIAL.md appended; (2) CLAUDE-*.md REINFORCEMENTS added
+#   if applicable; (3) cross-project memorial updated if threshold crossed;
+#   (4) round summary written; (5) **NEXT-ROLE.md STATUS field = ROUND-COMPLETE**
+#   verified via grep before MU exits. Cross-project promotion candidate at 3rd
+#   instance (currently Tessera-internal at 2 instances).
