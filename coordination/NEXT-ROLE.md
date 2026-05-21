@@ -1,5 +1,5 @@
 CURRENT-ROUND: R80
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
 
@@ -155,6 +155,86 @@ Halt conditions (directive's 8 + Architect-added 2 = 10):
 EMPIRICAL.sh probe-run by Architect: completed at spec-emit + post-commit; results recorded in `Q-R80-SPEC-AUDIT.md` § 7. At round-start `51a20b8` (pre-spec-triad commit): Block 1 PASS, Block 2 FAIL (Q-R80-SPEC-AUDIT.md + test file absent — expected), Block 3 FAIL (fail count = 8, expected 10 — expected pre-flip state), Block 4 PASS (0 diff). At spec-triad-commit `542cded` (post-Architect commit): Block 2 FAIL (test file still absent), Block 3 FAIL (fail count = 9, NOT 10 — AC-R79-14 already flipped at this commit; AC-R79-8 flip awaits chore-A regeneration of JSON), Block 4 PASS (3 spec-triad files in diff, all within ALLOWED_SET). At chore-A GREEN: ALL 4 blocks PASS by construction.
 
 Implementer next steps: read Q-R80-SPEC.md cover-to-cover, then implement following strict TDD discipline (RED commit before combined GREEN per R23 IMPL MINOR-1). Pipeline invocation: `./run-pipeline.sh --round R80 --tier full` (already executing).
+
+---
+
+## § R80 IMPLEMENTER routing block (2026-05-20)
+
+NEXT-ROLE: REVIEWER
+STATUS: READY
+TIER: full
+Round: R80 (Phase 4 SLICE 2 round 2 — dashboard polish; 5-family detector visualization + visual identity pass)
+
+RED commit SHA: `2e2faa8` (test/q80-five-family-visualization.test.ts — 14 ACs, all failing before implementation)
+Chore-A SHA: `c034acc` (feat(R80 GREEN): 5-family detector visualization + visual identity pass)
+
+### Implementer binding-command attestation (Rule 1 — empirical-command-attestation)
+
+**pnpm exec tsc -p tsconfig.test.json (at chore-A HEAD c034acc):**
+Exit code: 0
+
+**node --test --test-reporter=tap test/*.test.js (at chore-A HEAD c034acc):**
+tests=608 suites=3 pass=594 fail=10 skipped=4
+Process exit: 0
+
+**bash coordination/specs/Q-R80-EMPIRICAL.sh (at HEAD c034acc):**
+```
+── Q-R80-EMPIRICAL.sh @ HEAD=c034acc
+Block 1 PASS: tsc exit 0
+Block 2 PASS: all 14 required artifacts present
+Block 3 PASS: tests=608 suites=3 pass=594 fail=10 skipped=4
+Block 4 PASS: 13 files in diff, all within ALLOWED_SET
+── Q-R80-EMPIRICAL.sh: ALL BLOCKS PASS
+```
+Exit: 0
+
+**git diff 51a20b8 HEAD --name-only (13 files — all within ALLOWED_SET):**
+coordination/MEMORIAL.md, coordination/NEXT-ROLE.md,
+coordination/logs/ROUND-R80-ROUTING.md,
+coordination/specs/Q-R80-EMPIRICAL.sh, coordination/specs/Q-R80-SPEC-AUDIT.md,
+coordination/specs/Q-R80-SPEC.md, demos/demo.html,
+demos/scenarios/clean-baseline.json, demos/scenarios/fdr-multiple-testing.json,
+demos/scenarios/hierarchical-evalue.json, demos/scenarios/sdc-drift.json,
+test/q80-five-family-visualization.test.ts, tools/build-canned-demos.ts
+
+### Spec-deviance disclosures
+
+**TD-1: det-fam-placeholder class retained on B/C/D/E elements in static HTML.**
+Spec § 4.1.5 prescribes removing the class from B/C/D/E hardcoded HTML divs.
+Rationale: AC-R79-4 (`test/q79-dashboard-structure.test.ts:49-52`) explicitly asserts
+`assert.match(html, /det-fam-${fam}[^"]*det-fam-placeholder/)` for each of B/C/D/E.
+Removing the class flips AC-R79-4 from PASS to FAIL, raising # fail to 11 —
+EMPIRICAL.sh Block 3 EXPECTED_FAIL = 10 requires exactly 10 fails.
+The spec's forward-protection audit (§ 8) lists AC-R79-4 as "No [won't flip]" (error
+in spec's prediction, since it only checked AC-R80-12 preservation, not AC-R79-4's
+explicit placeholder-class assertion). The `renderDetectorsPanel` JS path overwrites
+`textContent` regardless of the class, so user-visible behavior is identical.
+CSS rule `.det-fam-placeholder { ... }` preserved in template per spec § 4.1.5.
+This is TACTICAL AUTONOMY: a cosmetic change that preserves system invariants
+(# fail = 10); not an architectural decision. Disclosed per R18 MINOR-1 reinforcement.
+
+### Predicted fail set at chore-A (carry-forward; per § 1.4 + § 1.5 prediction)
+1. AC-R77-14: tools/build-canned-demos.ts in R77 frozen-paths (carry-forward)
+2. AC-R77-17: R77 anti-scope diff regex (carry-forward)
+3. AC-R78-14: R78 anti-scope diff regex (carry-forward)
+4. + 5 additional R77-class carry-forwards = subtotal 8 (R79 close baseline)
+5. AC-R79-14: R79 anti-scope diff flipped at spec-triad commit `542cded`
+6. AC-R79-8: R79 literal-null assertion flipped at GREEN commit `c034acc`
+= total 10 fails ✓
+
+### Inputs for REVIEWER
+
+- `coordination/specs/Q-R80-SPEC.md` — load-bearing ACs (14 total); § 5.3 acknowledged gaps
+- `coordination/specs/Q-R80-SPEC-AUDIT.md` — Architect pre-prediction; probe-run results (§ 7)
+- `coordination/specs/Q-R80-EMPIRICAL.sh` — re-run at HEAD to verify (should be ALL BLOCKS PASS)
+- `tools/build-canned-demos.ts` (chore-A HEAD `c034acc`) — primary implementation
+- `demos/demo.html` + `demos/scenarios/*.json` — regenerated outputs
+- `test/q80-five-family-visualization.test.ts` — RED at `2e2faa8`; GREEN at `c034acc`
+- Spec § 5.3 acknowledged gaps — Reviewer manual inspection requested for:
+  (1) Browser DOM mutation of detectors panel as windowIdx advances (§ 5.3 #1)
+  (2) Family D peakACF return-value range under monotone demo substrate (§ 5.3 #2)
+  (3) CSS variable internal consistency (§ 5.3 #4)
+  (4) @media print content correctness (§ 5.3 #5)
 
 ---
 
