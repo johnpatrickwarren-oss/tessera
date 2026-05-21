@@ -19,6 +19,8 @@
     "coverage": "node tools/coverage-saturation.js",
     "prebuild:detector-envelope": "tsc -p tsconfig.test.json",
     "detector-envelope": "node tools/detector-envelope.js",
+    "prebuild:topology-walk-tuning": "tsc -p tsconfig.test.json",
+    "topology-walk-tuning": "node tools/topology-walk-tuning.js",
     "tier-router": "pnpm exec node scripts/tier-router.js",
     "tier-router:validate": "pnpm exec node scripts/tier-router-validate.js",
     "mu-model-select": "pnpm exec node scripts/mu-model-select.js",
