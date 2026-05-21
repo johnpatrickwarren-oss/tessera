@@ -1,5 +1,5 @@
 CURRENT-ROUND: R75
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
 ROUND-START-SHA: 6002dd6
@@ -3685,3 +3685,108 @@ cd /Users/johnwarren/concord/tessera
 6. **Future operator action:** dedicated design cycle for npm package extract (deferred from R61). To be scheduled at Phase 3 close or Phase 4 dispatch.
 7. **NEW R61 lesson:** Architect spec-emit-time empirical verification — when spec § 0.2 claims a codebase property ("X is true about the import graph"), Architect MUST `grep` the actual files at spec emit, not assert from architectural mental model. R61 had TWO premise-false escalations; that is a Reviewer (R47-class) candidate for cross-project derivation if it recurs at R62+. Currently flagged as 1st-tessera instance.
 8. OQ-Phase3-W3-1 RESOLVED A; W3-2 NEW FORMULATION (engine/ds-integration/ subdirectory; no package); W3-3 RESOLVED Coordinator default A; W3-4 RESOLVED A; W3-5 RESOLVED A.
+
+---
+
+## § R75 Implementer routing block (2026-05-20)
+
+NEXT-ROLE: REVIEWER
+STATUS: READY
+
+### Implementer attestation
+
+- **RED commit SHA:** `6a6689a` — `test(R75 RED): q75-cache-prefix.test.ts — 10 ACs, 7 fail (builder/measurer missing)`
+- **GREEN commit SHA:** `dc86e24` — `feat(R75 GREEN): scripts/build-role-context.ts + measure-cache-effect.ts`
+- **Additional changes commit SHA:** `95519ed` — `feat(R75): run-pipeline.sh integration + CLAUDE-COMMON.md Mode docs + package.json scripts`
+- **Chore-A coordination commit SHA (attested HEAD for Reviewer):** [UPDATED BELOW — see final chore-A commit]
+- **Round-start SHA (anti-scope diff lower bound):** `6002dd6`
+
+### Tactical deviations (TD)
+
+**TD-1:** `process.stdout.end(out)` instead of `process.stdout.write(out); process.exit(0)` in `scripts/build-role-context.ts main()`.
+- Spec prescribed `process.stdout.write(out); process.exit(0)` at § 3.1.
+- Reality: `process.exit(0)` truncates large payloads (>64KB) at the stdio buffer boundary by forcing termination without draining. All three emit modes (prefix/tail/full) exceed 64KB with real CLAUDE-COMMON.md + spec triad content.
+- Fix: `process.stdout.end(out)` flushes the buffer then exits naturally.
+- Equivalent behavior: both write `out` to stdout and terminate; semantics identical for well-behaved stdout consumer.
+
+**TD-2:** Added `require.main === module` guard around `main()` in `scripts/build-role-context.ts`.
+- Spec prescribed `main();` at module level (§ 3.1 last line).
+- Reality: `measure-cache-effect.ts` imports `buildPrefix`/`buildTail` from `build-role-context.ts`. Without the guard, `main()` runs on import and exits with "missing --emit" error.
+- Fix: `if (require.main === module) { main(); }` — standard Node.js/CommonJS module-as-CLI pattern.
+
+**TD-3:** `local measure_out=""` in Delta 3.3.B telemetry block replaced with plain `measure_out=""`.
+- Spec prescribed `local measure_out=""` at § 3.3 Delta B inside `{ ... } >> "$ROUTING_LOG"`.
+- Reality: the routing-log initialization block is at script top level (not inside a function); `local` is invalid outside bash functions and produces an error.
+- Fix: dropped `local` keyword; behavior identical since the variable is used only within the block.
+
+All three TDs are covered by TACTICAL AUTONOMY (§ 6.4 guard rails not triggered: no control-flow construct rewrites; no bash-boolean-semantics changes; no spec-literal substitution; no prefix-construction-logic changes).
+
+### Binding commands (VERBATIM observed output; Rule 1 ACTIVE GATE)
+
+**`pnpm exec tsc -p tsconfig.test.json`:** exit 0, zero diagnostics.
+
+**`pnpm exec node --test --test-reporter=tap test/*.test.js` (chore-A HEAD `95519ed`):**
+```
+# tests 549
+# pass 541
+# fail 5
+# skipped 3
+```
+Process exit: non-zero (fail=5 carry-forward; test runner exits non-zero when fail > 0).
+
+**`bash coordination/specs/Q-R75-EMPIRICAL.sh` (PASS 8 / FAIL 0, exit 0):**
+```
+PASS  Block: round-start-sha-valid
+PASS  Block: tsc-exit-0  (observed tsc exit: 0)
+PASS  Block: node-test-pass-fail-counts  (observed: # tests 549 / # pass 541 / # fail 5 / # skipped 3)
+PASS  Block: builder-determinism
+PASS  Block: builder-prefix-stability-across-roles
+PASS  Block: anti-regression-q73-q74  (q73+q74 exit=0)
+PASS  Block: anti-scope-diff-allowed-set  (observed diff path count: 11)
+PASS  Block: claude-common-reinforced-count-unchanged  (REINFORCED count: 8)
+
+PASS: 8
+FAIL: 0
+```
+
+**`git diff 6002dd6..HEAD --name-only` (11 paths before coordination-chore commit; all in ALLOWED_SET):**
+```
+CLAUDE-COMMON.md
+coordination/MEMORIAL.md
+coordination/NEXT-ROLE.md
+coordination/specs/Q-R75-EMPIRICAL.sh
+coordination/specs/Q-R75-SPEC-AUDIT.md
+coordination/specs/Q-R75-SPEC.md
+package.json
+run-pipeline.sh
+scripts/build-role-context.ts
+scripts/measure-cache-effect.ts
+test/q75-cache-prefix.test.ts
+```
+
+### Anti-scope verification
+
+- `git diff 6002dd6..HEAD --name-only` ⊆ ALLOWED_SET (§ 5.1 verified by Block 7 above).
+- No engine/*, demos/*, tools/* files touched.
+- scripts/tier-router*.ts, scripts/mu-model-select*.ts — NOT touched.
+- CLAUDE-*.md REINFORCEMENTS — NOT modified.
+- CLAUDE-COMMON.md REINFORCED count: 8 (unchanged; Block 8 PASS).
+
+### Inputs for Reviewer (R75)
+
+1. `coordination/specs/Q-R75-SPEC.md` (spec + § 5.2 ACs)
+2. `coordination/specs/Q-R75-SPEC-AUDIT.md` (Architect audit sidecar)
+3. `coordination/specs/Q-R75-EMPIRICAL.sh` (8 blocks, all PASS at this HEAD)
+4. `scripts/build-role-context.ts` + `scripts/measure-cache-effect.ts` (new)
+5. `test/q75-cache-prefix.test.ts` (10 ACs, all PASS)
+6. `run-pipeline.sh` (Delta 3.3.A + 3.3.B modifications)
+7. `CLAUDE-COMMON.md` (Mode docs section added)
+8. `package.json` (2 new script entries)
+9. `coordination/MEMORIAL.md` (this round's CONFIRMATION entries)
+
+### Halt conditions (Reviewer)
+
+1. Any AC in § 5.2 fails at this HEAD → MAJOR finding.
+2. EMPIRICAL.sh Block 7 (anti-scope) fails → MAJOR finding.
+3. CLAUDE-COMMON.md REINFORCED count ≠ 8 → MAJOR finding.
+4. TD-1/TD-2/TD-3 constitute non-TACTICAL-AUTONOMY deviations → MAJOR finding if Reviewer judges (a)–(d) guard rails triggered.
