@@ -1,6 +1,6 @@
 CURRENT-ROUND: R90
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 TIER: full
 
 ---
@@ -226,6 +226,50 @@ Inputs:
 ### Tactical deviations
 
 None. All implementation follows spec § 3 pseudocode verbatim. No spec/reality conflicts encountered; no halt conditions fired.
+
+---
+
+## § R90 REVIEWER routing block (2026-05-21)
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+TIER: full
+
+Inputs:
+- coordination/reviews/REVIEWER-REPORT-R90.md (THIS REVIEWER's report; 14/14 ACs PASS at Reviewer HEAD)
+- coordination/specs/Q-R90-SPEC.md
+- coordination/specs/Q-R90-SPEC-AUDIT.md
+- coordination/specs/Q-R90-EMPIRICAL.sh
+- coordination/MEMORIAL.md (R90 REVIEWER section — CONFIRMATIONs + VIOLATIONs appended)
+
+### Verdict
+
+**0 CRITICAL / 0 MAJOR / 4 MINOR / 3 OBS.** MERGE-READY.
+
+### Binding-command reproduction at Reviewer HEAD (`7e9062b`)
+
+- `bash coordination/specs/Q-R90-EMPIRICAL.sh` → 9 PASS / 0 FAIL, exit 0
+- `node --test --test-reporter=tap test/q90-engine-package-extract.test.js` → tests=14, pass=14, fail=0
+- `node --test --test-reporter=tap test/*.test.js` → tests=724, pass=704, fail=16, skip=4 (fail ∈ [16,17] band)
+- `git diff 65edb85 HEAD --name-only` → 12 paths, all ALLOWED_SET
+- Tarball: 255 entries; no raw .ts; no test/coordination/tools/scripts/demos prefix
+
+### Findings summary
+
+- MINOR-1 (ARCHITECT): Spec § 0 P0.2 off-by-one re-export count (12 claimed; 13 actual at `engine/types/index.ts:20-32`).
+- MINOR-2 (ARCHITECT): Spec § 5.4 acknowledged-gap completeness omits AC-R90-4 exports-enumeration coverage gap (~10 prescribed subpaths not AC-bound) and AC-R90-12 pack:engine no-runtime-verify gap.
+- MINOR-3 (IMPLEMENTER): `.gitignore` delta is 2 lines (comment + rule); spec § 4.2 step 6 prescribed 1 line.
+- MINOR-4 (ARCHITECT): Spec § 0 P0.13 import-count claim (56) does not reproduce at Reviewer HEAD (engine-scoped grep returns 48). Could be grep-command variance; load-bearing claim independently verified.
+- OBS-1: Stray `johnpatrickwarren-oss-tessera-0.1.0-pre.tgz` at repo root NOT gitignored (developer artifact; not R90 deliverable).
+- OBS-2: Phase numbering inconsistency — R90 frames as Phase 5 SLICE 3; PRD AC-P8 + FR-D1 say "DEFERRED to Phase 4 / dedicated design cycle".
+- OBS-3: `pack:engine` script not exercised by any R90 AC.
+
+### Notes for Memorial-Updater
+
+- 4 MINOR findings → 4 VIOLATION entries to append (per CLAUDE-REVIEWER REINFORCED 2026-05-17 + 2026-05-19 role-attribution lesson).
+- Role attributions per finding: MINOR-1 ARCHITECT, MINOR-2 ARCHITECT, MINOR-3 IMPLEMENTER, MINOR-4 ARCHITECT.
+- 0 CRITICAL → strict-routing rule (CLAUDE-REVIEWER REINFORCED 2026-05-19) → MERGE-READY clean. No operator-decision flag required.
+- Cross-project rule derivation: 3 MINORs are ARCHITECT-side empirical-baseline drift (P0 row count drift + § 5.4 gap-enumeration incompleteness). Already covered by `spec-literal-count-not-verified` rule (R40 ARCHITECT precedent + R44/R88 verbatim-attestation discipline). No new rule needed at this round.
 
 ### Anti-scope verification
 
