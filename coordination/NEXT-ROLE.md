@@ -9,7 +9,8 @@ TIER: full
 
 ### Implementer attestation
 
-- **Chore-A HEAD SHA:** `5024b7f1159e6327fe6f92c414357dbb7661dfd5`
+- **Chore-A implementation commit SHA:** `5024b7f1159e6327fe6f92c414357dbb7661dfd5`
+- **Chore-A coordination commit SHA (attested HEAD for Reviewer):** `7fbac4cafb56e67fd2b37bf5ceae8d1499e31ec5`
 - **Round-start SHA (anti-scope diff lower bound):** `bac83e4` (spec-triad commit; read from Architect routing block; NOT git rev-parse HEAD per R70 MINOR-1)
 - **RED commit SHA:** `3baad60` — `red(R74): q74 mu-haiku + reviewer-scope stub fails — assert.fail at AC-R74-1..22`
 - **GREEN commit SHA:** `5024b7f` — `feat(R74): mu-model-select selector + run-pipeline.sh integration + CLAUDE-REVIEWER.md Mode docs`
