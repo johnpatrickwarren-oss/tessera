@@ -163,6 +163,20 @@ See `coordination/coverage/R72-saturation-matrix.md` for the human-readable summ
 | hierarchical-evalue | 12 / 20 | ≥ 95% (and ≥ 80% fleet-fires-before-per-shard) |
 | topology-spanning-common-mode | 16 / 20 | ≥ 95% |
 
+### Detection envelope (R77)
+
+Tessera R77 characterizes the per-shard detector's detection probability across drift magnitude × window count × α threshold × detector family (Family A betting vs Family C ONS comparison). Generate the envelope matrix with:
+
+```bash
+pnpm detector-envelope
+```
+
+See `coordination/coverage/R77-detection-envelope.md` for the human-readable summary with detection curves; `coordination/coverage/R77-detection-envelope-matrix.json` is the machine-readable data (504 cells, 2520 trials).
+
+At default settings (α=0.005, window_count=200, Family A): **≈100% detection for all drift magnitudes from 0.050 to 0.375**. The transitional detection band is at window_count=30 with magnitude < 0.10. Family A outperforms Family C in the short-window/low-magnitude regime (the boundary cells where tuning choices matter most).
+
+Operator tuning guidance: see `scripts/detector-tuning-recommendation.md`.
+
 ## License
 
 Apache 2.0. See `LICENSE`.

@@ -17,6 +17,8 @@
     "build:demos": "node tools/build-canned-demos.js",
     "prebuild:coverage": "tsc -p tsconfig.test.json",
     "coverage": "node tools/coverage-saturation.js",
+    "prebuild:detector-envelope": "tsc -p tsconfig.test.json",
+    "detector-envelope": "node tools/detector-envelope.js",
     "tier-router": "pnpm exec node scripts/tier-router.js",
     "tier-router:validate": "pnpm exec node scripts/tier-router-validate.js",
     "mu-model-select": "pnpm exec node scripts/mu-model-select.js",
