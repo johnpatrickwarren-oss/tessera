@@ -3790,3 +3790,83 @@ test/q75-cache-prefix.test.ts
 2. EMPIRICAL.sh Block 7 (anti-scope) fails → MAJOR finding.
 3. CLAUDE-COMMON.md REINFORCED count ≠ 8 → MAJOR finding.
 4. TD-1/TD-2/TD-3 constitute non-TACTICAL-AUTONOMY deviations → MAJOR finding if Reviewer judges (a)–(d) guard rails triggered.
+
+## § R75 Reviewer routing block (2026-05-20)
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+
+### Reviewer attestation
+
+- **Reviewer HEAD:** `4fe6476` (chore(R75 IMPLEMENTER): record chore-A coordination SHA in routing block)
+- **Round-start SHA:** `6002dd6`
+- **Report:** `coordination/reviews/REVIEWER-REPORT-R75.md`
+- **Findings:** 0 CRITICAL, 0 MAJOR, 3 MINOR (all ARCHITECT-attributable spec self-application-gate defects; Implementer correctly identified + fixed each), 4 OBS
+- **AC pass rate:** 15 / 15 PASS (all R75 ACs verified)
+
+### Inputs for Memorial Updater (R75)
+
+1. `coordination/reviews/REVIEWER-REPORT-R75.md` (this report)
+2. `coordination/MEMORIAL.md` § R75 entries (Architect + Implementer + Reviewer)
+3. `coordination/specs/Q-R75-SPEC.md` + Q-R75-SPEC-AUDIT.md + Q-R75-EMPIRICAL.sh (Architect deliverables)
+4. `coordination/NEXT-ROLE.md` § R75 routing blocks (Architect + Implementer + this Reviewer block + § R75 Round-scope directive)
+5. `~/.claude/CROSS-PROJECT-MEMORIAL.md` Reinforcement-rules sections for Rule 7 threshold evaluation
+6. Reviewer-flagged Rule 7 candidate: R74 MINOR-5 spec-pseudocode-fails-verbatim class crossed 3-instance threshold this round (3 simultaneous instances: TD-1 stdout-truncation, TD-2 main-fire-on-import, TD-3 local-outside-function). Memorial Updater evaluates whether to derive a cross-project reinforcement rule.
+
+### Halt conditions (Memorial Updater)
+
+1. CROSS-PROJECT-MEMORIAL.md updates exceed scope (per role boundary: append, do not rewrite existing rules).
+2. Rule 7 cross-project propagation evaluation requires operator decision (threshold crossed but cross-project applicability uncertain) → ESCALATE rather than auto-derive.
+3. Memorial sharding (per CLAUDE-COMMON.md "Memorial sharding (R42 onward)") — active file does not need rolling at R75 (Phase 3 still open per inferred phase-shard index).
+
+### Routing notice
+
+Per CLAUDE-REVIEWER.md routing rule "MAJOR or below → STATUS: MERGE-READY", this round routes to MEMORIAL-UPDATER. No CRITICAL findings; the 3 MINORs are spec defects already self-corrected by the Implementer with full disclosure, not implementation bugs.
+
+## § R75 Memorial-Updater routing block (2026-05-20)
+
+NEXT-ROLE: (operator decision; R76 or other phase progression)
+STATUS: ROUND-COMPLETE
+
+### Memorial-Updater attestation
+
+- **Round-start SHA:** `6002dd6`
+- **Implementer chore-A SHA:** `c6f33a2`
+- **Reviewer HEAD:** `4fe6476`
+- **Discipline evaluation:** pre-emit-grilling | halt-discipline | right-reasons-audit | role-boundary | anti-scope | tdd-discipline | context-isolation (all 7 disciplines evaluated)
+- **Violations:** 3 MINOR (all ARCHITECT pre-emit-grilling § 9.6 self-application-gate defects); 0 MAJOR; 0 CRITICAL
+- **Confirmations:** 6 IMPLEMENTER + 5 REVIEWER per MEMORIAL.md entries
+- **Reinforcements added:** 3 new REINFORCED lines to CLAUDE-ARCHITECT.md (2026-05-20)
+- **Cross-project threshold evaluation:** 4th tessera instance of spec-pseudocode-fails-verbatim class (Rule 7 threshold crossed); new cross-project memory entries added
+- **Summary:** `coordination/logs/ROUND-R75-SUMMARY.md` (written by Memorial-Updater at R75 close)
+
+### Violations summary for operator review
+
+All 3 MINOR findings are ARCHITECT pre-emit-grilling gate failures where spec § 9.6 self-application did not walk code behavior under realistic conditions:
+
+1. **MINOR-1 (stdout truncation at 64KB):** process.stdout.write() empirically truncates at 65,536 bytes; R75 prefix is 177KB; ACs would fail/false-PASS verbatim. Implementer fixed with process.stdout.end(). Reproducer: `node -e "process.stdout.write('x'.repeat(500000)); process.exit(0);" | wc -c` = 65536.
+
+2. **MINOR-2 (cross-module main fire):** Bare main() in build-role-context + import in measure-cache-effect would execute main() at import-time with wrong argv. AC-R75-8 would FAIL verbatim. Implementer fixed with `if (require.main === module)` guard.
+
+3. **MINOR-3 (bash keyword out of context):** local keyword prescribed at script top level (invalid outside function). Script would error on load. Implementer fixed by dropping local.
+
+All fixes verified by Reviewer. No Implementer or Reviewer discipline violations. No MAJOR or CRITICAL findings. Implementer TDD discipline honored (RED separate from GREEN). Anti-scope clean (11 paths, all ALLOWED_SET members).
+
+### Inputs consumed
+
+- `coordination/specs/Q-R75-SPEC.md` (1504 lines; full)
+- `coordination/reviews/REVIEWER-REPORT-R75.md` (256 lines; full)
+- `coordination/MEMORIAL.md` (R75 entries; verified via tail)
+- `/Users/johnwarren/.claude/CROSS-PROJECT-MEMORIAL.md` (Reviewer-relevant sections)
+- `coordination/NEXT-ROLE.md` (Architect + Implementer + Reviewer routing blocks)
+- No diagnostics/ (none present for R75)
+
+### Outputs written
+
+- `coordination/MEMORIAL.md` (appended 6 Implementer CONFIRMATION + 5 Reviewer CONFIRMATION + 3 Reviewer VIOLATION entries)
+- `/Users/johnwarren/.claude/CROSS-PROJECT-MEMORIAL.md` (appended 8 tessera entries with [tessera] prefix)
+- `coordination/logs/ROUND-R75-SUMMARY.md` (full summary per § 5 deliverable)
+- `CLAUDE-ARCHITECT.md` (appended 3 REINFORCED lines for spec-pseudocode gate defects)
+- `coordination/NEXT-ROLE.md` (this routing block + STATUS update)
+
+**All deliverables complete. R75 round closed.**
