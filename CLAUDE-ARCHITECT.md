@@ -182,7 +182,7 @@ All unresolved decisions → open questions in the spec.
 #   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
 #   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
 
-# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 12 sub-variants observed at Tessera)
+# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 14 sub-variants observed at Tessera)
 #
 #   Fixture accumulation adequacy (R07 MAJOR-1): When grilling catches that an e-process or
 #     statistical-detector AC's fixture needs N windows of accumulation to cross a detection
@@ -375,6 +375,39 @@ All unresolved decisions → open questions in the spec.
 #     that. Detected tessera R77 MINOR-4 (AC-R77-9 at (mag=0.05, win=30, α=0.005, family-a):
 #     predicted ~0.0, actual 3/5=0.60, threshold ≤0.60, zero-margin pass; first PRNG-path
 #     change would flip without engine regression).
+#
+#   Spec-prescribed document-mutation instruction must verify target document state (R81 MAJOR-3):
+#     When a spec prescribes an additive action on an existing human-readable document (e.g.,
+#     "append a '## Quick demo' section to README.md"), the Architect MUST read that document's
+#     current state at spec-emit time to check for structural collisions — specifically, whether
+#     a section with that exact heading already exists. Prescribing "append after any existing
+#     section" without verifying the target document produces a duplicate-heading defect when the
+#     document already carries the same section name at a different location. Procedure: for any
+#     spec § 2.x prescription that adds a named heading to an existing document, grep the document
+#     for the exact heading string before finalizing the prescription: `grep -n "^## Quick demo"
+#     README.md`. If an existing section is found, the spec must prescribe an EXTEND or MERGE
+#     action (not a blind append), or flag the structural collision as a halt condition. Gate at
+#     spec § 9.4 ("Implementer can act without guessing"): could the Implementer follow this
+#     instruction verbatim without creating a document defect? If the target document's existing
+#     structure could produce a defect, name it and resolve it in the spec. Detected tessera R81
+#     MAJOR-3 (Reviewer; README.md already had `## Quick demo` at line 73; spec § 2.7 "append
+#     after existing section" created duplicate heading at line 194; Implementer followed spec
+#     verbatim without halting on the collision).
+#
+#   AC structural-boundary verification for sectioned documents (R81 MINOR-2): When an AC
+#     prescribes that a structured document (with sections separated by `## ` headings) contains
+#     specific content, the AC's regex must bind that content to the INTENDED section, not match
+#     globally across the document. A global-presence match (`README.md matches /scrubber/i`)
+#     passes vacuously when the scrubber text lives in a DIFFERENT same-named section than the one
+#     the spec prescribes. Procedure: for each AC that checks README.md or any markdown file with
+#     multiple `## ` headings, the regex must (a) locate the intended section by its exact heading,
+#     and (b) assert the required content appears within that section's body (before the next `## `
+#     heading). Pattern: extract the section with a bounded regex like
+#     `/^## Quick demo\n([\s\S]*?)(?=\n## |\z)/m` and assert the target pattern appears in the
+#     captured body. Gate at spec § 9.6 self-application: "if this document had two same-named
+#     sections, would the AC correctly FAIL when the target content appears only in the wrong one?"
+#     If no, the AC is too loose. Detected tessera R81 MINOR-2 (Architect; AC-R81-7 used three
+#     global matches; passed vacuously across duplicate `## Quick demo` headings).
 
 # REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
 #   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include

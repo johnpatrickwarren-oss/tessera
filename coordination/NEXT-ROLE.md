@@ -1,6 +1,6 @@
 CURRENT-ROUND: R81
-NEXT-ROLE: IMPLEMENTER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 TIER: full
 
 ---
@@ -5527,4 +5527,52 @@ Per spec § 5.3 acknowledged AC gaps, the Reviewer is asked to perform these man
 4. **CSS transition feel**: In SDC-drift scenario, watch Family A row status text + color when shard-04 crosses threshold (~window 23). Expected: ≈200ms smooth color fade (not instantaneous).
 5. **`body.scrubbing` class**: During drag, inspect `document.body.classList` via devtools; should contain `scrubbing` while dragging, absent on release.
 6. **DEMO-SCRIPT.md narrative quality**: Read `demos/DEMO-SCRIPT.md` end-to-end; verify per-scenario claims (engine behavior, threshold crossings, methodology) match what the dashboard actually shows under each scenario.
+
+---
+
+## § R81 Reviewer routing block (2026-05-21)
+
+**STATUS: MERGE-READY**
+
+**NEXT-ROLE: MEMORIAL-UPDATER**
+
+### Reviewer findings summary
+
+- 0 CRITICAL
+- 3 MAJOR
+  - MAJOR-1: DEMO-SCRIPT.md:115 cites non-existent engine path `engine/ds-integration/event-feed.ts` (actual: `engine/events/event-feed.ts` OR `engine/ds-integration/event-consumer.ts`)
+  - MAJOR-2: DEMO-SCRIPT.md:114 fabricates `cluster_event_id: EV-01` — actual scenario JSON has `event_id: evt-demo-firmware-push`
+  - MAJOR-3: README.md has duplicate `## Quick demo` headings at lines 73 + 194
+- 3 MINOR
+  - MINOR-1: DEMO-SCRIPT.md:124 mislocates `correlational_not_causal: true` as scenario-JSON; actual location is `engine/topology/common-mode-attribution.ts`
+  - MINOR-2: AC-R81-7 regex vacuous-pass enabled MAJOR-3 (Architect AC-design defect)
+  - MINOR-3: Implementer attestation incorrectly claims `renderAuditForWindow` still in IIFE; actual = zero matches (renamed to `rebuildAuditUpToCurrentWindow`)
+- 4 OBS (acknowledged design choices + audit-trail completeness)
+
+### Empirical re-run at Reviewer HEAD `438a218`
+
+```
+── Q-R81-EMPIRICAL.sh @ HEAD=438a218
+Block 1 PASS: tsc exit 0
+Block 2 PASS: all 15 required artifacts present
+Block 3 PASS: tests=622 suites=3 pass=607 fail=11 skipped=4
+Block 4 PASS: 11 files in diff, all within ALLOWED_SET
+── Q-R81-EMPIRICAL.sh: ALL BLOCKS PASS
+```
+
+All 14 AC-R81-* tests PASS. Implicit chore-A attestation (encode-actual-results-verbatim) verified.
+
+### Inputs for Memorial-Updater
+
+- `coordination/reviews/REVIEWER-REPORT-R81.md` (this round's Reviewer report; created at this commit)
+- `coordination/specs/Q-R81-SPEC.md` + `Q-R81-SPEC-AUDIT.md`
+- `coordination/NEXT-ROLE.md` (Implementer + Reviewer routing blocks)
+- `coordination/MEMORIAL.md` (active phase shard)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` (cross-project lessons)
+
+### Memorial-Updater carry-forward items
+
+1. **Cross-project promotion candidate (deferred from R80 close):** evaluate `haiku-mu-process-discipline-miss` 3rd-instance promotion to `~/.claude/CROSS-PROJECT-MEMORIAL.md` per Rule 5 threshold, or defer to Phase 4 close.
+2. **Per CLAUDE-REVIEWER.md REINFORCED 2026-05-17:** append VIOLATION entries to MEMORIAL.md for the 6 MINOR-and-above findings (MAJOR-1/2/3 + MINOR-1/2/3) with [role] = COMMITTING role per REINFORCED 2026-05-19 (NOT detecting role).
+3. **Reinforcement-rule candidates for CLAUDE-IMPLEMENTER.md / CLAUDE-ARCHITECT.md:** consider new reinforcement on (a) narrative-content empirical-verification (DEMO-SCRIPT-style files must grep-verify engine paths + literal values before commit), and (b) README spec-application cite-then-walk (Architect must read existing README structure for heading collisions before prescribing append).
 

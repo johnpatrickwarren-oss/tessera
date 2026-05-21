@@ -776,7 +776,7 @@ with a clear commit message.
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
 
-# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 10 sub-variants observed at Tessera)
+# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 12 sub-variants observed at Tessera)
 #
 #   Selective-audit-overreach (R41 MAJOR-1): When an audit empirically checks N of M files and
 #     the AC requires "all M files" verified, the delivered artifact must scope its claim to
@@ -912,6 +912,34 @@ with a clear commit message.
 #     No AC binding required; disclosure alone is sufficient. This prevents future readers from
 #     either (a) incorrectly assuming the branch is exercised, or (b) deleting it without
 #     understanding its intent. Detected tessera R74 MINOR-3 (Reviewer-1; run-pipeline.sh:235-236).
+#
+#   Narrative content must cite verbatim field-values from actual source data (R81 MAJOR-2):
+#     When authoring a demo script, dashboard reasoning string, or any published narrative
+#     that names a specific JSON field name or field value from a scenario file, read the actual
+#     scenario file and copy field names and values verbatim. Do NOT invent plausible-sounding
+#     synthetic identifiers (`cluster_event_id: EV-01`) when the actual data uses different
+#     field names and different values (`event_id: evt-demo-firmware-push`). A fabricated literal
+#     that contradicts the actual data is empirically falsifiable by any audience member who opens
+#     the scenario JSON. Procedure: before naming any JSON field or value in narrative text, run
+#     `cat demos/scenarios/<scenario>.json | grep -E "event_id|<field>"` and copy the actual output.
+#     This is the encode-actual-results-verbatim discipline applied to narrative content. Detected
+#     tessera R81 MAJOR-2 (Implementer; DEMO-SCRIPT.md:114 fabricated `cluster_event_id: EV-01`;
+#     actual event-conditional.json: `"event_id": "evt-demo-firmware-push"` with no
+#     `cluster_event_id` field).
+#
+#   Coordination-artifact source-state claims must be verified by command output (R81 MINOR-3):
+#     When a NEXT-ROLE.md attestation describes the state of an implementation detail (e.g.,
+#     "the function name `renderAuditForWindow` still appears in the IIFE"), that claim is a
+#     factual assertion about the current source state and MUST be verified by running a command
+#     (e.g., `grep -c renderAuditForWindow demos/demo.html tools/build-canned-demos.ts`) before
+#     writing it. Implementation details change during coding; memory of an earlier state
+#     misrepresents the committed artifact. The encode-actual-results-verbatim discipline (Rule 6)
+#     applies to ALL cited field values in coordination-artifact prose, not only to binding-command
+#     numeric summaries. Procedure: for each factual claim in NEXT-ROLE.md attestation about source
+#     content (function exists/renamed, class present, variable appears), run the verification
+#     command and record the actual output. Detected tessera R81 MINOR-3 (Implementer; NEXT-ROLE.md
+#     claimed `renderAuditForWindow` still appears; function was renamed to
+#     `rebuildAuditUpToCurrentWindow`; grep returns 0 matches in both files).
 
 # REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 6 sub-variants observed at Tessera)
 #
@@ -1019,7 +1047,7 @@ with a clear commit message.
 #   block at line 78; codebase convention violated per sibling q65 test file which groups
 #   imports at top).
 
-# REINFORCED — IMPLEMENTER-DOC-ACCURACY (composite; 2 sub-variants at Tessera)
+# REINFORCED — IMPLEMENTER-DOC-ACCURACY (composite; 4 sub-variants at Tessera)
 #
 #   Cite-with-counter-example-suppression in empirical doc prose (R77 MINOR-1): When filling
 #     in an empirical tuning recommendation section by reading the matrix (per spec [Implementer
@@ -1044,6 +1072,31 @@ with a clear commit message.
 #     ask "does every verb in this docstring match what the code actually does?" 'overlay',
 #     'merge', 'combine' all imply a different visual structure from 'separate rows'. Detected
 #     tessera R77 MINOR-3.
+#
+#   Narrative-empirical-verification: grep engine paths before citing them in docs (R81 MAJOR-1):
+#     When authoring any publicly-facing document (DEMO-SCRIPT.md, README, generated HTML,
+#     dashboard reasoning strings) that names a specific engine file path (e.g.,
+#     `engine/ds-integration/event-feed.ts`), run `ls <directory>/` or `find engine/ -name
+#     <file>` BEFORE committing that citation. A non-existent path in a live demo script is
+#     empirically falsifiable in front of the audience. The R71 MAJOR-1/2 reinforcement
+#     (pre-authored narrative claims MUST match the test surface) applies equally to paths
+#     originating from Architect spec placeholders: spec placeholder text is a STARTING POINT,
+#     not a verified fact — the Implementer is responsible for independently verifying every
+#     engine-path citation before committing narrative content. Procedure: for each engine path
+#     cited in a narrative document, `ls $(dirname <path>)` and confirm the file appears. If the
+#     spec's placeholder named the wrong path, fix it and record the deviation. Detected tessera
+#     R81 MAJOR-1 (Implementer; DEMO-SCRIPT.md:115 cited `engine/ds-integration/event-feed.ts`;
+#     actual directory has no such file; correct path is `engine/events/event-feed.ts`).
+#
+#   Narrative-location-accuracy: verify WHERE a field exists, not just THAT it exists (R81 MINOR-1):
+#     When authoring narrative text that cites a specific engine field or flag (e.g.,
+#     `correlational_not_causal: true`), verify BOTH that the field exists AND where it lives.
+#     "This field is in the scenario JSON" is a location claim, not just an existence claim.
+#     Procedure: `grep -r "correlational_not_causal" demos/ engine/` before writing the
+#     location claim; read which files the grep returns and use the correct location in the
+#     narrative. Detected tessera R81 MINOR-1 (Implementer; DEMO-SCRIPT.md:124 claimed
+#     `correlational_not_causal: true` is "in the scenario JSON"; field exists only in
+#     `engine/topology/common-mode-attribution.ts` output shape, not in any *.json file).
 
 # REINFORCED 2026-05-20 — Memorial attestation must reflect actual observed delta, not editorial
 #   abstraction. When implementation deviates from spec pseudocode (even functionally inert
