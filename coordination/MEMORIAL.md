@@ -2305,3 +2305,13 @@ CONFIRMATION: reinforcement-consolidation-composites-updated | R81 MU: all 4 R81
 
 [tessera] CONFIRMATION: anti-scope-allowed-set-forward-coverage | R82 ARCHITECT: spec § 3.2 ALLOWED_SET regex SHA-pinned to `5c3e0d9`; anchored `^...$` per R44/R46 discriminating-regex reinforcement; forward-protective entries `coordination/diagnostics/DIAGNOSTIC-R[0-9]+-*.md` and `coordination/logs/ROUND-R[0-9]+-(SUMMARY|ROUTING).md` use R-number wildcards so future round artifacts don't retroactively flip AC-R82-14. R81 AC-R81-14 forward-protection flip predicted at § 1.4 (R81 ALLOWED regex doesn't include R82-specific paths). | R82 | ARCHITECT
 
+
+## R82 IMPLEMENTER entries (2026-05-21)
+
+[tessera] CONFIRMATION: TDD-red-commit-git-verifiable | R82 IMPLEMENTER: RED commit `59e5355` landed before any GREEN implementation. All 14 ACs had `assert.fail` stubs; test/q82-engine-browser-bundle.test.ts compiled cleanly (tsc exit 0). RED commit is git-verifiable (git-verifiable-RED-commit-required reinforcement; R23 MINOR-1 + R77 MAJOR-1). | R82 | IMPLEMENTER
+
+[tessera] CONFIRMATION: pure-js-sha256-fips-verified | R82 IMPLEMENTER: pureJsSha256 passes all 3 FIPS 180-4 test vectors — empty string → e3b0c44..., "abc" → ba7816bf..., 56-byte multi-block → 248d6a61... — byte-identical with node:crypto. AC-R82-7 passes 14/14 in standalone run. Web Crypto adapter in topology-overlay.ts correctly falls back to pureJsSha256 when node:crypto unavailable. | R82 | IMPLEMENTER
+
+[tessera] CONFIRMATION: esbuild-bundle-structural-ACs | R82 IMPLEMENTER: demos/engine-bundle.mjs generated at 58,291 bytes (within spec § 1.4 band [35,000–80,000]); contains required exports (computeSnapshotHash, pureJsSha256, StaticTopologySource, TopologyEnricher); excludes banned ds-integration symbols; excludes polyfill markers; idempotent across two runs (AC-R82-11). AC-R82-1 through AC-R82-12 all pass in standalone q82 test. | R82 | IMPLEMENTER
+
+[tessera] VIOLATION: halt-discipline-unpredicted-test-failures | R82 IMPLEMENTER: full test suite at chore-A state shows fail=14, not EXPECTED_FAIL=12. Two unpredicted failures: (1) Q1 AC-7 — topology-overlay.ts is vendored-at-pin against ../deploysignal; R82 modification breaks byte-identity. Architect did not predict this flip. (2) AC-R71-3 — buildAllCannedDemos() in q71 test regenerates demo.html from HTML_TEMPLATE_FOOTER, overwriting manually-added smoke block; fixing requires tools/build-canned-demos.ts (NOT in ALLOWED_SET). Both are halt conditions per spec § 6.1 trigger 3 (fail ≠ 12) and CLAUDE-IMPLEMENTER.md halt condition (b) (spec/reality conflict requires ALLOWED_SET change). DIAGNOSTIC written at coordination/diagnostics/DIAGNOSTIC-R82-unpredicted-failures.md. STATUS: ESCALATE set in NEXT-ROLE.md. | R82 | IMPLEMENTER

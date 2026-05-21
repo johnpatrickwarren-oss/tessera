@@ -1,6 +1,6 @@
 CURRENT-ROUND: R82
 NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+STATUS: ESCALATE
 TIER: full
 
 ---
@@ -116,6 +116,50 @@ ALLOWED modifications:
 cd /Users/johnwarren/concord/tessera
 ./run-pipeline.sh --round R82 --tier full
 ```
+
+---
+
+## § R82 IMPLEMENTER routing block — STATUS: ESCALATE (2026-05-21)
+
+**Routing:** NEXT-ROLE: ARCHITECT | STATUS: ESCALATE
+
+**Operator note:** This ESCALATE is distinct from the Architect's prior ESCALATE (OQ-R82-1: esbuild dep). The operator authorized Option A (esbuild) and dispatched the Implementer. The Implementer has completed all R82 deliverables EXCEPT the demo.html smoke block, which cannot persist due to the `buildAllCannedDemos()` issue below.
+
+### Implementer completed deliverables (all passing in isolation)
+
+- `tools/build-browser-bundle.ts` — NEW; esbuild API; 58,291 byte bundle at `demos/engine-bundle.mjs`
+- `engine/topology-overlay.ts` — MODIFIED; Web Crypto adapter + pureJsSha256 (FIPS 180-4)
+- `demos/engine-bundle.mjs` — NEW (gitignored build artifact)
+- `package.json` — MODIFIED (esbuild ^0.28.0 devDep + build:browser script)
+- `pnpm-lock.yaml` — refreshed
+- `.gitignore` — MODIFIED (engine-bundle.mjs + pnpm-workspace.yaml entries)
+- `test/q82-engine-browser-bundle.test.ts` — NEW (14 ACs; RED commit `59e5355`)
+- Standalone q82 test result: 14/14 PASS when run alone
+
+### Two unpredicted failures — halt triggered (spec § 6.1 trigger 3)
+
+**Halt trigger:** TAP `# fail` ≠ EXPECTED_FAIL=12 at chore-A state.
+
+Observed full-suite result at chore-A: tests=636, pass=618, fail=14, skipped=4.
+
+**Failure 1 — Q1 AC-7 (test 19): "every vendored-at-pin file is byte-identical to source modulo header"**
+Root: `test/q01-no-at-pin-deltas.test.ts` AT_PIN_FILES includes `engine/topology-overlay.ts`. R82 modifies this file (Web Crypto adapter). Modulo-header byte-identity with `../deploysignal/engine/topology-overlay.ts` is broken. NOT in Architect's predicted carry-forward 11; Architect did not predict this flip.
+
+**Failure 2 — AC-R71-3 (test ~88): "buildAllCannedDemos is idempotent (byte-identical re-run)"**
+Root: `test/q71-demo-dashboard.test.ts` AC-R71-3 calls `buildAllCannedDemos()` which regenerates `demos/demo.html` from `HTML_TEMPLATE_HEAD + data + HTML_TEMPLATE_FOOTER` (tools/build-canned-demos.ts line 1906). The manually-added smoke block (before `</body>`) is overwritten. AC-R82-9 then also fails when q71 runs before q82 in the full suite. Fixing requires modifying `tools/build-canned-demos.ts` (NOT in ALLOWED_SET).
+
+### Tactical deviations
+
+- **TD-1:** esbuild installed as ^0.28.0 (latest) vs spec-prescribed ^0.24.0. API surface used is backward-compatible.
+- **TD-2:** AC-R82-5 tests discriminating property (no static import + `return _sha256Hex(canonical)`) rather than "`createHash` appears 0 times" — because spec § 4.1 constraint contradicts spec § 2.1 mechanism which prescribes `nc.createHash()` inside `_sha256Hex`.
+- **TD-3:** AC-R82-11 uses `node tools/build-browser-bundle.js` directly (not `pnpm exec node`) to match project tools/ convention.
+- **TD-4:** `pnpm-workspace.yaml` (gitignored) added with `allowBuilds: esbuild: true` to satisfy pnpm v11's security model. This file is untracked and does NOT appear in `git diff --name-only`.
+
+### DIAGNOSTIC
+
+See `coordination/diagnostics/DIAGNOSTIC-R82-unpredicted-failures.md` for bounded options A/B/C and implementation paths.
+
+**Recommended:** Option A — amend ALLOWED_SET to include `tools/build-canned-demos.ts` and `test/q01-no-at-pin-deltas.test.ts`; EXPECTED_FAIL stays 12.
 
 ---
 
