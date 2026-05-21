@@ -1,6 +1,6 @@
 CURRENT-ROUND: R85
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
 
 ---
@@ -6872,3 +6872,84 @@ MAJOR-1 is audit-trail-correctness (spec body diverges from test file post-ESCAL
 - **Option B:** Fold into R85 spec-emission audit; document as known carry-forward.
 
 No operator-blocking issue; this is a discipline / audit-trail clean-up. MU may flag for operator attention; Reviewer routes MERGE-READY per routing rule.
+
+---
+
+## § R85 ARCHITECT routing block (spec triad emitted) (2026-05-21)
+
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
+Inputs:
+  - coordination/specs/Q-R85-SPEC.md
+  - coordination/specs/Q-R85-SPEC-AUDIT.md
+  - coordination/specs/Q-R85-EMPIRICAL.sh
+
+### Spec triad commit SHA: 225e860 (pre-chore-A per R21 ARCH MINOR-1)
+
+### Round-start SHA: f737877
+
+### Observed empirical premise (Architect pre-route)
+
+- `bash coordination/specs/Q-R84-EMPIRICAL.sh` exit: **0** (15/15 sub-checks PASS; baseline preserved)
+- `bash coordination/specs/Q-R85-EMPIRICAL.sh` at round-start: **17 FAIL / 4 PASS** (expected — R85 deliverables don't exist yet; Block 1 typecheck + Block 5 anti-scope diff + Block 4 skipped-count all PASS; Block 2/3/4 fail as predicted; will all PASS post-Implementer GREEN)
+- Baseline TAP counts at round-start: tests=669 / pass=650 / fail=15 / skipped=4
+- R84 btnRun handler char size: 3133; first inner `});` at ~1563 chars; R85 additive edits keep first `});` under 1850 chars (well under 3000-char regex bound — AC-R84-8/10/11 continue to pass; § 8.10 walk in Q-R85-SPEC.md)
+
+### Architect picks summary (§ 1.12 of spec)
+
+| Choice | Pick |
+|---|---|
+| Mode state | separate `currentMode` (not controlState field) |
+| Toggle UI | radio group inside `<fieldset>` |
+| Per-mode disable | hybrid body[data-mode] CSS + element.disabled JS |
+| Loading spinner | `#engine-loading-indicator` + CSS @keyframes tessera-spin |
+| Run-status | `#engine-run-status` with 5-stage updateRunStatus(reset/running/complete/error/cancelled) |
+| DEMO-SCRIPT ToC | `## Contents` heading at top with anchor links |
+| README addition | one paragraph inside existing `### Browser dashboard` subsection |
+| CROSS-PROJECT-MEMORIAL append | NEW top-level section at END OF FILE (matches R44/R45/R46 per-round pattern) |
+| AC regex discipline | ZERO `{0,N}?` char-bounded quantifiers (self-application of the rule R85 promotes) |
+
+### Predicted at R85 chore-A (binding-command attestation; Rule 1 sub-class)
+
+| Observable | Predicted |
+|---|---|
+| `pnpm exec tsc -p tsconfig.test.json` exit | 0 (strict) |
+| `pnpm exec node --test --test-reporter=tap test/*.test.js` process exit | 1 (strict) |
+| TAP `# tests` | 689 (strict; R84 close 669 + 20 new) |
+| TAP `# pass` | 669 (band [668, 670]) |
+| TAP `# fail` | 16 (strict; R84 close 15 + AC-R84-16 forward-protection flip) |
+| TAP `# skipped` | 4 (strict) |
+| `bash Q-R85-EMPIRICAL.sh` exit | 0 (strict; all 5 blocks PASS) |
+| `git diff f737877 HEAD --name-only` line count | 9-14 (band) |
+| `demos/scenarios/*.json` byte-identity vs round-start | preserved (strict; halt 9) |
+| `~/.claude/CROSS-PROJECT-MEMORIAL.md` line delta | +~80 lines |
+
+### Halt conditions (14 enumerated in spec § 6.1)
+
+Highlights:
+- Halt 3: # fail ≠ 16 OR # pass outside [668, 670] → DIAGNOSTIC + ESCALATE (no silent EMPIRICAL.sh amendment per R79 MAJOR-1)
+- Halt 5: Any `{0,N}?` char-bounded regex appears in AC code → HALT (the very rule R85 promotes)
+- Halt 13: R84 btnRun handler additive edits push first inner `});` past 3000 chars from anchor → HALT + ESCALATE; pre-commit verify by re-running Q-R84-EMPIRICAL.sh
+
+### Cross-project disciplines applied UPFRONT (all 7 rules)
+
+- Rule 1 (false-compliance / empirical-command-attestation): EMPIRICAL.sh uses --test-reporter=tap; observed values cited verbatim
+- Rule 2 (branch-binding-coverage-gate): every R85 surface link has at least one binding AC (§ 5)
+- Rule 3 (implementer-spec-test-assertion-coverage): every AC's Then-clause has a matching assertion in § 1.8 test pseudocode
+- Rule 4 (anti-scope-allowed-set-forward-coverage): § 1.11 + § 8.13 walk forward-protection-ACs (1 flip predicted; AC-R84-16)
+- Rule 5 (rule-derivation-without-self-application): § 8.17 self-application gate — R85 ACs use ZERO char-bounded regex, applying the very rule R85 promotes
+- Rule 6 (halt-discipline-no-DIAGNOSTIC-for-workaround): halt § 6.1 enumerates 14 conditions; Halt 3 binds the binding-command divergence path
+- Rule 7 (derived-rule-propagation-mechanism-required): the 3 cross-project promotions land canonical text in `~/.claude/CROSS-PROJECT-MEMORIAL.md` with explicit derivation triggers; the vendored-at-pin precedent is documented as 2-instance flag with 3rd-instance reservation per Rule 7's own discipline (NOT promoted to a new Rule 8 from a single project's 2 instances)
+
+### Phase 4 close framing
+
+This is Phase 4's FINAL round. After R85: Tessera v1 + Phase 4 = comprehensive demo (canned + live) + cost-efficient pipeline (Haiku-MU model routing per R47-R51) + detector envelope characterization (R77/R78) + live in-browser engine (R82-R84) + explicit canned-vs-live UI (R85). R86+ candidate items per directive: R36/R65/R66 carry-forward AC cleanup; CLAUDE-*.md consolidation; DS-side adoption PR; engine npm extract dedicated cycle (Phase 4 deferral from R61 Option F); real-cluster DCGM validation.
+
+### Pipeline invocation (from directive)
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R85 --tier full --start-at IMPLEMENTER
+```
+
+(Spec triad already committed at SHA 225e860; Implementer begins at chore-A.)
