@@ -1,7 +1,99 @@
-CURRENT-ROUND: R84
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R85
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R84 close attestation (2026-05-21)
+
+R84 closed clean. `demos/engine-worker.js` (4 KB); 11 Worker/postMessage refs in demo.html. **"Tune knobs and watch the engine run" operationally realized.** R83-sharpened Haiku-MU REINFORCED worked: R84 Haiku correctly updated TOP-OF-FILE STATUS. Memorialization-changes-future-behavior loop demonstrated.
+
+---
+
+## § R85 Round-scope directive (Architect — SLICE 3 close + Phase 4 close memorialization; Phase 4 FINAL ROUND) (2026-05-21)
+
+R85 = Phase 4 SLICE 3 final + Phase 4 close. Polish + scrubber integration for live mode + Phase 4 close attestation + cross-project promotion of accumulated Tessera methodology lessons.
+
+**Round-start SHA:** SHA of this commit; verify at Architect session entry.
+
+### Primary deliverable
+
+1. **`demos/demo.html` final polish:**
+   - Wire live mode into existing scrubber UI (R81): scrubber moves through Worker-emitted ticks in live mode; canned scenario JSON ticks in canned mode
+   - "Canned vs Live" mode toggle: top-level switch
+   - Per-mode UI clarity: control panel (R83) active in live mode; scenario selector active in canned mode
+   - Polish: error banner styling; loading spinner during Worker bundle load; "Run again" affordance
+
+2. **`demos/DEMO-SCRIPT.md` extension** — Minute 10-12 "Live mode beat" + ToC update
+
+3. **`README.md` Quick demo** — mention live mode
+
+4. **`~/.claude/CROSS-PROJECT-MEMORIAL.md`** — Phase 4-derived promotions:
+   - **`haiku-mu-status-field-disambiguation`** (R75 + R78 + R80 + R83 = 4 instances; threshold crossed at R80)
+   - **`architect-encoded-regex-with-hardcoded-bounds`** sub-pattern of claim-then-walk (R62 + R66 + R68 + R72 + R83 + R84 = 6 instances; well past threshold)
+   - **`vendored-at-pin → vendored-with-deltas reclassification precedent`** (R56 verdict.ts + R82 topology-overlay.ts = 2 instances; 3rd-instance-trigger flag)
+
+5. **Test file** `test/q85-slice-3-close.test.ts`:
+   - Canned-vs-Live toggle ACs; scrubber-integration ACs; DEMO-SCRIPT.md extension ACs
+   - Anti-regression: R71/R79-R84 preserved
+   - Phase 4 close ACs: R72/R77/R78 detector envelope cited; cross-project promotions landed
+
+6. **Q-R85-EMPIRICAL.sh** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77.
+
+### Tier rationale
+
+**full-tier** — Architect (final polish + cross-project promotion authoring + Phase 4 close framing; cite-then-walk over R75-R83 patterns) + Implementer + Reviewer + MU. **Phase 4 FINAL round.**
+
+### Anti-scope (R85 hard limits)
+
+- NO modification of `engine/*` (Phase 3 + R82 frozen)
+- NO modification of R73-R84 deliverables (frozen)
+- NO new external dependencies
+- NO modification of `run-pipeline.sh` (PR #39 pending)
+- NO real-cluster; NO DS-repo; NO `gh repo` operations beyond push to Tessera public
+- NO modification of carry-forward AC fail set; NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `demos/demo.html` (final polish + live-mode toggle)
+- `demos/DEMO-SCRIPT.md` (extension)
+- `tools/build-canned-demos.ts` (extension if smoke-block annotation widens)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Phase 4-derived promotions; operator-authorized)
+- `package.json` (no new deps)
+- `README.md` (extend Quick demo)
+- `test/q85-slice-3-close.test.ts` (NEW)
+- `coordination/specs/Q-R85-SPEC.md` + `Q-R85-SPEC-AUDIT.md` + `Q-R85-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R85.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends; Phase 4 close memorial)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE. **Architect MUST use `--test-reporter=tap`** per R77. Run regex against prescribed pseudocode at spec-emit (R84 lesson). Haiku-MU MUST update TOP-OF-FILE STATUS (R83 sharpened).
+
+### Halt conditions (R85 Implementer)
+
+1. Q-R85-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R84 close other than R85-additions
+4. R61-class architectural-reality discovery
+5. Architect spec uses round-evolution-fragile AC patterns (especially regex with hardcoded bounds; R84 lesson): HALT
+6. All cross-project disciplines load-bearing
+7. New external dependency: HALT + DIAGNOSTIC + ESCALATE
+8. Cross-project promotion entry rejected by Reviewer as inconsistent with `~/.claude/CROSS-PROJECT-MEMORIAL.md` format: HALT + DIAGNOSTIC
+
+### Phase 4 close at R85
+
+After R85: Phase 4 SLICE 1 (R73-R78) + SLICE 2 (R79-R81) + SLICE 3 (R82-R85) all complete. Tessera v1 + Phase 4 = comprehensive demo + cost-efficient pipeline + detector envelope characterization + live in-browser engine.
+
+R86+ candidate: R36/R65/R66 carry-forward AC cleanup; CLAUDE-*.md consolidation; DS-side adoption PR; engine npm extract dedicated cycle (Phase 4 deferral from R61 Option F); real-cluster DCGM validation.
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R85 --tier full
+```
 
 ---
 
