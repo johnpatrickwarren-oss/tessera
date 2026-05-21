@@ -88,10 +88,30 @@
           "max_M_t": 1,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 0,
+          "threshold": 1,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 0,
+          "threshold": 1,
+          "fired": false,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 0,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -165,10 +185,30 @@
           "max_M_t": 1.620256,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 0.620256,
+          "threshold": 1,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 0.568502,
+          "threshold": 1,
+          "fired": false,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 1.707894,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -242,10 +282,30 @@
           "max_M_t": 2.035609,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 1.035609,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 1.434969,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 1.866322,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -319,10 +379,30 @@
           "max_M_t": 2.078314,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 1.078314,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 2.806941,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.448625,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 1.940845,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -396,10 +476,30 @@
           "max_M_t": 2.954565,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 1.954565,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 7.159223,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.421257,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.015576,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -473,10 +573,30 @@
           "max_M_t": 3.100282,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 2.100282,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 8.789337,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.47595,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 1.97709,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -550,10 +670,30 @@
           "max_M_t": 3.249316,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 2.249316,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 7.541456,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.412136,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.379187,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -627,10 +767,30 @@
           "max_M_t": 3.005661,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 2.005661,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 5.275407,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.414024,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.806116,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -704,10 +864,30 @@
           "max_M_t": 3.561188,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 2.561188,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 7.875676,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.403119,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.901343,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -781,10 +961,30 @@
           "max_M_t": 4.920033,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 3.920033,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 17.078271,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.367109,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.946233,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -858,10 +1058,30 @@
           "max_M_t": 4.891776,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 3.891776,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 17.20746,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.41894,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.933209,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -935,10 +1155,30 @@
           "max_M_t": 4.872262,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 3.872262,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 16.882385,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.444031,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.8796,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1012,10 +1252,30 @@
           "max_M_t": 3.408427,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 2.408427,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 7.862366,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.461202,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.677246,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1089,10 +1349,30 @@
           "max_M_t": 5.477754,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 4.477754,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 21.559432,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.391888,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.838501,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1166,10 +1446,30 @@
           "max_M_t": 8.898386,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 7.898386,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 60.709111,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.277976,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.89686,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1243,10 +1543,30 @@
           "max_M_t": 10.560029,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 9.560029,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 89.510415,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.190017,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.841784,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1320,10 +1640,30 @@
           "max_M_t": 12.720629,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 11.720629,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 141.668248,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.166818,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.684757,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1397,10 +1737,30 @@
           "max_M_t": 10.618855,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 9.618855,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 148.454708,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.26296,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.01561,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1474,10 +1834,30 @@
           "max_M_t": 18.196163,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 17.196163,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 411.64231,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.137517,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.179227,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1551,10 +1931,30 @@
           "max_M_t": 33.323052,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 32.323052,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 1104.700553,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.115687,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.609115,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1628,10 +2028,30 @@
           "max_M_t": 61.512309,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 60.512309,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 3622.604617,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.118074,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.717847,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1705,10 +2125,30 @@
           "max_M_t": 114.30361,
           "fired_shard_ids": []
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 113.30361,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 11477.450163,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.126031,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.938017,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1791,10 +2231,30 @@
             "shard-04"
           ]
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 212.59843,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 40352.210698,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.129857,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.990246,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1870,10 +2330,30 @@
             "shard-04"
           ]
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 400.078859,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 143196.379731,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.131604,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.997035,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -1949,10 +2429,30 @@
             "shard-04"
           ]
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 755.271033,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 510546.821183,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.132322,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.997945,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -2028,10 +2528,30 @@
             "shard-04"
           ]
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 1430.249405,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 1834142.319911,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.132541,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.999283,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -2107,10 +2627,30 @@
             "shard-04"
           ]
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 2716.422537,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 6622833.137935,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.132527,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.999672,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -2186,10 +2726,30 @@
             "shard-04"
           ]
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 5173.25417,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 24014088.341983,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.132411,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.99965,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -2265,10 +2825,30 @@
             "shard-04"
           ]
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 9876.708791,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 87707646.627578,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.132254,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.999963,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     },
     {
@@ -2344,10 +2924,30 @@
             "shard-04"
           ]
         },
-        "family_b": null,
-        "family_c": null,
-        "family_d": null,
-        "family_e": null
+        "family_b": {
+          "statistic": 18899.410826,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
+        },
+        "family_c": {
+          "statistic": 321348679.095948,
+          "threshold": 1,
+          "fired": true,
+          "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
+        },
+        "family_d": {
+          "statistic": 0.132086,
+          "threshold": 0.6,
+          "fired": false,
+          "derivation": "real engine peakACF() over the highest-wealth shard's M_t series (production Family D consumes per-signal bootstrap_null_quantile from FamilyDPerSignal and targets oscillation periods 3-10 ticks)"
+        },
+        "family_e": {
+          "statistic": 2.999994,
+          "threshold": 3,
+          "fired": false,
+          "derivation": "demo-substrate proxy: max fleet-z-score |M_t,i − μ_fleet| / σ_fleet (production Family E = multi-dim Mahalanobis vs ConformalParams.calibration_scores; not invoked here)"
+        }
       }
     }
   ],
@@ -2370,7 +2970,11 @@
     "Quarantine shard-04 from new workload placements pending hardware triage"
   ],
   "detector_families": [
-    "A"
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
   ],
   "threshold_crossing_log": [
     {
