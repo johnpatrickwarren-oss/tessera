@@ -1,7 +1,97 @@
-CURRENT-ROUND: R74
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R75
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R75 Round-scope directive (Architect — cross-session prompt-cache engineering; Phase 4 SLICE 1 round 3) (2026-05-20)
+
+R75 = full-tier pipeline round delivering the third cost-savings mechanism. Goal: structure spec-triad inputs as a stable cacheable prefix shared across role sessions within the 5-minute prompt-cache TTL, so 2nd+ session reads benefit from ~90% input-cost reduction on the shared prefix.
+
+**Round-start SHA:** `6002dd6` (chore(R74): Memorial-Updater outputs). Verify via `git rev-parse HEAD` at Architect session entry.
+
+### Primary deliverable
+
+1. **`scripts/build-role-context.ts`** (NEW):
+   - Constructs deterministic role-input context bundle from spec triad + directive section + minimal prior context
+   - Output: stable prefix block (system-prompt-cacheable) + per-role tail
+   - Prefix block byte-identical across sessions within a single round (Architect → Implementer → Reviewer → MU), enabling Anthropic API prompt-cache hits on 2nd+ session
+   - Architect picks prefix-tail split at spec § 0; suggested: prefix = spec triad + directive section + CLAUDE-COMMON + role-stamp
+
+2. **`run-pipeline.sh` integration:**
+   - Each role dispatch consumes `build-role-context.ts` output
+   - Pipeline ensures back-to-back role sessions land within ~5min wall-clock (5min TTL)
+   - Logs cache-hit telemetry in `coordination/logs/ROUND-R{N}-ROUTING.md`
+
+3. **`scripts/measure-cache-effect.ts`** (NEW):
+   - Compares input-token cost with/without cache-prefix structuring
+   - Reports estimated cost savings per full-tier round
+
+4. Test file `test/q75-cache-prefix.test.ts`:
+   - Prefix-determinism ACs (byte-identical for same round + spec SHA)
+   - Prefix-stability ACs (tail change does NOT alter prefix)
+   - Anti-regression: R73 router + R74 MU model selection preserved
+
+5. `Q-R75-EMPIRICAL.sh` at chore-A pre-commit
+
+### Tier rationale
+
+**full-tier** — Architect (cache-prefix structuring + cite-then-walk over R73+R74 patterns) + Implementer + Reviewer **full-adversarial** + MU.
+
+### Anti-scope (R75 hard limits)
+
+- NO modification of `engine/*` (frozen)
+- NO modification of `demos/*` / R70-R72 tools (frozen)
+- NO modification of `scripts/tier-router*.ts` (R73 frozen)
+- NO modification of `scripts/mu-model-select*.ts` (R74 frozen)
+- NO new external dependencies (R68 anti-worm)
+- **MODIFICATIONS PERMITTED:** `run-pipeline.sh` (continued Tessera-temporary-divergence; propagated to Anchor at R76); `CLAUDE-COMMON.md` Mode docs section ONLY (NOT REINFORCED)
+- NO modification of CLAUDE-*.md REINFORCEMENTS
+- NO DS-repo modifications
+- NO `gh repo` operations to Anchor (deferred R76)
+- NO modification of carry-forward AC fail set
+- NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `scripts/build-role-context.ts` (NEW)
+- `scripts/measure-cache-effect.ts` (NEW)
+- `run-pipeline.sh` (Tessera-vendored; continued divergence)
+- `CLAUDE-COMMON.md` (Mode docs addition only)
+- `coordination/logs/ROUND-R*-ROUTING.md` schema extension
+- `package.json` (add scripts)
+- `test/q75-cache-prefix.test.ts` (NEW)
+- `coordination/specs/Q-R75-SPEC.md` + `Q-R75-SPEC-AUDIT.md` + `Q-R75-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R75.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rule 1: ACTIVE GATE
+- Rule 2: ACTIVE GATE — prefix-construction + tail-construction + pipeline-integration branches
+- Rule 3: ACTIVE GATE
+- Rule 4: ACTIVE GATE — **NO forward-protection / live-file-count / anti-scope-diff-against-prior-round patterns**
+- Rule 5: N/A
+- Rule 6: ACTIVE GATE
+- Rule 7: ACTIVE GATE Surface (a) — cross-project claim-then-walk + R74-derived TACTICAL-AUTONOMY-without-re-verification discipline
+
+### Halt conditions (R75 Implementer)
+
+1. Q-R75-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R74 close other than R75-additions
+4. **R73 router validation regression** OR **R74 MU model selection regression** — HALT
+5. R61-class architectural-reality discovery
+6. **R72 claim-then-walk + R74 TACTICAL-AUTONOMY-without-re-verification disciplines**
+7. Architect spec uses round-evolution-fragile AC patterns: HALT
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R75 --tier full
+```
 
 ---
 
