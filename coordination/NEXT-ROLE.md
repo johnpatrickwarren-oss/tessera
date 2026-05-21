@@ -1,6 +1,6 @@
 CURRENT-ROUND: R81
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
 
 ---
@@ -5346,3 +5346,91 @@ Round: R79 (Phase 4 SLICE 2 round 1)
 ### Operator decision flag
 
 **None blocking.** Routes MERGE-READY. The MAJOR-1 finding documents a methodology violation that was self-disclosed by the Implementer in the routing block; the substantive deliverable is correct. Memorial-Updater records the violation per existing R25 cross-project precedent and adds the role-complementary REINFORCED line.
+
+---
+
+## § R81 ARCHITECT routing block (2026-05-21)
+
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
+Round: R81 (Phase 4 SLICE 2 final round)
+Tier: full
+
+### Inputs
+
+- `coordination/specs/Q-R81-SPEC.md` (the spec; load-bearing input)
+- `coordination/specs/Q-R81-SPEC-AUDIT.md` (audit sidecar; Reviewer-only — Implementer does NOT need to read)
+- `coordination/specs/Q-R81-EMPIRICAL.sh` (binding-command harness)
+- Spec-triad commit: `68e0f4b`
+- Round-start SHA (anti-scope baseline): `0eb371f`
+
+### Spec summary
+
+- **14 ACs** in `Q-R81-SPEC.md § 5.1` covering: scrubber HTML element (AC-R81-1); scrubber JS event listeners (AC-R81-2); document-level `keydown` keyboard shortcuts (AC-R81-3); 200ms CSS transitions on `.det-fam`/`.badge`/`#live-verdict-status` (AC-R81-4); `body.scrubbing` instant-update override (AC-R81-5); per-firing collapsible `<details class="provenance-receipt">` (AC-R81-6); README "Quick demo" section (AC-R81-7); `demos/DEMO-SCRIPT.md` existence + 5 minute-section headings + ≥150 lines + ≥8 `**Click:**`/`**Say:**` cue lines (AC-R81-8/9/10/11); R79+R80 anti-regression (AC-R81-12); EMPIRICAL.sh block-presence (AC-R81-13); anti-scope diff ⊆ ALLOWED_SET (AC-R81-14).
+- **Round-start baseline (verified at Architect session entry):** `tests=608 / pass=594 / fail=10 / skipped=4`; tsc exit 0; 10 carry-forward failing ACs identified by direct grep (AC-R36-21, AC-R36-30, AC-R36-31, R65 sibling-dep, R66 sibling-dep, AC-R77-14, AC-R77-17, AC-R78-14, AC-R79-8, AC-R79-14).
+- **Predicted at R81 chore-A:** `tests=622 / pass=607±2 (band [605,609]) / fail=11 (strict) / skipped=4`; `tsc` exit 0; `Q-R81-EMPIRICAL.sh` exit 0; `git diff 0eb371f HEAD --name-only` 8-12 paths. The only new flip is AC-R80-14 (R80 ALLOWED regex doesn't include R81 paths).
+- **EMPIRICAL.sh probe-run at round-start completed** (Q-R81-SPEC-AUDIT.md § C.3 records verbatim output; exit 1 as predicted because Implementer artifacts absent + fail-count not yet 11). R77+R47+R72 3rd-instance reinforcement satisfied.
+
+### Implementer-actionable steps
+
+1. **Read** `coordination/specs/Q-R81-SPEC.md` in full (load-bearing). Do NOT read the SPEC-AUDIT sidecar (cold-eye preservation).
+2. **RED commit first** (per R23 IMPL MINOR-1; 6/9-round streak preserved at R75+R78-R80; R77 streak break; rebuild discipline at R81):
+   - Create `test/q81-slice-2-close.test.ts` with 14 `test()` blocks each containing `assert.fail('AC-R81-N RED stub')` — no implementation. The test file imports only built-in `node:test` / `node:assert/strict` / `node:fs` / `node:path` / `node:child_process` (no engine imports).
+   - Verify `pnpm exec tsc -p tsconfig.test.json` exits 0 (or 2 if TS2307 fires due to compiled `.js` not yet emitted — Implementer chooses whether to commit the compiled .js with the .ts or build first).
+   - Commit with message naming the RED stubs.
+3. **GREEN commit (chore-A)**:
+   - **Read** `tools/build-canned-demos.ts:1175-1798` (HTML_TEMPLATE_HEAD + FOOTER) to identify insertion points.
+   - **Implement** per spec § 4.1 — extend `HTML_TEMPLATE_HEAD` (CSS rules + scrubber HTML), extend `HTML_TEMPLATE_FOOTER` (DOM ref + scrubber listeners + keydown listener + `manualStep` + `syncScrubberPosition` + audit rebuild + `renderProvenancePanel` `<details>` factory), preserving R79+R80 structural elements byte-identically.
+   - **Regenerate** `demos/demo.html` + `demos/scenarios/*.json` via build tool (`pnpm build:demos` or equivalent). Verify scenario JSONs are byte-identical to R80 close (halt condition #9 if not).
+   - **Author** `demos/DEMO-SCRIPT.md` per spec § 4.2 verbatim structural skeleton; flesh out narrative content per AC-R81-9/10/11 (5 minute-section headings; ≥150 lines; ≥8 `**Click:**`/`**Say:**` cue lines). The skeleton's `[bracketed]` placeholders must be replaced with narrative content that matches what the dashboard ACTUALLY shows under each scenario (per R71 MAJOR-1/2 lesson — narrative MUST be empirically verifiable; no pre-authored claims about engine behavior that contradict observed scenario state).
+   - **Append** to `README.md` per spec § 2.7 verbatim content (≤30 lines; "Quick demo" heading + scrubber instruction + DEMO-SCRIPT.md reference).
+   - **Run** `bash coordination/specs/Q-R81-EMPIRICAL.sh` and verify exit 0; if exit non-zero, HALT + DIAGNOSTIC per halt condition #1.
+   - **Run** `pnpm exec node --test --test-reporter=tap test/*.test.js | tail -10` and record actual `# tests` / `# pass` / `# fail` / `# skipped` values verbatim.
+   - **Commit** chore-A with message naming the implementation extents + spec compliance.
+4. **Routing**:
+   - Append `## § R81 IMPLEMENTER routing block` to `coordination/NEXT-ROLE.md` per established pattern.
+   - Set header `NEXT-ROLE: REVIEWER` + `STATUS: READY`.
+   - In the routing block, attest the OBSERVED binding-command outputs verbatim (per spec § 5.2 + R26 MAJOR-1 / R72 / R77 / R79 MAJOR-1 cross-project canonical):
+     - `pnpm exec tsc -p tsconfig.test.json` exit code (predicted `0`)
+     - `pnpm exec node --test --test-reporter=tap test/*.test.js` process exit code (predicted `1` — node-test exits 1 when subtests fail; per R79 MAJOR-1 Reviewer note, attest the ACTUAL observed value; do NOT propagate predictions)
+     - TAP `# tests` / `# pass` / `# fail` / `# skipped` values (predicted `622 / 607±2 / 11 / 4`)
+     - `git diff 0eb371f HEAD --name-only` line count (predicted 8-12)
+     - `bash Q-R81-EMPIRICAL.sh` exit code (predicted `0`)
+   - Append CONFIRMATION lines to `coordination/MEMORIAL.md` for: `tdd-discipline-red-green-verified`, `empirical-command-attestation-rule-1`, `all-14-acs-pass-at-green`, `halt-discipline-none-fired`, `anti-scope-allowed-set-respected`.
+
+### Halt conditions (recap from spec § 6.1)
+
+1. `bash Q-R81-EMPIRICAL.sh` exits non-zero at chore-A for any reason OTHER than the pre-documented carry-forward 10 + AC-R80-14 flip = 11.
+2. `pnpm exec tsc -p tsconfig.test.json` exit ≠ 0.
+3. Test baseline drift: `# fail` < 11 OR > 11; `# pass` outside `[605, 609]`.
+4. R61-class architectural-reality discovery.
+5. Round-evolution-fragile AC pattern in spec — halt + DIAGNOSTIC.
+6. Any cross-project discipline (Rules 1-7) violated.
+7. New external dependency required.
+8. New engine import beyond round-start.
+9. `demos/scenarios/*.json` content modified (must be byte-identical regeneration).
+10. SVG → canvas migration attempted.
+
+### Cross-project disciplines load-bearing at R81
+
+- **Rule 1** (empirical-command-attestation): Implementer attests ACTUAL observed values; no reframing as compliance. R26+R72+R77+R79+R70 lineage.
+- **Rule 3** (anti-self-application gate): spec § 9.6 walks all 14 ACs against prescribed pseudocode; all PASS. R74 MINOR-5 lesson.
+- **Rule 4** (anti-scope ALLOWED_SET forward-coverage): § 3.2 anchored regex; forward-protective R-number wildcards.
+- **Rule 6** (encode-actual-results-verbatim): § 5.2 explicit; `# pass` band has ±2 PRNG-environment padding; `# fail` is strict-equality 11.
+- **Rule 7** (cross-project canonical): claim-then-walk applied at spec-emit on 13 files (Q-R81-SPEC-AUDIT.md § B.1 enumerates); DEMO-SCRIPT.md skeleton uses `[bracketed]` placeholders not pre-authored engine claims (R71 MAJOR-1/2 lesson); EMPIRICAL.sh probe-run at spec-emit completed (R77+R47+R72 3rd-instance rule); strikethrough markdown avoided in spec (R66 MINOR-5 lesson).
+
+### TDD discipline reminder
+
+- R23 IMPL MINOR-1: RED commit (test file ONLY; all 14 stubs `assert.fail`; tsc TS2307 expected if compiled .js absent) precedes GREEN (implementation + real assertions). After R77 broke a 9-round streak (R69-R75), R78-R80 reinstated; R81 continues. Reviewer will verify the RED commit lands separately via `git log --oneline`.
+
+### Tactical autonomy + halt-discipline reminder (R73 MAJOR-2 / R74 CRITICAL-1 / R75 lessons)
+
+TACTICAL AUTONOMY at R81 covers: blank-line spacing inside CSS / JS; variable names inside helper-function locals; whether to use `for` or `forEach`; exact narrative wording in DEMO-SCRIPT.md beyond the AC-required minima (5 headings, line count, cue density); placement order of new CSS rules inside the existing `<style>` block (provided the rules land inside the block).
+
+TACTICAL AUTONOMY does NOT cover: (a) control-flow shape changes in `Q-R81-EMPIRICAL.sh` (R73 MAJOR-2 lesson — `if` vs `case` is structural); (b) substitution of prescribed CSS selectors / JS function names / event-type literals / `ev.code` literals (R72 CRITICAL-1 lesson — closed-set discriminators); (c) any change to `demos/scenarios/*.json` content (halt condition #9 — anti-scope); (d) skipping the RED commit (R23 IMPL MINOR-1); (e) running Q-R81-EMPIRICAL.sh once without re-verifying after any post-disclosure amendment (R72 false-compliance-attestation lesson).
+
+If a tactical deviation is contemplated, disclose it as `TD-N` in the IMPLEMENTER routing block with: WHAT was deviated, WHY the spec prescription was infeasible verbatim, EMPIRICAL EQUIVALENCE EVIDENCE that the deviation preserves the AC's intent (R74 CRITICAL-1 lesson — bash boolean-semantics test `bash -c 'VAR=false; echo "${VAR:+word}"'` is the canonical example).
+
+### Operator decision flag
+
+**None blocking at Architect routing.** Spec triad is MERGE-READY for Implementer pickup. If the Implementer encounters a halt condition (§ 6.1), `STATUS: ESCALATE` per existing halt-discipline; operator picks bounded option(s).
