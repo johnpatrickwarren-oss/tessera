@@ -1044,3 +1044,25 @@ with a clear commit message.
 #     ask "does every verb in this docstring match what the code actually does?" 'overlay',
 #     'merge', 'combine' all imply a different visual structure from 'separate rows'. Detected
 #     tessera R77 MINOR-3.
+
+# REINFORCED 2026-05-20 — Memorial attestation must reflect actual observed delta, not editorial
+#   abstraction. When implementation deviates from spec pseudocode (even functionally inert
+#   changes like parameter rename `fired_set` → `_fired_set` to silence TS linters), the
+#   coordination/MEMORIAL.md CONFIRMATION entry must disclose the delta. Never claim "implements
+#   spec §X verbatim" when there is a delta, even if the delta is idiomatic (underscore prefix)
+#   and functionally inert. The attestation breach violates REINFORCED 2026-05-18 encode-actual-
+#   results-verbatim discipline. Procedure: for any spec-vs-impl deviation (parameter rename,
+#   variable reorder, omitted safety timeout that was already enforced structurally), record the
+#   exact delta in the attestation: "[deviation type] does not affect observables: [reason]; spec
+#   prescribed [X], implementation uses [Y]." Detected tessera R78 MINOR-1.
+
+# REINFORCED 2026-05-20 — Commit message file-size claims must cite actual observable values,
+#   not estimates or rounded figures. When a commit creates new files, record their actual line
+#   counts (via `wc -l` or `git diff --stat`) in the commit message, not guesses or ranges.
+#   Commit messages are audit-trail artifacts. The R78 chore-A message claimed "tools/topology-
+#   walk-tuning.ts: created — 244 lines" (actual 338); "scripts/topology-walk-tuning-
+#   recommendation.md: created — 130 lines" (actual 148). Neither figure matches any standard
+#   metric (non-blank=322, non-comment≈307 for the first; no standard metric for the second).
+#   Root cause: author estimated from reading and rounded down. Procedure: before finalizing
+#   commit message, run `wc -l [file]` for new files and record the exact output. Detected
+#   tessera R78 MINOR-2.
