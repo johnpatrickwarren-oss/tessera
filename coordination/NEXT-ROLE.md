@@ -4226,4 +4226,4 @@ Key empirical findings (Family A at α=0.005, window_count=200): 5/5 detection f
 ---
 
 **Implementation commit SHA:** `56992bd` (`feat(R77 IMPLEMENTER): detection envelope sweep — 504-cell matrix, 17 ACs green`)
-**Coordination chore SHA:** (recorded after the coordination commit below)
+**Coordination chore SHA:** `15af7ea` (`chore(R77 IMPLEMENTER): ESCALATE — EMPIRICAL.sh Block 2 defect + Memorial + DIAGNOSTIC`)
