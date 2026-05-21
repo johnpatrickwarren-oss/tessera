@@ -686,3 +686,30 @@ cross-cluster coordination → Coordinator artifacts (`WAVE-PLAN-NN.md`,
 #   + coordination/reviews/REVIEWER-REPORT-R72.md; resolved by Coordinator-direct fix at
 #   commit 8b15549. 2nd Coordinator-side instance of claim-without-empirical-walk pattern
 #   (1st: R65+R66 CLUSTER-HANDOFF source-file drift).
+
+# REINFORCED 2026-05-21 — Multi-run-discipline for suspected-flake binding-command attestations.
+#   When the Coordinator (or any role) re-runs a binding command after a fix, and the command
+#   intersects with an AC class that has DOCUMENTED stochastic behavior (e.g., AC-R84-14
+#   structural-race flake; carry-forward fails with PRNG-environment sensitivity), a SINGLE
+#   passing observation does NOT constitute "flake resolved." The discipline-honoring
+#   characterization requires AT LEAST 3 consecutive passing runs OR a clear majority pattern
+#   from 5+ runs (e.g., 5/5 PASS = flake resolved; 4/5 PASS = still flaky; 3/5 PASS = unchanged).
+#   Apply ESPECIALLY when:
+#   (a) the prior pre-fix observation surfaced the flake (e.g., Implementer chore-A halt cited
+#       intermittent failure across multiple runs)
+#   (b) the AC binding is strict-count vs band; a single PASS may be a fluke draw from the
+#       same stochastic distribution
+#   (c) a Reviewer (or future role) will independently re-run the binding at later HEAD — if
+#       their re-run hits the failing draw, the prior "resolved" claim is empirically refuted
+#   Detected tessera 2026-05-21 at R85 (3rd Coordinator-side instance; cross-project threshold
+#   crossed at this round). My (Coordinator) fix at d1b147d ran the binding once, saw fail=16,
+#   declared "AC-R84-14 flakiness apparently resolved" — but the flake was stochastic, not
+#   resolved. Reviewer cold-eye at REVIEWER HEAD characterized via 8 runs: 6× fail=16 + 2×
+#   fail=17 (25% non-determinism). The single-run claim was empirically false. Procedure:
+#   (1) identify when a binding-command result could be from a stochastic AC class;
+#   (2) run 3-5 times before declaring "resolved";
+#   (3) if observations are mixed, amend the spec/EMPIRICAL.sh to use a band that accepts
+#       both observed values, document the flake source, and treat it as a known carry-forward;
+#   (4) NEVER attest "flake resolved" based on a single observation.
+#   Cross-project canonical landing flagged at R85 close per `coordinator-side-claim-without-
+#   empirical-walk` rule (now at 3 Tessera instances: R66 + R72-second + R85).
