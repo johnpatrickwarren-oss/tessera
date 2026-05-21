@@ -1,7 +1,26 @@
 CURRENT-ROUND: R77
-NEXT-ROLE: OPERATOR
-STATUS: ESCALATE
+NEXT-ROLE: REVIEWER
+STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R77 ESCALATE — Option A (2026-05-20)
+
+**Decision:** Option A approved (Coordinator-direct fix; 20-character addition).
+
+**Root cause:** Q-R77-EMPIRICAL.sh Block 2 ran `node --test test/*.test.js` without `--test-reporter=tap`. Default Node reporter format doesn't match the grep patterns; both TEST_PASS + TEST_FAIL resolved to empty; Block 2 unconditionally failed.
+
+**Fix applied:** added `--test-reporter=tap` to line 34. Verification: `bash Q-R77-EMPIRICAL.sh` → exit 0; all 8 blocks PASS; Block 2 extracts `tests=566 / pass=557 / fail=5 / skipped=4`.
+
+**Cross-round pattern:** 3rd Tessera instance of Architect-side empirical-script defect caught at Implementer chore-A (R47 self-recursive verifier + R72 .gitignore semantics + R77 reporter-format mismatch). Falls under cross-project canonical claim-then-walk discipline (already promoted at R72). MU memorialize 3rd-instance status.
+
+**MU scope at R77 close:**
+- Memorialize 3rd-instance of Architect-empirical-script-defect sub-pattern under cross-project canonical
+- Implementer halt-discipline correctly applied
+- 17 R77 ACs all PASS; 504-cell detection envelope matrix delivered
+
+**Pipeline resume:** `./run-pipeline.sh --round R77 --tier full --start-at REVIEWER`
 
 ---
 

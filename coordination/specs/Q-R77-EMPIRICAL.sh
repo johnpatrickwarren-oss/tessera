@@ -31,7 +31,7 @@ echo ""
 
 # ── Block 2: test pass/fail counts (AC-R77-16) ──
 echo "── Block 2: test counts"
-node --test test/*.test.js > /tmp/r77-block2.txt 2>&1
+node --test --test-reporter=tap test/*.test.js > /tmp/r77-block2.txt 2>&1
 TEST_EXIT=$?
 TEST_PASS=$(grep -E "^# pass " /tmp/r77-block2.txt | head -1 | awk '{print $3}')
 TEST_FAIL=$(grep -E "^# fail " /tmp/r77-block2.txt | head -1 | awk '{print $3}')
