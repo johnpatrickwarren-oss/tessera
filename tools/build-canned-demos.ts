@@ -1937,8 +1937,22 @@ export function buildAllCannedDemos(_opts?: BuildOpts): BuildResult {
     bytesTotal += s.length;
   }
 
-  const html = renderDemoHtml(jsonByName);
+  let html = renderDemoHtml(jsonByName);
   const htmlPath = path.join(root, 'demos', 'demo.html');
+  // Preserve R82-SMOKE-BLOCK section across regenerations (R82 Option A resolution).
+  // The smoke block is delimited by <!-- R82-SMOKE-BLOCK-START --> / <!-- R82-SMOKE-BLOCK-END -->
+  // and injected just before </body> so the dashboard IIFE is unaffected.
+  if (fs.existsSync(htmlPath)) {
+    const existing = fs.readFileSync(htmlPath, 'utf8');
+    const startMarker = '<!-- R82-SMOKE-BLOCK-START -->';
+    const endMarker = '<!-- R82-SMOKE-BLOCK-END -->';
+    const startIdx = existing.indexOf(startMarker);
+    const endIdx = existing.indexOf(endMarker);
+    if (startIdx !== -1 && endIdx !== -1) {
+      const smokeBlock = existing.slice(startIdx, endIdx + endMarker.length);
+      html = html.replace('</body>', smokeBlock + '\n</body>');
+    }
+  }
   fs.writeFileSync(htmlPath, html);
   bytesTotal += html.length;
 

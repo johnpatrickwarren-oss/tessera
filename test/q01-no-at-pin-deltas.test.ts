@@ -4,10 +4,11 @@
 // is byte-identical to its source in deploysignal/ modulo the 5-line
 // provenance header block prepended by the vendoring script.
 //
-// Scope: detectors (11) + family types (5) + core orchestration (4) +
-// type files at-pin (7 excl config.ts, verdict.ts) + compilation deps (6) + SLICE 4 tools (3) = 36 files.
+// Scope: detectors (11) + family types (5) + core orchestration (3) +
+// type files at-pin (7 excl config.ts, verdict.ts) + compilation deps (6) + SLICE 4 tools (3) = 35 files.
 // config.ts is vendored-with-deltas and is EXCLUDED from this check.
 // verdict-groups.ts excluded — vendored-with-deltas at R20 (cluster_event_id scope keying + composite group_id).
+// topology-overlay.ts excluded — vendored-with-deltas at R82 (Web Crypto adapter + pureJsSha256 fallback).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -45,10 +46,11 @@ const AT_PIN_FILES: Array<{ tessera: string; source: string }> = [
   { tessera: 'engine/types/families/c.ts',                         source: 'engine/types/families/c.ts' },
   { tessera: 'engine/types/families/d.ts',                         source: 'engine/types/families/d.ts' },
   { tessera: 'engine/types/families/e.ts',                         source: 'engine/types/families/e.ts' },
-  // Core orchestration primitives (4; verdict-groups.ts excluded at R20)
+  // Core orchestration primitives (3; verdict-groups.ts excluded at R20;
+  //                                   topology-overlay.ts excluded at R82 — reclassified
+  //                                   vendored-at-pin → vendored-with-deltas for Web Crypto adapter)
   { tessera: 'engine/core.ts',                                      source: 'engine/core.ts' },
   { tessera: 'engine/per-detector-resampler-mode.ts',              source: 'engine/per-detector-resampler-mode.ts' },
-  { tessera: 'engine/topology-overlay.ts',                         source: 'engine/topology-overlay.ts' },
   { tessera: 'engine/signal-classes.ts',                           source: 'engine/signal-classes.ts' },
   // Type files (at-pin; 7 files; config.ts excluded — vendored-with-deltas at R01;
   //                                verdict.ts excluded — vendored-with-deltas at R18 for

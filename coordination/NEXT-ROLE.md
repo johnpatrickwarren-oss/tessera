@@ -1,7 +1,44 @@
 CURRENT-ROUND: R82
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
+
+---
+
+## § R82 Implementer chore-A routing block (2026-05-21)
+
+### Binding-command attestation (Rule 1 — encode-actual-results-verbatim)
+
+All commands run at HEAD after all amendments; results are verbatim observed values.
+
+| Binding command | Observed |
+|---|---|
+| `pnpm exec tsc -p tsconfig.test.json` exit | **0** |
+| `pnpm exec node --test --test-reporter=tap test/*.test.js` process exit | **1** (fail count > 0) |
+| TAP `# tests` | **636** |
+| TAP `# pass` | **620** |
+| TAP `# fail` | **12** (strict equality — matches EXPECTED_FAIL=12) |
+| TAP `# skipped` | **4** |
+| `bash coordination/specs/Q-R82-EMPIRICAL.sh` exit | **0** (ALL 5 BLOCKS PASS) |
+| `git diff 5c3e0d9 HEAD --name-only` line count | **17** (after chore-A commit) |
+| `demos/engine-bundle.mjs` byte size | **58,291 bytes** |
+
+### Spec-deviance disclosures (none in this session)
+
+No spec deviations. All operator Option A work implemented as directed.
+
+### ALLOWED_SET expansion (Option A resolution — operator-authorized per NEXT-ROLE.md § Operator resolution)
+
+Three paths added to ALLOWED_SET across all gate artifacts (EMPIRICAL.sh Block 5, AC-R82-14 regex, Q-R82-SPEC.md § 3.2):
+- `tools/build-canned-demos.ts` — modified to preserve R82 smoke block during regeneration
+- `test/q01-no-at-pin-deltas.test.ts` — topology-overlay.ts removed from AT_PIN_FILES (reclassified vendored-with-deltas)
+- `coordination/VENDORING-MANIFEST.md` — topology-overlay.ts classification updated
+
+### Deliverable summary
+
+All 14 R82 ACs pass at chore-A HEAD. All EMPIRICAL.sh blocks pass. Chore-A commit SHA will be recorded below.
+
+**Chore-A SHA:** [committed below]
 
 ---
 
