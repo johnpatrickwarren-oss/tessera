@@ -1858,3 +1858,15 @@ CONFIRMATION: regex-discriminating-no-incidental-match | EMPIRICAL.sh Block 3 AL
 
 CONFIRMATION: spec-acknowledged-gaps-with-mitigation | § 4.19 lists 3 acknowledged AC gaps (no Family C per-cell low-magnitude ACs; no detection-window timing AC; no per-α gradient AC); each pairs with a minimum mitigation column (Reviewer manual audit; matrix-visual sanity check; ASCII curve overlay). No bare "Reviewer-reliance" without specification. Per R74 MINOR-2 reinforcement. | R77 | ARCHITECT
 
+
+VIOLATION: halt-discipline (§ 6.1 fires — EMPIRICAL.sh exits non-zero; see DIAGNOSTIC-R77-empirical-sh-block2-reporter.md) | Q-R77-EMPIRICAL.sh Block 2 exits 1 due to Architect-authored script defect: `node --test test/*.test.js` without `--test-reporter=tap`; grep patterns `^# pass ` produce empty strings; Block 2 unconditionally fails. Within-round prefix-continuity invariant prevents Implementer fix. All 17 R77 ACs independently pass (full suite: tests=566, pass=557, fail=5, skip=4). STATUS: ESCALATE set; DIAGNOSTIC written; operator options A (fix EMPIRICAL.sh) or B (waive Block 2) presented. | R77 | IMPLEMENTER
+
+CONFIRMATION: halt-discipline-correctly-triggered | Spec § 6.1 fires: EMPIRICAL.sh exits non-zero for a reason not in the pre-documented baseline (not one of the 5 carry-forward ACs). Implementer did not silently absorb or claim tactical-autonomy to bypass; wrote DIAGNOSTIC + set STATUS: ESCALATE + presented bounded options. Per R73 MAJOR-2 reinforcement and HALT-DISCIPLINE composite sub-variants. | R77 | IMPLEMENTER
+
+CONFIRMATION: tdd-green-all-17-acs | All 17 R77 ACs implemented and passing. test() block count = 17 (matches Architect prediction N_new_R77=17 exactly). AC-R77-7: 5/5 ≥ 0.6 ✓; AC-R77-8: 5/5 ≥ 0.6 ✓; AC-R77-9: 3/5 = 0.6 ≤ 0.6 ✓; AC-R77-10: both families present, delta reported (no sign assertion). Carry-forward fail set = 5 (R36-21/30/31, R65-2, R66-14) preserved. | R77 | IMPLEMENTER
+
+CONFIRMATION: anti-scope-preserved | `git diff 0d64d9a HEAD --name-only` produces ALLOWED_SET-only paths. engine/ frozen; tools/coverage-saturation.ts + demo tools frozen; scripts frozen; run-pipeline.sh frozen; R72 outputs byte-identical. No new external dependencies. No synthetic CompiledConfig construction. | R77 | IMPLEMENTER
+
+CONFIRMATION: family-c-interpretation-documented | R77 Family C path (pure-ONS bounded-z bet via `onsUpdate`) deviates from full kernel-MMD path; deviation documented in tools/detector-envelope.ts header comment + Q-R77-SPEC.md § 1.3 sub-§. Finding: Family A dominates Family C at short-window/low-magnitude boundary (A=3/5 vs C=0/5 at mag=0.050, win=30, α=0.005). | R77 | IMPLEMENTER
+
+VIOLATION: tdd-red-commit-not-in-git-history | RED commit (assert.fail stubs) performed in-session but not recorded as a separate git commit before GREEN. Only the GREEN state is committed. TDD spirit honored in-session; git history does not independently confirm RED→GREEN ordering. Per REINFORCED 2026-05-18 (RED commit discipline) + disclosed as TD-1 in NEXT-ROLE.md spec-deviance section. | R77 | IMPLEMENTER
