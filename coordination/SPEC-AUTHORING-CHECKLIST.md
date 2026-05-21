@@ -320,6 +320,66 @@ that uniquely identifies the structural location.
 of the searched token passes the check, even when the structural property the AC
 intended to verify is absent. Exact counts surface structural drift immediately.
 
+### Tightening: Architect-encoded text-matching patterns MUST be verified against prescribed implementation (R84+R85; promoted to cross-project at R85)
+
+**Rule:** when an AC or EMPIRICAL.sh block encodes a regex, awk pattern, or grep
+expression that targets prescribed code/markup/HTML, Architect MUST run that
+exact pattern against the prescribed pseudocode AT SPEC-EMIT TIME and verify
+the captured output matches the AC's intent. Pattern bugs at this layer surface
+at Implementer chore-A as halt-trigger ESCALATEs; the cost of catching them at
+spec-emit is materially lower than at chore-A.
+
+**Specific failure modes observed at Tessera (R62, R66, R68, R72, R83, R84, R85
+— ~7 instances across two sub-classes):**
+
+1. **Regex with hardcoded char limit too small for prescribed pseudocode:**
+   R84 AC-R84-9 used `[\s\S]{0,3000}?` non-greedy quantifier; spec-prescribed
+   handler body was ~3129 chars; regex stopped at first inner `});` at ~1563
+   chars; target `worker.postMessage(...)` at ~3129 fell outside region.
+   **Fix at spec-emit:** measure the prescribed pseudocode char count + add
+   margin (e.g., 1.5× actual + round to next 1000).
+
+2. **awk range patterns where start + end overlap on same line:**
+   R85 EMPIRICAL.sh Block 3 used `awk '/^### Browser dashboard/,/^### /'`;
+   start heading itself matches `^### `, so range produces only one line.
+   **Fix at spec-emit:** use explicit flag toggling pattern
+   `awk '/^### Browser dashboard/{flag=1;next} flag && /^### /{exit} flag'`
+   for any range where start anchor could match the end anchor on the same
+   line. Or use `sed -n '/start/,/end/p'` (which has same issue) → BUT verify
+   the issue doesn't apply via test against prescribed text.
+
+3. **Live-file-count assertion across rounds (R66 AC-R65-2 lesson):**
+   Hard-coded count assertions on barrel files / config files that subsequent
+   rounds may legitimately extend will fail in those rounds.
+   **Fix at spec-emit:** prefer "diff-against-fixed-SHA" pattern OR mark the
+   AC as single-round-scope with no carry-forward expectation.
+
+4. **Forward-protection diff empty-set assertion (R62 AC-R62-15 lesson):**
+   When chore-B itself modifies the test file (e.g., SHA injection), the diff
+   window can never be empty post-chore-B. Either redefine binding to allow
+   chore-B path OR drop the AC.
+
+5. **Anti-scope diff against prior-round ALLOWED_SET (R68 AC-R66-14 lesson):**
+   Hard-coded ALLOWED_SET enumerations in prior-round ACs will fail when
+   future rounds legitimately touch new files. Use round-scope ALLOWED_SETs
+   bound to spec-triad SHA, not live HEAD.
+
+6. **Strict count predictions against flaky binding-commands (R85 lesson):**
+   `EXPECTED_FAIL=N` strict prediction is empirically false when a carry-forward
+   AC has structural-race flakiness. Use band `[N, N+1]` if any AC in the
+   prediction has documented stochastic behavior; document the flake source.
+
+**Verification step:** for every regex/awk/grep pattern in a spec § 5 AC OR a
+Q-RNN-EMPIRICAL.sh block, run the pattern against the prescribed pseudocode
+(use `echo "$prescribed" | <pattern>`) at spec-emit time. Paste the actual
+output into the spec audit sidecar as evidence.
+
+**Self-application discipline (R85 SELF-VIOLATING-ROUND lesson):** the R85
+round promoted this rule but its OWN EMPIRICAL.sh Block 3 awk and spec § 5.2
+strict fail count were both instances of the very pattern. Future rounds
+introducing this rule MUST run the verification step on their own spec
+triad before routing to Implementer. Treat the rule as gating its own emit.
+
 ### Chore-A requirements (at Implementer commit)
 
 1. **Run `scripts/verify-empirical-acs.sh <round>` BEFORE chore-A commit.**

@@ -1,7 +1,38 @@
-CURRENT-ROUND: R85
+CURRENT-ROUND: R86
 NEXT-ROLE: OPERATOR
 STATUS: ROUND-COMPLETE
-TIER: full
+TIER: coordinator
+
+---
+
+## § R86 close attestation (Phase 4 SLICE 4 — methodology consolidation) (2026-05-21)
+
+R86 = Coordinator-interactive methodology consolidation round (pattern matches R64+R68; no pipeline subagent invocation).
+
+**Deliverables landed:**
+1. `coordination/SPEC-AUTHORING-CHECKLIST.md` extended: new "Architect-encoded text-matching patterns MUST be verified against prescribed implementation (R84+R85)" tightening — 6 specific failure modes documented (regex char-limit / awk range overlap / live-file-count / forward-protection diff / anti-scope diff against prior-round / strict count vs flaky) with fix-at-spec-emit procedures + self-application gate
+2. `CLAUDE-COORDINATOR.md` REINFORCED 2026-05-21: multi-run-discipline for suspected-flake binding-command attestations (3+ consecutive passing runs OR 5+ run majority pattern; NEVER single-run "flake resolved" claim)
+3. `coordination/MEMORIAL.md` R86 COORDINATOR section: 5 CONFIRMATIONs + 2 OBS
+4. `scripts/consolidate-reinforcements.sh` dry-run: no-op (Tessera too young for 180-day age archival; documented for future)
+
+**Phase 4 final summary (R73-R86 = 14 rounds across 4 slices):**
+
+| SLICE | Rounds | Outcome |
+|---|---|---|
+| SLICE 1 | R73-R78 | Cost-savings trilogy + detector envelope |
+| SLICE 2 | R79-R81 | Dashboard polish (9× → 5× gap to DS) |
+| SLICE 3 | R82-R85 | Live in-browser engine ("tune knobs and watch the engine run") |
+| **SLICE 4** | **R86** | **Methodology consolidation (prophylactic R84-R85 + multi-run discipline + Phase 4 close)** |
+
+**Next operator-initiative candidates (R87+):**
+1. Anchor PR #39 review + merge
+2. DS-side adoption PR at `~/concord/deploysignal/`
+3. Carry-forward AC cleanup
+4. Engine npm extract dedicated cycle (R61 Option F deferral; now backed by sharpened discipline)
+5. Real-cluster DCGM validation
+6. Anchor PR backflog (#40-#41 by phase boundary)
+
+R86 leaves Tessera in cleanest state to date — sharpened discipline lowers ESCALATE risk for R87+ substantive work.
 
 ---
 
