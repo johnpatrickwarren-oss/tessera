@@ -38,7 +38,7 @@ Three paths added to ALLOWED_SET across all gate artifacts (EMPIRICAL.sh Block 5
 
 All 14 R82 ACs pass at chore-A HEAD. All EMPIRICAL.sh blocks pass. Chore-A commit SHA will be recorded below.
 
-**Chore-A SHA:** [committed below]
+**Chore-A SHA:** `ee1a590`
 
 ---
 
