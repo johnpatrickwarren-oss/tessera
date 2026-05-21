@@ -1,7 +1,95 @@
-CURRENT-ROUND: R83
-NEXT-ROLE: IMPLEMENTER
-STATUS: READY
+CURRENT-ROUND: R84
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R83 close attestation (Coordinator-direct STATUS fix — 4th Haiku-MU variant) (2026-05-21)
+
+R83 substantively closed (MU outputs `4add51a`; dashboard 13,207 → 13,479; 48 control-element references; 7 MEMORIAL entries + 8 cross-project tessera entries + 3 REINFORCED).
+
+**4th Tessera instance of Haiku-MU process-discipline-miss (NEW VARIANT):** R75+R78 (READY stuck) / R80 (MERGE-READY wrong value) / R83 (Haiku added STATUS inside its own routing block but left TOP-OF-FILE at READY). **Sharpened CLAUDE-MEMORIAL.md REINFORCED entry landed this commit:** disambiguates "STATUS field" = TOP-OF-FILE (lines 1-5; `head -5 NEXT-ROLE.md | grep STATUS:`).
+
+Cross-project promotion threshold CROSSED at R80; 4-instance confirms. Promote to `~/.claude/CROSS-PROJECT-MEMORIAL.md` at Phase 4 close.
+
+---
+
+## § R84 Round-scope directive (Architect — live engine compute + Web Worker; Phase 4 SLICE 3 round 3) (2026-05-21)
+
+R84 = third SLICE 3 round. Wires R83 control surface to live in-browser engine via Web Worker. **"Tune knobs and watch the engine run" destination.**
+
+**Round-start SHA:** SHA of this commit; verify at Architect session entry.
+
+### Primary deliverable
+
+1. **`demos/engine-worker.js`** (NEW):
+   - Imports `engine-bundle.mjs` (R82)
+   - postMessage protocol: receives controlState + Run; synthesizes topology + injects fault; runs detection; streams per-window state back
+   - Architect picks message-protocol shape at spec § 0
+
+2. **`demos/demo.html` extension** — wire controlState Run to Web Worker:
+   - On Run: spawn/reuse Worker; postMessage controlState
+   - On worker per-window messages: update UI using R71/R79/R80 rendering; respect speed control
+   - Cancel button: terminate worker
+   - Error banner for worker errors
+
+3. **Performance:** Worker keeps UI responsive during multi-window compute
+
+4. **Test file** `test/q84-live-engine-compute.test.ts`:
+   - Worker file structural ACs
+   - Message-protocol ACs (postMessage shape)
+   - Cancel handling ACs
+   - End-to-end: Web Worker round-trip (Node v25 native Worker OR jsdom polyfill)
+   - Anti-regression: R71/R79-R83 preserved
+
+5. **Q-R84-EMPIRICAL.sh** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77.
+
+### Tier rationale
+
+**full-tier** — Architect (Worker message protocol + streaming + error handling; cite-then-walk over R82 bundle + R83 controlState + R71 rendering) + Implementer + Reviewer + MU.
+
+### Anti-scope (R84 hard limits)
+
+- NO modification of `engine/*` (Phase 3 + R82 frozen)
+- NO modification of R73-R83 deliverables (frozen)
+- NO new external dependencies (Web Worker standard browser API)
+- NO modification of `run-pipeline.sh` (PR #39 pending)
+- NO real-cluster; NO DS-repo; NO `gh repo` operations
+- NO modification of carry-forward AC fail set; NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `demos/engine-worker.js` (NEW)
+- `demos/demo.html` (Web Worker integration)
+- `tools/build-canned-demos.ts` (extension if smoke-block annotation widens)
+- `package.json` (no new deps)
+- `test/q84-live-engine-compute.test.ts` (NEW)
+- `coordination/specs/Q-R84-SPEC.md` + `Q-R84-SPEC-AUDIT.md` + `Q-R84-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R84.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE; **Architect MUST use `--test-reporter=tap`** per R77. Architect MUST verify Node v25 native Worker support OR jsdom Worker polyfill at spec-emit. **Sharpened Haiku-MU REINFORCED:** MU updates TOP-OF-FILE STATUS field (`head -5 NEXT-ROLE.md | grep STATUS:`).
+
+### Halt conditions (R84 Implementer)
+
+1. Q-R84-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R83 close other than R84-additions
+4. R61-class architectural-reality discovery
+5. Architect spec uses round-evolution-fragile AC patterns: HALT
+6. All cross-project disciplines load-bearing
+7. New external dependency: HALT + DIAGNOSTIC + ESCALATE
+8. **Web Worker not testable in Node:** document limitation + manual smoke test deferred to R85; HALT + DIAGNOSTIC for operator decision
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R84 --tier full
+```
 
 ---
 

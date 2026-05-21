@@ -87,3 +87,20 @@ with `git diff SHA-A HEAD -- src/ tests/ prisma/` exits 0.
 #   (4) round summary written; (5) **NEXT-ROLE.md STATUS field = ROUND-COMPLETE**
 #   verified via grep before MU exits. Cross-project promotion candidate at 3rd
 #   instance (currently Tessera-internal at 2 instances).
+
+# REINFORCED 2026-05-21 — SHARPENED: "NEXT-ROLE.md STATUS field" means the
+#   TOP-OF-FILE STATUS field (lines 1-5). NOT a STATUS field inside any
+#   role-specific routing block ("## § MEMORIAL-UPDATER routing block" etc.).
+#   The pipeline post-MU state check reads ONLY the top-of-file field via
+#   `head -5 coordination/NEXT-ROLE.md | grep STATUS:`. Updating a STATUS
+#   field inside a deeper routing block does NOT satisfy the discipline.
+#   Verification before MU exits: `head -5 coordination/NEXT-ROLE.md` MUST
+#   show `STATUS: ROUND-COMPLETE` on the third line. Detected tessera 2026-05-21
+#   at R83 (4th instance; Haiku-MU added STATUS inside its own routing block
+#   but left top-of-file at READY from Implementer→Reviewer routing). 3rd
+#   distinct variant of Haiku-MU process-discipline-miss; pattern at 4 Tessera
+#   instances now (R75 READY/R78 READY/R80 MERGE-READY/R83 added-inner-block).
+#   **3-instance cross-project promotion threshold CROSSED at R80; 4-instance
+#   confirms the pattern; flag operator-decision to promote `haiku-mu-status-
+#   field-disambiguation` to ~/.claude/CROSS-PROJECT-MEMORIAL.md at next
+#   Phase 4 close.**
