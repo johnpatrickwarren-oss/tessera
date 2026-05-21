@@ -191,6 +191,28 @@ Key findings: at the Tessera default `max_hop_distance=1`, the cooling_zone node
 
 Operator tuning guidance: see `scripts/topology-walk-tuning-recommendation.md`.
 
+## Quick demo
+
+Open `demos/demo.html` directly in any modern browser — no server required. Eight pre-recorded
+scenarios cover clean, drift, common-mode, event-conditional, FDR, hierarchical, sparse, and
+topology-spanning behaviors. Each runs deterministically from an LCG-seeded synthetic substrate.
+
+### Controls
+
+- **Scrubber** — drag the slider in the top controls to jump to any window (0 through 29).
+  Scrubbing pauses playback automatically; release the slider to resume manual control.
+- **Keyboard** — `space` toggles play/pause; `→` and `←` step forward and backward one window;
+  `r` resets the current scenario.
+- **Speed** — 1×, 2×, 4× playback (500ms / 250ms / 125ms per window).
+- **Per-firing receipts** — the provenance panel collapses individual firing receipts; click
+  any receipt summary to expand its evidence JSON.
+
+### 10-minute walkthrough
+
+See [`demos/DEMO-SCRIPT.md`](demos/DEMO-SCRIPT.md) for a minute-by-minute script that walks
+through clean-baseline → SDC-drift → common-mode-rack → event-conditional with talking points
+matched to the dashboard's per-tick state. Analogous to DeploySignal's `DEMO-SCRIPT-10MIN.md`.
+
 ## License
 
 Apache 2.0. See `LICENSE`.

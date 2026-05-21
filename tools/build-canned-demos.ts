@@ -1286,6 +1286,36 @@ const HTML_TEMPLATE_HEAD = `<!DOCTYPE html>
     .det-fam-C { border-left: 3px solid #a371f7; }
     .det-fam-D { border-left: 3px solid #d29922; }
     .det-fam-E { border-left: 3px solid #f78166; }
+    /* R81 — color-state transitions (200ms ease) on dashboard surfaces */
+    .det-fam, .badge, #live-verdict-status {
+      transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease;
+    }
+    body.scrubbing .det-fam,
+    body.scrubbing .badge,
+    body.scrubbing #live-verdict-status {
+      transition: none;
+    }
+    /* R81 — window scrubber */
+    #window-scrubber {
+      flex: 1 1 200px;
+      max-width: 320px;
+      accent-color: var(--tessera-accent-blue);
+      height: 6px;
+      cursor: pointer;
+    }
+    /* R81 — per-firing collapsible receipts */
+    .provenance-receipt > summary {
+      cursor: pointer;
+      padding: 4px 0;
+      color: #e6edf3;
+      font-weight: 500;
+    }
+    .provenance-receipt > summary:hover {
+      color: #f0f6fc;
+    }
+    details.provenance-receipt[open] > summary {
+      color: var(--tessera-accent-blue);
+    }
     /* R79: provenance panel */
     #provenance-panel { padding: 16px 24px; border-top: 1px solid #30363d; }
     #provenance-panel summary { cursor: pointer; font-size: 0.9rem; color: #8b949e; padding: 4px 0; }
@@ -1333,6 +1363,7 @@ const HTML_TEMPLATE_HEAD = `<!DOCTYPE html>
       <option value="2">2×</option>
       <option value="4">4×</option>
     </select>
+    <input type="range" id="window-scrubber" min="0" max="29" step="1" value="0" aria-label="Scrub to window">
     <span id="window-indicator">window 0 / 30</span>
   </section>
 
@@ -1412,6 +1443,7 @@ const HTML_TEMPLATE_FOOTER = `
   var playing = false;
   var intervalHandle = null;
   var baseIntervalMs = 500;
+  var isSyncingScrubber = false;
 
   // ── Load scenario data from inlined script blocks ──
   var names = [
@@ -1444,6 +1476,7 @@ const HTML_TEMPLATE_FOOTER = `
   var metricsBodyEl        = document.getElementById('metrics-body');
   var detectorsBodyEl      = document.getElementById('detectors-body');
   var provenanceBodyEl     = document.getElementById('provenance-body');
+  var windowScrubber       = document.getElementById('window-scrubber');
 
   var SVG_NS = 'http://www.w3.org/2000/svg';
   var SVG_W = 800, SVG_H = 400;
@@ -1560,14 +1593,15 @@ const HTML_TEMPLATE_FOOTER = `
     auditEl.insertBefore(li, auditEl.firstChild);
   }
 
-  function renderAuditForWindow(scenarioData, windowIdx) {
-    var windows = scenarioData.windows;
-    if (!windows.length) return;
-    var wIdx = Math.min(windowIdx, windows.length - 1);
-    var events = windows[wIdx].events;
-    for (var i = 0; i < events.length; i++) {
-      var ev = events[i];
-      appendAuditEntry('[w' + wIdx + '] ' + JSON.stringify(ev));
+  function rebuildAuditUpToCurrentWindow(scenarioData) {
+    auditEl.innerHTML = '';
+    if (!scenarioData || !scenarioData.windows.length) return;
+    var wIdx = Math.min(currentWindowIdx, scenarioData.windows.length - 1);
+    for (var i = 0; i <= wIdx; i++) {
+      var events = scenarioData.windows[i].events;
+      for (var j = 0; j < events.length; j++) {
+        appendAuditEntry('[w' + i + '] ' + JSON.stringify(events[j]));
+      }
     }
   }
 
@@ -1706,14 +1740,34 @@ const HTML_TEMPLATE_FOOTER = `
     }
     for (var i = 0; i < receipts.length; i++) {
       var r = receipts[i];
-      var card = document.createElement('div');
+      var card = document.createElement('details');  // R81: was 'div'
       card.className = 'provenance-receipt';
-      var h  = document.createElement('div'); h.className = 'pr-header';    h.textContent = '[' + r.event_id + '] ' + r.shard_id + ' · Family ' + r.family + ' · window ' + r.window;
+      // R81: collapsed by default (no open attribute)
+      var sum = document.createElement('summary');
+      sum.className = 'pr-header';
+      sum.textContent = '[' + r.event_id + '] ' + r.shard_id + ' · Family ' + r.family + ' · window ' + r.window;
       var rs = document.createElement('div'); rs.className = 'pr-reasoning'; rs.textContent = r.reasoning;
       var ev = document.createElement('pre'); ev.className = 'pr-evidence';  ev.textContent = JSON.stringify(r.evidence, null, 2);
-      card.appendChild(h); card.appendChild(rs); card.appendChild(ev);
+      card.appendChild(sum);
+      card.appendChild(rs);
+      card.appendChild(ev);
       provenanceBodyEl.appendChild(card);
     }
+  }
+
+  function syncScrubberPosition() {
+    if (!windowScrubber) return;
+    isSyncingScrubber = true;
+    windowScrubber.value = String(currentWindowIdx);
+    isSyncingScrubber = false;
+  }
+
+  function manualStep(delta) {
+    var sd = scenarios[currentName];
+    if (!sd) return;
+    var maxIdx = sd.windows.length - 1;
+    currentWindowIdx = Math.max(0, Math.min(maxIdx, currentWindowIdx + delta));
+    render();
   }
 
   function render() {
@@ -1722,12 +1776,14 @@ const HTML_TEMPLATE_FOOTER = `
     updateLiveVerdictBanner(scenarioData, currentWindowIdx);
     drawFrame(scenarioData, currentWindowIdx);
     renderBadges(scenarioData, currentWindowIdx);
+    rebuildAuditUpToCurrentWindow(scenarioData);
     updateWindowIndicator(scenarioData);
     renderMetricsPanel(scenarioData, currentWindowIdx);
     renderDetectorsPanel(scenarioData, currentWindowIdx);
     if (currentWindowIdx >= scenarioData.windows.length - 1) {
       renderReasoningAndActions(scenarioData);
     }
+    syncScrubberPosition();
   }
 
   function tick() {
@@ -1739,7 +1795,6 @@ const HTML_TEMPLATE_FOOTER = `
       return;
     }
     currentWindowIdx++;
-    renderAuditForWindow(scenarioData, currentWindowIdx);
     render();
   }
 
@@ -1760,6 +1815,12 @@ const HTML_TEMPLATE_FOOTER = `
     stopPlay();
     currentName = name;
     currentWindowIdx = 0;
+    if (windowScrubber) {
+      isSyncingScrubber = true;
+      windowScrubber.max = String(Math.max(0, (scenarios[currentName] || { windows: [] }).windows.length - 1));
+      windowScrubber.value = '0';
+      isSyncingScrubber = false;
+    }
     clearPanels();
     var scenarioData = scenarios[currentName];
     if (scenarioData) renderProvenancePanel(scenarioData);
@@ -1778,6 +1839,53 @@ const HTML_TEMPLATE_FOOTER = `
   });
   speedSel.addEventListener('change', function () {
     if (playing) { stopPlay(); startPlay(); }
+  });
+
+  if (windowScrubber) {
+    windowScrubber.addEventListener('input', function () {
+      if (isSyncingScrubber) return;
+      stopPlay();
+      document.body.classList.add('scrubbing');
+      currentWindowIdx = parseInt(windowScrubber.value, 10) || 0;
+      render();
+    });
+    windowScrubber.addEventListener('change', function () {
+      document.body.classList.remove('scrubbing');
+    });
+  }
+
+  document.addEventListener('keydown', function (ev) {
+    // Don't intercept keystrokes while user is in a form input or content-editable surface
+    if (ev.target && ev.target.tagName) {
+      var t = ev.target.tagName.toUpperCase();
+      if (t === 'INPUT' || t === 'SELECT' || t === 'TEXTAREA') return;
+    }
+    if (ev.target && ev.target.isContentEditable) return;
+    switch (ev.code) {
+      case 'Space':
+        ev.preventDefault();
+        if (playing) stopPlay(); else startPlay();
+        break;
+      case 'ArrowRight':
+        ev.preventDefault();
+        if (playing) stopPlay();
+        manualStep(1);
+        break;
+      case 'ArrowLeft':
+        ev.preventDefault();
+        if (playing) stopPlay();
+        manualStep(-1);
+        break;
+      case 'KeyR':
+        ev.preventDefault();
+        stopPlay();
+        currentWindowIdx = 0;
+        clearPanels();
+        var sd = scenarios[currentName];
+        if (sd) renderProvenancePanel(sd);
+        render();
+        break;
+    }
   });
 
   // ── Initial render ──
