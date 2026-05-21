@@ -15,4 +15,4 @@ Source: default for tier=audit
 
 ## Cache-prefix telemetry
 Measurer: scripts/measure-cache-effect.js
-Output: {"round":"R89","prefix_bytes":69733,"prefix_sha256":"a35a1b54e1a669220b4c14043cb82148b64a22e6a2e2359fd2573fe1febd761f","tail_bytes":{"IMPLEMENTER":91555,"REVIEWER":8345,"MEMORIAL-UPDATER":6661},"prefix_tokens_est":19924,"tail_tokens_est":{"IMPLEMENTER":26159,"REVIEWER":2385,"MEMORIAL-UPDATER":1904},"chars_per_token":3.5,"estimated_cache_hit_savings_percent_per_2nd_plus_session":59.6,"measurer_version":"0.1.0"}
+Output: {"round":"R89","prefix_bytes":69792,"prefix_sha256":"d62145a4df6ecc61f8dcc860bf8aeaf3ba967df0c06f2f87a468b141973cfb1d","tail_bytes":{"IMPLEMENTER":91591,"REVIEWER":8345,"MEMORIAL-UPDATER":6661},"prefix_tokens_est":19941,"tail_tokens_est":{"IMPLEMENTER":26169,"REVIEWER":2385,"MEMORIAL-UPDATER":1904},"chars_per_token":3.5,"estimated_cache_hit_savings_percent_per_2nd_plus_session":59.6,"measurer_version":"0.1.0"}

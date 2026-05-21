@@ -1,6 +1,6 @@
 CURRENT-ROUND: R89
-NEXT-ROLE: ARCHITECT
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 TIER: audit
 
 ---
@@ -201,4 +201,61 @@ scripts/finalize-round.sh
 test/q89-methodology-hygiene.test.ts
 ```
 All 14 paths within ALLOWED_SET. EMPIRICAL.sh Block 1: PASS.
+
+---
+
+## § R89 REVIEWER routing block (2026-05-21)
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+TIER: audit
+MODE: structural-only (R74 / CLAUDE-REVIEWER.md)
+
+Inputs:
+- coordination/reviews/REVIEWER-REPORT-R89.md (NEW; 0 CRITICAL / 1 MAJOR / 1 MINOR / 4 OBS)
+- coordination/MEMORIAL.md (R89 REVIEWER section — 4 CONFIRMATIONs + 2 VIOLATIONs appended)
+
+### Binding-command attestation at Reviewer HEAD (eca522f)
+
+- `bash coordination/specs/Q-R89-EMPIRICAL.sh` → 11 PASS / 0 FAIL, exit 0
+- `node --test --test-reporter=tap test/q89-methodology-hygiene.test.js` → tests=8, pass=8, fail=0, skip=0
+- Block 8 (full suite TAP): tests=710, pass=691, fail=15, skip=4 (within predicted bands per spec § 3)
+
+### AC coverage summary (structural-only walk)
+
+| AC | Result | Evidence |
+|---|---|---|
+| AC-R89-1: MEMORIAL-PHASE-3.md byte-identical | PASS | EMPIRICAL Block 2 + test ok 1 |
+| AC-R89-2: MEMORIAL-PHASE-4.md byte-identical | PASS | EMPIRICAL Block 3 + test ok 2 |
+| AC-R89-3: NEXT-ROLE-PHASE-4.md byte-identical | PASS | EMPIRICAL Block 4 + test ok 3 |
+| AC-R89-4: CLAUDE-ARCHITECT.md ≤30 (actual=24) | PASS | EMPIRICAL Block 5 + test ok 4 |
+| AC-R89-5: CLAUDE-IMPLEMENTER.md ≤30 (actual=30; AC-R36-21 FLIP) | PASS | EMPIRICAL Block 6 + test ok 5 |
+| AC-R89-6: check-claude-md-thresholds.sh exit 0 | PASS | EMPIRICAL Block 7 + test ok 6 |
+| AC-R89-7: active MEMORIAL.md R88 entries preserved (.includes()) | PASS | test ok 7 (MINOR-1 flag: test uses .includes() vs AC literal "at same line positions") |
+| AC-R89-8: active NEXT-ROLE.md first 126 lines byte-identical | PASS | test ok 8 |
+
+### Findings summary
+
+- **CRITICAL**: 0
+- **MAJOR**: 2
+  - MAJOR-1 prefix-continuity-invariant deviation (Q-R89-EMPIRICAL.sh Block 8 amended post-spec-commit 004cff6; Implementer self-disclosed via TD-1 + MEMORIAL VIOLATION). Substantive deliverable sound.
+  - MAJOR-2 AC-R89-8 structurally unsatisfiable at Reviewer/MU routing-commit stage. R83 routing discipline (top-STATUS updates land in routing-commit) conflicts with AC-R89-8's "first 126 lines byte-identical" requirement. Spec design issue; no role-execution error. AC-R89-8 will continue to FAIL through MU close — this is expected, not an MU defect.
+- **MINOR**: 1 — MINOR-1 AC-R89-7 test uses `.includes()` instead of AC literal "at same line positions" (line-shift acknowledged in spec audit § A5 but assertion form diverges).
+- **OBS**: 4 — finalize-round.sh nested-guard structure (functionally equivalent); .js artifact gitignored; phase-shard naming asymmetry (intentional, documented); uncommitted modification to coordination/logs/ROUND-R89-ROUTING.md.
+
+### Test baseline post-Reviewer-routing-commit
+
+Reviewer HEAD `eca522f` (PRE this Reviewer's routing-commit edits): `node --test --test-reporter=tap test/q89-methodology-hygiene.test.js` → 8/8 PASS; Q-R89-EMPIRICAL.sh → 11 PASS / 0 FAIL, exit 0; full suite within band (pass=691, fail=15).
+
+Post-this-routing-commit (AC-R89-8 flips per MAJOR-2): full suite expected `tests=710, pass=689-691, fail=16-17, skip=4` — explicitly OUT of the Implementer-chore-A `fail=[14,15]` band because of mandatory R83 top-STATUS update breaking AC-R89-8's "first 126 lines byte-identical" assertion. This is the MAJOR-2 spec-design-tension consequence, not an execution error. **Memorial Updater: do not interpret post-routing fail count as a halt condition.**
+
+### Operator-decision flags
+
+1. **MAJOR-1** (prefix-continuity-invariant deviation): Implementer self-disclosed via TD-1 and asked for Reviewer assessment of HALT+ESCALATE. Reviewer's structural-only assessment: deviation was necessary to make Block 8 verification work; substantive deliverable independent of Block 8 mechanics; audit trail preserved. Operator may consider retroactive ESCALATE handling.
+
+2. **MAJOR-2** (AC-R89-8 vs R83 spec design tension): Future methodology rounds should not write "first N lines byte-identical" ACs at the working-tree level — either exclude lines 1–4 (top routing block) or anchor the AC to a specific chore-A SHA via `git show`.
+
+### Right-reasons audit
+
+SUSPENDED per structural-only mode (CLAUDE-REVIEWER.md "## Mode: Structural-only Reviewer"). AC-binding structural integrity walk (8/8 PASS) replaces this audit for the structural-only scope.
 
