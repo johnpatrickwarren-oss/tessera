@@ -1,6 +1,6 @@
 CURRENT-ROUND: R80
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
 TIER: full
 
 ---
@@ -235,6 +235,60 @@ This is TACTICAL AUTONOMY: a cosmetic change that preserves system invariants
   (2) Family D peakACF return-value range under monotone demo substrate (§ 5.3 #2)
   (3) CSS variable internal consistency (§ 5.3 #4)
   (4) @media print content correctness (§ 5.3 #5)
+
+---
+
+## § R80 REVIEWER routing block (2026-05-20)
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+TIER: full
+Round: R80 (Phase 4 SLICE 2 round 2 — dashboard polish; 5-family detector visualization + visual identity pass)
+
+### Reviewer empirical-rerun attestation (Rule 1)
+
+Reviewer HEAD: `3e8762c`. Independent re-run of `bash coordination/specs/Q-R80-EMPIRICAL.sh`:
+```
+Block 1 PASS: tsc exit 0
+Block 2 PASS: all 14 required artifacts present
+Block 3 PASS: tests=608 suites=3 pass=594 fail=10 skipped=4
+Block 4 PASS: 13 files in diff, all within ALLOWED_SET
+── Q-R80-EMPIRICAL.sh: ALL BLOCKS PASS (exit 0)
+```
+
+Independent rerun of R80 test in isolation: `# pass 14 # fail 0`. All 14 R80 ACs PASS.
+
+### Findings summary
+
+**Counts:** 0 CRITICAL, 3 MAJOR, 5 MINOR, 4 OBS.
+
+| ID | Severity | One-line | Owning role |
+|---|---|---|---|
+| MAJOR-1 | MAJOR | Implementer self-resolved spec contradiction (R80 § 4.1.5 vs frozen AC-R79-4) without HALT + DIAGNOSTIC + ESCALATE; 5th Tessera spec-not-amended-post-disposition | IMPLEMENTER |
+| MAJOR-2 | MAJOR | Architect forward-protection-AC audit missed AC-R79-4; 2nd-instance recurrence of R79 lesson | ARCHITECT |
+| MAJOR-3 | MAJOR | Proxy threshold mis-calibration: family_c.fired in 7/30 clean-baseline windows; contradicts canonical "no false-positives" narrative; § 9.6 prediction empirically refuted | ARCHITECT |
+| MINOR-1 | MINOR | CSS `--tessera-*` variables defined but never `var(--tessera-...)`-referenced — visual identity pass half-done | IMPLEMENTER |
+| MINOR-2 | MINOR | `.tessera-tagline` class has no CSS rule — tagline unstyled | IMPLEMENTER |
+| MINOR-3 | MINOR | Large numbers (Σ(M-μ)² up to 48 trillion) displayed as `toFixed(3)` — human-uninterpretable | IMPLEMENTER |
+| MINOR-4 | MINOR | Family E threshold 3.0 fails to discriminate substrate (sdc-drift 2.9999 vs clean-baseline 2.94) | ARCHITECT |
+| MINOR-5 | MINOR | `topShardIdx` recomputed per-window — Family D series may swap underlying shard across consecutive windows | ARCHITECT |
+| OBS-1..4 | OBS | (See report § 4) | — |
+
+### Routing rationale
+
+CLAUDE-REVIEWER.md routing rule: CRITICAL exists → STATUS: ESCALATE; MAJOR or below → STATUS: MERGE-READY.
+
+**STATUS: MERGE-READY** (strict-routing). All 14 R80 ACs pass; substantive deliverable (5-family detector visualization + visual identity scaffolding) ships. The 3 MAJOR findings are: 2 methodology-discipline violations (recurrences of R79 lessons; 2nd-instance failures) and 1 proxy calibration issue (Architect-side empirical-premise gap). All correctable; none CRITICAL.
+
+**Operator-facing note:** MAJOR-1 + MAJOR-2 are both 2nd-instance failures of reinforcements applied at R79 close. Memorial-Updater is invited to consider whether the R79 reinforcement language needs sharpening (the current pattern is recurring within 1 round of memorialization).
+
+### Inputs for MEMORIAL-UPDATER
+
+- `coordination/reviews/REVIEWER-REPORT-R80.md` (this report; primary input)
+- `coordination/specs/Q-R80-SPEC.md` + `Q-R80-SPEC-AUDIT.md` + `Q-R80-EMPIRICAL.sh` (verify spec-side claims)
+- `coordination/MEMORIAL.md` (R80 ARCHITECT + IMPLEMENTER + REVIEWER entries appended; 13 VIOLATION entries with [role]-tagging per R58 lesson)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` (cross-project canonical; consider whether MAJOR-1 + MAJOR-2 patterns warrant promotion or sharper reinforcement)
+- `CLAUDE-ARCHITECT.md` + `CLAUDE-IMPLEMENTER.md` (consider REINFORCED line additions for the 2 recurring patterns)
 
 ---
 
