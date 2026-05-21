@@ -1,6 +1,6 @@
 CURRENT-ROUND: R88
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
 
 ---
@@ -102,6 +102,79 @@ ALLOWED modifications:
 ```bash
 cd /Users/johnwarren/concord/tessera
 ./run-pipeline.sh --round R88 --tier full
+```
+
+---
+
+## § R88 ARCHITECT routing block (2026-05-21)
+
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
+Inputs:
+- coordination/specs/Q-R88-SPEC.md
+- coordination/specs/Q-R88-SPEC-AUDIT.md
+- coordination/specs/Q-R88-EMPIRICAL.sh
+- coordination/MEMORIAL.md (R88 ARCHITECT section — 9 CONFIRMATIONs)
+
+### Architect-committed SHA: cc2725f
+
+### Spec summary
+
+R88 = full-tier Phase 5 SLICE 1 shipping `tools/curate-baseline.ts` — a one-command operator entry point composing Stage 2a (per-shard MCD-Mahalanobis screening) + Stage 2b (FCP-1 fleet-correlated e-process) curation pipeline via `curateBaselineFleetCorrelated()`. Auto-validation pass re-runs Stage 2a/2b on the curated bundle to confirm Family C detector quiescence (zero residual contamination + no FCP-1 fire). Threshold-based gating: `< 5%` → ready; `5-15%` → ready with warning; `≥ 15%` → HALT (overridable via `--allow-high-drop`); validation-failure → HALT (never overridable). Three output artifacts under `<out-dir>/`: `curated-baseline.json`, `curation-report.md`, `curation-decisions.jsonl`.
+
+### Round-start SHA: 7887298
+
+Verified empirically at Architect session entry (Q-R88-SPEC.md § 0):
+- `pnpm exec tsc -p tsconfig.test.json; echo $?` → `0`
+- TAP `# tests 692 / # pass 673 / # fail 15 / # skipped 4`
+
+### Implementer pseudo-code surface
+
+- `tools/curate-baseline.ts` (NEW; ~280 lines) — full pseudocode at Q-R88-SPEC.md § 3.1, including 5 exported functions (`runCurationFlow`, `decideOutcome`, `countAlignedTicks`, `runAutoValidation`, `buildReportMarkdown`) plus `loadBundle` / `parseCliArgs` / `writeOutputs` internals plus `require.main === module` CLI guard
+- `test/q88-baseline-curation-flow.test.ts` (NEW) — 10 runtime test() blocks (AC-R88-1..AC-R88-10); full pseudocode at Q-R88-SPEC.md § 3.2
+- `test/_substrate/curation-corpus-{clean,moderate,heterogeneous}.json` (3 NEW fixtures) — Implementer hand-constructs deterministic literal-array JSON bundles; tunes until observed drop_rate lands in target band per AC predicates (tactical autonomy permitted for fixture composition per § 5.3.3)
+- `package.json` — single line added to `"scripts"`: `"curate-baseline": "pnpm exec node tools/curate-baseline.js"` (§ 3.5)
+- `README.md` — `## Baseline curation` section inserted between `## Topology-walk tuning envelope (R78)` (line 200) and `## Quick demo` (line 202) — verbatim content at § 3.6
+- `Q-R88-EMPIRICAL.sh` — 6 blocks pre-staged at spec-emit; Implementer re-runs at chore-A and quotes verbatim output per Rule 1 sub-class `empirical-command-attestation`
+- MEMORIAL.md + NEXT-ROLE.md routing-block appends post-chore-A
+
+### Predicted chore-A binding-command outcomes (Q-R88-SPEC-AUDIT.md § A3)
+
+- `pnpm exec tsc -p tsconfig.test.json` exit: **0**
+- TAP summary: `# tests=702` strict; `# fail ∈ [15, 16]` (band; AC-R84-14 stochastic flake per R85 REVIEWER MINOR-2 / MEMORIAL.md:2583); `# pass ∈ [682, 683]` (band; complement); `# skipped = 4` strict
+- `bash coordination/specs/Q-R88-EMPIRICAL.sh` exit: **0**
+- `git diff 7887298 HEAD --name-only` line count: 14-17 files (spec triad + tools/curate-baseline ts+js + test file ts+js + 3 fixtures + package.json + README.md + NEXT-ROLE.md + MEMORIAL.md + optional logs/reviewer reports)
+
+### Halt conditions for Implementer (Q-R88-SPEC.md § 6 — 10 explicit triggers)
+
+1. Q-R88-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test count outside predicted band (single re-run permitted for AC-R84-14 flake; further drift → DIAGNOSTIC)
+4. R61-class architectural-reality discovery (function signatures or imports don't match spec § 0 / § 3.1)
+5. Spec-vs-impl semantic conflict
+6. New external dependency required
+7. Stage 2a / Stage 2b modification required (anti-scope expansion; ESCALATE)
+8. Pre-R88 test transitions PASS → FAIL (other than AC-R84-14 stochastic flake within band)
+9. EMPIRICAL.sh discovered to encode wrong prediction
+10. Unauthorized path in `git diff 7887298 HEAD --name-only` beyond § 5.2 ALLOWED_SET
+
+### Cross-project rules applied UPFRONT (per Q-R88-SPEC.md § 7)
+
+- Rule 1 sub-class `empirical-command-attestation` — AC-R88-7..R88-10 attestations quote OBSERVED `drop_rate` per fixture; AC-R88-11..R88-16 quote Q-R88-EMPIRICAL.sh verbatim block output
+- Rule 2 `architect-branch-binding-coverage` — § 4.1 binds every guard / branch in `tools/curate-baseline.ts` to an AC or to § 5.3 acknowledged gap
+- Rule 3 `implementer-spec-test-assertion-coverage` — per-AC assert.equal/assert.ok prescribed in § 3.2
+- Rule 4 `anti-scope-allowed-set-forward-coverage` — § 5.2 ALLOWED_SET byte-mirrored to EMPIRICAL.sh Block 6
+- Rule 5 `rule-derivation-without-self-application` — N/A at R88 (no new rule expected at MU)
+- Rule 6 `halt-discipline-no-DIAGNOSTIC-for-workaround` — § 6 enumerates 10 explicit halt conditions
+- Rule 7 `derived-rule-propagation-mechanism-required` — § 7 IS surface-(a); surface-(b) `scripts/pre-commit-rule-sweep.sh` at chore-A
+- R85 lesson: fail-count band [15, 16] (not strict) for AC-R84-14 flaky AC
+- R86 prophylactic + R87 sub-pattern variant: § 9.5 self-application gate; § 9.7 empirical-premise verification; § A8 verified zero existing `## Baseline curation` heading in README.md (R81 MAJOR-3 lesson)
+
+### Pipeline resume
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R88 --tier full --start-at IMPLEMENTER
 ```
 
 ---
