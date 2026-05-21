@@ -144,7 +144,7 @@ with a clear commit message.
 #   DIAGNOSTIC is required at point-of-encounter — not deferred to the coordination step.
 #   Detected R01: 6 anti-scope files vendored; no DIAGNOSTIC files produced.
 
-# REINFORCED — HALT-DISCIPLINE (composite; 10 sub-variants observed at Tessera)
+# REINFORCED — HALT-DISCIPLINE (composite; 11 sub-variants observed at Tessera)
 #
 #   Spec-internal contradiction (R01): Two spec sections that prescribe mutually
 #     incompatible implementation choices are HALT condition (c). All sub-types
@@ -234,6 +234,23 @@ with a clear commit message.
 #     requiring HALT + DIAGNOSTIC. Do NOT patch inline and disclose only in NEXT-ROLE.md spec-deviance.
 #     3rd tessera instance of tactical-autonomy-overreach sub-pattern; cross-project rule derived.
 #     Detected tessera R73 MAJOR-2 (Reviewer-1).
+#
+#   Bash-construct TD requires empirical semantic equivalence check (R74 CRITICAL-1 + MINOR-4):
+#     When a TACTICAL DEVIATION rewrites a bash construct — especially one involving boolean flag
+#     semantics (${VAR:+word}, $VAR && ..., if $VAR; then ...) — to satisfy an AC regex constraint,
+#     the TACTICAL DEVIATION disclosure MUST include an empirical equivalence check: verify the
+#     substitute construct produces identical behavior for BOTH the flag-set case (e.g., MU_SONNET=true)
+#     AND the flag-unset case (e.g., MU_SONNET=false). ${VAR:+word} triggers on set-and-non-null
+#     REGARDLESS of value — the string 'false' is non-empty and satisfies the condition, so
+#     ${MU_SONNET:+--mu-sonnet} with MU_SONNET=false (non-empty string) ALWAYS expands to --mu-sonnet.
+#     This is NOT equivalent to if [ "$MU_SONNET" = "true" ]; then ... fi. Procedure: for each bash
+#     substitute construct in a TD disclosure, run: bash -c 'set -u; VAR=false; echo "${VAR:+word}"'
+#     (produces "word" — proves non-equivalence). TD-1 type substitutions (e.g., replacing an invalid
+#     \Z regex with \s*$) are self-evidently equivalent; TD-2 type bash-construct rewrites require
+#     explicit empirical cross-check. Discovered when TD-2 at run-pipeline.sh:226 caused the
+#     Haiku-default mechanism to be structurally unreachable — every pipeline invocation fired
+#     operator_override Sonnet regardless of flag presence. 4th tessera tactical-autonomy instance;
+#     first bash-glue-semantic-equivalence sub-class. Detected tessera R74 CRITICAL-1 + MINOR-4.
 
 # REINFORCED 2026-05-18 — false-compliance-attestation (cross-project rule):
 #   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R03 MINOR-4 (spec count ≠ observed count),
@@ -298,7 +315,7 @@ with a clear commit message.
 #     entries but dropping them for others — is a verbatim-preservation failure even when the
 #     rule body itself is intact.
 
-# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 12 sub-variants)
+# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 13 sub-variants)
 #
 #   Prescriptions are binding (R01): Spec prescriptions in §Implementation surface are
 #     equivalent to ACs — not optional suggestions. When a prescription is unachievable,
@@ -421,6 +438,20 @@ with a clear commit message.
 #     ("# OPTIONAL — path included only if Implementer touches this file"). Detected tessera
 #     R73 MINOR-3 (spec §5.1: 26 fixed + CLAUDE-COORDINATOR.md OPTIONAL; EMPIRICAL.sh Block 8:
 #     27 uniform; Reviewer MINOR-3).
+#
+#   In-round AC addition must propagate to spec § 4 table + § 5.3 + § 10 predictions (R74 MAJOR-1 R2):
+#     When an Operator-authorized in-round fix adds a new AC to the test file (e.g., AC-R74-32 added
+#     per Option A directive), ALL spec gate artifacts that enumerate or count ACs must be amended in
+#     lockstep: (a) spec § 4 AC table (add the new AC row); (b) spec § 5.3 acknowledged-gaps narrative
+#     (mark the now-closed gap as "Closed by AC-R74-32 per Option A"); (c) spec § 10 Architect
+#     predictions (update N_new, tests, pass, and any per-AC predicted value affected by the fix).
+#     The R72 MAJOR-2 canonical rule (spec-amendment-ALL-gate-artifacts-propagation) applies not only
+#     to ALLOWED_SET surfaces but to any spec gate artifact that enforces an invariant — including the
+#     AC table's completeness claim. A test file with 32 ACs and a spec AC table with 31 rows is an
+#     internal inconsistency that leaves future Reviewers unable to count ACs reliably from the spec.
+#     Procedure: after any in-round AC addition, grep the spec for every occurrence of "N_new = " and
+#     "AC-R<N>-<last>" and update them to reflect the new totals. Detected tessera R74 MAJOR-1 R2
+#     (Reviewer-2; spec § 4 last row = AC-R74-31; § 5.3 still says "absent"; § 10 N_new = 22).
 
 # REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 6 sub-variants)
 #
@@ -560,7 +591,7 @@ with a clear commit message.
 #   step: open the header, read each attestation-type claim, verify it still describes the
 #   current file body accurately. Detected tessera R20 MINOR-1.
 
-# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 9 sub-variants)
+# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 10 sub-variants)
 #
 #   Full-formula re-verification (R20 MINOR-2): When spec § 4.x prescribes updating a
 #     specific arithmetic expression, re-read the FULL formula at the targeted line — all
@@ -638,6 +669,24 @@ with a clear commit message.
 #     your own commits. All 24 paths happened to be in ALLOWED_SET at R73 (substantive contract
 #     held); the lesson is that the count itself is a binding-command observation and must be
 #     verbatim. Detected tessera R73 MAJOR-1 (Reviewer-1; count 21 claimed vs 24 actual).
+#
+#   Attestation supplementary JSON field values must be verbatim (R74 MAJOR-1 R1): When
+#     a binding-command result produces structured JSON output with multiple fields and the
+#     attestation cites a REASON or interpretation for WHY a particular field value occurred
+#     (e.g., "selector returned Sonnet because of Class C co-occurrence in R72/R73 Reviewer
+#     prose"), that interpretive claim is also a binding-command observation — it must be
+#     derived verbatim from the actual JSON fields (e.g., matched_anchors, decision_path),
+#     not from the Implementer's inference about what section of the directive the selector
+#     must have read. At R74, the Implementer correctly attested model=claude-sonnet-4-6
+#     (verbatim correct) but mis-attributed the trigger to "Class C co-occurrence (Reviewer-2
+#     + ESCALATE in R73 Reviewer routing block)" — the actual selector output's matched_anchors
+#     was ["cross-project canonical"] and decision_path was ["marker_match","class_A"]. Reviewer-1
+#     verified /Reviewer-2/ → null AND /\bESCALATE\b/ → null in the actual R74 directive section
+#     (R73 Reviewer routing block is AFTER the directive's --- boundary, excluded by loadDirective).
+#     The encode-actual-results-verbatim rule (CLAUDE-COMMON.md REINFORCED 2026-05-18) extends to
+#     ALL cited fields in structured output — not only the field bound by the AC. Procedure: when
+#     attesting a structured JSON result, copy ALL cited field values verbatim from the actual
+#     JSON output before writing interpretive commentary. Detected tessera R74 MAJOR-1 R1.
 
 # REINFORCED 2026-05-17 — When implementing a spec-prescribed guard for a distinct failure
 #   mode, write a structural test that would FAIL if the guard were removed. If the existing
@@ -713,7 +762,7 @@ with a clear commit message.
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
 
-# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 9 sub-variants observed at Tessera)
+# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 10 sub-variants observed at Tessera)
 #
 #   Selective-audit-overreach (R41 MAJOR-1): When an audit empirically checks N of M files and
 #     the AC requires "all M files" verified, the delivered artifact must scope its claim to
@@ -835,6 +884,20 @@ with a clear commit message.
 #     Attestation = "I ran this command at HEAD after all amendments and observed this
 #     output." Detected tessera R72 CRITICAL-1 (Reviewer-2; second Tessera instance of
 #     false-compliance-attestation; first: R26 MAJOR-1).
+#
+#   Structurally-unreachable bash branch must be declared in TD disclosures (R74 MINOR-3):
+#     When a bash case-statement catch-all arm (*) is structurally unreachable through ALL valid
+#     inputs to the surrounding logic (e.g., the only emitted values are already handled by
+#     explicit pattern arms, and the value that would trigger the catch-all is short-circuited
+#     before the statement is reached), this constitutes defensive dead code. Defensive code is
+#     acceptable; SILENT defensive code is not. Procedure: when writing a case-statement with a
+#     catch-all arm that cannot be exercised by any valid caller path, include it as a named
+#     tactical deviation (e.g., "TD-N: unreachable catch-all arm at run-pipeline.sh:235 for
+#     selector model field — n/a is short-circuited before selector invocation by surrounding
+#     if-block at line 222; retained as defensive fallback for unexpected future selector values").
+#     No AC binding required; disclosure alone is sufficient. This prevents future readers from
+#     either (a) incorrectly assuming the branch is exercised, or (b) deleting it without
+#     understanding its intent. Detected tessera R74 MINOR-3 (Reviewer-1; run-pipeline.sh:235-236).
 
 # REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 6 sub-variants observed at Tessera)
 #
