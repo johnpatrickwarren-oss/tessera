@@ -299,6 +299,27 @@ ROUTING_LOG="coordination/logs/ROUND-${ROUND}-ROUTING.md"
   fi
 } > "$ROUTING_LOG"
 
+# R75: cache-prefix telemetry. Measures the byte-identical PREFIX (load-bearing
+# for Anthropic prompt-cache hits across role sessions). Emitted once at
+# pipeline startup; per-role tail bytes recorded by run_role() on dispatch.
+{
+  echo ""
+  echo "## Cache-prefix telemetry"
+  if [[ -f "$PROJECT_ROOT/scripts/measure-cache-effect.js" ]]; then
+    measure_out=""
+    if measure_out=$(node "$PROJECT_ROOT/scripts/measure-cache-effect.js" \
+        --round "$ROUND" \
+        --project-root "$PROJECT_ROOT" 2>/dev/null); then
+      echo "Measurer: scripts/measure-cache-effect.js"
+      echo "Output: ${measure_out}"
+    else
+      echo "Measurer: scripts/measure-cache-effect.js (invocation failed; no telemetry)"
+    fi
+  else
+    echo "Measurer: not-yet-compiled (R75-pre-chore-A or fresh clone before pretest)"
+  fi
+} >> "$ROUTING_LOG"
+
 # ── Tier configuration ────────────────────────────────────────────────────────
 # full (default): full Anchor — Architect writes spec, Implementer executes,
 #                 Reviewer audits cold, Memorial records.
@@ -1639,13 +1660,28 @@ EOF
     $BUDGET_FLAG_SUPPORTED && \
       flags+=("--max-turns" "$budget")
 
-    # Append CLAUDE-COMMON.md + CLAUDE-<ROLE>.md + role-stamp as the system
-    # prompt addition. --append-system-prompt preserves Claude Code's built-in
-    # capabilities and adds our role + discipline definitions on top.
-    # The common + role files are stable across worktrees → prompt-cache prefix
-    # hits. .role-stamp varies per session and goes AFTER, so the cacheable
-    # prefix remains intact.
-    flags+=("--append-system-prompt" "$(cat "$PROJECT_ROOT/CLAUDE-COMMON.md" "$role_claude_file" "$stamp_file")")
+    # R75: gated context-bundle dispatch. When scripts/build-role-context.js
+    # exists, use the deterministic prefix+tail construction so Anthropic's
+    # prompt-cache hits the prefix across role sessions within a 5-min TTL.
+    # Falls back to the legacy cat-bundle when .js missing (e.g., during the
+    # R75 round itself before the script is compiled at chore-A pretest).
+    local context_bundle=""
+    if [[ -f "$PROJECT_ROOT/scripts/build-role-context.js" ]]; then
+      if context_bundle=$(node "$PROJECT_ROOT/scripts/build-role-context.js" \
+          --emit full \
+          --role "$role" \
+          --round "$ROUND" \
+          --project-root "$PROJECT_ROOT" \
+          --role-claude-file "$role_claude_file" 2>/dev/null); then
+        :
+      else
+        context_bundle=""
+      fi
+    fi
+    if [[ -z "$context_bundle" ]]; then
+      context_bundle=$(cat "$PROJECT_ROOT/CLAUDE-COMMON.md" "$role_claude_file" "$stamp_file")
+    fi
+    flags+=("--append-system-prompt" "$context_bundle")
 
     # --exclude-dynamic-system-prompt-sections moves per-machine drift
     # (cwd, env, git status) out of the cached system-prompt prefix so it

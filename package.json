@@ -20,6 +20,8 @@
     "tier-router": "pnpm exec node scripts/tier-router.js",
     "tier-router:validate": "pnpm exec node scripts/tier-router-validate.js",
     "mu-model-select": "pnpm exec node scripts/mu-model-select.js",
+    "build-role-context": "pnpm exec node scripts/build-role-context.js",
+    "measure-cache-effect": "pnpm exec node scripts/measure-cache-effect.js",
     "pretest": "tsc -p tsconfig.test.json",
     "test": "node --test test/*.test.js",
     "typecheck": "tsc -p tsconfig.test.json --noEmit"
