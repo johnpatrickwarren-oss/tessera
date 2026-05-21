@@ -1,11 +1,32 @@
 CURRENT-ROUND: R77
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 TIER: full
+
+Inputs:
+  - `coordination/reviews/REVIEWER-REPORT-R77.md` (this Reviewer's report)
+  - `coordination/specs/Q-R77-SPEC.md` + `Q-R77-SPEC-AUDIT.md` + `Q-R77-EMPIRICAL.sh`
+  - `coordination/MEMORIAL.md` R77 sections (Architect 1829–1859; Implementer 1862–1872; this Reviewer's append below)
+  - `coordination/diagnostics/DIAGNOSTIC-R77-empirical-sh-block2-reporter.md` (Implementer-authored halt artifact; resolved by operator Option A)
+  - This file `§ Operator resolution of R77 ESCALATE — Option A (2026-05-20)`
+
+Reviewer outcome: 0 CRITICAL / 1 MAJOR / 4 MINOR / 5 OBS. All 17 ACs PASS empirically at HEAD `a08180a`; binding commands re-run by Reviewer at HEAD (tsc exit 0; node --test tests=566/pass=557/fail=5/suites=3/skipped=4; EMPIRICAL.sh exit 0; anti-scope diff 14 paths ⊆ ALLOWED_SET; frozen surfaces byte-identical).
+
+MEMORIAL-UPDATER scope at R77 close (read REVIEWER-REPORT-R77.md § 6 for full enumeration):
+  1. Record VIOLATION: tdd-separate-RED-commit (Implementer 56992bd combined-commit). 9-round streak R69–R75 ends at R77. Cross-project memorial entry recommended (first streak-break since the discipline was set at R23 IMPL MINOR-1 + REINFORCED 2026-05-18).
+  2. Record VIOLATION: doc-content-empirical-accuracy / cite-with-counter-example-suppression at scripts/detector-tuning-recommendation.md:42-46,85-87,99-102 (selective α-tuning citation). Sub-class candidate for EMPIRICAL-PREMISE-VERIFICATION composite if recurrent.
+  3. Record VIOLATION: spec-self-application-gate (Architect § 9 did not probe-run EMPIRICAL.sh; did not walk "does the ASCII curve at win=200 convey information?"). Architect-side sub-variant of EMPIRICAL-PREMISE-VERIFICATION composite.
+  4. Record CONFIRMATION: halt-discipline correctly applied at chore-A (Implementer 15af7ea).
+  5. Record CONFIRMATION: anti-scope preserved; engine + frozen tools/scripts/run-pipeline.sh + R72 outputs byte-identical.
+  6. Record CONFIRMATION: 3rd Tessera instance of Architect-side empirical-script defect (R47 + R72 + R77) — align cross-project memorial with operator-authored note at this file § Operator resolution.
+
+Routing rule: `CLAUDE-REVIEWER.md` says CRITICAL → ESCALATE / MAJOR or below → MERGE-READY. MAJOR-1 is procedural-discipline (TDD git-verifiability), not substance; the 504-cell detection envelope is functional and accurate, 17 ACs pass empirically, anti-scope clean. MERGE-READY routing applied.
+
+Pipeline resume: `./run-pipeline.sh --round R77 --tier full --start-at MEMORIAL-UPDATER`
 
 ---
 
-## § Operator resolution of R77 ESCALATE — Option A (2026-05-20)
+## § Original Operator resolution of R77 ESCALATE — Option A (2026-05-20)
 
 **Decision:** Option A approved (Coordinator-direct fix; 20-character addition).
 
