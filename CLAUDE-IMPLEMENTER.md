@@ -1066,3 +1066,28 @@ with a clear commit message.
 #   Root cause: author estimated from reading and rounded down. Procedure: before finalizing
 #   commit message, run `wc -l [file]` for new files and record the exact output. Detected
 #   tessera R78 MINOR-2.
+# REINFORCED 2026-05-20 — Halt-condition observed-vs-predicted divergence must ESCALATE to operator,
+#   not be self-resolved by modifying the binding-command harness. When EMPIRICAL.sh or any binding
+#   command produces an observed value diverging from spec-predicted (e.g., TAP fail count 8 vs
+#   predicted 7), the Implementer procedure is: (1) write DIAGNOSTIC identifying the root cause
+#   (2) set STATUS: ESCALATE (3) STOP. The Implementer does NOT amend EMPIRICAL.sh, Q-RNN-SPEC.md,
+#   or the spec triad to change expected values after observing differing actuals. That amendment is
+#   the operator's or Architect's decision, routed through the operator. This is the fourth tessera
+#   instance of spec-not-amended-post-disposition pattern (R25 MAJOR-2/3; R79 MAJOR-1); promoted to
+#   Implementer-role reinforcement because R79 was the first Implementer-side instance. Rule: the
+#   binding command harness is part of the spec triad. Implementer amendments to the spec triad are
+#   not acceptable under any conditions. Write the DIAGNOSTIC (✓), escalate (✗ at R79), resume after
+#   operator/Architect amends (N/A at R79). Detected tessera R79 MAJOR-1 (Implementer self-amended
+#   Q-R79-EMPIRICAL.sh EXPECTED_FAIL from 7→8 instead of escalating).
+# REINFORCED 2026-05-20 — Prefix-continuity-invariant must be honored even when the solution is obvious.
+#   CLAUDE-COMMON.md § "Within-round prefix-continuity invariant" declares: "once the Architect commits
+#   the spec triad, no role may modify the contents of Q-${round}-SPEC.md, Q-${round}-SPEC-AUDIT.md,
+#   Q-${round}-EMPIRICAL.sh (beyond pre-prescribed placeholder substitutions such as SHA injection
+#   blocks)." This is an invariant, not a guideline. When an Implementer-discovered fact (e.g.,
+#   AC-R77-14 forward-protection regression) makes an EXPECTED_FAIL value in EMPIRICAL.sh incorrect,
+#   the Implementer does NOT fix it unilaterally. The Implementer escalates. The operator then decides:
+#   does the issue warrant an Architect amendment commit, or does the issue expose a gap in the spec's
+#   prediction discipline (which is an Architect problem, not an Implementer problem)? The Implementer's
+#   job is to surface the gap cleanly, not to close it. Implementing an obvious fix silently (with
+#   explanatory comments) violates the invariant. Detected tessera R79 MAJOR-1 (Implementer added
+#   explanatory comment but still modified the binding harness unilaterally).
