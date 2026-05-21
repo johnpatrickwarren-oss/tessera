@@ -58,13 +58,17 @@ Per operator directive: Route to MEMORIAL-UPDATER (NOT back to Reviewer).
 
 ### Implementation attestation
 
-- **Option A fix commit SHA:** `796d3bfa47cff9e2f1c98e7bb48e85d08a5f9bcb`
-- **Fix applied:** `run-pipeline.sh:226` — replaced `${MU_SONNET:+--mu-sonnet}` (always-expands because MU_SONNET=false is non-empty string) with explicit conditional:
+- **Option A fix commits:** `796d3bf` (initial fix) → `d7c5cd5` (set -u correction)
+- **Fix applied:** `run-pipeline.sh:226` — replaced `${MU_SONNET:+--mu-sonnet}` (always-expands because MU_SONNET=false is non-empty string) with two-branch inline conditional (set -u safe; run-pipeline.sh has `set -uo pipefail` at line 53):
   ```bash
-  if [ "$MU_SONNET" = "true" ]; then MU_SONNET_FLAG=(--mu-sonnet); else MU_SONNET_FLAG=(); fi
-  MU_SELECT_OUT="$(node scripts/mu-model-select.js ... "${MU_SONNET_FLAG[@]}" ...)"
+  if [ "$MU_SONNET" = "true" ]; then
+    node scripts/mu-model-select.js --directive ... --tier ... --mu-sonnet
+  else
+    node scripts/mu-model-select.js --directive ... --tier ...
+  fi
   ```
-- **AC-R74-32 added** to `test/q74-mu-haiku-reviewer-scope.test.ts`: bash subprocess test verifying `MU_SONNET=false` → `claude-haiku-4-5-20251001` (not Sonnet). Closes spec § 5.3 acknowledged gap.
+  Note: Initial attempt used empty array `MU_SONNET_FLAG=()` + `"${array[@]}"` which fails under `set -u` on bash 3.2 (macOS). Replaced with two-branch form to avoid the empty-array expansion issue entirely.
+- **AC-R74-32 added** to `test/q74-mu-haiku-reviewer-scope.test.ts`: bash subprocess test under `set -u` verifying `MU_SONNET=false` → `claude-haiku-4-5-20251001` (not Sonnet). Closes spec § 5.3 acknowledged gap.
 - **MAJOR-1 corrected:** AC-R74-31 attestation at line 168 updated; Class C rationale replaced with Class A (`matched_anchors: ["cross-project canonical"]`).
 
 ### Binding commands (VERBATIM observed output; Rule 1 ACTIVE GATE)
