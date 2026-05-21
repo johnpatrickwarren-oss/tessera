@@ -91,98 +91,7 @@ All unresolved decisions → open questions in the spec.
 #   architect-branch-binding-coverage — Tessera Architect origins: R25 MINOR-2, R28 OBS-1, R30 MINOR-2.
 #   anti-scope-allowed-set-forward-coverage — Tessera Architect origins: R25 MAJOR-2, R29 MINOR-2, R34 MAJOR-1.
 
-# REINFORCED 2026-05-16 — Pre-emit grilling must include a cross-spec-section consistency
-#   pass before routing to Implementer. For every resolved decision (Q-N section) that names
-#   a module model, type structure, naming convention, or deferral policy, verify that ALL
-#   subsequent spec sections (§Mechanism, §Implementation surface pseudocode, §Tests pseudocode,
-#   Acceptance criteria) use a consistent surface. Contradictions between resolved decisions and
-#   spec pseudocode (e.g., Q1.1 "vendor tsconfig at-pin" → CJS contradicting §Implementation
-#   surface ESM/Bundler; "defer typedef extraction" in §Mechanism contradicting §Tests pseudocode
-#   importing named typedefs; `confidence` in §Mechanism contradicting `cell_confidence` in §Tests)
-#   are each an independent HALT condition (c) for the Implementer — they cannot be resolved without
-#   an architectural decision. The cross-section pass runs after all spec sections are written: for
-#   each Q-N pick, grep the remaining spec sections for any use of the alternative surface or a
-#   contradicting name. Detected R01: 3 uncaught contradictions produced REVIEWER MAJOR-5, MINOR-1,
-#   MINOR-2 and 2 additional silent Implementer absorptions.
-
-# REINFORCED 2026-05-16 — When spec pseudocode instantiates a named external type (e.g.,
-#   `key: CellKey`, `confidence: CellConfidence`, `const r: PerShardResidual = {...}`), open
-#   the source file where that type is DECLARED — not merely the file where it is used or
-#   re-exported — and read its exact definition before writing the pseudocode. "The type appears
-#   in config.ts" is not a substitute for opening the declaration-site file (e.g., primitives.ts).
-#   If the actual shape diverges from the spec's prediction, update pseudocode to reflect reality
-#   AND update any conditional directives that depend on the prediction. Add a "type-declaration-
-#   site check" to pre-emit grilling: for each named type instantiated in pseudocode, grep for
-#   its declaration site, open that file, record the actual definition. Detected R02: CellKey
-#   predicted as `Record<CellDimension, …>`; actual shape `Record<string, …>` at primitives.ts:44
-#   (not opened during spec authoring); cascaded to IMPLEMENTER retaining unnecessary `as any`
-#   cast because pseudocode showed it (REVIEWER MINOR-3 + OBS-3).
-
-# REINFORCED 2026-05-16 — When specifying file deletion commands, verify whether each named
-#   file is git-tracked before prescribing `git rm`. Check with `git ls-files <path>` (empty
-#   output means untracked). If track-state is uncertain, prescribe "git rm if tracked; rm -f
-#   if gitignored." Prescribing `git rm` for an untracked file causes the command to fail,
-#   forcing the Implementer to adapt — which may consume bounded budget or require judgment
-#   calls the spec should have pre-empted. Detected R02: ville-preservation .test.js was
-#   gitignored; spec prescribed `git rm` for both .ts and .js companions; Implementer correctly
-#   adapted but spec prescription was over-broad (REVIEWER OBS-2).
-
-# REINFORCED 2026-05-16 — When spec Integration points section describes how module A makes
-#   type T available to module B, verify BOTH (a) T's shape at its declaration site AND (b)
-#   whether A actually re-exports T at its public surface (run `grep -n "export.*T\|export.*from"
-#   engine/types/A.ts`). A plain `import type { T }` in A.ts is NOT a re-export. Verifying the
-#   type shape at the declaration site (primitives.ts) does not confirm the re-export chain from
-#   the consuming module (config.ts). Detected R03: spec Q-R03-SPEC.md:85 stated config.ts
-#   "re-exports CellKey through its own import from ./primitives" — factually wrong (plain import,
-#   no re-export); 2nd-cycle CellKey-class spec error despite primitives.ts:44 being opened
-#   (REVIEWER MINOR-3).
-
-# REINFORCED 2026-05-16 — When an AC prescribes a grep verification command to confirm absence
-#   or presence of a string in source files (e.g., `grep -n "as any"`, `grep -n "@ts-expect-error"`),
-#   the grep pattern must distinguish executable code from comment lines. Use `grep -nE "^[^/]*(pattern)"
-#   file.ts` or equivalent. A pattern that matches in `//` comments produces a literal-AC-fails
-#   outcome even when the implementation is correct. Add a "verification-command-soundness" step
-#   to pre-emit grilling: for each grep-based AC evidence command, ask "does this grep match in
-#   comments?" — if yes, tighten. Detected R03: AC-17/18/20 grep patterns matched in closure-
-#   documentation comments written by the Implementer (REVIEWER MINOR-2).
-
-# REINFORCED 2026-05-16 — When AC-N states per-file test counts (e.g., "q01-vendoring-coverage
-#   4 / 0"), verify by running each named test file independently via `node --test <file.js>`
-#   and recording the OBSERVED count — do not reconstruct from memory or copy from a prior spec.
-#   If a prior Reviewer report states the counts (e.g., REVIEWER-REPORT-R02.md), use that as the
-#   ground truth. Writing a count that has not been empirically observed is not verification; the
-#   Reviewer will independently run the files and any discrepancy will surface as a MINOR. Detected
-#   R03: AC-14 stated q01-vendoring-coverage = 4 (actual = 3); total 16 (actual = 15); REVIEWER-
-#   REPORT-R02.md (read at spec time) contained 9/0 for those three files (REVIEWER MINOR-4).
-
-# REINFORCED 2026-05-16 — When writing the Component inventory, the AC-range claim in each row
-#   ("binds AC-N through AC-M + AC-19") MUST be cross-checked against (a) the per-file pseudocode
-#   docstring comment and (b) the P3 ten-axis Coverage row before grilling sign-off. If any of the
-#   three sites disagrees on the count, update the narrative before emitting. The cross-section
-#   consistency pass (which checks resolved-decision tokens and naming conventions across spec
-#   sections) is NOT a substitute for this explicit arithmetic cross-check. Detected R05: Component
-#   inventory:80 said "AC-1 through AC-11" when per-file pseudocode (line 321) and P3 Coverage
-#   (line 715) both said "AC-1 through AC-13." In-spec arithmetic drift caught only by Reviewer
-#   cold-read (REVIEWER MINOR-1). 2nd tessera occurrence of narrative-vs-pseudocode count drift
-#   (first: R03 MINOR-4).
-
-# REINFORCED 2026-05-16 — When a delta prescription says "update the JSDoc at lines X–Y," the
-#   grilling scope-audit MUST include `grep -n "<stale_text>" <file>` to find ALL instances of
-#   that stale content in the file before finalizing the line-range. A delta that prescribes a
-#   single-site JSDoc update without checking for secondary occurrences will leave stale text at
-#   sibling sites (e.g., the in-interface comment block vs the standalone JSDoc block). Detected
-#   R06: Delta 1 prescribed lines 207-213 only; secondary JSDoc at config.ts:228 still referenced
-#   "(D1-D10)" after union extended to D1-D13 (REVIEWER MINOR-1).
-
-# REINFORCED 2026-05-16 — When a public API surface declares multiple optional parameters in an
-#   opts/options interface, the AC-coverage pass during grilling MUST enumerate ALL declared fields
-#   and verify each has either (a) a binding AC or (b) an explicit documented rationale for
-#   non-binding (e.g., "mcdSeed is a test-reproducibility knob; operational callers use the
-#   default; no AC needed"). Omitting a sibling field from AC coverage without documentation is a
-#   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
-#   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
-
-# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 14 sub-variants observed at Tessera)
+# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 28 sub-variants observed at Tessera)
 #
 #   Fixture accumulation adequacy (R07 MAJOR-1): When grilling catches that an e-process or
 #     statistical-detector AC's fixture needs N windows of accumulation to cross a detection
@@ -427,173 +336,352 @@ All unresolved decisions → open questions in the spec.
 #     execFileSync string in AC-R36-3's own assertion error message; empirically false at chore-A;
 #     HALT condition 6 / Implementer DIAGNOSTIC; Reviewer caught as claim-without-empirical-walk
 #     MAJOR-1).
+#
+#   Pre-emit grilling must include a cross-spec-section consistency
+#     pass before routing to Implementer. For every resolved decision (Q-N section) that names
+#     a module model, type structure, naming convention, or deferral policy, verify that ALL
+#     subsequent spec sections (§Mechanism, §Implementation surface pseudocode, §Tests pseudocode,
+#     Acceptance criteria) use a consistent surface. Contradictions between resolved decisions and
+#     spec pseudocode (e.g., Q1.1 "vendor tsconfig at-pin" → CJS contradicting §Implementation
+#     surface ESM/Bundler; "defer typedef extraction" in §Mechanism contradicting §Tests pseudocode
+#     importing named typedefs; `confidence` in §Mechanism contradicting `cell_confidence` in §Tests)
+#     are each an independent HALT condition (c) for the Implementer — they cannot be resolved without
+#     an architectural decision. The cross-section pass runs after all spec sections are written: for
+#     each Q-N pick, grep the remaining spec sections for any use of the alternative surface or a
+#     contradicting name. Detected R01: 3 uncaught contradictions produced REVIEWER MAJOR-5, MINOR-1,
+#     MINOR-2 and 2 additional silent Implementer absorptions.
+#
+#   When spec pseudocode instantiates a named external type (e.g.,
+#     `key: CellKey`, `confidence: CellConfidence`, `const r: PerShardResidual = {...}`), open
+#     the source file where that type is DECLARED — not merely the file where it is used or
+#     re-exported — and read its exact definition before writing the pseudocode. "The type appears
+#     in config.ts" is not a substitute for opening the declaration-site file (e.g., primitives.ts).
+#     If the actual shape diverges from the spec's prediction, update pseudocode to reflect reality
+#     AND update any conditional directives that depend on the prediction. Add a "type-declaration-
+#     site check" to pre-emit grilling: for each named type instantiated in pseudocode, grep for
+#     its declaration site, open that file, record the actual definition. Detected R02: CellKey
+#     predicted as `Record<CellDimension, …>`; actual shape `Record<string, …>` at primitives.ts:44
+#     (not opened during spec authoring); cascaded to IMPLEMENTER retaining unnecessary `as any`
+#     cast because pseudocode showed it (REVIEWER MINOR-3 + OBS-3).
+#
+#   When specifying file deletion commands, verify whether each named
+#     file is git-tracked before prescribing `git rm`. Check with `git ls-files <path>` (empty
+#     output means untracked). If track-state is uncertain, prescribe "git rm if tracked; rm -f
+#     if gitignored." Prescribing `git rm` for an untracked file causes the command to fail,
+#     forcing the Implementer to adapt — which may consume bounded budget or require judgment
+#     calls the spec should have pre-empted. Detected R02: ville-preservation .test.js was
+#     gitignored; spec prescribed `git rm` for both .ts and .js companions; Implementer correctly
+#     adapted but spec prescription was over-broad (REVIEWER OBS-2).
+#
+#   When spec Integration points section describes how module A makes
+#     type T available to module B, verify BOTH (a) T's shape at its declaration site AND (b)
+#     whether A actually re-exports T at its public surface (run `grep -n "export.*T\|export.*from"
+#     engine/types/A.ts`). A plain `import type { T }` in A.ts is NOT a re-export. Verifying the
+#     type shape at the declaration site (primitives.ts) does not confirm the re-export chain from
+#     the consuming module (config.ts). Detected R03: spec Q-R03-SPEC.md:85 stated config.ts
+#     "re-exports CellKey through its own import from ./primitives" — factually wrong (plain import,
+#     no re-export); 2nd-cycle CellKey-class spec error despite primitives.ts:44 being opened
+#     (REVIEWER MINOR-3).
+#
+#   When an AC prescribes a grep verification command to confirm absence
+#     or presence of a string in source files (e.g., `grep -n "as any"`, `grep -n "@ts-expect-error"`),
+#     the grep pattern must distinguish executable code from comment lines. Use `grep -nE "^[^/]*(pattern)"
+#     file.ts` or equivalent. A pattern that matches in `//` comments produces a literal-AC-fails
+#     outcome even when the implementation is correct. Add a "verification-command-soundness" step
+#     to pre-emit grilling: for each grep-based AC evidence command, ask "does this grep match in
+#     comments?" — if yes, tighten. Detected R03: AC-17/18/20 grep patterns matched in closure-
+#     documentation comments written by the Implementer (REVIEWER MINOR-2).
+#
+#   When AC-N states per-file test counts (e.g., "q01-vendoring-coverage
+#     4 / 0"), verify by running each named test file independently via `node --test <file.js>`
+#     and recording the OBSERVED count — do not reconstruct from memory or copy from a prior spec.
+#     If a prior Reviewer report states the counts (e.g., REVIEWER-REPORT-R02.md), use that as the
+#     ground truth. Writing a count that has not been empirically observed is not verification; the
+#     Reviewer will independently run the files and any discrepancy will surface as a MINOR. Detected
+#     R03: AC-14 stated q01-vendoring-coverage = 4 (actual = 3); total 16 (actual = 15); REVIEWER-
+#     REPORT-R02.md (read at spec time) contained 9/0 for those three files (REVIEWER MINOR-4).
+#
+#   When writing the Component inventory, the AC-range claim in each row
+#     ("binds AC-N through AC-M + AC-19") MUST be cross-checked against (a) the per-file pseudocode
+#     docstring comment and (b) the P3 ten-axis Coverage row before grilling sign-off. If any of the
+#     three sites disagrees on the count, update the narrative before emitting. The cross-section
+#     consistency pass (which checks resolved-decision tokens and naming conventions across spec
+#     sections) is NOT a substitute for this explicit arithmetic cross-check. Detected R05: Component
+#     inventory:80 said "AC-1 through AC-11" when per-file pseudocode (line 321) and P3 Coverage
+#     (line 715) both said "AC-1 through AC-13." In-spec arithmetic drift caught only by Reviewer
+#     cold-read (REVIEWER MINOR-1). 2nd tessera occurrence of narrative-vs-pseudocode count drift
+#     (first: R03 MINOR-4).
+#
+#   When a delta prescription says "update the JSDoc at lines X–Y," the
+#     grilling scope-audit MUST include `grep -n "<stale_text>" <file>` to find ALL instances of
+#     that stale content in the file before finalizing the line-range. A delta that prescribes a
+#     single-site JSDoc update without checking for secondary occurrences will leave stale text at
+#     sibling sites (e.g., the in-interface comment block vs the standalone JSDoc block). Detected
+#     R06: Delta 1 prescribed lines 207-213 only; secondary JSDoc at config.ts:228 still referenced
+#     "(D1-D10)" after union extended to D1-D13 (REVIEWER MINOR-1).
+#
+#   When a public API surface declares multiple optional parameters in an
+#     opts/options interface, the AC-coverage pass during grilling MUST enumerate ALL declared fields
+#     and verify each has either (a) a binding AC or (b) an explicit documented rationale for
+#     non-binding (e.g., "mcdSeed is a test-reproducibility knob; operational callers use the
+#     default; no AC needed"). Omitting a sibling field from AC coverage without documentation is a
+#     grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
+#     interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
+#
+#   When a REVIEWER-ANCHOR table row or Mechanism primitive cites a
+#     specific line range (e.g., `:43`, `:297-334`, `:329`) for a type or field declaration,
+#     extract those exact lines from the file using `sed -n 'N,Mp' <path>` at spec-emit time and
+#     paste them verbatim into the row or snippet. Do NOT reconstruct the cited content from memory
+#     or from reading surrounding context — a JSDoc paragraph at lines 43-44 is indistinguishable
+#     from a field declaration at line 47 when recalled from memory; only extracting those specific
+#     lines reveals the distinction. This check is distinct from "opened the file" (R02 reinforcement)
+#     and "verified the re-export chain" (R03 reinforcement): it applies after the file is open, at
+#     the specific sub-line being cited. Gate: for each REVIEWER-ANCHOR row containing a specific
+#     line-number reference, run `sed -n 'N,Mp' <file>` and verify the output matches the snippet
+#     in the table. Also verify the cited TYPE NAME is the exact identifier at that location (not a
+#     sibling type from the same file). Detected R11: OBS-1 (`M_t` cited at line 43, actual line 47;
+#     JSDoc occupies lines 43-44); OBS-2 (Mechanism primitive 7 cites `BettingEProcessState` +
+#     `engine/detectors/family-c-betting-e-process.ts:329 field fired: boolean` — actual type name is
+#     `FamilyCBettingEProcessState`, actual declaration file is `engine/types/families/c.ts:329`,
+#     actual content at the detector line 329 is an object-literal assignment).
+#
+#   When citing a named statistical bound or confidence interval in spec
+#     Mechanism primitives or evidence-matrix sections (e.g., "Wilson upper bound", "Wald interval",
+#     "Hoeffding bound", "Bernstein bound", "Clopper-Pearson interval"), add an explicit
+#     statistical-term-to-formula cross-check step to pre-emit grilling: verify the formula written
+#     matches the named procedure, not just that the formula is a valid bound. The Wald 3σ
+#     normal-approximation (p ± 3·√(p(1−p)/n)) and the Wilson score interval
+#     ((p + z²/2n ± z·√(p(1−p)/n + z²/4n²)) / (1 + z²/n)) produce materially different formulas;
+#     using one's name for the other's formula creates documentation drift that statistically-literate
+#     readers must audit. Gate: for any spec section that writes a named statistical formula, verify
+#     the formula by looking it up in a reference source OR by deriving the name from the formula.
+#     "The formula is a valid bound" is not sufficient — the NAME must also match. Detected R13
+#     MINOR-1: spec Mechanism primitive 10 and test/q13-e-bh-fdr.test.ts:58-59 name the Wald 3σ
+#     formula "Wilson upper bound"; caught by Reviewer; terminology inherited unchallenged from
+#     R11+R12 PR-F1/PR-F2 vocabulary.
+#
+#   In multi-cluster worktrees where the environment may differ from the
+#     reference worktree (e.g., no `../deploysignal` sibling), `git log --oneline -- test/`
+#     confirms no new test files since a reference round but cannot confirm pass/fail status.
+#     Run `node --test` (or the project's equivalent binding command) at Architect session start
+#     to empirically verify baseline pass count before encoding it in spec § 9.1 claims and AC
+#     rows. A spec clause "Baseline test count = N / fail=0" that inherits a reference-round
+#     attestation without a fresh cluster-worktree run encodes a potentially stale claim; in
+#     multi-cluster environments this is a near-certain failure (sibling-repo-dependent tests
+#     will fail). Add to § 9.7 empirical-premise-verification: "for each count AC with a
+#     pass/fail assertion, run `node --test` in this worktree and record observed counts."
+#     Detected tessera R25 MINOR-1 (root cause of MAJOR-1: AC-R25-14 `fail=0` unachievable).
+#
+#   Self-application gate must cover EMPIRICAL.sh shell-command patterns
+#     (Tessera R85 MAJOR-2; composite fold of R75 self-application-gate series):
+#     The § 8.17 Q.17 self-application gate walk is complete only when it covers ALL spec-triad
+#     artifacts: (a) in-test regex patterns in `test/q*-*.test.ts` [already in Q.17]; AND (b) shell
+#     command patterns in Q-RNN-EMPIRICAL.sh — awk range patterns, grep patterns, sed ranges, and
+#     variable-assertion logic. Shell range-matching patterns (`awk '/start/,/end/'`) match BOTH the
+#     start line and every subsequent line until (and including) a line matching the end pattern. If
+#     start-pattern and end-pattern can both match the SAME line (e.g., `/^### Browser dashboard/`
+#     and `/^### /` both match any `###`-prefixed heading), the range produces only the start line —
+#     not the section body the block was intended to extract. Procedure: for each awk/sed range in
+#     EMPIRICAL.sh, run the command against the prescribed implementation text verbatim at spec-emit;
+#     verify the output is non-empty and contains the expected assertion target. If start and end
+#     patterns can overlap on the same line, use flag-toggling awk (`/start/{flag=1;next} flag &&
+#     /end/{exit} flag`) instead of a simple `/X/,/Y/` range. This sub-variant extends the R75
+#     stdio-flush / bash-context / cross-module-import series: the self-application gate must walk
+#     EACH type of executable prescription in the spec triad, not only in-test TypeScript patterns.
+#     R85 MAJOR-2: `awk '/^### Browser dashboard/,/^### /'` in Block 3 produced one-line output;
+#     Implementer HALT-1 at chore-A; Coordinator-direct fix required. 7th tessera instance of the
+#     canonically-landed `architect-encoded-pattern-not-verified-against-prescribed-implementation`
+#     Rule 1 sub-class (R62+R66+R68+R72+R83+R84+R85).
+#
+#   Empirical command verification must distinguish global vs. anchored patterns
+#     in infrastructure files (Tessera R88 MAJOR-1; extension of architect-claim-without-empirical-walk):
+#     When claiming that a codebase file (e.g., .gitignore) does or does not contain a pattern, the
+#     Architect MUST run the actual tool that respects the pattern semantics (e.g., `git check-ignore`
+#     for .gitignore matching, or `git ls-files` to verify file tracking). A partial check (e.g.,
+#     `grep tools .gitignore`) that assumes the pattern is anchored or namespaced will miss global
+#     patterns (e.g., `*.js` which matches all .js files, not just ones named "tools...js"). Procedure:
+#     (1) identify the pattern language (glob, regex, sed, awk, shell glob); (2) run the COMMAND that
+#     interprets that language correctly (git check-ignore for gitignore, not grep; git ls-files for
+#     tracking status, not `test -f`); (3) record the OBSERVED output in § 9.7 empirical-premise row.
+#     R88 MAJOR-1: Architect claimed ".gitignore does NOT exclude tools/*.js" and verified via
+#     `grep tools .gitignore`; empirically false (global `*.js` pattern at line 8). The verification
+#     method was structurally wrong — grep of "tools" does not capture global patterns. Correct method:
+#     `git ls-files 'tools/*.js'` (empty output confirms exclusion) or `git check-ignore tools/foo.js`
+#     (exit code confirms exclusion). 9th tessera instance of architect-claim-without-empirical-walk.
 
-# REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
-#   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include
-#   a "file-level documentation coverage check": (a) read the existing file-level docblock;
-#   (b) verify it still accurately describes the file's full exported surface and semantic
-#   responsibility after the proposed delta; (c) if the delta adds a new exported symbol or
-#   changes the module's scope, the spec must include a docblock update prescription in the delta.
-#   Silence on docblock updates is a spec gap (Architect-attributable), not an Implementer
-#   tactical choice — the Implementer will faithfully follow the prescribed delta and leave the
-#   header unchanged. Gate placement: add this as a checkpoint in the "Implementer can act without
-#   guessing" grilling step, evaluated per modified file. Detected tessera R10 MINOR-1:
-#   runtime.ts SLICE 2b3 header persisted after SLICE 2b4 emission was added via Delta 2; spec
-#   prescribed three sub-changes but no docblock update; Reviewer caught at runtime.ts:1-13.
-# REINFORCED 2026-05-17 — When a REVIEWER-ANCHOR table row or Mechanism primitive cites a
-#   specific line range (e.g., `:43`, `:297-334`, `:329`) for a type or field declaration,
-#   extract those exact lines from the file using `sed -n 'N,Mp' <path>` at spec-emit time and
-#   paste them verbatim into the row or snippet. Do NOT reconstruct the cited content from memory
-#   or from reading surrounding context — a JSDoc paragraph at lines 43-44 is indistinguishable
-#   from a field declaration at line 47 when recalled from memory; only extracting those specific
-#   lines reveals the distinction. This check is distinct from "opened the file" (R02 reinforcement)
-#   and "verified the re-export chain" (R03 reinforcement): it applies after the file is open, at
-#   the specific sub-line being cited. Gate: for each REVIEWER-ANCHOR row containing a specific
-#   line-number reference, run `sed -n 'N,Mp' <file>` and verify the output matches the snippet
-#   in the table. Also verify the cited TYPE NAME is the exact identifier at that location (not a
-#   sibling type from the same file). Detected R11: OBS-1 (`M_t` cited at line 43, actual line 47;
-#   JSDoc occupies lines 43-44); OBS-2 (Mechanism primitive 7 cites `BettingEProcessState` +
-#   `engine/detectors/family-c-betting-e-process.ts:329 field fired: boolean` — actual type name is
-#   `FamilyCBettingEProcessState`, actual declaration file is `engine/types/families/c.ts:329`,
-#   actual content at the detector line 329 is an object-literal assignment).
-# REINFORCED 2026-05-17 — When citing a named statistical bound or confidence interval in spec
-#   Mechanism primitives or evidence-matrix sections (e.g., "Wilson upper bound", "Wald interval",
-#   "Hoeffding bound", "Bernstein bound", "Clopper-Pearson interval"), add an explicit
-#   statistical-term-to-formula cross-check step to pre-emit grilling: verify the formula written
-#   matches the named procedure, not just that the formula is a valid bound. The Wald 3σ
-#   normal-approximation (p ± 3·√(p(1−p)/n)) and the Wilson score interval
-#   ((p + z²/2n ± z·√(p(1−p)/n + z²/4n²)) / (1 + z²/n)) produce materially different formulas;
-#   using one's name for the other's formula creates documentation drift that statistically-literate
-#   readers must audit. Gate: for any spec section that writes a named statistical formula, verify
-#   the formula by looking it up in a reference source OR by deriving the name from the formula.
-#   "The formula is a valid bound" is not sufficient — the NAME must also match. Detected R13
-#   MINOR-1: spec Mechanism primitive 10 and test/q13-e-bh-fdr.test.ts:58-59 name the Wald 3σ
-#   formula "Wilson upper bound"; caught by Reviewer; terminology inherited unchallenged from
-#   R11+R12 PR-F1/PR-F2 vocabulary.
-# REINFORCED 2026-05-17 — When specifying an anti-scope git-diff baseline for an AC (e.g.,
-#   `git diff <SHA>..HEAD --name-only`), use the SHA of the last commit immediately before
-#   the current round's work began, NOT the prior round's attestation HEAD. Memorial-Updater
-#   commits and operator-prep commits may land between the prior attestation HEAD and the first
-#   Implementer commit; those paths inflate the diff beyond the allowed-set and create false
-#   anti-scope violations. Gate at spec-emit: run `git log --oneline <prior-attestation>..HEAD`
-#   and verify every commit in that window belongs to the current round; if not, advance the
-#   baseline to the post-prep commit. Additionally: if the spec's halt conditions mandate creation
-#   of a specific file type (e.g., `coordination/diagnostics/DIAGNOSTIC-RNN-*.md`), that path
-#   MUST appear in the anti-scope AC's allowed-set, OR the halt condition must not mandate a
-#   separate file. An allowed-set that omits a file the spec itself mandates is a spec-internal
-#   contradiction the Implementer cannot resolve without a judgement call. Detected tessera R15
-#   MINOR-1: baseline `c8da715` did not account for R14 Memorial-Updater commit `3a1b7d0` and
-#   operator-prep commit `67b7b0a`; DIAGNOSTIC mandated by § 6(a) but absent from AC-20 allowed-set.
-# REINFORCED 2026-05-17 — When a spec contains prescriptions that trigger on the same condition
-#   (e.g., "if ≥1 MD-violation then AC-8 says HALT" AND "if ≥1 MD-violation then § 6(a) says
-#   proceed-with-DIAGNOSTIC"), resolve the contradiction before routing to Implementer. Gate at
-#   pre-emit grilling: scan every (halt-condition trigger, AC consequence) pair and verify no
-#   two prescriptions prescribe conflicting actions for the same trigger state. Fix: pick ONE
-#   rule (HALT → STATUS: ESCALATE, OR proceed-with-DIAGNOSTIC only) and apply it consistently
-#   in both the AC text and the halt-condition body — they must agree. An Implementer forced to
-#   choose the "more permissive" or "more defensible" reading is encountering a spec defect;
-#   any downstream consequence of the forced choice is Architect-attributable. Detected tessera
-#   R15 MINOR-3: AC-8 prescribed HALT when ≥1 Memorial-D violation derived; § 6(a) parenthetical
-#   prescribed proceed-with-DIAGNOSTIC for the same trigger; Implementer chose the parenthetical;
-#   spec-internal contradiction caught by Reviewer as MINOR-3.
-# REINFORCED 2026-05-17 — For every planned delta to a vendored file, enumerate ALL existing
-#   tests that open or read that file and trace each test's FULL assertion surface against the
-#   planned delta. A first-line SHA-pin check (e.g., q01-vendoring-coverage) and a full-body
-#   byte-identity check modulo N header lines (e.g., q01-no-at-pin-deltas) are DISTINCT
-#   assertion surfaces on the same file; failure-mode analysis that considers only one misses
-#   the other. Pre-empt by: (1) greping for every test file that imports or readFileSync the
-#   modified vendored file; (2) reading what each such test asserts about the file's content;
-#   (3) if any test performs a body-level comparison (not just first-line), pre-disposition the
-#   manifest row (vendored-at-pin → vendored-with-deltas) and the AT_PIN_FILES list in the spec
-#   BEFORE routing — do not leave this as an ESCALATE condition for the Implementer to discover
-#   at GREEN. Detected tessera R18 OBS-2: Architect failure-mode 5 identified q01-vendoring-
-#   coverage but missed q01-no-at-pin-deltas; ESCALATE cycle with operator disposition required.
-# REINFORCED 2026-05-17 — When spec § 5 (AC-table section) contains a preamble paragraph that
-#   classifies specific ACs by attestation type (e.g., "AC-R20-12 ... is a binding-command
-#   attestation reported by the Implementer at GREEN"), add an explicit grilling step: for each
-#   named AC in the classification, verify the claim against the matching § 4.x implementation
-#   prescription. An AC classified as a "binding-command attestation" in § 5 but prescribed as
-#   a committed runtime test in § 4.7 (forward-protection pattern) is a spec-internal
-#   contradiction that the 16-token cross-section consistency pass does not catch — it targets
-#   identifier/format tokens, not narrative-classification-vs-structural-prescription mismatches
-#   at section boundaries. Add to grilling: "for each § 5 preamble attestation-type claim, open
-#   the matching § 4.x prescription and verify the classification matches." Detected R20 MINOR-1.
-# REINFORCED 2026-05-17 — Spec files (Q-RNN-SPEC.md, Q-RNN-SPEC-AUDIT.md) must be committed
-#   BEFORE the Implementer's chore-A commit. The Architect's NEXT-ROLE.md routing block triggers
-#   chore-A; if spec artifacts are uncommitted at that point, they fall outside the chore-A SHA
-#   boundary and appear as untracked files in the Reviewer's anti-scope check. Correct order:
-#   write spec → commit spec artifacts → write NEXT-ROLE.md routing block. Add as Architect
-#   pre-emit grilling step: "confirm all spec artifacts (Q-RNN-SPEC.md, Q-RNN-SPEC-AUDIT.md)
-#   are committed before writing NEXT-ROLE.md." Detected tessera R21 MINOR-1.
-# REINFORCED 2026-05-18 — When spec § Commit-inventory (§ 2.7) or § Anti-scope-allowed-set
-#   (§ 3) lists compiled artifact paths (e.g., `.js` outputs from `tsc`), verify against
-#   `.gitignore` and `git ls-files` before routing. A `.gitignore: *.js` rule makes these
-#   paths structurally unreachable from `git diff --name-only`; listing them inflates the
-#   allowed-set with phantom entries that can never appear in any diff. Add to § 9.7
-#   empirical-premise-verification: "are all listed artifact paths git-trackable per
-#   .gitignore?" (Run: `git ls-files <path>` — if no output, the path is gitignored.)
-#   R23's 13-entry allowed-set contained 4 `.js` paths that returned nothing from
-#   `git ls-files`; AC-R23-15 passed only because it asserts membership (not set-equality).
-#   Detected tessera R23 MINOR-2.
-# REINFORCED 2026-05-17 — When spec § 1 enumerates failure modes for a function, every named
-#   failure mode must be independently exercised by at least one AC scenario. A failure mode
-#   enumerated in the spec but absent from the AC table leaves the guard implementing it
-#   structurally unbound — removing it would not affect any test outcome. Add a branch-binding
-#   coverage pass to § 5 grilling: "for each failure mode in § 1, identify the AC row that
-#   exercises it; if no row exercises it, add one." Detected tessera R21 MINOR-2 (dedup-by-
-#   group_id guard at verdict-consumer.ts:87-94) and MINOR-3 (empty-string short-circuit at
-#   verdict-consumer.ts:77-79). Both guards were spec-prescribed; neither had a regression test.
-# REINFORCED 2026-05-18 — In multi-cluster worktrees where the environment may differ from the
-#   reference worktree (e.g., no `../deploysignal` sibling), `git log --oneline -- test/`
-#   confirms no new test files since a reference round but cannot confirm pass/fail status.
-#   Run `node --test` (or the project's equivalent binding command) at Architect session start
-#   to empirically verify baseline pass count before encoding it in spec § 9.1 claims and AC
-#   rows. A spec clause "Baseline test count = N / fail=0" that inherits a reference-round
-#   attestation without a fresh cluster-worktree run encodes a potentially stale claim; in
-#   multi-cluster environments this is a near-certain failure (sibling-repo-dependent tests
-#   will fail). Add to § 9.7 empirical-premise-verification: "for each count AC with a
-#   pass/fail assertion, run `node --test` in this worktree and record observed counts."
-#   Detected tessera R25 MINOR-1 (root cause of MAJOR-1: AC-R25-14 `fail=0` unachievable).
-# REINFORCED 2026-05-18 — After any operator ESCALATE disposition that resolves a spec-internal
-#   contradiction (e.g., "§ 1.8 tolerance 0.001 is authoritative; § 4.3/§ 5.1 tolerance 1e-9
-#   is superseded"), the Architect must amend all non-authoritative sections to match the
-#   dispositioned value before or at round close. Leaving contradicting prescriptions at HEAD
-#   (e.g., § 4.3 and § 5.1 still prescribing 1e-9 after Option A was selected) creates a
-#   forward-contamination trap: future readers encounter the original contradiction and either
-#   (a) propagate the wrong value or (b) re-derive the disposition from commit messages.
-#   Right procedure: after operator ESCALATE disposition, Architect (or Implementer under
-#   Architect direction) amends non-authoritative spec sections + adds a § 9.x note referencing
-#   the DIAGNOSTIC + disposition commit SHA. Detected tessera R25 MAJOR-3 (§ 4.3:752 and
-#   § 5.1 AC-R25-12 row still prescribe 1e-9 at HEAD).
-# REINFORCED 2026-05-18 — When spec § 9.x grilling sweep notes "pattern also matches
-#   comments / JSDoc" for an AC that guards a critical invariant, the grilling must complete
-#   a discriminability check — not merely note the ambiguity. Specifically: ask "would the
-#   assertion still PASS if only the comment/JSDoc occurrence is present and the
-#   type-declaration occurrence is removed?" If yes, the assertion is non-discriminating and
-#   must be strengthened (regex with line anchoring, specific line-range read, etc.) before
-#   the spec is emitted. A note that says "intentional, since the literal is in the type
-#   declaration body" without validating that the assertion CAN distinguish the two
-#   occurrences is an incomplete grilling gate. Detected tessera R30 MINOR-1 (spec § 9.2 R03
-#   sweep noted comment-match for AC-R30-15 and characterized it as intentional but did not
-#   compute that `verdict.includes(...)` would pass even with engine/types/verdict.ts:289
-#   removed while :272 JSDoc is preserved; Reviewer cold-caught this).
-# REINFORCED 2026-05-18 — Spec § 9.8 spec-internal-contradiction sweep MUST explicitly
-#   cross-check algorithmic boundary clauses (pre-window / post-window, filter predicates,
-#   interval endpoints) across ALL spec sections where they appear (§ 1.x prose, § 3.x
-#   pseudocode, § 4 AC Then-columns). Listing one section's boundary convention and not
-#   diffing it against the others produces internal contradictions that surface empirically
-#   at chore-B. Procedure: for each algorithmic primitive with boundary semantics, grep
-#   the spec for all occurrences and verify each uses the same convention (inclusive vs
-#   exclusive; open vs closed). Detected tessera R34 MINOR-2 (pre/post window boundary
-#   inconsistency across § 1.1, § 3.2 pseudocode, and § 4 AC-R34-8 text).
-# REINFORCED 2026-05-18 — When spec § 3.x pseudocode contains regex literals intended for
-#   test assertions, verify each regex is valid JavaScript BEFORE emitting the spec:
-#   (1) `\Z` is not a JavaScript regex metacharacter (it is a Perl/Python construct; MDN
-#   documents it as unsupported); use `$` with /m flag, end-of-string lookahead, or
-#   restructure via split. (2) lookahead alternation `(?=X|Y)` where Y contains language-
-#   specific anchors must be tested in a JS REPL before inclusion in spec pseudocode.
-#   Copy-pasting from spec pseudocode to test code propagates language-specific bugs that
-#   force content workarounds rather than code fixes. Detected tessera R34 MINOR-3.
+
+# REINFORCED — SPEC-PRESCRIPTION-DISCIPLINE (composite; 8 sub-variants)
+#
+#   When a spec delta modifies an existing file that carries a file-level
+#     docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include
+#     a "file-level documentation coverage check": (a) read the existing file-level docblock;
+#     (b) verify it still accurately describes the file's full exported surface and semantic
+#     responsibility after the proposed delta; (c) if the delta adds a new exported symbol or
+#     changes the module's scope, the spec must include a docblock update prescription in the delta.
+#     Silence on docblock updates is a spec gap (Architect-attributable), not an Implementer
+#     tactical choice — the Implementer will faithfully follow the prescribed delta and leave the
+#     header unchanged. Gate placement: add this as a checkpoint in the "Implementer can act without
+#     guessing" grilling step, evaluated per modified file. Detected tessera R10 MINOR-1:
+#     runtime.ts SLICE 2b3 header persisted after SLICE 2b4 emission was added via Delta 2; spec
+#     prescribed three sub-changes but no docblock update; Reviewer caught at runtime.ts:1-13.
+#
+#   When specifying an anti-scope git-diff baseline for an AC (e.g.,
+#     `git diff <SHA>..HEAD --name-only`), use the SHA of the last commit immediately before
+#     the current round's work began, NOT the prior round's attestation HEAD. Memorial-Updater
+#     commits and operator-prep commits may land between the prior attestation HEAD and the first
+#     Implementer commit; those paths inflate the diff beyond the allowed-set and create false
+#     anti-scope violations. Gate at spec-emit: run `git log --oneline <prior-attestation>..HEAD`
+#     and verify every commit in that window belongs to the current round; if not, advance the
+#     baseline to the post-prep commit. Additionally: if the spec's halt conditions mandate creation
+#     of a specific file type (e.g., `coordination/diagnostics/DIAGNOSTIC-RNN-*.md`), that path
+#     MUST appear in the anti-scope AC's allowed-set, OR the halt condition must not mandate a
+#     separate file. An allowed-set that omits a file the spec itself mandates is a spec-internal
+#     contradiction the Implementer cannot resolve without a judgement call. Detected tessera R15
+#     MINOR-1: baseline `c8da715` did not account for R14 Memorial-Updater commit `3a1b7d0` and
+#     operator-prep commit `67b7b0a`; DIAGNOSTIC mandated by § 6(a) but absent from AC-20 allowed-set.
+#
+#   For every planned delta to a vendored file, enumerate ALL existing
+#     tests that open or read that file and trace each test's FULL assertion surface against the
+#     planned delta. A first-line SHA-pin check (e.g., q01-vendoring-coverage) and a full-body
+#     byte-identity check modulo N header lines (e.g., q01-no-at-pin-deltas) are DISTINCT
+#     assertion surfaces on the same file; failure-mode analysis that considers only one misses
+#     the other. Pre-empt by: (1) greping for every test file that imports or readFileSync the
+#     modified vendored file; (2) reading what each such test asserts about the file's content;
+#     (3) if any test performs a body-level comparison (not just first-line), pre-disposition the
+#     manifest row (vendored-at-pin → vendored-with-deltas) and the AT_PIN_FILES list in the spec
+#     BEFORE routing — do not leave this as an ESCALATE condition for the Implementer to discover
+#     at GREEN. Detected tessera R18 OBS-2: Architect failure-mode 5 identified q01-vendoring-
+#     coverage but missed q01-no-at-pin-deltas; ESCALATE cycle with operator disposition required.
+#
+#   When spec § 5 (AC-table section) contains a preamble paragraph that
+#     classifies specific ACs by attestation type (e.g., "AC-R20-12 ... is a binding-command
+#     attestation reported by the Implementer at GREEN"), add an explicit grilling step: for each
+#     named AC in the classification, verify the claim against the matching § 4.x implementation
+#     prescription. An AC classified as a "binding-command attestation" in § 5 but prescribed as
+#     a committed runtime test in § 4.7 (forward-protection pattern) is a spec-internal
+#     contradiction that the 16-token cross-section consistency pass does not catch — it targets
+#     identifier/format tokens, not narrative-classification-vs-structural-prescription mismatches
+#     at section boundaries. Add to grilling: "for each § 5 preamble attestation-type claim, open
+#     the matching § 4.x prescription and verify the classification matches." Detected R20 MINOR-1.
+#
+#   Spec files (Q-RNN-SPEC.md, Q-RNN-SPEC-AUDIT.md) must be committed
+#     BEFORE the Implementer's chore-A commit. The Architect's NEXT-ROLE.md routing block triggers
+#     chore-A; if spec artifacts are uncommitted at that point, they fall outside the chore-A SHA
+#     boundary and appear as untracked files in the Reviewer's anti-scope check. Correct order:
+#     write spec → commit spec artifacts → write NEXT-ROLE.md routing block. Add as Architect
+#     pre-emit grilling step: "confirm all spec artifacts (Q-RNN-SPEC.md, Q-RNN-SPEC-AUDIT.md)
+#     are committed before writing NEXT-ROLE.md." Detected tessera R21 MINOR-1.
+#
+#   When spec § Commit-inventory (§ 2.7) or § Anti-scope-allowed-set
+#     (§ 3) lists compiled artifact paths (e.g., `.js` outputs from `tsc`), verify against
+#     `.gitignore` and `git ls-files` before routing. A `.gitignore: *.js` rule makes these
+#     paths structurally unreachable from `git diff --name-only`; listing them inflates the
+#     allowed-set with phantom entries that can never appear in any diff. Add to § 9.7
+#     empirical-premise-verification: "are all listed artifact paths git-trackable per
+#     .gitignore?" (Run: `git ls-files <path>` — if no output, the path is gitignored.)
+#     R23's 13-entry allowed-set contained 4 `.js` paths that returned nothing from
+#     `git ls-files`; AC-R23-15 passed only because it asserts membership (not set-equality).
+#     Detected tessera R23 MINOR-2.
+#
+#   When spec § 1 enumerates failure modes for a function, every named
+#     failure mode must be independently exercised by at least one AC scenario. A failure mode
+#     enumerated in the spec but absent from the AC table leaves the guard implementing it
+#     structurally unbound — removing it would not affect any test outcome. Add a branch-binding
+#     coverage pass to § 5 grilling: "for each failure mode in § 1, identify the AC row that
+#     exercises it; if no row exercises it, add one." Detected tessera R21 MINOR-2 (dedup-by-
+#     group_id guard at verdict-consumer.ts:87-94) and MINOR-3 (empty-string short-circuit at
+#     verdict-consumer.ts:77-79). Both guards were spec-prescribed; neither had a regression test.
+#
+#   When spec § 3.x pseudocode contains regex literals intended for
+#     test assertions, verify each regex is valid JavaScript BEFORE emitting the spec:
+#     (1) `\Z` is not a JavaScript regex metacharacter (it is a Perl/Python construct; MDN
+#     documents it as unsupported); use `$` with /m flag, end-of-string lookahead, or
+#     restructure via split. (2) lookahead alternation `(?=X|Y)` where Y contains language-
+#     specific anchors must be tested in a JS REPL before inclusion in spec pseudocode.
+#     Copy-pasting from spec pseudocode to test code propagates language-specific bugs that
+#     force content workarounds rather than code fixes. Detected tessera R34 MINOR-3.
+#   
+
+# REINFORCED — SPEC-INTERNAL-CONSISTENCY (composite; 7 sub-variants)
+#
+#   When a spec contains prescriptions that trigger on the same condition
+#     (e.g., "if ≥1 MD-violation then AC-8 says HALT" AND "if ≥1 MD-violation then § 6(a) says
+#     proceed-with-DIAGNOSTIC"), resolve the contradiction before routing to Implementer. Gate at
+#     pre-emit grilling: scan every (halt-condition trigger, AC consequence) pair and verify no
+#     two prescriptions prescribe conflicting actions for the same trigger state. Fix: pick ONE
+#     rule (HALT → STATUS: ESCALATE, OR proceed-with-DIAGNOSTIC only) and apply it consistently
+#     in both the AC text and the halt-condition body — they must agree. An Implementer forced to
+#     choose the "more permissive" or "more defensible" reading is encountering a spec defect;
+#     any downstream consequence of the forced choice is Architect-attributable. Detected tessera
+#     R15 MINOR-3: AC-8 prescribed HALT when ≥1 Memorial-D violation derived; § 6(a) parenthetical
+#     prescribed proceed-with-DIAGNOSTIC for the same trigger; Implementer chose the parenthetical;
+#     spec-internal contradiction caught by Reviewer as MINOR-3.
+#
+#   After any operator ESCALATE disposition that resolves a spec-internal
+#     contradiction (e.g., "§ 1.8 tolerance 0.001 is authoritative; § 4.3/§ 5.1 tolerance 1e-9
+#     is superseded"), the Architect must amend all non-authoritative sections to match the
+#     dispositioned value before or at round close. Leaving contradicting prescriptions at HEAD
+#     (e.g., § 4.3 and § 5.1 still prescribing 1e-9 after Option A was selected) creates a
+#     forward-contamination trap: future readers encounter the original contradiction and either
+#     (a) propagate the wrong value or (b) re-derive the disposition from commit messages.
+#     Right procedure: after operator ESCALATE disposition, Architect (or Implementer under
+#     Architect direction) amends non-authoritative spec sections + adds a § 9.x note referencing
+#     the DIAGNOSTIC + disposition commit SHA. Detected tessera R25 MAJOR-3 (§ 4.3:752 and
+#     § 5.1 AC-R25-12 row still prescribe 1e-9 at HEAD).
+#
+#   When spec § 9.x grilling sweep notes "pattern also matches
+#     comments / JSDoc" for an AC that guards a critical invariant, the grilling must complete
+#     a discriminability check — not merely note the ambiguity. Specifically: ask "would the
+#     assertion still PASS if only the comment/JSDoc occurrence is present and the
+#     type-declaration occurrence is removed?" If yes, the assertion is non-discriminating and
+#     must be strengthened (regex with line anchoring, specific line-range read, etc.) before
+#     the spec is emitted. A note that says "intentional, since the literal is in the type
+#     declaration body" without validating that the assertion CAN distinguish the two
+#     occurrences is an incomplete grilling gate. Detected tessera R30 MINOR-1 (spec § 9.2 R03
+#     sweep noted comment-match for AC-R30-15 and characterized it as intentional but did not
+#     compute that `verdict.includes(...)` would pass even with engine/types/verdict.ts:289
+#     removed while :272 JSDoc is preserved; Reviewer cold-caught this).
+#
+#   Spec § 9.8 spec-internal-contradiction sweep MUST explicitly
+#     cross-check algorithmic boundary clauses (pre-window / post-window, filter predicates,
+#     interval endpoints) across ALL spec sections where they appear (§ 1.x prose, § 3.x
+#     pseudocode, § 4 AC Then-columns). Listing one section's boundary convention and not
+#     diffing it against the others produces internal contradictions that surface empirically
+#     at chore-B. Procedure: for each algorithmic primitive with boundary semantics, grep
+#     the spec for all occurrences and verify each uses the same convention (inclusive vs
+#     exclusive; open vs closed). Detected tessera R34 MINOR-2 (pre/post window boundary
+#     inconsistency across § 1.1, § 3.2 pseudocode, and § 4 AC-R34-8 text).
+#
+#   Spec § 9.8 spec-internal-contradiction sweep must also cross-check
+#     type-shape definitions that appear in § 1.x scratch/type-pretest pseudocode against their
+#     corresponding definitions in § 4.x prescriptive pseudocode. The R34 MINOR-2 reinforcement
+#     (REINFORCED 2026-05-18) covers algorithmic boundary clause drift; this extends it to
+#     type-definition shape evolution: when § 1.5 type-pretest authors a type as a discriminated
+#     union with required fields on specific variants (e.g., status_code: number required on
+#     http_4xx/http_5xx), and § 4.x later emits the same type as an interface with optional
+#     fields (status_code?: number on all kinds), the § 10.8 sweep must explicitly diff the two.
+#     Procedure: for each named type in § 1.x pseudocode, grep spec §§ 4.x for the same type
+#     name and compare field optionality and variant structure. The drift is particularly likely
+#     when § 4.x is written after § 1.x and the type shape is simplified for implementation
+#     convenience. Detected tessera R65 MINOR-2 (FeedError § 1.5 discriminated union with
+#     required status_code vs § 4.1 interface with optional status_code; § 10.8 sweep missed;
+#     Implementer correctly followed § 4.1; weaker compile-time discrimination resulted).
+#
+#   Spec § 9 P3 ten-axis verification behavioral commitments (lines
+#     that assert "corner case input Z → expected output W") must be cross-checked against the
+#     AC table. For each P3 commitment, verify that at least one AC in § 5.1 structurally
+#     exercises that (Z, W) pair — meaning the AC's assertion is ON output W for input Z, not
+#     merely incidentally passing through it with assertions targeting other fields. Procedure:
+#     for each P3 statement, grep spec § 5.1 for an AC whose Then-column asserts on output W
+#     specifically. If none exists, either add the case to § 5.3 acknowledged-gaps with rationale
+#     OR add a new AC for it. The existing Rule 2 / § 5.3 acknowledged-gaps workflow covers
+#     implementation-derived gaps; this reinforcement ensures § 9 P3 commitments receive the
+#     same coverage check. Detected tessera R65 MINOR-3 (§ 9 line 1491 commits "empty
+#     firing_verdicts[] → firing_family_count === 0" but no AC asserts this; AC-R65-3/4/6 use
+#     empty input incidentally with assertions on other fields; § 5.3 did not enumerate this
+#     gap; a bug returning firing_family_count: 1 for empty input would pass all current ACs).
+#
+#   Spec-amendment-ALL-gate-artifacts-propagation (Tessera R82): When a spec amendment expands or modifies ALLOWED_SET (e.g., due to operator-authorized scope change during a dual-escalate window), Architect must update ALL four gate artifacts in lockstep: (a) spec § 3.2 or § 2.x ALLOWED_SET enumeration (narrative inventory table listing each file's authorization reason); (b) spec § 3.2 ALLOWED_SET regex (machine-checkable); (c) EMPIRICAL.sh Block 5 ALLOWED variable (script gate); (d) any AC that validates against the ALLOWED_SET (e.g., AC-R82-14). The narrative inventory table is a gate artifact — it provides the human-readable "why" for each file modification and is the first place future readers look to understand the round's scope. Omitting it from an amendment creates audit-trail confusion (machine gates pass but narrative lags reality). Procedure: before routing after any ALLOWED_SET amendment, grep the spec document for every occurrence of "§ 3.2", "ALLOWED_SET", and the new filename; verify at least 4 locations are updated (narrative table, regex, script, test AC). Detected tessera R82 MAJOR-1: narrative component inventory § 3.1 not updated when tools/build-canned-demos.ts was added to ALLOWED_SET (2nd instance; prior: R72).
 
 # REINFORCED 2026-05-19 — Empirical-AC threshold binding tightness (R44 MINOR-3, R46
 #   MINOR-1+2): When authoring an AC whose verification command is a `grep -c` count,
@@ -676,33 +764,6 @@ All unresolved decisions → open questions in the spec.
 #   MINOR-3 (post-MOD line numbers in branch-binding table); R65 MINOR-1 (routing-block
 #   carve-out AC numbers in NEXT-ROLE.md:234 "AC-R65-10 + AC-R65-12" → correct "AC-R65-16
 #   + AC-R65-18"). Detected tessera R65 MINOR-1.
-# REINFORCED 2026-05-20 — Spec § 9.8 spec-internal-contradiction sweep must also cross-check
-#   type-shape definitions that appear in § 1.x scratch/type-pretest pseudocode against their
-#   corresponding definitions in § 4.x prescriptive pseudocode. The R34 MINOR-2 reinforcement
-#   (REINFORCED 2026-05-18) covers algorithmic boundary clause drift; this extends it to
-#   type-definition shape evolution: when § 1.5 type-pretest authors a type as a discriminated
-#   union with required fields on specific variants (e.g., status_code: number required on
-#   http_4xx/http_5xx), and § 4.x later emits the same type as an interface with optional
-#   fields (status_code?: number on all kinds), the § 10.8 sweep must explicitly diff the two.
-#   Procedure: for each named type in § 1.x pseudocode, grep spec §§ 4.x for the same type
-#   name and compare field optionality and variant structure. The drift is particularly likely
-#   when § 4.x is written after § 1.x and the type shape is simplified for implementation
-#   convenience. Detected tessera R65 MINOR-2 (FeedError § 1.5 discriminated union with
-#   required status_code vs § 4.1 interface with optional status_code; § 10.8 sweep missed;
-#   Implementer correctly followed § 4.1; weaker compile-time discrimination resulted).
-# REINFORCED 2026-05-20 — Spec § 9 P3 ten-axis verification behavioral commitments (lines
-#   that assert "corner case input Z → expected output W") must be cross-checked against the
-#   AC table. For each P3 commitment, verify that at least one AC in § 5.1 structurally
-#   exercises that (Z, W) pair — meaning the AC's assertion is ON output W for input Z, not
-#   merely incidentally passing through it with assertions targeting other fields. Procedure:
-#   for each P3 statement, grep spec § 5.1 for an AC whose Then-column asserts on output W
-#   specifically. If none exists, either add the case to § 5.3 acknowledged-gaps with rationale
-#   OR add a new AC for it. The existing Rule 2 / § 5.3 acknowledged-gaps workflow covers
-#   implementation-derived gaps; this reinforcement ensures § 9 P3 commitments receive the
-#   same coverage check. Detected tessera R65 MINOR-3 (§ 9 line 1491 commits "empty
-#   firing_verdicts[] → firing_family_count === 0" but no AC asserts this; AC-R65-3/4/6 use
-#   empty input incidentally with assertions on other fields; § 5.3 did not enumerate this
-#   gap; a bug returning firing_family_count: 1 for empty input would pass all current ACs).
 # REINFORCED 2026-05-20 — When spec prescribes a hard-coded boolean or status literal in a
 #   success-response field whose name makes a semantic claim about a downstream side-effect
 #   the consumer cannot confirm (e.g., `freeze_hook_activated: true` when the consumer emits
@@ -794,7 +855,6 @@ All unresolved decisions → open questions in the spec.
 # REINFORCED 2026-05-20 — Spec § 9.6 self-application gate must walk stdio-flush semantics for large outputs. The pseudocode `process.stdout.write(out); process.exit(0)` empirically truncates at exactly 65,536 bytes when stdout is a pipe. Before prescribing this pattern for outputs that may exceed 64 KB (estimated from the spec triad size + directive section), verify the actual buffer size under realistic conditions: `node -e "process.stdout.write('x'.repeat(500000)); process.exit(0);" | wc -c`. If the spec prescribes a flow that outputs >64 KB in a single write, either use `process.stdout.end(data)` (which drains the buffer) or document the acknowledged gap in § 5.3 with a minimum mitigation. First tessera instance: R75 MINOR-1 (prefix 177KB); second instance: R74 MINOR-5 (not caught until Implementer noticed AC-R75-3 would consume truncated test output). Threshold reached at R75; cross-project memory entry added.
 # REINFORCED 2026-05-20 — Spec § 9.6 self-application gate must walk cross-module import execution paths. When a spec prescribes a TypeScript module with a bare `main();` call at module scope, and that module is imported by another module in the same spec, verify that the importing module's main() does not recursively execute the imported module's main(). Pattern: export the logic as a named export + guard the top-level execution with `if (require.main === module) { main(); }` so imports do not trigger execution at import-time. Before routing, simulate the import path: create a mental stack of which main() executes when module B imports module A that fires main() at script load. Procedure: grep for both bare `main();` calls and any `import/require` statements that span the imports. Spec R75 MINOR-2 (measure-cache-effect.ts importing build-role-context.ts would execute build-role-context's main() with wrong argv) caught by Implementer; specification gate gap. Third tessera instance (R74 MINOR-5 class); cross-project memory entry added.
 # REINFORCED 2026-05-20 — Spec § 9.6 self-application gate must verify bash context for prescribed keywords. When prescribing an insertion of bash code at a specific location (e.g., "append the following block after line X"), verify the keyword semantics are valid in that context. The `local` keyword is only valid inside bash function bodies; prescribing `local VAR=""` to be inserted at script top level (post routing-log heredoc) will cause bash to error "local: can only be used in a function" on script load. Procedure: before routing, verify every bash keyword (local, declare, typeset) against the insertion-site context. If the site is outside a function (e.g., appending to the main script body), use plain assignment `VAR=""` instead. Spec R75 MINOR-3 (local prescribed at top level) caught by Implementer. Fourth tessera instance of spec-pseudocode-fails-verbatim class (R74/R75); Rule 7 threshold crossed for cross-project rule derivation.
-# REINFORCED 2026-05-21 — Spec-amendment-ALL-gate-artifacts-propagation (Tessera R82): When a spec amendment expands or modifies ALLOWED_SET (e.g., due to operator-authorized scope change during a dual-escalate window), Architect must update ALL four gate artifacts in lockstep: (a) spec § 3.2 or § 2.x ALLOWED_SET enumeration (narrative inventory table listing each file's authorization reason); (b) spec § 3.2 ALLOWED_SET regex (machine-checkable); (c) EMPIRICAL.sh Block 5 ALLOWED variable (script gate); (d) any AC that validates against the ALLOWED_SET (e.g., AC-R82-14). The narrative inventory table is a gate artifact — it provides the human-readable "why" for each file modification and is the first place future readers look to understand the round's scope. Omitting it from an amendment creates audit-trail confusion (machine gates pass but narrative lags reality). Procedure: before routing after any ALLOWED_SET amendment, grep the spec document for every occurrence of "§ 3.2", "ALLOWED_SET", and the new filename; verify at least 4 locations are updated (narrative table, regex, script, test AC). Detected tessera R82 MAJOR-1: narrative component inventory § 3.1 not updated when tools/build-canned-demos.ts was added to ALLOWED_SET (2nd instance; prior: R72).
 # REINFORCED 2026-05-21 — AC-coverage-gap-mitigation-claim discipline (Tessera R83): When spec acknowledges an AC gap (e.g., "no live browser smoke test," "no assertion for X"), the mitigation claim must be specific and falsifiable. "ACs 10..13 bind the source-text patterns that runtime would invoke" is falsifiable only if every pattern-invocation path is enumerated and bound. If the spec later surfaces a 5-item set of listeners (ctrlDriftMag, ctrlWindowCount, ctrlAlphaThreshold, ctrlTargetShard, ctrlTopologySize) not covered by the named ACs, the mitigation claim was overstated. Procedure at pre-emit grilling: (a) for each acknowledged gap, enumerate ALL invocation paths of the pattern (e.g., "7 handler shapes: Run button, Reset button, 5 per-control listeners"); (b) verify each path has an AC binding; (c) if N paths are bound and M paths exist (N < M), the mitigation is incomplete — either extend the ACs or reword the gap to "static analysis catches N of M patterns; runtime mutation risk remains for M-N uncovered paths." Spec § 5.3 gap-acknowledgment + mitigation table pattern surfaced at R83; first tessera instance of this sub-variant (prior instances of "AC gap acknowledged without falsifiable mitigation" at R80 MINOR-1 + R81 MINOR-2, different structure).
 # REINFORCED 2026-05-21 — Pass-count arithmetic when forward-protection-AC flips present (Tessera R83): When computing predicted test pass count at a round where a forward-protection-AC is expected to flip (i.e., EXPECTED_FAIL increases by 1), subtract that flip from BOTH the predicted pass count AND the predicted pass-count band lower edge. Predicted pass = (prior-close PASS) - (forward-protection flip count) + (new ACs passing). Predicted band = [prior-close PASS - flip - 1, prior-close PASS - flip + 1] accounting for the delta direction. At R83: R82-close = 620 pass, AC-R82-14 flips (predicted), R83 adds 16 ACs all passing → prediction should be 620 - 1 + 16 = 635, band [634, 636]. Spec predicted 636 (missing the -1), band [635, 637], which masked the arithmetic error. Observation 635 fell at band lower edge; the gap between prediction and observation was attributed to "PRNG/environment variance" when it was actually systematic arithmetic. Fix: carry the forward-protection flip through the entire pass arithmetic. First tessera instance (prior: R79 MINOR-3 had similar gap but different structure).
 # REINFORCED 2026-05-21 — End-to-end-test-race-conditions: AC-R84-14 structurally flaky (Tessera R84 MINOR-2): When a spec prescribes an end-to-end test where an async operation (e.g., `worker.terminate()`) must halt a synchronous message stream, the test-harness timing is inherently racy: the worker thread may emit the final message between the async terminate() call and when the worker process is torn down. This is NOT an implementation bug; it is a fundamental concurrency property of async termination. When spectating this pattern, either (a) accept flakiness as a documented AC limitation in § 5.3 with explicit rationale ("terminate() is async; late-arriving messages are tolerated; AC asserts a lower bound not an exact count"), OR (b) restructure the test to not depend on race outcomes (e.g., measure the cumulative message count post-terminate across N test runs and assert a distribution, not a hard count). Procedure: if spec has a test of the form "invoke async operation X; assert that subsequent synchronous stream halts," audit whether X's completion is causally necessary for the halt assertion to be true. If the assertion is probabilistic (e.g., ">90% of runs observe ≤N messages"), document the flakiness as a known limitation; if the assertion is deterministic (e.g., "exactly K messages"), restructure. Spec R84 AC-R84-14 prescribed a deterministic assertion on an async race; observation: test passed in CI but exhibited transient local flakiness; Reviewer noted flakiness. Detected Tessera R84 MINOR-2 (first instance of this specific structure; related async-determinism pattern at R48 MINOR-3 / R53 MAJOR-2).
@@ -817,39 +877,3 @@ All unresolved decisions → open questions in the spec.
 #   full-suite runs at routing HEAD tripped Halt-3. Operator Option A resolution required post-Reviewer
 #   ESCALATE. Second tessera instance of count-arithmetic-missing-flake-contribution (prior: R83
 #   REINFORCED covered deterministic flips; R85 extends to stochastic flake variance).
-# REINFORCED 2026-05-21 — Self-application gate must cover EMPIRICAL.sh shell-command patterns
-#   (Tessera R85 MAJOR-2; composite fold of R75 self-application-gate series):
-#   The § 8.17 Q.17 self-application gate walk is complete only when it covers ALL spec-triad
-#   artifacts: (a) in-test regex patterns in `test/q*-*.test.ts` [already in Q.17]; AND (b) shell
-#   command patterns in Q-RNN-EMPIRICAL.sh — awk range patterns, grep patterns, sed ranges, and
-#   variable-assertion logic. Shell range-matching patterns (`awk '/start/,/end/'`) match BOTH the
-#   start line and every subsequent line until (and including) a line matching the end pattern. If
-#   start-pattern and end-pattern can both match the SAME line (e.g., `/^### Browser dashboard/`
-#   and `/^### /` both match any `###`-prefixed heading), the range produces only the start line —
-#   not the section body the block was intended to extract. Procedure: for each awk/sed range in
-#   EMPIRICAL.sh, run the command against the prescribed implementation text verbatim at spec-emit;
-#   verify the output is non-empty and contains the expected assertion target. If start and end
-#   patterns can overlap on the same line, use flag-toggling awk (`/start/{flag=1;next} flag &&
-#   /end/{exit} flag`) instead of a simple `/X/,/Y/` range. This sub-variant extends the R75
-#   stdio-flush / bash-context / cross-module-import series: the self-application gate must walk
-#   EACH type of executable prescription in the spec triad, not only in-test TypeScript patterns.
-#   R85 MAJOR-2: `awk '/^### Browser dashboard/,/^### /'` in Block 3 produced one-line output;
-#   Implementer HALT-1 at chore-A; Coordinator-direct fix required. 7th tessera instance of the
-#   canonically-landed `architect-encoded-pattern-not-verified-against-prescribed-implementation`
-#   Rule 1 sub-class (R62+R66+R68+R72+R83+R84+R85).
-
-# REINFORCED 2026-05-21 — Empirical command verification must distinguish global vs. anchored patterns
-#   in infrastructure files (Tessera R88 MAJOR-1; extension of architect-claim-without-empirical-walk):
-#   When claiming that a codebase file (e.g., .gitignore) does or does not contain a pattern, the
-#   Architect MUST run the actual tool that respects the pattern semantics (e.g., `git check-ignore`
-#   for .gitignore matching, or `git ls-files` to verify file tracking). A partial check (e.g.,
-#   `grep tools .gitignore`) that assumes the pattern is anchored or namespaced will miss global
-#   patterns (e.g., `*.js` which matches all .js files, not just ones named "tools...js"). Procedure:
-#   (1) identify the pattern language (glob, regex, sed, awk, shell glob); (2) run the COMMAND that
-#   interprets that language correctly (git check-ignore for gitignore, not grep; git ls-files for
-#   tracking status, not `test -f`); (3) record the OBSERVED output in § 9.7 empirical-premise row.
-#   R88 MAJOR-1: Architect claimed ".gitignore does NOT exclude tools/*.js" and verified via
-#   `grep tools .gitignore`; empirically false (global `*.js` pattern at line 8). The verification
-#   method was structurally wrong — grep of "tools" does not capture global patterns. Correct method:
-#   `git ls-files 'tools/*.js'` (empty output confirms exclusion) or `git check-ignore tools/foo.js`
-#   (exit code confirms exclusion). 9th tessera instance of architect-claim-without-empirical-walk.
