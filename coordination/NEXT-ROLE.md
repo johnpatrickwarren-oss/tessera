@@ -4391,3 +4391,104 @@ Key empirical findings (Family A at α=0.005, window_count=200): 5/5 detection f
 
 **Implementation commit SHA:** `56992bd` (`feat(R77 IMPLEMENTER): detection envelope sweep — 504-cell matrix, 17 ACs green`)
 **Coordination chore SHA:** `15af7ea` (`chore(R77 IMPLEMENTER): ESCALATE — EMPIRICAL.sh Block 2 defect + Memorial + DIAGNOSTIC`)
+
+---
+
+## § R78 IMPLEMENTER → REVIEWER routing block
+
+**NEXT-ROLE:** REVIEWER
+**STATUS:** READY
+**Round:** R78
+**Chore-A commit SHA:** `4b5ed80`
+
+### Binding-command attestation (all run at chore-A HEAD `4b5ed80`)
+
+**`npx tsc -p tsconfig.test.json`:** exit 0
+
+**`node --test --test-reporter=tap test/*.test.js`:**
+```
+# tests 580
+# suites 3
+# pass 570
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+```
+Exit code: 1 (fail=6 carry-forward; all 14 R78 tests pass)
+
+**`Q-R78-EMPIRICAL.sh`:**
+```
+Block 1 PASS: tsc exit 0
+Block 2 PASS: all 5 required artifacts present
+Block 3 PASS: tests=580 suites=3 pass=570 fail=6
+Block 4 PASS: 6 diff paths all ⊆ ALLOWED_SET
+Block 5 PASS: schema_version OK; 30 cells
+Block 6 PASS: engine + frozen tools/scripts + R72/R77 outputs byte-identical
+Block 7 PASS: all 5 required sections present
+Block 8 PASS: 5 spot-cells (0, 2, 11, 28, 29) match § 1.4 pre-prediction
+exit 0
+```
+
+### Per-cell matrix validation
+
+All 30 cells match the Architect's § 1.4 pre-prediction exactly. No halt
+condition 4 (architectural-reality discovery) or 8 (FP rate exceeded) fired.
+Shadow-rack FP never appeared at hop ≤ 2 (AC-R78-8 structural invariant
+confirmed). CZ unreachable at hop=1 for POS-CZ-* (AC-R78-9 confirmed).
+
+### Deliverables produced
+
+1. `tools/topology-walk-tuning.ts` — NEW; 244 lines TS; re-implements LCG +
+   scenario generators (zero cross-tool coupling); CLI guard: require.main === module
+2. `coordination/coverage/R78-topology-walk-tuning-matrix.json` — GENERATED;
+   30 cells × 5 trials = 150 deterministic trial outcomes; schema_version OK
+3. `coordination/coverage/R78-topology-walk-tuning.md` — GENERATED; 5 per-scenario
+   sections + Method section
+4. `scripts/topology-walk-tuning-recommendation.md` — NEW; ~130 lines MD; authored
+   from actual matrix; empirical envelope cites all required cells per spec § 3.2;
+   counter-example noted per R77 MINOR-1 (NEG-INDEP cells 26/27 non-monotone)
+5. `package.json` — MODIFIED; prebuild:topology-walk-tuning + topology-walk-tuning added
+6. `README.md` — MODIFIED; Coverage section extended with 16-line R78 entry (≤30)
+7. `test/q78-topology-walk-tuning.test.ts` — NEW (RED committed separately at 3e7e2cb)
+
+### Spec-deviance disclosures
+
+**TD-1 (TDD):** RED commit (`3e7e2cb`) predates GREEN commit (`4b5ed80`); git
+history confirms ordering. Spirit and letter both met. No deviation.
+
+**TD-2 (classifyOutcome parameter):** Spec § 3.1 defines
+`classifyOutcome(result, fired_set)` where `fired_set` is used in the
+pseudocode signature but the classification logic does not actually reference
+`fired_set` (shadow_rack_fp is computed from `rc.member_shard_ids` vs expected
+rack sets, not from fired_set). Renamed to `_fired_set` in implementation to
+suppress TypeScript `noUnusedLocals` warnings. Tactical adjustment per TACTICAL
+AUTONOMY clause (unused parameter rename).
+
+### Reviewer guidance
+
+**Key surfaces to verify cold-eye:**
+1. All engine files byte-identical to round-start SHA `3d00490` (AC-R78-13 scope)
+2. `tools/topology-walk-tuning.ts` imports NO other tools files (zero cross-tool coupling)
+3. LCG formula: `((s * 1664525) + 1013904223) >>> 0` — matches spec § 3.1 exactly
+4. Cell ordering: outer loop is SCENARIO_CLASSES (5), middle HOPS (3), inner MINS (2) → cell_idx 0..29
+5. Recommendation MD `## Empirical envelope` section cites actual matrix values (not pre-authored)
+
+### Anti-scope verification
+
+`git diff 3d00490 HEAD --name-only` at `4b5ed80`:
+```
+coordination/NEXT-ROLE.md
+coordination/MEMORIAL.md
+coordination/coverage/R78-topology-walk-tuning-matrix.json
+coordination/coverage/R78-topology-walk-tuning.md
+coordination/specs/Q-R78-EMPIRICAL.sh
+coordination/specs/Q-R78-SPEC-AUDIT.md
+coordination/specs/Q-R78-SPEC.md
+package.json
+README.md
+scripts/topology-walk-tuning-recommendation.md
+test/q78-topology-walk-tuning.test.ts
+tools/topology-walk-tuning.ts
+```
+All 12 paths are in the ALLOWED_SET (AC-R78-14 passes).
