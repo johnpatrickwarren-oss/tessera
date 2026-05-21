@@ -177,6 +177,20 @@ At default settings (α=0.005, window_count=200, Family A): **≈100% detection 
 
 Operator tuning guidance: see `scripts/detector-tuning-recommendation.md`.
 
+### Topology-walk tuning envelope (R78)
+
+Tessera R78 characterizes the tuning envelope of `attributeCommonMode` along two operator-visible dials — `max_hop_distance` and `min_member_count` — over 5 scenario classes × 30 cells × 5 trials. Generate the envelope matrix with:
+
+```bash
+pnpm topology-walk-tuning
+```
+
+See `coordination/coverage/R78-topology-walk-tuning.md` for the human-readable per-scenario summary; `coordination/coverage/R78-topology-walk-tuning-matrix.json` is the machine-readable data (30 cells, 150 trials).
+
+Key findings: at the Tessera default `max_hop_distance=1`, the cooling_zone node is structurally unreachable (shard→rack→cz is hop=2). Lifting to `max_hop_distance=2` catches all cross-rack CZ common-modes with no shadow-rack false-positives. `max_hop_distance=3` introduces structural false-positive attribution — not recommended for 2-tier topologies.
+
+Operator tuning guidance: see `scripts/topology-walk-tuning-recommendation.md`.
+
 ## License
 
 Apache 2.0. See `LICENSE`.
