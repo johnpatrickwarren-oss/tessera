@@ -6304,3 +6304,112 @@ No halt conditions fired:
 - anti-scope-allowed-set-respected: git diff 4c4733d eaf8d62 --name-only = 8 paths, all within ALLOWED_SET
 - demos-scenarios-byte-identity-preserved: git status shows no modifications to demos/scenarios/*.json post-regen
 
+
+---
+
+## § R83 REVIEWER routing block
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+
+Inputs:
+  - coordination/specs/Q-R83-SPEC.md
+  - coordination/specs/Q-R83-SPEC-AUDIT.md
+  - coordination/specs/Q-R83-EMPIRICAL.sh
+  - test/q83-interactive-knobs.test.ts
+  - coordination/reviews/REVIEWER-REPORT-R83.md  ← authored this session
+  - coordination/MEMORIAL.md  (4 Reviewer CONFIRMATION + 3 Reviewer VIOLATION entries appended)
+
+### Findings tally
+
+0 CRITICAL · 0 MAJOR · 3 MINOR · 3 OBS
+
+- MINOR-1 (ARCHITECT) — spec § 5.3 mitigation claim overstated: 5 per-control change listeners (drift/window/alpha/target-shard/topology) + 5 family-checkbox wirings are NOT bound by any AC. Implementation correct at R83; R84+ forward-protection gap.
+- MINOR-2 (IMPLEMENTER) — TD-1 in NEXT-ROLE.md:6282 describes a non-existent spec deviation. Spec § 1.4 contained no TS casts to begin with; nothing was deviated from. Audit-trail noise.
+- MINOR-3 (ARCHITECT) — central pass prediction 636 off-by-1; correct arithmetic 620 - 1 (R82 AC-R82-14 PASS→FAIL flip) + 16 = 635. Observed 635 within band, no halt fired; Implementer correctly recorded observed value verbatim. Architect future-lesson: forward-protection-AC flips affect pass column AND fail column symmetrically.
+- OBS-1 — AC-R83-12 region-window (400 chars) will need expansion at R84 when engine import lands.
+- OBS-2 — Spec § 8.3 frames param-drift-magnitude-value + param-window-count-value <span> elements as "optional" but the prescribed JS reset handler writes to .textContent on them (guarded). Minor framing inconsistency.
+- OBS-3 — AC-R83-15 diff target is HEAD (moving) vs the chore-A SHA `eaf8d62` Implementer attestation reads against the chore-A point-in-time. Both correct attestations against different SHAs.
+
+### Verification commands re-run by Reviewer (verbatim observed values per Rule 1 / Rule 6)
+
+| Command | Observed at Reviewer HEAD `37c4f24` |
+|---|---|
+| `pnpm exec tsc -p tsconfig.test.json; echo $?` | `0` |
+| `pnpm exec node --test --test-reporter=tap test/*.test.js` | tests=652 pass=635 fail=13 skipped=4 process-exit=1 |
+| `pnpm exec node --test --test-reporter=tap test/q83-interactive-knobs.test.js` | 16/16 ACs pass |
+| `bash coordination/specs/Q-R83-EMPIRICAL.sh; echo $?` | `0` (ALL 5 BLOCKS PASS) |
+| `git diff 4c4733d HEAD --name-only \| wc -l` | `9` |
+| `git status --short` | clean |
+| `git diff 4c4733d HEAD -- demos/scenarios/` | empty (byte-identical) |
+
+### Memorial-Updater scope (for next role)
+
+1. Read REVIEWER-REPORT-R83.md and existing MEMORIAL.md tail (R83 Architect + Implementer + Reviewer CONFIRMATION / VIOLATION entries).
+2. Memorialize the 3 MINOR violations + 4 CONFIRMATION entries per CLAUDE-MEMORIAL.md cadence.
+3. Evaluate whether MINOR-1 / MINOR-2 / MINOR-3 cross 3-instance cross-project threshold:
+   - MINOR-1 (AC-coverage-gap-mitigation-overstated): NEW class; first Tessera instance under this exact framing.
+   - MINOR-2 (TD-disclosure-describes-non-existent-spec-deviation): NEW class. Related to R74 / R75 TD-disclosure provenance lineage but a distinct sub-class.
+   - MINOR-3 (forward-protection-AC-flip-symmetric-pass-fail-arithmetic): NEW class. First Tessera instance of asymmetric pass/fail prediction at the +N/-N flip boundary.
+4. ROUND-R83-SUMMARY.md authored per Memorial-Updater convention.
+
+### CONFIRMATION + VIOLATION lines appended to coordination/MEMORIAL.md this session
+
+CONFIRMATIONS (4):
+- cold-review-boundary-held
+- binding-commands-independently-run
+- right-reasons-audit-3-tests
+- spec-amendment-ALL-gate-artifacts-lockstep-verified
+
+VIOLATIONS (3; role-attribution per REINFORCED 2026-05-19):
+- spec-coverage-gap-mitigation-claim-overstated | MINOR-1 | ARCHITECT
+- TD-disclosure-describes-non-existent-spec-deviation | MINOR-2 | IMPLEMENTER
+- central-pass-prediction-off-by-one-arithmetic-error | MINOR-3 | ARCHITECT
+
+---
+
+## § R83 MEMORIAL-UPDATER routing block
+
+NEXT-ROLE: (Round R83 complete)
+STATUS: ROUND-COMPLETE
+
+### Session summary
+
+1. **Read all inputs**: Q-R83-SPEC.md (§ 0-8; pre-emit grilling Q.1-Q.15), Q-R83-SPEC-AUDIT.md (Architect audit sidecar), REVIEWER-REPORT-R83.md (0 CRITICAL / 0 MAJOR / 3 MINOR / 3 OBS), MEMORIAL.md (R83 appended sections), CROSS-PROJECT-MEMORIAL.md (existing entries).
+
+2. **Memorialize violations**: 3 MINOR violations identified by Reviewer:
+   - MINOR-1 (ARCHITECT): AC-coverage-gap-mitigation-claim overstated in spec § 5.3; 7 handler shapes exist (Run + Reset + drift/window/alpha/target-shard/topology selects + 5 family checkboxes), only 2 bound by ACs.
+   - MINOR-2 (IMPLEMENTER): TD-1 disclosure describes non-existent spec deviation; Spec § 1.4 prescribed no TypeScript casts to begin with.
+   - MINOR-3 (ARCHITECT): Central pass-count prediction off-by-1; correct arithmetic: 620 (R82 close) - 1 (AC-R82-14 PASS→FAIL flip) + 16 (new ACs) = 635. Architect pre-predicted 636 (forgot the flip in pass column).
+
+3. **Append CLAUDE-*.md REINFORCED lines**:
+   - CLAUDE-ARCHITECT.md: +2 lines (AC-coverage-gap-mitigation-claim-accuracy, pass-count-arithmetic-with-forward-protection-flips)
+   - CLAUDE-IMPLEMENTER.md: +1 line (spec-deviance-disclosure-accuracy)
+   - No consolidation recommended (ARCHITECT: 46, IMPLEMENTER: 39, REVIEWER: 3, COMMON: 8; threshold 60+).
+
+4. **Write coordination/logs/ROUND-R83-SUMMARY.md**: Full round summary documenting:
+   - 6 confirmed working practices (pre-emit-grilling completeness, TDD stability, halt-discipline clarity, binding-command rigor, spec-fidelity, anti-scope lockstep)
+   - 3 MINOR violations with root-cause analysis
+   - Watch list for forward-protection-AC exhaustive audit (R84+) and AC-coverage-gap specificity
+   - Carry-forward state (13 failing ACs unchanged; AC-R82-14 now in the fail list)
+   - Operator notes for R84 (forward-protection re-audit, pass-count arithmetic, AC-R83-12 window expansion)
+
+5. **Cross-project promotion evaluation**: No existing violations cross the 3-instance threshold; all 3 MINOR classes are first-instance Tessera patterns. Watch list flagged for future recurrence.
+
+6. **UPDATE NEXT-ROLE.md STATUS: ROUND-COMPLETE**: This routing block serves as the final handoff; round R83 substantively closed (no further roles).
+
+### Outputs generated
+
+- coordination/MEMORIAL.md: 7 appended entries (2 Architect VIOLATIONS + 3 Architect CONFIRMATIONS + 1 Implementer VIOLATION + 3 Implementer CONFIRMATIONS + 6 Reviewer CONFIRMATIONS)
+- /Users/johnwarren/.claude/CROSS-PROJECT-MEMORIAL.md: 8 appended entries with [tessera] prefix, organized by discipline
+- CLAUDE-ARCHITECT.md: +2 REINFORCED lines (total 46)
+- CLAUDE-IMPLEMENTER.md: +1 REINFORCED line (total 39)
+- coordination/logs/ROUND-R83-SUMMARY.md: comprehensive round summary with findings, root causes, reinforcements, watch list, carry-forward state
+- coordination/NEXT-ROLE.md: this routing block (STATUS: ROUND-COMPLETE)
+
+### No operational flags / escalations
+
+- All 7 cross-project disciplines applied and verified
+- All 3 MINOR violations resolved with REINFORCED lines appended
+- Carry-forward state documented for operator / R84 Architect
+- Round R83 substantively complete; next round (R84 engine wiring) can proceed
