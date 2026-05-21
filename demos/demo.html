@@ -160,6 +160,44 @@
       details[open] > summary,
       details > *:not(summary) { display: block; }
     }
+    /* R83 — interactive control panel (parameter knobs; UI surface only at R83) */
+    #tessera-control-panel {
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 12px 24px;
+      background: var(--tessera-bg-elevated);
+      border-bottom: 1px solid var(--tessera-border);
+    }
+    #tessera-control-panel .control-panel-h {
+      font-size: 0.85rem; color: var(--tessera-fg-muted); font-weight: 500;
+    }
+    #tessera-control-panel .control-row {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      font-size: 0.85rem;
+    }
+    #tessera-control-panel label {
+      color: var(--tessera-fg-muted); min-width: 130px;
+    }
+    #tessera-control-panel .control-label { color: var(--tessera-fg-muted); min-width: 130px; }
+    #tessera-control-panel select,
+    #tessera-control-panel button {
+      background: var(--tessera-bg-control); color: var(--tessera-fg);
+      border: 1px solid var(--tessera-border); border-radius: 6px;
+      padding: 4px 10px; font-size: 0.85rem; cursor: pointer;
+      font-family: var(--tessera-font-mono);
+    }
+    #tessera-control-panel select:hover,
+    #tessera-control-panel button:hover { border-color: var(--tessera-accent-blue); }
+    #tessera-control-panel input[type="range"] { min-width: 180px; }
+    #tessera-control-panel .param-value {
+      color: var(--tessera-accent-blue); font-family: var(--tessera-font-mono);
+      font-size: 0.8rem; min-width: 48px; text-align: right;
+    }
+    #tessera-control-panel .family-toggles label {
+      min-width: 0; color: var(--tessera-fg); cursor: pointer;
+    }
+    #tessera-control-panel input[type="checkbox"] { margin-right: 4px; cursor: pointer; }
+    #btn-run { color: var(--tessera-accent-blue); border-color: var(--tessera-accent-blue); }
+    #btn-reset-params { color: var(--tessera-status-warn); border-color: var(--tessera-status-warn); }
   </style>
 </head>
 <body>
@@ -179,6 +217,7 @@
       <option value="hierarchical-evalue">Hierarchical e-value</option>
       <option value="sparse-data-resilience">Sparse-data resilience</option>
       <option value="topology-spanning-common-mode">Topology-spanning common-mode</option>
+      <option value="custom">Custom parameters</option>
     </select>
     <button id="btn-play">Play</button>
     <button id="btn-pause">Pause</button>
@@ -191,6 +230,78 @@
     </select>
     <input type="range" id="window-scrubber" min="0" max="29" step="1" value="0" aria-label="Scrub to window">
     <span id="window-indicator">window 0 / 30</span>
+  </section>
+
+  <section id="tessera-control-panel" class="control-panel">
+    <h2 class="control-panel-h">Interactive parameters — UI surface (R83); engine wiring lands at R84</h2>
+    <div class="control-row">
+      <label for="param-drift-magnitude">Drift magnitude</label>
+      <input type="range" id="param-drift-magnitude" min="0.05" max="0.40" step="0.025" value="0.10" aria-label="Drift magnitude">
+      <span id="param-drift-magnitude-value" class="param-value">0.100</span>
+    </div>
+    <div class="control-row">
+      <label for="param-window-count">Window count</label>
+      <input type="range" id="param-window-count" min="30" max="200" step="10" value="50" aria-label="Window count">
+      <span id="param-window-count-value" class="param-value">50</span>
+    </div>
+    <div class="control-row">
+      <label for="param-alpha-threshold">α threshold</label>
+      <select id="param-alpha-threshold">
+        <option value="0.001">0.001</option>
+        <option value="0.005" selected>0.005</option>
+        <option value="0.01">0.01</option>
+      </select>
+    </div>
+    <div class="control-row">
+      <label for="param-target-shard">Target shard</label>
+      <select id="param-target-shard">
+        <option value="shard-00" selected>shard-00</option>
+        <option value="shard-01">shard-01</option>
+        <option value="shard-02">shard-02</option>
+        <option value="shard-03">shard-03</option>
+        <option value="shard-04">shard-04</option>
+        <option value="shard-05">shard-05</option>
+        <option value="shard-06">shard-06</option>
+        <option value="shard-07">shard-07</option>
+        <option value="shard-08">shard-08</option>
+        <option value="shard-09">shard-09</option>
+        <option value="shard-10">shard-10</option>
+        <option value="shard-11">shard-11</option>
+        <option value="shard-12">shard-12</option>
+        <option value="shard-13">shard-13</option>
+        <option value="shard-14">shard-14</option>
+        <option value="shard-15">shard-15</option>
+        <option value="shard-16">shard-16</option>
+        <option value="shard-17">shard-17</option>
+        <option value="shard-18">shard-18</option>
+        <option value="shard-19">shard-19</option>
+        <option value="shard-20">shard-20</option>
+        <option value="shard-21">shard-21</option>
+        <option value="shard-22">shard-22</option>
+        <option value="shard-23">shard-23</option>
+        <option value="shard-24">shard-24</option>
+      </select>
+    </div>
+    <div class="control-row">
+      <label for="param-topology-size">Topology size</label>
+      <select id="param-topology-size">
+        <option value="small" selected>Small (6 shards)</option>
+        <option value="medium">Medium (10 shards)</option>
+        <option value="large">Large (25 shards)</option>
+      </select>
+    </div>
+    <div class="control-row family-toggles">
+      <span class="control-label">Detector families</span>
+      <label><input type="checkbox" id="param-family-a" checked> Family A</label>
+      <label><input type="checkbox" id="param-family-b" checked> Family B</label>
+      <label><input type="checkbox" id="param-family-c" checked> Family C</label>
+      <label><input type="checkbox" id="param-family-d" checked> Family D</label>
+      <label><input type="checkbox" id="param-family-e" checked> Family E</label>
+    </div>
+    <div class="control-row">
+      <button id="btn-run" type="button">Run</button>
+      <button id="btn-reset-params" type="button">Reset parameters</button>
+    </div>
   </section>
 
   <section id="live-verdict-banner" class="live-banner">
@@ -12788,6 +12899,141 @@
   var detectorsBodyEl      = document.getElementById('detectors-body');
   var provenanceBodyEl     = document.getElementById('provenance-body');
   var windowScrubber       = document.getElementById('window-scrubber');
+
+  // ── R83: interactive control panel — state management (UI surface; R84 wires to engine) ──
+  var R83_DEFAULTS = {
+    driftMagnitude: 0.10,
+    windowCount: 50,
+    alphaThreshold: 0.005,
+    targetShard: 'shard-00',
+    topologySize: 'small',
+    families: { a: true, b: true, c: true, d: true, e: true },
+  };
+
+  var controlState = {
+    driftMagnitude: R83_DEFAULTS.driftMagnitude,
+    windowCount: R83_DEFAULTS.windowCount,
+    alphaThreshold: R83_DEFAULTS.alphaThreshold,
+    targetShard: R83_DEFAULTS.targetShard,
+    topologySize: R83_DEFAULTS.topologySize,
+    families: {
+      a: R83_DEFAULTS.families.a, b: R83_DEFAULTS.families.b,
+      c: R83_DEFAULTS.families.c, d: R83_DEFAULTS.families.d,
+      e: R83_DEFAULTS.families.e,
+    },
+  };
+
+  var ctrlDriftMag       = document.getElementById('param-drift-magnitude');
+  var ctrlDriftMagVal    = document.getElementById('param-drift-magnitude-value');
+  var ctrlWindowCount    = document.getElementById('param-window-count');
+  var ctrlWindowCountVal = document.getElementById('param-window-count-value');
+  var ctrlAlphaThreshold = document.getElementById('param-alpha-threshold');
+  var ctrlTargetShard    = document.getElementById('param-target-shard');
+  var ctrlTopologySize   = document.getElementById('param-topology-size');
+  var ctrlFamilyA        = document.getElementById('param-family-a');
+  var ctrlFamilyB        = document.getElementById('param-family-b');
+  var ctrlFamilyC        = document.getElementById('param-family-c');
+  var ctrlFamilyD        = document.getElementById('param-family-d');
+  var ctrlFamilyE        = document.getElementById('param-family-e');
+  var btnRun             = document.getElementById('btn-run');
+  var btnResetParams     = document.getElementById('btn-reset-params');
+
+  function emitControlChange() {
+    document.dispatchEvent(new CustomEvent('tessera:control-change', {
+      detail: {
+        driftMagnitude: controlState.driftMagnitude,
+        windowCount: controlState.windowCount,
+        alphaThreshold: controlState.alphaThreshold,
+        targetShard: controlState.targetShard,
+        topologySize: controlState.topologySize,
+        families: {
+          a: controlState.families.a, b: controlState.families.b,
+          c: controlState.families.c, d: controlState.families.d,
+          e: controlState.families.e,
+        },
+      },
+    }));
+  }
+
+  if (ctrlDriftMag) {
+    ctrlDriftMag.addEventListener('input', function () {
+      controlState.driftMagnitude = parseFloat(ctrlDriftMag.value);
+      if (ctrlDriftMagVal) ctrlDriftMagVal.textContent = controlState.driftMagnitude.toFixed(3);
+      emitControlChange();
+    });
+  }
+  if (ctrlWindowCount) {
+    ctrlWindowCount.addEventListener('input', function () {
+      controlState.windowCount = parseInt(ctrlWindowCount.value, 10);
+      if (ctrlWindowCountVal) ctrlWindowCountVal.textContent = String(controlState.windowCount);
+      emitControlChange();
+    });
+  }
+  if (ctrlAlphaThreshold) {
+    ctrlAlphaThreshold.addEventListener('change', function () {
+      controlState.alphaThreshold = parseFloat(ctrlAlphaThreshold.value);
+      emitControlChange();
+    });
+  }
+  if (ctrlTargetShard) {
+    ctrlTargetShard.addEventListener('change', function () {
+      controlState.targetShard = ctrlTargetShard.value;
+      emitControlChange();
+    });
+  }
+  if (ctrlTopologySize) {
+    ctrlTopologySize.addEventListener('change', function () {
+      controlState.topologySize = ctrlTopologySize.value;
+      emitControlChange();
+    });
+  }
+  function wireFamilyCheckbox(el, key) {
+    if (!el) return;
+    el.addEventListener('change', function () {
+      controlState.families[key] = el.checked;
+      emitControlChange();
+    });
+  }
+  wireFamilyCheckbox(ctrlFamilyA, 'a');
+  wireFamilyCheckbox(ctrlFamilyB, 'b');
+  wireFamilyCheckbox(ctrlFamilyC, 'c');
+  wireFamilyCheckbox(ctrlFamilyD, 'd');
+  wireFamilyCheckbox(ctrlFamilyE, 'e');
+
+  if (btnRun) {
+    btnRun.addEventListener('click', function () {
+      // R83: placeholder; R84 invokes the engine bundle here.
+      console.log('R83 controlState (placeholder for R84 engine wiring):', JSON.stringify(controlState));
+    });
+  }
+
+  if (btnResetParams) {
+    btnResetParams.addEventListener('click', function () {
+      controlState.driftMagnitude = R83_DEFAULTS.driftMagnitude;
+      controlState.windowCount = R83_DEFAULTS.windowCount;
+      controlState.alphaThreshold = R83_DEFAULTS.alphaThreshold;
+      controlState.targetShard = R83_DEFAULTS.targetShard;
+      controlState.topologySize = R83_DEFAULTS.topologySize;
+      controlState.families.a = R83_DEFAULTS.families.a;
+      controlState.families.b = R83_DEFAULTS.families.b;
+      controlState.families.c = R83_DEFAULTS.families.c;
+      controlState.families.d = R83_DEFAULTS.families.d;
+      controlState.families.e = R83_DEFAULTS.families.e;
+      if (ctrlDriftMag)       ctrlDriftMag.value       = String(R83_DEFAULTS.driftMagnitude);
+      if (ctrlDriftMagVal)    ctrlDriftMagVal.textContent = R83_DEFAULTS.driftMagnitude.toFixed(3);
+      if (ctrlWindowCount)    ctrlWindowCount.value    = String(R83_DEFAULTS.windowCount);
+      if (ctrlWindowCountVal) ctrlWindowCountVal.textContent = String(R83_DEFAULTS.windowCount);
+      if (ctrlAlphaThreshold) ctrlAlphaThreshold.value = String(R83_DEFAULTS.alphaThreshold);
+      if (ctrlTargetShard)    ctrlTargetShard.value    = R83_DEFAULTS.targetShard;
+      if (ctrlTopologySize)   ctrlTopologySize.value   = R83_DEFAULTS.topologySize;
+      if (ctrlFamilyA) ctrlFamilyA.checked = R83_DEFAULTS.families.a;
+      if (ctrlFamilyB) ctrlFamilyB.checked = R83_DEFAULTS.families.b;
+      if (ctrlFamilyC) ctrlFamilyC.checked = R83_DEFAULTS.families.c;
+      if (ctrlFamilyD) ctrlFamilyD.checked = R83_DEFAULTS.families.d;
+      if (ctrlFamilyE) ctrlFamilyE.checked = R83_DEFAULTS.families.e;
+      emitControlChange();
+    });
+  }
 
   var SVG_NS = 'http://www.w3.org/2000/svg';
   var SVG_W = 800, SVG_H = 400;
