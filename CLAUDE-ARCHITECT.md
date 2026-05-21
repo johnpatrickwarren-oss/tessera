@@ -182,7 +182,7 @@ All unresolved decisions → open questions in the spec.
 #   grilling gap. Detected R06: AC-12 bound opts.mcdAlpha; sibling opts.mcdSeed declared in same
 #   interface had no binding AC and no documented rationale (REVIEWER MINOR-3).
 
-# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 10 sub-variants observed at Tessera)
+# REINFORCED — EMPIRICAL-PREMISE-VERIFICATION (composite; 12 sub-variants observed at Tessera)
 #
 #   Fixture accumulation adequacy (R07 MAJOR-1): When grilling catches that an e-process or
 #     statistical-detector AC's fixture needs N windows of accumulation to cross a detection
@@ -339,6 +339,42 @@ All unresolved decisions → open questions in the spec.
 #     to accumulate across rounds without incentivizing closure. Pre-emit gate: for each § 5.3 entry,
 #     specify the verification method the Reviewer will use to compensate, OR add a minimal AC.
 #     Detected tessera R74 MINOR-2 (Reviewer-1; AC-R74-32 added post-fix to close the gap).
+#
+#   Pre-routing empirical validation gate — EMPIRICAL.sh probe-run AND visualization sanity
+#     check (R77 OBS-4 + MINOR-2; 3rd Tessera EMPIRICAL.sh instance): Before routing to
+#     Implementer, the Architect MUST execute two empirical validations:
+#     (1) Run the spec-authored EMPIRICAL.sh against round-start HEAD: `bash Q-RNN-EMPIRICAL.sh`.
+#         All blocks must pass for reasons OTHER than the pre-documented carry-forward baseline.
+#         Common failure: a block uses `grep -E '^# pass '` (TAP format) but the invoked command
+#         omits `--test-reporter=tap`; the grep returns empty and the block unconditionally fails
+#         at chore-A. If ANY block fails at spec-emit time, fix BEFORE routing.
+#     (2) Verify each prescribed visualization (ASCII curve, heat-map slice) produces
+#         DISCRIMINATING output at the prescribed parameter slice. If the prescribed window_count
+#         causes ALL cells to saturate (e.g., every cell = 5/5 at window_count=200), the curve
+#         is entirely flat and conveys zero operator-visible information. The interesting boundary
+#         lives at shorter windows; the prescription must name a window in the dynamic range
+#         (≥50% of cells neither 0/5 nor 5/5). Procedure: mentally or empirically enumerate
+#         representative cells at the prescribed slice and check for uniformity.
+#     3rd Tessera EMPIRICAL.sh instance: R47 (self-recursive verifier), R72 (.gitignore
+#     semantics), R77 (reporter-format mismatch). Cross-project reinforcement rule derived.
+#     Detected tessera R77 OBS-4 (EMPIRICAL.sh Block 2 unconditionally failed at chore-A) +
+#     MINOR-2 (ASCII curves at window_count=200 = 14×2×3 = 84 saturated cells, all #####).
+#
+#   Discriminating AC threshold must pad predicted value by ≥1 trial from prediction
+#     (R77 MINOR-4; R71 MINOR-1 recurrence): When spec § 9 pre-predicts a detection rate for
+#     a named Monte Carlo cell AND that prediction has significant uncertainty (5-trial PRNG
+#     granularity = 20% steps), the AC threshold MUST be padded by at least one trial count
+#     (20%) in the permissive direction from the pre-predicted value. If the Architect
+#     pre-predicts ~0.0 ("essentially never detects") but the actual empirical value is 0.6
+#     (3/5), an AC threshold of ≤0.6 passes with zero margin — any PRNG-path change (seed
+#     formula, loop iteration order, LCG draw consumption order) flips the AC without any
+#     engine change. Padding rules: predicted ≈ 0% → threshold ≤ 0.4 (not ≤ 0.6); predicted
+#     ≈ 80% → threshold ≥ 0.6 (not ≥ 0.8); predicted ≈ 100% → threshold ≥ 0.8. Gate: at
+#     spec § 9 grilling, for each named-cell AC, ask "what is the 1-trial-pad of my
+#     pre-prediction?" and verify the AC threshold is no closer to the empirical boundary than
+#     that. Detected tessera R77 MINOR-4 (AC-R77-9 at (mag=0.05, win=30, α=0.005, family-a):
+#     predicted ~0.0, actual 3/5=0.60, threshold ≤0.60, zero-margin pass; first PRNG-path
+#     change would flip without engine regression).
 
 # REINFORCED 2026-05-17 — When a spec delta modifies an existing file that carries a file-level
 #   docblock (module header, file-level JSDoc, or equivalent), the pre-emit grilling must include

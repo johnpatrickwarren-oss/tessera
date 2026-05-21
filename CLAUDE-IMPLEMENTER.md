@@ -699,11 +699,25 @@ with a clear commit message.
 #   rather than a relative phrase. Chore-B adds one test (+1), making relative count literals
 #   stale. Add grilling gate: "does this count AC need SHA-anchoring?" R22 MINOR-1.
 
-# REINFORCED 2026-05-18 — When new production code and new tests are committed together in
-#   the same round, prefix with a separate RED commit (assert.fail stubs that compile but FAIL)
-#   before writing any implementation, so git history independently confirms RED→GREEN ordering.
-#   The stub does not need to be complex — its purpose is a git-verifiable RED-state record.
-#   Detected tessera R23 MINOR-1.
+# REINFORCED — TDD-SEPARATE-RED-COMMIT (composite; 2 sub-variants at Tessera)
+#
+#   Git-verifiable RED commit required (R23 MINOR-1): When new production code and new tests
+#     are committed together in the same round, prefix with a separate RED commit (assert.fail
+#     stubs that compile but FAIL) before writing any implementation, so git history independently
+#     confirms RED→GREEN ordering. The stub does not need to be complex — its purpose is a
+#     git-verifiable RED-state record. "I performed RED in-session" is an unverifiable claim by
+#     definition; the rule exists to produce INDEPENDENT VERIFIABILITY from git history.
+#     Detected tessera R23 MINOR-1.
+#
+#   Spirit-vs-letter disclosure is not a substitute (R77 MAJOR-1): When an Implementer performs
+#     RED in-session but does not commit a separate RED-state before the GREEN commit, the spirit
+#     of TDD is honored but the letter — git-verifiable ordering — is broken. Disclosing this as
+#     "spirit honored; git history doesn't confirm" in the MEMORIAL is the correct disclosure
+#     form; it is NOT a mitigation that makes the deviation acceptable. A N-round streak of
+#     honoring the rule does not grant a one-round exemption. Operator decides whether to require
+#     a corrective RED-only commit at the next round's entry or accept the in-session attestation;
+#     that decision belongs to the operator, not the Implementer. Detected tessera R77 MAJOR-1
+#     (9-round streak R69–R75 ends; first streak-break since R23 set the discipline).
 
 # REINFORCED 2026-05-18 — Chore-B forward-protection runtime tests must use `execFileSync`
 #   (no-shell array form) rather than `execSync` (shell-string form). `execSync` introduces
@@ -1004,3 +1018,29 @@ with a clear commit message.
 #   { PerShardResidual } and import type { ExtendedSampleObservation } after the describe()
 #   block at line 78; codebase convention violated per sibling q65 test file which groups
 #   imports at top).
+
+# REINFORCED — IMPLEMENTER-DOC-ACCURACY (composite; 2 sub-variants at Tessera)
+#
+#   Cite-with-counter-example-suppression in empirical doc prose (R77 MINOR-1): When filling
+#     in an empirical tuning recommendation section by reading the matrix (per spec [Implementer
+#     fills in...] placeholder pattern), apply CITE-AND-DISCLOSE: for every "lever X helps"
+#     claim, scan the matrix for adjacent cells where lever X makes detection WORSE and disclose
+#     any counter-examples found. At R77, the tuning recommendation cited (mag=0.075, win=30):
+#     α=0.005→2/5 vs α=0.010→5/5 as evidence that α=0.010 helps; the matrix shows the
+#     opposite at (mag=0.050, win=30): α=0.005→3/5 vs α=0.010→2/5. The non-monotonicity is a
+#     PRNG-resolution artifact (5-trial Monte Carlo with different seeds per α level — NOT the
+#     same noise with a different threshold), and presenting it as a tuning effect without the
+#     counter-example misleads operators. Procedure: for each tuning-lever claim, grep the
+#     matrix at adjacent parameter values; if any adjacent cell shows the opposite direction,
+#     add a note: "counter-example at (mag=X): lever direction reverses at this boundary —
+#     likely PRNG noise, not a tuning effect." Detected tessera R77 MINOR-1.
+#
+#   Docstring-vs-impl-claim accuracy (R77 MINOR-3): Module/function docstrings that describe
+#     a rendering behavior must match the actual implementation. If the implementation renders
+#     two separate rows (one per family), the docstring must say "separate row per family" —
+#     not "overlaying both families." A docstring claiming overlay implies a single-column
+#     display with family indicators interleaved; a reader expecting overlay would be confused
+#     by separate rows. Procedure: after writing a renderer function, re-read its docstring and
+#     ask "does every verb in this docstring match what the code actually does?" 'overlay',
+#     'merge', 'combine' all imply a different visual structure from 'separate rows'. Detected
+#     tessera R77 MINOR-3.
