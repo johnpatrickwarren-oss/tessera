@@ -209,15 +209,19 @@ test('AC-R74-22: corpus.json enumerates all 6 fixtures with expected models', ()
 
 // AC-R74-32: end-to-end bash flag construction — MU_SONNET=false → Haiku (not Sonnet).
 // Closes the spec § 5.3 acknowledged gap. Exercises the bash → selector integration path
-// that CRITICAL-1 broke: verifies the fixed conditional correctly omits --mu-sonnet when
-// MU_SONNET is not "true", allowing the marker-check branch to fire (or default-haiku for F1).
+// with set -u to match run-pipeline.sh's actual execution environment (set -uo pipefail).
+// Verifies the fixed conditional correctly omits --mu-sonnet when MU_SONNET is "false".
 test('AC-R74-32: MU_SONNET=false does not pass --mu-sonnet to selector (Haiku for F1 no-anchor)', () => {
   const f1Path = resolve(FIXTURES_DIR, 'F1-default-haiku.md');
-  // Simulate the fixed run-pipeline.sh flag construction in bash, then invoke selector.
+  // Mirror the fixed run-pipeline.sh conditional form under set -u (matches pipeline env).
   const bashScript = [
+    'set -u',
     'MU_SONNET=false',
-    'if [ "$MU_SONNET" = "true" ]; then MU_SONNET_FLAG=(--mu-sonnet); else MU_SONNET_FLAG=(); fi',
-    `node ${SELECTOR_PATH} --directive ${f1Path} --tier full "\${MU_SONNET_FLAG[@]}"`,
+    `if [ "$MU_SONNET" = "true" ]; then`,
+    `  node ${SELECTOR_PATH} --directive ${f1Path} --tier full --mu-sonnet`,
+    `else`,
+    `  node ${SELECTOR_PATH} --directive ${f1Path} --tier full`,
+    `fi`,
   ].join('\n');
   const r = spawnSync('bash', ['-c', bashScript], { encoding: 'utf-8' });
   assert.equal(r.status, 0, `bash script exited non-zero; stderr=${r.stderr}`);

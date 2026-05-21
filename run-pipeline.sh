@@ -224,11 +224,10 @@ if [[ "$TIER" == "solo" ]] || $COORDINATOR_MODE; then
   MU_FALLBACK_RATIONALE="MU not dispatched on this tier"
 else
   if [ "$MU_SONNET" = "true" ]; then
-    MU_SONNET_FLAG=(--mu-sonnet)
+    MU_SELECT_OUT="$(node scripts/mu-model-select.js --directive "$COORD/NEXT-ROLE.md" --tier "$TIER" --mu-sonnet 2>/dev/null)" || true
   else
-    MU_SONNET_FLAG=()
+    MU_SELECT_OUT="$(node scripts/mu-model-select.js --directive "$COORD/NEXT-ROLE.md" --tier "$TIER" 2>/dev/null)" || true
   fi
-  MU_SELECT_OUT="$(node scripts/mu-model-select.js --directive "$COORD/NEXT-ROLE.md" --tier "$TIER" "${MU_SONNET_FLAG[@]}" 2>/dev/null)" || true
   if [[ -n "$MU_SELECT_OUT" ]]; then
     MU_MODEL_RAW="$(echo "$MU_SELECT_OUT" | node -e \
       "process.stdin.resume(); let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{ try{const j=JSON.parse(d); console.log(j.model+'|'+(j.rationale||''))}catch{} })" 2>/dev/null)" || true
