@@ -7421,6 +7421,9 @@ R87 full-tier hygiene round: dropped AC-R36-30 + AC-R36-31 from `test/q36-phase2
 - `a0ec513` RED: q87 test stubs (all 5 fail)
 - `c0f9dc8` Partial chore-A: Edits 1, 2, 4, 5, 6 + ESCALATE halt
 - `e3135e7` Option A resolution: AC-R36-3 self-exclusion restored
+- `ccfe166` Coordination chore-A: MEMORIAL + NEXT-ROLE routing block
+
+**HEAD at routing to Reviewer:** `ccfe166` (plus SHA-backfill commit immediately following)
 
 ### Binding-command attestation (AC-R87-6)
 
