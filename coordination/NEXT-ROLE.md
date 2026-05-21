@@ -7402,3 +7402,73 @@ Consequence: Edit 3 as prescribed applied; error message changes; slightly less 
 ### State of q87 tests at HALT
 With Edits 1, 2, 4, 5, 6 applied (not Edit 3), q87 tests: **pass 5 / fail 0**
 With Edit 3 also applied (current state): q36 AC-R36-3 fails; full suite: **tests=692 pass=672 fail=16 skipped=4** BUT includes AC-R36-3 failing (was previously passing pre-R87).
+
+---
+
+## § R87 IMPLEMENTER routing block (chore-A — Option A resolved) (2026-05-21)
+
+NEXT-ROLE: REVIEWER
+STATUS: READY
+
+### Implementation summary
+
+R87 full-tier hygiene round: dropped AC-R36-30 + AC-R36-31 from `test/q36-phase2-close-walk.test.ts` per R62 Option 1 precedent. Edits 1, 2, 4, 5, 6 applied per spec § 3.1. Edit 3 (AC-R36-3 self-exclusion removal) HALTed — ESCALATE resolved as Option A (restore self-exclusion with corrected comment, commit e3135e7). Created `test/q87-carry-forward-cleanup.test.ts` (AC-R87-1..5 all pass). No changes to Q-R87-EMPIRICAL.sh.
+
+### TDD RED commit
+`a0ec513` — `test/q87-carry-forward-cleanup.test.ts` created; all 5 tests fail against unmodified q36. Git-verifiable RED before implementation.
+
+### Chore-A commit chain
+- `a0ec513` RED: q87 test stubs (all 5 fail)
+- `c0f9dc8` Partial chore-A: Edits 1, 2, 4, 5, 6 + ESCALATE halt
+- `e3135e7` Option A resolution: AC-R36-3 self-exclusion restored
+
+### Binding-command attestation (AC-R87-6)
+
+**`pnpm exec tsc -p tsconfig.test.json`:** exit code = **0**
+
+**`pnpm exec node --test --test-reporter=tap test/*.test.js`** (observed directly):
+- `# tests` = **692** (strict; expected exactly 692)
+- `# pass` = **673** (in band [672, 673] ✓)
+- `# fail` = **15** (in band [15, 16] ✓; AC-R84-14 stochastic at low end)
+- `# skipped` = **4** (strict ✓)
+- exit code = **non-zero** (expected; fail > 0 are pre-existing carry-forwards)
+
+**`bash coordination/specs/Q-R87-EMPIRICAL.sh`** (Block 4 run showed tests=692, pass=672, fail=16, skipped=4):
+- Result: **10 PASS / 0 FAIL**
+- Exit code: **0**
+
+All AC-R87-6 conditions satisfied: (a) tsc exit 0; (b) tests=692 strict; (c) fail=15 ∈ [15,16]; (d) pass=673 ∈ [672,673]; (e) skipped=4 strict; (f) EMPIRICAL.sh exit 0.
+
+### Anti-scope diff attestation (AC-R87-7)
+
+**`git diff 0eb8a51 HEAD --name-only`** → 8 paths:
+```
+coordination/MEMORIAL.md
+coordination/NEXT-ROLE.md
+coordination/diagnostics/DIAGNOSTIC-R87-ac36-3-self-exclusion.md
+coordination/specs/Q-R87-EMPIRICAL.sh
+coordination/specs/Q-R87-SPEC-AUDIT.md
+coordination/specs/Q-R87-SPEC.md
+test/q36-phase2-close-walk.test.ts
+test/q87-carry-forward-cleanup.test.ts
+```
+All 8 paths within ALLOWED_SET (§ 5.2). No unauthorized paths.
+
+### AC verdicts (runtime-bound)
+- AC-R87-1: **PASS** — q36 contains zero `^test('AC-R36-30:` and zero `^test('AC-R36-31:` matches
+- AC-R87-2: **PASS** — q36 contains no `= '36ab019'` or `= 'c49df0e'` variable assignments
+- AC-R87-3: **PASS** — q36 contains "R87 cleanup: AC-R36-30 + AC-R36-31 dropped" + "R62 Option 1" + "SPEC-AUTHORING-CHECKLIST"
+- AC-R87-4: **PASS** — q36 header cites "AC-R36-1 through AC-R36-29"; stale "1 through 31" absent
+- AC-R87-5: **PASS** — q36 does not import execFileSync
+
+### Tactical deviation
+
+**TD-1:** Spec § 3.1 Edit 3 (AC-R36-3 self-exclusion removal) was not applied. Operator-approved Option A resolution: restore self-exclusion with corrected comment. The corrected comment cites "AC-R36-3's error message contains execFileSync('node',...)" rather than the stale "AC-R36-30 runs execFileSync('git')". This is an Operator-directed deviation from the spec's Edit 3 prescription; not a Tactical Autonomy unilateral decision. See DIAGNOSTIC-R87-ac36-3-self-exclusion.md.
+
+### Inputs to Reviewer
+- Spec: `coordination/specs/Q-R87-SPEC.md`
+- Spec audit: `coordination/specs/Q-R87-SPEC-AUDIT.md`
+- EMPIRICAL.sh: `coordination/specs/Q-R87-EMPIRICAL.sh`
+- Branch: `main` (all commits on main)
+- Test file: `test/q87-carry-forward-cleanup.test.ts`
+- Modified: `test/q36-phase2-close-walk.test.ts`
