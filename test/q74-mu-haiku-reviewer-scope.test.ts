@@ -206,3 +206,23 @@ test('AC-R74-22: corpus.json enumerates all 6 fixtures with expected models', ()
     'F4-class-C-reviewer2', 'F5-class-D-option', 'F6-audit-no-anchor',
   ].sort());
 });
+
+// AC-R74-32: end-to-end bash flag construction — MU_SONNET=false → Haiku (not Sonnet).
+// Closes the spec § 5.3 acknowledged gap. Exercises the bash → selector integration path
+// that CRITICAL-1 broke: verifies the fixed conditional correctly omits --mu-sonnet when
+// MU_SONNET is not "true", allowing the marker-check branch to fire (or default-haiku for F1).
+test('AC-R74-32: MU_SONNET=false does not pass --mu-sonnet to selector (Haiku for F1 no-anchor)', () => {
+  const f1Path = resolve(FIXTURES_DIR, 'F1-default-haiku.md');
+  // Simulate the fixed run-pipeline.sh flag construction in bash, then invoke selector.
+  const bashScript = [
+    'MU_SONNET=false',
+    'if [ "$MU_SONNET" = "true" ]; then MU_SONNET_FLAG=(--mu-sonnet); else MU_SONNET_FLAG=(); fi',
+    `node ${SELECTOR_PATH} --directive ${f1Path} --tier full "\${MU_SONNET_FLAG[@]}"`,
+  ].join('\n');
+  const r = spawnSync('bash', ['-c', bashScript], { encoding: 'utf-8' });
+  assert.equal(r.status, 0, `bash script exited non-zero; stderr=${r.stderr}`);
+  const out = JSON.parse(r.stdout) as SelectorOut;
+  assert.equal(out.model, 'claude-haiku-4-5-20251001',
+    `MU_SONNET=false should not pass --mu-sonnet; expected haiku but got ${out.model}`);
+  assert.equal(out.decision_path[0], 'default_haiku');
+});
