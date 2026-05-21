@@ -1,6 +1,6 @@
 CURRENT-ROUND: R83
-NEXT-ROLE: ARCHITECT
-STATUS: PENDING
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
 
 ---
@@ -6162,3 +6162,90 @@ If a tactical deviation is contemplated, disclose as `TD-N` in the IMPLEMENTER r
 ---
 
 End of NEXT-ROLE.md
+
+## § R83 ARCHITECT routing block (2026-05-21)
+
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
+Inputs:
+- coordination/specs/Q-R83-SPEC.md (this round's spec; verbatim markup + CSS + JS + test file)
+- coordination/specs/Q-R83-SPEC-AUDIT.md (Reviewer-only audit sidecar)
+- coordination/specs/Q-R83-EMPIRICAL.sh (binding-command harness; chmod +x)
+
+### Spec triad SHA (committed BEFORE this routing block per R21 ARCH MINOR-1)
+
+`204f792` — `spec(R83): interactive control panel + state-management surface (Phase 4 SLICE 3 round 2)`
+
+### Round-start SHA
+
+`4c4733d` (the directive chore commit). All R83 ALLOWED_SET regexes (spec § 3.2, AC-R83-15, Q-R83-EMPIRICAL.sh Block 5) bind to this SHA via `git diff 4c4733d HEAD --name-only`.
+
+### Baseline at round-start HEAD (verified at Architect session entry; Rule 6 encode-actual-results-verbatim)
+
+- `pnpm exec tsc -p tsconfig.test.json` exit: `0`
+- `pnpm exec node --test --test-reporter=tap test/*.test.js` process exit: `1`
+- TAP `# tests`: `636`
+- TAP `# pass`: `620`
+- TAP `# fail`: `12`
+- TAP `# skipped`: `4`
+- `bash coordination/specs/Q-R83-EMPIRICAL.sh` probe at round-start: exit `1` (Block 1 PASS, Blocks 2/3/4 FAIL for the documented `Implementer-hasnt-built-yet` reasons, Block 5 PASS on empty diff; full verbatim record in Q-R83-SPEC-AUDIT.md § C.4)
+
+### Architect predictions at R83 chore-A (per spec § 5.2; Implementer attests OBSERVED verbatim — do NOT propagate predictions)
+
+| Observable | Prediction | Strictness |
+|---|---|---|
+| `pnpm exec tsc -p tsconfig.test.json` exit | `0` | strict |
+| `pnpm exec node --test --test-reporter=tap test/*.test.js` process exit | `1` | strict (carry-forward 12 + R82 AC-R82-14 flip = 13 failures) |
+| TAP `# tests` | `652` | strict |
+| TAP `# pass` | `636` | band [635, 637] |
+| TAP `# fail` | `13` | strict |
+| TAP `# skipped` | `4` | strict |
+| `bash coordination/specs/Q-R83-EMPIRICAL.sh` exit | `0` | strict |
+| `git diff 4c4733d HEAD --name-only` line count | `9-13` | band |
+| `demos/scenarios/*.json` content vs round-start | byte-identical | strict (halt condition 9) |
+
+### Implementer chore-A sequence (recap from spec § 4)
+
+1. **RED commit** — Write `test/q83-interactive-knobs.test.ts` with 16 stub `test()` blocks each containing `assert.fail('R83 RED: AC-R83-N')`. Verify `pnpm exec tsc -p tsconfig.test.json && pnpm exec node --test --test-reporter=tap test/q83-interactive-knobs.test.js` shows 16 failures + clean tsc. Commit as `test(R83 RED): 16 assert.fail stubs for interactive knobs ACs`.
+
+2. **GREEN commit** —
+   - Apply spec § 1.2 (HTML markup), § 1.3 (CSS rules), § 1.4 (JS source) edits to `tools/build-canned-demos.ts` (locate insertion points by the exact textual anchors prescribed: `</section>\n\n  <section id="live-verdict-banner"` for the new section markup; `before </style>` for CSS; `var windowScrubber       = document.getElementById('window-scrubber');` for the JS insertion point).
+   - Append `<option value="custom">Custom parameters</option>` to the existing `#scenario-selector` `<select>` block in `tools/build-canned-demos.ts` HTML_TEMPLATE_HEAD.
+   - Run `pnpm exec tsc -p tsconfig.test.json` (rebuild .js for tools/ + tests/).
+   - Run `pnpm exec node tools/build-canned-demos.js` to regenerate `demos/demo.html`.
+   - Verify `git status` shows ONLY `tools/build-canned-demos.ts` + `demos/demo.html` as modified at this point — and `demos/scenarios/*.json` UNCHANGED (halt condition 9; if any scenarios JSON appears modified, HALT + DIAGNOSTIC).
+   - Replace the test file's `assert.fail` stubs with the verbatim test body from spec § 2.5.
+   - Recompile tests: `pnpm exec tsc -p tsconfig.test.json`.
+   - Run full `pnpm exec node --test --test-reporter=tap test/*.test.js | tail -12` and record observed counts verbatim.
+   - Run `bash coordination/specs/Q-R83-EMPIRICAL.sh` and verify exit 0.
+   - Commit as `feat(R83 GREEN): interactive control panel + state management — chore-A`.
+
+3. **NEXT-ROLE.md routing** — Append `## § R83 IMPLEMENTER routing block (chore-A)` per spec § 6.2 template with `STATUS: READY`, observed binding-command outputs verbatim, the chore-A SHA, and the CONFIRMATION lines appended to coordination/MEMORIAL.md.
+
+### Halt conditions (recap from spec § 6.1)
+
+1. `bash Q-R83-EMPIRICAL.sh` exits non-zero at chore-A for any reason OTHER than a pre-documented carry-forward expectation.
+2. `pnpm exec tsc -p tsconfig.test.json` exit ≠ 0.
+3. Test baseline drift: `# fail` ≠ 13 OR `# pass` outside `[635, 637]`.
+4. R61-class architectural-reality discovery.
+5. Architect spec uses round-evolution-fragile AC patterns: HALT + DIAGNOSTIC; do NOT silently amend (R79 MAJOR-1 lesson — no Implementer-direct EMPIRICAL.sh amendments).
+6. Any cross-project discipline (Rules 1-7) violated: HALT + DIAGNOSTIC.
+7. New external dependency required: HALT + DIAGNOSTIC + ESCALATE.
+8. Anti-scope ALLOWED_SET incomplete (R82 MAJOR-1 lesson): file requires modification not in ALLOWED_SET → HALT + DIAGNOSTIC.
+9. `demos/scenarios/*.json` content drifts post-regen: HALT + DIAGNOSTIC.
+10. R82 smoke block at `demos/demo.html:13206-13230` lost post-regen: HALT + DIAGNOSTIC.
+
+### Cross-project disciplines load-bearing at R83
+
+- **Rule 1** (empirical-command-attestation; R26+R72+R77+R79+R70 canonical): Implementer attests ACTUAL observed values verbatim in chore-A routing block; do NOT propagate Architect predictions; do NOT reframe error exits as compliance.
+- **Rule 2** (branch-binding coverage; R21 derived): every event listener has an AC binding (spec § 5 table maps AC-R83-10..13 to all state-management branches).
+- **Rule 3** (self-application gate; tessera R74 MINOR-5 / R75 MINOR-3 / R81 MAJOR-3): Architect verified at spec § 8.5 walkthrough that every AC is structurally satisfied by spec prescriptions; Implementer copies verbatim.
+- **Rule 4** (cite-then-verify; R02/R11/R65/R72/R74 MINOR-1): all line citations in spec § 8.14 grep-verified at spec-emit; Implementer copies anchors verbatim.
+- **Rule 5** (claim-then-walk + ALLOWED_SET forward-coverage; R79 lesson): spec § 8.13 walked R82 AC-R82-14 (flip predicted) + R81/R80 ACs (carry-forward).
+- **Rule 6** (encode-actual-results-verbatim; R03/R26/R30/R44/R65/R77 MINOR-4): spec § 5.2 + § 6.2 routing block template; HALT if observed != predicted; NO silent self-amendments.
+- **Rule 7** (halt-discipline; R01/R02/R08/R79 MAJOR-1): spec § 6.1 halt conditions enumerated; DIAGNOSTIC + STATUS: ESCALATE never silent.
+
+### Memorial entries appended this session
+
+See coordination/MEMORIAL.md tail — Architect CONFIRMATION lines for pre-emit-grilling, brainstorm-design-review, halt-discipline (none-fired), role-boundary (no impl code), spec-amendment-ALL-gate-artifacts (upfront propagation verified), claim-then-walk forward-coverage (R82 flip predicted), encode-actual-results-verbatim (probe-run outcomes verbatim in audit § C.4).
+
