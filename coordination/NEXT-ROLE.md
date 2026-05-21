@@ -1,8 +1,119 @@
-CURRENT-ROUND: R75
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R77
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
-ROUND-START-SHA: 6002dd6
+
+---
+
+## § R76 close attestation (Anchor PR opened) (2026-05-20)
+
+R76 = cross-repo coordination chore (Coordinator-interactive; no Tessera pipeline subagent invocation). Phase 4 SLICE 1 cost-savings (R73-R75 framework changes) ported from Tessera to canonical Anchor repo.
+
+**PR opened:** https://github.com/johnpatrickwarren-oss/anchor/pull/39 (branch `feat/r73-r75-cost-savings-tessera-port` off `origin/main`)
+
+**Files ported (14 changed; 1465 insertions; 11 deletions):**
+- `run-pipeline.sh` (wholesale port — closes cumulative ~558-line Tessera divergence including R49+R50+R51+R63+R49 hybrid-reviewer accumulation in addition to R73-R75 cost-savings)
+- `scripts/tier-router.ts` + `tier-router-validate.ts` + `tier-router-criteria.md` (R73)
+- `scripts/mu-model-select.ts` + `mu-model-select-fixtures/` (R74)
+- `scripts/build-role-context.ts` + `measure-cache-effect.ts` (R75)
+
+**Operator action pending:** review + merge PR #39 at operator discretion. Did NOT disturb operator's WIP branch `feat/md-f6-existing-architectural-surface` (Anchor working directory restored to that branch post-PR).
+
+**Tessera-Anchor relationship after merge:** Once PR #39 merges, Tessera's vendored framework files are re-vendor-clean from Anchor canonical (the Tessera-temporary-divergence pattern resolves). Until merged, Tessera continues using its own (now-PR'd) framework files; behavior unchanged.
+
+---
+
+## § R77 Round-scope directive (Architect — detector tuning gap 1: low-magnitude SDC; Phase 4 SLICE 1 round 5) (2026-05-20)
+
+R77 = full-tier pipeline round addressing R72 coverage matrix gap 1: sdc-drift detected in only 90% of variations (2/20 missed at low drift magnitude < 0.15/window). Goal: characterize Tessera's detection envelope at low drift magnitudes; document tuning options (lower α; longer windows; Family C changepoint; hierarchical e-value combination).
+
+**Round-start SHA:** SHA of R75 close commit (1f81029); verify via `git rev-parse HEAD` at Architect session entry.
+
+### Primary deliverable
+
+1. **`tools/detector-envelope.ts`** (NEW; Coordinator default):
+   - Parameter sweep across drift magnitudes (0.05 → 0.40 in 0.025 steps; 14 magnitudes), window counts (30 → 200 in steps), α thresholds (0.001 / 0.005 / 0.01), and detector families (Family A betting baseline + Family C changepoint comparison)
+   - For each parameter combination, run 5 trials with different RNG seeds; report (a) detection rate; (b) detection-window median + p95
+   - Emit `coordination/coverage/R77-detection-envelope-matrix.json` (machine-readable) + `R77-detection-envelope.md` (human-readable summary with detection curve per family)
+
+2. **`tools/detection-curve.ts`** (NEW; optional convenience):
+   - Renders ASCII detection curve (rate vs magnitude) per Family + per α threshold; useful for inclusion in coverage report
+
+3. **`scripts/detector-tuning-recommendation.md`** (NEW; written content):
+   - Documents Tessera's detection envelope from R77 sweep
+   - Recommends operator-actionable tuning levers per failure scenario class
+   - Distinguishes theoretical Ville-bound floor (cannot cross) from operational tuning margin
+
+4. **README.md update** — extend "Coverage" section with detection envelope citation:
+   - Link to `coordination/coverage/R77-detection-envelope.md`
+   - Headline: detection envelope characterized for Family A (current) + Family C (alternative); ~X% detection at magnitude ≥ Y under default α=0.005; tuning options documented
+
+5. **Test file** `test/q77-detector-envelope.test.ts`:
+   - Matrix structural ACs
+   - Per-magnitude detection-rate ACs (Architect specifies minimum-rate thresholds for each magnitude bucket)
+   - Family A vs Family C comparison ACs (which family wins at each magnitude)
+   - Anti-regression: R72 saturation matrix preserved; R73-R75 cost-savings preserved
+
+6. **Q-R77-EMPIRICAL.sh** at chore-A pre-commit
+
+### Tier rationale
+
+**full-tier** — Architect (parameter-sweep design + detection-curve methodology + Ville-bound theoretical-floor analysis; cite-then-walk over Family A + Family C engine internals) + Implementer (sweep harness + matrix emission + tests) + Reviewer (cold-eye for parameter-sweep correctness; right-reasons audit on detection-rate ACs) + Memorial-Updater.
+
+### Anti-scope (R77 hard limits)
+
+- NO modification of `engine/*` files (Phase 3 frozen)
+- NO modification of `demos/*` / R70-R75 tools (frozen)
+- NO modification of `scripts/tier-router*.ts` / `mu-model-select*.ts` / `build-role-context.ts` / `measure-cache-effect.ts` (R73-R75 frozen)
+- NO modification of `run-pipeline.sh` (Tessera-temporary-divergence on hold pending R76 Anchor merge)
+- NO new external dependencies (R68 anti-worm)
+- NO real-cluster work (Path B preserved)
+- NO DS-repo modifications
+- NO `gh repo` operations to Anchor (PR #39 awaiting operator review)
+- NO modification of carry-forward AC fail set
+- NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `tools/detector-envelope.ts` (NEW)
+- `tools/detection-curve.ts` (NEW; optional)
+- `scripts/detector-tuning-recommendation.md` (NEW)
+- `coordination/coverage/R77-detection-envelope-matrix.json` + `R77-detection-envelope.md` (NEW; generated)
+- `package.json` (add `detector-envelope` script)
+- `README.md` (extend Coverage section)
+- `test/q77-detector-envelope.test.ts` (NEW)
+- `coordination/specs/Q-R77-SPEC.md` + `Q-R77-SPEC-AUDIT.md` + `Q-R77-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R77.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rule 1: ACTIVE GATE
+- Rule 2: ACTIVE GATE — branch-binding for parameter-sweep branches + detection-criteria branches + Family A vs Family C comparison branches
+- Rule 3: ACTIVE GATE
+- Rule 4: ACTIVE GATE — **NO forward-protection / live-file-count / anti-scope-diff-against-prior-round patterns** (cross-project canonical)
+- Rule 5: N/A
+- Rule 6: ACTIVE GATE
+- Rule 7: ACTIVE GATE Surface (a) — cross-project claim-then-walk + R74 TACTICAL-AUTONOMY-without-re-verification
+
+### Halt conditions (R77 Implementer)
+
+1. Q-R77-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R75 close other than R77-additions
+4. R61-class architectural-reality discovery
+5. **Claim-then-walk + TACTICAL-AUTONOMY-without-re-verification disciplines load-bearing** (cross-project canonical at R72/R74)
+6. Architect spec uses round-evolution-fragile AC patterns: HALT
+7. **Detection rate falls below claimed minimum for any magnitude bucket** in Architect spec → HALT + DIAGNOSTIC (substantive coverage gap; operator decides if claimed minimums are aspirational vs achievable)
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R77 --tier full
+```
+
+---
 SPEC-TRIAD-SHA: a466aa4
 
 ---
