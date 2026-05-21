@@ -1,7 +1,95 @@
-CURRENT-ROUND: R86
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
-TIER: coordinator
+CURRENT-ROUND: R87
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
+TIER: full
+
+---
+
+## § Anchor PR #39 merged (operator action 2026-05-21)
+
+Operator squashed-and-merged PR #39 to `github.com/johnpatrickwarren-oss/anchor` main. Cost-savings trilogy (R73-R75) + accumulated Tessera framework improvements (R49+R50+R51+R63+R49 hybrid-reviewer + R73-R75) propagated to Anchor canonical. Future Anchor consumers (other projects scaffolded via `new-project.sh`) inherit the cost-savings.
+
+**Tessera-Anchor temporary-divergence (R76-R86 anti-scope item):** resolved by definition. Tessera's framework files (`run-pipeline.sh` + R73-R75 scripts) are byte-identical to Anchor canonical post-merge (Tessera versions were the source of the merge; no intervening Tessera framework changes since R76). Re-vendor would be no-op; the divergence is closed.
+
+---
+
+## § R87 Round-scope directive (Architect — carry-forward AC cleanup; Phase 4 SLICE 5 hygiene round) (2026-05-21)
+
+R87 = full-tier hygiene round applying R62 Option 1 precedent (drop structurally-vacuous AC) to the **two Phase 2-close-legacy forward-protection ACs**: R36-30 + R36-31. These have been carry-forward-failing for 30+ rounds because the CHORE_A_SHA literal is `87e372f` (Phase 2 close), structurally older than every subsequent HEAD; the AC pattern is identical to R62 AC-R62-15 (dropped at R62) and structurally cannot PASS at any committed HEAD. Test baseline goes from 6 carry-forward fails (R36-21, R36-30, R36-31, R65-2, R66-14, AC-R84-14) → 4.
+
+**Round-start SHA:** SHA of this commit; verify via `git rev-parse HEAD` at Architect session entry.
+
+### Primary deliverable
+
+1. **`test/q36-phase2-close-walk.test.ts`** modification (CONDITIONAL; ALLOWED_SET expansion required):
+   - Remove `test('AC-R36-30: ...', ...)` block at line 640 (or equivalent location)
+   - Remove `test('AC-R36-31: ...', ...)` block (next test()-block after AC-R36-30)
+   - Add inline comment block citing R87 cleanup + R62 Option 1 precedent + R86 SPEC-AUTHORING-CHECKLIST tightening "Forward-protection diff empty-set assertion" failure mode
+   - Update header comment at lines 3-6 if it cites AC range "1 through 31" — change to "1 through 29"
+
+2. **`coordination/MEMORIAL.md`** appends:
+   - R87 COORDINATOR section documenting the cleanup rationale + R62 Option 1 precedent application
+   - Test baseline transition: 6 → 4 carry-forward fails (R36-21 + R65-2 + R66-14 + AC-R84-14 remain)
+
+3. **Test file** `test/q87-carry-forward-cleanup.test.ts`:
+   - AC-R87-1: q36 test file no longer contains `AC-R36-30:` or `AC-R36-31:` test() blocks (grep + count)
+   - AC-R87-2: Phase 2 close SHA `87e372f` no longer cited as CHORE_A_SHA in test files (grep)
+   - AC-R87-3: Test baseline: `tests` count = expected (post-cleanup; 2 fewer than R86); `fail` count = 4 (down from 6) ± stochastic band for AC-R84-14
+   - AC-R87-4: Comment block in q36 cites R87 + R62 Option 1 precedent
+
+4. **Q-R87-EMPIRICAL.sh** at chore-A pre-commit. **MUST use `--test-reporter=tap`** per R77.
+
+### Tier rationale
+
+**full-tier** — Architect (test-file modification scope + R62 Option 1 precedent citation + R86 SPEC-AUTHORING-CHECKLIST application; cite-then-walk over q36 test file structure) + Implementer + Reviewer (cold-eye for unintended test-removal scope; verify no other ACs depend on AC-R36-30/31 chain) + MU.
+
+### Anti-scope (R87 hard limits)
+
+- NO modification of `engine/*` (Phase 3 + R82 frozen)
+- NO modification of R73-R86 deliverables (frozen)
+- NO modification of other test files (`test/q01-*` through `test/q35-*`, `test/q37-*` through `test/q86-*`): R36 test file is uniquely authorized for this round per cleanup scope
+- NO modification of `tools/*` (R70/R71/R77/R78 + R86 build/coverage tools frozen)
+- NO new external dependencies
+- NO modification of `run-pipeline.sh` (now byte-equal to Anchor canonical; preserve)
+- NO real-cluster; NO DS-repo; NO `gh repo` operations beyond push to Tessera public
+- NO modification of carry-forward AC fail set OTHER than the targeted R36-30 + R36-31 removal
+- NO modification of prior-round Q-RNN-SPEC.md files
+- NO attempt to "fix" R36-21 (CLAUDE-IMPLEMENTER >30 entries; requires consolidation pass — separate work) OR R65-2 (live-file-count; documented at R66 Option A) OR R66-14 (anti-scope-diff against prior-round; documented at R68 Option A) OR AC-R84-14 (structural-race flakiness; documented at R85 Option A band)
+
+ALLOWED modifications:
+- `test/q36-phase2-close-walk.test.ts` (CONDITIONAL; remove AC-R36-30 + R36-31 + header citation update)
+- `test/q87-carry-forward-cleanup.test.ts` (NEW)
+- `package.json` (no new deps; no script changes expected)
+- `coordination/specs/Q-R87-SPEC.md` + `Q-R87-SPEC-AUDIT.md` + `Q-R87-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R87.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE. **Architect MUST use `--test-reporter=tap`** per R77.
+- **R86 prophylactic discipline load-bearing:** Architect spec MUST verify any awk/regex/grep against prescribed test-file structure at spec-emit time (SPEC-AUTHORING-CHECKLIST.md Architect-encoded-pattern section). Specifically: the AC-R87-1 grep that checks "no AC-R36-30/31 test blocks remain" MUST be tested against the prescribed post-removal q36 file at spec-emit.
+- Haiku-MU MUST update TOP-OF-FILE STATUS at R87 close (R83-sharpened discipline).
+
+### Halt conditions (R87 Implementer)
+
+1. Q-R87-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R86 close: more than 2 fewer fails OR any pre-R87 test other than R36-30/R36-31 transitions PASS→FAIL: HALT + DIAGNOSTIC
+4. R61-class architectural-reality discovery
+5. Architect spec uses round-evolution-fragile AC patterns (especially regex/awk with hardcoded bounds; R84-R85 lesson): HALT
+6. All cross-project disciplines load-bearing
+7. New external dependency: HALT + DIAGNOSTIC + ESCALATE
+8. **Implementer discovers another test file structurally depends on AC-R36-30 or AC-R36-31 existence:** HALT + DIAGNOSTIC for operator authorization on scope expansion
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R87 --tier full
+```
+
+---
 
 ---
 
