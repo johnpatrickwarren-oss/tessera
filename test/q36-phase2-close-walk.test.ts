@@ -1,20 +1,23 @@
 // test/q36-phase2-close-walk.test.ts — Phase 2 close-walk bindings (R36).
 //
-// Binds AC-R36-1 through AC-R36-31 per Q-R36-SPEC.md § 3.
+// Binds AC-R36-1 through AC-R36-29 per Q-R36-SPEC.md § 3.
 // AC-R36-28 (tsc exits 0) and AC-R36-29 (test count) are binding-command
 // attestations reported by the Implementer at GREEN in NEXT-ROLE.md;
-// not runtime-bound. AC-R36-31 (chore-B forward protection) is a runtime
-// test added at chore-B; RED by design at chore-A.
+// not runtime-bound.
 //
 // Covers: subprocess-hang fixes (D4), R32 carry-forwards (D2), R34
 // carry-forwards (D3), MR-2 consolidation (D5), Phase 2 close-walk doc
-// (D1), anchor backflow (D7), anti-scope protection.
+// (D1), anchor backflow (D7).
+//
+// R87 (2026-05-21): the two original anti-scope ACs (AC-R36-30 round-start-to-
+// chore-A diff; AC-R36-31 chore-B forward protection) were dropped per R62
+// Option 1 precedent — see in-file explanatory comment near the end of the
+// file and Q-R87-SPEC.md § 1 for rationale.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { execFileSync } from 'node:child_process';
 
 const ROOT = resolve(__dirname, '..');
 
@@ -71,8 +74,7 @@ test('AC-R36-3: no other test files carry execFileSync node --test pattern', () 
   const testFiles = readdirSync(testDir).filter(
     (f) => f.match(/^q\d+.*\.test\.ts$/) &&
       f !== 'q29-k8s-adapter.test.ts' &&
-      f !== 'q34-event-conditional-attribution.test.ts' &&
-      f !== 'q36-phase2-close-walk.test.ts',  // exclude self: AC-R36-30 runs execFileSync('git')
+      f !== 'q34-event-conditional-attribution.test.ts',
   );
   const pattern = /execFileSync\s*\(\s*['"]node['"]/;
   const violations: string[] = [];
@@ -636,90 +638,30 @@ test('AC-R36-27: ANCHOR-BACKFLOW-2026-05-18.md exists with all 4 subprocess-hang
   );
 });
 
-// ── AC-R36-30: anti-scope allowed-set (round-start to chore-A) ───────────────
-test('AC-R36-30: round-start-to-chore-A diff path-set ⊆ R36 allowed-set', () => {
-  const ROUND_START_SHA = '36ab019';
 
-  const ALLOWED_SET: ReadonlyArray<RegExp> = [
-    /^test\/q36-phase2-close-walk\.test\.ts$/,
-    /^test\/q29-k8s-adapter\.test\.ts$/,
-    /^test\/q34-event-conditional-attribution\.test\.ts$/,
-    /^test\/q32-slice3-close-walk\.test\.ts$/,
-    /^test\/q25-l0-contract\.test\.ts$/,
-    /^test\/q30-nvlink-adapter\.test\.ts$/,
-    /^test\/q28-slurm-adapter\.test\.ts$/,
-    /^test\/q-md-f4-common-mode-injection\.test\.ts$/,
-    /^engine\/topology\/common-mode-attribution\.ts$/,
-    /^coordination\/SCOPING-MEMO-v0\.3\.md$/,
-    /^coordination\/specs\/Q-R32-SPEC\.md$/,
-    /^coordination\/specs\/Q-R26-SPEC\.md$/,
-    /^coordination\/specs\/Q-R34-SPEC\.md$/,
-    /^coordination\/specs\/Q-R36-SPEC\.md$/,
-    /^coordination\/PHASE-2-CLOSE-WALK\.md$/,
-    /^coordination\/ANCHOR-BACKFLOW-2026-05-18\.md$/,
-    /^coordination\/SPEC-AUTHORING-CHECKLIST\.md$/,
-    /^CLAUDE-ARCHITECT\.md$/,
-    /^CLAUDE-IMPLEMENTER\.md$/,
-    /^CLAUDE-COMMON\.md$/,
-    /^coordination\/MEMORIAL\.md$/,
-    /^coordination\/COORDINATOR-MEMORIAL\.md$/, // TD-3: Memorial-Updater Wave 5 graduation entries
-    /^coordination\/NEXT-ROLE\.md$/,
-    /^coordination\/reviews\/REVIEWER-REPORT-R36(-opus|-sonnet)?\.md$/,
-  ];
-
-  let diffOutput: string;
-  try {
-    diffOutput = execFileSync(
-      'git',
-      ['diff', `${ROUND_START_SHA}..HEAD`, '--name-only'],
-      { encoding: 'utf8', cwd: ROOT },
-    );
-  } catch (err: unknown) {
-    const e = err as { stdout?: string };
-    diffOutput = e.stdout ?? '';
-  }
-
-  const paths = diffOutput.split('\n').filter((p) => p.length > 0);
-  const violations = paths.filter((p) => !ALLOWED_SET.some((re) => re.test(p)));
-
-  assert.deepStrictEqual(
-    violations,
-    [],
-    `R36 anti-scope violations (paths not in ALLOWED_SET): ${violations.join(', ')}`,
-  );
-});
-
-// ── AC-R36-31: chore-B forward-protection (chore-A to HEAD ⊆ post-chore-A set) ─
-// Verifies that every path committed after chore-A (c49df0e) belongs to the
-// post-chore-A allowed set: Reviewer report, MEMORIAL updates, NEXT-ROLE routing,
-// COORDINATOR-MEMORIAL graduation, and this chore-B test file itself.
-// (git diff subprocess; no transitive-hang risk; no skip guard needed.)
-test('AC-R36-31: chore-A-to-HEAD diff ⊆ R36 post-chore-A allowed set (chore-B forward protection)', () => {
-  const CHORE_A_SHA = 'c49df0e'; // R36 chore-A SHA
-
-  const ALLOWED_LITERAL = new Set([
-    'coordination/COORDINATOR-MEMORIAL.md',
-    'coordination/MEMORIAL.md',
-    'coordination/NEXT-ROLE.md',
-    'test/q36-phase2-close-walk.test.ts',
-  ]);
-  // Hybrid-aware carve-out: REVIEWER-REPORT-R36 may be -opus.md or -sonnet.md
-  const REVIEWER_REPORT_REGEX = /^coordination\/reviews\/REVIEWER-REPORT-R36(-opus|-sonnet)?\.md$/;
-
-  const diffOutput = execFileSync(
-    'git',
-    ['diff', `${CHORE_A_SHA}..HEAD`, '--name-only'],
-    { encoding: 'utf8', cwd: ROOT },
-  );
-
-  const paths = diffOutput.split('\n').filter((p) => p.length > 0);
-  const violations = paths.filter(
-    (p) => !ALLOWED_LITERAL.has(p) && !REVIEWER_REPORT_REGEX.test(p),
-  );
-
-  assert.deepStrictEqual(
-    violations,
-    [],
-    `post-chore-A modification outside allowed set: ${violations.join(', ')}`,
-  );
-});
+// ── R87 cleanup: AC-R36-30 + AC-R36-31 dropped (2026-05-21) ──────────────────
+// The original AC-R36-30 (round-start-to-chore-A diff path-set ⊆ R36 allowed-
+// set) and AC-R36-31 (chore-A-to-HEAD diff ⊆ R36 post-chore-A allowed set)
+// pinned forward-protection assertions to two R36-era SHAs via the now-
+// deleted constants ROUND_START_SHA and CHORE_A_SHA (the SHA values are not
+// reproduced here so EMPIRICAL.sh Block 2's deletion-count grep remains
+// unambiguous; see git history for the literal values). Both SHAs are far
+// older than every subsequent committed HEAD, so the `git diff <pin>..HEAD
+// --name-only` output includes hundreds of paths outside the original R36
+// allowed-set — the assertions are structurally unreachable at any post-R36
+// HEAD.
+//
+// Precedent: R62 Option 1 (operator-resolved at R62 close) dropped the
+// structurally-equivalent AC-R62-15 for the same reason. Q-R87-SPEC.md § 1
+// applies that precedent here.
+//
+// Related discipline: coordination/SPEC-AUTHORING-CHECKLIST.md was extended at
+// R86 (Phase 4 SLICE 4) to document the "Forward-protection diff empty-set
+// assertion" failure mode under "Architect-encoded text-matching patterns MUST
+// be verified against prescribed implementation." Future spec rounds should
+// not author pinned-SHA forward-protection diff assertions whose pin will fall
+// strictly behind subsequent committed HEAD — when they do, they become
+// permanent carry-forward fails like AC-R36-30/31 were before this round.
+//
+// AC-R36-28 + AC-R36-29 (binding-command attestations reported in
+// NEXT-ROLE.md, not runtime-bound) are preserved unchanged.
