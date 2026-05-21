@@ -1,7 +1,101 @@
-CURRENT-ROUND: R73
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R74
+NEXT-ROLE: ARCHITECT
+STATUS: PENDING
 TIER: full
+
+---
+
+## § R74 Round-scope directive (Architect — Haiku-for-MU + Reviewer scope differentiation; Phase 4 SLICE 1 round 2) (2026-05-20)
+
+R74 = full-tier pipeline round delivering two cost-savings mechanisms. Builds on R73's tier-router: when router routes `audit`, Reviewer runs structural-only; MU runs on Haiku for routine pattern-matching with Sonnet fallback for substantive cross-round derivations.
+
+**Round-start SHA:** `319cf6a` (chore(R73): Memorial-Updater outputs). Verify via `git rev-parse HEAD` at Architect session entry.
+
+### Primary deliverable
+
+**Mechanism 1: Haiku-for-MU**
+
+1. `run-pipeline.sh` MU role dispatch:
+   - Default MU model: `claude-haiku-4-5-20251001` (was `claude-sonnet-4-6`) — ~3× cost reduction per MU session
+   - **Sonnet fallback** when `--mu-sonnet` flag set OR tier-router output is `full` AND directive contains markers indicating cross-round-pattern memorial work (Architect picks marker set at spec § 0)
+
+**Mechanism 2: Reviewer scope differentiation**
+
+2. `CLAUDE-REVIEWER.md` new `## Mode: Structural-only Reviewer` section (Mode docs; NOT REINFORCED):
+   - **Full-adversarial mode** (default for tier=`full`): adversarial counterfactual + right-reasons audit + cold-eye independent binding-command re-runs
+   - **Structural-only mode** (default for tier=`audit`): binding-command re-runs + AC-binding structural integrity + ALLOWED_SET diff. NO adversarial counterfactual; NO right-reasons audit
+   - When tier=`implementer-only` or `coordinator-only`: Reviewer NOT invoked
+
+3. `run-pipeline.sh` Reviewer dispatch:
+   - Default model `claude-opus-4-7` (unchanged)
+   - Add `--reviewer-scope full|structural` flag; default = `full` when tier=`full`, `structural` when tier=`audit`
+
+4. `coordination/logs/ROUND-R{N}-ROUTING.md` extended schema:
+   - Add: MU model selected; Reviewer scope; Sonnet-fallback rationale
+
+5. Test file `test/q74-mu-haiku-reviewer-scope.test.ts`:
+   - MU model selection ACs (Haiku default; Sonnet on marker)
+   - Reviewer scope ACs (structural skips adversarial+right-reasons)
+   - Routing-integration ACs
+   - Anti-regression: R73 baseline preserved
+
+6. `Q-R74-EMPIRICAL.sh` at chore-A pre-commit
+
+### Tier rationale
+
+**full-tier** — Architect (cite-then-walk over R73 router output + Tessera commit history) + Implementer + Reviewer **full-adversarial** (don't undercut cold-eye discipline in own design) + MU.
+
+### Anti-scope (R74 hard limits)
+
+- NO modification of `engine/*` (frozen)
+- NO modification of `demos/*` / R70-R72 tools (frozen)
+- NO modification of `scripts/tier-router*.ts` (R73 frozen)
+- NO new external dependencies (R68 anti-worm)
+- **MODIFICATIONS PERMITTED:** `run-pipeline.sh` (continued Tessera-temporary-divergence); `CLAUDE-REVIEWER.md` Mode docs section ONLY
+- NO modification of CLAUDE-ARCHITECT/IMPLEMENTER/MEMORIAL REINFORCEMENTS or CLAUDE-COORDINATOR REINFORCEMENTS
+- NO DS-repo modifications
+- NO `gh repo` operations to Anchor (deferred R76)
+- NO modification of carry-forward AC fail set
+- NO modification of prior-round Q-RNN-SPEC.md files
+
+ALLOWED modifications:
+- `run-pipeline.sh` (Tessera-vendored; continued divergence)
+- `CLAUDE-REVIEWER.md` (Mode docs addition only)
+- `coordination/logs/ROUND-R*-ROUTING.md` schema extension
+- `test/q74-mu-haiku-reviewer-scope.test.ts` (NEW)
+- `coordination/specs/Q-R74-SPEC.md` + `Q-R74-SPEC-AUDIT.md` + `Q-R74-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R74.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rule 1: ACTIVE GATE
+- Rule 2: ACTIVE GATE — branch-binding for MU-model-selection + Reviewer-scope + tier-router-integration branches
+- Rule 3: ACTIVE GATE
+- Rule 4: ACTIVE GATE — **NO forward-protection / live-file-count / anti-scope-diff-against-prior-round patterns** (R62+R66+R68 lesson; cross-project canonical at R72)
+- Rule 5: N/A
+- Rule 6: ACTIVE GATE
+- Rule 7: ACTIVE GATE Surface (a)
+
+### Halt conditions (R74 Implementer)
+
+1. Q-R74-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test baseline drift beyond R73 close other than R74-additions
+4. **R73 router validation regression: any of R45/R61/R62/R66/R72 routes anything other than `full` post-R74 → HALT**
+5. R61-class architectural-reality discovery
+6. **R72-promoted claim-then-walk discipline:** verify codebase + future-state claims at spec-emit via direct verification command
+7. Architect spec uses round-evolution-fragile AC patterns: HALT
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R74 --tier full
+```
+
+(Intentional: R74 runs full-tier despite designing tier-down mechanisms; first-round bootstrap preserves full discipline.)
 
 ---
 
