@@ -4492,3 +4492,131 @@ test/q78-topology-walk-tuning.test.ts
 tools/topology-walk-tuning.ts
 ```
 All 12 paths are in the ALLOWED_SET (AC-R78-14 passes).
+
+---
+
+## § R78 REVIEWER → MEMORIAL-UPDATER routing block
+
+**NEXT-ROLE:** MEMORIAL-UPDATER
+**STATUS:** MERGE-READY
+**Round:** R78
+**Reviewer HEAD:** `8cb84cf`
+**Reviewer report:** `coordination/reviews/REVIEWER-REPORT-R78.md`
+
+### Finding summary
+
+| Severity | Count | Description |
+|---|---|---|
+| CRITICAL | 0 | — |
+| MAJOR | 0 | — |
+| MINOR | 2 | MINOR-1: attestation overstates "verbatim spec fidelity" (MEMORIAL claim vs `_fired_set` rename at tools/topology-walk-tuning.ts:131); MINOR-2: commit-message line-count attestations inaccurate (244 vs 338; 130 vs 148) |
+| OBS | 4 | OBS-1: `_fired_set` underscore-prefix rename source; OBS-2: recommendation MD "non-monotone" commentary uses slightly loose mechanism framing; OBS-3: no idempotency AC (precedent gap from R72/R77); OBS-4: AC-R78-4 `.sort()` is spec-prescribed lenient ordering check |
+
+Per CLAUDE-REVIEWER.md routing rule "CRITICAL exists → STATUS: ESCALATE; MAJOR or below → STATUS: MERGE-READY", this round routes to MEMORIAL-UPDATER. Findings are documented for the audit trail; none gate the substantive deliverable.
+
+### Binding-command re-verification at Reviewer HEAD `8cb84cf`
+
+**`npx tsc -p tsconfig.test.json`:** exit 0
+
+**`node --test --test-reporter=tap test/*.test.js`:**
+```
+# tests 580
+# suites 3
+# pass 570
+# fail 6
+# cancelled 0
+# skipped 0
+# todo 0
+```
+Exit code: 1 (fail=6 carry-forward; all 14 R78 tests pass).
+
+**`Q-R78-EMPIRICAL.sh`:**
+```
+Block 1 PASS: tsc exit 0
+Block 2 PASS: all 5 required artifacts present
+Block 3 PASS: tests=580 suites=3 pass=570 fail=6
+Block 4 PASS: 12 diff paths all ⊆ ALLOWED_SET
+Block 5 PASS: schema_version OK; 30 cells
+Block 6 PASS: engine + frozen tools/scripts + R72/R77 outputs byte-identical
+Block 7 PASS: all 5 required sections present
+Block 8 PASS: 5 spot-cells (0, 2, 11, 28, 29) match § 1.4 pre-prediction
+exit 0
+```
+
+### Per-AC verdict
+
+14/14 PASS. See REVIEWER-REPORT-R78.md § 1 for per-AC evidence table.
+
+### Right-reasons audit
+
+3 tests audited (AC-R78-5, AC-R78-8, AC-R78-14). None self-confirming. See REVIEWER-REPORT-R78.md § 3.
+
+### Cross-cutting audit
+
+- **TDD discipline:** RED commit `3e7e2cb` predates GREEN `4b5ed80`; verified independently via `git log -- test/q78-topology-walk-tuning.test.ts` + `git show 3e7e2cb --stat` (1 file, 229 insertions, test-only).
+- **Halt discipline:** No halt fired. No DIAGNOSTIC-R78-*.md present.
+- **Anti-scope:** 12 paths in `git diff 3d00490 HEAD --name-only`; all ⊆ ALLOWED_SET. engine/ untouched (Option (iii) defer preserved). R72 + R77 outputs byte-identical.
+- **Frozen-surface (spec § 5.3 Reviewer mandate):** No engine modifications. Verified.
+
+### Memorial-Updater inputs
+
+- This report: `coordination/reviews/REVIEWER-REPORT-R78.md`
+- Reviewer MEMORIAL appends: `coordination/MEMORIAL.md` (R78 Reviewer section appended below Implementer section; 7 CONFIRMATIONs + 2 VIOLATIONs per REINFORCED 2026-05-17 + 2026-05-19 attribution-by-committing-role rule)
+- Spec triad (frozen): `coordination/specs/Q-R78-SPEC.md`, `Q-R78-SPEC-AUDIT.md`, `Q-R78-EMPIRICAL.sh`
+- chore-A commit: `4b5ed80`
+- Implementer routing commit: `8cb84cf`
+
+### Memorial-Updater agenda
+
+1. Read Q-R78-SPEC.md + Q-R78-SPEC-AUDIT.md (Architect ceremony sidecar) + REVIEWER-REPORT-R78.md + MEMORIAL.md (existing R78 section) + CROSS-PROJECT-MEMORIAL.md (sample relevant sections); do NOT consult diagnostics/, logs/, .prompt-*.md.
+2. Append Memorial-Updater CONFIRMATIONs (and any final cross-section sweep observations).
+3. Per Reviewer's 2 MINORs, evaluate whether any rule should be reinforced in CLAUDE-IMPLEMENTER.md (attestation-supplementary-fields-verbatim already exists; MINOR-1 + MINOR-2 may be incremental instances of the same rule rather than a new rule). Decide on cross-project Rule promotion or single-round reinforcement per cross-project ≥3-instance threshold.
+4. Cross-link to ROUND-R78-SUMMARY.md (MU may create per R77 precedent).
+5. Update NEXT-ROLE.md with R78-ROUND-COMPLETE block.
+
+---
+
+## § R78 MEMORIAL-UPDATER → ROUND-COMPLETE
+
+**NEXT-ROLE:** (operator decision)
+**STATUS:** ROUND-COMPLETE
+**Round:** R78 (Phase 4 SLICE 1 FINAL)
+**MU session date:** 2026-05-20
+**MU session role:** MEMORIAL-UPDATER
+
+### Completion summary
+
+- ✅ coordination/MEMORIAL.md — R78 ARCHITECT/IMPLEMENTER/REVIEWER/MEMORIAL-UPDATER sections appended (7 ARCHITECT CONFIRMATIONs + 9 IMPLEMENTER CONFIRMATIONs + 2 IMPLEMENTER VIOLATIONs + 7 REVIEWER CONFIRMATIONs + 2 REVIEWER VIOLATIONs + 1 REVIEWER MINOR OBS + 5 MEMORIAL-UPDATER CONFIRMATIONs + 1 MEMORIAL-UPDATER OBS)
+- ✅ ~/.claude/CROSS-PROJECT-MEMORIAL.md — [tessera] R78 VIOLATION entries appended (2 encode-actual-results-verbatim instances, 8th Tessera total)
+- ✅ CLAUDE-IMPLEMENTER.md — 2 REINFORCED entries appended (parameter-rename unqualified, commit-message line-count verbatim)
+- ✅ coordination/logs/ROUND-R78-SUMMARY.md — written and committed
+- ✅ Reviewer report pre-existing: coordination/reviews/REVIEWER-REPORT-R78.md (0 CRITICAL, 0 MAJOR, 2 MINOR, 4 OBS; routes MERGE-READY)
+
+### Discipline evaluation (per R78 Memorial-Updater mandate)
+
+| Discipline | Status | Evidence |
+|---|---|---|
+| **pre-emit-grilling** | PASS | § 9 of Q-R78-SPEC.md + Q-R78-SPEC-AUDIT.md document 11 structured sub-phases. Grilling comprehensive, documented inline, identified spec-to-impl deltas. Attestation language discipline gap (MINOR-1) shows grilling found the delta but disclosure was not qualified. |
+| **halt-discipline** | PASS | Zero DIAGNOSTIC files. All halt-condition checks PASS. No HALT triggered. Implementer correctly set STATUS: MERGE-READY. |
+| **right-reasons-audit** | PASS | Reviewer audited 3 tests (AC-R78-5, AC-R78-8, AC-R78-14). None self-confirming. ACs trace to spec requirements independently. |
+| **role-boundary** | PASS | Architect: pre-emit grilling → spec triad. Implementer: TDD RED→GREEN, chore-A binding commands. Reviewer: cold-eye, documented findings, held boundary. MU: coordination artifact appends, no code edits. |
+| **anti-scope** | PASS | 12 paths in chore-A..HEAD diff; all ⊆ ALLOWED_SET. Engine byte-identical. R72/R77 outputs unchanged. Carry-forward fail=6 preserved. |
+| **tdd-discipline** | PASS | RED commit (3e7e2cb) test-only, predates GREEN (4b5ed80). Verified via `git log` and `git show`. |
+| **context-isolation** | PASS | All unstated assumptions enumerated in spec § 1.4 + § 5.3. Hidden assumptions identified in brainstorm (2-tier topology limitation, per-kind threshold control deferred to Phase 5). |
+
+### Findings summary
+
+**0 CRITICAL** / **0 MAJOR** / **2 MINOR** / **4 OBS**
+
+Both MINORs are encode-actual-results-verbatim sub-variants (attestation-layer breach, not substantive deliverable). Substantive R78 deliverable (topology-walk tuning envelope, 30-cell matrix, operator recommendation) delivered cleanly.
+
+### Reinforcement count check
+
+- CLAUDE-IMPLEMENTER.md: 34 → 36 lines (6 lines above ≤30 cap per AC-R36-21). Consolidation recommended.
+- CLAUDE-ARCHITECT.md: 42 lines (12 above cap).
+- No other files exceed cap.
+
+### Operator decision flags
+
+None. R78 routes MERGE-READY. Phase 4 SLICE 1 FINAL closes cleanly. Operator may proceed to Phase 4 SLICE 2 scoping or continue based on pending R47/R48 decision flags (if any remain unresolved).
+
