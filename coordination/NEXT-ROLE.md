@@ -1,9 +1,25 @@
 CURRENT-ROUND: R75
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 TIER: full
 ROUND-START-SHA: 6002dd6
 SPEC-TRIAD-SHA: a466aa4
+
+---
+
+## § R75 close attestation (Coordinator post-MU fix) (2026-05-20)
+
+**Substantive close:** R75 Memorial-Updater outputs landed at `28fd727`. All 15/15 ACs PASS; 0 CRITICAL / 0 MAJOR / 3 MINOR (Architect pre-emit gaps + Implementer-fixed at chore-A: stdout truncation at 64KB; cross-module main fire-on-import; bash `local` keyword at top-level). Cross-project memorial gained 8 new tessera entries (4th instance of spec-pseudocode-fails-verbatim class). CLAUDE-ARCHITECT at 42 REINFORCED entries.
+
+**Coordinator-direct STATUS fix:** Haiku MU (per R74 mechanism) committed substantive outputs but missed updating NEXT-ROLE.md STATUS field from `READY` to `ROUND-COMPLETE`. Coordinator fix at this commit. Memorialization observation: Haiku MU works for substantive memorialization but misses small process-discipline details (status field transition). Worth a CLAUDE-MEMORIAL.md REINFORCED entry deferred to R76+ Anchor merge work.
+
+**R75 deliverables:**
+- `scripts/build-role-context.ts` — deterministic role-input bundle (prefix-tail split)
+- `scripts/measure-cache-effect.ts` — cost-savings measurement
+- `run-pipeline.sh` integration (continued Tessera-temporary-divergence)
+- `CLAUDE-COMMON.md` Mode docs section
+- `test/q75-cache-prefix.test.ts` — 10 ACs
+- 8 new cross-project tessera entries in `~/.claude/CROSS-PROJECT-MEMORIAL.md`
 
 ---
 
