@@ -6249,3 +6249,58 @@ Inputs:
 
 See coordination/MEMORIAL.md tail — Architect CONFIRMATION lines for pre-emit-grilling, brainstorm-design-review, halt-discipline (none-fired), role-boundary (no impl code), spec-amendment-ALL-gate-artifacts (upfront propagation verified), claim-then-walk forward-coverage (R82 flip predicted), encode-actual-results-verbatim (probe-run outcomes verbatim in audit § C.4).
 
+---
+
+## § R83 IMPLEMENTER routing block (chore-A)
+
+NEXT-ROLE: REVIEWER
+STATUS: READY
+Inputs: coordination/specs/Q-R83-SPEC.md
+        coordination/specs/Q-R83-SPEC-AUDIT.md
+        coordination/specs/Q-R83-EMPIRICAL.sh
+        test/q83-interactive-knobs.test.ts
+        coordination/reviews/REVIEWER-REPORT-R83.md (Reviewer authors)
+
+### Chore-A SHA: `eaf8d62`
+
+### Observed binding-command outputs (verbatim; Rule 1 sub-class empirical-command-attestation; R26+R72+R77+R79+R70 lineage)
+
+| Binding command | Observed | Predicted | Match |
+|---|---|---|---|
+| `pnpm exec tsc -p tsconfig.test.json` exit | **0** | 0 | ✓ |
+| `pnpm exec node --test --test-reporter=tap test/*.test.js` process exit | **1** | 1 | ✓ |
+| TAP `# tests` | **652** | 652 | ✓ |
+| TAP `# pass` | **635** | 636 (band [635,637]) | ✓ |
+| TAP `# fail` | **13** | 13 | ✓ |
+| TAP `# skipped` | **4** | 4 | ✓ |
+| `bash coordination/specs/Q-R83-EMPIRICAL.sh` exit | **0** (ALL 5 BLOCKS PASS) | 0 | ✓ |
+| `git diff 4c4733d HEAD --name-only` line count | **8** | 9-13 | ✓ |
+| `demos/scenarios/*.json` post-regen content | **byte-identical** (no files in git status) | byte-identical | ✓ |
+
+### Spec-deviance disclosures
+
+TD-1: JS inside `HTML_TEMPLATE_FOOTER` is a plain-string template literal rendered to browser HTML — TypeScript type casts (`as HTMLInputElement`, etc.) are invalid browser JS. All TypeScript casts removed; plain `var.value` / `var.checked` assignments used throughout, matching the existing IIFE pattern throughout the footer. Functionally equivalent; no behavior change.
+
+### Halt conditions assessed
+
+No halt conditions fired:
+1. EMPIRICAL.sh exit = 0 ✓
+2. tsc exit = 0 ✓
+3. fail=13, pass=635 (in band) ✓
+4. No R61-class discovery ✓
+5. Spec AC patterns not round-evolution-fragile ✓
+6. No cross-project discipline violations ✓
+7. No new external dependencies ✓
+8. ALLOWED_SET complete ✓
+9. demos/scenarios/*.json byte-identical ✓
+10. R82 smoke block preserved by tool mechanism ✓
+
+### CONFIRMATION lines appended to coordination/MEMORIAL.md
+
+- tdd-discipline-red-green-verified: separate RED commit `bd48c1e` (16 assert.fail stubs, all failing); GREEN commit `eaf8d62` (all 16 ACs pass)
+- empirical-command-attestation-rule-1: all binding-command outputs recorded verbatim above; no predictions propagated
+- all-16-acs-pass-at-green: AC-R83-1..16 all pass at `eaf8d62`
+- halt-discipline-none-fired: no halt conditions triggered; TD-1 is a tactical fix within TACTICAL AUTONOMY scope (JS template literal → no TS casts)
+- anti-scope-allowed-set-respected: git diff 4c4733d eaf8d62 --name-only = 8 paths, all within ALLOWED_SET
+- demos-scenarios-byte-identity-preserved: git status shows no modifications to demos/scenarios/*.json post-regen
+
