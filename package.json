@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "curate-baseline": "pnpm exec node tools/curate-baseline.js",
     "predemo": "tsc -p tsconfig.test.json",
     "demo": "node tools/demo-scenario.js",
     "build:browser": "node tools/build-browser-bundle.js",
