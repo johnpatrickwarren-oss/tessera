@@ -1,7 +1,29 @@
 CURRENT-ROUND: R87
-NEXT-ROLE: ESCALATE
-STATUS: ESCALATE
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R87 ESCALATE — Option A (2026-05-21)
+
+**Decision:** Option A approved. Revert Edit 3; restore self-exclusion line with corrected comment. Edits 1, 2, 4, 5, 6 stand.
+
+**Root cause:** Architect spec § 3.1 Edit 3 verification claimed "Post-R87, q36 contains no `execFileSync` call." Empirically false — AC-R36-3's own error message at q36:90 contains the literal `execFileSync('node',...)` which matches the grep pattern. **8th Tessera instance of architect-claim-without-empirical-walk.** R86 prophylactic discipline didn't catch this — Architect missed checking own-AC-error-message strings when verifying post-edit grep state.
+
+**Fix applied (Coordinator-direct edit to working tree):** `test/q36-phase2-close-walk.test.ts:73-78` — restored self-exclusion line with corrected comment citing R87 Option A + DIAGNOSTIC-R87-ac36-3-self-exclusion.md.
+
+**Verification (pre-commit):**
+- tsc exit 0 ✓
+- q36 + q87 targeted run: 31/32 PASS; only AC-R36-21 fails (pre-existing CLAUDE-IMPLEMENTER >30 carry-forward; NOT R87 work)
+- All 5 q87 tests PASS ✓
+- AC-R36-3 PASSES (self-exclusion restored)
+
+**Implementer scope:** commit chore-A with working-tree state; re-attest binding commands; route to REVIEWER.
+
+**MU memorial at R87 close:** 8th instance of architect-claim-without-empirical-walk; **sub-pattern variant: prose-claim-about-post-edit-state vs in-AC-pattern-encoding.** R86 SPEC-AUTHORING-CHECKLIST tightening covered in-AC patterns but not prose verification claims. R87 MU sharpens checklist to include prose-verification of post-edit grep claims.
+
+**Pipeline resume:** `./run-pipeline.sh --round R87 --tier full --start-at IMPLEMENTER`
 
 ---
 
