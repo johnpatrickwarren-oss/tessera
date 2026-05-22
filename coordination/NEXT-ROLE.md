@@ -1,7 +1,31 @@
 CURRENT-ROUND: R91
-NEXT-ROLE: REVIEWER
+NEXT-ROLE: MEMORIAL-UPDATER
 STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R91 ESCALATE — Option A (2026-05-21)
+
+**Decision:** Option A approved (matches R87 precedent). Add `q91-engine-package-consumption.test.ts` to the q36 AC-R36-3 self-exclusion carve-out at `test/q36-phase2-close-walk.test.ts:74-79`. 1-line edit.
+
+**Root cause:** R91 AC-R91-7 (subpath-export resolution verification) uses `execFileSync('node', ['-e', "require.resolve(...)"], ...)` for runtime resolution check. q36 AC-R36-3 forward-protection scans all test files for `/execFileSync\s*\(\s*['"]node['"]/` and flags any matches. Same pattern as R87 ESCALATE; same Option A resolution.
+
+**Fix applied (Coordinator-direct edit to working tree):** `test/q36-phase2-close-walk.test.ts:74-79` — added q91 to carve-out list with comment citing R91 Option A and precedent class (q29/q34/q36 carve-out pattern). q36 is in R91 ALLOWED_REGEX (`test/*.test.ts`) so anti-scope holds.
+
+**Verification (pre-commit):**
+- tsc exit 0 ✓
+- q36 targeted run: 26/27 PASS; AC-R36-3 FLIPPED FAIL→PASS ✓; the 1 remaining fail (AC-R36-19) is a pre-existing carry-forward unrelated to R91
+- q91 targeted run: 14/14 PASS ✓ (no R91 AC regression from carve-out)
+- Full suite: 738/715/19/4 — fail count in spec band [17,20] ✓
+
+**Recurrence note (4th-instance of AC-R36-3 collision):** AC-R36-3 has now flipped twice this slice (R87 + R91). The forward-protection-AC-as-tripwire pattern is structurally fragile — any new test using subprocess-spawn triggers it. **Operator-decision flag for later methodology round:** consider AC-R36-3 redesign (move the check to a pre-commit hook script rather than test-time forward-protection), OR drop like AC-R36-30/31 were dropped at R87. Carry forward as candidate for R93 SLICE 3 close + hygiene round.
+
+**Implementer scope:** N/A (Coordinator-direct fix to working tree; Implementer chore-A SHA `ef7f027` preserved as routing-commit reference).
+
+**MU at R91 close:** memorialize the 2nd AC-R36-3 collision (4th-instance carve-out class: q29/q34/q36/q91). Memorial entry should note this is the same shape as R87 ESCALATE, suggesting structural-fragility worth a redesign decision (link to R93 candidate).
+
+**Pipeline resume:** `./run-pipeline.sh --round R91 --tier full --start-at MEMORIAL-UPDATER`
 
 ---
 
@@ -823,4 +847,47 @@ Reviewer inputs:
 - Chore-A SHA: `79252b2`
 - Test file: `test/q91-engine-package-consumption.test.ts` (14 ACs; all PASS)
 - Anti-scope ALLOWED_REGEX in spec § 5.3 + test file AC-R91-12 + EMPIRICAL.sh Block 9
+
+
+## § R91 REVIEWER routing block (2026-05-21)
+
+**NEXT-ROLE: OPERATOR | STATUS: ESCALATE**
+
+### Reviewer verdict
+
+**1 CRITICAL / 2 MAJOR / 2 MINOR / 4 OBS.** All 14 R91 ACs PASS at Reviewer HEAD — the substantive consumption migration deliverable is sound (anti-scope clean, engine sentinels byte-frozen, TDD discipline followed, 50 consumer files migrated). Routing ESCALATE because a pre-existing AC flipped PASS → FAIL and the Implementer bypassed halt condition 4.
+
+### Bounded operator question
+
+R91's q91 RED commit (`10cb3b1`) introduced `execFileSync('node', ['-e', ...])` in `test/q91-engine-package-consumption.test.ts:99-101` (AC-R91-7 — 5 require.resolve probes via subprocess). This matches the forbidden pattern guarded by AC-R36-3 (`test/q36-phase2-close-walk.test.ts:71-93` — "no other test files carry execFileSync node --test pattern"). The q36 carve-out list at lines 74-79 excludes only `q29-k8s-adapter.test.ts` + `q34-event-conditional-attribution.test.ts` + `q36-phase2-close-walk.test.ts` (self). q91 was not added to the carve-out by the Implementer. Result: AC-R36-3 was passing at ROUND_START_SHA `a63da14` (verified via `git show a63da14:test/q36-phase2-close-walk.test.ts` — same carve-out, no q91); AC-R36-3 fails at HEAD (`not ok 329` in TAP run). This is exactly halt condition 4 — "ANY existing test file that PASSED pre-R91 fails post-R91 (other than the 12 documented anti-scope-diff carry-forward already-failing ACs)" — and AC-R36-3 is NOT in those 12.
+
+Three fix options:
+
+- **Option A (recommended)** — Amend `test/q36-phase2-close-walk.test.ts:74-79` to add `f !== 'q91-engine-package-consumption.test.ts'` to the carve-out filter. 1-line fix; `test/*.test.ts` is in R91 ALLOWED_REGEX so anti-scope holds; q29/q34/q36 are precedent carve-outs by the same mechanism (R87 Option A precedent). Preserves AC-R91-7's `execFileSync('node',...)` resolution-probe mechanism (which is the spec-prescribed test for spec § 1.2 dual-mode runtime resolution).
+- **Option B** — Refactor AC-R91-7 to use `node:module` `createRequire(__filename).resolve(...)` in-process (eliminates `execFileSync('node',...)` entirely; ~10-15 line diff in q91; tests run in the parent process; no transitive hang risk).
+- **Option C** — Spec-amend § 1.4 carry-forward fail set to include AC-R36-3 (no code change; ratifies the discipline-violating outcome — discouraged per R56 MINOR-1 + R86 prophylactic principles + the discipline accretion this project has been building).
+
+Stochastic-flake side effect: Block 8 of Q-R91-EMPIRICAL.sh stochastically fails at HEAD (observed 1-of-3 my runs: fail=21 above predicted band [17, 20]). Resolves automatically once CRITICAL-1 is fixed (AC-R36-3 stops contributing +1 to baseline; the upper tail of AC-R84-14 ~25% stochastic returns within band).
+
+### Inputs (for operator + downstream MU)
+
+- **Report:** `coordination/reviews/REVIEWER-REPORT-R91.md` (this report)
+- Spec: `coordination/specs/Q-R91-SPEC.md` + `coordination/specs/Q-R91-EMPIRICAL.sh`
+- Chore-A SHA: `79252b2`; Reviewer HEAD: `ef7f027`
+- q91 source: `test/q91-engine-package-consumption.test.ts:99-101` (the offending pattern)
+- q36 carve-out: `test/q36-phase2-close-walk.test.ts:71-93` (the unguarded AC; line 74-79 is the fix site for Option A)
+
+### Reviewer findings summary table
+
+| Severity | Finding | File:line |
+|---|---|---|
+| CRITICAL-1 | AC-R36-3 flipped PASS→FAIL; halt condition 4 bypassed | q91:99-101 + q36:74-79 |
+| MAJOR-1 | Predicted fail-count band [17,20] empirically too tight; halt condition 1 stochastically triggered | spec:62-66 + EMPIRICAL.sh:146-148 |
+| MAJOR-2 | Spec § 1.4 carry-forward fail enumeration is incomplete; halt-4 cross-check degraded | spec:62-71 |
+| MINOR-1 | AC-R91-2 grep prediction off-by-one (51 predicted vs 50 observed; threshold ≥50 still met) | spec:765-767 |
+| MINOR-2 | AC-R91-12 ALLOWED_REGEX self-confirming; mitigated by § 8.6 byte-mirror (verified) | q91:171 + spec:561 + EMPIRICAL.sh:168 |
+| OBS-1 | pnpm-lock.yaml regeneration not directly attested | spec:592 |
+| OBS-2 | Approach D pretest adds ~1-2s overhead | spec § A1.1 |
+| OBS-3 | Stale-dist risk if developer bypasses `pnpm test` | spec § A2.4 |
+| OBS-4 | engine/dist is built twice in pretest chain | package.json:32 |
 
