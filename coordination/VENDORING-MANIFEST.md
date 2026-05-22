@@ -11,6 +11,14 @@ Phase 5 SLICE 3 round 1 (R90) extracted the engine to the `@johnpatrickwarren-os
 
 ---
 
+## R94 extraction note (2026-05-21)
+
+Per Q-R94-SPEC.md, the engine subtree at Tessera SHA `9e24aa4` was extracted to its own dedicated repository (`github.com/johnpatrickwarren-oss/deploysignal-engine`) via `git filter-repo --subdirectory-filter engine` and tagged `v0.1.0-pre`. Tessera consumes the engine via git-dependency from R94 onward.
+
+**Effect on this manifest:** per-file vendored-at-pin SHA rows below remain frozen as historical provenance (R42 + R89 archival-discipline). The rows describe Tessera's engine state AT-PIN to DeploySignal `5a72371`; the same content is mirrored in the new repo's filter-repo'd history at corresponding commits. Future re-pins (per Tessera close-walk discipline) update the new repo + this manifest in lockstep.
+
+---
+
 ## R91 consumption-migration note (2026-05-21)
 
 Phase 5 SLICE 3 round 2 (R91) dogfooded the `@johnpatrickwarren-oss/deploysignal-engine` package boundary by migrating Tessera's own `test/* + tools/* + test/_substrate/* + tools/calibrators/*` consumers (~50 files; 90 distinct relative imports) from `'../engine/...'` to `'@johnpatrickwarren-oss/deploysignal-engine/...'` package-path imports. Resolution mechanism: TypeScript `paths` mapping in `tsconfig.json` (for tsc compile-time) + `file:./engine` dependency in root `package.json` (for Node runtime via `node_modules/@johnpatrickwarren-oss/deploysignal-engine` symlink + exports map → `engine/dist/`). Pretest extended to `"tsc && tsc -p tsconfig.test.json"` to build `engine/dist/` before tests run. Per-row vendored-at-pin / vendored-with-deltas SHAs UNCHANGED by R91 (engine source content byte-identical to R90 close per AC-R91-13 + AC-R91-14; pnpm-workspace.yaml + .gitignore preserved per R82 intent). R92 (next round) repeats the same migration on the DS-side codebase.

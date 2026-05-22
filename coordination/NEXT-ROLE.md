@@ -1,6 +1,6 @@
 CURRENT-ROUND: R94
-NEXT-ROLE: IMPLEMENTER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ESCALATE
 TIER: full
 
 ---
@@ -1359,4 +1359,55 @@ All files below or at WARN threshold; zero new REINFORCED lines added (zero viol
 **Architect grilling verdict:** PASS — 11 gates walked (spec § 7); 0 unstated assumptions remain; probe-run at spec-emit matched predicted 3 PASS / 8 FAIL state (SPEC-AUDIT § A7.1 verbatim).
 
 **Spec-internal contradiction sweep:** PASS — § 7.11 walked all cross-section references; ALLOWED_REGEX byte-identical across 3 of 4 surfaces at spec-emit (Surface 4 is Implementer-emitted at chore-A).
+
+
+---
+
+## R94 IMPLEMENTER ESCALATION (2026-05-21)
+
+**STATUS: ESCALATE — Halt condition 8 fired.**
+
+`pnpm exec tsc -p tsconfig.test.json` exits 2 (non-zero) post-Phase-B due to TS7016 in `test/q05-per-shard-runtime.test.ts:251`.
+
+**Spec-premise failure:** P0.8 used `grep -rln "from ['\"]\\.\\..*engine"` to verify zero relative engine imports. This pattern matches static `from '...'` syntax only. Dynamic `import('...')` syntax is NOT matched. q05:251 contains `await import('../engine/per-shard/warm-start')` — an ES dynamic import missed by P0.8. Post R94 `git rm -r engine/`, this resolves to the stale gitignored `engine/per-shard/warm-start.js` file still on disk, causing TS7016.
+
+**Diagnostic file:** `coordination/diagnostics/DIAGNOSTIC-R94-q05-dynamic-import.md`
+
+**Current state after halt-point:**
+
+Phase A (external): COMPLETE
+- New repo `johnpatrickwarren-oss/deploysignal-engine` created ✓
+- Engine extracted via `git filter-repo --subdirectory-filter engine` ✓
+- `dist/` built and committed (commit `7a56d0c` in engine repo) ✓
+- `typesVersions` added (commits `117514c`, `18978ab` — two passes; index.d.ts fallback) ✓
+- Tag `v0.1.0-pre` pushed at commit `18978ab` ✓
+- Verified via GitHub API (gh release view exits 0) ✓
+
+Phase B (Tessera-side): COMPLETE
+- `package.json` dep URL: `"github:johnpatrickwarren-oss/deploysignal-engine#v0.1.0-pre"` ✓
+- `package.json` pretest: `"tsc -p tsconfig.test.json"` ✓
+- `pack:engine` script removed ✓
+- `tsconfig.json`: empty include; no outDir/rootDir/baseUrl/paths ✓
+- `tsconfig.test.json`: `engine/**/*.ts` removed from include ✓
+- `.gitignore`: R90 engine/*.tgz lines removed ✓
+- `VENDORING-MANIFEST.md`: R94 extraction header note appended ✓
+- `git rm -r engine/` ✓
+- `pnpm install` (pnpm-lock.yaml regenerated at commit `18978ab`) ✓
+
+Phase C (test file): RED commit `c074d97` made (13 assert.fail stubs) ✓
+Phase C (GREEN): NOT COMPLETE — halt condition 8 fires before GREEN commit
+
+**Blocking error (verbatim):**
+```
+test/q05-per-shard-runtime.test.ts(251,42): error TS7016: Could not find a declaration file for module '../engine/per-shard/warm-start'. '/Users/johnwarren/concord/tessera/engine/per-shard/warm-start.js' implicitly has an 'any' type.
+```
+
+**Operator decision required — choose one:**
+
+**Option A (recommended):** Expand ALLOWED_SET to include `test/q05-per-shard-runtime.test.ts`. Implementer will:
+1. Change q05 line 251: `await import('../engine/per-shard/warm-start')` → `await import('@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start')`
+2. Update ALLOWED_REGEX in 3 surfaces: spec § 5.2, q94 ALLOWED_REGEX constant, EMPIRICAL.sh Block 11 (4th surface = this NEXT-ROLE.md routing block)
+3. Updated ALLOWED_REGEX: `^(\.gitignore|coordination\/MEMORIAL\.md|coordination\/NEXT-ROLE\.md|coordination\/VENDORING-MANIFEST\.md|coordination\/specs\/Q-R94-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination\/reviews\/REVIEWER-REPORT-R94\.md|coordination\/logs\/ROUND-R94-[A-Z0-9-]+\.md|engine\/.+|package\.json|pnpm-lock\.yaml|test\/q05-per-shard-runtime\.test\.ts|test\/q94-engine-repo-extraction\.test\.ts|tsconfig\.json|tsconfig\.test\.json)$`
+
+**Option B:** Add `"allowJs": true, "checkJs": false` to tsconfig.test.json compilerOptions (within current ALLOWED_SET). Implementer will add these 2 compilerOptions to `tsconfig.test.json`. q05:251 relative import remains but TS7016 is suppressed. Note: broader impact (all .js imports valid in test/tools/scripts tier). Spec-deviance from § 3.4 (two options beyond what spec prescribes).
 

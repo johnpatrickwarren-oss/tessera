@@ -16,8 +16,6 @@ build/
 coverage/
 *.tsbuildinfo
 
-# R90: engine pack tarball (produced by `cd engine && pnpm pack`; regenerated per test run)
-engine/*.tgz
 # R82: engine browser-bundle (build output of `pnpm build:browser`)
 demos/engine-bundle.mjs
 # R82: pnpm v11 build-approval file (auto-created by pnpm; project-local; not tracked)

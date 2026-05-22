@@ -10,7 +10,6 @@
     "noEmit": false
   },
   "include": [
-    "engine/**/*.ts",
     "test/**/*.ts",
     "tools/**/*.ts",
     "scripts/**/*.ts"
