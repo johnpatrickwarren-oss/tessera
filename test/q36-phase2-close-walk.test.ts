@@ -75,7 +75,8 @@ test('AC-R36-3: no other test files carry execFileSync node --test pattern', () 
     (f) => f.match(/^q\d+.*\.test\.ts$/) &&
       f !== 'q29-k8s-adapter.test.ts' &&
       f !== 'q34-event-conditional-attribution.test.ts' &&
-      f !== 'q36-phase2-close-walk.test.ts',  // exclude self: this AC's error message literal contains execFileSync('node',...) (R87 Option A resolution preserves this line; spec Edit 3 was empirically infeasible per DIAGNOSTIC-R87-ac36-3-self-exclusion.md)
+      f !== 'q36-phase2-close-walk.test.ts' &&  // exclude self: this AC's error message literal contains execFileSync('node',...) (R87 Option A resolution preserves this line; spec Edit 3 was empirically infeasible per DIAGNOSTIC-R87-ac36-3-self-exclusion.md)
+      f !== 'q91-engine-package-consumption.test.ts',  // R91 Option A: q91 AC-R91-7 uses execFileSync('node',...) for subpath-export resolution verification (precedented carve-out class; matches q29/q34/q36 pattern)
   );
   const pattern = /execFileSync\s*\(\s*['"]node['"]/;
   const violations: string[] = [];
