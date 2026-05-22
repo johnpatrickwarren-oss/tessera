@@ -123,7 +123,7 @@ describe('R66 WU-Phase3-3C DS→Tessera event consumer + freeze-hook factory', (
     }
   });
 
-  // AC-R66-4: invalid event_class (6th value) → 400
+  // AC-R66-4: invalid event_class (7th value) → 400
   test('AC-R66-4: server rejects invalid event_class with 400', async () => {
     const c = new DsEventConsumer({ port: 0 });
     await c.start();
@@ -173,13 +173,14 @@ describe('R66 WU-Phase3-3C DS→Tessera event consumer + freeze-hook factory', (
     }
   });
 
-  // AC-R66-7: mapEventClassToKind identity-maps all 5 valid values
-  test('AC-R66-7: mapEventClassToKind returns identity-mapped ClusterEventKind for all 5 values', () => {
+  // AC-R66-7: mapEventClassToKind identity-maps all 6 valid values
+  test('AC-R66-7: mapEventClassToKind returns identity-mapped ClusterEventKind for all 6 values', () => {
     assert.strictEqual(mapEventClassToKind('firmware_push'), 'firmware_push');
     assert.strictEqual(mapEventClassToKind('model_redeploy'), 'model_redeploy');
     assert.strictEqual(mapEventClassToKind('env_change'), 'env_change');
     assert.strictEqual(mapEventClassToKind('config_change'), 'config_change');
     assert.strictEqual(mapEventClassToKind('capacity_change'), 'capacity_change');
+    assert.strictEqual(mapEventClassToKind('chaos_experiment'), 'chaos_experiment');
   });
 
   // AC-R66-8: mapEventClassToKind throws at runtime for unknown value
@@ -310,10 +311,10 @@ describe('R66 WU-Phase3-3C DS→Tessera event consumer + freeze-hook factory', (
   });
 
   // AC-R66-17: ClusterEventKind ↔ event_class parity at compile time + runtime
-  test('AC-R66-17: ClusterEventKind 5-value union matches event_class 5-value union', () => {
+  test('AC-R66-17: ClusterEventKind 6-value union matches event_class 6-value union', () => {
     const contract = readFileSync('engine/ds-integration/event-contract.ts', 'utf8');
     const feed = readFileSync('engine/events/event-feed.ts', 'utf8');
-    const expected = ['firmware_push', 'model_redeploy', 'env_change', 'config_change', 'capacity_change'];
+    const expected = ['firmware_push', 'model_redeploy', 'env_change', 'config_change', 'capacity_change', 'chaos_experiment'];
     for (const v of expected) {
       assert.match(contract, new RegExp(`'${v}'`), `event-contract.ts must reference '${v}'`);
       assert.match(feed, new RegExp(`'${v}'`), `event-feed.ts must reference '${v}'`);
