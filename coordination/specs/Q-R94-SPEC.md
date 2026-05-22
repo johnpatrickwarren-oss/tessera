@@ -65,12 +65,16 @@ AC-R84-14 (`structural flakiness` per R85 CRITICAL-1 REINFORCED 2026-05-21) PASS
 
 ### 0.2 Post-impl prediction band (R85 REINFORCED + R91 MAJOR-4 lesson)
 
-| Metric | Pre-R94 observed | R94 delta | Post-R94 prediction | Band |
-|---|---|---|---|---|
-| tests | 745 | +13 (q94 new ACs) | 758 | **exact 758** |
-| pass | 721 | +13 (q94 all PASS at chore-A) | 734 | **[733, 734]** (±1 for AC-R84-14 flake) |
-| fail | 20 | 0 (no carry-forward flip) | 20 | **[20, 21]** (±1 for AC-R84-14 flake) |
-| skipped | 4 | 0 | 4 | **exact 4** |
+**AMENDED 2026-05-22 per R94 ESCALATE Option A+D operator resolution.** Pre-amendment prediction was based on the (incorrect) assumption that no PASSING ACs check the physical existence of `engine/*.ts` source files. Empirical reality at chore-A: ~51 historical ACs (Q1, R18, R20, R23, R29, R30, R32, R34, R36, R38, R53, R56, R58, R62, R82 vendoring/SHA-pin checks + R90/R91/R93 forward-protection ACs) flipped PASS→FAIL because R94 removes Tessera's local `engine/`. Per operator Option A+D resolution: accept as carry-forward this round; R95 scheduled to delete/redirect the defunct ACs. See `coordination/diagnostics/DIAGNOSTIC-R94-engine-source-tests.md` for full enumeration + categorization.
+
+| Metric | Pre-R94 observed | R94 delta (original prediction) | R94 delta (amended) | Post-R94 prediction (amended) | Band |
+|---|---|---|---|---|---|
+| tests | 745 | +13 (q94 new ACs) | +13 (q94) | 758 | **exact 758** |
+| pass | 721 | +13 (q94 PASS) | +13 (q94 PASS), −51 (engine-source-tests flip) | ~683 | **[679, 684]** (±5 for stochastic + counting variance) |
+| fail | 20 | 0 | +51 (engine-source-tests flip) | ~72 | **[70, 75]** (±5 for stochastic + counting variance) |
+| skipped | 4 | 0 | 0 | 4 | **exact 4** |
+
+**Pre-amendment band (retained for audit-trail):** pass `[733, 734]`; fail `[20, 21]`.
 
 ---
 
@@ -589,7 +593,7 @@ test('AC-R94-8: VENDORING-MANIFEST.md has R94 extraction header note', () => {
     'VENDORING-MANIFEST.md R94 note must reference the new repo');
 });
 
-test('AC-R94-9: full test suite TAP counts within band [tests=758, pass∈[733,734], fail∈[20,21], skip=4]', () => {
+test('AC-R94-9: full test suite TAP counts within band [tests=758, pass∈[679,684], fail∈[70,75], skip=4]', () => {
   // This AC binds the band documented in spec § 0.2.
   // The test runs the full suite as a subprocess; guarded by NODE_TEST_CONTEXT skip
   // to prevent recursive invocation when this test file itself is being run.
@@ -605,8 +609,8 @@ test('AC-R94-9: full test suite TAP counts within band [tests=758, pass∈[733,7
   const specPath = pathJoin(REPO_ROOT, 'coordination', 'specs', 'Q-R94-SPEC.md');
   const spec = readFileSync(specPath, 'utf8');
   assert.match(spec, /tests=758/, 'spec must encode predicted test count');
-  assert.match(spec, /\[733, 734\]/, 'spec must encode predicted pass band');
-  assert.match(spec, /\[20, 21\]/, 'spec must encode predicted fail band');
+  assert.match(spec, /\[679, 684\]/, 'spec must encode amended predicted pass band (R94 ESCALATE Option A+D 2026-05-22)');
+  assert.match(spec, /\[70, 75\]/, 'spec must encode amended predicted fail band (R94 ESCALATE Option A+D 2026-05-22)');
 });
 
 test('AC-R94-10: pnpm exec tsc -p tsconfig.test.json exits 0 (no typecheck regression)', () => {
@@ -690,7 +694,7 @@ Notation: **Given X**, **When Y**, **Then Z**. Every AC is verifiable via a re-r
 | **AC-R94-6** | Tessera `tsconfig.test.json` at chore-A HEAD | parse JSON | `.include` does NOT contain `"engine/**/*.ts"`; DOES contain `"test/**/*.ts"`, `"tools/**/*.ts"`, `"scripts/**/*.ts"` |
 | **AC-R94-7** | Tessera `package.json` at chore-A HEAD | parse JSON | `.scripts.pretest === "tsc -p tsconfig.test.json"` AND `.scripts["pack:engine"] === undefined` |
 | **AC-R94-8** | Tessera `coordination/VENDORING-MANIFEST.md` at chore-A HEAD | read file | regex match `/^## R94 extraction note/m`; contains `git filter-repo --subdirectory-filter engine`; contains `johnpatrickwarren-oss/deploysignal-engine` |
-| **AC-R94-9** | Spec `Q-R94-SPEC.md` at chore-A HEAD | read file | contains predicted band literals `tests=758`, `[733, 734]`, `[20, 21]` (substantive band verification in Q-R94-EMPIRICAL.sh Block 9) |
+| **AC-R94-9** | Spec `Q-R94-SPEC.md` at chore-A HEAD | read file | contains predicted band literals `tests=758`, `[679, 684]`, `[70, 75]` per amended § 0.2 (Q-R94-EMPIRICAL.sh Block 9 verifies substantively) |
 | **AC-R94-10** | Spec `Q-R94-EMPIRICAL.sh` at chore-A HEAD | read file | contains substring `tsc -p tsconfig.test.json` (substantive typecheck verification in Block 4) |
 | **AC-R94-11** | `git diff 9e24aa4 HEAD --name-only` at chore-A HEAD | for each path | regex matches `ALLOWED_REGEX` (see § 3.9 q94 verbatim source); diff includes at least one `engine/` deletion path (sanity) |
 | **AC-R94-12** | 10 sampled R91-migrated consumer files (existing post-R94) | grep each for `@johnpatrickwarren-oss/deploysignal-engine` AND `from '../*engine/'` (negative) | each present file contains the package import; none reverted to relative |
@@ -797,7 +801,7 @@ Trigger any of the following → HALT + write `coordination/diagnostics/DIAGNOST
 
 7. **q94 ACs FAIL at GREEN** (chore-A commit candidate; any of AC-R94-1..13 fails) → HALT; DIAGNOSTIC names which AC fails + verbatim assertion message.
 8. **`pnpm exec tsc -p tsconfig.test.json` exits non-zero post-Phase-B** → HALT; DIAGNOSTIC names the TS error code + line + bounded options.
-9. **Full-suite TAP counts outside band** (`# tests != 758` OR `# pass ∉ [733, 734]` OR `# fail ∉ [20, 21]` OR `# skipped != 4`) → HALT; DIAGNOSTIC enumerates observed counts + identifies which AC flipped + bounded options.
+9. **Full-suite TAP counts outside band** (`# tests != 758` OR `# pass ∉ [679, 684]` OR `# fail ∉ [70, 75]` OR `# skipped != 4`) → HALT; DIAGNOSTIC enumerates observed counts + identifies which AC flipped + bounded options. *Band amended 2026-05-22 per R94 ESCALATE Option A+D.*
 10. **Anti-scope diff includes path NOT matching `ALLOWED_REGEX`** → HALT; DIAGNOSTIC enumerates unauthorized paths + bounded options.
 11. **ANY existing test file that PASSED pre-R94 fails post-R94** (other than the 20 documented carry-forward already-failing ACs in § 0.1) → HALT; DIAGNOSTIC names the flipped AC + bounded options (per R91 CRITICAL-1 lesson: halt-condition-4-bypass discipline; even if the flip is "obviously caused by" R94, HALT and let operator pick).
 12. **R94 prescribes a step that conflicts with the R86 prophylactic walk** (e.g., q94 introduces a pattern guarded by AC-R36-3-replacement hook) → HALT; DIAGNOSTIC documents the conflict + bounded options (refactor q94 to avoid the pattern; or amend hook APPROVED list). **NOTE**: Architect's R86 walk at § 7.5 confirms NO such conflict exists for q94 (uses `execFileSync('git',...)` only). If chore-A discovers otherwise, this halt fires.

@@ -5,6 +5,61 @@ TIER: full
 
 ---
 
+## § Operator resolution of R94 ESCALATE-2 — Option A+D (2026-05-22)
+
+**Decision:** Option A+D approved (matches Implementer recommendation). Accept ~51 newly-failing engine-source-tests as carry-forward this round; amend Q-R94-EMPIRICAL.sh Block 8 fail band; schedule R95 to delete/redirect the defunct ACs.
+
+**Coordinator-direct spec amendments (per prefix-continuity-invariant operator-amendment precedent):**
+
+1. `coordination/specs/Q-R94-EMPIRICAL.sh` Block 8 header comment + `EXPECTED_PASS_LO/HI` + `EXPECTED_FAIL_LO/HI`:
+   - `EXPECTED_PASS_LO=733; EXPECTED_PASS_HI=734` → `EXPECTED_PASS_LO=679; EXPECTED_PASS_HI=684`
+   - `EXPECTED_FAIL_LO=20;  EXPECTED_FAIL_HI=21` → `EXPECTED_FAIL_LO=70;  EXPECTED_FAIL_HI=75`
+   - Header comment + audit-trail comment block added explaining amendment
+2. `coordination/specs/Q-R94-SPEC.md` § 0.2 prediction band table: original `[20, 21]` / `[733, 734]` retained as audit-trail; amended row added showing `[70, 75]` / `[679, 684]` with rationale linking to DIAGNOSTIC-R94-engine-source-tests.md
+3. `coordination/specs/Q-R94-SPEC.md` § 3.9 AC-R94-9 test literal: updated to assert `[679, 684]` + `[70, 75]` regex matches against spec
+4. `coordination/specs/Q-R94-SPEC.md` § 4 AC table for AC-R94-9: updated band literals
+5. `coordination/specs/Q-R94-SPEC.md` § 6.3 halt condition 9: updated band literals (with amendment note)
+
+**Implementer scope on resume:**
+1. Re-run binding commands; verify EMPIRICAL.sh Block 8 now PASS within new band
+2. Stage GREEN q94 test file (already on disk per Implementer attestation) with updated AC-R94-9 band literals from spec § 3.9 (Implementer to copy spec literal into actual q94 source)
+3. Continue to chore-A (full Q-R94-EMPIRICAL.sh PASS; all 13 q94 ACs PASS; routing to REVIEWER)
+4. Memorialize Option A+D operator-resolution in MEMORIAL.md appends
+5. Flag R95 scope (defunct AC cleanup) for operator follow-up after R94 close
+
+**R95 scope (queued for after R94 close):**
+- Delete or skip ~51 historical engine-source-tests across 15+ test files (Q1, R18, R20, R23, R29, R30, R32, R34, R36, R38, R53, R56, R58, R62, R82) + R90/R91/R93 forward-protection ACs
+- Restore fail-baseline noise floor to pre-R94 levels (~21)
+- Single audit-tier hygiene round
+
+**MU at R94 close:** memorialize architect-prediction-band-incompleteness as sub-pattern of architect-claim-without-empirical-walk family. Architect's § 0.1 analysis "engine deletion does not change PASS/FAIL state of any already-FAIL AC" was true-but-incomplete (it didn't enumerate PASSING ACs that reference engine paths). 12th Tessera instance overall.
+
+**Pipeline resume:** `./run-pipeline.sh --round R94 --tier full --start-at IMPLEMENTER`
+
+---
+
+## § R94 Implementer ESCALATE — engine-source-tests (2026-05-21)
+
+**Halt conditions fired:** § 6.3 halt-11 (existing tests that PASSED pre-R94 now FAIL post-R94) + halt-9 (TAP counts outside band).
+
+**Observed:** tests=758, pass=682, fail=72, skipped=4. Predicted band: fail ∈ [20, 21]. Delta: +52 newly-flipping tests.
+
+**Root cause:** ~51 existing tests check `engine/*.ts` source files, `engine/package.json`, `engine/dist/`, or prior-round tsconfig state that R94 intentionally changed. The Architect's spec §0.1 analysis ("engine deletion does not change PASS/FAIL state of any already-FAIL AC") was correct for the 20 carry-forward ACs but did not account for PASSING ACs that check engine/ source paths now absent.
+
+**DIAGNOSTIC:** `coordination/diagnostics/DIAGNOSTIC-R94-engine-source-tests.md` — 4 bounded options.
+
+**Options summary:**
+- **Option A:** Accept ~51 newly-failing tests as permanent carry-forward. Requires Architect spec amendment to Q-R94-EMPIRICAL.sh Block 8 EXPECTED_FAIL band (from [20,21] to approximately [70,75]). No test files modified. Implementer proceeds after spec amendment.
+- **Option B:** Expand R94 scope to delete/skip ~51 defunct ACs across 15+ test files. Large scope; requires operator authorization + ALLOWED_SET expansion + spec triad amendment.
+- **Option C:** Partial: accept R90/R91/R93 ACs as carry-forward (~20 of the 51); investigate Category A (historical vendoring checks) separately. Still requires spec amendment.
+- **Option D:** Option A now + schedule R95 cleanup round to remove defunct vendoring ACs from Q1/R18-R62 test files.
+
+**Session ends here.** Implementer has NOT committed chore-A; GREEN q94 test file written on disk but not staged. Awaiting operator decision.
+
+**What is NOT in question:** q94 13/13 PASS; `pnpm exec tsc -p tsconfig.test.json` exit 0; AC-R94-1 through AC-R94-13 all PASS individually; Phase A + Phase B + Option A fix all committed and correct.
+
+---
+
 ## § Operator resolution of R94 ESCALATE — Option A (2026-05-21)
 
 **Decision:** Option A approved (matches R87 + R91 ESCALATE precedent). Fix q05 dynamic import to use package path; expand ALLOWED_SET to include q05 + DIAGNOSTIC file path; preserve all R94 Phase A + Phase B work.

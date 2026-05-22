@@ -134,7 +134,16 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# ── Block 8: full TAP within band — tests=758 / pass∈[733,734] / fail∈[20,21] / skip=4 ──
+# ── Block 8: full TAP within band — tests=758 / pass∈[679,684] / fail∈[70,75] / skip=4 ──
+#   AMENDED 2026-05-22 per operator R94 ESCALATE Option A+D resolution:
+#   ~51 historical engine-source-tests (Q1, R18, R20, R23, R29, R30, R32, R34, R36,
+#   R38, R53, R56, R58, R62, R82) + R90/R91/R93 forward-protection ACs flipped
+#   PASS→FAIL because R94 removes Tessera's local engine/. Architect's spec § 0.1
+#   prediction was wrong (assumed no PASSING ACs check engine/*.ts source paths).
+#   Implementer recommendation accepted: accept as carry-forward; R95 scheduled
+#   to delete/redirect the defunct ACs. Original band [20,21] preserved here
+#   as a comment for audit-trail; new band reflects post-extraction reality.
+#   Pre-amendment band: tests=758 / pass∈[733,734] / fail∈[20,21] / skip=4
 # (Per R77 OBS-4 + R89 MAJOR-1: --test-reporter=tap BEFORE test files; per R85
 #  CRITICAL-1: fail count is a BAND, not strict.)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -145,8 +154,8 @@ PASS_N=$(echo "$TAP_OUT" | grep -E '^# pass ' | sed -E 's/^# pass +//' || echo "
 FAIL_N=$(echo "$TAP_OUT" | grep -E '^# fail ' | sed -E 's/^# fail +//' || echo "0")
 SKIP_N=$(echo "$TAP_OUT" | grep -E '^# skipped ' | sed -E 's/^# skipped +//' || echo "0")
 EXPECTED_TESTS=758
-EXPECTED_PASS_LO=733; EXPECTED_PASS_HI=734
-EXPECTED_FAIL_LO=20;  EXPECTED_FAIL_HI=21
+EXPECTED_PASS_LO=679; EXPECTED_PASS_HI=684
+EXPECTED_FAIL_LO=70;  EXPECTED_FAIL_HI=75
 EXPECTED_SKIP=4
 TAP_BAND_OK=true
 [ "$TESTS" = "$EXPECTED_TESTS" ] || TAP_BAND_OK=false
