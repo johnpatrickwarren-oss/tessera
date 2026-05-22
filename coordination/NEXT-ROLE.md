@@ -1,5 +1,5 @@
 CURRENT-ROUND: R91
-NEXT-ROLE: IMPLEMENTER
+NEXT-ROLE: REVIEWER
 STATUS: READY
 TIER: full
 
@@ -747,4 +747,80 @@ Post-this-routing-commit (AC-R89-8 flips per MAJOR-2): full suite expected `test
 ### Right-reasons audit
 
 SUSPENDED per structural-only mode (CLAUDE-REVIEWER.md "## Mode: Structural-only Reviewer"). AC-binding structural integrity walk (8/8 PASS) replaces this audit for the structural-only scope.
+
+---
+
+## § R91 Implementer routing block (2026-05-21)
+
+**NEXT-ROLE: REVIEWER | STATUS: READY**
+
+### Implementer attestation
+
+**SHA-A (chore-A commit):** `79252b2` — chore(R91 chore-A): Tessera-internal engine package consumption migration
+
+**RED commit:** `10cb3b1` — test(R91 RED): add q91 engine-package-consumption test file (14 ACs); committed before any implementation per TDD discipline.
+
+### Binding-command results (all run at HEAD `79252b2`)
+
+**Q-R91-EMPIRICAL.sh** (run 1 of 2 — pre-coordination-chore):
+```
+── Block 1: tsconfig.json paths mapping present ──  PASS
+── Block 2: package.json file: dep present ──       PASS
+── Block 3: package.json pretest extended ──        PASS
+── Block 4: node_modules symlink/dir exists ──      PASS
+── Block 5: 5 representative require.resolve probes ── PASS
+── Block 6: zero relative ../engine imports ──      PASS
+── Block 7: pnpm exec tsc -p tsconfig.test.json --noEmit exits 0 ── PASS
+── Block 8: full test count band ──                 PASS: tests=738 [736,740]=Y pass=714 [714,718]=Y fail=20 [17,20]=Y skip=4 =4?Y
+── Block 9: anti-scope diff ⊆ ALLOWED_SET ──        PASS
+── Block 10: VENDORING-MANIFEST.md R91 + R90 headers ── PASS
+─── Q-R91-EMPIRICAL.sh summary ─── PASS: 10 / 10 blocks; FAIL: 0 / 10 blocks; exit 0
+```
+
+**`pnpm exec tsc -p tsconfig.test.json --noEmit`:** exit 0
+
+**`node --test --test-reporter=tap test/q91-engine-package-consumption.test.js`:** tests=14, pass=14, fail=0, skip=0; exit 0
+
+**`node --test --test-reporter=tap test/*.test.js`** (manual run): tests=738, pass=715, fail=19, skip=4; exit non-zero (pre-existing fail-count carries forward per spec § 1.4; within band [17,20] ✓)
+
+**Anti-scope diff (`git diff a63da14 HEAD --name-only`):** 60 paths; all within ALLOWED_REGEX (Block 9 PASS ✓). Paths include: `tsconfig.json`, `package.json`, `pnpm-lock.yaml`, 5 `test/_substrate/` files, 36 `test/*.test.ts` files (including new `q91`), 9 `tools/` files + `tools/calibrators/family-c.ts`, `coordination/VENDORING-MANIFEST.md`, `coordination/specs/Q-R91-{SPEC,SPEC-AUDIT,EMPIRICAL}.{md,sh}`, `coordination/MEMORIAL.md`, `coordination/NEXT-ROLE.md`.
+
+### Tactical deviations
+
+**TD-1:** AC-R91-7 regex — spec-prescribed `/engine\/dist\/.*\.js$/` changed to `/engine\/dist\/.*\.js$/m` (multiline flag added). Root cause: `execFileSync` with `encoding: 'utf8'` includes a trailing `\n` from `console.log`; JavaScript `$` in non-multiline mode matches only literal end-of-string, not before `\n`. Without `m` flag, regex fails to match `engine/dist/types/verdict.js\n`. With `m` flag, `$` matches before each `\n`, producing the correct match. Verified: `node -e "/engine\/dist\/.*\.js$/.test('...dist/types/verdict.js')"` → `false`; with `m` flag → `true`. This is a spec-vs-runtime discrepancy (spec prescribes the regex; runtime output shape requires the `m` flag). The substantive deliverable (5 subpath resolutions under `engine/dist/`) is independently verified by AC-R91-9 (file existence) and AC-R91-6 (symlink exists). **This is the only tactical deviation. No HALT conditions were triggered.**
+
+### AC coverage summary
+
+All 14 ACs PASS at SHA-A `79252b2`:
+- **AC-R91-1** PASS: `grep -rl "from ['\"]\.\..*engine" test/ tools/` → empty (0 files)
+- **AC-R91-2** PASS: 51 consumer files with `@johnpatrickwarren-oss/deploysignal-engine` imports (50 migrated + q91 test file string literal)
+- **AC-R91-3** PASS: `tsconfig.json` paths mapping present with correct 2-key structure + `baseUrl: "."`
+- **AC-R91-4** PASS: `package.json` `dependencies["@johnpatrickwarren-oss/deploysignal-engine"] === "file:./engine"`
+- **AC-R91-5** PASS: `package.json` `scripts.pretest === "tsc && tsc -p tsconfig.test.json"`
+- **AC-R91-6** PASS: `node_modules/@johnpatrickwarren-oss/deploysignal-engine` exists (symlink via pnpm virtual store)
+- **AC-R91-7** PASS (with TD-1 `m` flag): all 5 subpath resolves return path under `deploysignal-engine/dist/`
+- **AC-R91-8** PASS: `pnpm exec tsc -p tsconfig.test.json --noEmit` → exit 0
+- **AC-R91-9** PASS: all 5 `engine/dist/` sentinels exist
+- **AC-R91-10** PASS: q91 test file contains no `../engine` relative imports
+- **AC-R91-11** PASS: `coordination/VENDORING-MANIFEST.md` has R91 header + R90 header + package name reference
+- **AC-R91-12** PASS: anti-scope diff ⊆ ALLOWED_REGEX (60 paths, 0 violators)
+- **AC-R91-13** PASS: 10 engine sentinel files byte-identical to `a63da14`
+- **AC-R91-14** PASS: `engine/package.json` + `engine/README.md` byte-identical to `a63da14`
+
+### Halt conditions
+
+No halt conditions triggered. Anti-scope adherence verified (AC-R91-12 + EMPIRICAL.sh Block 9). No engine algorithm content modified. No new external dependencies added. No orphan relative imports remain (AC-R91-1 grep returns empty).
+
+### Pre-existing carry-forward fails (per spec § 1.4)
+
+12 already-failing anti-scope-diff ACs from prior rounds (R77-14, R77-17, R78-14, R79-14, R80-14, R81-14, R82-14, R83-15, R84-16, R85-19, R89-8, R90-13) continue to FAIL at R91 close — as predicted. R91 modifications add more violators to their already-failing `git diff` blocks without flipping PASS/FAIL state. Plus AC-R84-14 stochastic flake (~25%). Observed fail count ∈ {19, 20} across two runs — within predicted band [17, 20] ✓.
+
+### Forward to Reviewer
+
+Reviewer inputs:
+- Spec: `coordination/specs/Q-R91-SPEC.md` + `Q-R91-SPEC-AUDIT.md`
+- EMPIRICAL harness: `coordination/specs/Q-R91-EMPIRICAL.sh` (re-run at Reviewer HEAD)
+- Chore-A SHA: `79252b2`
+- Test file: `test/q91-engine-package-consumption.test.ts` (14 ACs; all PASS)
+- Anti-scope ALLOWED_REGEX in spec § 5.3 + test file AC-R91-12 + EMPIRICAL.sh Block 9
 
