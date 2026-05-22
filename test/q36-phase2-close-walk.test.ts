@@ -16,7 +16,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
 const ROOT = resolve(__dirname, '..');
@@ -68,30 +68,16 @@ test('AC-R36-2: q34 AC-R34-21 skips when NODE_TEST_CONTEXT or NODE_TEST_WORKER_I
   );
 });
 
-// ── AC-R36-3: grep audit — no other subprocess-spawn in test files ───────────
-test('AC-R36-3: no other test files carry execFileSync node --test pattern', () => {
-  const testDir = join(ROOT, 'test');
-  const testFiles = readdirSync(testDir).filter(
-    (f) => f.match(/^q\d+.*\.test\.ts$/) &&
-      f !== 'q29-k8s-adapter.test.ts' &&
-      f !== 'q34-event-conditional-attribution.test.ts' &&
-      f !== 'q36-phase2-close-walk.test.ts' &&  // exclude self: this AC's error message literal contains execFileSync('node',...) (R87 Option A resolution preserves this line; spec Edit 3 was empirically infeasible per DIAGNOSTIC-R87-ac36-3-self-exclusion.md)
-      f !== 'q91-engine-package-consumption.test.ts',  // R91 Option A: q91 AC-R91-7 uses execFileSync('node',...) for subpath-export resolution verification (precedented carve-out class; matches q29/q34/q36 pattern)
-  );
-  const pattern = /execFileSync\s*\(\s*['"]node['"]/;
-  const violations: string[] = [];
-  for (const f of testFiles) {
-    const content = readFileSync(join(testDir, f), 'utf8');
-    if (pattern.test(content)) {
-      violations.push(f);
-    }
-  }
-  assert.deepStrictEqual(
-    violations,
-    [],
-    `These test files carry execFileSync('node',...) — transitive hang risk: ${violations.join(', ')}`,
-  );
-});
+// ── AC-R36-3 dropped at R93 (2026-05-21) ────────────────────────────────────
+// AC-R36-3 scanned test files for the subprocess-spawn pattern (execFileSync with node as first arg) using readdirSync.
+// It flipped twice in Phase 5 (R87 ESCALATE + R91 ESCALATE), each time requiring
+// an operator-resolved carve-out addition. Two flips in one SLICE crosses the
+// structural-fragility threshold per Q-R93-SPEC.md § 1 (Approach A selected).
+//
+// Replacement: scripts/check-no-execfilesync-spawn.sh (pre-commit hook, non-
+// blocking WARN) wired into finalize-round.sh Step 7b. The hook carries the
+// approved carve-out list (q29, q34, q91). Rationale and forward-protection
+// AC registry entry: coordination/FORWARD-PROTECTION-AC-REGISTRY.md.
 
 // ── AC-R36-4: forward-protection tests stabilized (q29/q32/q34) ─────────────
 test('AC-R36-4: q29 AC-R29-13, q32 AC-R32-20, q34 AC-R34-19 use pinned SHAs or fixed allowed-set', () => {
