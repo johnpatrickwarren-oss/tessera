@@ -248,7 +248,7 @@ test('R05 AC-12 — initialPerShardResidual still produces welford_state === und
 test('R05 AC-13 — direct observeSample (without sampleVector) does not produce welford_state', async () => {
   // observeSample (R03-shipped) is composed by updatePerShardResidual but is itself unchanged.
   // A direct observeSample call from outside runtime.ts should NOT yield a welford_state field.
-  const { observeSample } = await import('../engine/per-shard/warm-start');
+  const { observeSample } = await import('@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start');
   const next = observeSample(initialPerShardResidual(), {
     observedAt: 100,
     residualSeedHash: 'sha:a',
