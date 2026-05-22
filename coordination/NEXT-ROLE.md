@@ -1,7 +1,65 @@
 CURRENT-ROUND: R94
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: OPERATOR
+STATUS: ROUND-COMPLETE
 TIER: full
+
+---
+
+## § R94 REVIEWER routing block (2026-05-22)
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+TIER: full
+
+Inputs:
+- coordination/reviews/REVIEWER-REPORT-R94.md (this round)
+- coordination/specs/Q-R94-SPEC.md
+- coordination/specs/Q-R94-SPEC-AUDIT.md
+- coordination/specs/Q-R94-EMPIRICAL.sh
+- coordination/MEMORIAL.md (R94 Reviewer section — CONFIRMATIONs + VIOLATIONs appended below)
+
+### Verdict summary
+
+0 CRITICAL / 4 MAJOR / 4 MINOR / 4 OBS → MERGE-READY.
+
+Substantive deliverable sound: engine repo created + tagged v0.1.0-pre per Implementer attestation; Tessera-side migration to git-dep complete; engine/ removed from Tessera tree; all 13 q94 ACs PASS at test runner; 11/11 EMPIRICAL.sh blocks PASS on independent Reviewer re-run; full suite within amended Option A+D band (tests=758/pass=682/fail=72/skipped=4); anti-scope diff fully ⊆ ALLOWED_REGEX.
+
+### Findings (severity ordered)
+
+- **MAJOR-1:** AC-R94-9 structural vacuity — NODE_TEST_CONTEXT early-return + body only checks spec literals; never verifies TAP counts.
+- **MAJOR-2:** AC-R94-10 structural vacuity — body only checks EMPIRICAL.sh contains string; never runs tsc.
+- **MAJOR-3:** Spec § 5.1 hard-limit violation via TD-3 (typesVersions added to new repo's package.json before tag); halt + ESCALATE discipline bypassed; transparently disclosed but not gated. Operator decision recommended.
+- **MAJOR-4:** v0.1.0-pre tag annotation message "byte-identical to Tessera HEAD" now factually incorrect (downstream of MAJOR-3); cannot be retroactively fixed due to tag immutability.
+- **MINOR-1:** ALLOWED_REGEX "byte-identical across 4 surfaces" framing is misleading; surfaces use formatting-appropriate-per-surface escaping (semantically equivalent, not byte-identical).
+- **MINOR-2:** EMPIRICAL.sh Block 11 grep targets the COMMENT line (regex-literal form), not the live `new RegExp(...)` constant.
+- **MINOR-3:** 12th Tessera instance of architect-claim-without-empirical-walk; new sub-variant predicted-band-incompleteness (FAIL-set enumerated; PASS-set not enumerated for flip risk). MU rule-derivation candidate.
+- **MINOR-4:** AC-R94-12 defensive `continue` allows vacuous pass if sampled consumers are deleted; no live impact at R94.
+
+OBS-1 through OBS-4 documented in report.
+
+### MU action items at close
+
+1. Record MAJOR-1 + MAJOR-2 as VIOLATION entries against Architect (artifacts authored by Architect; substantive failure is AC-name-vs-test-binding-mismatch — R62 class structural-vacuity sub-variant).
+2. Record MAJOR-3 as VIOLATION against Implementer (halt-discipline bypass on § 5.1 hard limit).
+3. Record MAJOR-4 as VIOLATION against Implementer (audit-trail accuracy in tag annotation; downstream of MAJOR-3).
+4. Record MINOR-1 + MINOR-2 as VIOLATION against Architect (R82 propagation framing accuracy; Block 11 gate-scope).
+5. Record MINOR-3 as VIOLATION against Architect (architect-claim-without-empirical-walk 12th instance; sub-variant per NEXT-ROLE.md MU note).
+6. Consider new rule derivation: AC-name-vs-test-binding-mismatch (when an AC delegates to EMPIRICAL.sh, the AC name must match the actual test-file binding; do not name-imply substantive verification when only a spec-literal-encoding check is performed).
+7. Maintain ALLOWED_REGEX surface-3 propagation discipline review (TD-4 workaround is fragile per OBS-1).
+
+### Reviewer-side re-run attestation (verbatim)
+
+- `bash coordination/specs/Q-R94-EMPIRICAL.sh` → `Total: 11 PASS / 0 FAIL (11 blocks). Exit: 0`
+- `pnpm exec node --test --test-reporter=tap test/q94-engine-repo-extraction.test.js` → `# tests 13 / # pass 13 / # fail 0`
+- `git diff 9e24aa4 HEAD --name-only | grep -vE <ALLOWED_REGEX>` → empty output (anti-scope holds Tessera-side)
+- `node --test /tmp/check-node-test-env.js` → `NODE_TEST_CONTEXT="child-v8" / NODE_TEST_WORKER_ID="1"` (confirms MAJOR-1's early-return mechanism)
+- `git show 9e24aa4:engine/package.json` → contains 0 occurrences of `typesVersions` (confirms MAJOR-3 — the field was added post-extraction, before tag)
+
+### Pipeline resume
+
+```bash
+./run-pipeline.sh --round R94 --tier full --start-at MEMORIAL-UPDATER
+```
 
 ---
 

@@ -933,3 +933,38 @@ All unresolved decisions → open questions in the spec.
 #   existing AC-R36-3 flipped PASS→FAIL). Procedure: R86 gate gate must add
 #   a sub-step "Does this test introduce a guarded pattern (check forward-
 #   protection ACs)?" before spec-emit.
+
+# REINFORCED 2026-05-22 — AC-name-vs-test-binding-mismatch (R62 structural-vacuity
+#   sub-variant; Tessera R94 first consolidation). When spec prescribes an AC that
+#   delegates substantive verification to EMPIRICAL.sh (e.g., "run the full suite and
+#   check counts"), the test-file AC body must bind the same substance the AC name claims.
+#   Violation: AC name claims "TAP counts within [X, Y, Z]" but test body returns early
+#   via NODE_TEST_CONTEXT + only checks spec-literal encoding. Test passes vacuously at
+#   test-layer; substantive verification is in EMPIRICAL.sh. Detected R94 MAJOR-1 (AC-R94-9:
+#   "full test suite TAP counts"; test NODE_TEST_CONTEXT return + spec-literal check only)
+#   and MAJOR-2 (AC-R94-10: "tsc exits 0"; test checks EMPIRICAL.sh contains string, never
+#   runs tsc). Procedure: when delegating to EMPIRICAL.sh, test-layer AC must either
+#   (a) bind the same substance (run the suite, count results) OR (b) explicitly signal
+#   delegation in AC name (e.g., "EMPIRICAL.sh Block 8 assertion: TAP counts..."). Avoid
+#   name-imply-substance-but-test-delegates pattern. Watch list: cross-project candidate
+#   at 3+ instances (current: 2 Tessera R94).
+
+# REINFORCED 2026-05-22 — Spec-prose-accuracy gates (R82+R87 sub-variants; Tessera R94).
+#   Three distinct sub-patterns detected: (1) MINOR-1: "byte-identical across surfaces"
+#   claim empirically false (surfaces use formatting-appropriate escaping — semantically
+#   equivalent, not byte-identical). Spec: correct literal claims to match reality (e.g.,
+#   "semantically-equivalent regex with formatting-appropriate-per-surface escaping").
+#   (2) MINOR-2: EMPIRICAL.sh binding gate checks comment-line instead of live constant.
+#   Result: gate silently passes if constant drifts. Procedure: EMPIRICAL.sh blocks that
+#   verify regex byte-identity must extract and compare the live constant, not a comment
+#   documentation copy. (3) MINOR-3: architect-claim-without-empirical-walk sub-variant
+#   "predicted-band-incompleteness-due-to-FAIL-set-only-enumeration." Spec predicted
+#   band [733,734]/[20,21] by enumerating 20 carry-forward FAIL ACs and asserting no
+#   PASS↔FAIL flips; did not enumerate ~51 PASSING ACs referencing engine/*.ts source
+#   files. Result: ~51 PASS→FAIL flips at chore-A; band incorrect. Procedure: band-
+#   completeness claims require enumeration of BOTH FAIL-set (carry-forwards) AND PASS-set
+#   (ACs with structural dependencies on changed paths). When AC names reference source-
+#   level properties (vendor hashes, file paths), trace backward to all ACs using those
+#   properties for completeness. Detected R94 (Architect § 0.1-0.2 prediction); root cause
+#   P0.8 grep empirical-validation gap (static grep `from '...'` syntax; missed dynamic
+#   `import('...')` at q05:251).
