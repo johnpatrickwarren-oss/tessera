@@ -130,41 +130,17 @@ test('AC-R23-9: computeSnapshotHash is deterministic on v9Y fixture', () => {
   assert.match(hash1, /^[0-9a-f]{64}$/, 'hash is 64-char lowercase hex');
 });
 
-// AC-R23-10: inherited Addition #25 D5 group_id format preserved in verdict-groups.ts
-test('AC-R23-10: engine/verdict-groups.ts preserves Addition #25 D5 group_id format', () => {
-  const src = readFileSync('engine/verdict-groups.ts', 'utf8');
-  assert.match(src, /group-\$\{deployId\}-\$\{window_start_ts\}/);
-});
+// ── AC-R23-10 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/verdict-groups.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
-// AC-R23-11: inherited Addition #26 D4 correlational_not_causal: true preserved in verdict.ts
-test('AC-R23-11: engine/types/verdict.ts preserves Addition #26 D4 correlational_not_causal: true', () => {
-  const src = readFileSync('engine/types/verdict.ts', 'utf8');
-  assert.match(src, /correlational_not_causal:\s*true;/);
-});
+// ── AC-R23-11 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
-// AC-R23-12: all vendored .ts files in manifest have SHA-pin header; count === 40
-test('AC-R23-12: vendored .ts file count === 40 and each has SHA-pin header', () => {
-  const manifest = readFileSync('coordination/VENDORING-MANIFEST.md', 'utf8');
-  const rows = manifest.split('\n').filter(line =>
-    (line.includes('vendored-at-pin') || line.includes('vendored-with-deltas')) &&
-    line.includes('.ts'),
-  );
-  const paths = rows.map(line => {
-    const cols = line.split('|').map(c => c.trim());
-    return cols[2]; // column index 2 = target path in manifest table format
-  }).filter(p => p && p.endsWith('.ts'));
-
-  assert.strictEqual(paths.length, 40, `expected 40 vendored .ts rows; got ${paths.length}`);
-
-  for (const p of paths) {
-    const content = readFileSync(p, 'utf8');
-    const firstLine = content.split('\n')[0];
-    assert.ok(
-      firstLine.includes('VENDORED FROM DeploySignal main@5a72371'),
-      `${p}: first line should contain SHA-pin header; got: ${firstLine}`,
-    );
-  }
-});
+// ── AC-R23-12 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: 40 vendored engine/*.ts files removed from
+// Tessera worktree; readFileSync on each fails with ENOENT. Category A.
 
 // AC-R23-15: anti-scope diff — baseline 2946b13 to chore-A d2286b2 within allowed-set
 // (chore-B; chore-A SHA d2286b2 substituted per TQ-4 γ pattern)

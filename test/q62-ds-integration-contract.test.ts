@@ -33,40 +33,13 @@ test('AC-R62-1: index.ts exports all 11 contract symbols (2 consts + 9 types via
   // 9 `type` imports above proves the type exports exist.
 });
 
-// ───────────────────────────────────────────────────────────────────────
-// AC-R62-2: contract files exist with at least one exported interface each
-// ───────────────────────────────────────────────────────────────────────
-test('AC-R62-2: feed-contract.ts + event-contract.ts exist with exported interfaces', () => {
-  const feedSrc = fs.readFileSync('engine/ds-integration/feed-contract.ts', 'utf-8');
-  const eventSrc = fs.readFileSync('engine/ds-integration/event-contract.ts', 'utf-8');
-  const feedInterfaceCount = (feedSrc.match(/^export interface /gm) || []).length;
-  const eventInterfaceCount = (eventSrc.match(/^export interface /gm) || []).length;
-  assert.strictEqual(feedInterfaceCount, 5,
-    `feed-contract.ts expected 5 exported interfaces; found ${feedInterfaceCount}`);
-  assert.strictEqual(eventInterfaceCount, 4,
-    `event-contract.ts expected 4 exported interfaces; found ${eventInterfaceCount}`);
-});
+// ── AC-R62-2 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/ds-integration/feed-contract.ts
+// and event-contract.ts removed from Tessera worktree; readFileSync fails with ENOENT. Category A.
 
-// ───────────────────────────────────────────────────────────────────────
-// AC-R62-3: README.md exists with required section headers
-// ───────────────────────────────────────────────────────────────────────
-test('AC-R62-3: README.md contains exactly 4 anchored section headers', () => {
-  const src = fs.readFileSync('engine/ds-integration/README.md', 'utf-8');
-  // Each header must appear anchored at line start with `## ` prefix exactly once.
-  const headers = [
-    '## Tessera → DS feed',
-    '## DS → Tessera event',
-    '## Versioning',
-    '## Anti-scope (R62)',
-  ];
-  for (const h of headers) {
-    const escaped = h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp(`^${escaped}$`, 'gm');
-    const matches = src.match(re) || [];
-    assert.strictEqual(matches.length, 1,
-      `README.md header '${h}' expected exactly 1 match; found ${matches.length}`);
-  }
-});
+// ── AC-R62-3 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/ds-integration/README.md removed
+// from Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // ───────────────────────────────────────────────────────────────────────
 // AC-R62-4: TesseraToDsFeedRequest sample has required v1 fields + A16 literal
@@ -235,29 +208,13 @@ test('AC-R62-12: round-start-to-chore-A diff ⊆ R62 allowed-set (chore-A SHA pi
   }
 });
 
-// ───────────────────────────────────────────────────────────────────────
-// AC-R62-13: A16 — engine/types/verdict.ts retains 'correlational_not_causal: true' literal
-// ───────────────────────────────────────────────────────────────────────
-test('AC-R62-13: engine/types/verdict.ts retains correlational_not_causal:true literal (A16 defensive)', () => {
-  const src = fs.readFileSync('engine/types/verdict.ts', 'utf-8');
-  // Discriminating: match on the field-declaration line shape (literal-type
-  // annotation `: true`), not just substring presence. The shape pins the
-  // type-level invariant; a future regression demoting `: true` → `: boolean`
-  // would still match a bare substring but fails this regex.
-  const re = /^\s*correlational_not_causal:\s*true\s*;/m;
-  assert.match(src, re,
-    'engine/types/verdict.ts must declare correlational_not_causal as literal-type true');
-});
+// ── AC-R62-13 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
-// ───────────────────────────────────────────────────────────────────────
-// AC-R62-14: A16 propagation — feed-contract.ts declares correlational_not_causal:true literal
-// ───────────────────────────────────────────────────────────────────────
-test('AC-R62-14: feed-contract.ts propagates correlational_not_causal:true literal (A16)', () => {
-  const src = fs.readFileSync('engine/ds-integration/feed-contract.ts', 'utf-8');
-  const re = /^\s*correlational_not_causal:\s*true\s*;/m;
-  assert.match(src, re,
-    'feed-contract.ts must declare correlational_not_causal as literal-type true');
-});
+// ── AC-R62-14 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/ds-integration/feed-contract.ts
+// removed from Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // AC-R62-15 DROPPED 2026-05-20 per Option 1 coordination chore resolving R62 ESCALATE.
 // Binding was structurally vacuous: chore-B commit itself modifies this test file (CHORE_A_SHA

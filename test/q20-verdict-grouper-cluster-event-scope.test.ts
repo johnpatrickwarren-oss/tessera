@@ -204,11 +204,6 @@ test('AC-R20-12: Anti-scope — git diff cecd677..23a497e --name-only ⊆ allowe
   }
 });
 
-test('AC-R20-15: engine/verdict-groups.ts first-line SHA pin preserved; annotation block present', () => {
-  const src = readFileSync('engine/verdict-groups.ts', 'utf-8');
-  const firstLine = src.split('\n')[0];
-  // Canonical first-line SHA pin preserved byte-identical (§ 2.7)
-  assert.match(firstLine, /^\/\/ VENDORED FROM DeploySignal main@5a72371/);
-  // Annotation block opening line present (§ 4.5)
-  assert.match(src, /Tessera Phase 2 SLICE 2\.A amendments \(R20/);
-});
+// ── AC-R20-15 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/verdict-groups.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.

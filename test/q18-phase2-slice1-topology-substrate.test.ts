@@ -106,38 +106,17 @@ test('AC-R18-6: computeSnapshotHash on v9X fixture is deterministic across two i
   assert.match(h1, /^[0-9a-f]{64}$/);
 });
 
-test('AC-R18-7: Inherited Addition #25 D5 — group_id format `group-${deployId}-${window_start_ts}` retained at engine/verdict-groups.ts', () => {
-  const src = readFileSync('engine/verdict-groups.ts', 'utf-8');
-  assert.match(src, /group-\$\{deployId\}-\$\{window_start_ts\}/);
-});
+// ── AC-R18-7 removed R95 2026-05-22 ─────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/verdict-groups.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
-test('AC-R18-8: Inherited Addition #26 D4 — TopologyCandidate.correlational_not_causal literal true type retained', () => {
-  const src = readFileSync('engine/types/verdict.ts', 'utf-8');
-  assert.match(src, /correlational_not_causal:\s*true;/);
-});
+// ── AC-R18-8 removed R95 2026-05-22 ─────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
-test('AC-R18-9: All 40 vendored files retain SHA pin 5a72371 in first-line header', () => {
-  const manifest = readFileSync('coordination/VENDORING-MANIFEST.md', 'utf-8');
-  const paths: string[] = [];
-  for (const line of manifest.split('\n')) {
-    if (!line.startsWith('|')) continue;
-    if (!line.includes('vendored-at-pin') && !line.includes('vendored-with-deltas')) continue;
-    const cells = line.split('|').map((c) => c.trim());
-    const path = cells[1];
-    if (path && path.endsWith('.ts')) {
-      paths.push(path);
-    }
-  }
-  assert.strictEqual(paths.length, 40, `expected 40 vendored paths in manifest, got ${paths.length}`);
-  for (const p of paths) {
-    const firstLine = readFileSync(p, 'utf-8').split('\n')[0];
-    assert.match(
-      firstLine,
-      /VENDORED FROM DeploySignal main@5a72371/,
-      `vendored file ${p} first line does not contain SHA pin: ${firstLine}`,
-    );
-  }
-});
+// ── AC-R18-9 removed R95 2026-05-22 ─────────────────────────────────────────
+// Defunct post-R94 engine extraction: 40 vendored engine/*.ts files removed from
+// Tessera worktree; readFileSync on each fails with ENOENT. Category A.
 
 // Pinned to R18 MERGE-READY SHA 9012faa (not HEAD) so Memorial-Updater outputs
 // (CLAUDE-ARCHITECT.md, CLAUDE-IMPLEMENTER.md, REVIEWER-REPORT-R18.md, etc.) which

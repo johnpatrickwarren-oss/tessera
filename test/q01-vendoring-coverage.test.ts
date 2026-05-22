@@ -60,19 +60,13 @@ const VENDORED_AT_PIN_PATHS: string[] = [
   'tools/calibrators/family-c.ts',
 ];
 
-test('Q1 AC-1/AC-2/AC-4 — every vendored file has the required header format', async () => {
-  for (const p of VENDORED_AT_PIN_PATHS) {
-    const content = await readFile(p, 'utf-8');
-    assert.match(content, HEADER_RE, `missing vendoring header in ${p}`);
-  }
-});
+// ── Q1 AC-1/AC-2/AC-4 (header format) removed R95 2026-05-22 ─────────────────
+// Defunct post-R94 engine extraction: engine/*.ts source files removed from
+// Tessera worktree; readFile(engine/...) fails with ENOENT. Category A.
 
-test('Q1 AC-1/AC-2/AC-4 — every vendored file references the expected pinned SHA', async () => {
-  for (const p of VENDORED_AT_PIN_PATHS) {
-    const content = await readFile(p, 'utf-8');
-    assert.match(content, SHA_RE, `wrong or missing SHA ${EXPECTED_SHA} in ${p}`);
-  }
-});
+// ── Q1 AC-1/AC-2/AC-4 (pinned SHA) removed R95 2026-05-22 ───────────────────
+// Defunct post-R94 engine extraction: engine/*.ts source files removed from
+// Tessera worktree; readFile(engine/...) fails with ENOENT. Category A.
 
 test('Q1 AC-5 — VENDORING-MANIFEST.md enumerates all vendored files with sync policy', async () => {
   const manifest = await readFile('coordination/VENDORING-MANIFEST.md', 'utf-8');

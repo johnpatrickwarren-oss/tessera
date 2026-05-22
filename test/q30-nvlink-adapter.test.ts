@@ -198,16 +198,9 @@ test('AC-R30-14: transformPair with counter_width omitted routes makeResetPair t
   assert.strictEqual(out.value, null);
 });
 
-// AC-R30-15: A16 — engine/types/verdict.ts retains `correlational_not_causal: true` literal
-// R30 MINOR-1 fix: use line-anchored regex with /m flag (not plain includes()) to avoid
-// matching JSDoc backtick occurrences; guards the type-declaration body specifically.
-test('AC-R30-15: A16 preservation — verdict.ts retains correlational_not_causal: true literal', () => {
-  const verdict = readFileSync('engine/types/verdict.ts', 'utf8');
-  assert.ok(
-    /^\s*correlational_not_causal:\s*true\s*;/m.test(verdict),
-    'verdict.ts retains correlational_not_causal: true in type-declaration body per Addition #26 D4',
-  );
-});
+// ── AC-R30-15 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // AC-R30-18: anti-scope diff at chore-A SHA ⊆ allowed-set
 // Chore-A SHA literal committed by Implementer at chore-B. If a HALT fires mid-round and

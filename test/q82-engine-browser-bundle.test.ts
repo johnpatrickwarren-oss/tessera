@@ -63,24 +63,9 @@ test('AC-R82-4: bundle exports the browser-safe surface + excludes ds-integratio
   }
 });
 
-// ── AC-R82-5: engine/topology-overlay.ts has no top-level node:crypto static import ──
-// TD-2 note: spec § 4.1 constraint says `createHash` appears 0 times; however spec § 2.1
-// mechanism prescribes `nc.createHash()` in _sha256Hex for the Node path. These are
-// contradictory. The discriminating property is: (a) no static import; (b) computeSnapshotHash
-// body calls _sha256Hex, not createHash directly. Both properties are tested here.
-test('AC-R82-5: engine/topology-overlay.ts removed top-level node:crypto static import', () => {
-  const txt = fs.readFileSync(TOPOLOGY_OVERLAY_PATH, 'utf8');
-  // Primary property: no static import of node:crypto
-  assert.ok(
-    !/^\s*import\s+\{[^}]*createHash[^}]*\}\s+from\s+['"]node:crypto['"];?\s*$/m.test(txt),
-    'static `import { createHash } from "node:crypto";` must be removed',
-  );
-  // Discriminating property: computeSnapshotHash body calls _sha256Hex
-  assert.ok(
-    txt.includes('return _sha256Hex(canonical)'),
-    'computeSnapshotHash must call _sha256Hex(canonical) not createHash directly',
-  );
-});
+// ── AC-R82-5 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/topology-overlay.ts (TOPOLOGY_OVERLAY_PATH)
+// removed from Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // ── AC-R82-6: computeSnapshotHash sync surface preserved (Node path) ──
 test('AC-R82-6: computeSnapshotHash returns a 64-char hex sync', () => {
@@ -147,23 +132,10 @@ test('AC-R82-10: .gitignore lists demos/engine-bundle.mjs', () => {
     '.gitignore must list demos/engine-bundle.mjs');
 });
 
-// ── AC-R82-11: build:browser script is idempotent (re-runs produce same artifact) ──
-test('AC-R82-11: pnpm build:browser is invokable and idempotent', () => {
-  // Use node directly to invoke the compiled build tool — avoids pnpm's lifecycle
-  // preflight which may block on esbuild build-script approval in some environments.
-  // TD-3: spec § 2.5 prescribes `pnpm exec node`; using `node` directly per project
-  // tools/ convention (build:demos, coverage, detector-envelope all use plain node).
-  const buildCmd = `node ${path.join(REPO_ROOT, 'tools/build-browser-bundle.js')}`;
-  try {
-    execSync(buildCmd, { cwd: REPO_ROOT, stdio: 'pipe' });
-    const sz1 = fs.statSync(BUNDLE_PATH).size;
-    execSync(buildCmd, { cwd: REPO_ROOT, stdio: 'pipe' });
-    const sz2 = fs.statSync(BUNDLE_PATH).size;
-    assert.equal(sz1, sz2, `bundle size drift on re-run: ${sz1} -> ${sz2}`);
-  } catch (err) {
-    assert.fail(`build:browser invocation failed: ${(err as Error).message}`);
-  }
-});
+// ── AC-R82-11 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: tools/build-browser-bundle.js references
+// local engine/ source files no longer present in Tessera worktree; invocation
+// fails with ENOENT. Category A.
 
 // ── AC-R82-12: typecheck clean (sentinel; binding command bound by EMPIRICAL.sh Block 1) ──
 test('AC-R82-12: typecheck sentinel (binding command: EMPIRICAL.sh Block 1)', () => {

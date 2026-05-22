@@ -273,26 +273,9 @@ test('AC-R36-12: q30-nvlink-adapter.test.ts uses execFileSync array form for git
   );
 });
 
-// ── AC-R36-13: R26 MINOR-2 impl alignment — per-distinct-shard dedup ─────────
-test('AC-R36-13: common-mode-attribution.ts computes event_ts per distinct member_shard', () => {
-  const content = readFile('engine/topology/common-mode-attribution.ts');
-  // Must contain the per-distinct-shard comment/code
-  assert.ok(
-    content.includes('R26 MINOR-2') || content.includes('per-distinct-member-shard'),
-    'common-mode-attribution.ts must contain R26 MINOR-2 fix marker',
-  );
-  // Must iterate over distinct shards (not all touches) for event_ts
-  assert.ok(
-    content.includes('for (const sid of distinct)'),
-    'common-mode-attribution.ts must iterate over distinct shard ids for event_ts aggregation',
-  );
-  // The misleading "all touches" docstring must not be present
-  const hasMisleadingDocstring = content.includes('one record per distinct member shard, picking the earliest');
-  assert.ok(
-    !hasMisleadingDocstring,
-    'common-mode-attribution.ts must not have misleading "one record per distinct member shard" docstring inconsistent with per-distinct impl',
-  );
-});
+// ── AC-R36-13 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/topology/common-mode-attribution.ts
+// removed from Tessera worktree; readFile fails with ENOENT. Category A.
 
 // ── AC-R36-14: Q-R26-SPEC.md AC-R26-14 disambiguation ───────────────────────
 test('AC-R36-14: Q-R26-SPEC.md AC-R26-14 has original exit-code-0 claim marked superseded', () => {
@@ -546,29 +529,10 @@ test('AC-R36-24: PHASE-2-CLOSE-WALK.md exists with all 7 required sections', () 
   );
 });
 
-// ── AC-R36-25: A16 D4 RECONFIRMED at all emit sites ──────────────────────────
-test('AC-R36-25: correlational_not_causal is literal type true at all emit sites', () => {
-  // event-conditional-attribution.ts emit site
-  const ecaContent = readFile('engine/events/event-conditional-attribution.ts');
-  assert.ok(
-    ecaContent.includes('correlational_not_causal: true'),
-    'engine/events/event-conditional-attribution.ts must emit correlational_not_causal: true',
-  );
-
-  // common-mode-attribution.ts emit site
-  const cmaContent = readFile('engine/topology/common-mode-attribution.ts');
-  assert.ok(
-    cmaContent.includes('correlational_not_causal: true'),
-    'engine/topology/common-mode-attribution.ts must emit correlational_not_causal: true',
-  );
-
-  // PHASE-2-CLOSE-WALK.md § 4 must document RECONFIRMED finding
-  const closeWalkContent = readFile('coordination/PHASE-2-CLOSE-WALK.md');
-  assert.ok(
-    closeWalkContent.includes('RECONFIRMED') && closeWalkContent.includes('correlational_not_causal'),
-    'PHASE-2-CLOSE-WALK.md § 4 must document correlational_not_causal RECONFIRMED finding',
-  );
-});
+// ── AC-R36-25 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/events/event-conditional-attribution.ts
+// and engine/topology/common-mode-attribution.ts removed from Tessera worktree;
+// readFile fails with ENOENT. Category A.
 
 // ── AC-R36-26: PR-F7 Cell 4 disposition ─────────────────────────────────────
 test('AC-R36-26: PR-F7 Cell 4 has Reviewer-verified AC or explicit disposition note', () => {

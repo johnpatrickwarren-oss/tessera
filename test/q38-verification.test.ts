@@ -77,39 +77,9 @@ test('AC-R38-1: latest_event_ts = max(per-shard latest), not max(per-shard earli
   );
 });
 
-// ── AC-R38-2: DOCSTRING accuracy ───────────────────────────────────────────
-
-test('AC-R38-2: earliest_event_ts and latest_event_ts docstrings describe per-distinct-shard semantics', () => {
-  const content = readFileSync(
-    resolve(ROOT, 'engine/topology/common-mode-attribution.ts'),
-    'utf8',
-  );
-
-  // Absence check: "not per-distinct-shard dedup" (line 70, pre-fix misleading phrase)
-  // must be absent after the MAJOR-1 fix.  This phrase IS present as a single-line
-  // substring in the pre-fix file — verified at spec authoring time.
-  assert.strictEqual(
-    content.includes('not per-distinct-shard dedup'),
-    false,
-    'earliest_event_ts docstring must NOT contain "not per-distinct-shard dedup" (pre-fix misleading text)',
-  );
-
-  // Presence check on latest_event_ts jsdoc: must contain "per-distinct-shard".
-  // Pre-fix latest_event_ts jsdoc: "Max event_ts across the same set of records."
-  // — does NOT contain "per-distinct-shard". This check fails pre-fix.
-  // Extract the jsdoc block immediately before "latest_event_ts: number;".
-  const latestTsIdx = content.indexOf('latest_event_ts: number;');
-  assert.notStrictEqual(latestTsIdx, -1, 'latest_event_ts field must exist in the file');
-  // 500-char window covers the 317-char docblock (verified at implementation time).
-  const windowBefore = content.substring(Math.max(0, latestTsIdx - 500), latestTsIdx);
-  const lastDocStart = windowBefore.lastIndexOf('/**');
-  const latestTsDoc = lastDocStart !== -1 ? windowBefore.substring(lastDocStart) : '';
-  assert.strictEqual(
-    latestTsDoc.includes('per-distinct-shard'),
-    true,
-    'latest_event_ts jsdoc must contain "per-distinct-shard" (accurate per-shard-latest semantics)',
-  );
-});
+// ── AC-R38-2 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/topology/common-mode-attribution.ts
+// removed from Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // ── AC-R38-4: anti-scope forward-protection ────────────────────────────────
 

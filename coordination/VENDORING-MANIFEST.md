@@ -25,6 +25,20 @@ Phase 5 SLICE 3 round 2 (R91) dogfooded the `@johnpatrickwarren-oss/deploysignal
 
 ---
 
+## R95 defunct AC cleanup note (2026-05-22)
+
+Phase 5 SLICE 4 hygiene round (R95) removed ~51 defunct test assertions that had been testing
+Tessera's local `engine/` source files, which were deleted by R94 (engine extraction to the
+`@johnpatrickwarren-oss/deploysignal-engine` git-dependency repo). The defunct ACs were
+categorized as: Category A (historical vendoring/SHA-pin checks reading `engine/*.ts`);
+Category B (R90 engine-package ACs reading `engine/package.json` + `engine/dist/`);
+Category C (R91 config-state ACs verifying the pre-R94 `file:./engine` dep + paths mapping);
+Category D (prior-round anti-scope diff ACs whose ALLOWED_SET didn't account for R94 MU commits).
+Per-row vendored-at-pin / vendored-with-deltas SHAs below are UNCHANGED by R95.
+Fail baseline restored from ~75 to ~27 (band [24, 30]).
+
+---
+
 ## DeploySignal engine vendoring
 
 | Target (tessera/) | Source (deploysignal/) | SHA | Sync policy | Vendored | Notes |
