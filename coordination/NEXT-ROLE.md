@@ -1,7 +1,124 @@
-CURRENT-ROUND: R91
-NEXT-ROLE: MEMORIAL-UPDATER
-STATUS: ROUND-COMPLETE
-TIER: full
+CURRENT-ROUND: R93
+NEXT-ROLE: ARCHITECT
+STATUS: READY
+TIER: audit
+
+---
+
+## § R91 close attestation + R92 deferral (2026-05-21)
+
+R91 closed at MU commit `9656eb4`. 50-file Tessera-internal migration to `@johnpatrickwarren-oss/deploysignal-engine/...` package paths verified end-to-end. 1 CRITICAL resolved via Option A (q91 carve-out at `b7b0193`, matches R87 precedent). 4 MAJORs reinforced (architect-claim-without-empirical-walk 10th instance + halt-discipline-bypass + memorial-self-mischaracterization + spec-band-derivation). 14/14 R91 ACs PASS. Test baseline: 738 / 715 / 19 / 4 (in spec band).
+
+**R92 (DS-side adoption PR) DEFERRED** — operator-coordinated cross-repo work, not pipeline-fireable. Blockers: (i) DS repo on feature branch `feat/anvil-addition-29` with active WIP (Anvil chaos-verdict feature); (ii) DS has its own `engine/` tree — Tessera-package adoption requires DS-side architectural decision on replacement vs parallel consumption; (iii) DS lacks Anchor/Tessera pipeline infrastructure (no `run-pipeline.sh`); (iv) cross-repo PR requires operator review + merge gates. R92 resurfaces when operator coordinates DS Anvil branch resolution + engine-replacement strategy.
+
+---
+
+## § R93 Round-scope directive (Architect — Phase 5 SLICE 3 close + hygiene; AC-R36-3 redesign + carry-forward band re-derivation + forward-protection AC registry) (2026-05-21)
+
+R93 is **Phase 5 SLICE 3 close + hygiene round**. NOT a substantive product round. Pattern matches R86 (Phase 4 SLICE 4 methodology consolidation) + R89 (methodology hygiene). Closes SLICE 3 with R92 explicitly deferred + addresses R87/R91 carry-forward methodology debt.
+
+**Motivation:** Phase 5 SLICE 3 produced two substantive rounds (R90 engine extraction; R91 Tessera-internal consumption) plus R91 ESCALATE resolution. Three methodology-debt items surfaced across the chain:
+1. **AC-R36-3 has flipped twice (R87 + R91)** — same execFileSync-in-test-file collision; same Option A carve-out resolution. The forward-protection-AC-as-tripwire pattern is structurally fragile. Each new test using subprocess-spawn requires a carve-out edit. Two precedents established the pattern; a third would warrant cross-project derivation. Time to redesign or drop.
+2. **Spec-side fail-count-band derivation is incomplete** (R91 MAJOR-4). The Architect's pre-impl fail-set enumeration counted ~12 carry-forward + AC-R83-12 + AC-R84-14 stochastic but missed ~6 others (Q1 AC-7 ENOENT, AC-R36-19, AC-R78-13, AC-R79-8, R65/R66 DS-integration tests). This degraded the Implementer's halt-discipline (couldn't detect a NEW flip vs already-failing). Pattern parallel to R88 false-compliance-attestation: encode observed verbatim, do not summarize.
+3. **No Architect-side forward-protection AC registry exists** (R91 watch-list). The R86 prophylactic walk requires the Architect to enumerate pre-existing forward-protection ACs, but there's no centralized list — Architect has to discover them ad-hoc each round. A registry file would make the R86 walk mechanical.
+
+**Round-start SHA:** SHA of this directive commit; verify at Architect session entry.
+
+**Empirical premises Architect MUST verify at session entry** (R86/R87/R88/R89 prophylactic discipline):
+- Current pre-impl fail-set: run `node --test --test-reporter=tap test/*.test.js 2>&1 | grep '^not ok'` and quote verbatim (Rule 1 sub-class empirical-command-attestation; R91 MAJOR-4 lesson)
+- AC-R36-3 current carve-out list at `test/q36-phase2-close-walk.test.ts:74-79`: 4 entries (q29, q34, q36-self, q91)
+- Phase 5 SLICE 3 chain status: R90 closed `95dbcdf`; R91 closed `9656eb4`; R92 DEFERRED; R93 = this round
+- CLAUDE-*.md threshold state (sustaining mechanism `scripts/check-claude-md-thresholds.sh`): current counts ARCH ≤ 30; IMPL ≤ 30 (R89 sustaining mechanism active; verify via direct execution)
+
+### Primary deliverables (R93 — methodology hygiene only)
+
+1. **AC-R36-3 redesign OR drop (Architect picks).** Three candidate approaches:
+   - **Drop AC-R36-3** (matches R87 drop of AC-R36-30/31 precedent). Removed from `test/q36-phase2-close-walk.test.ts`. Update q36 header comment. Forward-protection function moves to `scripts/check-no-execfilesync-spawn.sh` as pre-commit hook (R89 sustaining-mechanism extension).
+   - **Redesign as pre-commit hook only** — keep AC-R36-3 logic but move execution out of test-time forward-protection into pre-commit. Pre-commit script greps test files for the pattern, exits non-zero with violator list. AC-R36-3 itself dropped from test file.
+   - **Keep AC-R36-3 + add carve-out-registry test** — keep current test, but add a parallel AC that verifies the carve-out list matches a registry file (so adding a new spawn-test requires updating the registry, not the AC inline). Lower-risk but doesn't solve the fragility.
+   - Architect picks ONE; documents trade-offs in spec § A1. **Drop or pre-commit-hook recommended** per the "twice-flipped pattern crosses the cross-project promotion threshold" framing.
+
+2. **Forward-protection AC registry created.** New file `coordination/FORWARD-PROTECTION-AC-REGISTRY.md` (Architect picks exact name). Enumerates every pre-existing AC that scans the working tree for forbidden patterns (current known: AC-R36-3 execFileSync; any AC-R36-* anti-scope guard; any AC that uses `readdirSync` over test/ or tools/; spec-prescribed forward-protection patterns from R51/R75/R83). Per-entry fields: AC ID, file:line, what it scans, current carve-out list, last flip date. Architect cites-then-walks current `test/q36-phase2-close-walk.test.ts` + `grep -l 'readdirSync\|readFileSync.*test' test/` + spec history to populate.
+
+3. **Spec-authoring-checklist update for fail-set enumeration (R91 MAJOR-4 lesson).** Add gate to `templates/SPEC-AUTHORING-CHECKLIST.md` (or equivalent — Architect verifies file path via Read at spec-emit). Gate text: "Before predicting close-state fail band, Architect MUST run `node --test --test-reporter=tap test/*.test.js 2>&1 | grep '^not ok'` at round-start HEAD and paste the VERBATIM `not ok` list into spec § 0 or § 1.4. Predicting the band from a partial enumeration is a R91 MAJOR-4 violation."
+
+4. **R86 prophylactic walk extension for forward-protection ACs.** Add gate to SPEC-AUTHORING-CHECKLIST or CLAUDE-ARCHITECT.md REINFORCED entry: "When prescribing new test files OR new test patterns (especially subprocess-spawn, file-write, network-call patterns), Architect MUST walk the forward-protection AC registry and identify any pattern matches. If a match exists, the spec MUST include the carve-out amendment in the same component inventory (§ 2/3)."
+
+5. **R92 deferral memorialization.** Update `MEMORIAL.md` with explicit R92-deferral entry (status: deferred-as-operator-coordinated; reasons enumerated). Reference from `coordination/logs/ROUND-R93-SUMMARY.md`. Keep the entry pointer-style — actual R92 will write its own MEMORIAL when fired.
+
+6. **Phase 5 SLICE 3 close attestation.** Update SLICE 3 status in `coordination/PHASE-3-CANDIDATES-PRELIMINARY.md` (or successor file — verify path) OR create `coordination/PHASE-5-SLICE-3-CLOSE-WALK.md` per the R37 + R66 SLICE-close precedent. Documents what shipped (R90 + R91), what deferred (R92), what hygiene landed (R93).
+
+7. **CLAUDE-*.md threshold re-verification.** Re-run `scripts/check-claude-md-thresholds.sh` post-R93; verify no threshold breach. R91 added 2 REINFORCED entries (CLAUDE-ARCHITECT +1, CLAUDE-IMPLEMENTER HALT-DISCIPLINE 11→12 sub-variant); R93 may add 1-2 more (AC-R36-3 redesign rationale; forward-protection-ac-registry pattern). Composite folding only if threshold crossed.
+
+8. **`test/q93-slice3-close-hygiene.test.ts`** (NEW; audit-tier minimal) — at least 5 ACs:
+   - AC-R36-3 redesign verifiable (per chosen Approach): either dropped (test asserts AC body absent), OR pre-commit script exists + works, OR registry-test exists
+   - Forward-protection AC registry file exists; has ≥1 entry; references AC-R36-3
+   - SPEC-AUTHORING-CHECKLIST has new fail-set-enumeration gate (grep for the literal phrase)
+   - SPEC-AUTHORING-CHECKLIST has new R86-prophylactic-walk forward-protection gate
+   - Test count baseline preserved (fail-set within R91 band ± redesign delta)
+
+9. **`Q-R93-EMPIRICAL.sh`** at chore-A pre-commit. **MUST use `--test-reporter=tap` BEFORE test files** per R77 + R89 MAJOR-1 sub-pattern.
+
+### Tier rationale
+
+**audit-tier** — Architect (Implementer-hat per R42 + R89 precedent) + Reviewer (cold-eye on methodology-debt resolution) + MU. No engine work; no substantive product code; methodology consolidation + new checklist gates + AC redesign. The 4 deliverables are tightly coupled (R87/R91 methodology debt + R92 deferral memorialization).
+
+### Anti-scope (R93 hard limits)
+
+- **NO modification of engine/ files** (R90 frozen)
+- **NO modification of test/q90-*, test/q91-* files** (R90/R91 deliverables frozen)
+- **NO modification of `tsconfig.json` engine paths or `package.json` engine dep** (R91 frozen)
+- **NO DS-side work** (R92 explicitly deferred this round)
+- **NO modification of R73-R91 substantive deliverables** (frozen)
+- **NO new external dependencies**
+- **NO modification of pre-R93 carry-forward AC fail set** beyond AC-R36-3 redesign (if Architect drops AC-R36-3, the fail set drops by 0 because AC-R36-3 currently PASSES post-Option-A; redesign should keep that property OR the spec MUST predict the new fail-set state explicitly)
+- **NO real-cluster; NO DS-repo; NO `gh repo` operations beyond push to Tessera public**
+- **NO modification of `coordination/MEMORIAL-PHASE-*.md` shards** (R89 archival stands)
+
+ALLOWED modifications:
+- `test/q36-phase2-close-walk.test.ts` (AC-R36-3 redesign per chosen Approach)
+- `scripts/check-no-execfilesync-spawn.sh` (NEW, if Approach 1 or 2 chosen)
+- `scripts/finalize-round.sh` OR equivalent (wire new pre-commit script if applicable)
+- `coordination/FORWARD-PROTECTION-AC-REGISTRY.md` (NEW)
+- `templates/SPEC-AUTHORING-CHECKLIST.md` (gate additions; verify path at spec-emit)
+- `CLAUDE-ARCHITECT.md` (REINFORCED additions only; composite-fold if threshold hit)
+- `CLAUDE-IMPLEMENTER.md` (REINFORCED additions only; composite-fold if threshold hit)
+- `coordination/PHASE-5-SLICE-3-CLOSE-WALK.md` (NEW) OR equivalent SLICE close artifact
+- `coordination/MEMORIAL.md` (R92 deferral entry + R93 appends)
+- `test/q93-slice3-close-hygiene.test.ts` (NEW)
+- `coordination/specs/Q-R93-SPEC.md` + `Q-R93-SPEC-AUDIT.md` + `Q-R93-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R93.md` (Reviewer)
+- `coordination/NEXT-ROLE.md` (this file)
+- `coordination/logs/ROUND-R93-*.md`
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE. **Architect MUST use `--test-reporter=tap` BEFORE test files** per R77 + R89 MAJOR-1 sub-pattern.
+- **R86 prophylactic + R87 + R88 + R89 + R91 sub-patterns** load-bearing.
+- **R83 routing discipline:** top-of-file `STATUS: READY` updates MUST land in the same commit as the routing block.
+- **R89 MAJOR-2 lesson:** NO "first N lines byte-identical" ACs against working-tree files.
+- **R91 MAJOR-4 lesson (applies UPFRONT to R93 itself):** Architect MUST paste verbatim `not ok` enumeration from current test suite into spec § 0 before predicting R93 close-state band.
+- **R91 CRITICAL-1 lesson (applies UPFRONT to R93 itself):** Architect MUST walk the forward-protection AC registry (or current ad-hoc list since registry is being created THIS round) before prescribing any new test patterns; q93 test file MUST not introduce a new violator. **Self-application gate.**
+
+### Halt conditions (R93 Implementer/Architect-hat)
+
+1. Q-R93-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Full test suite drift beyond predicted band (Architect MUST encode band per R91 MAJOR-4 fix)
+4. ANY test file that passed pre-R93 fails post-R93 (other than ACs touched by AC-R36-3 redesign — spec MUST enumerate exact ACs allowed to flip)
+5. AC-R36-3 redesign produces new flip (e.g., dropping it without verifying carry-forward consumer expectations): HALT + DIAGNOSTIC
+6. Forward-protection AC registry incomplete (Architect MUST justify completeness via grep over `test/` for `readdirSync\|readFileSync.*test` patterns at spec-emit): HALT at spec-emit
+7. SPEC-AUTHORING-CHECKLIST gates not actually verifiable (Architect prescribes a checklist entry without empirically demonstrating it would have caught R91's specific gap): HALT at spec-emit
+8. New external dependency: HALT + DIAGNOSTIC + ESCALATE
+9. R90/R91 substantive deliverable modified (anti-scope violation): HALT + DIAGNOSTIC + ESCALATE
+10. Architect-claim-without-empirical-walk (11th Tessera instance trigger): HALT at MU review
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R93 --tier audit
+```
 
 ---
 
