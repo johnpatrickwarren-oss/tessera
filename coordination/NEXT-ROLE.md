@@ -1,7 +1,134 @@
-CURRENT-ROUND: R94
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
-TIER: full
+CURRENT-ROUND: R95
+NEXT-ROLE: ARCHITECT
+STATUS: READY
+TIER: audit
+
+---
+
+## § R94 close attestation (2026-05-22)
+
+R94 closed at MU commit `d26998f`. Phase 5 SLICE 4 substantive deliverable shipped: engine extracted to `johnpatrickwarren-oss/deploysignal-engine` (history preserved via `git filter-repo --subdirectory-filter engine`), tagged `v0.1.0-pre` at engine commit `18978ab`, Tessera migrated to consume via `github:...#v0.1.0-pre`, local `engine/` removed. 13/13 R94 ACs PASS. Final findings: 0 CRITICAL / 4 MAJOR / 4 MINOR / 4 OBS — all methodology-class. Two ESCALATEs absorbed: first (q05 dynamic import; Option A); second (~51 engine-source-tests PASS→FAIL; Option A+D — accept as carry-forward, schedule R95 cleanup THIS round).
+
+**Carried-forward operator-decision flags from R94 close:**
+- MAJOR-1+2: AC-name-vs-test-binding-mismatch (2nd Tessera instance; cross-project promotion candidate at 3rd)
+- MAJOR-3: typesVersions hard-limit bypass (reinforced into CLAUDE-IMPLEMENTER.md halt-discipline-gate-no-transparent-only)
+- MAJOR-4: v0.1.0-pre tag annotation factually-incorrect "byte-identical to Tessera HEAD" claim (tag immutable; options: live-with vs delete+re-tag — operator's call; PR #20 is the only consumer and is in draft)
+
+---
+
+## § R95 Round-scope directive (Architect — defunct AC cleanup; Phase 5 SLICE 4 hygiene round) (2026-05-22)
+
+R95 is the **defunct AC cleanup round** queued by R94 ESCALATE-2 Option A+D resolution. Restores fail-baseline noise floor from ~72 → ~21 by removing the ~51 historical engine-source tests that became structurally defunct when R94 moved engine source-of-truth to the extracted repo. NOT a substantive product round. Pattern matches R87 (carry-forward AC drop) + R89 (methodology hygiene) + R93 (SLICE close + AC-R36-3 redesign).
+
+**Motivation:** R94 deletion of Tessera's local `engine/` directory invalidated ~51 historical ACs across 15+ test files. The ACs verified Tessera's local vendored engine state (SHA-pin headers, file existence, byte-identity to vendoring pin) — that state no longer exists in Tessera by R94 design. Per `coordination/diagnostics/DIAGNOSTIC-R94-engine-source-tests.md` § Options, Option A+D was chosen: accept as carry-forward at R94 close, defunct cleanup deferred to R95 (this round). Cleaning these up restores test-suite signal-to-noise for future rounds.
+
+**Round-start SHA:** SHA of this directive commit; verify at Architect session entry.
+
+**Empirical premises Architect MUST verify at session entry** (R86/R87/R88/R89/R91/R93 prophylactic discipline + R91 MAJOR-4 verbatim lesson + R94 MAJOR-1+2 AC-binding lesson):
+- Current pre-impl fail-set: run `node --test --test-reporter=tap test/*.test.js 2>&1 | grep '^not ok'` and quote VERBATIM in spec § 0 (R91 MAJOR-4 lesson; R94 § 0.1 partial enumeration was load-bearing for R94 MAJOR-4 derivation)
+- Cross-reference: `coordination/diagnostics/DIAGNOSTIC-R94-engine-source-tests.md` has the categorized enumeration; Architect verifies it matches current state via grep over the listed AC IDs
+- The 4 DIAGNOSTIC categories: Category A (Q1, R18, R20, R23, R29, R30, R32, R34, R36, R38, R53, R56, R58, R62, R82 historical vendoring); Category B (R90-1..R90-12, R90-14); Category C (R91-3, R91-4, R91-5, R91-9, R91-13, R91-14); Category D (R93-7)
+- `engine/` does NOT exist in Tessera worktree (R94 deleted)
+- `node_modules/@johnpatrickwarren-oss/deploysignal-engine` exists post-pnpm-install (R94 git-dep)
+- All R94 deliverables frozen (engine repo + Tessera package.json + tsconfig + pnpm-lock + VENDORING-MANIFEST + q94)
+- Forward-protection AC registry walked (R93 deliverable; Architect cites entries that could fire on R95 changes)
+
+### Primary deliverables (R95 cleanup)
+
+1. **Defunct AC enumeration in spec § 0.** Architect pastes verbatim:
+   - Full pre-R95 `not ok` list (R91 MAJOR-4 lesson)
+   - Per-category AC ID enumeration with file:line citation for each
+   - Per-AC disposition: DELETE (default) vs SKIP-WITH-COMMENT (for ACs whose semantics could be reinterpreted post-extraction) vs KEEP-AND-UPDATE (for ACs whose ALLOWED_SET regex needs widening to recognize R94's diff)
+   - Default disposition per category:
+     - **Category A (vendoring/SHA-pin checks):** DELETE (vendoring discipline moves to new repo; Tessera no longer has the source files to check)
+     - **Category B (R90 engine-package ACs):** DELETE (package no longer at local `engine/`; ACs verified pre-R94 state by design)
+     - **Category C (R91 config-state ACs):** DELETE (R91 paths-mapping + file: dep are superseded by R94 git-dep; ACs verify pre-R94 state)
+     - **Category D (R93-7 anti-scope):** KEEP-AND-UPDATE (R93 ALLOWED_REGEX widened to recognize R94 changes; OR DELETE if Architect judges cleaner)
+
+2. **Per-test-file edits.** ~15 test files modified. Each edit:
+   - Removes the defunct AC block (preserving surrounding ACs)
+   - Adds an in-place comment citing R95 + reason for removal + commit SHA where the AC was removed
+   - Preserves all NON-defunct ACs in the same file byte-identical (Architect must enumerate via cite-then-walk per file)
+
+3. **R94 MAJOR-1+2 fix (in same round).** Update AC-R94-9 + AC-R94-10 in `test/q94-engine-repo-extraction.test.ts` to actually verify the band substantively (not just the spec containing literal strings). R94 Reviewer flagged these as structurally vacuous; R95 patches the test to bind the assertion to actual TAP run output OR removes the ACs entirely if the EMPIRICAL.sh Block 8/4 verification suffices. Architect picks.
+
+4. **R94 MAJOR-3 reinforcement enforcement.** Update `templates/SPEC-AUTHORING-CHECKLIST.md` (or equivalent) with a load-bearing gate: "transparent disclosure of hard-limit anti-scope deviation does NOT substitute for HALT+DIAGNOSTIC+ESCALATE; Implementer-side hard-limit modification REQUIRES operator gate." R89 sustaining mechanism + R93 forward-protection registry pattern — gate this discipline structurally, not advisory.
+
+5. **R94 MAJOR-4 operator-decision flag preserved.** Update NEXT-ROLE.md operator-decision flags section: tag-annotation-immutability options (live-with vs delete+re-tag v0.1.0-pre); R95 does NOT decide this — preserves flag for operator review at R95 close.
+
+6. **VENDORING-MANIFEST.md updated** with R95 cleanup header note (no row rewrites).
+
+7. **`test/q95-defunct-ac-cleanup.test.ts`** (NEW; audit-tier minimal) — at least 5 ACs:
+   - Pre-R95 fail-count had ~72 fails; post-R95 fail-count has ~21 (or whatever the predicted post-cleanup band is — Architect MUST encode exact band per R91 MAJOR-4)
+   - Specific deleted ACs no longer present in their test files (grep for AC ID returns 0)
+   - Specific RETAINED ACs in same file still pass (file isn't accidentally over-deleted)
+   - SPEC-AUTHORING-CHECKLIST contains new R94 MAJOR-3 hard-limit gate text
+   - R94 MAJOR-4 operator-decision flag present in NEXT-ROLE.md
+
+8. **`Q-R95-EMPIRICAL.sh`** at chore-A pre-commit. **MUST use `--test-reporter=tap` BEFORE test files** per R77 + R89 MAJOR-1 sub-pattern lesson.
+
+### Tier rationale
+
+**audit-tier** — Architect (Implementer-hat per R42 + R89 + R93 precedent) + Reviewer (cold-eye on what got deleted + did the right test files survive) + MU. Mechanical reorg + checklist gate addition; no substantive product code; no engine work. The ~51 AC deletions are tightly bounded (DIAGNOSTIC-R94-engine-source-tests.md enumerates them).
+
+### Anti-scope (R95 hard limits)
+
+- **NO modification of any non-defunct AC** — Architect MUST enumerate every modified AC by ID in spec § 4 + the disposition reason; Reviewer cold-eye verifies no over-deletion
+- **NO modification of `engine/` content (in new repo OR local)** — local engine/ doesn't exist; new repo not touched
+- **NO modification of Tessera's R91-migrated import paths** (`@johnpatrickwarren-oss/deploysignal-engine/...`) — those are NOT defunct
+- **NO modification of Tessera root package.json or tsconfig.json or pnpm-lock.yaml** (R94 frozen)
+- **NO modification of `tools/curate-baseline.ts` or any R88 deliverable** (frozen)
+- **NO modification of R73-R94 substantive deliverables** beyond the defunct AC cleanup (frozen)
+- **NO new external dependencies**
+- **NO DS-side work** (PR #20 update is Coordinator-direct, separate)
+- **NO modification of CLAUDE-*.md files beyond MU's normal REINFORCED appends** (R89 sustaining mechanism enforces)
+- **NO new tag operations on engine repo** (MAJOR-4 resolution is operator-decision, not R95 scope)
+- **NO real-cluster; NO DS-repo modifications**
+- **NO modification of `coordination/MEMORIAL-PHASE-*.md` shards** (R89 archival stands)
+
+ALLOWED modifications:
+- Test files containing defunct ACs (Architect enumerates exhaustively in spec § 4; Reviewer cross-verifies)
+- `test/q94-engine-repo-extraction.test.ts` (AC-R94-9 + AC-R94-10 substantive fix per MAJOR-1+2)
+- `test/q95-defunct-ac-cleanup.test.ts` (NEW)
+- `templates/SPEC-AUTHORING-CHECKLIST.md` (R94 MAJOR-3 hard-limit gate addition)
+- `coordination/VENDORING-MANIFEST.md` (header note only)
+- `coordination/specs/Q-R95-SPEC.md` + `Q-R95-SPEC-AUDIT.md` + `Q-R95-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R95.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends; threshold check at MU per R89 sustaining mechanism)
+- `coordination/NEXT-ROLE.md` (this file)
+- `coordination/logs/ROUND-R95-*.md`
+
+### Apply all 7 cross-project rules + R94 reinforced disciplines UPFRONT
+
+- Rules 1-7 ACTIVE. **Architect MUST use `--test-reporter=tap` BEFORE test files** per R77 + R89 MAJOR-1.
+- **R86 prophylactic + R87 + R88 + R89 + R91 + R93 + R94 sub-patterns** load-bearing.
+- **R83 routing discipline:** top-of-file `STATUS: READY` updates MUST land in the same commit as the routing block.
+- **R91 MAJOR-4 lesson (applied UPFRONT):** Architect MUST paste verbatim `not ok` enumeration from current test suite into spec § 0 before predicting R95 close-state band. Cross-validate against DIAGNOSTIC-R94-engine-source-tests.md categorization.
+- **R94 MAJOR-1+2 lesson (applied UPFRONT to R95 itself):** Every AC name must match what the AC actually verifies. Architect MUST walk each q95 AC's name vs implementation pseudocode to ensure binding correctness. No structurally-vacuous ACs.
+- **R94 MAJOR-3 lesson (applied UPFRONT):** Implementer-side hard-limit anti-scope modification = HALT+ESCALATE; transparent disclosure does NOT substitute. R95 itself is bound by this — any hard-limit deviation discovered at chore-A REQUIRES HALT, no TD-disclosure path.
+- **R93 self-application gate:** R95 itself MUST not introduce a new violator into any forward-protection AC. The new q95 test file MUST NOT use `execFileSync('node', ...)` patterns without registry update.
+- **R85 stochastic-flake band preserved.** AC-R84-14 unchanged.
+
+### Halt conditions (R95 Implementer/Architect-hat)
+
+1. Q-R95-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Test suite fail-count outside Architect-predicted post-cleanup band (Architect MUST encode band per R91 MAJOR-4 fix)
+4. ANY non-defunct AC accidentally deleted or modified (Reviewer cold-eye catches this; Implementer self-check via per-file cite-then-walk diff)
+5. ANY test file modified that is NOT in spec § 4 enumeration: HALT + DIAGNOSTIC
+6. R94 MAJOR-1+2 fix (q94 AC-R94-9 + AC-R94-10) produces structurally-vacuous replacement (recursive R62/R94 pattern): HALT
+7. New external dependency required: HALT + DIAGNOSTIC + ESCALATE
+8. R88-or-prior substantive deliverable modified beyond defunct AC removal: HALT + DIAGNOSTIC + ESCALATE
+9. Any engine/ content modification (local or new repo): HALT + DIAGNOSTIC + ESCALATE
+10. Architect-claim-without-empirical-walk pattern detected at spec-emit: HALT at MU review (13th Tessera instance trigger if it fires)
+11. **R94-MAJOR-3-applied:** any hard-limit anti-scope deviation discovered at chore-A: HALT + DIAGNOSTIC + ESCALATE (NOT TD-disclosure-and-proceed)
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R95 --tier audit
+```
 
 ---
 
