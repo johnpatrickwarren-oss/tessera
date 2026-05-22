@@ -330,3 +330,26 @@ CONFIRMATION: operator-resolution-swift-applied | Operator resolution (Option A:
 
 CONFIRMATION: context-isolation-boundary-preserved | Memorial-Updater read: spec (full § 8.11 probe-run section + § 1.4 band), reviewer report (full), NEXT-ROLE.md (routing block + operator resolution), MEMORIAL.md (full active file), CROSS-PROJECT-MEMORIAL.md (full). Did NOT read coordination/diagnostics/ (none present for R91 Implementer; halt-disciplines did not follow through to DIAGNOSTIC stage). Did NOT read coordination/logs/ or .prompt-*.md files. Cold-eye boundary preserved. | R91 | MEMORIAL-UPDATER
 
+## R92 — DEFERRED (operator-coordinated) (2026-05-21)
+
+CONFIRMATION: r92-deferred-as-operator-coordinated | R92 (DS-side engine package consumption) deferred as operator-coordinated. Blockers: (a) Tessera engine/ package not yet published to npm; (b) DS-Anvil branch WIP and not in stable merge state; (c) no Tessera→DS pipeline integration for cross-repo PR; (d) DS engine architecture (multi-source vs. single-source) requires architectural clarity before DS-side consumption. Decision: sequencing gate, not scope reduction. R92 remains the natural next step after engine publication. Close-walk artifact: coordination/PHASE-5-SLICE-3-CLOSE-WALK.md § 2. Re-engage trigger: (a) engine/ package published to npm OR locally-linked in DS package.json AND (b) DS-Anvil branch stable. | R92 | OPERATOR
+
+## R93 — IMPLEMENTER (audit-tier; Architect-hat) (2026-05-21)
+
+CONFIRMATION: tdd-red-green-ordering | RED commit (`f704785`) committed before any deliverable implementation. Expected RED state: 6/8 ACs fail (AC-R93-1 through -5 and -8 FAIL; AC-R93-6 and -7 PASS). Verified by git log — RED precedes GREEN chore-A commit. | R93 | IMPLEMENTER
+
+CONFIRMATION: brainstorm-3-approaches-evaluated | Approached AC-R36-3 redesign with 3 candidates: (A) Drop + pre-commit hook — SELECTED; (B) Keep + registry-backed carve-out — REJECTED (structural fragility remains); (C) EMPIRICAL.sh block only — REJECTED (not forward-propagating). Selection rationale in Q-R93-SPEC-AUDIT.md § A1.2–A1.4. | R93 | IMPLEMENTER
+
+CONFIRMATION: r91-major-4-self-application | Pre-impl fail set enumeration performed at session start via `node --test --test-reporter=tap test/*.test.js 2>&1 | grep 'not ok'` at round-start HEAD `fe74c64`. Verbatim output formed the basis for band prediction (tests=745, pass∈[720,722], fail∈[19,21], skip=4). Observed at chore-A: tests=745, pass=720, fail=21, skip=4 — in band. | R93 | IMPLEMENTER
+
+CONFIRMATION: r91-critical-1-self-application | Forward-protection AC registry walk performed for q93 test patterns before committing. q93 uses `execFileSync` with 'git' only (not 'node'). Hook `scripts/check-no-execfilesync-spawn.sh` exits 0 on q93. AC-R93-6 self-check: pattern not present. No new carve-out required. | R93 | IMPLEMENTER
+
+CONFIRMATION: false-positive-hook-detection-caught-and-fixed | During hook testing, discovered that q36 drop comment and q93 assertion message both contained the literal `execFileSync('node'` string — causing the new hook to fire false positives. Fixed by rephrasing to `execFileSync with node` (no paren-quote pattern). AC-R93-6 self-check confirmed the regex does not match q93's source. | R93 | IMPLEMENTER
+
+CONFIRMATION: anti-scope-clean | EMPIRICAL.sh Block 9 exit 0. `git diff fe74c64..HEAD --name-only` → paths within ALLOWED_SET only. | R93 | IMPLEMENTER
+
+CONFIRMATION: empirical-sh-9-blocks-all-pass | Q-R93-EMPIRICAL.sh: 17 PASS / 0 FAIL, exit 0. All 8 q93 ACs pass at chore-A. | R93 | IMPLEMENTER
+
+CONFIRMATION: checklist-gates-verbatim-command-embedded | SPEC-AUTHORING-CHECKLIST.md gates contain the verbatim command `node --test --test-reporter=tap test/*.test.js 2>&1 | grep '^not ok'` (AC-R93-4) and the phrase `forward-protection AC registry` (AC-R93-5). Both verified by node -e string-contains check before commit. | R93 | IMPLEMENTER
+
+

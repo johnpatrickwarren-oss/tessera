@@ -509,3 +509,35 @@ wave-gate close flow sequence.
 
 > **Canonical text landed at:** R50 (2026-05-19). Closes "no cold-eye review at consolidation
 > when clusters ran solo-tier" gap. Rule 7 Surface (a) for wave-aggregate verification discipline.
+
+---
+
+## § Fail-set enumeration gate (R91 MAJOR-4 lesson)
+
+**Gate:** Before predicting the close-state fail band, the Architect MUST run the following command at round-start HEAD and paste the VERBATIM `not ok` list into spec § 0 or § 1.4:
+
+```
+node --test --test-reporter=tap test/*.test.js 2>&1 | grep '^not ok'
+```
+
+**Why:** R91 MAJOR-4 — the Architect's pre-impl fail-set enumeration counted ~12 carry-forward + AC-R83-12 + AC-R84-14 stochastic, but missed ~6 others (Q1 AC-7 ENOENT, AC-R36-19, AC-R78-13, AC-R79-8, R65/R66 DS-integration tests). This degraded the Implementer's halt-discipline: without a complete pre-impl fail list, the Implementer could not detect when a NEW test flip occurred versus an already-failing test. The `verbatim not ok list` is the source of truth; predicting the band from memory or a partial enumeration is a R91 MAJOR-4 violation.
+
+**Mechanic:** The spec § 0 must contain a fenced code block showing the actual `not ok` lines from the command output (not a count, not a summary — the literal lines). The Implementer uses this list as the reference for halt condition 3 ("full test suite drift beyond predicted band") and halt condition 4 ("any test that passed pre-round fails post-round").
+
+> **Canonical text landed at:** R93 (2026-05-21). Closes R91 MAJOR-4 spec-authoring-discipline gap.
+
+---
+
+## § Forward-protection AC registry walk (R91 CRITICAL-1 lesson)
+
+**Gate:** When prescribing new test files OR new test patterns (especially subprocess-spawn, file-write, or network-call patterns), Architect MUST walk the forward-protection AC registry and identify any pattern matches:
+
+1. Read `coordination/FORWARD-PROTECTION-AC-REGISTRY.md` in full.
+2. For each new test file the spec prescribes: check whether any registry entry's "What it scans" pattern would match code in the new test file.
+3. If a match exists → the spec MUST include the carve-out amendment in the same component inventory (§ 2/3). Prescribing the test file without the carve-out causes a halt condition 4 flip of the guarding AC.
+
+**Why:** R91 CRITICAL-1 — spec prescribed q91 test with `execFileSync(node, ...)` pattern that triggered AC-R36-3 (pre-existing forward-protection); Implementer attested zero halt conditions without verifying pre-existing AC carve-out status. AC-R36-3 flipped FAIL post-implementation, triggering halt condition 4. The ESCALATE and Option A resolution (add q91 to q36 carve-out) consumed one full round-close cycle. The registry makes this walk mechanical: instead of ad-hoc discovery, the Architect queries the registry first.
+
+**Mechanic:** Add a "§ R86 prophylactic walk" subsection to the spec § 2 component inventory, with a table row per registry entry checked. Mark each as "no match" or "match → carve-out included at [§ N.N]". The walk is incomplete if any registry entry is unchecked.
+
+> **Canonical text landed at:** R93 (2026-05-21). Closes R91 CRITICAL-1 forward-protection discovery gap. Registry file: `coordination/FORWARD-PROTECTION-AC-REGISTRY.md`.

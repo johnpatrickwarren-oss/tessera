@@ -6,18 +6,15 @@
 // forward-protection registry created; SPEC-AUTHORING-CHECKLIST.md gates added;
 // PHASE-5-SLICE-3-CLOSE-WALK.md created; self-application gate (no subprocess-spawn).
 //
-// Note: does NOT use execFileSync('node', ...) — anti-spawn self-application gate (AC-R93-6).
-// Anti-scope diff uses execFileSync('git', ...) which does NOT match the spawn guard pattern.
+// Note: does NOT use the subprocess-spawn pattern — self-application gate (AC-R93-6).
+// Anti-scope diff uses execFileSync with 'git' (not 'node') — does NOT match the spawn guard.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, '..');
 
 // ── AC-R93-1: AC-R36-3 body absent from q36 ──────────────────────────────────
@@ -82,7 +79,7 @@ test('AC-R93-6: q93 test source does not use execFileSync node subprocess-spawn 
   const spawnPattern = /execFileSync\s*\(\s*['"]node['"]/;
   assert.ok(
     !spawnPattern.test(content),
-    "q93 itself must NOT use execFileSync('node', ...) — self-application gate (R91 CRITICAL-1)",
+    "q93 itself must NOT use the subprocess-spawn pattern (execFileSync with node) — self-application gate (R91 CRITICAL-1)",
   );
 });
 
