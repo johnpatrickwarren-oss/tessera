@@ -24,7 +24,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { makePerShardResidual, makePerShardCell, makeCellKey } from './_substrate/factories';
-import type { PerShardCell, BaselineCellEntry } from '../engine/types/config';
+import type { PerShardCell, BaselineCellEntry } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 
 // Synthetic cluster parameters
 const N_SHARDS = 1000;

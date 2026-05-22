@@ -23,10 +23,10 @@ import {
   attributeCommonMode,
   type FiredShardEvent,
   type CommonModeAttributionResult,
-} from '../engine/topology/common-mode-attribution.js';
+} from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
 import type {
   TopologySnapshot, TopologyNode, TopologyEdge,
-} from '../engine/types/verdict.js';
+} from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 // ── fs + path imports (Node-builtins only) ──
 import * as fs from 'node:fs';

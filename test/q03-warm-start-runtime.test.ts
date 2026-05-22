@@ -12,7 +12,7 @@ import {
   initialPerShardResidual,
   WARM_START_THRESHOLD,
   STRICT_UPGRADE_THRESHOLD,
-} from '../engine/per-shard/warm-start';
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
 import { makePerShardResidual } from './_substrate/factories';
 
 test('R03 AC-1 — initialPerShardResidual returns cold-start state', () => {

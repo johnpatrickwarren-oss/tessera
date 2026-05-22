@@ -7,13 +7,13 @@ import assert from 'node:assert/strict';
 import {
   updatePerShardResidual,
   type ExtendedSampleObservation,
-} from '../engine/per-shard/runtime';
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
 import {
   initialPerShardResidual,
   WARM_START_THRESHOLD,
   STRICT_UPGRADE_THRESHOLD,
-} from '../engine/per-shard/warm-start';
-import { welfordMean } from '../engine/per-shard/welford';
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
+import { welfordMean } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/welford';
 import { makePerShardResidual } from './_substrate/factories';
 
 // ─── R05 AC-1 — cold-start composition produces correct merged residual ─────

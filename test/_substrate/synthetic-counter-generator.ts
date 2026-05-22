@@ -12,7 +12,7 @@
 //
 // Tessera-original code (NOT vendored from DeploySignal).
 
-import type { CounterSample } from '../../engine/l0/counter-rate-transform';
+import type { CounterSample } from '@johnpatrickwarren-oss/deploysignal-engine/l0/counter-rate-transform';
 
 const DEFAULT_BASE_TS = 1_700_000_000;
 const DEFAULT_STARTING_VALUE = 1000;

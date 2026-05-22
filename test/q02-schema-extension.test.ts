@@ -6,7 +6,7 @@ import type {
   CellConfidence,
   PerShardCell,
   PerShardResidual,
-} from '../engine/types/config';
+} from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 import { makePerShardCell, makeCellKey } from './_substrate/factories';
 
 test('R02 AC-1 — PerShardResidual.n_samples is mandatory and typed number', () => {

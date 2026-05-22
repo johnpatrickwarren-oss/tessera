@@ -16,10 +16,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { HardwareTopologySource } from '../engine/hardware-topology-source';
-import { computeSnapshotHash } from '../engine/topology-overlay';
+import { HardwareTopologySource } from '@johnpatrickwarren-oss/deploysignal-engine/hardware-topology-source';
+import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
 import { makeV9YMultiRackCluster } from './_substrate/v9Y-multi-rack-cluster';
-import type { TopologyNode, TopologyEdge } from '../engine/types/verdict';
+import type { TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 // AC-R23-1: psu + cooling_zone literals accepted by TopologyNode.kind union
 test('AC-R23-1: psu and cooling_zone are accepted as TopologyNode.kind', () => {

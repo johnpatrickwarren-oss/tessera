@@ -6,7 +6,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { BaselineBundle, BaselineCurationDecision } from '../engine/types/config';
+import type { BaselineBundle, BaselineCurationDecision } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 import {
   curateBaselineFleetCorrelated,
   runFleetCorrelatedEProcess,
