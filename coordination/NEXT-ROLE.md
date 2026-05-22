@@ -1,5 +1,5 @@
 CURRENT-ROUND: R94
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: IMPLEMENTER
 STATUS: READY
 TIER: full
 
@@ -1310,4 +1310,53 @@ All files below or at WARN threshold; zero new REINFORCED lines added (zero viol
 **Routing:** STATUS: ROUND-COMPLETE. Round ready for operator review and next-phase sequencing.
 
 **Summary artifact:** `coordination/logs/ROUND-R93-SUMMARY.md`
+
+
+---
+
+## § R94 Architect routing block (READY → IMPLEMENTER) (2026-05-21)
+
+**Spec triad committed at `0d60a38`** (spec(R94 triad): emit spec). Triad sequence per R21 ARCH MINOR-1: spec-triad committed BEFORE this routing block + MEMORIAL append.
+
+**Inputs for Implementer:**
+- `coordination/specs/Q-R94-SPEC.md` (load-bearing spec; 994 lines; § 3 per-file pseudocode + verbatim file contents)
+- `coordination/specs/Q-R94-SPEC-AUDIT.md` (Architect audit-trail; 424 lines; brainstorm + design sketch + pre-prediction + verbatim probe-run capture)
+- `coordination/specs/Q-R94-EMPIRICAL.sh` (binding-command harness; 11 blocks; chmod +x)
+- `coordination/FORWARD-PROTECTION-AC-REGISTRY.md` (R93 deliverable; 7 entries; q94 walked through R86 prophylactic gate in spec § 7.5)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` (Reinforcement rules derived sections; apply at chore-A)
+- `coordination/MEMORIAL.md` (active phase; R88-R93 entries below for context)
+
+**Implementer commit sequence per spec § 1.2 + R23 IMPL MINOR-1 + R83 routing discipline:**
+1. **RED commit** — `test(R94 RED): q94 stubs — 13/13 ACs fail`. Create `test/q94-engine-repo-extraction.test.ts` with all 13 ACs as `assert.fail('RED: q94 not yet GREEN')` per spec § 3.9.1.
+2. **Phase A externally** (scratch dir; no Tessera diff) — `brew install git-filter-repo` + clone Tessera + `git filter-repo --subdirectory-filter engine` + `gh repo create johnpatrickwarren-oss/deploysignal-engine` + push + tag `v0.1.0-pre` + push tag. Verify `gh release view v0.1.0-pre`. Per spec § 3.1.
+3. **Phase B + C** (Tessera worktree) — apply file deltas per spec § 3.2-3.8 + replace q94 stubs with verbatim source per spec § 3.9.2 + `pnpm install`.
+4. **chore-A commit** — `chore(R94 chore-A): engine repo extraction + Tessera migration to git-dep`. ONE commit containing all Phase B + C changes; all 13 q94 ACs PASS GREEN.
+5. **Routing commit** — `chore(R94 Implementer routing): READY → REVIEWER + MEMORIAL appends`. Includes top-of-file STATUS update per R83.
+
+**ALLOWED_SET (copy this verbatim from spec § 5.2 — R82 4-surface byte-mirror discipline):**
+
+```regex
+^(\.gitignore|coordination/MEMORIAL\.md|coordination/NEXT-ROLE\.md|coordination/VENDORING-MANIFEST\.md|coordination/specs/Q-R94-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination/reviews/REVIEWER-REPORT-R94\.md|coordination/logs/ROUND-R94-[A-Z0-9-]+\.md|engine/.+|package\.json|pnpm-lock\.yaml|test/q94-engine-repo-extraction\.test\.ts|tsconfig\.json|tsconfig\.test\.json)$
+```
+
+**Predicted close-state band (per spec § 0.2 + § 10):**
+- tests = 758 (exact)
+- pass ∈ [733, 734] (±1 for AC-R84-14 stochastic flake)
+- fail ∈ [20, 21] (±1 for AC-R84-14)
+- skipped = 4 (exact)
+- `pnpm exec tsc -p tsconfig.test.json` exit 0
+- `bash coordination/specs/Q-R94-EMPIRICAL.sh` exit 0 (11 PASS / 0 FAIL at chore-A)
+- 13 q94 ACs all PASS
+
+**Carry-forward fail set (preserved by R94 — spec § 0.1 verbatim enumeration):** 20 entries; none flip due to R94. AC-R36-3 (the chronic flipper of R87+R91) is DROPPED at R93; replaced by `scripts/check-no-execfilesync-spawn.sh` hook. Q94 uses `execFileSync('git',...)` ONLY (NOT `'node'`) per R86 prophylactic + R93 hook compliance; spec § 7.5 walks this self-application gate explicitly.
+
+**Halt conditions:** spec § 6 enumerates 15 explicit triggers (Phase A external failures 1-5; Phase B halt 6; Phase C halts 7-15). On ANY trigger, HALT + DIAGNOSTIC + ESCALATE per CLAUDE-COMMON.md halt-discipline. Per R91 CRITICAL-1 lesson: DO NOT bypass halt condition 11 ("ANY pre-passing test fails post-R94 other than carry-forward").
+
+**Cross-project rules application:** spec § 11 walks all 7 rules.
+
+**Architect-prescribed install method for `git-filter-repo`:** `brew install git-filter-repo` (homebrew 5.1.11 verified available at P0.10; canonical macOS approach; sudo-free). Fallback per § 6.1 halt-1: `pip3 install --user git-filter-repo`.
+
+**Architect grilling verdict:** PASS — 11 gates walked (spec § 7); 0 unstated assumptions remain; probe-run at spec-emit matched predicted 3 PASS / 8 FAIL state (SPEC-AUDIT § A7.1 verbatim).
+
+**Spec-internal contradiction sweep:** PASS — § 7.11 walked all cross-section references; ALLOWED_REGEX byte-identical across 3 of 4 surfaces at spec-emit (Surface 4 is Implementer-emitted at chore-A).
 
