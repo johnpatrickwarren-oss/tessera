@@ -12,16 +12,12 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync, lstatSync, readdirSync } from 'node:fs';
+import { readFileSync, existsSync, lstatSync } from 'node:fs';
 import { execFileSync, execSync } from 'node:child_process';
 import * as path from 'node:path';
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const ROUND_START_SHA = 'a63da14';
-
-function readJson(p: string): any {
-  return JSON.parse(readFileSync(p, 'utf8'));
-}
 
 // ── AC-R91-1: zero relative '../engine' imports remain in test/ + tools/ ──
 test('AC-R91-1: zero relative ../engine imports remain in test/ + tools/', () => {
@@ -38,44 +34,19 @@ test('AC-R91-2: at least 50 consumer files use @johnpatrickwarren-oss/deploysign
   assert.ok(files.length >= 50, `expected ≥50 consumer files; observed ${files.length}: ${files.slice(0, 5).join(', ')}...`);
 });
 
-// ── AC-R91-3: tsconfig.json contains paths mapping for the package ──
-test('AC-R91-3: tsconfig.json has compilerOptions.paths entries for @johnpatrickwarren-oss/deploysignal-engine', () => {
-  const tsc = readJson(path.join(REPO_ROOT, 'tsconfig.json'));
-  const paths = tsc.compilerOptions?.paths;
-  assert.ok(paths, 'tsconfig.json compilerOptions.paths must exist');
-  assert.deepEqual(
-    paths['@johnpatrickwarren-oss/deploysignal-engine'],
-    ['./engine/types/index'],
-    'tsconfig.json paths["@johnpatrickwarren-oss/deploysignal-engine"] must equal ["./engine/types/index"]',
-  );
-  assert.deepEqual(
-    paths['@johnpatrickwarren-oss/deploysignal-engine/*'],
-    ['./engine/*'],
-    'tsconfig.json paths["@johnpatrickwarren-oss/deploysignal-engine/*"] must equal ["./engine/*"]',
-  );
-  assert.equal(tsc.compilerOptions.baseUrl, '.', 'tsconfig.json compilerOptions.baseUrl must be "."');
-});
+// ── AC-R91-3 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: tsconfig.json paths mapping for
+// @johnpatrickwarren-oss/deploysignal-engine now points to node_modules via
+// git-dep, not local engine/ directory. Category C.
 
-// ── AC-R91-4: root package.json has file: dependency on engine ──
-test('AC-R91-4: root package.json dependencies includes @johnpatrickwarren-oss/deploysignal-engine: file:./engine', () => {
-  const pkg = readJson(path.join(REPO_ROOT, 'package.json'));
-  assert.ok(pkg.dependencies, 'root package.json must have dependencies block');
-  assert.equal(
-    pkg.dependencies['@johnpatrickwarren-oss/deploysignal-engine'],
-    'file:./engine',
-    'dependencies["@johnpatrickwarren-oss/deploysignal-engine"] must equal "file:./engine"',
-  );
-});
+// ── AC-R91-4 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: root package.json dep is now
+// github:johnpatrickwarren-oss/deploysignal-engine#v0.1.0-pre (git-dep),
+// not file:./engine. Category C.
 
-// ── AC-R91-5: root package.json pretest extended ──
-test('AC-R91-5: root package.json scripts.pretest === "tsc && tsc -p tsconfig.test.json"', () => {
-  const pkg = readJson(path.join(REPO_ROOT, 'package.json'));
-  assert.equal(
-    pkg.scripts?.pretest,
-    'tsc && tsc -p tsconfig.test.json',
-    'pretest must run engine/dist build before tsconfig.test.json build',
-  );
-});
+// ── AC-R91-5 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: pretest no longer runs `tsc` to build
+// engine/dist (engine/ removed); pretest changed at R94. Category C.
 
 // ── AC-R91-6: node_modules symlink exists ──
 test('AC-R91-6: node_modules/@johnpatrickwarren-oss/deploysignal-engine exists (symlink or dir post-install)', () => {
@@ -121,19 +92,9 @@ test('AC-R91-8: pnpm exec tsc -p tsconfig.test.json --noEmit exits 0', () => {
   assert.equal(exit, 0, 'tsc -p tsconfig.test.json must exit 0 with package-path imports + paths mapping');
 });
 
-// ── AC-R91-9: engine/dist contains the resolution targets ──
-test('AC-R91-9: engine/dist/ contains the 5 representative resolution targets as .js', () => {
-  const targets = [
-    'engine/dist/types/verdict.js',
-    'engine/dist/types/config.js',
-    'engine/dist/detectors/betting-e-process.js',
-    'engine/dist/topology-overlay.js',
-    'engine/dist/ds-integration/index.js',
-  ];
-  for (const t of targets) {
-    assert.ok(existsSync(path.join(REPO_ROOT, t)), `engine/dist sentinel missing: ${t}`);
-  }
-});
+// ── AC-R91-9 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/dist/ removed from Tessera
+// worktree (engine/ deleted by R94); existsSync fails. Category C.
 
 // ── AC-R91-10: sample test file uses package-path imports ──
 test('AC-R91-10: q91 own test file uses package-name imports (self-binding)', () => {
@@ -178,33 +139,10 @@ test('AC-R91-12: anti-scope diff round-start..HEAD ⊆ ALLOWED_SET', () => {
   assert.deepEqual(violators, [], `anti-scope violators: ${violators.join(', ')}`);
 });
 
-// ── AC-R91-13: engine algorithm + types byte-identical to round-start ──
-test('AC-R91-13: engine/*.ts (algorithm + types + barrel) byte-identical to ROUND_START_SHA', () => {
-  // Sentinel set: representative engine source files that R91 anti-scope freezes.
-  const sentinels = [
-    'engine/types/index.ts',
-    'engine/types/verdict.ts',
-    'engine/types/config.ts',
-    'engine/detectors/betting-e-process.ts',
-    'engine/topology-overlay.ts',
-    'engine/core.ts',
-    'engine/loader.ts',
-    'engine/ds-integration/event-consumer.ts',
-    'engine/l0/counter-rate-transform.ts',
-    'engine/fleet/verdict-consumer.ts',
-  ];
-  for (const s of sentinels) {
-    const atRoundStart = execFileSync('git', ['show', `${ROUND_START_SHA}:${s}`], { cwd: REPO_ROOT, encoding: 'utf8' });
-    const atHead = readFileSync(path.join(REPO_ROOT, s), 'utf8');
-    assert.equal(atHead, atRoundStart, `engine sentinel modified between ${ROUND_START_SHA}..HEAD: ${s}`);
-  }
-});
+// ── AC-R91-13 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/*.ts sentinel files removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category C.
 
-// ── AC-R91-14: engine/package.json + engine/README.md byte-identical (R90 frozen) ──
-test('AC-R91-14: engine/package.json + engine/README.md byte-identical to ROUND_START_SHA (R90 deliverables forward-protected)', () => {
-  for (const p of ['engine/package.json', 'engine/README.md']) {
-    const atRoundStart = execFileSync('git', ['show', `${ROUND_START_SHA}:${p}`], { cwd: REPO_ROOT, encoding: 'utf8' });
-    const atHead = readFileSync(path.join(REPO_ROOT, p), 'utf8');
-    assert.equal(atHead, atRoundStart, `R90 deliverable modified between ${ROUND_START_SHA}..HEAD: ${p}`);
-  }
-});
+// ── AC-R91-14 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/package.json + engine/README.md
+// removed from Tessera worktree; readFileSync fails with ENOENT. Category C.

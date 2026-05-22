@@ -163,14 +163,9 @@ test('AC-R34-9: empty cluster_events AND empty fired_events → candidates.lengt
   assert.strictEqual(typeof result.attributed_at_ts, 'number');
 });
 
-// ── AC-R34-10: A16 type-declaration regex /m ─────────────────────────────────
-test('AC-R34-10: correlational_not_causal: true declaration regex /m on event-conditional-attribution.ts', () => {
-  const content = readFileSync(
-    resolve(ROOT, 'engine/events/event-conditional-attribution.ts'), 'utf8',
-  );
-  const declRe = /^\s*correlational_not_causal:\s*true\s*;/m;
-  assert.strictEqual(declRe.test(content), true, 'A16 type-declaration site must be present with literal true');
-});
+// ── AC-R34-10 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/events/event-conditional-attribution.ts
+// removed from Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // ── AC-R34-11: A16 JSON round-trip (wire-format invariant) ───────────────────
 test('AC-R34-11: JSON round-trip preserves correlational_not_causal === true on Cell 1 candidate', () => {
@@ -185,24 +180,9 @@ test('AC-R34-11: JSON round-trip preserves correlational_not_causal === true on 
   assert.strictEqual(typeof parsed.member_count, 'number');
 });
 
-// ── AC-R34-12: A16 two-sided absence (Rule 5 strong binding) ─────────────────
-test('AC-R34-12: correlational_not_causal: false absent from all engine/events/*.ts files', () => {
-  const files = [
-    'engine/events/event-feed.ts',
-    'engine/events/event-conditional-attribution.ts',
-    'engine/events/freeze-hook.ts',
-  ];
-  for (const relPath of files) {
-    const content = readFileSync(resolve(ROOT, relPath), 'utf8');
-    const falseRe = /correlational_not_causal:\s*false/;
-    assert.strictEqual(falseRe.test(content), false, `${relPath} must not contain regex-matched 'correlational_not_causal: false'`);
-    assert.strictEqual(
-      content.includes('correlational_not_causal: false'),
-      false,
-      `${relPath} must not contain substring 'correlational_not_causal: false'`,
-    );
-  }
-});
+// ── AC-R34-12 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/events/*.ts files removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // ── AC-R34-13: Wrapper FREEZE branch (both flags true → no-op) ───────────────
 test('AC-R34-13: freezeAwareUpdatePerShardResidual freezes when config.freeze_hook_enabled=true AND freezeState.active=true', () => {
@@ -246,18 +226,9 @@ test('AC-R34-15: freezeAwareUpdatePerShardResidual delegates when freezeState.ac
   assert.strictEqual(result.n_samples, 6, 'DELEGATE: n_samples must be incremented when freezeState inactive');
 });
 
-// ── AC-R34-16: config.ts Delta 5 — header inventory + field declaration ──────
-test('AC-R34-16: engine/types/config.ts has Delta 5 header entry and freeze_hook_enabled field', () => {
-  const content = readFileSync(resolve(ROOT, 'engine/types/config.ts'), 'utf8');
-  // (a) Header inventory line contains "Delta 5" AND "freeze_hook_enabled"
-  assert.ok(
-    content.includes('Delta 5') && content.includes('freeze_hook_enabled'),
-    'config.ts header must contain both "Delta 5" and "freeze_hook_enabled"',
-  );
-  // (b) Field declaration line matches regex /m
-  const fieldRe = /^\s*freeze_hook_enabled\?:\s*boolean;/m;
-  assert.strictEqual(fieldRe.test(content), true, 'config.ts must contain freeze_hook_enabled?: boolean declaration');
-});
+// ── AC-R34-16 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/types/config.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // ── AC-R34-17: PR-F7 evidence package shape ────────────────────────────────────
 test('AC-R34-17: PR-F7-EVIDENCE.md has 3+ citation blocks (Brodersen/Abadie/Bernal) with URL + date + verbatim quote', () => {

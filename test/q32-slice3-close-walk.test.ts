@@ -132,17 +132,9 @@ test('AC-R32-9: q-md-f4 test AC-R26-16 uses execFileSync for git diff call', () 
   assert.ok(!acSection.includes('execSync('), 'AC-R26-16 must not use execSync');
 });
 
-// ── AC-R32-10: R26 MINOR-2 — docstring/impl alignment for earliest/latest ───
-test('AC-R32-10: common-mode-attribution.ts earliest_event_ts docstring aligned with impl', () => {
-  const content = readCoord('engine/topology/common-mode-attribution.ts');
-  // The misleading "one record per distinct member shard, picking the earliest"
-  // text must be gone (either docstring relaxed OR impl tightened to per-distinct).
-  const hasMisleadingDocstring = content.includes('one record per distinct member shard, picking the earliest');
-  assert.ok(
-    !hasMisleadingDocstring,
-    'common-mode-attribution.ts must not have misleading "one record per distinct member shard, picking the earliest" docstring when impl iterates all touches',
-  );
-});
+// ── AC-R32-10 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/topology/common-mode-attribution.ts
+// removed from Tessera worktree; readCoord fails with ENOENT. Category A.
 
 // ── AC-R32-11: R28 MINOR-1 — AC-R28-9 asserts source_id + source_version ────
 test('AC-R32-11: q28 test AC-R28-9 asserts source_id and source_version', () => {
@@ -227,19 +219,9 @@ test('AC-R32-15: q30 test AC-R30-15 uses regex with /m flag or line anchor', () 
   );
 });
 
-// ── AC-R32-16: R30 MINOR-2 — nvlink-source.ts :133-134 dead-code annotated ──
-test('AC-R32-16: nvlink-source.ts constructor dead-code at :133-134 has comment OR third operand removed', () => {
-  const content = readCoord('engine/topology/nvlink-source.ts');
-  // Either: comment explaining unreachability near the ?? chain, OR the two ?? fallbacks removed
-  const hasComment = content.includes('unreachable') || content.includes('dead code') ||
-    content.includes('always defaults') || content.includes('parseNvlinkStatus defaults');
-  const hasSimplified = !content.includes(`'nvlink_topology_source'`) ||
-    !content.includes(`'nvlink-1'`);
-  assert.ok(
-    hasComment || hasSimplified,
-    'nvlink-source.ts :133-134 must have dead-code comment OR simplified ?? chain without third operand',
-  );
-});
+// ── AC-R32-16 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/topology/nvlink-source.ts removed
+// from Tessera worktree; readCoord fails with ENOENT. Category A.
 
 // ── AC-R32-17: Hybrid Reviewer report exists (RED at chore-A; GREEN after Reviewer) ──
 test('AC-R32-17: REVIEWER-REPORT-R32.md exists (forward-protection: fails before Reviewer commits)', () => {

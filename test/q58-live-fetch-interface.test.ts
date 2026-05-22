@@ -169,14 +169,9 @@ test('AC-R58-10: snapshotHash delegates to computeSnapshotHash across all 5 adap
   }
 });
 
-// AC-R58-11: A16 — engine/types/verdict.ts retains 'correlational_not_causal: true' literal.
-test("AC-R58-11: A16 — verdict.ts retains 'correlational_not_causal: true' literal", () => {
-  const text = readFileSync('engine/types/verdict.ts', 'utf8');
-  assert.ok(
-    text.includes('correlational_not_causal: true'),
-    "verdict.ts must contain literal 'correlational_not_causal: true' per Addition #26 D4",
-  );
-});
+// ── AC-R58-11 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // AC-R58-14: round-start-to-chore-A diff ⊆ R58 allowed-set (chore-A SHA pinned).
 // Appended by Implementer at chore-B with chore-A SHA substituted into CHORE_A_SHA literal.

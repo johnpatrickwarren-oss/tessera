@@ -179,14 +179,9 @@ test('AC-R56-11: tpu_version discriminator maps v4 + v5p both → tpu_shard node
   assert.strictEqual(snap_v5p.nodes[0].kind, 'tpu_shard');
 });
 
-// AC-R56-12: A16 — engine/types/verdict.ts retains the 'correlational_not_causal: true' literal
-test("AC-R56-12: A16 — verdict.ts retains 'correlational_not_causal: true' literal", () => {
-  const text = readFileSync('engine/types/verdict.ts', 'utf8');
-  assert.ok(
-    text.includes('correlational_not_causal: true'),
-    "verdict.ts must contain literal 'correlational_not_causal: true' per Addition #26 D4",
-  );
-});
+// ── AC-R56-12 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // AC-R56-15: anti-scope file-set diff against round-start baseline 4447586
 // (Appended by Implementer at chore-B with chore-A SHA substituted.)

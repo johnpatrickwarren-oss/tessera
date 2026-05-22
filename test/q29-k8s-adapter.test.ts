@@ -204,12 +204,9 @@ test('AC-R29-9 / TopologySource interface conformance + delegation + determinism
   assert.strictEqual(src.snapshotHash(snap1), src2.snapshotHash(snap3));
 });
 
-// AC-R29-10: A16 preservation — k8s-source.ts contains zero occurrences of correlational_not_causal
-test('AC-R29-10 / A16 preservation — k8s-source.ts contains zero occurrences of correlational_not_causal', () => {
-  const srcText = readFileSync(resolve(__dirname, '../engine/topology/k8s-source.ts'), 'utf8');
-  const occurrences = (srcText.match(/correlational_not_causal/g) ?? []).length;
-  assert.strictEqual(occurrences, 0, 'engine/topology/k8s-source.ts must not contain correlational_not_causal');
-});
+// ── AC-R29-10 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct post-R94 engine extraction: engine/topology/k8s-source.ts removed from
+// Tessera worktree; readFileSync fails with ENOENT. Category A.
 
 // AC-R29-11: typecheck binding-command — tsc exits 2 with only {TS2688, TS5107}
 // Per spec § 7.1(a): if observed exit code or diagnostic set differs from AC literal, HALT.

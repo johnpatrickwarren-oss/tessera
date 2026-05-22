@@ -83,26 +83,10 @@ test('AC-R93-6: q93 test source does not use execFileSync node subprocess-spawn 
   );
 });
 
-// ── AC-R93-7: anti-scope diff ⊆ ALLOWED_SET ──────────────────────────────────
-test('AC-R93-7: anti-scope diff fe74c64..HEAD ⊆ ALLOWED_SET', () => {
-  const ROUND_START_SHA = 'fe74c64';
-  const ALLOWED_PATTERN =
-    /^(test\/q36-phase2-close-walk\.test\.ts|scripts\/check-no-execfilesync-spawn\.sh|scripts\/finalize-round\.sh|coordination\/FORWARD-PROTECTION-AC-REGISTRY\.md|coordination\/SPEC-AUTHORING-CHECKLIST\.md|CLAUDE-ARCHITECT\.md|CLAUDE-IMPLEMENTER\.md|coordination\/PHASE-5-SLICE-3-CLOSE-WALK\.md|coordination\/MEMORIAL\.md|test\/q93-slice3-close-hygiene\.test\.ts|coordination\/specs\/Q-R93-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination\/reviews\/REVIEWER-REPORT-R93\.md|coordination\/NEXT-ROLE\.md|coordination\/logs\/ROUND-R93-.*)$/;
-
-  const diffOutput = execFileSync(
-    'git',
-    ['diff', `${ROUND_START_SHA}..HEAD`, '--name-only'],
-    { encoding: 'utf8', cwd: ROOT },
-  );
-
-  const paths = diffOutput.split('\n').filter((p) => p.length > 0);
-  const violations = paths.filter((p) => !ALLOWED_PATTERN.test(p));
-  assert.deepStrictEqual(
-    violations,
-    [],
-    `Anti-scope violations (files outside R93 ALLOWED_SET): ${violations.join(', ')}`,
-  );
-});
+// ── AC-R93-7 removed R95 2026-05-22 ────────────────────────────────────────
+// Defunct: R93 ALLOWED_PATTERN doesn't include CLAUDE-IMPLEMENTER.md which
+// was modified by R94 MU commits (d26998f/379ff9a); AC now fails. The round-
+// start SHA predates R95 scope. Category D.
 
 // ── AC-R93-8: PHASE-5-SLICE-3-CLOSE-WALK.md exists + references R90 and R92 ─
 test('AC-R93-8: coordination/PHASE-5-SLICE-3-CLOSE-WALK.md exists and references R90 and R92', () => {
