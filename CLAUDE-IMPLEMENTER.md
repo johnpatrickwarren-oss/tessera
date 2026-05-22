@@ -144,7 +144,7 @@ with a clear commit message.
 #   DIAGNOSTIC is required at point-of-encounter — not deferred to the coordination step.
 #   Detected R01: 6 anti-scope files vendored; no DIAGNOSTIC files produced.
 
-# REINFORCED — HALT-DISCIPLINE (composite; 11 sub-variants observed at Tessera)
+# REINFORCED — HALT-DISCIPLINE (composite; 12 sub-variants observed at Tessera)
 #
 #   Spec-internal contradiction (R01): Two spec sections that prescribe mutually
 #     incompatible implementation choices are HALT condition (c). All sub-types
@@ -234,6 +234,23 @@ with a clear commit message.
 #     requiring HALT + DIAGNOSTIC. Do NOT patch inline and disclose only in NEXT-ROLE.md spec-deviance.
 #     3rd tessera instance of tactical-autonomy-overreach sub-pattern; cross-project rule derived.
 #     Detected tessera R73 MAJOR-2 (Reviewer-1).
+#
+#   Pre-existing-AC-carve-out verification at chore-A (R91 MAJOR-1): When the spec prescribes a new
+#     test file with AC assertions that use subprocess-spawn patterns (e.g., `execFileSync('node', ...)`)
+#     or other patterns guarded by pre-existing forward-protection ACs, the Implementer must verify
+#     pre-chore-A that the new test file's pattern will trigger a pre-existing AC. Check: (a) identify
+#     all pre-existing forward-protection ACs in the codebase that guard test patterns (e.g.,
+#     AC-R36-3 guards `execFileSync('node', ...)` in all test files); (b) scan the spec-prescribed
+#     new test file for any patterns matching those forward-protection AC triggers; (c) if matches
+#     exist, verify BEFORE claiming zero halt conditions that the AC carve-out list includes the new
+#     test file OR pre-emptively ESCALATE with a halt-condition-4 DIAGNOSTIC. At R91, spec prescribed
+#     q91 test with `execFileSync('node'...)` pattern that triggered AC-R36-3 (pre-existing
+#     forward-protection); Implementer attested zero halt conditions without verifying pre-existing
+#     AC carve-out status. AC-R36-3 flipped FAIL post-implementation, triggering halt condition 4
+#     which the Implementer had missed. The R86 spec-emit grilling walk must include completeness
+#     check: "does my new test file match patterns guarded by pre-existing forward-protection ACs?"
+#     Detected tessera R91 MAJOR-1 (Implementer); resolved by operator Option A (add q91 to q36
+#     carve-out list pre-implementation).
 #
 #   Bash-construct TD requires empirical semantic equivalence check (R74 CRITICAL-1 + MINOR-4):
 #     When a TACTICAL DEVIATION rewrites a bash construct — especially one involving boolean flag
