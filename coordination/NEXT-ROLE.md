@@ -1,6 +1,6 @@
 CURRENT-ROUND: R95
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: ROUND-COMPLETE
 TIER: audit
 
 ---
@@ -195,6 +195,42 @@ templates/SPEC-AUTHORING-CHECKLIST.md contains gate text; VENDORING-MANIFEST.md 
 NEXT-ROLE.md preserves R94 MAJOR-4 flag; tsc + EMPIRICAL.sh exit 0.
 
 R94 MAJOR-4 operator-decision flag PRESERVED in this file (line 15 of NEXT-ROLE.md).
+
+---
+
+## § R95 REVIEWER routing block (2026-05-22)
+
+NEXT-ROLE: MEMORIAL-UPDATER
+STATUS: MERGE-READY
+TIER: audit
+REVIEWER-SCOPE: structural-only (R74)
+
+### Inputs
+- `coordination/reviews/REVIEWER-REPORT-R95.md` (this report)
+- `coordination/specs/Q-R95-SPEC.md`
+- `coordination/specs/Q-R95-SPEC-AUDIT.md`
+- `coordination/specs/Q-R95-EMPIRICAL.sh`
+
+### Findings summary
+**0 CRITICAL / 1 MAJOR / 1 MINOR / 3 OBS**
+
+- **MAJOR-1** (IMPLEMENTER): TD-2 attestation factually wrong — claims AC-R94-12 was in original 70 failing ACs at round-start; empirically AC-R94-12 was PASSING at round-start `e535a53` (verified by checkout + test re-run). The PASS→FAIL flip post-R95 is a new regression caused by R95's q90 deletions, not a "spec §9 enumeration gap." encode-actual-results-verbatim violation (CROSS-PROJECT-MEMORIAL.md REINFORCED 2026-05-18).
+- **MINOR-1** (ARCHITECT): Spec § 9 forward-protection-AC enumeration incomplete — did not predict AC-R94-12 PASS→FAIL flip caused by removing all `@johnpatrickwarren-oss/deploysignal-engine` string occurrences from q90. Band [24, 30] absorbed the flip.
+- **OBS-1** (ARCHITECT): Spec § 4 attributes `Q1 AC-7` to `test/q01-vendoring-coverage.test.ts`; it actually lives in `test/q01-no-at-pin-deltas.test.ts`. No implementation harm.
+- **OBS-2** (ARCHITECT): Architect chose DELETE for AC-R94-9/R94-10 over substantive-fix per directive license; band verification preserved via EMPIRICAL.sh Block 11.
+- **OBS-3**: Q1 AC-5 in q01-vendoring-coverage.test.ts is architecturally fragile post-R94 (KEPT correctly; future engine-vendoring policy will reconsider).
+
+### Routing rationale
+Per CLAUDE-REVIEWER.md routing rule: "CRITICAL exists → STATUS: ESCALATE; MAJOR or below → STATUS: MERGE-READY." No CRITICAL findings. Per REINFORCED 2026-05-19, MAJOR findings at attestation level do not require ESCALATE override — they retain default routing severity with operator notification via this report and MEMORIAL append.
+
+### Operator-decision flags preserved
+- **R94 MAJOR-4** (line 15): v0.1.0-pre tag annotation factually-incorrect "byte-identical to Tessera HEAD" claim (tag immutable; live-with vs delete+re-tag — operator's call)
+- **R95 MAJOR-1** (THIS round; new): Implementer TD-2 attestation accuracy violation — operator may want to address either (a) update AC-R94-12 sampleConsumers list in a subsequent round, or (b) accept the regression-as-band-absorbed state per spec § 9 tolerance
+
+### Memorial Updater scope
+- Append MEMORIAL.md Reviewer section with 1 MAJOR VIOLATION (IMPLEMENTER) + 1 MINOR VIOLATION (ARCHITECT) + CONFIRMATION entries
+- Apply standard CLAUDE-*.md REINFORCED append rules if any cross-project promotion threshold crosses (R95 detected 1st Tessera instance of "encode-actual-results-verbatim sub-pattern: regression-reframed-as-pre-existing-gap"; below 3-instance promotion threshold)
+- Update CROSS-PROJECT-MEMORIAL.md if applicable
 
 ---
 
