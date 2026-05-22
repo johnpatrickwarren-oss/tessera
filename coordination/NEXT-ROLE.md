@@ -1,7 +1,145 @@
-CURRENT-ROUND: R90
-NEXT-ROLE: OPERATOR
-STATUS: ROUND-COMPLETE
+CURRENT-ROUND: R91
+NEXT-ROLE: ARCHITECT
+STATUS: READY
 TIER: full
+
+---
+
+## § R90 close attestation (2026-05-21)
+
+R90 closed clean — cleanest substantive round in months. 0 CRITICAL / 0 MAJOR / 4 MINOR / 3 OBS. All 14 ACs PASS. Engine package boundary declared at `engine/` (Option A — sub-package; `pnpm-workspace.yaml` NOT modified per P0.8 gitignore conflict caught at Architect grilling). Build artifact verified: 252-file `engine/dist/` + 255-entry tarball via `pnpm pack`. 1-line `tsconfig.json` outDir change (`dist/engine` → `engine/dist`). Test baseline: 724 / 704 / 16 / 4 (band [16,17] ✓). Zero tactical deviations; zero halt conditions; zero anti-scope violations. R89 prophylactic discipline accretion + sustaining mechanism (`scripts/check-claude-md-thresholds.sh` at MU close) visibly load-bearing. CLAUDE-ARCHITECT.md REINFORCED count: 26 (post-R90 MU). Final commit: `95dbcdf`.
+
+---
+
+## § R91 Round-scope directive (Architect — Tessera-internal consumption migration; Phase 5 SLICE 3 round 2 of 4-round chain) (2026-05-21)
+
+R91 is **round 2 of the Phase 5 SLICE 3 4-round chain** (R90 engine extraction DONE → **R91 Tessera-internal consumption** → R92 DS-side adoption → R93 SLICE 3 close). R91 dogfoods the R90-extracted engine package by switching Tessera's OWN internal consumers (`test/*`, `tools/*`, ~50 files with `from '../engine/...'` relative imports) to `@johnpatrickwarren-oss/deploysignal-engine/...` package paths. **The purpose is to shake out package-boundary bugs in Tessera's cheap-to-iterate environment before R92 ships DS-side adoption.**
+
+**Motivation:** R90 produced a buildable package (`engine/package.json` + 34-entry subpath exports map + `engine/dist/` build output + `pnpm pack` tarball), but nothing in Tessera consumes it yet. The package is unvalidated as a consumable. R91 proves: (a) subpath exports actually resolve at runtime under `node --test`; (b) types-barrel imports work via package paths (not just relative); (c) no hidden relative-path leakage in `tools/*` / `test/*`; (d) the resolution mechanism scales to ~50 consumers without breaking the test suite.
+
+**Round-start SHA:** SHA of this directive commit; verify at Architect session entry.
+
+**Empirical premises Architect MUST verify at session entry** (R86/R87/R88/R89 prophylactic discipline):
+- `engine/package.json` exists; `exports` field has 34 entries (per R90 close)
+- `engine/dist/` populated by `pnpm exec tsc` (root tsconfig.json) — current build state
+- `tsconfig.test.json` compiles tests + tools + engine in-place to co-located `.js` (NOT to engine/dist/)
+- `.gitignore` line 22 contains `pnpm-workspace.yaml` (R82 build-approval rationale; gitignored)
+- `pnpm-workspace.yaml` current content is `allowBuilds: esbuild: true` (per Read at HEAD)
+- Current import surface: `grep -rl "from ['\\\"]\\.\\..*engine" test/ tools/` returns ~50 files
+- Current consumer types: relative `.js` extension imports (Node ESM convention) — `from '../engine/detectors/betting-e-process.js'`
+- Package exports point to `./dist/...` paths (compile-mode-1; root tsconfig.json), NOT co-located `.js` paths (compile-mode-2; tsconfig.test.json)
+
+### Primary deliverables (R91 — Tessera-internal consumption only)
+
+1. **Resolution mechanism declared.** Architect picks via cite-then-walk + brainstorm (spec § A1 documents 3+ alternatives with trade-offs). Candidate approaches:
+   - **Approach A — TypeScript paths mapping + file: dependency.** Add `paths` mapping in root `tsconfig.json` + `tsconfig.test.json` to resolve `@johnpatrickwarren-oss/deploysignal-engine/*` → `engine/*` (source paths). Add `"@johnpatrickwarren-oss/deploysignal-engine": "file:./engine"` to root `package.json` `dependencies`. pnpm creates a symlink in `node_modules/`; Node resolves via that symlink + engine `exports`; tsc resolves via paths mapping. Pro: workspace-config-free; gitignore-compatible. Con: two resolution paths (tsc via paths; node via package exports); must ensure they agree.
+   - **Approach B — Force-commit `pnpm-workspace.yaml` with engine workspace entry.** Requires `git add -f pnpm-workspace.yaml` + revert `.gitignore` line 22 + preserve esbuild build-approval entry. Operator-level decision: was the R82 gitignore intentional or vestigial? Pro: standard pnpm workspace flow; single resolution path. Con: overrides R82 intent; needs operator concurrence in spec.
+   - **Approach C — Subpath imports via root package.json `imports` field.** Add `"#deploysignal-engine/*": "./engine/dist/*"` to root `package.json`. Rewrite consumer imports to `#deploysignal-engine/...`. Pro: Node-native; no workspace; no paths mapping. Con: NOT the package name we want to validate; DS-side adoption (R92) wouldn't follow the same pattern; defeats the dogfooding purpose.
+   - **Approach D — Hybrid: paths mapping for tsc + file: dep for Node + pretest hook ensures `engine/dist/` is built.** Variant of A that explicitly handles the dual-compile-mode tension by making `pretest` run BOTH `tsc -p tsconfig.test.json` (existing) AND `tsc` (root; builds engine/dist).
+
+   Architect picks ONE; documents trade-offs; commits to choice at spec-emit. **Approach A or D recommended** as least invasive; B requires operator concurrence on R82 gitignore.
+
+2. **Import migration across ~50 consumer files.** All `from '../engine/...'` imports in `test/*` + `tools/*` rewritten to `from '@johnpatrickwarren-oss/deploysignal-engine/...'`. Architect prescribes the exact path mapping (which subpath export each relative-path-segment becomes) via Block N of `Q-R91-EMPIRICAL.sh` (e.g., `grep -c "from '\.\./engine/" test/ tools/` should return 0 post-R91). Migration is mechanical — Architect provides the regex + path table; Implementer applies and verifies.
+
+3. **Backwards-compat preserved.** Tessera's full test suite continues to pass:
+   - `pnpm test` → tests=724+R91-additions, pass≥704, fail ∈ [16,17], skip=4 (band carry-forward from R90)
+   - `pnpm exec tsc -p tsconfig.test.json` → exit 0
+   - `pnpm curate-baseline` (R88 wrapper) still executable
+   - `Q-R89-EMPIRICAL.sh` + `Q-R90-EMPIRICAL.sh` continue to pass (prior-round attestation harnesses are forward-protected)
+
+4. **Resolution-correctness verification.** Architect prescribes at least 3 binding-command attestations proving the resolution mechanism actually works:
+   - `node -e "require.resolve('@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process')"` exits 0 and prints a path under `engine/dist/`
+   - `node -e "require.resolve('@johnpatrickwarren-oss/deploysignal-engine/types/verdict')"` exits 0
+   - Sample test file (e.g., a known-trivial AC) loads via Node and passes when imports are package paths
+
+5. **`test/q91-engine-package-consumption.test.ts`** (NEW; full-tier) — at least 8 ACs:
+   - Zero `from '../engine/' grep matches in test/* + tools/* post-R91
+   - Sample subpath-export resolution succeeds (3-5 representative export paths)
+   - Backwards-compat smoke: full test count + pass count in predicted band
+   - Resolution mechanism produces stable paths under HEAD (deterministic, not env-dependent)
+   - VENDORING-MANIFEST.md header note updated with R91 consumption-migration event
+
+6. **VENDORING-MANIFEST.md updated** with R91 consumption-migration header note (no row rewrites).
+
+7. **`Q-R91-EMPIRICAL.sh`** at chore-A pre-commit. **MUST use `--test-reporter=tap` BEFORE test files** per R77 + R89 MAJOR-1 sub-pattern lesson. Architect MUST run EMPIRICAL.sh at round-start HEAD pre-routing and verify expected-pre-impl-state outcomes per R89 sub-pattern.
+
+### Tier rationale
+
+**full-tier** — Architect (resolution-mechanism choice + per-file migration prescription + exports-table walk) + Implementer + Reviewer (cold-eye on backwards-compat regression + resolution correctness) + MU. ~50-file migration + new resolution infrastructure warrants full discipline.
+
+### Anti-scope (R91 hard limits)
+
+- **NO modification of engine algorithm files** (`engine/detectors/*`, `engine/fleet/*`, `engine/l0/*`, `engine/o0/*`, `engine/per-shard/*`, `engine/topology/*` content) — engine remains frozen this round
+- **NO modification of `engine/package.json`** (exports map preserved from R90; if migration reveals a missing export, HALT + DIAGNOSTIC — that's an R90 gap)
+- **NO modification of `engine/types/*.ts` content** (barrel + re-exports preserved)
+- **NO modification of `engine/README.md`** (R90 deliverable; frozen)
+- **NO DS-side work** (any `~/concord/deploysignal/` changes are R92 scope)
+- **NO modification of R73-R90 substantive deliverables** (frozen)
+- **NO new external dependencies** beyond the file: dep on engine itself (which is internal)
+- **NO npm publish; NO git tag creation** (R91 stays Tessera-internal)
+- **NO modification of pre-R91 carry-forward AC fail set** (AC-R84-14 stochastic flake band preserved; AC-R89-8 acknowledged-failing per R89 MAJOR-2)
+- **NO modification of `CLAUDE-*.md` files** (R89 sustaining mechanism enforces)
+- **NO modification of `coordination/MEMORIAL-PHASE-*.md` shards** (R89 archival stands)
+- **NO modification of `tools/curate-baseline.ts`** content (R88 frozen) — only its imports
+- **NO bulk find/replace without per-file verification** — Implementer applies migration with grep-after-each-batch attestation
+
+ALLOWED modifications:
+- `tsconfig.json` (paths mapping per chosen Approach)
+- `tsconfig.test.json` (paths mapping inheritance verified)
+- `package.json` root (file: dependency + script adjustments if needed)
+- `pnpm-workspace.yaml` IF AND ONLY IF Architect picks Approach B (force-committed via `git add -f`); document operator concurrence in spec § A1
+- `.gitignore` IF AND ONLY IF Approach B chosen (remove line 22 `pnpm-workspace.yaml`)
+- `test/*.test.ts` (import migration; ~30-40 files)
+- `tools/*.ts` (import migration; ~10-15 files)
+- `test/q91-engine-package-consumption.test.ts` (NEW)
+- `coordination/VENDORING-MANIFEST.md` (header note only)
+- `coordination/specs/Q-R91-SPEC.md` + `Q-R91-SPEC-AUDIT.md` + `Q-R91-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R91.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends)
+- `coordination/NEXT-ROLE.md` (this file)
+- `coordination/logs/ROUND-R91-*.md`
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE. **Architect MUST use `--test-reporter=tap` BEFORE test files** per R77 + R89 MAJOR-1 sub-pattern.
+- **R86 prophylactic + R87 sub-pattern + R88 sub-pattern-2 + R89 sub-pattern (EMPIRICAL.sh probe-run at spec-emit)** load-bearing.
+- **R83 routing discipline:** top-of-file `STATUS: READY` updates MUST land in the same commit as the routing block.
+- **R89 MAJOR-2 lesson applied:** NO "first N lines byte-identical" ACs against working-tree files. If byte-identity assertion is required, use `git show <SHA>:...` anchored to a specific chore-A SHA.
+- **R85 stochastic-flake band [15,16]→[16,17] preserved.** AC-R84-14 unchanged.
+- **R88 sub-pattern (gitignore-global-rule check):** if any spec premise depends on a file being / not being committed, Architect MUST run `git ls-files <path>` AND `grep -F <path> .gitignore` BOTH.
+- **R90 P0.8 lesson (gitignored config files):** if Approach B chosen, Architect MUST surface the gitignore-override decision in spec § A1 with operator concurrence rationale.
+- **Migration-discipline forward-protection:** every consumer file edited MUST have its import-path delta independently verified by grep against the package exports map; spec § 4 (AC) MUST enumerate the verification.
+
+### Halt conditions (R91 Implementer)
+
+1. Q-R91-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Full test suite drift beyond R90 close band (tests < 724; pass < 704; fail ∉ [16,17]; skip ≠ 4)
+4. ANY existing test file that passed pre-R91 fails post-R91 (other than AC-R89-8's documented R83-routing-flip)
+5. `node -e "require.resolve('@johnpatrickwarren-oss/deploysignal-engine/...')"` non-zero exit for any prescribed export path
+6. Engine exports map gap discovered (consumer needs a subpath not in `engine/package.json` exports): HALT + DIAGNOSTIC (R90 gap; do NOT silently add to engine/package.json)
+7. New external dependency required: HALT + DIAGNOSTIC + ESCALATE
+8. R88-or-prior substantive deliverable modified (anti-scope violation): HALT + DIAGNOSTIC + ESCALATE
+9. Engine algorithm file content modified (anti-scope): HALT + DIAGNOSTIC + ESCALATE
+10. Architect-claim-without-empirical-walk pattern detected at spec-emit (10th Tessera instance would be the canonical sharpening trigger): HALT at MU review
+11. Migration leaves orphan relative imports (any `from '../engine/'` match in test/* or tools/* post-chore-A): HALT
+12. Approach B chosen without operator concurrence documented in spec § A1: HALT
+
+### Predicted post-R91 state
+
+- `grep -rl "from ['\\\"]\\.\\..*engine" test/ tools/` returns 0 files (all migrated)
+- `grep -rl "@johnpatrickwarren-oss/deploysignal-engine" test/ tools/` returns ~50 files (migration target)
+- `pnpm test` exit non-zero (fails > 0 are pre-existing); test counts: `tests=730±, pass=710±, fail=16-17, skip=4`
+- `node -e "require.resolve('@johnpatrickwarren-oss/deploysignal-engine')"` exits 0; prints path under `engine/dist/`
+- `git diff <R91-start-SHA> HEAD --name-only`: 50-60 paths (mostly mechanical import migration)
+- Resolution mechanism per chosen Approach surfaces in `tsconfig.json` + root `package.json` (and `pnpm-workspace.yaml` if Approach B)
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R91 --tier full
+```
 
 ---
 
