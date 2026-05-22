@@ -916,3 +916,20 @@ All unresolved decisions → open questions in the spec.
 #   class as MINOR-1 (empirical-baseline integer not cross-validated). Detected
 #   R90 MINOR-4; minor instance of R88 false-compliance-attestation extended
 #   into grep-reproducibility variance.
+
+# REINFORCED 2026-05-21 — R86 prophylactic walk must check new test files
+#   against pre-existing forward-protection ACs (Tessera 10th instance of
+#   architect-claim-without-empirical-walk pattern; see CROSS-PROJECT-MEMORIAL.md).
+#   When spec § 8.5 (R86 self-application) prescribes a new test file
+#   introducing a subprocess-spawn pattern, pattern-matching, or observable
+#   side-effect, the walk must: (1) enumerate all pre-existing forward-
+#   protection ACs in the project (e.g., AC-R36-3, AC-R89-7); (2) check if
+#   the new test file introduces the guarded pattern; (3) either refactor to
+#   avoid the pattern OR document carve-out amendment in spec's component
+#   inventory § 2.x. Detected R91: spec prescribed q91 test with execFileSync
+#   ('node',...) pattern, R86 walk checked self-consistency of q91 in isolation,
+#   did NOT check against AC-R36-3 (q36 test file's "no other test files
+#   carry this pattern" guard). Resulted in halt-condition-4 trigger (pre-
+#   existing AC-R36-3 flipped PASS→FAIL). Procedure: R86 gate gate must add
+#   a sub-step "Does this test introduce a guarded pattern (check forward-
+#   protection ACs)?" before spec-emit.
