@@ -28,7 +28,7 @@ ROUND_START_SHA='9e24aa4'  # chore(R94 directive): engine repo extraction + Tess
 #   (2) test/q94-engine-repo-extraction.test.ts AC-R94-11 inline constant
 #   (3) this script Block 11 (below)
 #   (4) NEXT-ROLE.md Implementer routing block (copy-paste from § 5.2)
-ALLOWED_REGEX='^(\.gitignore|coordination/MEMORIAL\.md|coordination/NEXT-ROLE\.md|coordination/VENDORING-MANIFEST\.md|coordination/specs/Q-R94-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination/reviews/REVIEWER-REPORT-R94\.md|coordination/logs/ROUND-R94-[A-Z0-9-]+\.md|engine/.+|package\.json|pnpm-lock\.yaml|test/q94-engine-repo-extraction\.test\.ts|tsconfig\.json|tsconfig\.test\.json)$'
+ALLOWED_REGEX='^(\.gitignore|coordination/MEMORIAL\.md|coordination/NEXT-ROLE\.md|coordination/VENDORING-MANIFEST\.md|coordination/specs/Q-R94-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination/reviews/REVIEWER-REPORT-R94\.md|coordination/logs/ROUND-R94-[A-Z0-9-]+\.md|coordination/diagnostics/DIAGNOSTIC-R94-[a-z0-9-]+\.md|engine/.+|package\.json|pnpm-lock\.yaml|test/q05-per-shard-runtime\.test\.ts|test/q94-engine-repo-extraction\.test\.ts|tsconfig\.json|tsconfig\.test\.json)$'
 
 PASS_COUNT=0
 FAIL_COUNT=0

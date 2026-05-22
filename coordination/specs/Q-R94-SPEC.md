@@ -513,7 +513,7 @@ const requireFromHere = createRequire(__filename);
 const REPO_ROOT = pathResolve(__dirname, '..');
 const ROUND_START_SHA = '9e24aa4'; // R94 directive commit
 
-const ALLOWED_REGEX = /^(\.gitignore|coordination\/MEMORIAL\.md|coordination\/NEXT-ROLE\.md|coordination\/VENDORING-MANIFEST\.md|coordination\/specs\/Q-R94-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination\/reviews\/REVIEWER-REPORT-R94\.md|coordination\/logs\/ROUND-R94-[A-Z0-9-]+\.md|engine\/.+|package\.json|pnpm-lock\.yaml|test\/q94-engine-repo-extraction\.test\.ts|tsconfig\.json|tsconfig\.test\.json)$/;
+const ALLOWED_REGEX = /^(\.gitignore|coordination\/MEMORIAL\.md|coordination\/NEXT-ROLE\.md|coordination\/VENDORING-MANIFEST\.md|coordination\/specs\/Q-R94-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination\/reviews\/REVIEWER-REPORT-R94\.md|coordination\/logs\/ROUND-R94-[A-Z0-9-]+\.md|coordination\/diagnostics\/DIAGNOSTIC-R94-[a-z0-9-]+\.md|engine\/.+|package\.json|pnpm-lock\.yaml|test\/q05-per-shard-runtime\.test\.ts|test\/q94-engine-repo-extraction\.test\.ts|tsconfig\.json|tsconfig\.test\.json)$/;
 
 test('AC-R94-1: Tessera root has no engine/ directory post-R94', () => {
   const enginePath = pathJoin(REPO_ROOT, 'engine');
@@ -742,8 +742,10 @@ The same regex appears in 4 places (byte-identical):
 4. NEXT-ROLE.md routing block attestation (Implementer-side; copy-paste from here)
 
 ```regex
-^(\.gitignore|coordination\/MEMORIAL\.md|coordination\/NEXT-ROLE\.md|coordination\/VENDORING-MANIFEST\.md|coordination\/specs\/Q-R94-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination\/reviews\/REVIEWER-REPORT-R94\.md|coordination\/logs\/ROUND-R94-[A-Z0-9-]+\.md|engine\/.+|package\.json|pnpm-lock\.yaml|test\/q94-engine-repo-extraction\.test\.ts|tsconfig\.json|tsconfig\.test\.json)$
+^(\.gitignore|coordination\/MEMORIAL\.md|coordination\/NEXT-ROLE\.md|coordination\/VENDORING-MANIFEST\.md|coordination\/specs\/Q-R94-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination\/reviews\/REVIEWER-REPORT-R94\.md|coordination\/logs\/ROUND-R94-[A-Z0-9-]+\.md|coordination\/diagnostics\/DIAGNOSTIC-R94-[a-z0-9-]+\.md|engine\/.+|package\.json|pnpm-lock\.yaml|test\/q05-per-shard-runtime\.test\.ts|test\/q94-engine-repo-extraction\.test\.ts|tsconfig\.json|tsconfig\.test\.json)$
 ```
+
+**Operator-resolution amendment (R94 ESCALATE 2026-05-21):** added `coordination/diagnostics/DIAGNOSTIC-R94-[a-z0-9-]+\.md` (DIAGNOSTIC file from Implementer halt) + `test/q05-per-shard-runtime\.test\.ts` (operator-approved Option A fix for dynamic-import-not-migrated finding; q05:251 changed from `await import('../engine/per-shard/warm-start')` → package-path import). 16 path patterns total post-amendment.
 
 ### 5.3 ALLOWED_SET narrative table (per R82 propagation; per-row reason)
 
@@ -758,14 +760,16 @@ The same regex appears in 4 places (byte-identical):
 | `coordination/specs/Q-R94-EMPIRICAL.sh` | Architect deliverable |
 | `coordination/reviews/REVIEWER-REPORT-R94.md` | Reviewer deliverable |
 | `coordination/logs/ROUND-R94-[A-Z0-9-]+\.md` | Pipeline-emitted routing log files |
+| `coordination/diagnostics/DIAGNOSTIC-R94-[a-z0-9-]+\.md` | ESCALATE-time DIAGNOSTIC files (added post-Implementer halt 2026-05-21 per R94 ESCALATE Option A operator resolution) |
 | `engine/.+` | § 3.7 prescribes `git rm -r engine/` (all engine/ files become deletions in the diff) |
 | `package.json` | § 3.2 prescribes 3 deltas (dep URL, pretest, pack:engine removal) |
 | `pnpm-lock.yaml` | § 3.8 prescribes `pnpm install` which regenerates the lockfile |
+| `test/q05-per-shard-runtime.test.ts` | R91 migration grep missed dynamic `await import('../engine/...')` at q05:251 (Architect P0.8 static-grep gap surfaced as ESCALATE halt-condition-8 at chore-A; operator-resolved Option A: change to package import; added to ALLOWED_SET post-resolution 2026-05-21) |
 | `test/q94-engine-repo-extraction.test.ts` | § 3.9 prescribes (NEW) |
 | `tsconfig.json` | § 3.3 prescribes structural delta |
 | `tsconfig.test.json` | § 3.4 prescribes include trim |
 
-**14 path patterns total.** Byte-mirrored across 4 surfaces per R82 spec-amendment-ALL-gate-artifacts-propagation discipline.
+**16 path patterns total post-ESCALATE-resolution.** Byte-mirrored across 4 surfaces per R82 spec-amendment-ALL-gate-artifacts-propagation discipline.
 
 ### 5.4 Carry-forward fail ACs (pre-R94; preserved by R94)
 

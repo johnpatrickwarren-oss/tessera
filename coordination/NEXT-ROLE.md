@@ -1,7 +1,39 @@
 CURRENT-ROUND: R94
-NEXT-ROLE: OPERATOR
-STATUS: ESCALATE
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
 TIER: full
+
+---
+
+## § Operator resolution of R94 ESCALATE — Option A (2026-05-21)
+
+**Decision:** Option A approved (matches R87 + R91 ESCALATE precedent). Fix q05 dynamic import to use package path; expand ALLOWED_SET to include q05 + DIAGNOSTIC file path; preserve all R94 Phase A + Phase B work.
+
+**Root cause:** Architect P0.8 grep (`from ['\"]\\.\\..*engine`) matched static ES module imports only; missed q05:251's dynamic `await import('../engine/per-shard/warm-start')`. Post Phase B `git rm -r engine/`, dynamic import resolves to stale gitignored `.js` on disk → TS7016. Sub-pattern variant of architect-claim-without-empirical-walk: static-grep-misses-dynamic-import (NEW sub-pattern; MU should record as variant of existing rule, not as new rule).
+
+**Fix applied (Coordinator-direct edit to working tree):**
+
+1. `test/q05-per-shard-runtime.test.ts:251`: changed `await import('../engine/per-shard/warm-start')` → `await import('@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start')`
+2. `coordination/specs/Q-R94-EMPIRICAL.sh:31`: ALLOWED_REGEX updated (added `coordination/diagnostics/DIAGNOSTIC-R94-[a-z0-9-]+\.md` + `test/q05-per-shard-runtime\.test\.ts`)
+3. `coordination/specs/Q-R94-SPEC.md:516` (q94 inline source): same ALLOWED_REGEX update
+4. `coordination/specs/Q-R94-SPEC.md:745` (§ 5.2 narrative regex): same ALLOWED_REGEX update
+5. `coordination/specs/Q-R94-SPEC.md:761` (§ 5.3 narrative table): added 2 new rows + count `14 → 16 path patterns`
+
+q94 GREEN test file (not yet authored; RED stubs at commit `c074d97`) will use the spec § 3.9 ALLOWED_REGEX which is now byte-mirrored to the updated EMPIRICAL.sh — 3 of 4 R82 propagation surfaces updated; 4th surface (q94 GREEN test) lands when Implementer writes it.
+
+**Verification (pre-routing):**
+- `pnpm exec tsc -p tsconfig.test.json` → exit 0 ✓
+- q05 dynamic import now resolves via `node_modules/@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start.d.ts`
+
+**Implementer scope on resume:**
+1. Re-run binding commands; verify tsc exit 0
+2. Write GREEN q94 test file (13 ACs from spec § 3.9; use updated ALLOWED_REGEX)
+3. Continue to chore-A (full Q-R94-EMPIRICAL.sh pass; routing to REVIEWER)
+4. Memorialize Option A operator-resolution in MEMORIAL.md appends
+
+**MU at R94 close:** memorialize the static-grep-misses-dynamic-import sub-pattern variant of architect-claim-without-empirical-walk (11th Tessera instance overall; novel sub-variant — Architect's static-pattern grep didn't cover ES dynamic import syntax). Update CLAUDE-ARCHITECT.md EMPIRICAL-PREMISE-VERIFICATION composite count.
+
+**Pipeline resume:** `./run-pipeline.sh --round R94 --tier full --start-at IMPLEMENTER`
 
 ---
 
