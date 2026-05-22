@@ -19,7 +19,12 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@johnpatrickwarren-oss/deploysignal-engine": ["./engine/types/index"],
+      "@johnpatrickwarren-oss/deploysignal-engine/*": ["./engine/*"]
+    }
   },
   "include": ["engine/**/*.ts"],
   "exclude": ["node_modules", "dist", "test", "tools"]

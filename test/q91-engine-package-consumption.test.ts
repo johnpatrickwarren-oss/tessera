@@ -101,7 +101,7 @@ test('AC-R91-7: require.resolve succeeds for 5 representative subpaths via packa
     });
     assert.match(
       out,
-      /engine\/dist\/.*\.js$/,
+      /engine\/dist\/.*\.js$/m,
       `require.resolve('${sp}') must resolve under engine/dist; got: ${out.trim()}`,
     );
   }

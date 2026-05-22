@@ -13,7 +13,7 @@ import type {
   CompiledConfig,
   PerShardCell,
   PerShardResidual,
-} from '../engine/types/config';
+} from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 import { makePerShardCell, makeCellKey } from './_substrate/factories';
 
 test('Q1 AC-3 Delta-1 — shard_id is a valid CellDimension', () => {

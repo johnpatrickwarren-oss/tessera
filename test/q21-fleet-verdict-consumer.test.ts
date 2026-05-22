@@ -8,15 +8,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execSync } from 'node:child_process';
-import { VerdictGrouper } from '../engine/verdict-groups';
+import { VerdictGrouper } from '@johnpatrickwarren-oss/deploysignal-engine/verdict-groups';
 import {
   fleetTickIngest,
   rollupByClusterEvent,
   type FleetTickInput,
   type FleetTickIngestResult,
   type ClusterEventRollup,
-} from '../engine/fleet/verdict-consumer';
-import type { FusedVerdict } from '../engine/types/verdict';
+} from '@johnpatrickwarren-oss/deploysignal-engine/fleet/verdict-consumer';
+import type { FusedVerdict } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 function makeVerdict(deploy_ref: string, tick: number, firing = false): FusedVerdict {
   return {

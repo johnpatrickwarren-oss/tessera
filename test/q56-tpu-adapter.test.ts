@@ -27,9 +27,9 @@ import { execSync } from 'node:child_process';
 import {
   parseTpuTopologyJson,
   TpuTopologySource,
-} from '../engine/topology/tpu-source';
-import { computeSnapshotHash } from '../engine/topology-overlay';
-import type { TopologyNode, TopologyEdge } from '../engine/types/verdict';
+} from '@johnpatrickwarren-oss/deploysignal-engine/topology/tpu-source';
+import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+import type { TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 const V4_CUBE       = readFileSync('test/_substrate/tpu-fixture-v4-cube.json',          'utf8');
 const V5P_CUBE      = readFileSync('test/_substrate/tpu-fixture-v5p-cube.json',         'utf8');

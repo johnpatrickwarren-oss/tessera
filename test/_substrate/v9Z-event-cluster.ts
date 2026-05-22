@@ -12,9 +12,9 @@
 //
 // Tessera-original code (NOT vendored from DeploySignal).
 
-import type { TopologySnapshot } from '../../engine/types/verdict';
-import type { ClusterEvent } from '../../engine/events/event-feed';
-import type { FiredShardEvent } from '../../engine/topology/common-mode-attribution';
+import type { TopologySnapshot } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
+import type { ClusterEvent } from '@johnpatrickwarren-oss/deploysignal-engine/events/event-feed';
+import type { FiredShardEvent } from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
 import { makeV9YMultiRackCluster } from './v9Y-multi-rack-cluster';
 
 export interface EventClusterScenario {

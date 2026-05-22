@@ -19,10 +19,10 @@
 // work; no DS-repo modifications. Tessera-original code. NOT vendored.
 
 // ── Engine imports (.js extension; matches R72 convention) ──
-import { freshBettingState, updateBettingState } from '../engine/detectors/betting-e-process.js';
+import { freshBettingState, updateBettingState } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
 import {
   freshFamilyCBettingEProcessState, onsUpdate,
-} from '../engine/detectors/family-c-betting-e-process.js';
+} from '@johnpatrickwarren-oss/deploysignal-engine/detectors/family-c-betting-e-process';
 
 // ── fs + path imports (Node-builtins only) ──
 import * as fs from 'node:fs';

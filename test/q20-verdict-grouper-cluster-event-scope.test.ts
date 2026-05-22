@@ -14,8 +14,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
-import { VerdictGrouper } from '../engine/verdict-groups';
-import type { FusedVerdict } from '../engine/types/verdict';
+import { VerdictGrouper } from '@johnpatrickwarren-oss/deploysignal-engine/verdict-groups';
+import type { FusedVerdict } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 function makeVerdict(deploy_ref: string, tick: number, firing = false): FusedVerdict {
   return {

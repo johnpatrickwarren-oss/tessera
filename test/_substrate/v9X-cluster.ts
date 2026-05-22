@@ -10,7 +10,7 @@
 //
 // Tessera-original code (NOT vendored from DeploySignal).
 
-import type { TopologyNode, TopologyEdge, TopologySnapshot } from '../../engine/types/verdict';
+import type { TopologyNode, TopologyEdge, TopologySnapshot } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 export interface MakeV9XSingleRackClusterOpts {
   nShards?: number;

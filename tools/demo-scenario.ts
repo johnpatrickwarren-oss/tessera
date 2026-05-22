@@ -12,17 +12,17 @@
 import {
   freshBettingState,
   updateBettingState,
-} from '../engine/detectors/betting-e-process.js';
+} from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
 import {
   attributeCommonMode,
   type FiredShardEvent,
-} from '../engine/topology/common-mode-attribution.js';
-import { DsEventConsumer } from '../engine/ds-integration/event-consumer.js';
-import { createFreezeHookFromDsEvents } from '../engine/ds-integration/freeze-hook-factory.js';
-import { initialPerShardResidual } from '../engine/per-shard/warm-start.js';
-import type { TopologySnapshot, TopologyNode, TopologyEdge } from '../engine/types/verdict.js';
-import type { ExtendedSampleObservation } from '../engine/per-shard/runtime.js';
-import type { DeployEventPayload } from '../engine/ds-integration/event-contract.js';
+} from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+import { DsEventConsumer } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-consumer';
+import { createFreezeHookFromDsEvents } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/freeze-hook-factory';
+import { initialPerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
+import type { TopologySnapshot, TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
+import type { ExtendedSampleObservation } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
+import type { DeployEventPayload } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-contract';
 
 // (Note: tools/* import convention uses `.js` extensions per existing
 //  tools/curate-baseline-pipeline.ts neighbor file at tools/curate-baseline-pipeline.ts:44.

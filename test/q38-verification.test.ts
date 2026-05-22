@@ -13,8 +13,8 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { test } from 'node:test';
-import type { TopologySnapshot } from '../engine/types/verdict';
-import { attributeCommonMode } from '../engine/topology/common-mode-attribution';
+import type { TopologySnapshot } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
+import { attributeCommonMode } from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
 
 const ROOT = resolve(__dirname, '..');
 
