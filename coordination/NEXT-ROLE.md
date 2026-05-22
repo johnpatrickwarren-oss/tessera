@@ -1,7 +1,145 @@
-CURRENT-ROUND: R92
-NEXT-ROLE: (operator review of DS PR #20)
-STATUS: CROSS-REPO-PR-OPEN
-TIER: coordinator-direct
+CURRENT-ROUND: R94
+NEXT-ROLE: ARCHITECT
+STATUS: READY
+TIER: full
+
+---
+
+## § R94 Round-scope directive (Architect — engine repo extraction + Tessera migration to git-dep; Phase 5 SLICE 4 round 1 of 1) (2026-05-21)
+
+R94 extracts Tessera's `engine/` subdirectory to its own dedicated public repo (`johnpatrickwarren-oss/deploysignal-engine`), tags `v0.1.0-pre`, migrates Tessera to consume the engine via git-dependency, and removes the now-redundant local `engine/` from Tessera. **DS PR #20 unblock is a follow-up Coordinator-direct artifact after R94 close; R94 itself is Tessera-side.**
+
+**Motivation:** R92 PoC validated package-boundary correctness on local dev but DS CI immediately surfaced the predicted architectural finding: `file:../tessera/engine` works on dev machines (Tessera + DS as siblings under `~/concord/`) but is not portable to CI runners with no Tessera checkout. The R92 close attestation flagged engine-repo-extraction as the pre-req for true git-dep adoption. R94 ships that pre-req.
+
+**Operator-locked decisions (this directive):**
+- **New repo name:** `johnpatrickwarren-oss/deploysignal-engine` (matches `engine/package.json:name`; tag URL `github:johnpatrickwarren-oss/deploysignal-engine#v0.1.0-pre`)
+- **History preservation:** YES, via `git filter-repo --subdirectory-filter engine` (preserves blame/log provenance back to R01+ vendoring)
+- **Round scope:** full chain — extract + tag + Tessera migration to git-dep + Tessera local engine/ removal
+
+**Round-start SHA:** SHA of this directive commit; verify at Architect session entry.
+
+**Empirical premises Architect MUST verify at session entry** (R86/R87/R88/R89/R91 prophylactic discipline + R91 MAJOR-4 fail-set verbatim lesson):
+- `engine/` exists at Tessera HEAD with current package boundary (`engine/package.json`, `engine/README.md`, `engine/dist/` build output present)
+- `engine/package.json:name` is `@johnpatrickwarren-oss/deploysignal-engine` (per R90)
+- `engine/types/index.ts:4` references the same extract-target name
+- Tessera consumes engine via R91 paths-mapping + `file:./engine` dep (verify `package.json:dependencies` + `tsconfig.json:paths`)
+- ~50 Tessera-internal consumers in `test/*` + `tools/*` import via `@johnpatrickwarren-oss/deploysignal-engine/...` package paths (per R91 migration)
+- Pre-impl test suite: verbatim `node --test --test-reporter=tap test/*.test.js 2>&1 | grep '^not ok'` enumerated in spec § 0 (R91 MAJOR-4 lesson)
+- `git filter-repo` installed: `git filter-repo --version` returns version OR Architect prescribes `pip install git-filter-repo` (or equivalent) at spec § 3.1
+- `gh repo create` permission verified: `gh auth status` shows write scope; Architect verifies operator owns `johnpatrickwarren-oss` org
+- DS PR #20 state: draft per R92 close + CI-failure comment; will be updated Coordinator-direct after R94 close
+- Forward-protection AC registry walked (R93 deliverable; Architect cites entries that could fire on R94 changes)
+
+### Primary deliverables (R94 full chain)
+
+1. **New GitHub repo created.** `gh repo create johnpatrickwarren-oss/deploysignal-engine --public --license=Apache-2.0 --description "Statistical detector engine — Tessera-evolved snapshot from DeploySignal main@5a72371"`. Architect prescribes the exact command in spec § 3.1 (or alternative if operator pre-creates).
+
+2. **Engine extracted with history.** Architect prescribes the `git filter-repo --subdirectory-filter engine` workflow on a fresh Tessera clone (or worktree). Output: a clean repo containing only engine/ history. Pushed to new remote. Initial commit message preserves provenance link.
+
+3. **Tag `v0.1.0-pre` published.** `git tag -a v0.1.0-pre -m "..."` + `git push origin v0.1.0-pre`. Tag MUST be reachable from `gh release` / `npm install github:johnpatrickwarren-oss/deploysignal-engine#v0.1.0-pre`.
+
+4. **Tessera consumes via git-dep.** Root `package.json` dep changes from `file:./engine` to `github:johnpatrickwarren-oss/deploysignal-engine#v0.1.0-pre` (or equivalent npm-resolvable URL form). `pnpm install` populates `node_modules/@johnpatrickwarren-oss/deploysignal-engine` from the new repo.
+
+5. **Tessera local `engine/` removed.** `git rm -r engine/` after migration. Engine source-of-truth moves to new repo; Tessera becomes pure consumer of its own engine package. **THIS IS DESTRUCTIVE TO THE TESSERA TREE** — Architect MUST verify backwards-compat empirically before chore-A; Reviewer cold-eye on every consumer file.
+
+6. **`tsconfig.json` + `tsconfig.test.json` updated.** `include` lists no longer reference `engine/**/*.ts` (gone from Tessera). Paths mapping for `@johnpatrickwarren-oss/deploysignal-engine/*` either dropped (node_modules resolution suffices) OR repointed to `node_modules/...` (Architect picks; document trade-offs).
+
+7. **`pretest` chain simplified.** R91 added `tsc && tsc -p tsconfig.test.json` to ensure engine/dist built before tests. Post-R94: only `tsc -p tsconfig.test.json` needed (engine ships pre-built in the package). Root `tsc` invocation removed from pretest.
+
+8. **`VENDORING-MANIFEST.md` updated.** Header note: "R94 extraction — engine source-of-truth moved to johnpatrickwarren-oss/deploysignal-engine@v0.1.0-pre; Tessera consumes via git-dep; per-file vendored-at-pin SHAs (5a72371) preserved as historical provenance, now mirrored in new repo's filter-repo'd history." Per-row entries NOT rewritten (preserve audit trail per R42 + R89 discipline).
+
+9. **`test/q94-engine-repo-extraction.test.ts`** (NEW; full-tier) — at least 10 ACs:
+   - Tessera root has NO `engine/` directory
+   - Tessera root package.json dep URL contains `github:johnpatrickwarren-oss/deploysignal-engine` + version tag string
+   - `node_modules/@johnpatrickwarren-oss/deploysignal-engine/package.json` exists post-install
+   - `node -e "require.resolve('@johnpatrickwarren-oss/deploysignal-engine/ds-integration')"` exits 0 and prints path under `node_modules/...`
+   - Backwards-compat smoke: full test suite passes; tsc exits 0; per-AC verdict count within band
+   - VENDORING-MANIFEST.md header note present
+   - `tsconfig.json` no longer includes `engine/**`
+   - All ~50 R91-migrated consumer imports still resolve
+
+10. **`Q-R94-EMPIRICAL.sh`** at chore-A pre-commit. **MUST use `--test-reporter=tap` BEFORE test files** per R77 + R89 MAJOR-1 sub-pattern lesson.
+
+### Tier rationale
+
+**full-tier** — Architect (per-file pseudocode for extraction workflow + repo creation + tag + tsconfig changes + engine/ removal) + Implementer + Reviewer (cold-eye on backwards-compat + repo creation correctness) + MU. Highest-blast-radius round to date; engine source-of-truth moves repos; warrants full discipline.
+
+### Anti-scope (R94 hard limits)
+
+- **NO modification of engine algorithm files DURING extraction** — extraction is a pure git operation; content frozen
+- **NO modification of engine source content in the new repo before initial tag** — initial-commit + tag is the engine state at Tessera HEAD pre-R94
+- **NO modification of Tessera-internal consumer imports** (R91 migration to `@johnpatrickwarren-oss/deploysignal-engine/...` already done; preserves post-R94)
+- **NO DS-side work** — DS PR #20 update is Coordinator-direct after R94 close; out of R94 anti-scope
+- **NO modification of R73-R93 substantive deliverables** (frozen)
+- **NO new external Tessera dependencies** beyond the engine git-dep itself
+- **NO npm publish** (git-dep only; npm-registry adoption is future-cycle decision)
+- **NO modification of pre-R94 carry-forward AC fail set** beyond R94-explicit additions
+- **NO modification of `coordination/MEMORIAL-PHASE-*.md` shards** (R89 archival stands)
+- **NO modification of `CLAUDE-*.md` files beyond MU's normal REINFORCED appends**
+- **NO real-cluster; NO DS-repo modifications**
+- **NO force-push to new repo** (initial push only; tag is immutable)
+
+ALLOWED modifications:
+- New repo creation via `gh repo create` (one-time; operator authorized this directive)
+- New repo initial commit + tag via `git push` + `git push origin v0.1.0-pre`
+- Tessera root `package.json` (dep URL change; pretest script change)
+- Tessera root `tsconfig.json` + `tsconfig.test.json` (include/paths)
+- Tessera `pnpm-lock.yaml` — wait, this is gitignored per .gitignore line 22 — actually that was `pnpm-workspace.yaml`, lockfile is separate. Architect verifies via Read.
+- Tessera `git rm -r engine/` (the destructive piece)
+- `coordination/VENDORING-MANIFEST.md` (header note; no row rewrites)
+- `test/q94-engine-repo-extraction.test.ts` (NEW)
+- `coordination/specs/Q-R94-SPEC.md` + `Q-R94-SPEC-AUDIT.md` + `Q-R94-EMPIRICAL.sh` (NEW)
+- `coordination/reviews/REVIEWER-REPORT-R94.md` (Reviewer)
+- `coordination/MEMORIAL.md` (appends; threshold check at MU per R89 sustaining mechanism)
+- `coordination/NEXT-ROLE.md` (this file)
+- `coordination/logs/ROUND-R94-*.md`
+
+### Apply all 7 cross-project rules UPFRONT
+
+- Rules 1-7 ACTIVE. **Architect MUST use `--test-reporter=tap` BEFORE test files** per R77 + R89 MAJOR-1.
+- **R86 prophylactic + R87 + R88 + R89 + R91 sub-patterns** load-bearing.
+- **R83 routing discipline:** top-of-file `STATUS: READY` updates MUST land in the same commit as the routing block.
+- **R91 MAJOR-4 fail-set verbatim:** Architect MUST paste actual `not ok` enumeration from current test suite into spec § 0 before predicting R94 close-state band.
+- **R91 CRITICAL-1 forward-protection registry walk:** Architect MUST walk `coordination/FORWARD-PROTECTION-AC-REGISTRY.md` before prescribing q94 test patterns. Any AC that scans test/ or tools/ for forbidden patterns gets carve-out enumeration in spec.
+- **R93 self-application gate:** R94 itself MUST not introduce a new violator into any forward-protection AC. Specifically: q94 cannot use `execFileSync('node', ...)` patterns without carve-out registry update.
+- **R85 stochastic-flake band preserved.** AC-R84-14 unchanged.
+- **R88 sub-pattern (gitignore-global-rule check):** if any spec premise depends on a file being / not being committed, Architect MUST run `git ls-files <path>` AND `grep -F <path> .gitignore` BOTH.
+- **NEW for R94 (cross-repo discipline):** any operation against the new repo (push, tag, gh repo create) MUST be verifiable by Tessera-side artifact (e.g., the new repo's URL embedded in package.json + a comment citing the new repo's HEAD SHA in MEMORIAL.md).
+
+### Halt conditions (R94 Implementer)
+
+1. Q-R94-EMPIRICAL.sh non-zero exit at chore-A
+2. `pnpm exec tsc -p tsconfig.test.json` non-zero exit
+3. Full test suite drift beyond predicted band (Architect must encode band per R91 MAJOR-4 fix)
+4. ANY test file that passed pre-R94 fails post-R94 (other than ACs touched by tsconfig/include changes — spec MUST enumerate exact ACs allowed to flip)
+5. `git filter-repo` produces engine repo with non-engine files (extraction must be clean)
+6. `gh repo create` fails (operator org / permission / name collision): HALT + DIAGNOSTIC + ESCALATE
+7. `git push` to new repo fails or push includes unintended branches: HALT
+8. `git tag` not reachable post-push or tag points to wrong SHA: HALT
+9. Tessera `pnpm install` post-package-json-change fails to resolve new dep URL: HALT + DIAGNOSTIC (likely repo+tag visibility issue; needs gh + git debugging)
+10. Backwards-compat broken: any `node --test test/*.test.js` AC that passed pre-R94 fails post-R94 due to import resolution change: HALT
+11. New external dependency required (beyond `git-filter-repo` if not pre-installed): HALT + DIAGNOSTIC + ESCALATE
+12. R88-or-prior substantive deliverable modified (anti-scope violation): HALT + DIAGNOSTIC + ESCALATE
+13. Engine algorithm file content modified during extraction: HALT + DIAGNOSTIC + ESCALATE (extraction MUST be content-preserving per R42 byte-identical discipline)
+14. Architect-claim-without-empirical-walk pattern detected at spec-emit: HALT at MU review
+15. **R94-specific:** Tessera engine/ removed but consumer imports still reference local engine/ paths (resolution would silently fall back to old paths if not careful): HALT + DIAGNOSTIC
+
+### Cross-repo follow-up (NOT in R94 scope; Coordinator-direct after R94 close)
+
+After R94 closes cleanly:
+1. Switch to DS feat/r92-tessera-engine-poc branch
+2. Update `package.json` dep URL: `file:../tessera/engine` → `github:johnpatrickwarren-oss/deploysignal-engine#v0.1.0-pre`
+3. `npm install`; re-run PoC tests; verify 3/3 PASS
+4. Convert PR #20 from draft → ready-for-review
+5. Verify DS CI green
+6. Tessera-side R95 attestation (Coordinator-direct, same pattern as R92 close)
+
+### Pipeline invocation
+
+```bash
+cd /Users/johnwarren/concord/tessera
+./run-pipeline.sh --round R94 --tier full
+```
 
 ---
 
