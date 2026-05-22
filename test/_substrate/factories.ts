@@ -11,13 +11,13 @@
 // (underscore prefix marks the directory as a non-test helper — Tessera test discovery
 // is the top-level glob `test/*.test.js`, so files here are not run as tests directly).
 
-import type { CellKey } from '../../engine/types/primitives';
+import type { CellKey } from '@johnpatrickwarren-oss/deploysignal-engine/types/primitives';
 import type {
   CellDimension,
   PerShardResidual,
   PerShardCell,
   BaselineCellEntry,
-} from '../../engine/types/config';
+} from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 
 /**
  * Build a CellKey with optional dimension overrides. Default carries

@@ -11,7 +11,7 @@ import {
   updateWelford,
   welfordMean,
   welfordCovariance,
-} from '../engine/per-shard/welford';
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/welford';
 
 // Naive two-pass reference for cross-checking Welford (sample covariance, n−1 divisor).
 // Kept inline (not in test/_substrate/) because it is q04-specific and serves the

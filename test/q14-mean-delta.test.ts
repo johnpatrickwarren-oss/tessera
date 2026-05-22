@@ -10,9 +10,9 @@ import {
   updatePerShardResidual,
   projectTierGatedOutputs,
   type ExtendedSampleObservation,
-} from '../engine/per-shard/runtime';
-import { initialPerShardResidual } from '../engine/per-shard/warm-start';
-import { welfordMean } from '../engine/per-shard/welford';
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
+import { initialPerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
+import { welfordMean } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/welford';
 import { makePerShardResidual, makeBaselineCellEntry } from './_substrate/factories';
 
 // ─── R14 AC-1 — mean_delta computed correctly at warm_start when baselineCell provided ────

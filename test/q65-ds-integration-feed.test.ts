@@ -17,12 +17,12 @@ import {
   verdictGroupToFeedRequest,
   TesseraToDsFeedClient,
   type FeedResult,
-} from '../engine/ds-integration/feed';
+} from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/feed';
 import {
   TESSERA_TO_DS_FEED_ENDPOINT,
   type TesseraToDsAuthHeaders,
-} from '../engine/ds-integration/feed-contract';
-import type { VerdictGroup, FusedVerdict } from '../engine/types/verdict';
+} from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/feed-contract';
+import type { VerdictGroup, FusedVerdict } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 // ── Synthetic VerdictGroup builders ─────────────────────────────────────
 

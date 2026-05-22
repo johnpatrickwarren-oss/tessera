@@ -4,8 +4,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadCompiledConfig } from '../engine/loader';
-import type { CompiledConfig } from '../engine/types/config';
+import { loadCompiledConfig } from '@johnpatrickwarren-oss/deploysignal-engine/loader';
+import type { CompiledConfig } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 
 /** Minimal valid CompiledConfig for loader tests. */
 function makeMinimalConfig(overrides: Partial<CompiledConfig> = {}): CompiledConfig {

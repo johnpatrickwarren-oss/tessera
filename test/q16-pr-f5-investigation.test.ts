@@ -14,8 +14,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { PerShardResidual } from '../engine/types/config';
-import { updatePerShardResidual, type ExtendedSampleObservation } from '../engine/per-shard/runtime';
+import type { PerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
+import { updatePerShardResidual, type ExtendedSampleObservation } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
 
 // ─── R16 AC-R16-3 — welford_state survives JSON round-trip ───────────────────────────────
 test('R16 AC-R16-3 — welford_state survives JSON round-trip', () => {

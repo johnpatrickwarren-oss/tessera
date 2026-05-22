@@ -22,8 +22,8 @@ import {
   UINT32_MOD,
   type CounterMetadata,
   type RateSample,
-} from '../engine/l0/counter-rate-transform';
-import { TrendBuffer } from '../engine/core';
+} from '@johnpatrickwarren-oss/deploysignal-engine/l0/counter-rate-transform';
+import { TrendBuffer } from '@johnpatrickwarren-oss/deploysignal-engine/core';
 import {
   makeCleanPair, makeMissedScrapePair, makeWrap32Pair, makeResetPair,
   makeVariableIntervalSequence,

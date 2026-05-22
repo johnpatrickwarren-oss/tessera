@@ -21,12 +21,12 @@ import {
   updateFleetEProcessState,
   type FleetEProcessState,
   type FleetMergeOutput,
-} from '../engine/fleet/combine';
+} from '@johnpatrickwarren-oss/deploysignal-engine/fleet/combine';
 import {
   freshBettingState,
   updateBettingState,
-} from '../engine/detectors/betting-e-process';
-import type { FamilyCBettingEProcessState } from '../engine/types/families/c';
+} from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
+import type { FamilyCBettingEProcessState } from '@johnpatrickwarren-oss/deploysignal-engine/types/families/c';
 
 // ─── Deterministic PRNG + Gaussian generator (re-inlined from the inherited
 // test/betting-e-process-class-dispatch.test.ts:40-83 pattern; NOT imported
