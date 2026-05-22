@@ -1,7 +1,61 @@
-CURRENT-ROUND: R95
-NEXT-ROLE: MEMORIAL-UPDATER
-STATUS: ROUND-COMPLETE
-TIER: audit
+CURRENT-ROUND: R92.1
+NEXT-ROLE: (operator review of DS PR #20)
+STATUS: CROSS-REPO-PR-READY-FOR-REVIEW
+TIER: coordinator-direct
+
+---
+
+## § R92.1 Coordinator-direct close attestation (2026-05-22)
+
+R92.1 executed Coordinator-direct per R94 directive Phase 5 SLICE 4 cross-repo follow-up clause + standing operator authorization. R94 engine extraction (`johnpatrickwarren-oss/deploysignal-engine@v0.1.0-pre`) unblocks portable DS-side adoption that R92 PoC had to leave on `file:../tessera/engine`.
+
+### Operator-locked context (carried from R94 directive)
+
+- R94 (Tessera commit `cdc7361` chore-A → `254d1ad` R95 MU close) extracted engine to its own repo + tagged `v0.1.0-pre` at engine commit `18978ab`
+- R92 PR #20 was draft + had failing CI under `file:` dep (R92 close attestation predicted this exactly)
+- This update switches dep URL `file:../tessera/engine` → `github:johnpatrickwarren-oss/deploysignal-engine#v0.1.0-pre` and marks PR ready-for-review
+
+### DS-side deliverables shipped
+
+- **Branch:** `feat/r92-tessera-engine-poc` (continuation of original R92 PoC branch)
+- **New commit:** `e7b19cd` — "feat(R92.1): switch dep URL file:../tessera/engine → github: portable git-dep"
+- **PR #20:** converted from DRAFT → READY-FOR-REVIEW; explanatory comment posted
+- **Files changed (2):** `package.json` (dep URL), `package-lock.json` (npm-managed)
+
+### Empirical attestations (verified pre-push)
+
+- `npx tsc -p tsconfig.test.json` (DS): **exit 0**
+- `node --test --test-reporter=tap test/r92-tessera-engine-package-poc.test.js`: **3 pass / 0 fail** (same as R92)
+- `npm install` resolved `github:johnpatrickwarren-oss/deploysignal-engine#v0.1.0-pre` cleanly; `node_modules/@johnpatrickwarren-oss/deploysignal-engine/dist/ds-integration/` populated from the v0.1.0-pre tag
+
+### Pre-existing finding still present (R94 MAJOR-4 carry-forward)
+
+The v0.1.0-pre tag annotation on the new engine repo contains a factually-incorrect "byte-identical to Tessera HEAD" claim per R94 Reviewer MAJOR-4. Tag is immutable. R92.1 doesn't fix this (out of scope); operator-decision flag remains preserved in R95 NEXT-ROLE.md routing: live-with (annotation is cosmetic; tag SHA + content are correct) vs delete+re-tag at same SHA with corrected annotation.
+
+### DS-side WIP preservation discipline
+
+User had uncommitted change to `coordination/TESSERA-CHAOS-EXPERIMENT-EVENT-CLASS.patch` on `feat/cairn-addition-30`. Stashed with descriptive message ("WIP on feat/anvil-addition-29 (auto-stash by R92.1 cross-repo update — pop after)"), checked out R92 branch, did the work, restored user's branch + popped stash cleanly. DS working tree returned to pre-R92.1 state on `feat/cairn-addition-30` with WIP intact.
+
+### Operator next-step
+
+1. **PR #20 review + merge** — CI runs at PR head; merge gates by operator
+2. **R94 MAJOR-4 tag-annotation operator-decision** — out-of-band; PR #20 doesn't require it (the annotation isn't load-bearing for npm install resolution)
+
+### Tessera-side state at R92.1 close
+
+- Tessera repo working tree clean (only build artifact `johnpatrickwarren-oss-tessera-0.1.0-pre.tgz` untracked + gitignore-eligible; not in any spec)
+- This NEXT-ROLE.md update is the only Tessera change for R92.1
+- Phase 5 SLICE 3 + SLICE 4 chain status now fully closed end-to-end (R90 → R91 → R92 → R93 → R94 → R95 → R92.1 unblock)
+
+### Cost note
+
+R92.1 burned ~$5-10 of credits for the cross-repo update vs ~$50-100 estimated for a full Tessera-pipeline round on the same scope. Second validation of the Coordinator-direct-round shape as a viable cost-reduction option for cross-repo / pipeline-mismatched work (first validation: R92 close).
+
+---
+
+## § R95 close attestation (2026-05-22)
+
+R95 closed at MU commit `254d1ad`. Phase 5 SLICE 4 hygiene complete: 51 defunct engine-source-tests deleted across 15+ test files (exact match to spec § 4 table); fail-baseline restored from ~70 → ~27-29 (in predicted band [24,30]); R94 MAJOR-1+2 (q94 AC-name-vs-test-binding) + MAJOR-3 (SPEC-AUTHORING-CHECKLIST hard-limit gate) follow-ups landed same round; R94 MAJOR-4 (tag-annotation immutability) preserved as operator-decision flag. Findings: 0 CRITICAL / 1 MAJOR / 1 MINOR / 3 OBS. MAJOR-1 (R95): Implementer TD-2 attestation factually wrong about AC-R94-12 carry-forward status; substantive deliverable sound, encode-actual-results-verbatim violation memorialized.
 
 ---
 
