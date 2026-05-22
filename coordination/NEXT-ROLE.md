@@ -1,5 +1,5 @@
 CURRENT-ROUND: R91
-NEXT-ROLE: ARCHITECT
+NEXT-ROLE: IMPLEMENTER
 STATUS: READY
 TIER: full
 
@@ -143,7 +143,69 @@ cd /Users/johnwarren/concord/tessera
 
 ---
 
-## § R89 close attestation (2026-05-21)
+## § R91 ARCHITECT routing block (2026-05-21)
+
+NEXT-ROLE: IMPLEMENTER
+STATUS: READY
+ROUND: R91
+TIER: full
+
+**Inputs:**
+- `coordination/specs/Q-R91-SPEC.md` (load-bearing — read in full)
+- `coordination/specs/Q-R91-SPEC-AUDIT.md` (audit-trail; optional for Implementer; mandatory for Reviewer)
+- `coordination/specs/Q-R91-EMPIRICAL.sh` (binding-command harness — 10 blocks)
+- `coordination/PRD.md` (Tessera scoping)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` Implementer-relevant sections
+- `coordination/MEMORIAL.md` (this project's active-phase history; R88-R90 tail)
+
+**ROUND_START_SHA:** `a63da14` (R91 directive commit; spec triad commit is `5184b35`).
+
+**Selected approach:** Approach D (paths mapping + file: dep + pretest chain). See Q-R91-SPEC.md § 1.1 + § A1.3 for full why-picked / why-rejected. Approach B + C explicitly REJECTED at brainstorm — Implementer MUST NOT deviate to B/C without HALT + ESCALATE (per § 6 halt condition 12).
+
+**Implementer execution order (per spec § 3 + § 11):**
+
+1. **RED commit**: drop `test/q91-engine-package-consumption.test.ts` (full file source verbatim from Q-R91-SPEC.md § 3.4). Expected RED state: 10+ ACs FAIL (most depend on tsconfig/package.json edits that haven't landed yet); some ACs MAY pass at RED (e.g., AC-R91-13 + AC-R91-14 byte-identity checks pass when no engine modification has happened — verify empirically and document in commit message).
+
+2. **GREEN commit (chore-A)**: apply the 6-step prescription:
+   - (a) `tsconfig.json` delta per § 3.1 (add `baseUrl` + `paths`)
+   - (b) `package.json` delta per § 3.2 (add `dependencies.@johnpatrickwarren-oss/deploysignal-engine: file:./engine`; extend `scripts.pretest`)
+   - (c) `pnpm install` to materialize `node_modules/@johnpatrickwarren-oss/deploysignal-engine` symlink + regenerate `pnpm-lock.yaml`
+   - (d) Apply migration regex Pattern 1 + Pattern 2 per § 3.3 to all 50 consumer files in `test/* + test/_substrate/* + tools/* + tools/calibrators/*`. Mechanical (Implementer's choice of sed/perl/IDE multi-edit). After each batch of ~10 files: grep-verify the migration scope locally before continuing (per § 5.1 "NO bulk find/replace without per-file verification").
+   - (e) Insert R91 header note in `coordination/VENDORING-MANIFEST.md` per § 3.5 (between R90 note and DeploySignal engine vendoring table; verbatim)
+   - (f) Verify `bash coordination/specs/Q-R91-EMPIRICAL.sh` exits 0 (10/10 PASS); verify `pnpm exec tsc -p tsconfig.test.json --noEmit` exits 0; verify `node --test --test-reporter=tap test/*.test.js` test counts within band (tests∈[736,740], pass∈[714,718], fail∈[17,20], skip=4)
+
+3. **Routing commit**: update top of this file (NEXT-ROLE → REVIEWER, STATUS → READY) IN SAME COMMIT as the Implementer routing block append + MEMORIAL.md append (per R83 routing discipline)
+
+**Halt conditions** (per § 6; 13 explicit triggers): see Q-R91-SPEC.md § 6. Notable carry-forward:
+- Halt 1: Q-R91-EMPIRICAL.sh non-zero exit at chore-A (any block fail other than pre-documented expected pre-impl state from § 8.11). Probe-run at HEAD `a63da14` produced 2 PASS / 8 FAIL exactly matching predicted pre-impl state — Implementer drives PASS by completing prescribed work.
+- Halt 3: test count drift beyond predicted band (tests∉[736,740] OR pass<712 OR fail∉[17,20] OR skip≠4)
+- Halt 4: any existing test file that PASSED pre-R91 now fails (other than the 12 documented carry-forward anti-scope-diff ACs which stay binary FAIL)
+- Halt 6: engine exports-map gap discovered → HALT, do NOT silently add to engine/package.json (R90 gap)
+- Halt 11: migration leaves orphan relative imports (any `from '../engine'` or `'../../engine'` match post-chore-A → AC-R91-1 binding)
+
+**ALLOWED_SET** (4-surface byte-mirrored per R82 propagation; full enumeration at Q-R91-SPEC.md § 5.2 + § 5.3):
+```
+^(tsconfig\.json|package\.json|pnpm-lock\.yaml|test/[^/]+\.test\.ts|test/_substrate/[^/]+\.ts|tools/[^/]+\.ts|tools/calibrators/[^/]+\.ts|coordination/VENDORING-MANIFEST\.md|coordination/specs/Q-R91-(SPEC|SPEC-AUDIT|EMPIRICAL)\.(md|sh)|coordination/reviews/REVIEWER-REPORT-R91\.md|coordination/MEMORIAL\.md|coordination/NEXT-ROLE\.md|coordination/logs/ROUND-R91-.*)$
+```
+
+**Empirical pre-impl probe-run result (captured by Architect at HEAD `a63da14` BEFORE spec-triad commit; per R86 prophylactic + R89 sub-pattern)**:
+
+```
+PASS: 2 / 10 blocks (Blocks 7 + 9)
+FAIL: 8 / 10 blocks (Blocks 1, 2, 3, 4, 5, 6, 8, 10)
+```
+
+Matches Q-R91-SPEC.md § 8.11 per-block predictions exactly.
+
+**Architect attestation (per R86 prophylactic + R89 sub-pattern + R88 false-compliance-attestation)**:
+- Q-R91-EMPIRICAL.sh probe-run at HEAD `a63da14`: 2 PASS / 8 FAIL exit 1 (matches predicted pre-impl per § 8.11 — verbatim)
+- `pnpm exec tsc -p tsconfig.test.json --noEmit` at HEAD: exit 0
+- `node --test --test-reporter=tap test/*.test.js` baseline (3 runs sampled): tests=724/pass=701-702/fail=18-19/skip=4 (stochastic from AC-R84-14 ~25% flake per R85 REVIEWER MINOR-2)
+- 90 distinct relative-engine-import strings across 50 consumer files (full migration surface enumerated at § 3.3)
+- All engine subpaths in current imports resolve cleanly via engine/package.json exports map (P0.13 cross-walk)
+
+**Spec triad commit**: `5184b35`. Read-only after this commit per R83 prefix-continuity invariant.
+
 
 R89 closed clean. 4 queued items shipped: NEXT-ROLE.md archival (7961→145 active lines; single `NEXT-ROLE-PHASE-4.md` shard), MEMORIAL.md archival (2825→132 active; PHASE-3 + PHASE-4 shards byte-identical), CLAUDE-*.md composite folding (ARCH 51→24; IMPL 41→30, AC-R36-21 FLIPPED FAIL→PASS), sustaining mechanism (`scripts/check-claude-md-thresholds.sh` wired into `scripts/finalize-round.sh` Step 7b — load-bearing at every round close). Reviewer MERGE-READY (0 CRITICAL / 2 MAJOR / 1 MINOR / 4 OBS). 2 MAJORs preserved as operator-decision flags (prefix-continuity-invariant deviation in EMPIRICAL.sh Block 8; AC-R89-8 vs R83 spec-design tension). Phase 5 SLICE 2 closed. Tessera at cleanest methodology state to date.
 
