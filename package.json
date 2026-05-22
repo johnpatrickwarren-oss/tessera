@@ -28,13 +28,12 @@
     "mu-model-select": "pnpm exec node scripts/mu-model-select.js",
     "build-role-context": "pnpm exec node scripts/build-role-context.js",
     "measure-cache-effect": "pnpm exec node scripts/measure-cache-effect.js",
-    "pack:engine": "cd engine && pnpm exec tsc --project ../tsconfig.json && pnpm pack",
-    "pretest": "tsc && tsc -p tsconfig.test.json",
+    "pretest": "tsc -p tsconfig.test.json",
     "test": "node --test test/*.test.js",
     "typecheck": "tsc -p tsconfig.test.json --noEmit"
   },
   "dependencies": {
-    "@johnpatrickwarren-oss/deploysignal-engine": "file:./engine"
+    "@johnpatrickwarren-oss/deploysignal-engine": "github:johnpatrickwarren-oss/deploysignal-engine#v0.1.0-pre"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
