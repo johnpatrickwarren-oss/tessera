@@ -19,7 +19,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 ROUND_START_SHA="e535a53"
-CHORE_A_SHA="<INJECTED-AT-CHORE-A>"
+CHORE_A_SHA="6c440fc5f4576be8f860906673aa8fea0c10c731"
 
 echo "=== Q-R95-EMPIRICAL.sh ==="
 echo "Round: R95 | Round-start: ${ROUND_START_SHA} | Chore-A: ${CHORE_A_SHA}"
