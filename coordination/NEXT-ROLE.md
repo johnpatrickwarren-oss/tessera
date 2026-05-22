@@ -1,7 +1,66 @@
-CURRENT-ROUND: R93
-NEXT-ROLE: (operator decision)
-STATUS: ROUND-COMPLETE
-TIER: audit
+CURRENT-ROUND: R92
+NEXT-ROLE: (operator review of DS PR #20)
+STATUS: CROSS-REPO-PR-OPEN
+TIER: coordinator-direct
+
+---
+
+## § R92 Coordinator-direct close attestation (2026-05-21)
+
+R92 (DS-side adoption PR) executed Coordinator-direct per operator decision — no Tessera pipeline invocation, cross-repo work in `~/concord/deploysignal/`. Phase 5 SLICE 3 chain status now: R90 ✓ R91 ✓ **R92 PR-opened** R93 ✓.
+
+### Operator-locked decisions
+
+- **Adoption scope:** Proof-of-concept — add package as `file:../tessera/engine` dep + import 1-3 R62 ds-integration contract types. No DS engine code modified.
+- **DS branch strategy:** New branch `feat/r92-tessera-engine-poc` from DS `main` (avoid `feat/anvil-addition-29` WIP conflict).
+- **Round shape:** Coordinator-direct; no Tessera pipeline; this attestation is the Tessera-side R92 close artifact.
+
+### DS-side deliverables shipped
+
+- **Branch:** `feat/r92-tessera-engine-poc` (from DS main `237b1f4`)
+- **Commit:** `042b385` — "feat(R92 PoC): consume Tessera-evolved engine package via file: dep"
+- **PR:** https://github.com/johnpatrickwarren-oss/deploysignal/pull/20
+- **Files changed (3):** `package.json` (+1 dep), `package-lock.json` (npm-managed), `test/r92-tessera-engine-package-poc.test.ts` (NEW, 3 ACs)
+
+### Empirical attestations (verified pre-PR-open)
+
+- `npx tsc -p tsconfig.test.json` (DS): **exit 0**
+- `node --test --test-reporter=tap test/r92-tessera-engine-package-poc.test.js`: **3 pass / 0 fail**
+- Full DS suite: `tests=988 / pass=976 / fail=4 / skip=2 / todo=6` — the 4 fails are pre-existing on DS main (NOT introduced by R92)
+- Package resolves: `node_modules/@johnpatrickwarren-oss/deploysignal-engine/dist/ds-integration/event-contract.d.ts` exists post-`npm install`
+- R62 contract types (`DeployEventPayload`, `DsToTesseraEventRequest`) imported successfully via `@johnpatrickwarren-oss/deploysignal-engine/ds-integration` subpath export
+
+### Architectural finding (PoC discovery)
+
+**True git-dependency adoption requires extracting Tessera engine/ to its own repo.** R90 declared the package boundary at `engine/package.json` but the engine still lives as a subdirectory of the Tessera monorepo. `pnpm install github:johnpatrickwarren-oss/tessera#main` would install the entire Tessera repo as a package (root package.json declares `@johnpatrickwarren-oss/tessera`, not `@johnpatrickwarren-oss/deploysignal-engine`). For R92 PoC, `file:../tessera/engine` works locally but isn't portable. **Future-cycle operator decision:** extract engine to its own repo (e.g., `johnpatrickwarren-oss/deploysignal-engine`) to enable true git-dep + semver tagging + cross-machine reproducibility.
+
+### Architectural finding (DS-engine divergence — pre-existing)
+
+DS engine has structurally diverged from Tessera engine since the `5a72371` vendoring pin:
+- **DS-only directories:** `g0/`, `gates/`, `drift/`, `resamplers/`, `scenarios/`, `signals/`
+- **Tessera-only directories:** `ds-integration/`, `events/`, `fleet/`, `per-shard/`
+- **Shared (potentially diverged at file level):** `detectors/`, `l0/`, `o0/`, `topology/`, `types/`, `audit.ts`, `core.ts`
+
+Full replacement is NOT viable. PoC adopts only `ds-integration` (designed for DS↔Tessera contract layer at R62). Future detector-adoption is a separate operator decision requiring coexistence strategy.
+
+### Operator next-step decisions
+
+1. **DS PR #20** — review + merge (DS-side CI runs on PR; merge gates by operator)
+2. **Engine repo extraction** — future-cycle decision; pre-req for true git-dep adoption
+3. **Detector adoption** — future-cycle decision; per-detector evaluation of Tessera-evolved vs DS-vendored detector choice
+4. **Anvil branch coordination** — `feat/anvil-addition-29` continues independently; merge order between Anvil PRs and R92 PR is operator's call
+
+### Tessera-side state at R92 close
+
+- No Tessera repo files modified by R92 (this NEXT-ROLE.md update is the only change)
+- No Tessera spec triad, no q92 test file, no Q-R92-EMPIRICAL.sh (cross-repo round; pipeline-discipline N/A by operator decision)
+- Phase 5 SLICE 3 chain status fully tracked in `coordination/PHASE-5-SLICE-3-CLOSE-WALK.md` (R93 deliverable; R92 entry pre-existed as DEFERRED at R93 close — this attestation supersedes that to PR-OPEN)
+
+### Cache-prefix telemetry / cost note
+
+Coordinator-direct R92 burned ~$15-25 of credits for DS PoC execution (vs estimated $50-100 for a full Tessera-pipeline round on the same scope). The PoC was completed in ~30 min wall time. Validates the operator-direct-round shape as a viable cost-reduction option for cross-repo or pipeline-mismatched work.
+
+---
 
 ## § R93 Reviewer routing (2026-05-21; structural-only mode per R74)
 
