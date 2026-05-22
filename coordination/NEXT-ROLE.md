@@ -1,7 +1,16 @@
 CURRENT-ROUND: R93
-NEXT-ROLE: REVIEWER
-STATUS: READY
+NEXT-ROLE: (operator decision)
+STATUS: ROUND-COMPLETE
 TIER: audit
+
+## § R93 Reviewer routing (2026-05-21; structural-only mode per R74)
+
+**Inputs:**
+- `coordination/reviews/REVIEWER-REPORT-R93.md`
+
+**Verdict:** 0 CRITICAL / 0 MAJOR / 0 MINOR / 4 OBS. All 8 q93 ACs PASS. Binding commands at Reviewer HEAD: `Q-R93-EMPIRICAL.sh` exit 0 (17 PASS / 0 FAIL); `pnpm exec tsc -p tsconfig.test.json --noEmit` exit 0; TAP totals `tests=745 / pass∈{720,721} / fail∈{20,21} / skip=4` (within spec § 8 band). ALLOWED_SET diff: 13/13 paths within spec § 5.2 ALLOWED_SET. Carry-forward fail set: 20 `not ok` lines pre-impl → 20 post-impl, indices shifted by −1 per AC-R36-3 drop; no new flip.
+
+**Routing:** STATUS: MERGE-READY → Memorial-Updater.
 
 ---
 
@@ -1081,4 +1090,27 @@ Walked `coordination/FORWARD-PROTECTION-AC-REGISTRY.md` (just created this round
 ### Spec-deviance section
 
 None. All spec prescriptions implemented verbatim. TD-1/-2/-3 are tactical implementation choices, not spec divergences (the spec did not prescribe specific patterns for these elements).
+
+---
+
+## § R93 Memorial-Updater routing (2026-05-21)
+
+**Inputs:**
+- `coordination/reviews/REVIEWER-REPORT-R93.md` (0 CRITICAL / 0 MAJOR / 0 MINOR / 4 OBS)
+- `coordination/MEMORIAL.md` (appended Implementer, Reviewer, MU entries)
+- `~/.claude/CROSS-PROJECT-MEMORIAL.md` (appended R93 CONFIRMATION entries)
+
+**Verdict:** 0 VIOLATIONS across all roles and all 7 core disciplines. All load-bearing constraints honored (pre-emit-grilling, halt-discipline, right-reasons-audit, role-boundary, anti-scope, tdd-discipline, context-isolation). Substantive deliverable sound (8/8 q93 ACs PASS; zero new test regressions; fail-set preserved at 20). Pure-hygiene round successfully closed.
+
+**Reinforcement threshold check:**
+- CLAUDE-ARCHITECT.md: 27 REINFORCED (OK; WARN 30, ERROR 40)
+- CLAUDE-IMPLEMENTER.md: 30 REINFORCED (AT WARN; no fold required — ERROR 40)
+- CLAUDE-REVIEWER.md: 3
+- CLAUDE-MEMORIAL.md: 2
+- CLAUDE-COMMON.md: 8
+All files below or at WARN threshold; zero new REINFORCED lines added (zero violations → no new reinforcements).
+
+**Routing:** STATUS: ROUND-COMPLETE. Round ready for operator review and next-phase sequencing.
+
+**Summary artifact:** `coordination/logs/ROUND-R93-SUMMARY.md`
 
