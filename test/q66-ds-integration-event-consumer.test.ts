@@ -9,17 +9,17 @@ import { readFileSync } from 'node:fs';
 import {
   DsEventConsumer,
   type DsToTesseraAuthHeaders,
-} from '../engine/ds-integration/event-consumer';
+} from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-consumer';
 import {
   createFreezeHookFromDsEvents,
   mapEventClassToKind,
-} from '../engine/ds-integration/freeze-hook-factory';
+} from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/freeze-hook-factory';
 import {
   DS_TO_TESSERA_EVENT_ENDPOINT,
   type DeployEventPayload,
   type DsToTesseraEventRequest,
   type DsToTesseraEventResponse,
-} from '../engine/ds-integration/event-contract';
+} from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-contract';
 
 const VALID_HEADERS: DsToTesseraAuthHeaders & Record<string, string> = {
   'x-ds-instance-id': 'ds-test',
@@ -329,8 +329,8 @@ describe('R66 WU-Phase3-3C DS→Tessera event consumer + freeze-hook factory', (
 // minimal field sets instead (verified via grep on engine/types/config.ts
 // + engine/per-shard/runtime.ts).
 
-import type { PerShardResidual } from '../engine/types/config';
-import type { ExtendedSampleObservation } from '../engine/per-shard/runtime';
+import type { PerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
+import type { ExtendedSampleObservation } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
 
 function freshResidual(): PerShardResidual {
   return { n_samples: 0, confidence: 'none' };

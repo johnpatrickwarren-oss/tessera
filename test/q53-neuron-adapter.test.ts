@@ -23,9 +23,9 @@ import { execFileSync } from 'node:child_process';
 import {
   parseNeuronLsJson,
   NeuronTopologySource,
-} from '../engine/topology/neuron-source';
-import { computeSnapshotHash } from '../engine/topology-overlay';
-import type { TopologyNode, TopologyEdge } from '../engine/types/verdict';
+} from '@johnpatrickwarren-oss/deploysignal-engine/topology/neuron-source';
+import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+import type { TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 const TRAINIUM   = readFileSync('test/_substrate/neuron-fixture-trainium-2d-torus.json', 'utf8');
 const INFERENTIA = readFileSync('test/_substrate/neuron-fixture-inferentia-ring.json',   'utf8');

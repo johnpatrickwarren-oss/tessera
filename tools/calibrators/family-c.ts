@@ -20,14 +20,14 @@
 import type {
   CompilerOptions, FamilyCPerCell, MMDParams, OutlierDetection,
   SafeHotellingParams,
-} from '../../engine/types';
+} from '@johnpatrickwarren-oss/deploysignal-engine/types';
 import { mulberry32, choleskyLocal } from './_shared.js';
 import {
   generateBaselinePool, baselinePoolSeed,
-} from '../../engine/detectors/sequential-mmd.js';
+} from '@johnpatrickwarren-oss/deploysignal-engine/detectors/sequential-mmd';
 import {
   computeRffFeatureMap, applyRffFeatureMap, rffCellSeed, RFF_DEFAULT_DIM,
-} from '../../engine/detectors/family-c-rff.js';
+} from '@johnpatrickwarren-oss/deploysignal-engine/detectors/family-c-rff';
 
 // ── Q2.B.6.2 sliding-buffer Hotelling recalibration ─────────────────
 

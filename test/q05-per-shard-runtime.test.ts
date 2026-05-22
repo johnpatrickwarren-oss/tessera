@@ -7,13 +7,13 @@ import assert from 'node:assert/strict';
 import {
   updatePerShardResidual,
   type ExtendedSampleObservation,
-} from '../engine/per-shard/runtime';
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
 import {
   initialPerShardResidual,
   WARM_START_THRESHOLD,
   STRICT_UPGRADE_THRESHOLD,
-} from '../engine/per-shard/warm-start';
-import { welfordMean } from '../engine/per-shard/welford';
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
+import { welfordMean } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/welford';
 import { makePerShardResidual } from './_substrate/factories';
 
 // ─── R05 AC-1 — cold-start composition produces correct merged residual ─────
@@ -248,7 +248,7 @@ test('R05 AC-12 — initialPerShardResidual still produces welford_state === und
 test('R05 AC-13 — direct observeSample (without sampleVector) does not produce welford_state', async () => {
   // observeSample (R03-shipped) is composed by updatePerShardResidual but is itself unchanged.
   // A direct observeSample call from outside runtime.ts should NOT yield a welford_state field.
-  const { observeSample } = await import('../engine/per-shard/warm-start');
+  const { observeSample } = await import('@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start');
   const next = observeSample(initialPerShardResidual(), {
     observedAt: 100,
     residualSeedHash: 'sha:a',

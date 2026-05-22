@@ -194,4 +194,17 @@ if [[ -z "${_FINALIZE_PIPELINE_ACTIVE:-}" ]]; then
   export _FINALIZE_PIPELINE_ACTIVE=1
   # shellcheck disable=SC2086
   "$PROJECT_ROOT/run-pipeline.sh" --round "$ROUND" --start-at REVIEWER --tier "$TIER_VAL" $HYBRID_FLAG
+
+  # ── Step 7b: CLAUDE-*.md threshold check ─────────────────────────────────
+  "$PROJECT_ROOT/scripts/check-claude-md-thresholds.sh" || {
+    echo "WARNING: CLAUDE-*.md threshold check failed. Consider running consolidation."
+  }
+
+  # ── Step 7c: subprocess-spawn guard (non-blocking WARN) ──────────────────
+  # Replaces AC-R36-3 (dropped at R93) — see coordination/FORWARD-PROTECTION-AC-REGISTRY.md.
+  if [[ -x "$PROJECT_ROOT/scripts/check-no-execfilesync-spawn.sh" ]]; then
+    "$PROJECT_ROOT/scripts/check-no-execfilesync-spawn.sh" || {
+      echo "WARNING: subprocess-spawn guard found unapproved patterns. Review and add to approved list if intentional."
+    }
+  fi
 fi

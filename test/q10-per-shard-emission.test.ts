@@ -8,12 +8,12 @@ import assert from 'node:assert/strict';
 import {
   updatePerShardResidual,
   projectTierGatedOutputs,
-} from '../engine/per-shard/runtime';
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
 import {
   welfordMean,
   welfordCovariance,
-} from '../engine/per-shard/welford';
-import { initialPerShardResidual } from '../engine/per-shard/warm-start';
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/welford';
+import { initialPerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
 import { makePerShardResidual } from './_substrate/factories';
 
 // ─── R10 AC-1 — projectTierGatedOutputs at strict tier emits mean_vector + covariance with closed-form values ─

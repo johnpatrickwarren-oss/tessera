@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type { BaselineBundle } from '../engine/types/config';
+import type { BaselineBundle } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 import {
   runCurationFlow,
   decideOutcome,

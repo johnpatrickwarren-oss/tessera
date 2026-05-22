@@ -22,11 +22,11 @@ import assert from 'node:assert/strict';
 import {
   eBenjaminiHochberg,
   type EBenjaminiHochbergOutput,
-} from '../engine/fleet/e-bh';
+} from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 import {
   freshBettingState,
   updateBettingState,
-} from '../engine/detectors/betting-e-process';
+} from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
 
 // ─── Deterministic PRNG + Gaussian generator (re-inlined per R11 q11 +
 // R12 q12 standalone convention; NOT imported from inherited tests). ───

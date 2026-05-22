@@ -144,7 +144,7 @@ with a clear commit message.
 #   DIAGNOSTIC is required at point-of-encounter — not deferred to the coordination step.
 #   Detected R01: 6 anti-scope files vendored; no DIAGNOSTIC files produced.
 
-# REINFORCED — HALT-DISCIPLINE (composite; 11 sub-variants observed at Tessera)
+# REINFORCED — HALT-DISCIPLINE (composite; 12 sub-variants observed at Tessera)
 #
 #   Spec-internal contradiction (R01): Two spec sections that prescribe mutually
 #     incompatible implementation choices are HALT condition (c). All sub-types
@@ -235,6 +235,23 @@ with a clear commit message.
 #     3rd tessera instance of tactical-autonomy-overreach sub-pattern; cross-project rule derived.
 #     Detected tessera R73 MAJOR-2 (Reviewer-1).
 #
+#   Pre-existing-AC-carve-out verification at chore-A (R91 MAJOR-1): When the spec prescribes a new
+#     test file with AC assertions that use subprocess-spawn patterns (e.g., `execFileSync('node', ...)`)
+#     or other patterns guarded by pre-existing forward-protection ACs, the Implementer must verify
+#     pre-chore-A that the new test file's pattern will trigger a pre-existing AC. Check: (a) identify
+#     all pre-existing forward-protection ACs in the codebase that guard test patterns (e.g.,
+#     AC-R36-3 guards `execFileSync('node', ...)` in all test files); (b) scan the spec-prescribed
+#     new test file for any patterns matching those forward-protection AC triggers; (c) if matches
+#     exist, verify BEFORE claiming zero halt conditions that the AC carve-out list includes the new
+#     test file OR pre-emptively ESCALATE with a halt-condition-4 DIAGNOSTIC. At R91, spec prescribed
+#     q91 test with `execFileSync('node'...)` pattern that triggered AC-R36-3 (pre-existing
+#     forward-protection); Implementer attested zero halt conditions without verifying pre-existing
+#     AC carve-out status. AC-R36-3 flipped FAIL post-implementation, triggering halt condition 4
+#     which the Implementer had missed. The R86 spec-emit grilling walk must include completeness
+#     check: "does my new test file match patterns guarded by pre-existing forward-protection ACs?"
+#     Detected tessera R91 MAJOR-1 (Implementer); resolved by operator Option A (add q91 to q36
+#     carve-out list pre-implementation).
+#
 #   Bash-construct TD requires empirical semantic equivalence check (R74 CRITICAL-1 + MINOR-4):
 #     When a TACTICAL DEVIATION rewrites a bash construct — especially one involving boolean flag
 #     semantics (${VAR:+word}, $VAR && ..., if $VAR; then ...) — to satisfy an AC regex constraint,
@@ -252,12 +269,7 @@ with a clear commit message.
 #     operator_override Sonnet regardless of flag presence. 4th tessera tactical-autonomy instance;
 #     first bash-glue-semantic-equivalence sub-class. Detected tessera R74 CRITICAL-1 + MINOR-4.
 
-# REINFORCED 2026-05-18 — false-compliance-attestation (cross-project rule):
-#   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R03 MINOR-4 (spec count ≠ observed count),
-#   R18 MINOR-2+3 (arithmetic errors in NEXT-ROLE.md), R26 MAJOR-1 (tsc exit 2 attested as 0).
-#   Core: report observed results verbatim; never reframe errors to match AC literal.
-
-# REINFORCED — MEMORIAL-AND-ATTESTATION-ACCURACY (composite; 8 sub-variants)
+# REINFORCED — MEMORIAL-AND-ATTESTATION-ACCURACY (composite; 9 sub-variants)
 #
 #   Tactical choice verification (R05): When a MEMORIAL entry names a specific tactical
 #     implementation choice, verify it against the committed artifact BEFORE finalizing.
@@ -314,8 +326,19 @@ with a clear commit message.
 #     their full provenance detail. Asymmetric elision — preserving case-study tails for some
 #     entries but dropping them for others — is a verbatim-preservation failure even when the
 #     rule body itself is intact.
+#
+#   Memorial attestation must reflect actual observed delta (R78 MINOR-1): not editorial
+#     abstraction. When implementation deviates from spec pseudocode (even functionally inert
+#     changes like parameter rename `fired_set` → `_fired_set` to silence TS linters), the
+#     coordination/MEMORIAL.md CONFIRMATION entry must disclose the delta. Never claim "implements
+#     spec §X verbatim" when there is a delta, even if the delta is idiomatic (underscore prefix)
+#     and functionally inert. The attestation breach violates REINFORCED 2026-05-18 encode-actual-
+#     results-verbatim discipline. Procedure: for any spec-vs-impl deviation (parameter rename,
+#     variable reorder, omitted safety timeout that was already enforced structurally), record the
+#     exact delta in the attestation: "[deviation type] does not affect observables: [reason]; spec
+#     prescribed [X], implementation uses [Y]." Detected tessera R78 MINOR-1.
 
-# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 13 sub-variants)
+# REINFORCED — SPEC-PRESCRIPTION-FIDELITY (composite; 14 sub-variants)
 #
 #   Prescriptions are binding (R01): Spec prescriptions in §Implementation surface are
 #     equivalent to ACs — not optional suggestions. When a prescription is unachievable,
@@ -452,8 +475,14 @@ with a clear commit message.
 #     Procedure: after any in-round AC addition, grep the spec for every occurrence of "N_new = " and
 #     "AC-R<N>-<last>" and update them to reflect the new totals. Detected tessera R74 MAJOR-1 R2
 #     (Reviewer-2; spec § 4 last row = AC-R74-31; § 5.3 still says "absent"; § 10 N_new = 22).
+#
+#   rule-derivation-without-self-application (cross-project rule; 2026-05-18):
+#     see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R32 MAJOR-2 (4 AC instances of
+#     `includes(...)` violated the assertion-coverage rule derived and committed in the same round).
+#     When deriving a new rule, immediately grep the current test file for the weak patterns
+#     the rule prohibits and apply the mutation test to every match.
 
-# REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 6 sub-variants)
+# REINFORCED — AC-COVERAGE-COMPLETENESS (composite; 7 sub-variants)
 #
 #   Coverage scope (R01): When an AC says "enumerates every vendored file," resolve scope
 #     for ALL files the workflow touches, not just the primary directory. Files in test/ or
@@ -510,29 +539,13 @@ with a clear commit message.
 #     multi-branch validation function, list all branches in the branch-binding table and
 #     mark each as bound-by-AC or defensive+documented. Detected tessera R56 MINOR-3
 #     (parallel to R30 + R53 per-element-validation disposition; carries forward open gap).
-
-# REINFORCED 2026-05-17 — When spec § Mechanism defines a quantitative formula by name,
-#   pre-emit grilling MUST include a "formula vs implementation" cross-check: verify the
-#   test code implements the exact named formula OR explicitly documents the deviation.
-#   A +1 offset like (fleet+perShard)/fleet vs perShard/fleet is definitionally distinct
-#   even when magnitude difference is rounding noise. Detected tessera R14 MINOR-1.
-
-# REINFORCED 2026-05-17 — When an AC test computes its expected value via a production
-#   helper that the implementation also calls internally, flag the self-confirming pattern.
-#   Require that at least one AC in the behavioral cluster binds a LITERAL hand-traced
-#   value independent of the production helper. If a sibling AC provides the literal,
-#   document the dependency explicitly. Detected tessera R14 MINOR-2.
-
-# REINFORCED 2026-05-17 — When spec § Mechanism specifies a quantitative bound, taking
-#   the deviation-documented path does NOT exempt the test from a regression-line assertion.
-#   Include at least one bound assertion calibrated to the OBSERVED magnitude, not only an
-#   absolute byte-count guard. Detected tessera R14 MINOR-3.
-
-# REINFORCED 2026-05-17 — When building a measurement-proxy helper that cross-references
-#   an established baseline test, do a field-by-field input-construction comparison before
-#   writing findings. A "within X% match" from two compensating biases is not alignment.
-#   Gate: verify helper inputs are field-equivalent to the reference before writing any
-#   agreement claim. Detected tessera R16 MINOR-1.
+#
+#   anti-scope-allowed-set-forward-coverage (cross-project rule; 2026-05-18):
+#     see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R19 MAJOR-1 (anti-scope absolute for
+#     test/ paths; HALT-b fires at existence of spec/reality conflict), R19 MAJOR-2 (HALT-b
+#     triggered by the conflict, not by difficulty of fix), R25 MAJOR-2 (forward-protection
+#     ALLOWED_SET self-expansion forbidden — test reads its own literal and cannot audit itself;
+#     commit-message justification does not substitute for spec-amendment audit trail).
 
 # REINFORCED 2026-05-17 — When an AC parenthetical says "Verifies [production function X]",
 #   the test MUST import and call that production function — not a functionally-equivalent
@@ -578,20 +591,13 @@ with a clear commit message.
 #   disposition; (c) rationale for the AC allowed-set expansion. Editing the allowed-set
 #   without paper trail surfaces as a Reviewer MINOR. Detected tessera R18 MINOR-1.
 
-# REINFORCED 2026-05-18 — anti-scope-allowed-set-forward-coverage (cross-project rule):
-#   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R19 MAJOR-1 (anti-scope absolute for
-#   test/ paths; HALT-b fires at existence of spec/reality conflict), R19 MAJOR-2 (HALT-b
-#   triggered by the conflict, not by difficulty of fix), R25 MAJOR-2 (forward-protection
-#   ALLOWED_SET self-expansion forbidden — test reads its own literal and cannot audit itself;
-#   commit-message justification does not substitute for spec-amendment audit trail).
-
 # REINFORCED 2026-05-17 — When a chore commit adds a new test to an existing test file,
 #   re-read the file's header comment block before committing to verify that the header's
 #   classification claims for each AC remain accurate. Include this as a pre-chore-B grilling
 #   step: open the header, read each attestation-type claim, verify it still describes the
 #   current file body accurately. Detected tessera R20 MINOR-1.
 
-# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 10 sub-variants)
+# REINFORCED — CITATION-AND-ARITHMETIC-ACCURACY (composite; 15 sub-variants)
 #
 #   Full-formula re-verification (R20 MINOR-2): When spec § 4.x prescribes updating a
 #     specific arithmetic expression, re-read the FULL formula at the targeted line — all
@@ -687,6 +693,40 @@ with a clear commit message.
 #     ALL cited fields in structured output — not only the field bound by the AC. Procedure: when
 #     attesting a structured JSON result, copy ALL cited field values verbatim from the actual
 #     JSON output before writing interpretive commentary. Detected tessera R74 MAJOR-1 R1.
+#
+#   When spec § Mechanism defines a quantitative formula by name (R14 MINOR-1):
+#     pre-emit grilling MUST include a "formula vs implementation" cross-check: verify the
+#     test code implements the exact named formula OR explicitly documents the deviation.
+#     A +1 offset like (fleet+perShard)/fleet vs perShard/fleet is definitionally distinct
+#     even when magnitude difference is rounding noise. Detected tessera R14 MINOR-1.
+#
+#   When an AC test computes its expected value via a production helper (R14 MINOR-2): that
+#     the implementation also calls internally, flag the self-confirming pattern.
+#     Require that at least one AC in the behavioral cluster binds a LITERAL hand-traced
+#     value independent of the production helper. If a sibling AC provides the literal,
+#     document the dependency explicitly. Detected tessera R14 MINOR-2.
+#
+#   When spec § Mechanism specifies a quantitative bound (R14 MINOR-3): taking
+#     the deviation-documented path does NOT exempt the test from a regression-line assertion.
+#     Include at least one bound assertion calibrated to the OBSERVED magnitude, not only an
+#     absolute byte-count guard. Detected tessera R14 MINOR-3.
+#
+#   When building a measurement-proxy helper that cross-references (R16 MINOR-1):
+#     an established baseline test, do a field-by-field input-construction comparison before
+#     writing findings. A "within X% match" from two compensating biases is not alignment.
+#     Gate: verify helper inputs are field-equivalent to the reference before writing any
+#     agreement claim. Detected tessera R16 MINOR-1.
+#
+#   Commit message file-size claims must cite actual observable values (R78 MINOR-2):
+#     not estimates or rounded figures. When a commit creates new files, record their actual line
+#     counts (via `wc -l` or `git diff --stat`) in the commit message, not guesses or ranges.
+#     Commit messages are audit-trail artifacts. The R78 chore-A message claimed "tools/topology-
+#     walk-tuning.ts: created — 244 lines" (actual 338); "scripts/topology-walk-tuning-
+#     recommendation.md: created — 130 lines" (actual 148). Neither figure matches any standard
+#     metric (non-blank=322, non-comment≈307 for the first; no standard metric for the second).
+#     Root cause: author estimated from reading and rounded down. Procedure: before finalizing
+#     commit message, run `wc -l [file]` for new files and record the exact output. Detected
+#     tessera R78 MINOR-2.
 
 # REINFORCED 2026-05-17 — When implementing a spec-prescribed guard for a distinct failure
 #   mode, write a structural test that would FAIL if the guard were removed. If the existing
@@ -752,12 +792,6 @@ with a clear commit message.
 #   list item retains its full rationale paragraph adjacent to its entry; (b) no orphaned
 #   rationale text appears after the new content. Detected tessera R32 MAJOR-1.
 
-# REINFORCED 2026-05-18 — rule-derivation-without-self-application (cross-project rule):
-#   see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R32 MAJOR-2 (4 AC instances of
-#   `includes(...)` violated the assertion-coverage rule derived and committed in the same round).
-#   When deriving a new rule, immediately grep the current test file for the weak patterns
-#   the rule prohibits and apply the mutation test to every match.
-
 # REINFORCED 2026-05-18 — When amending a spec AC row with an existing Then clause that will
 #   be superseded, mark the original claim as superseded BEFORE appending the new claim. Use
 #   `~~strikethrough~~` or `[R{N}-amended: the following supersedes the prior claim]`. Leaving
@@ -776,7 +810,7 @@ with a clear commit message.
 #   sum equals the spec'ied total. A silently-dropped AC is invisible to the assertion.
 #   Detected tessera R34 MINOR-4.
 
-# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 12 sub-variants observed at Tessera)
+# REINFORCED — ATTESTATION-SCOPE-FIDELITY (composite; 15 sub-variants observed at Tessera)
 #
 #   Selective-audit-overreach (R41 MAJOR-1): When an audit empirically checks N of M files and
 #     the AC requires "all M files" verified, the delivered artifact must scope its claim to
@@ -940,6 +974,38 @@ with a clear commit message.
 #     command and record the actual output. Detected tessera R81 MINOR-3 (Implementer; NEXT-ROLE.md
 #     claimed `renderAuditForWindow` still appears; function was renamed to
 #     `rebuildAuditUpToCurrentWindow`; grep returns 0 matches in both files).
+#
+#   false-compliance-attestation (cross-project rule; 2026-05-18):
+#     see CROSS-PROJECT-MEMORIAL.md. Tessera origin: R03 MINOR-4 (spec count ≠ observed count),
+#     R18 MINOR-2+3 (arithmetic errors in NEXT-ROLE.md), R26 MAJOR-1 (tsc exit 2 attested as 0).
+#     Core: report observed results verbatim; never reframe errors to match AC literal.
+#
+#   Halt-condition observed-vs-predicted divergence must ESCALATE to operator (R79 MAJOR-1):
+#     not be self-resolved by modifying the binding-command harness. When EMPIRICAL.sh or any binding
+#     command produces an observed value diverging from spec-predicted (e.g., TAP fail count 8 vs
+#     predicted 7), the Implementer procedure is: (1) write DIAGNOSTIC identifying the root cause
+#     (2) set STATUS: ESCALATE (3) STOP. The Implementer does NOT amend EMPIRICAL.sh, Q-RNN-SPEC.md,
+#     or the spec triad to change expected values after observing differing actuals. That amendment is
+#     the operator's or Architect's decision, routed through the operator. This is the fourth tessera
+#     instance of spec-not-amended-post-disposition pattern (R25 MAJOR-2/3; R79 MAJOR-1); promoted to
+#     Implementer-role reinforcement because R79 was the first Implementer-side instance. Rule: the
+#     binding command harness is part of the spec triad. Implementer amendments to the spec triad are
+#     not acceptable under any conditions. Write the DIAGNOSTIC (✓), escalate (✗ at R79), resume after
+#     operator/Architect amends (N/A at R79). Detected tessera R79 MAJOR-1 (Implementer self-amended
+#     Q-R79-EMPIRICAL.sh EXPECTED_FAIL from 7→8 instead of escalating).
+#
+#   Prefix-continuity-invariant must be honored even when the solution is obvious (R79 MAJOR-1):
+#     CLAUDE-COMMON.md § "Within-round prefix-continuity invariant" declares: "once the Architect commits
+#     the spec triad, no role may modify the contents of Q-${round}-SPEC.md, Q-${round}-SPEC-AUDIT.md,
+#     Q-${round}-EMPIRICAL.sh (beyond pre-prescribed placeholder substitutions such as SHA injection
+#     blocks)." This is an invariant, not a guideline. When an Implementer-discovered fact (e.g.,
+#     AC-R77-14 forward-protection regression) makes an EXPECTED_FAIL value in EMPIRICAL.sh incorrect,
+#     the Implementer does NOT fix it unilaterally. The Implementer escalates. The operator then decides:
+#     does the issue warrant an Architect amendment commit, or does the issue expose a gap in the spec's
+#     prediction discipline (which is an Architect problem, not an Implementer problem)? The Implementer's
+#     job is to surface the gap cleanly, not to close it. Implementing an obvious fix silently (with
+#     explanatory comments) violates the invariant. Detected tessera R79 MAJOR-1 (Implementer added
+#     explanatory comment but still modified the binding harness unilaterally).
 
 # REINFORCED — PRE-EMIT-GRILLING-COMPLETENESS-GATE (composite; 6 sub-variants observed at Tessera)
 #
@@ -1098,52 +1164,6 @@ with a clear commit message.
 #     `correlational_not_causal: true` is "in the scenario JSON"; field exists only in
 #     `engine/topology/common-mode-attribution.ts` output shape, not in any *.json file).
 
-# REINFORCED 2026-05-20 — Memorial attestation must reflect actual observed delta, not editorial
-#   abstraction. When implementation deviates from spec pseudocode (even functionally inert
-#   changes like parameter rename `fired_set` → `_fired_set` to silence TS linters), the
-#   coordination/MEMORIAL.md CONFIRMATION entry must disclose the delta. Never claim "implements
-#   spec §X verbatim" when there is a delta, even if the delta is idiomatic (underscore prefix)
-#   and functionally inert. The attestation breach violates REINFORCED 2026-05-18 encode-actual-
-#   results-verbatim discipline. Procedure: for any spec-vs-impl deviation (parameter rename,
-#   variable reorder, omitted safety timeout that was already enforced structurally), record the
-#   exact delta in the attestation: "[deviation type] does not affect observables: [reason]; spec
-#   prescribed [X], implementation uses [Y]." Detected tessera R78 MINOR-1.
-
-# REINFORCED 2026-05-20 — Commit message file-size claims must cite actual observable values,
-#   not estimates or rounded figures. When a commit creates new files, record their actual line
-#   counts (via `wc -l` or `git diff --stat`) in the commit message, not guesses or ranges.
-#   Commit messages are audit-trail artifacts. The R78 chore-A message claimed "tools/topology-
-#   walk-tuning.ts: created — 244 lines" (actual 338); "scripts/topology-walk-tuning-
-#   recommendation.md: created — 130 lines" (actual 148). Neither figure matches any standard
-#   metric (non-blank=322, non-comment≈307 for the first; no standard metric for the second).
-#   Root cause: author estimated from reading and rounded down. Procedure: before finalizing
-#   commit message, run `wc -l [file]` for new files and record the exact output. Detected
-#   tessera R78 MINOR-2.
-# REINFORCED 2026-05-20 — Halt-condition observed-vs-predicted divergence must ESCALATE to operator,
-#   not be self-resolved by modifying the binding-command harness. When EMPIRICAL.sh or any binding
-#   command produces an observed value diverging from spec-predicted (e.g., TAP fail count 8 vs
-#   predicted 7), the Implementer procedure is: (1) write DIAGNOSTIC identifying the root cause
-#   (2) set STATUS: ESCALATE (3) STOP. The Implementer does NOT amend EMPIRICAL.sh, Q-RNN-SPEC.md,
-#   or the spec triad to change expected values after observing differing actuals. That amendment is
-#   the operator's or Architect's decision, routed through the operator. This is the fourth tessera
-#   instance of spec-not-amended-post-disposition pattern (R25 MAJOR-2/3; R79 MAJOR-1); promoted to
-#   Implementer-role reinforcement because R79 was the first Implementer-side instance. Rule: the
-#   binding command harness is part of the spec triad. Implementer amendments to the spec triad are
-#   not acceptable under any conditions. Write the DIAGNOSTIC (✓), escalate (✗ at R79), resume after
-#   operator/Architect amends (N/A at R79). Detected tessera R79 MAJOR-1 (Implementer self-amended
-#   Q-R79-EMPIRICAL.sh EXPECTED_FAIL from 7→8 instead of escalating).
-# REINFORCED 2026-05-20 — Prefix-continuity-invariant must be honored even when the solution is obvious.
-#   CLAUDE-COMMON.md § "Within-round prefix-continuity invariant" declares: "once the Architect commits
-#   the spec triad, no role may modify the contents of Q-${round}-SPEC.md, Q-${round}-SPEC-AUDIT.md,
-#   Q-${round}-EMPIRICAL.sh (beyond pre-prescribed placeholder substitutions such as SHA injection
-#   blocks)." This is an invariant, not a guideline. When an Implementer-discovered fact (e.g.,
-#   AC-R77-14 forward-protection regression) makes an EXPECTED_FAIL value in EMPIRICAL.sh incorrect,
-#   the Implementer does NOT fix it unilaterally. The Implementer escalates. The operator then decides:
-#   does the issue warrant an Architect amendment commit, or does the issue expose a gap in the spec's
-#   prediction discipline (which is an Architect problem, not an Implementer problem)? The Implementer's
-#   job is to surface the gap cleanly, not to close it. Implementing an obvious fix silently (with
-#   explanatory comments) violates the invariant. Detected tessera R79 MAJOR-1 (Implementer added
-#   explanatory comment but still modified the binding harness unilaterally).
 # REINFORCED 2026-05-21 — Spec-deviance-disclosure-accuracy (Tessera R83): A "spec-deviance disclosure" in the TD-N lines of NEXT-ROLE.md routing block must describe an actual delta between spec prescription and implementation commit, not Implementer thought-process or recognized hazards that never actualized. If the spec prescribes "use plain `.value` assignments" and the Implementer uses plain `.value` assignments, there is no deviation to disclose — even if the Implementer internally considered (and rejected) adding TypeScript casts. Audit-trail integrity depends on TD-N entries corresponding to real spec-vs-commit deltas. Procedure: before writing a TD-N line, verify: (a) spec prescribed pattern A; (b) commit contains pattern B (B ≠ A); (c) the deviation (A→B delta) is intentional and worth disclosing. If spec prescribed B to begin with, or if the Implementer rejected an internal idea without committing it, do not write the TD-N line — it will confuse future readers and create spurious audit-trail entries. First tessera instance of TD-disclosure-describes-non-existent-delta (prior: R82 had TD-1 accuracy issues at a different structural level).
 # REINFORCED 2026-05-21 — Operator-resolution-amendment-scope-boundary (Tessera R84 MAJOR-1): When an operator-resolved ESCALATE option prescribes a spec amendment (steps 1-N enumerating specific file:section edits), those amendments are the ONLY scope changes the Implementer is authorized to make to the spec triad. The Implementer must execute all enumerated steps; omitting any step is a violation of the operator-resolution boundary. Specific failure mode: operator prescribed 6 steps; Implementer executed steps 2-6 but did NOT execute step 1 (amend spec § 1.6 AC-R84-9). The test file was changed per step 2; the spec body that prescribes the test was not changed per step 1. Result: spec and test diverged; spec triad lost internal coherence. The operator's resolution authority extends to amending the spec; the Implementer's authority is to execute the prescribed amendments faithfully, not to choose which amendments are "worth doing." If any enumerated step is omitted, escalate for operator clarification (unless the operator explicitly said "steps 2-6 only, skip step 1"). Detected tessera R84 MAJOR-1; 5th instance of spec-not-amended-post-disposition pattern overall (R25×2 + R79 + R82 + R84).
 # REINFORCED 2026-05-21 — Operator-regex-strictness-fidelity (Tessera R84 MINOR-1): When an operator-resolution ESCALATE option prescribes a specific regex (e.g., "use this exact pattern /.../ to replace the region-scoped pattern"), apply the operator-prescribed regex verbatim. Do not apply the prior permissive pattern "because it still passes" — the operator selected a stricter pattern for a reason (better discriminating power against future regressions). Operator-prescribed regex `/worker\.postMessage\s*\(\s*\{\s*type:\s*['"]run['"],\s*controlState\s*:/` (strict: no chars between `{` and `type`; comma + colon required) vs Implementer-applied regex `/worker\.postMessage\s*\(\s*\{[\s\S]*?type:\s*['"]run['"][\s\S]*?controlState/` (permissive: lazy any-chars match). Both pass current code; operator's regex is materially less vulnerable to payload-shape drift in future rounds. Operator decisions on regex patterns are structural discipline; applying a different pattern than prescribed violates the resolution boundary. Detected tessera R84 MINOR-1.

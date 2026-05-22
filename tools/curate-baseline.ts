@@ -23,7 +23,7 @@ import type {
   BaselineBundle,
   BaselineCurationDecision,
   BaselineCurationDecisionId,
-} from '../engine/types/config';
+} from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 import {
   curateBaselineFleetCorrelated,
   type FleetCorrelatedResult,

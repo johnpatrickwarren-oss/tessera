@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import {
   computeSnapshotHash,
   pureJsSha256,
-} from '../engine/topology-overlay';
+} from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
 
 const ROUND_START_SHA = '5c3e0d9';
 const REPO_ROOT = path.resolve(__dirname, '..');

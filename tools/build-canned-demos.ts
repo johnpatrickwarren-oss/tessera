@@ -10,21 +10,21 @@
 
 // ── Engine imports (same .js extension convention as tools/demo-scenario.ts) ──
 import { freshBettingState, updateBettingState }
-  from '../engine/detectors/betting-e-process.js';
-import { peakACF } from '../engine/detectors/spectral.js';
+  from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
+import { peakACF } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/spectral';
 import { attributeCommonMode, type FiredShardEvent, DEFAULT_MIN_MEMBER_COUNT }
-  from '../engine/topology/common-mode-attribution.js';
-import { DsEventConsumer } from '../engine/ds-integration/event-consumer.js';
+  from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+import { DsEventConsumer } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-consumer';
 import { createFreezeHookFromDsEvents }
-  from '../engine/ds-integration/freeze-hook-factory.js';
-import { initialPerShardResidual } from '../engine/per-shard/warm-start.js';
-import { eBenjaminiHochberg } from '../engine/fleet/e-bh.js';
+  from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/freeze-hook-factory';
+import { initialPerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
+import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 import { combineAverage, freshFleetEProcessState, updateFleetEProcessState }
-  from '../engine/fleet/combine.js';
+  from '@johnpatrickwarren-oss/deploysignal-engine/fleet/combine';
 import type { TopologySnapshot, TopologyNode, TopologyEdge }
-  from '../engine/types/verdict.js';
-import type { ExtendedSampleObservation } from '../engine/per-shard/runtime.js';
-import type { DeployEventPayload } from '../engine/ds-integration/event-contract.js';
+  from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
+import type { ExtendedSampleObservation } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
+import type { DeployEventPayload } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-contract';
 
 // ── fs + path imports (Node-builtins only) ──
 import * as fs from 'node:fs';

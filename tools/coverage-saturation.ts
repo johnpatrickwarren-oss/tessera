@@ -19,16 +19,16 @@
 //   a typecheck error at the consumer → cast at consumer or widen at producer.")
 
 // ── Engine imports (.js extension; matches R70/R71 convention) ──
-import { freshBettingState, updateBettingState } from '../engine/detectors/betting-e-process.js';
-import { attributeCommonMode, type FiredShardEvent } from '../engine/topology/common-mode-attribution.js';
-import { DsEventConsumer } from '../engine/ds-integration/event-consumer.js';
-import { createFreezeHookFromDsEvents } from '../engine/ds-integration/freeze-hook-factory.js';
-import { initialPerShardResidual } from '../engine/per-shard/warm-start.js';
-import { eBenjaminiHochberg } from '../engine/fleet/e-bh.js';
-import { combineAverage, freshFleetEProcessState, updateFleetEProcessState } from '../engine/fleet/combine.js';
-import type { TopologySnapshot, TopologyNode, TopologyEdge } from '../engine/types/verdict.js';
-import type { ExtendedSampleObservation } from '../engine/per-shard/runtime.js';
-import type { DeployEventPayload } from '../engine/ds-integration/event-contract.js';
+import { freshBettingState, updateBettingState } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
+import { attributeCommonMode, type FiredShardEvent } from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+import { DsEventConsumer } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-consumer';
+import { createFreezeHookFromDsEvents } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/freeze-hook-factory';
+import { initialPerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
+import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
+import { combineAverage, freshFleetEProcessState, updateFleetEProcessState } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/combine';
+import type { TopologySnapshot, TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
+import type { ExtendedSampleObservation } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
+import type { DeployEventPayload } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-contract';
 
 // ── fs + path imports (Node-builtins only) ──
 import * as fs from 'node:fs';

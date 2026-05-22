@@ -24,21 +24,21 @@ import {
   parseNvlinkStatus,
   NvlinkTopologySource,
   ingestNvlinkErrorCounter,
-} from '../engine/topology/nvlink-source';
-import { computeSnapshotHash } from '../engine/topology-overlay';
+} from '@johnpatrickwarren-oss/deploysignal-engine/topology/nvlink-source';
+import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
 import {
   transformPair,
   UINT32_MOD,
   type CounterMetadata,
-} from '../engine/l0/counter-rate-transform';
+} from '@johnpatrickwarren-oss/deploysignal-engine/l0/counter-rate-transform';
 import {
   makeWrap32Pair,
   makeMissedScrapePair,
   makeResetPair,
   makeVariableIntervalSequence,
 } from './_substrate/synthetic-counter-generator';
-import { TrendBuffer } from '../engine/core';
-import type { TopologyNode, TopologyEdge } from '../engine/types/verdict';
+import { TrendBuffer } from '@johnpatrickwarren-oss/deploysignal-engine/core';
+import type { TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 const WELL_FORMED = readFileSync('test/_substrate/nvlink-fixture-well-formed.txt', 'utf8');
 const SPARSE      = readFileSync('test/_substrate/nvlink-fixture-sparse.txt',      'utf8');

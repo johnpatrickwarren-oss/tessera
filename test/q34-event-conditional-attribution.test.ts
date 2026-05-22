@@ -19,14 +19,14 @@ import {
   DEFAULT_PRE_WINDOW_SECONDS,
   DEFAULT_POST_WINDOW_SECONDS,
   DEFAULT_CORRELATION_WINDOW_SECONDS,
-} from '../engine/events/event-conditional-attribution';
-import { SyntheticEventFeed, type ClusterEvent } from '../engine/events/event-feed';
+} from '@johnpatrickwarren-oss/deploysignal-engine/events/event-conditional-attribution';
+import { SyntheticEventFeed, type ClusterEvent } from '@johnpatrickwarren-oss/deploysignal-engine/events/event-feed';
 import {
   freezeAwareUpdatePerShardResidual,
   type FreezeHookState,
-} from '../engine/events/freeze-hook';
-import { initialPerShardResidual } from '../engine/per-shard/warm-start';
-import type { PerShardResidual } from '../engine/types/config';
+} from '@johnpatrickwarren-oss/deploysignal-engine/events/freeze-hook';
+import { initialPerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
+import type { PerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 import {
   scenarioCell1,
   scenarioCell2,

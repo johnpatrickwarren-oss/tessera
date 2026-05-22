@@ -41,7 +41,7 @@ import type {
   BaselineCurationDecision,
   BaselineCurationDecisionId,
   CompiledConfig,
-} from '../engine/types/config.js';
+} from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 
 export type SliceId = 'SLICE_1' | 'SLICE_2' | 'SLICE_3';
 

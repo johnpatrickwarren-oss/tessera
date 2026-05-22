@@ -24,19 +24,19 @@ import {
   fleetMergeFamilyC,
   type FleetMergeStepResult,
   type CombinePrimitive,
-} from '../engine/fleet/detectors';
+} from '@johnpatrickwarren-oss/deploysignal-engine/fleet/detectors';
 import {
   combineProduct,
   combineAverage,
   freshFleetEProcessState,
   type FleetEProcessState,
-} from '../engine/fleet/combine';
+} from '@johnpatrickwarren-oss/deploysignal-engine/fleet/combine';
 import {
   freshBettingState,
   updateBettingState,
-} from '../engine/detectors/betting-e-process';
-import type { BettingEProcessState } from '../engine/types/families/a';
-import type { FamilyCBettingEProcessState } from '../engine/types/families/c';
+} from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
+import type { BettingEProcessState } from '@johnpatrickwarren-oss/deploysignal-engine/types/families/a';
+import type { FamilyCBettingEProcessState } from '@johnpatrickwarren-oss/deploysignal-engine/types/families/c';
 
 // ─── Deterministic PRNG + Gaussian generator (re-inlined per R11 q11
 // standalone convention at test/q11-hierarchical-e-value-combination.test.ts:35-50). ───
