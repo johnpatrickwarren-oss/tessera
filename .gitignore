@@ -31,3 +31,9 @@ coordination/multi-track-status.json
 # R72: exempt coordination/coverage/ from the root-level coverage/ gitignore rule
 # (git's 'coverage/' pattern without leading slash matches all dirs named coverage/ in tree)
 !coordination/coverage/
+
+# clustersynth perf bench: per-run reports (timestamped, regenerable)
+bench/results/
+
+# clustersynth fixtures dropped into _substrate for bench/smoke tests
+test/_substrate/clustersynth-*.json
