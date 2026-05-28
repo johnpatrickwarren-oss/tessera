@@ -25,6 +25,8 @@
     "topology-walk-tuning": "node tools/topology-walk-tuning.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
+    "prebench:mmd-sampling": "tsc -p tsconfig.test.json",
+    "bench:mmd-sampling": "node tools/mmd-sampling-envelope.js",
     "tier-router": "pnpm exec node scripts/tier-router.js",
     "tier-router:validate": "pnpm exec node scripts/tier-router-validate.js",
     "mu-model-select": "pnpm exec node scripts/mu-model-select.js",
