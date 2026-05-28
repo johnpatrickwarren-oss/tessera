@@ -28,7 +28,7 @@ test('AC-R94-1: Tessera root has no engine/ directory post-R94', () => {
     'engine/ directory must be absent at Tessera root post-R94 chore-A');
 });
 
-test('AC-R94-2: package.json dependency URL is github: with v0.3.0-pre tag', () => {
+test('AC-R94-2: package.json dependency URL is github: with reviewed pin (v0.3.0-pre tag OR engine PR #12 SHA)', () => {
   // Bumped from v0.1.0-pre to v0.3.0-pre at Phase E close on the engine
   // side (deploysignal-engine PR #11). Surface compat verified: Tessera
   // imports from detectors/, ds-integration/, per-shard/, topology/,
@@ -36,12 +36,23 @@ test('AC-R94-2: package.json dependency URL is github: with v0.3.0-pre tag', () 
   // NEW files only — `detectors/ar-p.ts`, `detectors/seasonal.ts`,
   // `types/production-ar-substrate.ts`, plus tools/ changes Tessera
   // doesn't import).
+  //
+  // Pinned bump 2026-05-28: engine PR #12 added optional cluster-topology
+  // extension types (additive, non-breaking — no changes to existing
+  // NodeKind / EdgeRelationship / TopologyNode / TopologyEdge /
+  // TopologySnapshot). SHA pin `9f3e5227...` is reachable from engine
+  // main via the merge commit. Will flip to a fresh tag (e.g. v0.3.1-pre)
+  // when one is cut.
+  const ENGINE_PR12_SHA = '9f3e5227ba152d37c764ffbb6b4095742b1c37b5';
+  const ALLOWED = new RegExp(
+    `^github:johnpatrickwarren-oss\\/deploysignal-engine#(v0\\.3\\.0-pre|${ENGINE_PR12_SHA})$`,
+  );
   const pkgPath = pathJoin(REPO_ROOT, 'package.json');
   const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
   const depUrl = pkg.dependencies?.['@johnpatrickwarren-oss/deploysignal-engine'];
   assert.equal(typeof depUrl, 'string', 'engine dep must be present');
-  assert.match(depUrl, /^github:johnpatrickwarren-oss\/deploysignal-engine#v0\.3\.0-pre$/,
-    `engine dep URL must point at github:johnpatrickwarren-oss/deploysignal-engine#v0.3.0-pre, observed: ${depUrl}`);
+  assert.match(depUrl, ALLOWED,
+    `engine dep URL must be a reviewed pin (v0.3.0-pre tag OR engine PR #12 SHA), observed: ${depUrl}`);
 });
 
 test('AC-R94-3: installed package has version 0.3.0-pre + name matches', () => {
