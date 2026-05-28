@@ -28,39 +28,29 @@ test('AC-R94-1: Tessera root has no engine/ directory post-R94', () => {
     'engine/ directory must be absent at Tessera root post-R94 chore-A');
 });
 
-test('AC-R94-2: package.json dependency URL is github: with reviewed pin (v0.3.0-pre tag OR engine PR #12 SHA)', () => {
-  // Bumped from v0.1.0-pre to v0.3.0-pre at Phase E close on the engine
-  // side (deploysignal-engine PR #11). Surface compat verified: Tessera
-  // imports from detectors/, ds-integration/, per-shard/, topology/,
-  // types/ are byte-identical between v0.1 and v0.3 (v0.2 + v0.3 added
-  // NEW files only — `detectors/ar-p.ts`, `detectors/seasonal.ts`,
-  // `types/production-ar-substrate.ts`, plus tools/ changes Tessera
-  // doesn't import).
-  //
-  // Pinned bump 2026-05-28: engine PR #12 added optional cluster-topology
-  // extension types (additive, non-breaking — no changes to existing
-  // NodeKind / EdgeRelationship / TopologyNode / TopologyEdge /
-  // TopologySnapshot). SHA pin `9f3e5227...` is reachable from engine
-  // main via the merge commit. Will flip to a fresh tag (e.g. v0.3.1-pre)
-  // when one is cut.
-  const ENGINE_PR12_SHA = '9f3e5227ba152d37c764ffbb6b4095742b1c37b5';
-  const ALLOWED = new RegExp(
-    `^github:johnpatrickwarren-oss\\/deploysignal-engine#(v0\\.3\\.0-pre|${ENGINE_PR12_SHA})$`,
-  );
+test('AC-R94-2: package.json dependency URL is github: with v0.3.1-pre tag', () => {
+  // Version history:
+  //   v0.1.0-pre — initial Tessera engine pin
+  //   v0.3.0-pre — engine PR #11, Phase E close + production-AR substrate
+  //   v0.3.1-pre — engine PR #12, additive ClusterTopologyKind extension
+  //                (2026-05-28)
+  // Surface compat verified across all three pins: every Tessera import
+  // from detectors/, ds-integration/, per-shard/, topology/, types/
+  // remains byte-identical; each minor pin added NEW files only.
   const pkgPath = pathJoin(REPO_ROOT, 'package.json');
   const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
   const depUrl = pkg.dependencies?.['@johnpatrickwarren-oss/deploysignal-engine'];
   assert.equal(typeof depUrl, 'string', 'engine dep must be present');
-  assert.match(depUrl, ALLOWED,
-    `engine dep URL must be a reviewed pin (v0.3.0-pre tag OR engine PR #12 SHA), observed: ${depUrl}`);
+  assert.match(depUrl, /^github:johnpatrickwarren-oss\/deploysignal-engine#v0\.3\.1-pre$/,
+    `engine dep URL must point at github:johnpatrickwarren-oss/deploysignal-engine#v0.3.1-pre, observed: ${depUrl}`);
 });
 
-test('AC-R94-3: installed package has version 0.3.0-pre + name matches', () => {
+test('AC-R94-3: installed package has version 0.3.1-pre + name matches', () => {
   const installedPath = pathJoin(REPO_ROOT, 'node_modules', '@johnpatrickwarren-oss', 'deploysignal-engine', 'package.json');
   assert.equal(existsSync(installedPath), true, 'installed package.json must exist post pnpm install');
   const installed = JSON.parse(readFileSync(installedPath, 'utf8'));
   assert.equal(installed.name, '@johnpatrickwarren-oss/deploysignal-engine');
-  assert.equal(installed.version, '0.3.0-pre');
+  assert.equal(installed.version, '0.3.1-pre');
 });
 
 test('AC-R94-4: 5 prescribed engine subpaths resolve via createRequire under node_modules', () => {
