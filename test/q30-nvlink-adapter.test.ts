@@ -201,28 +201,3 @@ test('AC-R30-14: transformPair with counter_width omitted routes makeResetPair t
 // ── AC-R30-15 removed R95 2026-05-22 ────────────────────────────────────────
 // Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
 // Tessera worktree; readFileSync fails with ENOENT. Category A.
-
-// AC-R30-18: anti-scope diff at chore-A SHA ⊆ allowed-set
-// Chore-A SHA literal committed by Implementer at chore-B. If a HALT fires mid-round and
-// produces coordination/diagnostics/DIAGNOSTIC-R30-<topic>.md, the Implementer adds the specific
-// DIAGNOSTIC path as a 9th allowed-set entry per spec § 3 conditional clause.
-test('AC-R30-18: round-start-to-chore-A diff path-set ⊆ R30 allowed-set', () => {
-  const BASELINE_SHA = '5bb427c';     // R30 routing commit (round-start)
-  const CHORE_A_SHA  = '82d1e5a355cf9a30ab58f515078bc89e655ab05d';
-  const ALLOWED_SET = new Set<string>([
-    'engine/topology/nvlink-source.ts',
-    'test/q30-nvlink-adapter.test.ts',
-    'test/_substrate/nvlink-fixture-well-formed.txt',
-    'test/_substrate/nvlink-fixture-sparse.txt',
-    'coordination/specs/Q-R30-SPEC.md',
-    'coordination/specs/Q-R30-SPEC-AUDIT.md',
-    'coordination/NEXT-ROLE.md',
-    'coordination/MEMORIAL.md',
-    // Conditional 9th entry per spec § 3: added IFF a HALT fires mid-round.
-  ]);
-  const diffOutput = execFileSync('git', ['diff', `${BASELINE_SHA}..${CHORE_A_SHA}`, '--name-only'], { encoding: 'utf8' });
-  const paths = diffOutput.split('\n').filter((p) => p.length > 0);
-  for (const p of paths) {
-    assert.ok(ALLOWED_SET.has(p), `unexpected R30 path in chore-A diff: ${p}`);
-  }
-});

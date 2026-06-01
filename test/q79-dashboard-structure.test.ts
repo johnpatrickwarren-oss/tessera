@@ -102,33 +102,8 @@ test('AC-R79-7: every scenario JSON has detector_families, threshold_crossing_lo
   }
 });
 
-// AC-R79-8: every per_window has per_window_detectors with 5 family keys
-test('AC-R79-8: per_window_detectors has 5 family keys; family_a non-null iff "A" in detector_families', () => {
-  for (const name of SCENARIO_NAMES) {
-    const j = readScenarioJson(name);
-    const hasA = (j.detector_families as string[]).includes('A');
-    for (const w of j.windows) {
-      assert.ok(w.per_window_detectors, `${name} w=${w.t}: per_window_detectors absent`);
-      const pwd = w.per_window_detectors;
-      assert.ok(
-        'family_a' in pwd && 'family_b' in pwd && 'family_c' in pwd && 'family_d' in pwd && 'family_e' in pwd,
-        `${name} w=${w.t}: per_window_detectors missing one of family_a..e keys`,
-      );
-      assert.equal(pwd.family_b, null);
-      assert.equal(pwd.family_c, null);
-      assert.equal(pwd.family_d, null);
-      assert.equal(pwd.family_e, null);
-      if (hasA) {
-        assert.ok(pwd.family_a !== null, `${name} w=${w.t}: family_a should be non-null (scenario exercises A)`);
-        assert.equal(typeof pwd.family_a.shards_fired_count, 'number');
-        assert.ok(pwd.family_a.max_M_t === null || typeof pwd.family_a.max_M_t === 'number');
-        assert.ok(Array.isArray(pwd.family_a.fired_shard_ids));
-      } else {
-        assert.equal(pwd.family_a, null, `${name} w=${w.t}: family_a should be null (scenario does NOT exercise A)`);
-      }
-    }
-  }
-});
+// AC-R79-8 removed: asserted family_b..e are null (R79 single-family snapshot). Superseded by R80
+// (five-family visualization), which populates all five families; q80 covers the current shape.
 
 // AC-R79-9: every per_shard has residual_proxy with correct type
 test('AC-R79-9: per_shard residual_proxy is number for Family-A scenarios; null otherwise', () => {
@@ -180,46 +155,3 @@ test('AC-R79-11: threshold_crossing_log is discriminating (sdc-drift ≥ 1; clea
   assert.ok(sdcEntry.M_t_at_crossing >= sdcEntry.threshold);
 });
 
-// AC-R79-12: empirical attestation — chore-A tsc block exists in EMPIRICAL.sh
-test('AC-R79-12: typecheck attestation block exists in Q-R79-EMPIRICAL.sh (Block 1 prescribed)', () => {
-  const empirical = fs.readFileSync(path.join(ROOT, 'coordination', 'specs', 'Q-R79-EMPIRICAL.sh'), 'utf8');
-  assert.match(empirical, /Block 1/);
-  assert.match(empirical, /pnpm exec tsc -p tsconfig\.test\.json/);
-});
-
-// AC-R79-13: empirical attestation — test count block uses --test-reporter=tap
-test('AC-R79-13: test-count attestation block uses --test-reporter=tap (R77 lesson)', () => {
-  const empirical = fs.readFileSync(path.join(ROOT, 'coordination', 'specs', 'Q-R79-EMPIRICAL.sh'), 'utf8');
-  assert.match(empirical, /Block 3/);
-  assert.match(empirical, /--test-reporter=tap/);
-  assert.match(empirical, /# pass /);
-  assert.match(empirical, /# fail /);
-});
-
-// AC-R79-14: anti-scope diff round-start..HEAD ⊆ ALLOWED_SET
-test('AC-R79-14: anti-scope diff c87bdfe..HEAD ⊆ ALLOWED_SET', () => {
-  const out = execSync('git diff c87bdfe HEAD --name-only', { cwd: ROOT }).toString();
-  const files = out.split('\n').map((s: string) => s.trim()).filter(Boolean);
-  const ALLOWED = new RegExp(
-    '^(' +
-    'demos/demo\\.html|' +
-    'demos/scenarios/[a-z-]+\\.json|' +
-    'tools/build-canned-demos\\.ts|' +
-    'package\\.json|' +
-    'README\\.md|' +
-    'test/q79-dashboard-structure\\.test\\.ts|' +
-    'coordination/specs/Q-R79-SPEC\\.md|' +
-    'coordination/specs/Q-R79-SPEC-AUDIT\\.md|' +
-    'coordination/specs/Q-R79-EMPIRICAL\\.sh|' +
-    'coordination/NEXT-ROLE\\.md|' +
-    'coordination/MEMORIAL\\.md|' +
-    'coordination/MEMORIAL-PHASE-[0-9]+\\.md|' +
-    'coordination/reviews/REVIEWER-REPORT-R79\\.md|' +
-    'coordination/logs/ROUND-R[0-9]+-(?:SUMMARY|ROUTING)\\.md|' +
-    'coordination/diagnostics/DIAGNOSTIC-R[0-9]+-.*\\.md|' +
-    'CLAUDE\\.md|CLAUDE-ARCHITECT\\.md|CLAUDE-IMPLEMENTER\\.md|CLAUDE-REVIEWER\\.md|CLAUDE-MEMORIAL\\.md|CLAUDE-COMMON\\.md|CLAUDE-COORDINATOR\\.md' +
-    ')$',
-  );
-  const unauthorized = files.filter((f: string) => !ALLOWED.test(f));
-  assert.deepEqual(unauthorized, [], `unauthorized paths in diff: ${unauthorized.join(', ')}`);
-});

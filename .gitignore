@@ -21,16 +21,11 @@ demos/engine-bundle.mjs
 # R82: pnpm v11 build-approval file (auto-created by pnpm; project-local; not tracked)
 pnpm-workspace.yaml
 
-# Anchor Mode 2 pipeline artifacts (gitignored per new-project.sh convention)
-coordination/.prompt-*.md
-coordination/.pipeline-*.lock
-coordination/.role-stamp
-coordination/clusters/
-coordination/multi-track-status.json
-
-# R72: exempt coordination/coverage/ from the root-level coverage/ gitignore rule
-# (git's 'coverage/' pattern without leading slash matches all dirs named coverage/ in tree)
-!coordination/coverage/
+# Anchor pipeline working state. coordination/ is the orchestrator's LOCAL working directory
+# (PRD, role directives, memorials, specs, reviews, round logs) — not part of the published product:
+# no src/ or test/ code depends on it (product tests read only src/ + fixtures + coverage-matrices/).
+# Kept locally for run-pipeline.sh (override location with --coord-dir / ANCHOR_COORD_DIR); not tracked.
+coordination/
 
 # clustersynth perf bench: per-run reports (timestamped, regenerable)
 bench/results/

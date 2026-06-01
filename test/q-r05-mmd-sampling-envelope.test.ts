@@ -17,7 +17,7 @@ import { strict as a } from 'node:assert';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-const MATRIX_PATH = join(__dirname, '..', 'coordination', 'coverage', 'R05-mmd-sampling-envelope.json');
+const MATRIX_PATH = join(__dirname, '..', 'coverage-matrices', 'R05-mmd-sampling-envelope.json');
 
 interface Cell {
   scenario: 'persistent_linear' | 'short_bounded' | 'no_drift';

@@ -160,7 +160,7 @@ Tessera R72 validates the engine against 6 failure types × 20 parameter variati
 pnpm coverage
 ```
 
-See `coordination/coverage/R72-saturation-matrix.md` for the human-readable summary; `coordination/coverage/R72-saturation-matrix.json` is the machine-readable data. The matrix is deterministic — re-running produces byte-identical output.
+See `coverage-matrices/R72-saturation-matrix.md` for the human-readable summary; `coverage-matrices/R72-saturation-matrix.json` is the machine-readable data. The matrix is deterministic — re-running produces byte-identical output.
 
 | Type | Detection floor | Attribution floor |
 |---|---|---|
@@ -179,7 +179,7 @@ Tessera R77 characterizes the per-shard detector's detection probability across 
 pnpm detector-envelope
 ```
 
-See `coordination/coverage/R77-detection-envelope.md` for the human-readable summary with detection curves; `coordination/coverage/R77-detection-envelope-matrix.json` is the machine-readable data (504 cells, 2520 trials).
+See `coverage-matrices/R77-detection-envelope.md` for the human-readable summary with detection curves; `coverage-matrices/R77-detection-envelope-matrix.json` is the machine-readable data (504 cells, 2520 trials).
 
 At default settings (α=0.005, window_count=200, Family A): **≈100% detection for all drift magnitudes from 0.050 to 0.375**. The transitional detection band is at window_count=30 with magnitude < 0.10. Family A outperforms Family C in the short-window/low-magnitude regime (the boundary cells where tuning choices matter most).
 
@@ -193,7 +193,7 @@ Tessera R78 characterizes the tuning envelope of `attributeCommonMode` along two
 pnpm topology-walk-tuning
 ```
 
-See `coordination/coverage/R78-topology-walk-tuning.md` for the human-readable per-scenario summary; `coordination/coverage/R78-topology-walk-tuning-matrix.json` is the machine-readable data (30 cells, 150 trials).
+See `coverage-matrices/R78-topology-walk-tuning.md` for the human-readable per-scenario summary; `coverage-matrices/R78-topology-walk-tuning-matrix.json` is the machine-readable data (30 cells, 150 trials).
 
 Key findings: at the Tessera default `max_hop_distance=1`, the cooling_zone node is structurally unreachable (shard→rack→cz is hop=2). Lifting to `max_hop_distance=2` catches all cross-rack CZ common-modes with no shadow-rack false-positives. `max_hop_distance=3` introduces structural false-positive attribution — not recommended for 2-tier topologies.
 

@@ -1,0 +1,1891 @@
+{
+  "meta": {
+    "drift_scenarios": [
+      "persistent_linear",
+      "short_bounded",
+      "no_drift"
+    ],
+    "magnitudes": [
+      0,
+      0.025,
+      0.05,
+      0.075,
+      0.1,
+      0.125,
+      0.15,
+      0.175,
+      0.2,
+      0.225,
+      0.25,
+      0.275,
+      0.3,
+      0.375
+    ],
+    "sampling_intervals": [
+      1,
+      5,
+      10,
+      100
+    ],
+    "trials_per_cell": 5,
+    "window_count": 200,
+    "alpha": 0.005,
+    "p": 11,
+    "mmd_pool": 500,
+    "bandwidth": 4.69041575982343,
+    "short_drift_duration": 30,
+    "seed_prefix": 23125,
+    "total_cells": 168,
+    "total_trials": 840
+  },
+  "cells": [
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.025,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 72,
+        "mean_detection_window": 73.2
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.025,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 139,
+        "mean_detection_window": 137
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.025,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 4,
+        "detection_rate": 0.8,
+        "median_detection_window": 199,
+        "mean_detection_window": 199
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.025,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.05,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 53,
+        "mean_detection_window": 53.2
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.05,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 109,
+        "mean_detection_window": 109
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.05,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 179,
+        "mean_detection_window": 177
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.05,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.075,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 45,
+        "mean_detection_window": 45.2
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.075,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 99,
+        "mean_detection_window": 99
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.075,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 159,
+        "mean_detection_window": 163
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.075,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.1,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 41,
+        "mean_detection_window": 41
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.1,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 94,
+        "mean_detection_window": 94
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.1,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 159,
+        "mean_detection_window": 159
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.1,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.125,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 37,
+        "mean_detection_window": 37.2
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.125,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 89,
+        "mean_detection_window": 91
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.125,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 159,
+        "mean_detection_window": 159
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.125,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.15,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 35,
+        "mean_detection_window": 35.4
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.15,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 89,
+        "mean_detection_window": 89
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.15,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 159,
+        "mean_detection_window": 159
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.15,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.175,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 33,
+        "mean_detection_window": 34
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.175,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 89,
+        "mean_detection_window": 89
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.175,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 159,
+        "mean_detection_window": 159
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.175,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.2,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 31,
+        "mean_detection_window": 31.8
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.2,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 89,
+        "mean_detection_window": 89
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.2,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 159,
+        "mean_detection_window": 161
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.2,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.225,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 31,
+        "mean_detection_window": 30.6
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.225,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 89,
+        "mean_detection_window": 89
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.225,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 159,
+        "mean_detection_window": 159
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.225,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.25,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 31,
+        "mean_detection_window": 30.2
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.25,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 89,
+        "mean_detection_window": 89
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.25,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 159,
+        "mean_detection_window": 163
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.25,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.275,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 29,
+        "mean_detection_window": 29.4
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.275,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 89,
+        "mean_detection_window": 91
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.275,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 169,
+        "mean_detection_window": 165
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.275,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.3,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 29,
+        "mean_detection_window": 29.2
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.3,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 89,
+        "mean_detection_window": 89
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.3,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 169,
+        "mean_detection_window": 169
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.3,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.375,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 25,
+        "mean_detection_window": 25
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.375,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 89,
+        "mean_detection_window": 91
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.375,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 169,
+        "mean_detection_window": 171
+      }
+    },
+    {
+      "scenario": "persistent_linear",
+      "magnitude": 0.375,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.025,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.025,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.025,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.025,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.05,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.05,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.05,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.05,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.075,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.075,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.075,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.075,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.1,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.1,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.1,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.1,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.125,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 41,
+        "mean_detection_window": 42
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.125,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.125,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.125,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.15,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 37,
+        "mean_detection_window": 36.4
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.15,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.15,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.15,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.175,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 34,
+        "mean_detection_window": 35.4
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.175,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.175,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.175,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.2,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 32,
+        "mean_detection_window": 32.4
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.2,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.2,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.2,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.225,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 31,
+        "mean_detection_window": 31.2
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.225,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.225,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.225,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.25,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 29,
+        "mean_detection_window": 29.2
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.25,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.25,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.25,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.275,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 29,
+        "mean_detection_window": 29.6
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.275,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.275,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.275,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.3,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 29,
+        "mean_detection_window": 29
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.3,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.3,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.3,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.375,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 5,
+        "detection_rate": 1,
+        "median_detection_window": 27,
+        "mean_detection_window": 26.8
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.375,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.375,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "short_bounded",
+      "magnitude": 0.375,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.025,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.025,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.025,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.025,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.05,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.05,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.05,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.05,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.075,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.075,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.075,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.075,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.1,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.1,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.1,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.1,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.125,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.125,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.125,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.125,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.15,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.15,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.15,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.15,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.175,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.175,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.175,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.175,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.2,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.2,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.2,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.2,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.225,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.225,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.225,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.225,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.25,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.25,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.25,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.25,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.275,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.275,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.275,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.275,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.3,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.3,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.3,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.3,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.375,
+      "sampling_interval": 1,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.375,
+      "sampling_interval": 5,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.375,
+      "sampling_interval": 10,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    },
+    {
+      "scenario": "no_drift",
+      "magnitude": 0.375,
+      "sampling_interval": 100,
+      "summary": {
+        "detection_count": 0,
+        "detection_rate": 0,
+        "median_detection_window": null,
+        "mean_detection_window": null
+      }
+    }
+  ]
+}

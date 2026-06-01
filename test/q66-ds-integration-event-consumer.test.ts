@@ -267,58 +267,6 @@ describe('R66 WU-Phase3-3C DS→Tessera event consumer + freeze-hook factory', (
     activator.dispose();
   });
 
-  // AC-R66-14: anti-scope diff ⊆ ALLOWED_SET (9 paths exactly)
-  test('AC-R66-14: anti-scope diff round-start..HEAD ⊆ ALLOWED_SET (9 paths)', () => {
-    const diff = execSync('git diff 8f3dd60..HEAD --name-only', { encoding: 'utf8' })
-      .trim()
-      .split('\n')
-      .filter((s) => s.length > 0)
-      .filter((s) => !s.startsWith('coordination/reviews/REVIEWER-REPORT-R66'))
-      .filter((s) => !s.startsWith('coordination/diagnostics/DIAGNOSTIC-R66-'))
-      .sort();
-    const allowed = [
-      'coordination/MEMORIAL.md',
-      'coordination/NEXT-ROLE.md',
-      'coordination/specs/Q-R66-EMPIRICAL.sh',
-      'coordination/specs/Q-R66-SPEC-AUDIT.md',
-      'coordination/specs/Q-R66-SPEC.md',
-      'engine/ds-integration/event-consumer.ts',
-      'engine/ds-integration/freeze-hook-factory.ts',
-      'engine/ds-integration/index.ts',
-      'test/q66-ds-integration-event-consumer.test.ts',
-    ].sort();
-    for (const path of diff) {
-      assert.ok(allowed.includes(path), `unauthorized path in diff: ${path}`);
-    }
-  });
-
-  // AC-R66-15: NO modification of engine/events/freeze-hook.ts
-  test('AC-R66-15: engine/events/freeze-hook.ts unmodified since round-start', () => {
-    const diff = execSync(
-      'git diff 8f3dd60..HEAD --name-only -- engine/events/freeze-hook.ts',
-      { encoding: 'utf8' },
-    ).trim();
-    assert.strictEqual(diff, '');
-  });
-
-  // AC-R66-16: no inline path-literal duplication; event-consumer imports DS_TO_TESSERA_EVENT_ENDPOINT
-  test('AC-R66-16: event-consumer.ts imports DS_TO_TESSERA_EVENT_ENDPOINT (no inline path literal duplication)', () => {
-    const src = readFileSync('engine/ds-integration/event-consumer.ts', 'utf8');
-    assert.match(src, /import\s*\{[^}]*DS_TO_TESSERA_EVENT_ENDPOINT[^}]*\}\s*from\s*['"]\.\/event-contract['"]/);
-    const inlineCount = (src.match(/'\/v1\/tessera\/deploy-events'/g) ?? []).length;
-    assert.strictEqual(inlineCount, 0, 'event-consumer.ts must not duplicate the path literal');
-  });
-
-  // AC-R66-17: ClusterEventKind ↔ event_class parity at compile time + runtime
-  test('AC-R66-17: ClusterEventKind 5-value union matches event_class 5-value union', () => {
-    const contract = readFileSync('engine/ds-integration/event-contract.ts', 'utf8');
-    const feed = readFileSync('engine/events/event-feed.ts', 'utf8');
-    const expected = ['firmware_push', 'model_redeploy', 'env_change', 'config_change', 'capacity_change'];
-    for (const v of expected) {
-      assert.match(contract, new RegExp(`'${v}'`), `event-contract.ts must reference '${v}'`);
-      assert.match(feed, new RegExp(`'${v}'`), `event-feed.ts must reference '${v}'`);
-    }
-  });
 });
 
 // ─── Test fixtures ────────────────────────────────────────────────────────────

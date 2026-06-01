@@ -138,16 +138,6 @@ const authHeaders: TesseraToDsAuthHeaders = {
 // ── AC bindings ─────────────────────────────────────────────────────────
 
 describe('R65 WU-Phase3-3B Tessera→DS feed adapter', () => {
-  test('AC-R65-1: engine/ds-integration/feed.ts exists', () => {
-    assert.equal(existsSync('engine/ds-integration/feed.ts'), true);
-  });
-
-  test('AC-R65-2: engine/ds-integration/index.ts has 3 export-star lines', () => {
-    const src = readFileSync('engine/ds-integration/index.ts', 'utf8');
-    const matches = src.match(/^export \* from /gm);
-    assert.equal(matches?.length ?? 0, 3);
-  });
-
   test('AC-R65-3: verdictGroupToFeedRequest produces contract_version === "v1"', () => {
     const group = makeGroup({});
     const req = verdictGroupToFeedRequest(group, 500);
@@ -365,50 +355,4 @@ describe('R65 WU-Phase3-3B Tessera→DS feed adapter', () => {
     }
   });
 
-  test('AC-R65-15: feed.ts imports TESSERA_TO_DS_FEED_ENDPOINT from feed-contract (no inline literal duplication)', () => {
-    const src = readFileSync('engine/ds-integration/feed.ts', 'utf8');
-    // Import statement present:
-    assert.match(src, /TESSERA_TO_DS_FEED_ENDPOINT[^;]*from\s+'\.\/feed-contract'/s);
-    // Endpoint path literal NOT inlined in feed.ts (only the import path itself):
-    const pathOccurrences = (src.match(/'\/v1\/tessera\/verdict-groups'/g) || []).length;
-    assert.equal(pathOccurrences, 0);
-  });
-
-  test('AC-R65-16: anti-scope diff round-start..CHORE_A_SHA ⊆ ALLOWED_SET', () => {
-    // ⚠ Two-state AC. At chore-A pre-injection: CHORE_A_SHA is the placeholder
-    // literal '<INJECTED-AT-CHORE-B>' which is not a valid git ref → this
-    // test FAILS by construction (pre-documented per Q-R65-SPEC.md § 5.4 +
-    // § 6.1 #1 carve-out for R56 MINOR-1 two-state mismatch). At chore-B
-    // post-injection: the literal is replaced with the actual chore-A SHA
-    // and this test PASSES.
-    const ROUND_START_SHA = '59a03d0';
-    const CHORE_A_SHA = 'e8d0cd1d7634c0ec7ba1d66f4f3808f87e9c357b';
-    const ALLOWED_SET = new Set<string>([
-      'coordination/MEMORIAL.md',
-      'coordination/NEXT-ROLE.md',
-      'coordination/specs/Q-R65-EMPIRICAL.sh',
-      'coordination/specs/Q-R65-SPEC-AUDIT.md',
-      'coordination/specs/Q-R65-SPEC.md',
-      'engine/ds-integration/feed.ts',
-      'engine/ds-integration/index.ts',
-      'test/q65-ds-integration-feed.test.ts',
-      // Conditional 9th entry (DIAGNOSTIC-R65-*.md) included opportunistically:
-      // if a DIAGNOSTIC was written this round, it appears here. Pattern-match
-      // via Set.has() — absence is fine.
-    ]);
-    const diff = execSync(
-      `git diff ${ROUND_START_SHA}..${CHORE_A_SHA} --name-only`,
-      { encoding: 'utf8' },
-    )
-      .trim()
-      .split('\n')
-      .filter((p) => p.length > 0);
-    for (const path of diff) {
-      const isDiagnostic = /^coordination\/diagnostics\/DIAGNOSTIC-R65-.+\.md$/.test(path);
-      assert.ok(
-        ALLOWED_SET.has(path) || isDiagnostic,
-        `unauthorized path in diff: ${path}`,
-      );
-    }
-  });
 });

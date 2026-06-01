@@ -172,34 +172,3 @@ test('AC-R58-10: snapshotHash delegates to computeSnapshotHash across all 5 adap
 // ── AC-R58-11 removed R95 2026-05-22 ────────────────────────────────────────
 // Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
 // Tessera worktree; readFileSync fails with ENOENT. Category A.
-
-// AC-R58-14: round-start-to-chore-A diff ⊆ R58 allowed-set (chore-A SHA pinned).
-// Appended by Implementer at chore-B with chore-A SHA substituted into CHORE_A_SHA literal.
-test('AC-R58-14: round-start-to-chore-A diff ⊆ R58 allowed-set (chore-A SHA pinned)', () => {
-  const BASELINE_SHA = '7e9d399';
-  const CHORE_A_SHA  = '7368dcd';
-  const ALLOWED_SET = new Set<string>([
-    'coordination/MEMORIAL.md',
-    'coordination/NEXT-ROLE.md',
-    'coordination/specs/Q-R58-EMPIRICAL.sh',
-    'coordination/specs/Q-R58-SPEC-AUDIT.md',
-    'coordination/specs/Q-R58-SPEC.md',
-    'engine/topology/fetch-context.ts',
-    'engine/topology/k8s-source.ts',
-    'engine/topology/neuron-source.ts',
-    'engine/topology/nvlink-source.ts',
-    'engine/topology/slurm-source.ts',
-    'engine/topology/tpu-source.ts',
-    'test/q58-live-fetch-interface.test.ts',
-    // Conditional 13th entry per spec § 3.2: added IFF a HALT fires mid-round.
-  ]);
-  const diffOutput = execFileSync(
-    'git',
-    ['diff', `${BASELINE_SHA}..${CHORE_A_SHA}`, '--name-only'],
-    { encoding: 'utf8' },
-  );
-  const paths = diffOutput.split('\n').filter((p) => p.length > 0);
-  for (const p of paths) {
-    assert.ok(ALLOWED_SET.has(p), `unexpected R58 path in chore-A diff: ${p}`);
-  }
-});

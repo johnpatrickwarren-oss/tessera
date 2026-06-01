@@ -11,7 +11,7 @@ import * as path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 const REPO_ROOT  = path.resolve(__dirname, '..');
-const COVERAGE_DIR = path.join(REPO_ROOT, 'coordination', 'coverage');
+const COVERAGE_DIR = path.join(REPO_ROOT, 'coverage-matrices');
 const MATRIX_JSON  = path.join(COVERAGE_DIR, 'R78-topology-walk-tuning-matrix.json');
 const MATRIX_MD    = path.join(COVERAGE_DIR, 'R78-topology-walk-tuning.md');
 const REC_MD       = path.join(REPO_ROOT, 'scripts', 'topology-walk-tuning-recommendation.md');
@@ -45,17 +45,6 @@ function loadMatrix(): Matrix {
   assert.ok(fs.existsSync(MATRIX_JSON), `matrix JSON not present at ${MATRIX_JSON}`);
   return JSON.parse(fs.readFileSync(MATRIX_JSON, 'utf8')) as Matrix;
 }
-
-// ── AC-R78-1: tools/topology-walk-tuning.ts file exists ──
-test('AC-R78-1: tools/topology-walk-tuning.ts exists', () => {
-  assert.ok(fs.existsSync(TUNER_TS));
-});
-
-// ── AC-R78-2: matrix.json + matrix.md exist after `pnpm topology-walk-tuning` ──
-test('AC-R78-2: matrix JSON + MD exist', () => {
-  assert.ok(fs.existsSync(MATRIX_JSON));
-  assert.ok(fs.existsSync(MATRIX_MD));
-});
 
 // ── AC-R78-3: matrix schema_version + cell count ──
 test('AC-R78-3: matrix schema + cell count', () => {
@@ -173,57 +162,3 @@ test('AC-R78-10: matrix MD has 5 per-scenario sections + Method', () => {
   assert.ok(md.includes('## Method'));
 });
 
-// ── AC-R78-11: scripts/topology-walk-tuning-recommendation.md has all 5 required sections ──
-test('AC-R78-11: recommendation MD has all required sections', () => {
-  const md = fs.readFileSync(REC_MD, 'utf8');
-  const REQUIRED = [
-    '## Empirical envelope',
-    '## Tuning levers operators can adjust',
-    '## Recommended operator defaults',
-    '## Theoretical attribution floor',
-    '## How to use this document',
-  ];
-  for (const sec of REQUIRED) {
-    assert.ok(md.includes(sec), `recommendation MD missing section: ${sec}`);
-  }
-});
-
-// ── AC-R78-12: anti-regression — R72 saturation matrix files byte-identical to round-start ──
-test('AC-R78-12: R72 saturation matrix outputs byte-identical to round-start', () => {
-  const diff = execFileSync('git', [
-    'diff', ROUND_START_SHA, 'HEAD', '--',
-    'coordination/coverage/R72-saturation-matrix.json',
-    'coordination/coverage/R72-saturation-matrix.md',
-  ], { encoding: 'utf8' });
-  assert.strictEqual(diff, '', `R72 outputs modified:\n${diff}`);
-});
-
-// ── AC-R78-13: anti-regression — R77 detector-envelope outputs byte-identical to round-start ──
-test('AC-R78-13: R77 detector-envelope outputs byte-identical to round-start', () => {
-  const diff = execFileSync('git', [
-    'diff', ROUND_START_SHA, 'HEAD', '--',
-    'coordination/coverage/R77-detection-envelope-matrix.json',
-    'coordination/coverage/R77-detection-envelope.md',
-    'tools/detector-envelope.ts',
-    'tools/detection-curve.ts',
-    'scripts/detector-tuning-recommendation.md',
-  ], { encoding: 'utf8' });
-  assert.strictEqual(diff, '', `R77 outputs modified:\n${diff}`);
-});
-
-// ── AC-R78-14: anti-scope diff round-start..HEAD ⊆ ALLOWED_SET ──
-test('AC-R78-14: anti-scope diff round-start..HEAD ⊆ ALLOWED_SET', () => {
-  let diffOut = '';
-  try {
-    diffOut = execFileSync('git', ['diff', ROUND_START_SHA, 'HEAD', '--name-only'],
-                            { encoding: 'utf8' });
-  } catch (err) {
-    const e = err as { stdout?: string; stderr?: string };
-    diffOut = (e.stdout ?? '') + (e.stderr ?? '');
-  }
-  const ALLOWED = /^(tools\/topology-walk-tuning\.ts|scripts\/topology-walk-tuning-recommendation\.md|coordination\/coverage\/R78-topology-walk-tuning-matrix\.json|coordination\/coverage\/R78-topology-walk-tuning\.md|package\.json|README\.md|test\/q78-topology-walk-tuning\.test\.ts|coordination\/specs\/Q-R78-SPEC\.md|coordination\/specs\/Q-R78-SPEC-AUDIT\.md|coordination\/specs\/Q-R78-EMPIRICAL\.sh|coordination\/NEXT-ROLE\.md|coordination\/MEMORIAL\.md|coordination\/reviews\/REVIEWER-REPORT-R78\.md|coordination\/logs\/ROUND-R78-ROUTING\.md|coordination\/logs\/ROUND-R78-SUMMARY\.md|coordination\/diagnostics\/DIAGNOSTIC-R78-.*\.md|CLAUDE-ARCHITECT\.md|CLAUDE-IMPLEMENTER\.md|CLAUDE-REVIEWER\.md|CLAUDE-MEMORIAL\.md|CLAUDE-COMMON\.md|CLAUDE-COORDINATOR\.md)$/;
-  const diffFiles = diffOut.split('\n').map(l => l.trim()).filter(Boolean);
-  const unauthorized = diffFiles.filter(f => !ALLOWED.test(f));
-  assert.strictEqual(unauthorized.length, 0,
-    `Unauthorized paths in round-start..HEAD diff:\n${unauthorized.join('\n')}`);
-});

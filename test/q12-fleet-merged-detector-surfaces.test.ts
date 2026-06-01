@@ -299,17 +299,6 @@ test('R12 AC-15 — empirical wiring: fleetMergeFamilyA with combineAverage unde
   );
 });
 
-// ─── R12 AC-16 — observed test count attestation (R03 MINOR-4 reinforcement) ─
-test('R12 AC-16 — OBSERVED q12 test count + TDD ordering reported in NEXT-ROLE.md attestation', () => {
-  // Architect-predicted count: 16 ACs / 16 tests. Implementer reports OBSERVED
-  // via `node --test test/q12-fleet-merged-detector-surfaces.test.js` count
-  // at GREEN; NEXT-ROLE.md attestation block captures the actual value, not
-  // the prediction (R03 MINOR-4 reinforcement; 7th consecutive application).
-  // TDD ordering: RED commit adds q12 test only (TS2307 on missing detectors.ts);
-  // GREEN commit adds engine/fleet/detectors.ts atomically.
-  assert.ok(true);
-});
-
 // ─── Per-fleet-trajectory simulator (Family A; iid H₀) ──────────────────
 
 function simulateFleetTrajectoryFamilyA(
