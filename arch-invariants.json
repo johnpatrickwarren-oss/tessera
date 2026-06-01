@@ -1,0 +1,18 @@
+[
+  {
+    "id": "no-time-bomb-tests",
+    "intent": "No test pinned to a frozen git ref/SHA (git diff <ref>..HEAD, --name-only, git show <sha>). Such tests can only rot once HEAD moves past the round — enforce scope via scripts/anti-scope-gate.sh during the round, not as a permanent product test.",
+    "check": { "kind": "time_bomb_tests", "dirs": ["test"] },
+    "max": 0,
+    "mode": "ratchet",
+    "severity": "block"
+  },
+  {
+    "id": "product-not-read-process",
+    "intent": "Product tests must not read Anchor process state (coordination/). coordination/ is the pipeline's local working dir; product tests depend only on src/ + fixtures + coverage-matrices/. (Comment citations are fine — only code references count.)",
+    "check": { "kind": "forbid_path", "dirs": ["test"], "path": "coordination/" },
+    "max": 0,
+    "mode": "ratchet",
+    "severity": "block"
+  }
+]

@@ -9,27 +9,12 @@
 // Tessera-original test (not vendored). R38 spec: coordination/specs/Q-R38-SPEC.md.
 
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { test } from 'node:test';
 import type { TopologySnapshot } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 import { attributeCommonMode } from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
 
 const ROOT = resolve(__dirname, '..');
-
-// RED commit SHA — lower bound for AC-R38-4 anti-scope diff.
-const RED_COMMIT_SHA = '41c1ff1';
-const ALLOWED_SET = new Set([
-  'engine/topology/common-mode-attribution.ts',
-  'test/q38-verification.test.ts',
-  'coordination/specs/Q-R38-SPEC.md',
-  'coordination/reviews/REVIEWER-REPORT-R38.md',
-  'coordination/MEMORIAL.md',
-  'coordination/NEXT-ROLE.md',
-  'coordination/logs/ROUND-R38-SUMMARY.md',
-  'coordination/diagnostics/DIAGNOSTIC-R38-baseline-mismatch.md',
-]);
 
 // ── AC-R38-1: latest_event_ts FIXTURE ──────────────────────────────────────
 
@@ -77,31 +62,6 @@ test('AC-R38-1: latest_event_ts = max(per-shard latest), not max(per-shard earli
   );
 });
 
-// ── AC-R38-2 removed R95 2026-05-22 ────────────────────────────────────────
-// Defunct post-R94 engine extraction: engine/topology/common-mode-attribution.ts
-// removed from Tessera worktree; readFileSync fails with ENOENT. Category A.
-
-// ── AC-R38-4: anti-scope forward-protection ────────────────────────────────
-
-test(
-  'AC-R38-4: R38 anti-scope diff ⊆ ALLOWED_SET (RED commit 41c1ff1..HEAD)',
-  {
-    skip: (process.env['NODE_TEST_CONTEXT'] != null || process.env['NODE_TEST_WORKER_ID'] != null)
-      ? 'subprocess-spawn skipped in worker context — transitive hang risk (R34 incident)'
-      : false,
-  },
-  () => {
-    const diffOut = execFileSync(
-      'git',
-      ['diff', `${RED_COMMIT_SHA}..HEAD`, '--name-only', '--', '.', ':!*.js'],
-      { cwd: ROOT },
-    ).toString().trim();
-    const changedPaths = diffOut.length === 0 ? [] : diffOut.split('\n');
-    const violations = changedPaths.filter((p) => !ALLOWED_SET.has(p));
-    assert.deepStrictEqual(
-      violations,
-      [],
-      `R38 anti-scope violations (paths not in ALLOWED_SET): ${violations.join(', ')}`,
-    );
-  },
-);
+// AC-R38-2 (engine-file readFileSync) + AC-R38-4 (anti-scope git-diff pinned to RED commit 41c1ff1)
+// removed: the engine was extracted (R94) and the anti-scope check is a round-scoped time-bomb — both
+// are governance, now enforced by scripts/anti-scope-gate.sh, not a permanent product test.
