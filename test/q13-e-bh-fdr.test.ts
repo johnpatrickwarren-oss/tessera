@@ -203,24 +203,6 @@ test('R13 AC-12 — qLevel is a required positional parameter (no default; docum
   );
 });
 
-// ─── R13 AC-13 — TDD ordering (RED precedes GREEN) ──────────────────────
-test('R13 AC-13 — TDD ordering: RED commit (q13 test only; TS2307 on missing e-bh.ts) precedes GREEN (e-bh.ts atomic landing)', () => {
-  // Verified by Implementer attestation + Reviewer git log review.
-  // RED commit must add only test/q13-e-bh-fdr.test.ts; GREEN must add
-  // engine/fleet/e-bh.ts atomically. Two-commit ordering visible in
-  // `git log --oneline` and `git show --stat <RED> <GREEN>`.
-  assert.ok(true);
-});
-
-// ─── R13 AC-14 — OBSERVED q13 test count attestation (R03 MINOR-4) ──────
-test('R13 AC-14 — OBSERVED q13 test count reported in NEXT-ROLE.md attestation', () => {
-  // Architect-predicted count: 14 ACs / 14 tests. Implementer reports
-  // OBSERVED via `node --test test/q13-e-bh-fdr.test.js` count at GREEN;
-  // NEXT-ROLE.md attestation block captures the actual value, not the
-  // prediction (R03 MINOR-4 reinforcement; 8th consecutive application).
-  assert.ok(true);
-});
-
 // ─── PR-F2 simulator (Family A; one trial = N shards × T ticks under
 // chosen H₀ scenario). Reuses the R11 correlated-drift mechanism. ────────
 

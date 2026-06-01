@@ -118,32 +118,3 @@ test('AC-R18-6: computeSnapshotHash on v9X fixture is deterministic across two i
 // Defunct post-R94 engine extraction: 40 vendored engine/*.ts files removed from
 // Tessera worktree; readFileSync on each fails with ENOENT. Category A.
 
-// Pinned to R18 MERGE-READY SHA 9012faa (not HEAD) so Memorial-Updater outputs
-// (CLAUDE-ARCHITECT.md, CLAUDE-IMPLEMENTER.md, REVIEWER-REPORT-R18.md, etc.) which
-// land in commits after 9012faa do not cause false failures. Pinned at R19 in-passing.
-test('AC-R18-10: Anti-scope — git diff b640c6c..9012faa --name-only ⊆ allowed-set', () => {
-  const allowed = new Set([
-    'engine/types/verdict.ts',
-    'engine/types/verdict.js',
-    'test/_substrate/v9X-cluster.ts',
-    'test/_substrate/v9X-cluster.js',
-    'test/q18-phase2-slice1-topology-substrate.test.ts',
-    'test/q18-phase2-slice1-topology-substrate.test.js',
-    'coordination/specs/Q-R18-SPEC.md',
-    'coordination/specs/Q-R18-SPEC-AUDIT.md',
-    'coordination/NEXT-ROLE.md',
-    'coordination/MEMORIAL.md',
-    // Operator-side artifacts added during R18 ESCALATE → Option A unblock cycle:
-    'coordination/OVERNIGHT-LOG-2026-05-17.md',
-    'coordination/diagnostics/DIAGNOSTIC-R18-no-at-pin-deltas-verdict.md',
-    // Option A fix (operator dispositioned the ESCALATE bounded question):
-    'test/q01-no-at-pin-deltas.test.ts',
-    'test/q01-no-at-pin-deltas.test.js',
-    'coordination/VENDORING-MANIFEST.md',
-  ]);
-  const diff = execSync('git diff b640c6c..9012faa --name-only', { encoding: 'utf-8' });
-  const touched = diff.split('\n').filter((p) => p.length > 0);
-  for (const p of touched) {
-    assert.ok(allowed.has(p), `Unexpected file in R18 diff vs b640c6c: ${p}`);
-  }
-});

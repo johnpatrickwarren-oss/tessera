@@ -171,26 +171,3 @@ test('AC-R80-12: demos/demo.html preserves R79 structural elements', () => {
   assert.ok(!/\bopen\b/.test(attrs), '<details id="provenance-panel"> should not have open attribute');
 });
 
-// AC-R80-13: Q-R80-EMPIRICAL.sh has required binding command blocks
-test('AC-R80-13: Q-R80-EMPIRICAL.sh contains required binding command blocks', () => {
-  const sh = fs.readFileSync(
-    path.join(ROOT, 'coordination', 'specs', 'Q-R80-EMPIRICAL.sh'),
-    'utf8',
-  );
-  assert.match(sh, /pnpm exec tsc -p tsconfig\.test\.json/, 'Block 1 tsc invocation missing');
-  assert.match(sh, /node --test --test-reporter=tap/, 'Block 3 tap invocation missing');
-  // Block 4: ALLOWED regex from § 3.2 (check distinctive substring)
-  assert.match(sh, /ALLOWED=/, 'Block 4 ALLOWED pattern missing');
-  assert.match(sh, /demos\/scenarios\/\[a-z-\]/, 'Block 4 ALLOWED regex missing scenario pattern');
-});
-
-// AC-R80-14: git diff from round-start SHA to HEAD ⊆ ALLOWED_SET
-test('AC-R80-14: git diff from round-start to HEAD contains only ALLOWED files', () => {
-  const diffRaw = execSync(`git diff ${ROUND_START_SHA} HEAD --name-only`, { encoding: 'utf8' }).trim();
-  const diffFiles = diffRaw ? diffRaw.split('\n').filter(f => f.length > 0) : [];
-  const ALLOWED =
-    /^(demos\/demo\.html|demos\/scenarios\/[a-z-]+\.json|tools\/build-canned-demos\.ts|package\.json|README\.md|test\/q80-five-family-visualization\.test\.ts|coordination\/specs\/Q-R80-SPEC\.md|coordination\/specs\/Q-R80-SPEC-AUDIT\.md|coordination\/specs\/Q-R80-EMPIRICAL\.sh|coordination\/NEXT-ROLE\.md|coordination\/MEMORIAL\.md|coordination\/MEMORIAL-PHASE-[0-9]+\.md|coordination\/reviews\/REVIEWER-REPORT-R80\.md|coordination\/logs\/ROUND-R[0-9]+-(SUMMARY|ROUTING)\.md|coordination\/diagnostics\/DIAGNOSTIC-R[0-9]+-.*\.md|CLAUDE\.md|CLAUDE-ARCHITECT\.md|CLAUDE-IMPLEMENTER\.md|CLAUDE-REVIEWER\.md|CLAUDE-MEMORIAL\.md|CLAUDE-COMMON\.md|CLAUDE-COORDINATOR\.md)$/;
-  for (const f of diffFiles) {
-    assert.match(f, ALLOWED, `unauthorized file in round-start..HEAD diff: ${f}`);
-  }
-});

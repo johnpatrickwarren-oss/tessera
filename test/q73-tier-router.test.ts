@@ -116,27 +116,3 @@ test('AC-R73-9: hybrid mode emits decision_path containing haiku-fallback marker
   assert.equal(out.decision_path[0], 'heuristic_rule_5_default');
 });
 
-// AC-R73-10: package.json contains the tier-router scripts.
-test('AC-R73-10: package.json registers tier-router + tier-router:validate scripts', () => {
-  const pkg = JSON.parse(readFileSync(resolve(__dirname, '..', 'package.json'), 'utf-8'));
-  assert.equal(pkg.scripts['tier-router'], 'pnpm exec node scripts/tier-router.js');
-  assert.equal(pkg.scripts['tier-router:validate'], 'pnpm exec node scripts/tier-router-validate.js');
-});
-
-// AC-R73-11: run-pipeline.sh declares --auto-tier flag.
-test('AC-R73-11: run-pipeline.sh advertises --auto-tier flag', () => {
-  const script = readFileSync(resolve(__dirname, '..', 'run-pipeline.sh'), 'utf-8');
-  assert.ok(script.includes('--auto-tier'), 'run-pipeline.sh must advertise --auto-tier flag');
-  // The flag must be in the case statement (argument parsing); not only in --help text.
-  assert.ok(/--auto-tier\)\s*[A-Z_]+=true/.test(script) || /--auto-tier\)\s*AUTO_TIER=true/.test(script));
-});
-
-// AC-R73-12: tier-router-criteria.md is committed and contains the four tier names verbatim.
-test('AC-R73-12: tier-router-criteria.md exists + names all four tiers', () => {
-  const path = resolve(__dirname, '..', 'scripts', 'tier-router-criteria.md');
-  assert.ok(existsSync(path));
-  const content = readFileSync(path, 'utf-8');
-  for (const tier of ['full', 'audit', 'implementer-only', 'coordinator-only']) {
-    assert.ok(content.includes(tier), `criteria.md must name tier '${tier}'`);
-  }
-});

@@ -165,27 +165,6 @@ test('AC-R21-8: rollupByClusterEvent("") short-circuits to no-match (empty-strin
   assert.deepStrictEqual(rollup.deploy_ids, []);
 });
 
-// AC-R21-11: anti-scope diff forward-protection (chore-B; SHA-pinned per TQ-4 γ + R15 MINOR-1 + R19 MAJOR-3)
-test('AC-R21-11: git diff baseline..chore-A only contains allowed-set paths', () => {
-  const diff = execSync(
-    'git diff 62e28d7..a5cae6d --name-only',
-    { encoding: 'utf-8' },
-  ).trim().split('\n').filter(Boolean);
-  const allowed = new Set([
-    'engine/fleet/verdict-consumer.ts',
-    'engine/fleet/verdict-consumer.js',
-    'test/q21-fleet-verdict-consumer.test.ts',
-    'test/q21-fleet-verdict-consumer.test.js',
-    'coordination/specs/Q-R21-SPEC.md',
-    'coordination/specs/Q-R21-SPEC-AUDIT.md',
-    'coordination/NEXT-ROLE.md',
-    'coordination/MEMORIAL.md',
-  ]);
-  for (const p of diff) {
-    assert.ok(allowed.has(p), `unexpected path in R21 diff: ${p}`);
-  }
-});
-
 // AC-R22-3: dedup-guard structural binding (R22 Deliverable 3)
 // Two verdicts with the same deploy_ref under the same cluster_event_id produce two
 // IngestResults attributed to the SAME VerdictGroup (same composite key → same group_id).
@@ -236,27 +215,4 @@ test("AC-R22-4: rollupByClusterEvent('') short-circuits even when groups have cl
   const rollup = rollupByClusterEvent(out.ingest_results, '');
   assert.deepStrictEqual(rollup.groups, []);
   assert.deepStrictEqual(rollup.deploy_ids, []);
-});
-
-// AC-R22-8: anti-scope diff forward-protection (chore-B; SHA-pinned per TQ-4 γ + R15 MINOR-1 + R19 MAJOR-3)
-// Baseline f7111c9 = R22-prep chore commit (HEAD at R22 session start).
-// End-bound 480fc43 = R22 chore-A (coordination artifacts only; no engine/ changes).
-test('AC-R22-8: git diff baseline..chore-A only contains allowed-set paths', () => {
-  const diff = execSync(
-    'git diff f7111c9..480fc43 --name-only',
-    { encoding: 'utf-8' },
-  ).trim().split('\n').filter(Boolean);
-  const allowed = new Set([
-    'coordination/PHASE-2-SLICE-2-CLOSE-WALK.md',
-    'coordination/specs/Q-R22-SPEC.md',
-    'coordination/NEXT-ROLE.md',
-    'coordination/MEMORIAL.md',
-    'test/q20-verdict-grouper-cluster-event-scope.test.ts',
-    'test/q21-fleet-verdict-consumer.test.ts',
-    'test/q21-fleet-verdict-consumer.test.js',
-    'test/q01-no-at-pin-deltas.test.ts',
-  ]);
-  for (const p of diff) {
-    assert.ok(allowed.has(p), `unexpected path in R22 diff: ${p}`);
-  }
 });

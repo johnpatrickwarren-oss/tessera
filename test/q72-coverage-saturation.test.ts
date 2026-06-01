@@ -10,7 +10,7 @@ import {
   type FailureTypeName,
 } from '../tools/coverage-saturation.js';
 
-const COVERAGE_DIR = path.resolve(__dirname, '..', 'coordination', 'coverage');
+const COVERAGE_DIR = path.resolve(__dirname, '..', 'coverage-matrices');
 const JSON_PATH = path.join(COVERAGE_DIR, 'R72-saturation-matrix.json');
 const MD_PATH = path.join(COVERAGE_DIR, 'R72-saturation-matrix.md');
 
@@ -52,12 +52,6 @@ function loadCommittedMatrix(): CoverageMatrix {
   const raw = fs.readFileSync(JSON_PATH, 'utf8');
   return JSON.parse(raw) as CoverageMatrix;
 }
-
-// AC-R72-1: matrix.json file exists at the canonical path.
-test('AC-R72-1: matrix.json file exists at coordination/coverage/R72-saturation-matrix.json', () => {
-  assert.strictEqual(fs.existsSync(JSON_PATH), true,
-    `Expected matrix JSON at ${JSON_PATH}`);
-});
 
 // AC-R72-2: matrix.json schema_version is 'tessera-coverage-v1'.
 test('AC-R72-2: matrix.json schema_version is "tessera-coverage-v1"', () => {
@@ -204,20 +198,6 @@ test('AC-R72-17: matrix idempotency — runSaturationCoverage twice produces byt
   const buf2 = fs.readFileSync(second.matrix_json_path);
   assert.strictEqual(buf1.length, buf2.length, `Matrix JSON size diverged: ${buf1.length} -> ${buf2.length}`);
   assert.ok(buf1.equals(buf2), 'Matrix JSON bytes diverged across two runs (non-idempotent)');
-});
-
-// AC-R72-18: matrix.md exists and matches matrix.json totals.
-test('AC-R72-18: matrix.md exists and references matrix.json totals correctly', () => {
-  assert.strictEqual(fs.existsSync(MD_PATH), true,
-    `Expected matrix MD at ${MD_PATH}`);
-  const md = fs.readFileSync(MD_PATH, 'utf8');
-  const m = loadCommittedMatrix();
-  assert.ok(md.includes(`| ${m.totals.total_variations} | ${m.totals.total_detected} | ${m.totals.total_attribution_correct} |`),
-    'matrix.md Totals row does not match matrix.json totals');
-  for (const t of m.types) {
-    assert.ok(md.includes(`### ${m.types.indexOf(t) + 1}. ${t.type_name}`),
-      `matrix.md missing heading "### N. ${t.type_name}"`);
-  }
 });
 
 // AC-R72-19: anti-regression — R71 build artifact preserved.

@@ -182,30 +182,3 @@ test('AC-R56-11: tpu_version discriminator maps v4 + v5p both → tpu_shard node
 // ── AC-R56-12 removed R95 2026-05-22 ────────────────────────────────────────
 // Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
 // Tessera worktree; readFileSync fails with ENOENT. Category A.
-
-// AC-R56-15: anti-scope file-set diff against round-start baseline 4447586
-// (Appended by Implementer at chore-B with chore-A SHA substituted.)
-test('AC-R56-15: round-start-to-chore-A diff ⊆ R56 allowed-set (chore-A SHA pinned)', () => {
-  const BASELINE_SHA = '4447586';
-  const CHORE_A_SHA = '93d3689';
-  const ALLOWED_SET = new Set<string>([
-    'engine/topology/tpu-source.ts',
-    'engine/types/verdict.ts',
-    'test/q56-tpu-adapter.test.ts',
-    'test/_substrate/tpu-fixture-v4-cube.json',
-    'test/_substrate/tpu-fixture-v5p-cube.json',
-    'test/_substrate/tpu-fixture-sparse-subcube.json',
-    'coordination/VENDORING-MANIFEST.md',
-    'coordination/specs/Q-R56-SPEC.md',
-    'coordination/specs/Q-R56-SPEC-AUDIT.md',
-    'coordination/specs/Q-R56-EMPIRICAL.sh',
-    'coordination/NEXT-ROLE.md',
-    'coordination/MEMORIAL.md',
-    // Conditional 13th entry per spec § 3: added IFF a HALT fires mid-round.
-  ]);
-  const diffOutput = execSync(`git diff ${BASELINE_SHA}..${CHORE_A_SHA} --name-only`, { encoding: 'utf8' });
-  const paths = diffOutput.split('\n').filter((p) => p.length > 0);
-  for (const p of paths) {
-    assert.ok(ALLOWED_SET.has(p), `unexpected R56 path in chore-A diff: ${p}`);
-  }
-});

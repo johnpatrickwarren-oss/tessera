@@ -13,7 +13,7 @@
 // scripts/topology-walk-tuning-recommendation.md.
 //
 // Deterministic (seeded LCG); idempotent. Re-running `pnpm topology-walk-
-// tuning` produces byte-identical coordination/coverage/R78-* outputs.
+// tuning` produces byte-identical coverage-matrices/R78-* outputs.
 //
 // Anti-scope: no new external deps; no engine modifications; no real-cluster
 // work; no DS-repo modifications. Tessera-original code. NOT vendored.
@@ -309,7 +309,7 @@ export interface TuningRunResult {
 }
 export function runTopologyWalkTuning(): TuningRunResult {
   const root = path.resolve(__dirname, '..');
-  const coverageDir = path.join(root, 'coordination', 'coverage');
+  const coverageDir = path.join(root, 'coverage-matrices');
   fs.mkdirSync(coverageDir, { recursive: true });
   const snapshot = buildTopology();
   const matrix = buildMatrix(snapshot);
