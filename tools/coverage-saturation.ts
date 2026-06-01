@@ -650,7 +650,7 @@ function renderMatrixMd(matrix: CoverageMatrix): string {
 // ── Public entry point ──
 export function runSaturationCoverage(_opts?: SaturationOpts): SaturationResult {
   const root = path.resolve(__dirname, '..');
-  const coverageDir = path.join(root, 'coordination', 'coverage');
+  const coverageDir = path.join(root, 'coverage-matrices');
   fs.mkdirSync(coverageDir, { recursive: true });
   const matrix = buildCoverageMatrix();
   const jsonStr = serializeMatrixJson(matrix);

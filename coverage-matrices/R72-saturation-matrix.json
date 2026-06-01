@@ -1,0 +1,3274 @@
+{
+  "schema_version": "tessera-coverage-v1",
+  "generated_with_seed_prefix": 465920,
+  "types": [
+    {
+      "type_name": "sdc-drift",
+      "description": "Single-shard SDC: linear additive drift on one targeted shard within a 10-shard, 30-window fleet under Family A betting e-process.",
+      "primary_axis_label": "target_shard_id",
+      "secondary_axis_label": "(drift_per_window, drift_start_window)",
+      "variations": [
+        {
+          "variation_idx": 0,
+          "params": {
+            "target_shard_id": "shard-01",
+            "drift_per_window": 0.2,
+            "drift_start_window": 10
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 27,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-01"
+              ],
+              "target_M": 1407.636704
+            }
+          }
+        },
+        {
+          "variation_idx": 1,
+          "params": {
+            "target_shard_id": "shard-01",
+            "drift_per_window": 0.3,
+            "drift_start_window": 8
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 20,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-01"
+              ],
+              "target_M": 190577.458663
+            }
+          }
+        },
+        {
+          "variation_idx": 2,
+          "params": {
+            "target_shard_id": "shard-01",
+            "drift_per_window": 0.4,
+            "drift_start_window": 6
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 22,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-01"
+              ],
+              "target_M": 32029.191721
+            }
+          }
+        },
+        {
+          "variation_idx": 3,
+          "params": {
+            "target_shard_id": "shard-01",
+            "drift_per_window": 0.5,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 20,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-01"
+              ],
+              "target_M": 132225.455928
+            }
+          }
+        },
+        {
+          "variation_idx": 4,
+          "params": {
+            "target_shard_id": "shard-01",
+            "drift_per_window": 0.7,
+            "drift_start_window": 4
+          },
+          "observation": {
+            "detected": false,
+            "attribution_correct": null,
+            "detection_window_index": null,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [],
+              "target_M": 0.954735
+            }
+          }
+        },
+        {
+          "variation_idx": 5,
+          "params": {
+            "target_shard_id": "shard-03",
+            "drift_per_window": 0.2,
+            "drift_start_window": 10
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 25,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-03"
+              ],
+              "target_M": 4771.140774
+            }
+          }
+        },
+        {
+          "variation_idx": 6,
+          "params": {
+            "target_shard_id": "shard-03",
+            "drift_per_window": 0.3,
+            "drift_start_window": 8
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 19,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-03"
+              ],
+              "target_M": 217065.516469
+            }
+          }
+        },
+        {
+          "variation_idx": 7,
+          "params": {
+            "target_shard_id": "shard-03",
+            "drift_per_window": 0.4,
+            "drift_start_window": 6
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 22,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-03"
+              ],
+              "target_M": 18911.737577
+            }
+          }
+        },
+        {
+          "variation_idx": 8,
+          "params": {
+            "target_shard_id": "shard-03",
+            "drift_per_window": 0.5,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 18,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-03"
+              ],
+              "target_M": 749978.65637
+            }
+          }
+        },
+        {
+          "variation_idx": 9,
+          "params": {
+            "target_shard_id": "shard-03",
+            "drift_per_window": 0.7,
+            "drift_start_window": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 12,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-03"
+              ],
+              "target_M": 28740875.740149
+            }
+          }
+        },
+        {
+          "variation_idx": 10,
+          "params": {
+            "target_shard_id": "shard-04",
+            "drift_per_window": 0.2,
+            "drift_start_window": 10
+          },
+          "observation": {
+            "detected": false,
+            "attribution_correct": null,
+            "detection_window_index": null,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [],
+              "target_M": 26.670692
+            }
+          }
+        },
+        {
+          "variation_idx": 11,
+          "params": {
+            "target_shard_id": "shard-04",
+            "drift_per_window": 0.3,
+            "drift_start_window": 8
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 26,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-04"
+              ],
+              "target_M": 1705.59483
+            }
+          }
+        },
+        {
+          "variation_idx": 12,
+          "params": {
+            "target_shard_id": "shard-04",
+            "drift_per_window": 0.4,
+            "drift_start_window": 6
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 19,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-04"
+              ],
+              "target_M": 234574.218216
+            }
+          }
+        },
+        {
+          "variation_idx": 13,
+          "params": {
+            "target_shard_id": "shard-04",
+            "drift_per_window": 0.5,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 18,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-04"
+              ],
+              "target_M": 513464.947297
+            }
+          }
+        },
+        {
+          "variation_idx": 14,
+          "params": {
+            "target_shard_id": "shard-04",
+            "drift_per_window": 0.7,
+            "drift_start_window": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 12,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-04"
+              ],
+              "target_M": 32417035.611155
+            }
+          }
+        },
+        {
+          "variation_idx": 15,
+          "params": {
+            "target_shard_id": "shard-07",
+            "drift_per_window": 0.2,
+            "drift_start_window": 10
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 26,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-07"
+              ],
+              "target_M": 2101.060935
+            }
+          }
+        },
+        {
+          "variation_idx": 16,
+          "params": {
+            "target_shard_id": "shard-07",
+            "drift_per_window": 0.3,
+            "drift_start_window": 8
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 24,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-07"
+              ],
+              "target_M": 6505.148739
+            }
+          }
+        },
+        {
+          "variation_idx": 17,
+          "params": {
+            "target_shard_id": "shard-07",
+            "drift_per_window": 0.4,
+            "drift_start_window": 6
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 23,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-07"
+              ],
+              "target_M": 10192.048169
+            }
+          }
+        },
+        {
+          "variation_idx": 18,
+          "params": {
+            "target_shard_id": "shard-07",
+            "drift_per_window": 0.5,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 19,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-07"
+              ],
+              "target_M": 196712.834135
+            }
+          }
+        },
+        {
+          "variation_idx": 19,
+          "params": {
+            "target_shard_id": "shard-07",
+            "drift_per_window": 0.7,
+            "drift_start_window": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 20,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "firing_shards": [
+                "shard-07"
+              ],
+              "target_M": 110691.219586
+            }
+          }
+        }
+      ],
+      "summary": {
+        "detection_rate": 0.9,
+        "detected_count": 18,
+        "attribution_accuracy": 1,
+        "correct_count": 18,
+        "max_false_positive_count": 0,
+        "pedagogical_property_rate": null
+      }
+    },
+    {
+      "type_name": "common-mode-rack",
+      "description": "Rack-localized common-mode: 2 or 3 shards co-fire on the same rack; default attribution opts (max_hop=1, min_member=2).",
+      "primary_axis_label": "(target_rack, fired_set)",
+      "secondary_axis_label": "attribution_window",
+      "variations": [
+        {
+          "variation_idx": 0,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02"
+            ],
+            "attribution_window": 0
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 0,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 1,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02"
+            ],
+            "attribution_window": 1
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 2,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02"
+            ],
+            "attribution_window": 2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 2,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 3,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02"
+            ],
+            "attribution_window": 3
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 4,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02"
+            ],
+            "attribution_window": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 4,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 5,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01"
+            ],
+            "attribution_window": 0
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 0,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 6,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01"
+            ],
+            "attribution_window": 1
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 7,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01"
+            ],
+            "attribution_window": 2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 2,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 8,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01"
+            ],
+            "attribution_window": 3
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 9,
+          "params": {
+            "target_rack": "rack-A",
+            "fired_set": [
+              "shard-00",
+              "shard-01"
+            ],
+            "attribution_window": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 4,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-A",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 10,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "attribution_window": 0
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 0,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 11,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "attribution_window": 1
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 12,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "attribution_window": 2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 2,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 13,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "attribution_window": 3
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 14,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "attribution_window": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 4,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 3
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 15,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04"
+            ],
+            "attribution_window": 0
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 0,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 16,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04"
+            ],
+            "attribution_window": 1
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 17,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04"
+            ],
+            "attribution_window": 2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 2,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 18,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04"
+            ],
+            "attribution_window": 3
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 19,
+          "params": {
+            "target_rack": "rack-B",
+            "fired_set": [
+              "shard-03",
+              "shard-04"
+            ],
+            "attribution_window": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 4,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "candidates": [
+                {
+                  "shared_node_id": "rack-B",
+                  "shared_node_kind": "rack",
+                  "member_count": 2
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "summary": {
+        "detection_rate": 1,
+        "detected_count": 20,
+        "attribution_accuracy": 1,
+        "correct_count": 20,
+        "max_false_positive_count": 0,
+        "pedagogical_property_rate": null
+      }
+    },
+    {
+      "type_name": "event-conditional",
+      "description": "DS deploy-event activates the freeze-hook; subsequent residual update returns the existing residual unchanged (absorbed=false).",
+      "primary_axis_label": "event_class",
+      "secondary_axis_label": "(event_ts_offset_s, sample_ts_offset_s)",
+      "variations": [
+        {
+          "variation_idx": 0,
+          "params": {
+            "event_class": "firmware_push",
+            "event_ts_offset_s": 10,
+            "sample_ts_offset_s": 20
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 1,
+          "params": {
+            "event_class": "firmware_push",
+            "event_ts_offset_s": 50,
+            "sample_ts_offset_s": 100
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 2,
+          "params": {
+            "event_class": "firmware_push",
+            "event_ts_offset_s": 100,
+            "sample_ts_offset_s": 150
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 3,
+          "params": {
+            "event_class": "firmware_push",
+            "event_ts_offset_s": 200,
+            "sample_ts_offset_s": 250
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 4,
+          "params": {
+            "event_class": "firmware_push",
+            "event_ts_offset_s": 290,
+            "sample_ts_offset_s": 295
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 5,
+          "params": {
+            "event_class": "model_redeploy",
+            "event_ts_offset_s": 10,
+            "sample_ts_offset_s": 20
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 6,
+          "params": {
+            "event_class": "model_redeploy",
+            "event_ts_offset_s": 50,
+            "sample_ts_offset_s": 100
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 7,
+          "params": {
+            "event_class": "model_redeploy",
+            "event_ts_offset_s": 100,
+            "sample_ts_offset_s": 150
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 8,
+          "params": {
+            "event_class": "model_redeploy",
+            "event_ts_offset_s": 200,
+            "sample_ts_offset_s": 250
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 9,
+          "params": {
+            "event_class": "model_redeploy",
+            "event_ts_offset_s": 290,
+            "sample_ts_offset_s": 295
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 10,
+          "params": {
+            "event_class": "config_change",
+            "event_ts_offset_s": 10,
+            "sample_ts_offset_s": 20
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 11,
+          "params": {
+            "event_class": "config_change",
+            "event_ts_offset_s": 50,
+            "sample_ts_offset_s": 100
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 12,
+          "params": {
+            "event_class": "config_change",
+            "event_ts_offset_s": 100,
+            "sample_ts_offset_s": 150
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 13,
+          "params": {
+            "event_class": "config_change",
+            "event_ts_offset_s": 200,
+            "sample_ts_offset_s": 250
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 14,
+          "params": {
+            "event_class": "config_change",
+            "event_ts_offset_s": 290,
+            "sample_ts_offset_s": 295
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 15,
+          "params": {
+            "event_class": "env_change",
+            "event_ts_offset_s": 10,
+            "sample_ts_offset_s": 20
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 16,
+          "params": {
+            "event_class": "env_change",
+            "event_ts_offset_s": 50,
+            "sample_ts_offset_s": 100
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 17,
+          "params": {
+            "event_class": "env_change",
+            "event_ts_offset_s": 100,
+            "sample_ts_offset_s": 150
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 18,
+          "params": {
+            "event_class": "env_change",
+            "event_ts_offset_s": 200,
+            "sample_ts_offset_s": 250
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        },
+        {
+          "variation_idx": 19,
+          "params": {
+            "event_class": "env_change",
+            "event_ts_offset_s": 290,
+            "sample_ts_offset_s": 295
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 1,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "freeze_active": true
+            }
+          }
+        }
+      ],
+      "summary": {
+        "detection_rate": 1,
+        "detected_count": 20,
+        "attribution_accuracy": 1,
+        "correct_count": 20,
+        "max_false_positive_count": null,
+        "pedagogical_property_rate": null
+      }
+    },
+    {
+      "type_name": "fdr-multiple-testing",
+      "description": "e-Benjamini-Hochberg FDR control: K drifting shards in a 10-shard fleet; e-BH selects under qLevel.",
+      "primary_axis_label": "drifting_shard_count",
+      "secondary_axis_label": "qLevel",
+      "variations": [
+        {
+          "variation_idx": 0,
+          "params": {
+            "drifting_shard_count": 1,
+            "drifting_indices": [
+              0
+            ],
+            "qLevel": 0.05
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 19,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 1,
+              "fdr_selected_indices": [
+                0
+              ],
+              "firing_shards": [
+                "shard-00"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 1,
+          "params": {
+            "drifting_shard_count": 1,
+            "drifting_indices": [
+              0
+            ],
+            "qLevel": 0.1
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 12,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 1,
+              "fdr_selected_indices": [
+                0
+              ],
+              "firing_shards": [
+                "shard-00"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 2,
+          "params": {
+            "drifting_shard_count": 1,
+            "drifting_indices": [
+              0
+            ],
+            "qLevel": 0.15
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 17,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 1,
+              "fdr_selected_indices": [
+                0
+              ],
+              "firing_shards": [
+                "shard-00"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 3,
+          "params": {
+            "drifting_shard_count": 1,
+            "drifting_indices": [
+              0
+            ],
+            "qLevel": 0.2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 16,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 1,
+              "fdr_selected_indices": [
+                0
+              ],
+              "firing_shards": [
+                "shard-00"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 4,
+          "params": {
+            "drifting_shard_count": 1,
+            "drifting_indices": [
+              0
+            ],
+            "qLevel": 0.25
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 18,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 1,
+              "fdr_selected_indices": [
+                0
+              ],
+              "firing_shards": [
+                "shard-00"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 5,
+          "params": {
+            "drifting_shard_count": 3,
+            "drifting_indices": [
+              0,
+              1,
+              2
+            ],
+            "qLevel": 0.05
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 15,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 3,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 6,
+          "params": {
+            "drifting_shard_count": 3,
+            "drifting_indices": [
+              0,
+              1,
+              2
+            ],
+            "qLevel": 0.1
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 14,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 3,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 7,
+          "params": {
+            "drifting_shard_count": 3,
+            "drifting_indices": [
+              0,
+              1,
+              2
+            ],
+            "qLevel": 0.15
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 16,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 3,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 8,
+          "params": {
+            "drifting_shard_count": 3,
+            "drifting_indices": [
+              0,
+              1,
+              2
+            ],
+            "qLevel": 0.2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 12,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 3,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 9,
+          "params": {
+            "drifting_shard_count": 3,
+            "drifting_indices": [
+              0,
+              1,
+              2
+            ],
+            "qLevel": 0.25
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 14,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 3,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 10,
+          "params": {
+            "drifting_shard_count": 5,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "qLevel": 0.05
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 12,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 5,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 11,
+          "params": {
+            "drifting_shard_count": 5,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "qLevel": 0.1
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 18,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 5,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 12,
+          "params": {
+            "drifting_shard_count": 5,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "qLevel": 0.15
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 13,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 5,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 13,
+          "params": {
+            "drifting_shard_count": 5,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "qLevel": 0.2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 12,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 5,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 14,
+          "params": {
+            "drifting_shard_count": 5,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "qLevel": 0.25
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 13,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 5,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 15,
+          "params": {
+            "drifting_shard_count": 8,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "qLevel": 0.05
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 14,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 8,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04",
+                "shard-05",
+                "shard-06",
+                "shard-07"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 16,
+          "params": {
+            "drifting_shard_count": 8,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "qLevel": 0.1
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 12,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 8,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04",
+                "shard-05",
+                "shard-06",
+                "shard-07"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 17,
+          "params": {
+            "drifting_shard_count": 8,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "qLevel": 0.15
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 14,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 8,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04",
+                "shard-05",
+                "shard-06",
+                "shard-07"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 18,
+          "params": {
+            "drifting_shard_count": 8,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "qLevel": 0.2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 14,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 6,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                7
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04",
+                "shard-07"
+              ]
+            }
+          }
+        },
+        {
+          "variation_idx": 19,
+          "params": {
+            "drifting_shard_count": 8,
+            "drifting_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "qLevel": 0.25
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 12,
+            "false_positive_count": 0,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "fdr_K": 8,
+              "fdr_selected_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "firing_shards": [
+                "shard-00",
+                "shard-01",
+                "shard-02",
+                "shard-03",
+                "shard-04",
+                "shard-05",
+                "shard-06",
+                "shard-07"
+              ]
+            }
+          }
+        }
+      ],
+      "summary": {
+        "detection_rate": 1,
+        "detected_count": 20,
+        "attribution_accuracy": 1,
+        "correct_count": 20,
+        "max_false_positive_count": 0,
+        "pedagogical_property_rate": null
+      }
+    },
+    {
+      "type_name": "hierarchical-evalue",
+      "description": "Hierarchical e-value combination via combineAverage; small uniform drift across all shards; fleet wealth crosses log(1/0.05).",
+      "primary_axis_label": "shard_count",
+      "secondary_axis_label": "(drift_per_window, drift_start_window)",
+      "variations": [
+        {
+          "variation_idx": 0,
+          "params": {
+            "shard_count": 5,
+            "drift_per_window": 0.1,
+            "drift_start_window": 8
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 22,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 22,
+              "per_shard_first_fire_tick": [
+                27,
+                28,
+                null,
+                null,
+                27
+              ],
+              "earliest_per_shard_tick": 27
+            }
+          }
+        },
+        {
+          "variation_idx": 1,
+          "params": {
+            "shard_count": 5,
+            "drift_per_window": 0.13,
+            "drift_start_window": 7
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 23,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 23,
+              "per_shard_first_fire_tick": [
+                null,
+                null,
+                29,
+                null,
+                26
+              ],
+              "earliest_per_shard_tick": 26
+            }
+          }
+        },
+        {
+          "variation_idx": 2,
+          "params": {
+            "shard_count": 5,
+            "drift_per_window": 0.16,
+            "drift_start_window": 6
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 20,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 20,
+              "per_shard_first_fire_tick": [
+                25,
+                27,
+                25,
+                22,
+                28
+              ],
+              "earliest_per_shard_tick": 22
+            }
+          }
+        },
+        {
+          "variation_idx": 3,
+          "params": {
+            "shard_count": 5,
+            "drift_per_window": 0.2,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 17,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 17,
+              "per_shard_first_fire_tick": [
+                26,
+                23,
+                23,
+                21,
+                18
+              ],
+              "earliest_per_shard_tick": 18
+            }
+          }
+        },
+        {
+          "variation_idx": 4,
+          "params": {
+            "shard_count": 5,
+            "drift_per_window": 0.25,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 15,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 15,
+              "per_shard_first_fire_tick": [
+                27,
+                23,
+                18,
+                17,
+                22
+              ],
+              "earliest_per_shard_tick": 17
+            }
+          }
+        },
+        {
+          "variation_idx": 5,
+          "params": {
+            "shard_count": 8,
+            "drift_per_window": 0.1,
+            "drift_start_window": 8
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 23,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 23,
+              "per_shard_first_fire_tick": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                24,
+                null
+              ],
+              "earliest_per_shard_tick": 24
+            }
+          }
+        },
+        {
+          "variation_idx": 6,
+          "params": {
+            "shard_count": 8,
+            "drift_per_window": 0.13,
+            "drift_start_window": 7
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 22,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 22,
+              "per_shard_first_fire_tick": [
+                null,
+                null,
+                27,
+                26,
+                null,
+                24,
+                25,
+                27
+              ],
+              "earliest_per_shard_tick": 24
+            }
+          }
+        },
+        {
+          "variation_idx": 7,
+          "params": {
+            "shard_count": 8,
+            "drift_per_window": 0.16,
+            "drift_start_window": 6
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 18,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 18,
+              "per_shard_first_fire_tick": [
+                21,
+                24,
+                22,
+                27,
+                25,
+                26,
+                25,
+                20
+              ],
+              "earliest_per_shard_tick": 20
+            }
+          }
+        },
+        {
+          "variation_idx": 8,
+          "params": {
+            "shard_count": 8,
+            "drift_per_window": 0.2,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 14,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 14,
+              "per_shard_first_fire_tick": [
+                20,
+                19,
+                24,
+                22,
+                23,
+                26,
+                20,
+                15
+              ],
+              "earliest_per_shard_tick": 15
+            }
+          }
+        },
+        {
+          "variation_idx": 9,
+          "params": {
+            "shard_count": 8,
+            "drift_per_window": 0.25,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 17,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 17,
+              "per_shard_first_fire_tick": [
+                23,
+                19,
+                null,
+                21,
+                20,
+                20,
+                22,
+                23
+              ],
+              "earliest_per_shard_tick": 19
+            }
+          }
+        },
+        {
+          "variation_idx": 10,
+          "params": {
+            "shard_count": 10,
+            "drift_per_window": 0.1,
+            "drift_start_window": 8
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 24,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 24,
+              "per_shard_first_fire_tick": [
+                null,
+                null,
+                29,
+                null,
+                null,
+                null,
+                25,
+                null,
+                29,
+                null
+              ],
+              "earliest_per_shard_tick": 25
+            }
+          }
+        },
+        {
+          "variation_idx": 11,
+          "params": {
+            "shard_count": 10,
+            "drift_per_window": 0.13,
+            "drift_start_window": 7
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 22,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 22,
+              "per_shard_first_fire_tick": [
+                25,
+                27,
+                24,
+                29,
+                null,
+                27,
+                29,
+                24,
+                null,
+                27
+              ],
+              "earliest_per_shard_tick": 24
+            }
+          }
+        },
+        {
+          "variation_idx": 12,
+          "params": {
+            "shard_count": 10,
+            "drift_per_window": 0.16,
+            "drift_start_window": 6
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 18,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 18,
+              "per_shard_first_fire_tick": [
+                21,
+                29,
+                25,
+                27,
+                20,
+                20,
+                25,
+                26,
+                29,
+                27
+              ],
+              "earliest_per_shard_tick": 20
+            }
+          }
+        },
+        {
+          "variation_idx": 13,
+          "params": {
+            "shard_count": 10,
+            "drift_per_window": 0.2,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 15,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 15,
+              "per_shard_first_fire_tick": [
+                25,
+                16,
+                21,
+                23,
+                18,
+                20,
+                22,
+                20,
+                22,
+                18
+              ],
+              "earliest_per_shard_tick": 16
+            }
+          }
+        },
+        {
+          "variation_idx": 14,
+          "params": {
+            "shard_count": 10,
+            "drift_per_window": 0.25,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 15,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 15,
+              "per_shard_first_fire_tick": [
+                21,
+                17,
+                17,
+                17,
+                22,
+                20,
+                21,
+                20,
+                18,
+                18
+              ],
+              "earliest_per_shard_tick": 17
+            }
+          }
+        },
+        {
+          "variation_idx": 15,
+          "params": {
+            "shard_count": 15,
+            "drift_per_window": 0.1,
+            "drift_start_window": 8
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 24,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 24,
+              "per_shard_first_fire_tick": [
+                null,
+                null,
+                null,
+                26,
+                26,
+                29,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                27,
+                29
+              ],
+              "earliest_per_shard_tick": 26
+            }
+          }
+        },
+        {
+          "variation_idx": 16,
+          "params": {
+            "shard_count": 15,
+            "drift_per_window": 0.13,
+            "drift_start_window": 7
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 22,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 22,
+              "per_shard_first_fire_tick": [
+                null,
+                null,
+                28,
+                25,
+                24,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                23,
+                28,
+                28
+              ],
+              "earliest_per_shard_tick": 23
+            }
+          }
+        },
+        {
+          "variation_idx": 17,
+          "params": {
+            "shard_count": 15,
+            "drift_per_window": 0.16,
+            "drift_start_window": 6
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 20,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 20,
+              "per_shard_first_fire_tick": [
+                26,
+                null,
+                26,
+                25,
+                25,
+                22,
+                22,
+                25,
+                null,
+                26,
+                23,
+                25,
+                23,
+                24,
+                24
+              ],
+              "earliest_per_shard_tick": 22
+            }
+          }
+        },
+        {
+          "variation_idx": 18,
+          "params": {
+            "shard_count": 15,
+            "drift_per_window": 0.2,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 15,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 15,
+              "per_shard_first_fire_tick": [
+                16,
+                22,
+                20,
+                27,
+                22,
+                24,
+                26,
+                26,
+                21,
+                24,
+                22,
+                19,
+                17,
+                21,
+                19
+              ],
+              "earliest_per_shard_tick": 16
+            }
+          }
+        },
+        {
+          "variation_idx": 19,
+          "params": {
+            "shard_count": 15,
+            "drift_per_window": 0.25,
+            "drift_start_window": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 14,
+            "false_positive_count": null,
+            "pedagogical_property_met": true,
+            "raw_terminal": {
+              "fleet_fired": true,
+              "fleet_tick_at_first_fire": 14,
+              "per_shard_first_fire_tick": [
+                17,
+                20,
+                17,
+                18,
+                22,
+                20,
+                23,
+                16,
+                18,
+                22,
+                19,
+                21,
+                22,
+                18,
+                16
+              ],
+              "earliest_per_shard_tick": 16
+            }
+          }
+        }
+      ],
+      "summary": {
+        "detection_rate": 1,
+        "detected_count": 20,
+        "attribution_accuracy": 1,
+        "correct_count": 20,
+        "max_false_positive_count": null,
+        "pedagogical_property_rate": 1
+      }
+    },
+    {
+      "type_name": "topology-spanning-common-mode",
+      "description": "Cross-rack common-mode: BFS over cooling-zone-spanning topology; max_hop_distance varies to expose the 1-hop / 2-hop reachability boundary.",
+      "primary_axis_label": "fired_set",
+      "secondary_axis_label": "max_hop_distance",
+      "variations": [
+        {
+          "variation_idx": 0,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-03",
+              "shard-04"
+            ],
+            "max_hop_distance": 1
+          },
+          "observation": {
+            "detected": false,
+            "attribution_correct": null,
+            "detection_window_index": null,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 2,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": null
+            }
+          }
+        },
+        {
+          "variation_idx": 1,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-03",
+              "shard-04"
+            ],
+            "max_hop_distance": 2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 4
+            }
+          }
+        },
+        {
+          "variation_idx": 2,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-03",
+              "shard-04"
+            ],
+            "max_hop_distance": 3
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 4
+            }
+          }
+        },
+        {
+          "variation_idx": 3,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-03",
+              "shard-04"
+            ],
+            "max_hop_distance": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 4
+            }
+          }
+        },
+        {
+          "variation_idx": 4,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-03",
+              "shard-04"
+            ],
+            "max_hop_distance": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 4
+            }
+          }
+        },
+        {
+          "variation_idx": 5,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "max_hop_distance": 1
+          },
+          "observation": {
+            "detected": false,
+            "attribution_correct": null,
+            "detection_window_index": null,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 2,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": null
+            }
+          }
+        },
+        {
+          "variation_idx": 6,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "max_hop_distance": 2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 6
+            }
+          }
+        },
+        {
+          "variation_idx": 7,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "max_hop_distance": 3
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 6
+            }
+          }
+        },
+        {
+          "variation_idx": 8,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "max_hop_distance": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 6
+            }
+          }
+        },
+        {
+          "variation_idx": 9,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03",
+              "shard-04",
+              "shard-05"
+            ],
+            "max_hop_distance": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 6
+            }
+          }
+        },
+        {
+          "variation_idx": 10,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-03"
+            ],
+            "max_hop_distance": 1
+          },
+          "observation": {
+            "detected": false,
+            "attribution_correct": null,
+            "detection_window_index": null,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 0,
+              "non_cz_candidate_count": 0,
+              "cz_member_count": null
+            }
+          }
+        },
+        {
+          "variation_idx": 11,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-03"
+            ],
+            "max_hop_distance": 2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "non_cz_candidate_count": 0,
+              "cz_member_count": 2
+            }
+          }
+        },
+        {
+          "variation_idx": 12,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-03"
+            ],
+            "max_hop_distance": 3
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 2
+            }
+          }
+        },
+        {
+          "variation_idx": 13,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-03"
+            ],
+            "max_hop_distance": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 2
+            }
+          }
+        },
+        {
+          "variation_idx": 14,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-03"
+            ],
+            "max_hop_distance": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 2
+            }
+          }
+        },
+        {
+          "variation_idx": 15,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03"
+            ],
+            "max_hop_distance": 1
+          },
+          "observation": {
+            "detected": false,
+            "attribution_correct": null,
+            "detection_window_index": null,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 1,
+              "non_cz_candidate_count": 1,
+              "cz_member_count": null
+            }
+          }
+        },
+        {
+          "variation_idx": 16,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03"
+            ],
+            "max_hop_distance": 2
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 2,
+              "non_cz_candidate_count": 1,
+              "cz_member_count": 4
+            }
+          }
+        },
+        {
+          "variation_idx": 17,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03"
+            ],
+            "max_hop_distance": 3
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 4
+            }
+          }
+        },
+        {
+          "variation_idx": 18,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03"
+            ],
+            "max_hop_distance": 4
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 4
+            }
+          }
+        },
+        {
+          "variation_idx": 19,
+          "params": {
+            "fired_set": [
+              "shard-00",
+              "shard-01",
+              "shard-02",
+              "shard-03"
+            ],
+            "max_hop_distance": 5
+          },
+          "observation": {
+            "detected": true,
+            "attribution_correct": true,
+            "detection_window_index": 3,
+            "false_positive_count": null,
+            "pedagogical_property_met": null,
+            "raw_terminal": {
+              "candidates_count": 3,
+              "non_cz_candidate_count": 2,
+              "cz_member_count": 4
+            }
+          }
+        }
+      ],
+      "summary": {
+        "detection_rate": 0.8,
+        "detected_count": 16,
+        "attribution_accuracy": 1,
+        "correct_count": 16,
+        "max_false_positive_count": null,
+        "pedagogical_property_rate": null
+      }
+    }
+  ],
+  "totals": {
+    "total_variations": 120,
+    "total_detected": 114,
+    "total_attribution_correct": 114
+  }
+}

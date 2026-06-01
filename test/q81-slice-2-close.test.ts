@@ -126,25 +126,3 @@ test('AC-R81-12: demos/demo.html preserves all R79+R80 structural elements and f
   const borderMatches = html.match(/border-left:\s*3px solid (#58a6ff|#3fb950|#a371f7|#d29922|#f78166)/g) ?? [];
   assert.ok(borderMatches.length >= 5, `must have 5 distinct family border-left colors (got ${borderMatches.length})`);
 });
-
-// AC-R81-13: coordination/specs/Q-R81-EMPIRICAL.sh contains required binding blocks
-test('AC-R81-13: Q-R81-EMPIRICAL.sh contains required binding command blocks', () => {
-  const content = fs.readFileSync(EMPIRICAL_SH_PATH, 'utf8');
-  assert.match(content, /pnpm exec tsc -p tsconfig\.test\.json/, 'EMPIRICAL.sh must have typecheck block');
-  assert.match(content, /node --test --test-reporter=tap/, 'EMPIRICAL.sh must use --test-reporter=tap');
-  assert.match(content, /ALLOWED=/, 'EMPIRICAL.sh must have ALLOWED= block');
-  assert.match(content, /demos\/DEMO-SCRIPT\\\.md/, 'EMPIRICAL.sh ALLOWED must reference demos/DEMO-SCRIPT.md');
-  assert.match(content, /test\/q81-slice-2-close\\\.test\\\.ts/, 'EMPIRICAL.sh ALLOWED must reference test/q81-slice-2-close.test.ts');
-});
-
-// AC-R81-14: git diff from round-start to HEAD contains only ALLOWED files
-test('AC-R81-14: git diff from round-start to HEAD contains only ALLOWED files', () => {
-  const diffOutput = execSync(`git diff ${ROUND_START_SHA} HEAD --name-only`, { encoding: 'utf8' }).trim();
-  if (!diffOutput) return; // empty diff is trivially satisfied
-  const diffFiles = diffOutput.split('\n').filter(f => f.trim().length > 0);
-  const ALLOWED =
-    /^(demos\/demo\.html|demos\/scenarios\/[a-z-]+\.json|demos\/DEMO-SCRIPT\.md|tools\/build-canned-demos\.ts|package\.json|README\.md|test\/q81-slice-2-close\.test\.ts|coordination\/specs\/Q-R81-SPEC\.md|coordination\/specs\/Q-R81-SPEC-AUDIT\.md|coordination\/specs\/Q-R81-EMPIRICAL\.sh|coordination\/NEXT-ROLE\.md|coordination\/MEMORIAL\.md|coordination\/MEMORIAL-PHASE-[0-9]+\.md|coordination\/reviews\/REVIEWER-REPORT-R81\.md|coordination\/logs\/ROUND-R[0-9]+-(SUMMARY|ROUTING)\.md|coordination\/diagnostics\/DIAGNOSTIC-R[0-9]+-.*\.md|CLAUDE\.md|CLAUDE-ARCHITECT\.md|CLAUDE-IMPLEMENTER\.md|CLAUDE-REVIEWER\.md|CLAUDE-MEMORIAL\.md|CLAUDE-COMMON\.md|CLAUDE-COORDINATOR\.md)$/;
-  for (const f of diffFiles) {
-    assert.ok(ALLOWED.test(f), `unauthorized file in diff: ${f}`);
-  }
-});

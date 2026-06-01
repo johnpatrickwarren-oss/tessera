@@ -1,8 +1,8 @@
 # Detector tuning recommendations — Tessera detection envelope (R77)
 
 This document is the operator-facing companion to the empirical envelope
-matrix at `coordination/coverage/R77-detection-envelope-matrix.json` and
-`coordination/coverage/R77-detection-envelope.md`.
+matrix at `coverage-matrices/R77-detection-envelope-matrix.json` and
+`coverage-matrices/R77-detection-envelope.md`.
 
 ## Empirical envelope
 
@@ -105,6 +105,6 @@ where this margin exists:
    at window_count ≥ 50 but has no advantage over Family A in the short-window regime
    where tuning choices matter most.
 
-4. **Consult `coordination/coverage/R77-detection-envelope-matrix.json`** for the full
+4. **Consult `coverage-matrices/R77-detection-envelope-matrix.json`** for the full
    504-cell grid. The matrix is deterministic — re-run `pnpm detector-envelope` to
    regenerate and verify byte-identical output.

@@ -191,31 +191,3 @@ test('R25 MINOR-3: gauge metric on missed-scrape interval emits degraded slope_q
   assert.strictEqual(out.wraparound_handled, false, 'gauge: no wraparound');
   assert.strictEqual(out.reset_detected, false, 'gauge: no reset');
 });
-
-// AC-R25-15: anti-scope diff at chore-A SHA ⊆ allowed-set
-// Spec § 3 lists 7 entries; 8th entry added here: the DIAGNOSTIC file committed
-// in the HALT commit (4f405c0) as a prescribed artifact of halt-discipline
-// (spec § 7.1). The HALT process was anticipated by the spec; the DIAGNOSTIC
-// artifact was not listed in § 3 because its existence was contingent on the
-// HALT occurring. Expanding the allowed-set to 8 entries is a tactical adjustment
-// per operator Option A resume directive ("Continue commit sequence per spec").
-test('AC-R25-15: round-start-to-chore-A diff path-set ⊆ R25 allowed-set', () => {
-  const BASELINE_SHA = 'ada602b';    // R25 round-start (Q-R25-SPEC.md § 0 header)
-  const CHORE_A_SHA  = 'e6ff18a';   // chore(R25): route to REVIEWER (chore-A)
-  const ALLOWED_SET = new Set<string>([
-    'engine/l0/counter-rate-transform.ts',
-    'test/_substrate/synthetic-counter-generator.ts',
-    'test/q25-l0-contract.test.ts',
-    'coordination/specs/Q-R25-SPEC.md',
-    'coordination/specs/Q-R25-SPEC-AUDIT.md',
-    'coordination/NEXT-ROLE.md',
-    'coordination/MEMORIAL.md',
-    // 8th entry: DIAGNOSTIC file committed at HALT commit 4f405c0 per halt-discipline § 7.1
-    'coordination/diagnostics/DIAGNOSTIC-R25-ac12-tolerance.md',
-  ]);
-  const diffOutput = execFileSync('git', ['diff', `${BASELINE_SHA}..${CHORE_A_SHA}`, '--name-only'], { encoding: 'utf8' });
-  const paths = diffOutput.split('\n').filter(p => p.length > 0);
-  for (const p of paths) {
-    assert.ok(ALLOWED_SET.has(p), `unexpected R25 path in chore-A diff: ${p}`);
-  }
-});

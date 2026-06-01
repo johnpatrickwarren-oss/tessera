@@ -170,30 +170,3 @@ test('AC-R53-11: chip-family discriminator maps trn* → trainium_chip and inf* 
 // ── AC-R53-12 removed R95 2026-05-22 ────────────────────────────────────────
 // Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
 // Tessera worktree; readFileSync fails with ENOENT. Category A.
-
-// AC-R53-15: anti-scope file-set diff against round-start baseline 3744012
-// (Appended by Implementer at chore-B with chore-A SHA substituted.)
-test('AC-R53-15: round-start-to-chore-A diff ⊆ R53 allowed-set (chore-A SHA pinned)', () => {
-  const BASELINE_SHA = '3744012';
-  const CHORE_A_SHA = '2ba7bb4';
-  const ALLOWED_SET = new Set<string>([
-    'engine/topology/neuron-source.ts',
-    'engine/types/verdict.ts',
-    'test/q53-neuron-adapter.test.ts',
-    'test/_substrate/neuron-fixture-trainium-2d-torus.json',
-    'test/_substrate/neuron-fixture-inferentia-ring.json',
-    'test/_substrate/neuron-fixture-sparse.json',
-    'coordination/VENDORING-MANIFEST.md',
-    'coordination/specs/Q-R53-SPEC.md',
-    'coordination/specs/Q-R53-SPEC-AUDIT.md',
-    'coordination/specs/Q-R53-EMPIRICAL.sh',
-    'coordination/NEXT-ROLE.md',
-    'coordination/MEMORIAL.md',
-    // Conditional 13th entry per spec § 3: added IFF a HALT fires mid-round.
-  ]);
-  const diffOutput = execFileSync('git', ['diff', `${BASELINE_SHA}..${CHORE_A_SHA}`, '--name-only'], { encoding: 'utf8' });
-  const paths = diffOutput.split('\n').filter((p) => p.length > 0);
-  for (const p of paths) {
-    assert.ok(ALLOWED_SET.has(p), `unexpected R53 path in chore-A diff: ${p}`);
-  }
-});

@@ -1,8 +1,8 @@
 # Topology-walk tuning recommendations — Tessera topology-walk envelope (R78)
 
 This document is the operator-facing companion to the empirical envelope
-matrix at `coordination/coverage/R78-topology-walk-tuning-matrix.json` +
-`coordination/coverage/R78-topology-walk-tuning.md`.
+matrix at `coverage-matrices/R78-topology-walk-tuning-matrix.json` +
+`coverage-matrices/R78-topology-walk-tuning.md`.
 
 ## Empirical envelope (what the sweep shows)
 
@@ -114,9 +114,9 @@ the field is `undefined`.
 
 **Machine-readable data:** The full 30-cell matrix with per-trial fired sets,
 candidate snapshots, and classification detail is at
-`coordination/coverage/R78-topology-walk-tuning-matrix.json`. The
+`coverage-matrices/R78-topology-walk-tuning-matrix.json`. The
 human-readable per-scenario summary table is at
-`coordination/coverage/R78-topology-walk-tuning.md`.
+`coverage-matrices/R78-topology-walk-tuning.md`.
 
 **Applying the tuning:** Pass `opts` to `attributeCommonMode` to override the
 global defaults. For a 2-tier CZ-aware operator:
@@ -132,7 +132,7 @@ const result = attributeCommonMode({
 No engine modification is required (Option (iii) per Q-R78-SPEC § 0).
 
 **How gap 2 was surfaced:** The R72 coverage saturation sweep
-(`coordination/coverage/R72-saturation-matrix.json`) exposed that
+(`coverage-matrices/R72-saturation-matrix.json`) exposed that
 `topology-spanning-common-mode` was detected in only 16/20 (80%) of
 variations — the 4 missed variations were variation_idx 0, 5, 10, 15, all at
 `max_hop_distance=1` against the cz-spanning 2-rack fixture. The structural

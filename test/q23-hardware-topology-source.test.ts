@@ -35,16 +35,6 @@ test('AC-R23-2: nvlink_peer is accepted as TopologyEdge.relationship', () => {
   assert.strictEqual(rel, 'nvlink_peer');
 });
 
-// AC-R23-3: manifest row for verdict.ts contains the three R23 literal strings
-test('AC-R23-3: VENDORING-MANIFEST.md verdict.ts row contains psu, cooling_zone, nvlink_peer', () => {
-  const manifest = readFileSync('coordination/VENDORING-MANIFEST.md', 'utf8');
-  const verdictRow = manifest.split('\n').find(line => line.includes('engine/types/verdict.ts'));
-  assert.ok(verdictRow, 'verdict.ts row found in manifest');
-  assert.ok(verdictRow!.includes('psu'), "manifest verdict.ts row contains 'psu'");
-  assert.ok(verdictRow!.includes('cooling_zone'), "manifest verdict.ts row contains 'cooling_zone'");
-  assert.ok(verdictRow!.includes('nvlink_peer'), "manifest verdict.ts row contains 'nvlink_peer'");
-});
-
 // AC-R23-4: HardwareTopologySource satisfies TopologySource interface at runtime
 test('AC-R23-4: HardwareTopologySource implements TopologySource interface', async () => {
   const snapshot = makeV9YMultiRackCluster();
@@ -141,29 +131,3 @@ test('AC-R23-9: computeSnapshotHash is deterministic on v9Y fixture', () => {
 // ── AC-R23-12 removed R95 2026-05-22 ────────────────────────────────────────
 // Defunct post-R94 engine extraction: 40 vendored engine/*.ts files removed from
 // Tessera worktree; readFileSync on each fails with ENOENT. Category A.
-
-// AC-R23-15: anti-scope diff — baseline 2946b13 to chore-A d2286b2 within allowed-set
-// (chore-B; chore-A SHA d2286b2 substituted per TQ-4 γ pattern)
-test('AC-R23-15: git diff baseline..chore-A only contains allowed-set paths', () => {
-  const { execSync } = require('node:child_process');
-  const allowedSet = new Set([
-    'engine/types/verdict.ts',
-    'engine/types/verdict.js',
-    'engine/hardware-topology-source.ts',
-    'engine/hardware-topology-source.js',
-    'test/_substrate/v9Y-multi-rack-cluster.ts',
-    'test/_substrate/v9Y-multi-rack-cluster.js',
-    'test/q23-hardware-topology-source.test.ts',
-    'test/q23-hardware-topology-source.test.js',
-    'coordination/VENDORING-MANIFEST.md',
-    'coordination/specs/Q-R23-SPEC.md',
-    'coordination/specs/Q-R23-SPEC-AUDIT.md',
-    'coordination/NEXT-ROLE.md',
-    'coordination/MEMORIAL.md',
-  ]);
-  const output = execSync('git diff 2946b13..d2286b2 --name-only', { encoding: 'utf8' });
-  const paths = output.trim().split('\n').filter(Boolean);
-  for (const p of paths) {
-    assert.ok(allowedSet.has(p), `path outside allowed-set: ${p}`);
-  }
-});

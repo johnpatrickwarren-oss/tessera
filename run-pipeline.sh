@@ -54,13 +54,13 @@ set -uo pipefail
 
 # ── Config ────────────────────────────────────────────────────────────────────
 PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
-COORD="$PROJECT_ROOT/coordination"
+COORD="${ANCHOR_COORD_DIR:-$PROJECT_ROOT/coordination}"   # pipeline working dir; override via --coord-dir / ANCHOR_COORD_DIR
 CROSS_MEMORIAL="$HOME/.claude/CROSS-PROJECT-MEMORIAL.md"
 LOG_DIR="$COORD/logs"
 
 ROUND="R01"
 START_AT=""
-PRD_PATH="$COORD/PRD.md"
+PRD_PATH=""   # resolved after arg-parse: explicit --prd, else $COORD/PRD.md
 DRY_RUN=false
 MODEL_ROUTING=true
 TIER="full"
@@ -128,6 +128,7 @@ while [[ $# -gt 0 ]]; do
     --round)            ROUND="$2";        shift 2 ;;
     --start-at)         START_AT="$2";     shift 2 ;;
     --prd)              PRD_PATH="$2";     shift 2 ;;
+    --coord-dir)        COORD="$2";        shift 2 ;;
     --tier)             TIER="$2"; TIER_EXPLICIT=true; shift 2 ;;
     --dry-run)          DRY_RUN=true;      shift   ;;
     --hybrid-reviewer)  HYBRID_REVIEWER=true; shift ;;
@@ -146,7 +147,10 @@ Usage: ./run-pipeline.sh [options]
 Options:
   --round R01          Round identifier (default: R01)
   --start-at ROLE      Resume from a specific role (after resolving escalation)
-  --prd PATH           Path to PRD (default: coordination/PRD.md)
+  --prd PATH           Path to PRD (default: <coord-dir>/PRD.md)
+  --coord-dir PATH     Pipeline working dir (default: ./coordination; or ANCHOR_COORD_DIR).
+                       coordination/ is the orchestrator's local working state and is gitignored
+                       (not part of the published product); point this elsewhere to relocate it.
   --tier solo|audit|full
                        Pipeline tier (default: full)
                          full  = Architect + Implementer + Reviewer + Memorial
@@ -192,6 +196,10 @@ EOF
     *) echo "Unknown argument: $1"; exit 1 ;;
   esac
 done
+
+# Resolve coordination-dir-derived paths now that --coord-dir / ANCHOR_COORD_DIR are known.
+LOG_DIR="$COORD/logs"
+PRD_PATH="${PRD_PATH:-$COORD/PRD.md}"
 
 # ── Auto-tier integration (R73) ───────────────────────────────────────────────
 # When --auto-tier is passed without an explicit --tier, invoke the heuristic router
@@ -261,8 +269,8 @@ else
 fi
 
 # ── Routing log (R74; extends R73 auto-tier log) ──────────────────────────────
-mkdir -p coordination/logs
-ROUTING_LOG="coordination/logs/ROUND-${ROUND}-ROUTING.md"
+mkdir -p "$LOG_DIR"
+ROUTING_LOG="$LOG_DIR/ROUND-${ROUND}-ROUTING.md"
 {
   echo "# Round ${ROUND} routing"
   echo ""

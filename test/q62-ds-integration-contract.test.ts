@@ -179,35 +179,6 @@ test('AC-R62-9: endpoint constants match interface literal types in both directi
   assert.strictEqual(eventEp.method, 'POST');
 });
 
-// ───────────────────────────────────────────────────────────────────────
-// AC-R62-12: anti-scope diff at chore-A ⊆ ALLOWED_SET (10 paths)
-// ───────────────────────────────────────────────────────────────────────
-test('AC-R62-12: round-start-to-chore-A diff ⊆ R62 allowed-set (chore-A SHA pinned)', () => {
-  const ROUND_START = 'ad6cc6b';
-  const CHORE_A_SHA = '0018502b12ba3e730fa093e682c9f0ae0ad42abe';
-  const ALLOWED = [
-    'coordination/MEMORIAL.md',
-    'coordination/NEXT-ROLE.md',
-    'coordination/specs/Q-R62-EMPIRICAL.sh',
-    'coordination/specs/Q-R62-SPEC-AUDIT.md',
-    'coordination/specs/Q-R62-SPEC.md',
-    'engine/ds-integration/README.md',
-    'engine/ds-integration/event-contract.ts',
-    'engine/ds-integration/feed-contract.ts',
-    'engine/ds-integration/index.ts',
-    'test/q62-ds-integration-contract.test.ts',
-  ];
-  const out = execSync(`git diff ${ROUND_START}..${CHORE_A_SHA} --name-only`, { encoding: 'utf-8' })
-    .split('\n').filter(s => s.length > 0).sort();
-  const allowedSet = new Set(ALLOWED);
-  const diagnosticRe = /^coordination\/diagnostics\/DIAGNOSTIC-R62-.*\.md$/;
-  for (const p of out) {
-    if (!allowedSet.has(p) && !diagnosticRe.test(p)) {
-      assert.fail(`Unauthorized path in chore-A diff: ${p}`);
-    }
-  }
-});
-
 // ── AC-R62-13 removed R95 2026-05-22 ────────────────────────────────────────
 // Defunct post-R94 engine extraction: engine/types/verdict.ts removed from
 // Tessera worktree; readFileSync fails with ENOENT. Category A.

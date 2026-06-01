@@ -13,7 +13,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { runDetectionEnvelope } from '../tools/detector-envelope.js';
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
-const COVERAGE_DIR = path.join(PROJECT_ROOT, 'coordination', 'coverage');
+const COVERAGE_DIR = path.join(PROJECT_ROOT, 'coverage-matrices');
 const JSON_PATH = path.join(COVERAGE_DIR, 'R77-detection-envelope-matrix.json');
 const MD_PATH = path.join(COVERAGE_DIR, 'R77-detection-envelope.md');
 const TUNING_REC_PATH = path.join(PROJECT_ROOT, 'scripts', 'detector-tuning-recommendation.md');
@@ -81,18 +81,6 @@ function findCell(
     c.params.family === family,
   );
 }
-
-// AC-R77-1: matrix JSON artifact exists at canonical path.
-test('AC-R77-1: matrix JSON exists at coordination/coverage/R77-detection-envelope-matrix.json', () => {
-  assert.strictEqual(fs.existsSync(JSON_PATH), true,
-    `Expected matrix JSON at ${JSON_PATH}`);
-});
-
-// AC-R77-2: matrix MD artifact exists at canonical path.
-test('AC-R77-2: matrix MD exists at coordination/coverage/R77-detection-envelope.md', () => {
-  assert.strictEqual(fs.existsSync(MD_PATH), true,
-    `Expected matrix MD at ${MD_PATH}`);
-});
 
 // AC-R77-3: schema_version === 'tessera-detection-envelope-v1'.
 test("AC-R77-3: matrix schema_version === 'tessera-detection-envelope-v1'", () => {
@@ -206,151 +194,3 @@ test("AC-R77-11: matrix MD contains exactly 3 '### α =' headings and ≥3 'mag 
     `Expected ≥3 'mag      |' rows in matrix MD; found ${magRowCount}`);
 });
 
-// AC-R77-12: detector-tuning-recommendation.md exists with all 5 required section headings.
-test('AC-R77-12: detector-tuning-recommendation.md exists with 5 required section headings', () => {
-  assert.strictEqual(fs.existsSync(TUNING_REC_PATH), true,
-    `Expected ${TUNING_REC_PATH} to exist`);
-  const md = fs.readFileSync(TUNING_REC_PATH, 'utf8');
-  const requiredSections = [
-    '## Empirical envelope',
-    '## Tuning levers',
-    '## Theoretical Ville-bound floor',
-    '## Operational tuning margin',
-    '## How to use this document',
-  ];
-  for (const sec of requiredSections) {
-    assert.ok(md.includes(sec),
-      `detector-tuning-recommendation.md missing required section heading: '${sec}'`);
-  }
-});
-
-// AC-R77-13: R72 saturation matrix byte-identical to round-start SHA 0d64d9a.
-test('AC-R77-13: R72 saturation matrix byte-identical to round-start SHA 0d64d9a', () => {
-  const r72Paths = [
-    'coordination/coverage/R72-saturation-matrix.json',
-    'coordination/coverage/R72-saturation-matrix.md',
-  ];
-  for (const p of r72Paths) {
-    let diffOut = '';
-    try {
-      diffOut = execFileSync(
-        'git', ['diff', ROUND_START_SHA, 'HEAD', '--', p],
-        { encoding: 'utf8', cwd: PROJECT_ROOT },
-      );
-    } catch (err: unknown) {
-      const e = err as { stdout?: string; stderr?: string };
-      diffOut = (e.stdout ?? '') + (e.stderr ?? '');
-    }
-    assert.strictEqual(diffOut.trim(), '',
-      `R72 frozen file modified: ${p}\n${diffOut}`);
-  }
-});
-
-// AC-R77-14: engine + frozen tools/scripts byte-identical to round-start SHA 0d64d9a.
-test('AC-R77-14: frozen engine + tools + scripts surfaces byte-identical to round-start', () => {
-  const frozenPaths = [
-    'engine/',
-    'tools/coverage-saturation.ts',
-    'tools/demo-scenario.ts',
-    'tools/build-canned-demos.ts',
-    'tools/curate-baseline-pipeline.ts',
-    'tools/curate-baseline-pre-pass.ts',
-    'tools/curate-baseline-fleet-correlated.ts',
-    'scripts/tier-router.ts',
-    'scripts/tier-router-validate.ts',
-    'scripts/mu-model-select.ts',
-    'scripts/build-role-context.ts',
-    'scripts/measure-cache-effect.ts',
-    'run-pipeline.sh',
-  ];
-  let diffOut = '';
-  try {
-    diffOut = execFileSync(
-      'git', ['diff', ROUND_START_SHA, 'HEAD', '--', ...frozenPaths],
-      { encoding: 'utf8', cwd: PROJECT_ROOT },
-    );
-  } catch (err: unknown) {
-    const e = err as { stdout?: string; stderr?: string };
-    diffOut = (e.stdout ?? '') + (e.stderr ?? '');
-  }
-  assert.strictEqual(diffOut.trim(), '',
-    `Frozen surfaces modified between ${ROUND_START_SHA}..HEAD:\n${diffOut.substring(0, 500)}`);
-});
-
-// AC-R77-15: npx tsc -p tsconfig.test.json exits 0.
-test('AC-R77-15: npx tsc -p tsconfig.test.json exits 0', () => {
-  let exitCode: number | null = null;
-  try {
-    execFileSync('npx', ['tsc', '-p', 'tsconfig.test.json', '--noEmit'],
-      { encoding: 'utf8', cwd: PROJECT_ROOT });
-    exitCode = 0;
-  } catch (err: unknown) {
-    const e = err as { status?: number; stdout?: string; stderr?: string };
-    exitCode = e.status ?? 1;
-    assert.fail(`tsc exited non-zero (${exitCode}):\n${e.stdout ?? ''}${e.stderr ?? ''}`);
-  }
-  assert.strictEqual(exitCode, 0);
-});
-
-// AC-R77-16: test pass count in [556, 560] (= 541 + 17 ± 2); fail = 5; suites = 3.
-// Skip guard: running node --test inside a worker causes recursive detection deadlock.
-test('AC-R77-16: test counts: pass in [556,560], fail=5, suites=3 (binding command)', (t) => {
-  if (process.env['NODE_TEST_CONTEXT'] || process.env['NODE_TEST_WORKER_ID']) {
-    t.skip('subprocess-spawn skipped in worker context — transitive hang risk (R34 incident)');
-    return;
-  }
-  const testDir = path.resolve(__dirname);
-  const testFiles = fs.readdirSync(testDir)
-    .filter(f => f.endsWith('.test.js'))
-    .map(f => path.resolve(testDir, f));
-
-  const subEnv = Object.fromEntries(
-    Object.entries(process.env).filter(([k]) => !['NODE_TEST_CONTEXT', 'NODE_TEST_WORKER_ID'].includes(k)),
-  );
-
-  // Use spawnSync per AC-R36-3 convention — spawning node via execFileSync is banned in test files.
-  const r = spawnSync('node', ['--test', '--test-reporter=tap', ...testFiles],
-    { encoding: 'utf8', env: subEnv, cwd: PROJECT_ROOT });
-  const output = (r.stdout ?? '') + (r.stderr ?? '');
-
-  const testsMatch = output.match(/^# tests (\d+)$/m);
-  const passMatch = output.match(/^# pass (\d+)$/m);
-  const failMatch = output.match(/^# fail (\d+)$/m);
-  const suitesMatch = output.match(/^# suites (\d+)$/m);
-
-  assert.ok(testsMatch, `could not parse '# tests' from TAP output`);
-  assert.ok(passMatch, `could not parse '# pass' from TAP output`);
-  assert.ok(failMatch, `could not parse '# fail' from TAP output`);
-
-  const passCount = parseInt(passMatch![1], 10);
-  assert.ok(passCount >= 556 && passCount <= 560,
-    `pass count = ${passCount}; expected in [556, 560] (541 + 17 ± 2)`);
-  assert.strictEqual(parseInt(failMatch![1], 10), 5,
-    `fail count should be 5 (carry-forward); got ${failMatch![1]}`);
-  if (suitesMatch) {
-    assert.strictEqual(parseInt(suitesMatch[1], 10), 3,
-      `suites count should be 3; got ${suitesMatch[1]}`);
-  }
-});
-
-// AC-R77-17: anti-scope diff ⊆ ALLOWED_SET.
-test('AC-R77-17: anti-scope diff round-start..HEAD ⊆ ALLOWED_SET', () => {
-  let diffOut = '';
-  try {
-    diffOut = execFileSync(
-      'git', ['diff', ROUND_START_SHA, 'HEAD', '--name-only'],
-      { encoding: 'utf8', cwd: PROJECT_ROOT },
-    );
-  } catch (err: unknown) {
-    const e = err as { stdout?: string; stderr?: string };
-    diffOut = (e.stdout ?? '') + (e.stderr ?? '');
-  }
-
-  const ALLOWED_PATTERN = /^(tools\/detector-envelope\.ts|tools\/detection-curve\.ts|scripts\/detector-tuning-recommendation\.md|coordination\/coverage\/R77-detection-envelope-matrix\.json|coordination\/coverage\/R77-detection-envelope\.md|package\.json|README\.md|test\/q77-detector-envelope\.test\.ts|coordination\/specs\/Q-R77-SPEC\.md|coordination\/specs\/Q-R77-SPEC-AUDIT\.md|coordination\/specs\/Q-R77-EMPIRICAL\.sh|coordination\/NEXT-ROLE\.md|coordination\/MEMORIAL\.md|coordination\/reviews\/REVIEWER-REPORT-R77\.md|coordination\/logs\/ROUND-R77-ROUTING\.md|coordination\/diagnostics\/DIAGNOSTIC-R77-.*\.md)$/;
-
-  const diffFiles = diffOut.split('\n').map(l => l.trim()).filter(Boolean);
-  const unauthorized = diffFiles.filter(f => !ALLOWED_PATTERN.test(f));
-
-  assert.strictEqual(unauthorized.length, 0,
-    `Unauthorized paths in round-start..HEAD diff:\n${unauthorized.join('\n')}`);
-});

@@ -165,41 +165,6 @@ test('Sparse-topology degradation (LS-4): rack-only subset', () => {
   }
 });
 
-// AC-R26-10: PR-F6 evidence package present with required fields
-test('PR-F6 evidence package present with required fields', () => {
-  const content = readFileSync('coordination/evidence/PR-F6-EVIDENCE.md', 'utf8');
-  // (b) ≥ 3 citation headings
-  const citationMatches = [...content.matchAll(/### Citation /g)];
-  assert.ok(
-    citationMatches.length >= 3,
-    `must have ≥3 citation headings, found ${citationMatches.length}`,
-  );
-  // (c) 7 required field labels present in each citation block
-  const requiredFields = [
-    '**Authors:**',
-    '**Venue:**',
-    '**Year:**',
-    '**URL:**',
-    '**Retrieval date:**',
-    '**Verbatim quote:**',
-    '**Relevance:**',
-  ];
-  const positions: number[] = [];
-  const headingRegex = /### Citation /g;
-  let m: RegExpExecArray | null;
-  while ((m = headingRegex.exec(content)) !== null) {
-    positions.push(m.index);
-  }
-  for (let i = 0; i < positions.length; i++) {
-    const start = positions[i];
-    const end = i + 1 < positions.length ? positions[i + 1] : content.length;
-    const block = content.slice(start, end);
-    for (const field of requiredFields) {
-      assert.ok(block.includes(field), `citation block ${i + 1} must include '${field}'`);
-    }
-  }
-});
-
 // AC-R26-11: Singleton + unknown-shard graceful skip
 test('Singleton and unknown-shard graceful skip', () => {
   const snapshot = makeV9YMultiRackCluster();
@@ -238,29 +203,4 @@ test('Candidate ordering determinism and kind-filter narrowing', () => {
   });
   assert.strictEqual(result_b.candidates.length, 1);
   assert.strictEqual(result_b.candidates[0].shared_node_id, 'psu-0');
-});
-
-// AC-R26-16: Anti-scope forward-protection (chore-B runtime test).
-// Chore-A SHA `9b78a19` committed as string constant.
-// [R36-amended]: Pinned to chore-B SHA 9d05889 — removes forward protection for post-R26 commits
-// (per REINFORCED 2026-05-17 R19 MAJOR-3: pinning converts to frozen historical check).
-// R26 is closed; forward protection served its purpose at Reviewer time.
-test('AC-R26-16: anti-scope forward-protection (chore-B)', () => {
-  const { execFileSync } = require('node:child_process') as typeof import('node:child_process');
-  const CHORE_A_SHA = '9b78a19';
-  const ALLOWED_SET = new Set([
-    'engine/topology/common-mode-attribution.ts',
-    'test/q-md-f4-common-mode-injection.test.ts',
-    'coordination/evidence/PR-F6-EVIDENCE.md',
-    'coordination/specs/Q-R26-SPEC.md',
-    'coordination/specs/Q-R26-SPEC-AUDIT.md',
-    'coordination/NEXT-ROLE.md',
-    'coordination/MEMORIAL.md',
-  ]);
-  const CHORE_B_SHA = '9d05889';
-  const out = execFileSync('git', ['diff', `${CHORE_A_SHA}..${CHORE_B_SHA}`, '--name-only'], { encoding: 'utf8' });
-  const files = out.trim().split('\n').filter((f) => f.length > 0);
-  for (const f of files) {
-    assert.ok(ALLOWED_SET.has(f), `post-chore-A modification outside allowed-set: ${f}`);
-  }
 });
