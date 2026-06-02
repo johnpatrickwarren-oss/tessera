@@ -52,106 +52,105 @@ export interface PrePassResult {
   decisions: Partial<Record<BaselineCurationDecisionId, BaselineCurationDecision>>;
 }
 
-/** Stage 2a per-shard within-window screening.
+/** Mutable accumulator threaded through per-run screening. Each `screenRun` call
+ *  reads `opts` and updates these counters in place; the totals feed the D11 audit. */
+interface ScreenCounters {
+  nRunsScreened: number;
+  nRunsSkippedInsufficientSamples: number;
+  nRunsSkippedMcdFailed: number;
+  nTicksTotal: number;            // counts only ticks that were SCREENED (not pass-through ticks)
+  nTicksContaminated: number;
+}
+
+/** Screen a single run for within-window contamination.
  *
- *  For each run in `bundle.runs`:
  *    - Collect signal names by sorted Object.keys for deterministic column ordering.
  *    - Form an N×p sample matrix where N = min length across the run's signal_series and p = number of signals.
  *    - If N < p + 1 (insufficient for MCD): pass run through unchanged, increment skip counter.
  *    - Else: run fastMCD(rows, α, seed). If MCD fails (null result, non-PD): pass through, increment skip counter.
  *    - Else: compute Mahalanobis d² per tick under (mcd.mean, mcd.cov); flag ticks where d² > chiSqQuantile975(p).
  *    - Build curated run: filter signal_series / hour_of_day / day_of_week at non-contaminated indices.
- *    - Accumulate per-run counts into the D11 audit summary.
  *
- *  Returns a NEW BaselineBundle; the input bundle is not mutated. */
-export function curateBaselinePrePass(
-  bundle: BaselineBundle,
-  opts: PrePassOpts = {},
-): PrePassResult {
-  const mcdAlpha = opts.mcdAlpha ?? FASTMCD_DEFAULT_ALPHA;
-  const mcdSeed = opts.mcdSeed ?? FASTMCD_DEFAULT_SEED;
+ *  Counters in `c` are mutated in place; returns the (possibly pass-through) run. */
+function screenRun(
+  run: BaselineBundle['runs'][number],
+  mcdAlpha: number,
+  mcdSeed: number,
+  c: ScreenCounters,
+): BaselineBundle['runs'][number] {
+  const sortedSignals = Object.keys(run.signal_series).sort();
+  const p = sortedSignals.length;
+  if (p === 0) {
+    // Run carries no signals; pass through; no screening.
+    return run;
+  }
+  const minLen = Math.min(...sortedSignals.map((sig) => run.signal_series[sig].length));
+  if (minLen < p + 1) {
+    // Insufficient samples for MCD.
+    c.nRunsSkippedInsufficientSamples += 1;
+    return run;
+  }
+  // Form rows: rows[i][j] = run.signal_series[sortedSignals[j]][i] for i ∈ [0, minLen), j ∈ [0, p).
+  const rows: number[][] = [];
+  for (let i = 0; i < minLen; i++) {
+    const row = new Array<number>(p);
+    for (let j = 0; j < p; j++) {
+      row[j] = run.signal_series[sortedSignals[j]][i];
+    }
+    rows.push(row);
+  }
+  const mcd = fastMCD(rows, mcdAlpha, mcdSeed);
+  if (mcd === null) {
+    c.nRunsSkippedMcdFailed += 1;
+    return run;
+  }
+  const L = choleskyLocal(mcd.cov);
+  if (L === null) {
+    // MCD produced a non-PD cov (defensive; should not normally happen since fastMCD
+    // internally Choleskys the candidate covs — but the explicit check here is the
+    // belt-and-suspenders against a marginal-PD result).
+    c.nRunsSkippedMcdFailed += 1;
+    return run;
+  }
+  const cutoff = chiSqQuantile975(p);
+  const keptIndices: number[] = [];
+  for (let i = 0; i < minLen; i++) {
+    const d2 = mahalanobisSqFromL(rows[i], mcd.mean, L);
+    if (d2 <= cutoff) {
+      keptIndices.push(i);
+    } else {
+      c.nTicksContaminated += 1;
+    }
+  }
+  c.nRunsScreened += 1;
+  c.nTicksTotal += minLen;
 
-  let nRunsScreened = 0;
-  let nRunsSkippedInsufficientSamples = 0;
-  let nRunsSkippedMcdFailed = 0;
-  let nTicksTotal = 0;            // counts only ticks that were SCREENED (not pass-through ticks)
-  let nTicksContaminated = 0;
-
-  const curatedRuns = bundle.runs.map((run) => {
-    const sortedSignals = Object.keys(run.signal_series).sort();
-    const p = sortedSignals.length;
-    if (p === 0) {
-      // Run carries no signals; pass through; no screening.
-      return run;
-    }
-    const minLen = Math.min(...sortedSignals.map((sig) => run.signal_series[sig].length));
-    if (minLen < p + 1) {
-      // Insufficient samples for MCD.
-      nRunsSkippedInsufficientSamples += 1;
-      return run;
-    }
-    // Form rows: rows[i][j] = run.signal_series[sortedSignals[j]][i] for i ∈ [0, minLen), j ∈ [0, p).
-    const rows: number[][] = [];
-    for (let i = 0; i < minLen; i++) {
-      const row = new Array<number>(p);
-      for (let j = 0; j < p; j++) {
-        row[j] = run.signal_series[sortedSignals[j]][i];
-      }
-      rows.push(row);
-    }
-    const mcd = fastMCD(rows, mcdAlpha, mcdSeed);
-    if (mcd === null) {
-      nRunsSkippedMcdFailed += 1;
-      return run;
-    }
-    const L = choleskyLocal(mcd.cov);
-    if (L === null) {
-      // MCD produced a non-PD cov (defensive; should not normally happen since fastMCD
-      // internally Choleskys the candidate covs — but the explicit check here is the
-      // belt-and-suspenders against a marginal-PD result).
-      nRunsSkippedMcdFailed += 1;
-      return run;
-    }
-    const cutoff = chiSqQuantile975(p);
-    const keptIndices: number[] = [];
-    for (let i = 0; i < minLen; i++) {
-      const d2 = mahalanobisSqFromL(rows[i], mcd.mean, L);
-      if (d2 <= cutoff) {
-        keptIndices.push(i);
-      } else {
-        nTicksContaminated += 1;
-      }
-    }
-    nRunsScreened += 1;
-    nTicksTotal += minLen;
-
-    // Build the curated run: filter each signal_series + hour_of_day + day_of_week at keptIndices.
-    const newSignalSeries: Record<string, number[]> = {};
-    for (const sig of Object.keys(run.signal_series)) {
-      newSignalSeries[sig] = keptIndices.map((i) => run.signal_series[sig][i]);
-    }
-    const curated: BaselineBundle['runs'][number] = {
-      signal_series: newSignalSeries,
-    };
-    if (run.tenant_id !== undefined) curated.tenant_id = run.tenant_id;
-    if (run.hour_of_day !== undefined) {
-      curated.hour_of_day = keptIndices.map((i) => run.hour_of_day![i]);
-    }
-    if (run.day_of_week !== undefined) {
-      curated.day_of_week = keptIndices.map((i) => run.day_of_week![i]);
-    }
-    return curated;
-  });
-
-  const curatedBundle: BaselineBundle = {
-    version: bundle.version,
-    generated_at: bundle.generated_at,
-    seed: bundle.seed,
-    runs: curatedRuns,
+  // Build the curated run: filter each signal_series + hour_of_day + day_of_week at keptIndices.
+  const newSignalSeries: Record<string, number[]> = {};
+  for (const sig of Object.keys(run.signal_series)) {
+    newSignalSeries[sig] = keptIndices.map((i) => run.signal_series[sig][i]);
+  }
+  const curated: BaselineBundle['runs'][number] = {
+    signal_series: newSignalSeries,
   };
-  if (bundle.cell_dim !== undefined) curatedBundle.cell_dim = bundle.cell_dim;
+  if (run.tenant_id !== undefined) curated.tenant_id = run.tenant_id;
+  if (run.hour_of_day !== undefined) {
+    curated.hour_of_day = keptIndices.map((i) => run.hour_of_day![i]);
+  }
+  if (run.day_of_week !== undefined) {
+    curated.day_of_week = keptIndices.map((i) => run.day_of_week![i]);
+  }
+  return curated;
+}
 
-  const d11: BaselineCurationDecision = {
+/** Assemble the D11 BaselineCurationDecision audit record from the run totals. */
+function buildD11Decision(
+  bundle: BaselineBundle,
+  mcdAlpha: number,
+  mcdSeed: number,
+  c: ScreenCounters,
+): BaselineCurationDecision {
+  return {
     decision_id: 'D11',
     decision_name: 'Per-shard within-window contamination screening',
     inputs: {
@@ -162,12 +161,12 @@ export function curateBaselinePrePass(
     },
     output_summary: {
       n_runs_total: bundle.runs.length,
-      n_runs_screened: nRunsScreened,
-      n_runs_skipped_insufficient_samples: nRunsSkippedInsufficientSamples,
-      n_runs_skipped_mcd_failed: nRunsSkippedMcdFailed,
-      n_ticks_total: nTicksTotal,
-      n_ticks_contaminated: nTicksContaminated,
-      contamination_rate: nTicksTotal > 0 ? nTicksContaminated / nTicksTotal : 0,
+      n_runs_screened: c.nRunsScreened,
+      n_runs_skipped_insufficient_samples: c.nRunsSkippedInsufficientSamples,
+      n_runs_skipped_mcd_failed: c.nRunsSkippedMcdFailed,
+      n_ticks_total: c.nTicksTotal,
+      n_ticks_contaminated: c.nTicksContaminated,
+      contamination_rate: c.nTicksTotal > 0 ? c.nTicksContaminated / c.nTicksTotal : 0,
       mcd_method: 'mcd',
       mcd_alpha: mcdAlpha,
     },
@@ -182,6 +181,41 @@ export function curateBaselinePrePass(
       'ARCHITECT-REPLY-BASELINE-CURATION-v0.2-PRE-DISPOSITION (Q-JC1 α + Q-JC2 + Q-JC3); '
       + 'SCOPING-MEMO-BASELINE-CURATION-v0.2 § 2 Stage 2a.',
   };
+}
+
+/** Stage 2a per-shard within-window screening.
+ *
+ *  For each run in `bundle.runs`, delegates to `screenRun` (deterministic column
+ *  ordering, MCD-robust Mahalanobis screening, curated-run rebuild), accumulating
+ *  per-run counts that `buildD11Decision` packages into the D11 audit summary.
+ *
+ *  Returns a NEW BaselineBundle; the input bundle is not mutated. */
+export function curateBaselinePrePass(
+  bundle: BaselineBundle,
+  opts: PrePassOpts = {},
+): PrePassResult {
+  const mcdAlpha = opts.mcdAlpha ?? FASTMCD_DEFAULT_ALPHA;
+  const mcdSeed = opts.mcdSeed ?? FASTMCD_DEFAULT_SEED;
+
+  const c: ScreenCounters = {
+    nRunsScreened: 0,
+    nRunsSkippedInsufficientSamples: 0,
+    nRunsSkippedMcdFailed: 0,
+    nTicksTotal: 0,
+    nTicksContaminated: 0,
+  };
+
+  const curatedRuns = bundle.runs.map((run) => screenRun(run, mcdAlpha, mcdSeed, c));
+
+  const curatedBundle: BaselineBundle = {
+    version: bundle.version,
+    generated_at: bundle.generated_at,
+    seed: bundle.seed,
+    runs: curatedRuns,
+  };
+  if (bundle.cell_dim !== undefined) curatedBundle.cell_dim = bundle.cell_dim;
+
+  const d11 = buildD11Decision(bundle, mcdAlpha, mcdSeed, c);
 
   return {
     curatedBundle,
