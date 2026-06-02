@@ -11,106 +11,133 @@
 //   { type: 'window',   windowIdx, perShard: [{shard_id, M_t, fired, residual_proxy}], events: [] }
 //   { type: 'terminal', fdr_K, fdr_qLevel, fdr_selected_indices, candidates: [] }
 //   { type: 'error',    error: <string> }
+//
+// All worker state lives inside the trailing IIFE; the module-scope helpers below are pure
+// (no closure over worker state) so they stay well under the 100-line/function budget.
 
-(function () {
-  var isNodeWorker = (typeof process !== 'undefined' && process.versions && process.versions.node);
+var ENGINE_WORKER_IS_NODE =
+  (typeof process !== 'undefined' && process.versions && process.versions.node);
 
-  function getPort() {
-    if (isNodeWorker) {
-      var wt = require('worker_threads');
-      return {
-        post: function (m) { wt.parentPort.postMessage(m); },
-        on:   function (h) { wt.parentPort.on('message', h); },
-      };
-    }
+var ENGINE_WORKER_SHARD_COUNTS = { small: 6, medium: 10, large: 25 };
+
+// ── Runtime plumbing ──────────────────────────────────────────────────
+function engineWorkerGetPort() {
+  if (ENGINE_WORKER_IS_NODE) {
+    var wt = require('worker_threads');
     return {
-      post: function (m) { self.postMessage(m); },
-      on:   function (h) { self.onmessage = function (e) { h(e.data); }; },
+      post: function (m) { wt.parentPort.postMessage(m); },
+      on:   function (h) { wt.parentPort.on('message', h); },
     };
   }
+  return {
+    post: function (m) { self.postMessage(m); },
+    on:   function (h) { self.onmessage = function (e) { h(e.data); }; },
+  };
+}
 
-  function getBundleSpecifier() {
-    if (isNodeWorker) {
-      var url = require('url');
-      var path = require('path');
-      return url.pathToFileURL(path.join(__dirname, 'engine-bundle.mjs')).href;
-    }
-    return './engine-bundle.mjs';
+function engineWorkerGetBundleSpecifier() {
+  if (ENGINE_WORKER_IS_NODE) {
+    var url = require('url');
+    var path = require('path');
+    return url.pathToFileURL(path.join(__dirname, 'engine-bundle.mjs')).href;
   }
+  return './engine-bundle.mjs';
+}
 
-  var SHARD_COUNTS = { small: 6, medium: 10, large: 25 };
-
-  function makeShardIds(count) {
-    var out = [];
-    for (var i = 0; i < count; i++) {
-      var n = String(i);
-      out.push('shard-' + (n.length < 2 ? '0' + n : n));
-    }
-    return out;
+// ── Run-parameter derivation (pure) ───────────────────────────────────
+function engineWorkerMakeShardIds(count) {
+  var out = [];
+  for (var i = 0; i < count; i++) {
+    var n = String(i);
+    out.push('shard-' + (n.length < 2 ? '0' + n : n));
   }
+  return out;
+}
 
-  function targetIndexFor(controlState, shardCount) {
-    var s = String(controlState.targetShard || '');
-    var m = s.match(/-(\d+)$/);
-    var idx = m ? parseInt(m[1], 10) : 0;
-    if (!isFinite(idx) || idx < 0 || idx >= shardCount) return 0;
-    return idx;
-  }
+function engineWorkerTargetIndexFor(controlState, shardCount) {
+  var s = String(controlState.targetShard || '');
+  var m = s.match(/-(\d+)$/);
+  var idx = m ? parseInt(m[1], 10) : 0;
+  if (!isFinite(idx) || idx < 0 || idx >= shardCount) return 0;
+  return idx;
+}
 
-  function handleRun(engine, controlState, port) {
-    var shardCount = SHARD_COUNTS[controlState.topologySize] || SHARD_COUNTS.small;
-    var shardIds = makeShardIds(shardCount);
-    var windowCount = Math.max(1, parseInt(controlState.windowCount, 10) || 50);
-    var alpha = Number(controlState.alphaThreshold);
-    if (!(alpha > 0 && alpha < 1)) alpha = 0.005;
-    var threshold = 1 / alpha;
-    var driftMag = Number(controlState.driftMagnitude);
-    if (!(driftMag >= 0)) driftMag = 0;
-    var driftStart = Math.floor(windowCount / 3);
-    var targetIdx = targetIndexFor(controlState, shardCount);
-    var familyAEnabled = !!(controlState.families && controlState.families.a);
+// Derive the per-run scalar config from the inbound controlState.
+function engineWorkerDeriveRunConfig(controlState) {
+  var shardCount = ENGINE_WORKER_SHARD_COUNTS[controlState.topologySize] || ENGINE_WORKER_SHARD_COUNTS.small;
+  var windowCount = Math.max(1, parseInt(controlState.windowCount, 10) || 50);
+  var alpha = Number(controlState.alphaThreshold);
+  if (!(alpha > 0 && alpha < 1)) alpha = 0.005;
+  var driftMag = Number(controlState.driftMagnitude);
+  if (!(driftMag >= 0)) driftMag = 0;
+  return {
+    shardCount: shardCount,
+    shardIds: engineWorkerMakeShardIds(shardCount),
+    windowCount: windowCount,
+    alpha: alpha,
+    threshold: 1 / alpha,
+    driftMag: driftMag,
+    driftStart: Math.floor(windowCount / 3),
+    targetIdx: engineWorkerTargetIndexFor(controlState, shardCount),
+    familyAEnabled: !!(controlState.families && controlState.families.a),
+  };
+}
 
-    // Per-shard Family-A betting state.
-    var states = new Array(shardCount);
-    for (var s = 0; s < shardCount; s++) states[s] = engine.detectors.freshBettingState();
-
-    for (var w = 0; w < windowCount; w++) {
-      var perShard = [];
-      for (var i = 0; i < shardCount; i++) {
-        var x = (i === targetIdx && w >= driftStart) ? driftMag : 0;
-        var Mt = states[i].M;
-        if (familyAEnabled) {
-          Mt = engine.detectors.updateBettingState(states[i], x, 0, 1, alpha);
-        }
-        perShard.push({
-          shard_id: shardIds[i],
-          M_t: Mt,
-          fired: Mt >= threshold,
-          residual_proxy: x,
-        });
+// ── Streaming compute (verbatim-equivalent blocks) ────────────────────
+// Stream one 'window' message per window over the per-shard betting states.
+function engineWorkerStreamWindows(engine, cfg, states, port) {
+  for (var w = 0; w < cfg.windowCount; w++) {
+    var perShard = [];
+    for (var i = 0; i < cfg.shardCount; i++) {
+      var x = (i === cfg.targetIdx && w >= cfg.driftStart) ? cfg.driftMag : 0;
+      var Mt = states[i].M;
+      if (cfg.familyAEnabled) {
+        Mt = engine.detectors.updateBettingState(states[i], x, 0, 1, cfg.alpha);
       }
-      port.post({ type: 'window', windowIdx: w, perShard: perShard, events: [] });
+      perShard.push({
+        shard_id: cfg.shardIds[i],
+        M_t: Mt,
+        fired: Mt >= cfg.threshold,
+        residual_proxy: x,
+      });
     }
-
-    // Terminal e-BH FDR selection over per-shard final M values.
-    var eValues = states.map(function (st) { return st.M; });
-    var ebh = engine.eBH.eBenjaminiHochberg(eValues, alpha);
-    port.post({
-      type: 'terminal',
-      fdr_K: ebh.K,
-      fdr_qLevel: alpha,
-      fdr_selected_indices: ebh.selected,
-      candidates: [],
-    });
+    port.post({ type: 'window', windowIdx: w, perShard: perShard, events: [] });
   }
+}
 
-  var port = getPort();
-  var enginePromise = import(getBundleSpecifier());
+// Terminal e-BH FDR selection over per-shard final M values.
+function engineWorkerPostTerminal(engine, cfg, states, port) {
+  var eValues = states.map(function (st) { return st.M; });
+  var ebh = engine.eBH.eBenjaminiHochberg(eValues, cfg.alpha);
+  port.post({
+    type: 'terminal',
+    fdr_K: ebh.K,
+    fdr_qLevel: cfg.alpha,
+    fdr_selected_indices: ebh.selected,
+    candidates: [],
+  });
+}
+
+function engineWorkerHandleRun(engine, controlState, port) {
+  var cfg = engineWorkerDeriveRunConfig(controlState);
+
+  // Per-shard Family-A betting state.
+  var states = new Array(cfg.shardCount);
+  for (var s = 0; s < cfg.shardCount; s++) states[s] = engine.detectors.freshBettingState();
+
+  engineWorkerStreamWindows(engine, cfg, states, port);
+  engineWorkerPostTerminal(engine, cfg, states, port);
+}
+
+// ── Wiring ────────────────────────────────────────────────────────────
+(function () {
+  var port = engineWorkerGetPort();
+  var enginePromise = import(engineWorkerGetBundleSpecifier());
 
   port.on(function (msg) {
     if (!msg || msg.type !== 'run') return;
     enginePromise.then(function (engine) {
-      handleRun(engine, msg.controlState || {}, port);
+      engineWorkerHandleRun(engine, msg.controlState || {}, port);
     }).catch(function (err) {
       port.post({ type: 'error', error: String(err && err.message || err) });
     });

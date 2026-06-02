@@ -145,26 +145,12 @@ function syntheticFires(shardIds: string[], n: number, baseTs: number): FiredSha
   return shardIds.slice(0, n).map((id, i) => ({ shard_node_id: id, event_ts: baseTs + i }));
 }
 
-// ── Measurement loop ─────────────────────────────────────────────────
-function measure(spec: FixtureSpec): Measurement | null {
-  const fullPath = join(SUBSTRATE, spec.path);
-  if (!existsSync(fullPath)) {
-    if (spec.required) throw new Error(`required fixture missing: ${fullPath}`);
-    process.stderr.write(`SKIP ${spec.name}: ${fullPath} not present\n`);
-    return null;
-  }
-  const rss0 = process.memoryUsage().rss;
-
-  const t0 = performance.now();
-  const snap: TopologySnapshot = JSON.parse(readFileSync(fullPath, 'utf8'));
-  const parse_ms = performance.now() - t0;
-
-  const shardIds = snap.nodes
-    .filter((n) => (n.kind as string) === 'gpu_shard')
-    .map((n) => n.id);
-  const fires = syntheticFires(shardIds, N_FIRES, 1_700_000_000);
-
-  // Attribution: end-to-end against the real fixture
+// ── Measurement helpers ──────────────────────────────────────────────
+// Attribution: end-to-end against the real fixture. Returns p50/p99 wall time.
+function measureAttribution(
+  snap: TopologySnapshot,
+  fires: FiredShardEvent[],
+): { attribution_ms_p50: number; attribution_ms_p99: number } {
   const attribution_samples: number[] = [];
   for (let i = 0; i < WARMUP_ITERS + MEASURE_ITERS; i++) {
     const ta = performance.now();
@@ -181,14 +167,14 @@ function measure(spec: FixtureSpec): Measurement | null {
   const attribution_ms_p99 = attribution_samples[
     Math.min(attribution_samples.length - 1, Math.floor(MEASURE_ITERS * 0.99))
   ]!;
+  return { attribution_ms_p50, attribution_ms_p99 };
+}
 
-  // Per-shard primitives ────────────────
-  const N = shardIds.length;
-  const pool = syntheticBaselinePool(BENCH_P, MMD_POOL);
-  const live = new Float64Array(BENCH_P);
-  for (let i = 0; i < BENCH_P; i++) live[i] = Math.cos(i * 0.7);
-  const liveArr = Array.from(live);
-
+// Welford + betting per-shard primitive costs.
+function measureWelfordBetting(
+  N: number,
+  live: Float64Array,
+): { welford_us_per_shard: number; betting_ns_per_shard: number } {
   // Welford
   let welford_total_ns = 0;
   for (let it = 0; it < WARMUP_ITERS + MEASURE_ITERS; it++) {
@@ -213,7 +199,15 @@ function measure(spec: FixtureSpec): Measurement | null {
     if (it >= WARMUP_ITERS) betting_total_ns += dt_ns;
   }
   const betting_ns_per_shard = betting_total_ns / N / MEASURE_ITERS;
+  return { welford_us_per_shard, betting_ns_per_shard };
+}
 
+// MMD floor + full per-shard costs.
+function measureMmd(
+  N: number,
+  pool: number[][],
+  liveArr: number[],
+): { mmd_floor_us_per_shard: number; mmd_full_us_per_shard: number } {
   // MMD floor — m=500 rbf cross-terms only (~500 evals/shard). Bandwidth=1
   // matches the R04 measurement (kept verbatim for back-compat with the floor
   // column; the floor's responsiveness to drift is not at issue here — only
@@ -258,8 +252,11 @@ function measure(spec: FixtureSpec): Measurement | null {
     if (it >= full_warmup) mmd_full_total_us += dt_us;
   }
   const mmd_full_us_per_shard = mmd_full_total_us / N / full_iters;
+  return { mmd_floor_us_per_shard, mmd_full_us_per_shard };
+}
 
-  // Fleet e-BH
+// Fleet e-BH cost (p50 over MEASURE_ITERS).
+function measureEbh(N: number): number {
   const eValues = new Array(N).fill(0).map((_, i) => 1 + (i % 7) * 0.5);
   const ebh_samples: number[] = [];
   for (let it = 0; it < WARMUP_ITERS + MEASURE_ITERS; it++) {
@@ -269,7 +266,40 @@ function measure(spec: FixtureSpec): Measurement | null {
     if (it >= WARMUP_ITERS) ebh_samples.push(dt);
   }
   ebh_samples.sort((a, b) => a - b);
-  const ebh_ms_p50 = ebh_samples[Math.floor(MEASURE_ITERS / 2)]!;
+  return ebh_samples[Math.floor(MEASURE_ITERS / 2)]!;
+}
+
+// ── Measurement loop ─────────────────────────────────────────────────
+function measure(spec: FixtureSpec): Measurement | null {
+  const fullPath = join(SUBSTRATE, spec.path);
+  if (!existsSync(fullPath)) {
+    if (spec.required) throw new Error(`required fixture missing: ${fullPath}`);
+    process.stderr.write(`SKIP ${spec.name}: ${fullPath} not present\n`);
+    return null;
+  }
+  const rss0 = process.memoryUsage().rss;
+
+  const t0 = performance.now();
+  const snap: TopologySnapshot = JSON.parse(readFileSync(fullPath, 'utf8'));
+  const parse_ms = performance.now() - t0;
+
+  const shardIds = snap.nodes
+    .filter((n) => (n.kind as string) === 'gpu_shard')
+    .map((n) => n.id);
+  const fires = syntheticFires(shardIds, N_FIRES, 1_700_000_000);
+
+  const { attribution_ms_p50, attribution_ms_p99 } = measureAttribution(snap, fires);
+
+  // Per-shard primitives ────────────────
+  const N = shardIds.length;
+  const pool = syntheticBaselinePool(BENCH_P, MMD_POOL);
+  const live = new Float64Array(BENCH_P);
+  for (let i = 0; i < BENCH_P; i++) live[i] = Math.cos(i * 0.7);
+  const liveArr = Array.from(live);
+
+  const { welford_us_per_shard, betting_ns_per_shard } = measureWelfordBetting(N, live);
+  const { mmd_floor_us_per_shard, mmd_full_us_per_shard } = measureMmd(N, pool, liveArr);
+  const ebh_ms_p50 = measureEbh(N);
 
   const rss1 = process.memoryUsage().rss;
   const peak_rss_mb_delta = (rss1 - rss0) / (1024 * 1024);

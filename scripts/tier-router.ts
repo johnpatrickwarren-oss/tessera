@@ -81,7 +81,7 @@ function loadDirective(path: string): { content: string; round: string } {
   return { content, round };
 }
 
-function heuristic(content: string, round: string): RouterResult {
+function heuristicRule1Coordinator(content: string, round: string): RouterResult | null {
   // RULE 1: coordinator-only (confidence 0.90, first-match wins)
   const coordinatorMatches: string[] = [];
   if (/coordinator wave plan/i.test(content)) coordinatorMatches.push('Coordinator wave plan');
@@ -101,7 +101,10 @@ function heuristic(content: string, round: string): RouterResult {
       mode: 'heuristic',
     };
   }
+  return null;
+}
 
+function heuristicRule2Full(content: string, round: string): RouterResult | null {
   // RULE 2: full (confidence 0.85)
   const fullMatches: string[] = [];
   if (/\bESCALATE\b/.test(content)) fullMatches.push('ESCALATE');
@@ -123,7 +126,10 @@ function heuristic(content: string, round: string): RouterResult {
       mode: 'heuristic',
     };
   }
+  return null;
+}
 
+function heuristicRule3ImplementerOnly(content: string, round: string): RouterResult | null {
   // RULE 3: implementer-only (confidence 0.80)
   // Count ALLOWED paths heuristically in a window after "ALLOWED".
   const allowedSection = content.match(/(?:^|\n)ALLOWED(?: modifications)?:?[\s\S]{0,3000}/i);
@@ -152,7 +158,10 @@ function heuristic(content: string, round: string): RouterResult {
       mode: 'heuristic',
     };
   }
+  return null;
+}
 
+function heuristicRule4Audit(content: string, round: string): RouterResult | null {
   // RULE 4: audit (confidence 0.75)
   const auditMatches: string[] = [];
   if (/\bmethodology\b/i.test(content)) auditMatches.push('methodology');
@@ -170,7 +179,10 @@ function heuristic(content: string, round: string): RouterResult {
       mode: 'heuristic',
     };
   }
+  return null;
+}
 
+function heuristicRule5Default(round: string): RouterResult {
   // RULE 5: default — ambiguous directive
   return {
     round,
@@ -181,6 +193,17 @@ function heuristic(content: string, round: string): RouterResult {
     router_version: ROUTER_VERSION,
     mode: 'heuristic',
   };
+}
+
+function heuristic(content: string, round: string): RouterResult {
+  // First-match wins across rules 1-4; rule 5 is the default escape hatch.
+  return (
+    heuristicRule1Coordinator(content, round) ??
+    heuristicRule2Full(content, round) ??
+    heuristicRule3ImplementerOnly(content, round) ??
+    heuristicRule4Audit(content, round) ??
+    heuristicRule5Default(round)
+  );
 }
 
 // Embed the Anchor tier-routing rubric for Haiku prompt construction.
