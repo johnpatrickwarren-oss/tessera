@@ -128,7 +128,7 @@ Tessera's product code (curation pipeline, demo scenarios, envelope/coverage too
 - [x] **M3** Fix or remove the no-op `pnpm build` script (`tsconfig.json` `include: []`).
 - [x] **M4** Add a CI workflow (install + typecheck + test + build:browser); wire up or document the `arch-invariants.json` gate runner.
 - [x] **L1** Add `require.main` guards + flag validation to `scripts/tier-router.ts`, `scripts/measure-cache-effect.ts`, `scripts/mu-model-select.ts`.
-- [ ] **L2** Make `run-pipeline.sh` lock acquisition atomic (`noclobber`/`mkdir`).
+- [x] **L2** Make `run-pipeline.sh` lock acquisition atomic (`noclobber`/`mkdir`).
 - [ ] **L3** Remove dead constants in `test/q82-engine-browser-bundle.test.ts`; fix `templates/PRD-TEMPLATE.md` and `scripts/run-pipeline.sh` stale references.
 - [x] **L4** Deduplicate the two `## Quick demo` README sections; refresh test counts and version claims.
 - [ ] **L5** Scramble per-trial seeds in `tools/detector-envelope.ts` / `tools/topology-walk-tuning.ts` on next regeneration.

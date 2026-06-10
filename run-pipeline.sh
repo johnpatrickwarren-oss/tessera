@@ -428,23 +428,6 @@ trap cleanup_lock EXIT
 
 acquire_round_lock() {
   LOCKFILE="$COORD/.pipeline-${ROUND}.lock"
-  if [[ -f "$LOCKFILE" ]]; then
-    local lock_pid
-    lock_pid=$(awk -F': ' '/^PID:/ {print $2; exit}' "$LOCKFILE" 2>/dev/null)
-    if [[ -n "$lock_pid" ]] && kill -0 "$lock_pid" 2>/dev/null; then
-      log_error "Another pipeline is already running for round $ROUND."
-      log_error "  Lockfile: $LOCKFILE"
-      log_error "  Live PID: $lock_pid"
-      log_error ""
-      log_error "Wait for that pipeline to finish, or kill the process before retrying."
-      log_error "If you are certain the lockfile is stale (process died without cleanup),"
-      log_error "remove it manually: rm \"$LOCKFILE\""
-      exit 2
-    else
-      log_warn "Stale lockfile at $LOCKFILE (PID $lock_pid not alive); removing."
-      rm -f "$LOCKFILE"
-    fi
-  fi
 
   # Compute effective roles — the roles that will actually run, given START_AT filtering.
   # Mirrors the should_run() logic inline so it is available before that function is defined.
@@ -464,7 +447,12 @@ acquire_round_lock() {
     _effective_tier+="$_er"
   done
 
-  cat > "$LOCKFILE" <<EOF
+  # Atomic acquisition: noclobber makes the `>` redirect fail if the lockfile
+  # already exists, closing the check-then-create TOCTOU window (two concurrent
+  # invocations for the same round can no longer both acquire the lock).
+  local _attempt
+  for _attempt in 1 2 3; do
+    if ( set -o noclobber; cat > "$LOCKFILE" ) 2>/dev/null <<EOF
 PID: $$
 STARTED: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 HOSTNAME: $(hostname -s 2>/dev/null || hostname)
@@ -473,7 +461,36 @@ START_AT: ${START_AT:-$FIRST_ROLE}
 TIER: $TIER
 EFFECTIVE_TIER: $_effective_tier
 EOF
-  LOCK_HELD=true
+    then
+      LOCK_HELD=true
+      return 0
+    fi
+
+    # Lockfile exists. Verify the recorded PID is alive AND still looks like
+    # this pipeline (guards against PID reuse by an unrelated process).
+    local lock_pid lock_cmd
+    lock_pid=$(awk -F': ' '/^PID:/ {print $2; exit}' "$LOCKFILE" 2>/dev/null)
+    lock_cmd=""
+    if [[ -n "$lock_pid" ]] && kill -0 "$lock_pid" 2>/dev/null; then
+      lock_cmd=$(ps -o command= -p "$lock_pid" 2>/dev/null || true)
+    fi
+    if [[ -n "$lock_pid" && "$lock_cmd" == *run-pipeline* ]]; then
+      log_error "Another pipeline is already running for round $ROUND."
+      log_error "  Lockfile: $LOCKFILE"
+      log_error "  Live PID: $lock_pid"
+      log_error ""
+      log_error "Wait for that pipeline to finish, or kill the process before retrying."
+      log_error "If you are certain the lockfile is stale (process died without cleanup),"
+      log_error "remove it manually: rm \"$LOCKFILE\""
+      exit 2
+    fi
+    log_warn "Stale lockfile at $LOCKFILE (PID ${lock_pid:-unknown} not a live run-pipeline process); removing."
+    rm -f "$LOCKFILE"
+    # Loop: retry atomic creation (another contender may win; that is correct).
+  done
+
+  log_error "Could not acquire round lock at $LOCKFILE after 3 attempts (live contention)."
+  exit 2
 }
 
 # ── Flag detection ────────────────────────────────────────────────────────────
