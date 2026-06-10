@@ -1,16 +1,20 @@
 # Tessera Demo — 10-minute walkthrough
 
-_Authored R81 for SLICE 2 close. Companion to `demos/demo.html` (no server required;
-opens from `file://`). Analogous to DeploySignal's `DEMO-SCRIPT-10MIN.md`._
+_Authored R81 for SLICE 2 close. Companion to `demos/demo.html` (canned mode: no server
+required; opens from `file://`. Live mode — Minute 10:00–12:00 — needs `pnpm build:browser`
+plus an HTTP server; see that section). Analogous to DeploySignal's `DEMO-SCRIPT-10MIN.md`._
 
 ## Before you start
 
-Open `demos/demo.html` directly in Chrome or Firefox — no server or build step required.
+Open `demos/demo.html` directly in Chrome or Firefox — no server or build step required
+for the canned walkthrough (minutes 0:00–10:00). If you plan to show the optional Live-mode
+beat, do the Live-mode setup below before the session starts.
 Set audience context: "Tessera is a per-shard observation layer for AI training and inference
 clusters. It provides any-time-valid statistical detection of behavioral drift with fleet-level
 false-discovery-rate guarantees."
-Pre-open context: `demos/demo.html` in browser, `engine/detectors/` in editor for follow-up
-questions on implementation.
+Pre-open context: `demos/demo.html` in browser, the engine package's `detectors/` sources
+(`node_modules/@johnpatrickwarren-oss/deploysignal-engine/dist/detectors/`) in editor for
+follow-up questions on implementation.
 
 ## Contents
 
@@ -186,6 +190,10 @@ freeze_active = true events.
 ## Minute 10:00 – 12:00 — Live mode (interactive)
 
 _Optional extension for technical-peer audiences who want to see the engine respond to parameter changes in-browser. For non-technical audiences, skip this beat and go straight to the follow-up bank._
+
+_Setup (before the session): Live mode needs the gitignored engine bundle and an HTTP origin —
+browsers refuse Worker construction from `file://`. Run `pnpm build:browser`, then serve the
+demo over HTTP (`python3 -m http.server -d demos` and open `http://localhost:8000/demo.html`)._
 
 **Click:** flip the "Mode" toggle at the top of the page from **Canned** to **Live**. The scenario selector grays out; the parameter control panel becomes active.
 
