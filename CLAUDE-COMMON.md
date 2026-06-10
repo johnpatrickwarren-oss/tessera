@@ -249,7 +249,7 @@ to solo; absence of justification stays at full default.
 | Add 5 new integration tests closing a prior-round MINOR coverage gap | audit | Z3 disqualified (gap-closure + integration-tier); S4 applies |
 | Bump Playwright timeout from 5s to 10s | solo | Z4 |
 | Rename an internal helper function (no external callers) | solo | Z1 |
-| Update `templates/PRD-TEMPLATE.md` docs | solo | Z2 |
+| Update `templates/WAVE-PLAN-TEMPLATE.md` docs | solo | Z2 |
 | Fix typo in a user-facing button label | solo | Z5 |
 | Bump a npm dev-dependency patch version | solo | Z1 |
 

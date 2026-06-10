@@ -1,24 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 
 import {
   computeSnapshotHash,
   pureJsSha256,
 } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
-
-const ROUND_START_SHA = '5c3e0d9';
-const REPO_ROOT = path.resolve(__dirname, '..');
-
-const BUNDLE_PATH = path.join(REPO_ROOT, 'demos/engine-bundle.mjs');
-const BUILD_TOOL_PATH = path.join(REPO_ROOT, 'tools/build-browser-bundle.ts');
-const DEMO_HTML_PATH = path.join(REPO_ROOT, 'demos/demo.html');
-const PACKAGE_JSON_PATH = path.join(REPO_ROOT, 'package.json');
-const GITIGNORE_PATH = path.join(REPO_ROOT, '.gitignore');
-const TOPOLOGY_OVERLAY_PATH = path.join(REPO_ROOT, 'engine/topology-overlay.ts');
 
 // ── AC-R82-6: computeSnapshotHash sync surface preserved (Node path) ──
 test('AC-R82-6: computeSnapshotHash returns a 64-char hex sync', () => {

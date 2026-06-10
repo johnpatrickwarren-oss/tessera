@@ -782,7 +782,7 @@ sequential):
     - Recommend the operator invoke scripts/multi-track-cluster-setup.sh per cluster
     - Document each cluster's worktree branch + scope in the wave plan
   For single-cluster waves:
-    - Recommend the operator run scripts/run-pipeline.sh in standard mode (no --coordinator)
+    - Recommend the operator run ./run-pipeline.sh in standard mode (no --coordinator)
     - Note the specific constraint that prevented fan-out
 
 When wave plan passes grilling:
