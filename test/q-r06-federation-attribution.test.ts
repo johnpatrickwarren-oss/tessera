@@ -47,7 +47,7 @@ function clusterOf(nodeId: string): string | null {
 }
 
 test('AC-R06-1: max_hop=1 — no substrate candidates surface (BFS does not reach rack)',
-  { skip: !existsSync(C0_PATH) }, () => {
+  { skip: !existsSync(C0_PATH) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
     const snap = loadC0();
     const fires: FiredShardEvent[] = [];
     for (let r = 0; r < 5; r++) {
@@ -66,7 +66,7 @@ test('AC-R06-1: max_hop=1 — no substrate candidates surface (BFS does not reac
   });
 
 test('AC-R06-2: max_hop=2, fires in cluster-0 — candidates all in cluster-0',
-  { skip: !existsSync(C0_PATH) }, () => {
+  { skip: !existsSync(C0_PATH) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
     const snap = loadC0();
     const fires: FiredShardEvent[] = [];
     for (let r = 0; r < 5; r++) {
@@ -93,7 +93,7 @@ test('AC-R06-2: max_hop=2, fires in cluster-0 — candidates all in cluster-0',
   });
 
 test('AC-R06-3..4: fires split across cluster-0 + cluster-1, max_hop ∈ {2, 4} — candidates partition by cluster',
-  { skip: !existsSync(C0_PATH) }, () => {
+  { skip: !existsSync(C0_PATH) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
     const snap = loadC0();
     const fires: FiredShardEvent[] = [];
     for (const c of [0, 1]) {
@@ -120,7 +120,7 @@ test('AC-R06-3..4: fires split across cluster-0 + cluster-1, max_hop ∈ {2, 4} 
   });
 
 test('AC-R06-5: at max_hop ∈ {6, 8, 10} — record threshold at which cross-cluster contamination surfaces',
-  { skip: !existsSync(C0_PATH) }, () => {
+  { skip: !existsSync(C0_PATH) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
     const snap = loadC0();
     const fires: FiredShardEvent[] = [];
     for (const c of [0, 1]) {
@@ -151,7 +151,7 @@ test('AC-R06-5: at max_hop ∈ {6, 8, 10} — record threshold at which cross-cl
   });
 
 test('AC-R06-6: operationally-reasonable max_hop ≤ 4 — federation invariant holds with fires in all 4 sub-clusters',
-  { skip: !existsSync(C0_PATH) }, () => {
+  { skip: !existsSync(C0_PATH) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
     const snap = loadC0();
     const fires: FiredShardEvent[] = [];
     for (const c of [0, 1, 2, 3]) {

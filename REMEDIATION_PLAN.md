@@ -131,5 +131,5 @@ Tessera's product code (curation pipeline, demo scenarios, envelope/coverage too
 - [x] **L2** Make `run-pipeline.sh` lock acquisition atomic (`noclobber`/`mkdir`).
 - [x] **L3** Remove dead constants in `test/q82-engine-browser-bundle.test.ts`; fix `templates/PRD-TEMPLATE.md` and `scripts/run-pipeline.sh` stale references.
 - [x] **L4** Deduplicate the two `## Quick demo` README sections; refresh test counts and version claims.
-- [ ] **L5** Scramble per-trial seeds in `tools/detector-envelope.ts` / `tools/topology-walk-tuning.ts` on next regeneration.
-- [ ] **L6** (Optional) Commit a small clustersynth fixture or improve skip diagnostics.
+- [ ] **L5** Scramble per-trial seeds in `tools/detector-envelope.ts` / `tools/topology-walk-tuning.ts` on next regeneration. [deferred: changes the committed R77/R78 matrices and the README-documented detection findings — needs a dedicated regeneration round with schema_version bump and re-review of the published numbers, per the finding's own "on next regeneration" scoping]
+- [x] **L6** (Optional) Commit a small clustersynth fixture or improve skip diagnostics.

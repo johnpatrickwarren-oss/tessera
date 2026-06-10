@@ -63,7 +63,7 @@ function load(path: string): ClusterTopologySnapshot {
   return JSON.parse(readFileSync(path, 'utf8')) as ClusterTopologySnapshot;
 }
 
-test('clustersynth S2 envelope satisfies Tessera TopologySnapshot', { skip: !existsSync(S2) }, () => {
+test('clustersynth S2 envelope satisfies Tessera TopologySnapshot', { skip: !existsSync(S2) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
   const snap = load(S2);
   // Envelope-level assignability: every TopologySnapshot field present and well-typed.
   a.ok(Array.isArray(snap.nodes));
@@ -76,7 +76,7 @@ test('clustersynth S2 envelope satisfies Tessera TopologySnapshot', { skip: !exi
   a.equal(gpu, 7200);
 });
 
-test('clustersynth S2 referential integrity', { skip: !existsSync(S2) }, () => {
+test('clustersynth S2 referential integrity', { skip: !existsSync(S2) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
   const snap = load(S2);
   const ids = new Set(snap.nodes.map((n) => n.id));
   for (const e of snap.edges) {
@@ -85,7 +85,7 @@ test('clustersynth S2 referential integrity', { skip: !existsSync(S2) }, () => {
   }
 });
 
-test('clustersynth-added kinds type-narrow via ClusterTopologyKind extension', { skip: !existsSync(S2) }, () => {
+test('clustersynth-added kinds type-narrow via ClusterTopologyKind extension', { skip: !existsSync(S2) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
   const snap = load(S2);
   // Every cluster-added kind is reachable via narrowing on the composed type —
   // proves the extension types resolve and compose correctly.
@@ -103,7 +103,7 @@ test('clustersynth-added kinds type-narrow via ClusterTopologyKind extension', {
   a.ok(pod, 'pod kind narrows');
 });
 
-test('clustersynth C0 (federated campus) partitions by sub-cluster ID prefix', { skip: !existsSync(C0) }, () => {
+test('clustersynth C0 (federated campus) partitions by sub-cluster ID prefix', { skip: !existsSync(C0) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
   const snap = load(C0);
   // 4 sub-clusters × 7200 = 28,800 GPUs
   const gpu = snap.nodes.filter((n) => n.kind === 'gpu_shard').length;
@@ -120,7 +120,7 @@ test('clustersynth C0 (federated campus) partitions by sub-cluster ID prefix', {
   }
 });
 
-test('clustersynth C0 sub-cluster partitions are disjoint', { skip: !existsSync(C0) }, () => {
+test('clustersynth C0 sub-cluster partitions are disjoint', { skip: !existsSync(C0) && 'clustersynth fixture missing (gitignored) — generate per bench/README.md' }, () => {
   const snap = load(C0);
   const byCluster: Record<string, string[]> = { '0': [], '1': [], '2': [], '3': [] };
   for (const n of snap.nodes.filter((n) => n.kind === 'gpu_shard')) {

@@ -46,7 +46,7 @@ function findCell(m: Matrix, scenario: Cell['scenario'], magnitude: number, samp
     c.scenario === scenario && c.magnitude === magnitude && c.sampling_interval === sampling_interval);
 }
 
-test('AC-R05-3 — α preserved under sampling (no_drift scenario)', { skip: !existsSync(MATRIX_PATH) }, () => {
+test('AC-R05-3 — α preserved under sampling (no_drift scenario)', { skip: !existsSync(MATRIX_PATH) && 'R05 matrix missing — regenerate with pnpm bench:mmd-sampling' }, () => {
   const m = loadMatrix()!;
   const noDriftCells = m.cells.filter((c) => c.scenario === 'no_drift');
   a.ok(noDriftCells.length === 14 * 4, `expected 14×4=56 no_drift cells, got ${noDriftCells.length}`);
@@ -56,7 +56,7 @@ test('AC-R05-3 — α preserved under sampling (no_drift scenario)', { skip: !ex
   }
 });
 
-test('AC-R05-4 — persistent drift saturates at k ≤ 10 for magnitudes ≥ 0.05', { skip: !existsSync(MATRIX_PATH) }, () => {
+test('AC-R05-4 — persistent drift saturates at k ≤ 10 for magnitudes ≥ 0.05', { skip: !existsSync(MATRIX_PATH) && 'R05 matrix missing — regenerate with pnpm bench:mmd-sampling' }, () => {
   const m = loadMatrix()!;
   for (const magnitude of [0.05, 0.10, 0.20, 0.375]) {
     for (const k of [1, 5, 10]) {
@@ -68,7 +68,7 @@ test('AC-R05-4 — persistent drift saturates at k ≤ 10 for magnitudes ≥ 0.0
   }
 });
 
-test('AC-R05-4 carve-out — k=100 may not saturate (V2 pre-prediction)', { skip: !existsSync(MATRIX_PATH) }, () => {
+test('AC-R05-4 carve-out — k=100 may not saturate (V2 pre-prediction)', { skip: !existsSync(MATRIX_PATH) && 'R05 matrix missing — regenerate with pnpm bench:mmd-sampling' }, () => {
   // The Q-R05-SPEC-AUDIT V2 variant noted: at k=100 across 200 windows, the
   // e-process has only 2 evaluations; wealth factor bounded at 1.5; max
   // attainable M = 2.25 ≪ 1/α=200. So detection at k=100 is structurally
@@ -80,7 +80,7 @@ test('AC-R05-4 carve-out — k=100 may not saturate (V2 pre-prediction)', { skip
     `k=100 detection at magnitude=0.375 is structurally impossible at this lambda; if it fires, the envelope semantic is wrong`);
 });
 
-test('AC-R05-5 — short-bounded drift detection falls off as k increases', { skip: !existsSync(MATRIX_PATH) }, () => {
+test('AC-R05-5 — short-bounded drift detection falls off as k increases', { skip: !existsSync(MATRIX_PATH) && 'R05 matrix missing — regenerate with pnpm bench:mmd-sampling' }, () => {
   const m = loadMatrix()!;
   // For each magnitude ≥ 0.125 (where k=1 actually detects), assert that
   // detection_rate is monotonically non-increasing as k increases.
@@ -96,7 +96,7 @@ test('AC-R05-5 — short-bounded drift detection falls off as k increases', { sk
   }
 });
 
-test('AC-R05-2 — matrix has 168 cells with the right shape', { skip: !existsSync(MATRIX_PATH) }, () => {
+test('AC-R05-2 — matrix has 168 cells with the right shape', { skip: !existsSync(MATRIX_PATH) && 'R05 matrix missing — regenerate with pnpm bench:mmd-sampling' }, () => {
   const m = loadMatrix()!;
   a.equal(m.cells.length, 3 * 14 * 4);
   for (const c of m.cells) {
