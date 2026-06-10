@@ -148,7 +148,7 @@ The full audit trail is preserved in this repo's commit history (every round's r
 - `MEMORIAL.md` — Cross-round violation + confirmation ledger
 - `specs/Q-RNN-SPEC.md` — Per-round Architect specifications
 
-CLAUDE-*.md files at the repo root hold the per-role pipeline disciplines (CLAUDE-COMMON.md + CLAUDE-ARCHITECT.md + CLAUDE-IMPLEMENTER.md + CLAUDE-REVIEWER.md + CLAUDE-MEMORIAL.md + CLAUDE-COORDINATOR.md).
+CLAUDE-*.md files at the repo root hold the per-role pipeline disciplines (CLAUDE-COMMON.md + CLAUDE-ARCHITECT.md + CLAUDE-IMPLEMENTER.md + CLAUDE-REVIEWER.md + CLAUDE-MEMORIAL.md + CLAUDE-COORDINATOR.md). The architecture ratchet gates declared in `arch-invariants.json` are enforced by the external Anchor harness during pipeline rounds (the gate runner is not vendored here); repository CI (`.github/workflows/ci.yml`) runs typecheck + tests + the browser-bundle build on every push/PR.
 
 ## Layout
 
