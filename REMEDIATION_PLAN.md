@@ -123,13 +123,13 @@ Tessera's product code (curation pipeline, demo scenarios, envelope/coverage too
 - [x] **C1** Repoint `tools/build-browser-bundle.ts` `ENTRY_SOURCE` imports from `./engine/*` to `@johnpatrickwarren-oss/deploysignal-engine/*`; confirm `node tools/build-browser-bundle.js` emits `demos/engine-bundle.mjs`.
 - [x] **H1** Commit `pnpm-workspace.yaml` with `onlyBuiltDependencies: [esbuild]` (and drop the `.gitignore` entry); verify fresh-clone `pnpm install && pnpm test` exits 0.
 - [x] **H2** Re-run the suite → expect 543/543 (minus documented skips); change q84's bundle bootstrap to call `node` directly or implement the documented skip path.
-- [ ] **M1** Rewrite README Layout / Engine-sourcing / Methodology sections to reflect the post-R90 engine-as-npm-dependency reality and the local-only `coordination/` directory.
-- [ ] **M2** Document HTTP serving for Live mode (or add a `file://` detection banner in `demos/demo.html`); scope the "no server required" claim to canned mode.
+- [x] **M1** Rewrite README Layout / Engine-sourcing / Methodology sections to reflect the post-R90 engine-as-npm-dependency reality and the local-only `coordination/` directory.
+- [x] **M2** Document HTTP serving for Live mode (or add a `file://` detection banner in `demos/demo.html`); scope the "no server required" claim to canned mode.
 - [ ] **M3** Fix or remove the no-op `pnpm build` script (`tsconfig.json` `include: []`).
 - [ ] **M4** Add a CI workflow (install + typecheck + test + build:browser); wire up or document the `arch-invariants.json` gate runner.
 - [ ] **L1** Add `require.main` guards + flag validation to `scripts/tier-router.ts`, `scripts/measure-cache-effect.ts`, `scripts/mu-model-select.ts`.
 - [ ] **L2** Make `run-pipeline.sh` lock acquisition atomic (`noclobber`/`mkdir`).
 - [ ] **L3** Remove dead constants in `test/q82-engine-browser-bundle.test.ts`; fix `templates/PRD-TEMPLATE.md` and `scripts/run-pipeline.sh` stale references.
-- [ ] **L4** Deduplicate the two `## Quick demo` README sections; refresh test counts and version claims.
+- [x] **L4** Deduplicate the two `## Quick demo` README sections; refresh test counts and version claims.
 - [ ] **L5** Scramble per-trial seeds in `tools/detector-envelope.ts` / `tools/topology-walk-tuning.ts` on next regeneration.
 - [ ] **L6** (Optional) Commit a small clustersynth fixture or improve skip diagnostics.

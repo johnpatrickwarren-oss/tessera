@@ -6,7 +6,7 @@ Tessera detects deviations in AI cluster behavior at the per-shard level and acr
 
 ## Status
 
-**Phase 3 closed; v1 publication candidate (2026-05-20).** 67+ rounds of iterative-spec-with-cold-eye-Reviewer development have shipped vendor coverage across the major AI compute substrates plus a bi-directional integration interface with DeploySignal.
+**Phase 3 closed; v1 publication candidate (2026-05-20); engine npm extract shipped (R90/R94).** 90+ rounds of iterative-spec-with-cold-eye-Reviewer development have shipped vendor coverage across the major AI compute substrates plus a bi-directional integration interface with DeploySignal. Current package version is `0.1.0-pre`; the v1 tag lands with the publication gate.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -15,7 +15,8 @@ Tessera detects deviations in AI cluster behavior at the per-shard level and acr
 | Phase 3 SLICE 1 | AWS Trainium + AWS Inferentia (Neuron Link topology) adapters | Closed |
 | Phase 3 SLICE 2 | Google TPU/ICI adapter + `fetchSnapshot(ctx)` live-fetch interface across 5 adapters | Closed |
 | Phase 3 SLICE 3 | DS integration interface contract + Tessera→DS feed + DS→Tessera event consumer + freeze-hook real-event factory | Closed |
-| Phase 4 (candidate) | Engine npm extract (dedicated design cycle); real-cluster DCGM validation; methodology framework consolidation | Pending |
+| Phase 4 | Engine npm extract → [`deploysignal-engine`](https://github.com/johnpatrickwarren-oss/deploysignal-engine) (R90/R94) | Closed |
+| Phase 4 (candidate) | Real-cluster DCGM validation; methodology framework consolidation | Pending |
 
 ## What Tessera does
 
@@ -27,10 +28,10 @@ Tessera detects deviations in AI cluster behavior at the per-shard level and acr
 - e-BH FDR control over the per-shard verdict surface
 
 **DeploySignal integration:**
-- HTTP API contract (TypeScript types + endpoint metadata) at `engine/ds-integration/`
+- HTTP API contract (TypeScript types + endpoint metadata) at `@johnpatrickwarren-oss/deploysignal-engine/ds-integration`
 - Tessera→DS feed adapter: per-shard `VerdictGroup` observations → DS correlation layer
 - DS→Tessera event consumer + factory: real deploy-event-driven freeze-hook activation
-- Bi-directional contract eliminates engine duplication without requiring npm-package extraction (Phase 4 candidate)
+- Bi-directional contract eliminates engine duplication; the engine itself now ships as a shared npm package (extracted R90/R94)
 
 ## What Tessera does NOT do
 
@@ -48,15 +49,13 @@ Tessera detects deviations in AI cluster behavior at the per-shard level and acr
 | Trigger | Each deployment | Continuous |
 | Failure class | Pre-existing-detector classes applied to canary metrics | Same engine; per-shard SDC-class faults that DCGM/NVML don't catch; topology-localized common-mode failures; event-conditional drift attribution |
 
-Tessera is **not** a fork or extension of DeploySignal — it's a separate product that reuses the statistical engine. The two integrate via HTTP contract (`engine/ds-integration/`) rather than runtime code sharing.
+Tessera is **not** a fork or extension of DeploySignal — it's a separate product that reuses the statistical engine. The two integrate via HTTP contract (the engine package's `ds-integration` surface) rather than runtime code sharing.
 
 ## Engine sourcing
 
-Tessera vendors the load-bearing engine subset from DeploySignal at SHA `5a72371`. Each vendored file carries a header noting:
-- Source: DeploySignal path + SHA
-- Sync policy: vendored-at-pin (byte-identical) or vendored-with-deltas (Tessera extensions added)
+The statistical-detector engine is consumed as the npm package [`@johnpatrickwarren-oss/deploysignal-engine`](https://github.com/johnpatrickwarren-oss/deploysignal-engine), pinned in `package.json` to a tagged commit (`#v0.3.1-pre`). The package is the Tessera-evolved snapshot of the engine originally vendored from DeploySignal at SHA `5a72371` (per-file deltas were tracked in the pipeline's vendoring manifest); the extract shipped in rounds R90/R94, removing the former in-repo `engine/` tree.
 
-Engine npm extract (eliminating vendoring drift via shared package) is **deferred to a Phase 4 dedicated design cycle.** The R61 architectural-reality discovery surfaced that a clean extract requires resolving the types-barrel coupling between vendored-with-deltas surfaces and the detection algorithms — a project-close-magnitude decision that deserves its own design phase rather than absorption into a SLICE 3 wave.
+A small calibration subset remains vendored in-repo at `tools/calibrators/*` (each file carries a source-path + SHA header and a sync-policy note).
 
 ## Getting started
 
@@ -66,8 +65,8 @@ Requires Node ≥ 20 and pnpm ≥ 11.
 git clone https://github.com/johnpatrickwarren-oss/tessera.git
 cd tessera
 pnpm install
-pnpm test      # runs the full test suite (~440 tests)
-pnpm build     # tsc compile
+pnpm test      # runs the full test suite (~540 tests; 10 skip without local clustersynth fixtures)
+pnpm build     # tsc compile (tools + scripts + tests, via tsconfig.test.json)
 ```
 
 ## Quick demo
@@ -77,10 +76,25 @@ Tessera ships two demo surfaces — a CLI for terminal walk-through (R70) and a 
 ### Browser dashboard
 
 ```bash
-open demos/demo.html      # opens in default browser; no install / no server required
+open demos/demo.html      # canned mode: opens in default browser; no install / no server required
 ```
 
-The dashboard pages through 8 pre-recorded scenarios (clean baseline, single-shard SDC drift, rack-localized common mode, event-conditional freeze, FDR control, hierarchical e-value combination, sparse-data resilience, and topology-spanning common mode) with Play / Pause / Reset / Speed controls, an audit-trail panel, a reasoning panel, and a suggested-next-actions panel. All scenarios are deterministic and regeneratable via `pnpm build:demos`. The dashboard ships as a single static HTML file with vanilla CSS/JS — no external dependencies, opens from `file://`.
+The dashboard pages through 8 pre-recorded scenarios (clean baseline, single-shard SDC drift, rack-localized common mode, event-conditional freeze, FDR control, hierarchical e-value combination, sparse-data resilience, and topology-spanning common mode) with Play / Pause / Reset / Speed controls, an audit-trail panel, a reasoning panel, and a suggested-next-actions panel. All scenarios are deterministic and regeneratable via `pnpm build:demos`. The dashboard ships as a single static HTML file with vanilla CSS/JS — no external dependencies; **canned mode** opens directly from `file://`.
+
+Dashboard controls:
+
+- **Scrubber** — drag the slider in the top controls to jump to any window (0 through 29).
+  Scrubbing pauses playback automatically; release the slider to resume manual control.
+- **Keyboard** — `space` toggles play/pause; `→` and `←` step forward and backward one window;
+  `r` resets the current scenario.
+- **Speed** — 1×, 2×, 4× playback (500ms / 250ms / 125ms per window).
+- **Per-firing receipts** — the provenance panel collapses individual firing receipts; click
+  any receipt summary to expand its evidence JSON.
+
+For a minute-by-minute walkthrough (clean-baseline → SDC-drift → common-mode-rack →
+event-conditional) see [`demos/DEMO-SCRIPT.md`](demos/DEMO-SCRIPT.md).
+
+#### Live mode (requires a build step + local HTTP server)
 
 The dashboard ships a **Live mode toggle** at the top of the page (R85). Switching to
 **Live** activates the parameter control panel (drift magnitude, window count, α
@@ -89,6 +103,16 @@ through a Web Worker that loads the engine bundle in-browser and streams per-win
 state back to the UI. Use the scrubber to replay the run at any speed; click Cancel to
 terminate mid-stream. See [`demos/DEMO-SCRIPT.md` § Minute 10:00 – 12:00](./demos/DEMO-SCRIPT.md#minute-1000--1200--live-mode-interactive)
 for the live-mode walkthrough.
+
+Unlike canned mode, Live mode needs two extra steps: the engine bundle
+(`demos/engine-bundle.mjs`) is a gitignored build artifact, and browsers refuse to
+construct a `Worker` from a `file://` origin — so serve `demos/` over HTTP:
+
+```bash
+pnpm build:browser              # writes demos/engine-bundle.mjs
+python3 -m http.server -d demos # or: npx serve demos
+open http://localhost:8000/demo.html
+```
 
 ### CLI scenarios
 
@@ -115,7 +139,7 @@ Idempotent: re-running produces byte-identical files. The 8 scenario JSON files 
 
 Tessera was developed using the [Anchor](https://github.com/johnpatrickwarren-oss/anchor) coordination methodology — a four-role pipeline (Architect → Implementer → Reviewer → Memorial-Updater) with cold-eye discipline, threshold-aware reinforcement accretion, and explicit ESCALATE patterns for spec/reality mismatches.
 
-The full audit trail is preserved in this repo's commit history (every round's role-tagged commits, cold-eye Reviewer reports, Memorial-Updater outputs, and ESCALATE-resolution patterns are public). The `coordination/` directory contains:
+The full audit trail is preserved in this repo's commit history (every round's role-tagged commits, cold-eye Reviewer reports, Memorial-Updater outputs, and ESCALATE-resolution patterns are public). The pipeline's working state lives in a `coordination/` directory that is **pipeline-local and gitignored** (not part of the published repo); it holds:
 
 - `PRD.md` — Product requirements (per-phase scope)
 - `SCOPING-MEMO-v0.3.md` — Engine vendoring policy + cross-cutting anti-scope
@@ -133,24 +157,25 @@ tessera/
 ├── README.md                     # This file
 ├── LICENSE                       # Apache 2.0
 ├── package.json                  # pnpm-managed (packageManager: pnpm@11.x)
-├── pnpm-lock.yaml
+│                                 #   engine dep: @johnpatrickwarren-oss/deploysignal-engine
+│                                 #   (Family A/C/D/E detectors, topology adapters, e-BH,
+│                                 #   per-shard runtime, ds-integration — extracted R90/R94)
+├── pnpm-lock.yaml + pnpm-workspace.yaml
 ├── tsconfig.json + tsconfig.test.json
 ├── CLAUDE-*.md                   # Anchor pipeline role disciplines
-├── coordination/                 # PRD + specs + wave plans + memorial + reviews + logs
-├── engine/                       # Statistical-detector engine (vendored from DS) + per-shard extensions
-│   ├── core.ts
-│   ├── detectors/                # Family A/C/D/E detector implementations
-│   ├── topology/                 # Vendor adapters: slurm, k8s, nvlink, neuron, tpu, + base
-│   ├── types/                    # Verdict + config + policy + audit schemas (Tessera-extended)
-│   ├── events/                   # Cluster event feed + freeze-hook
-│   ├── ds-integration/           # HTTP API contract + adapters (Tessera↔DS bi-directional)
-│   ├── per-shard/                # Per-shard residual semantics
-│   └── l0/, l1/, fleet/, o0/     # Layered analysis primitives
-├── test/                         # 440+ tests (per-AC; per-round test files q01–q66)
-├── scripts/                      # Pipeline scripts (run-pipeline.sh, verify-*.sh, finalize-round.sh)
 ├── run-pipeline.sh               # Anchor four-role pipeline orchestrator
-└── tools/                        # Synthetic fixtures + topology injection harness
+├── bench/                        # clustersynth perf bench (fixtures generated locally)
+├── coverage-matrices/            # R72/R77/R78 deterministic coverage + envelope matrices
+├── demos/                        # Browser dashboard + worker + DEMO-SCRIPT + scenario JSON
+├── scripts/                      # Pipeline scripts (verify-*.sh, finalize-round.sh, tier-router, …)
+├── templates/                    # Anchor project templates
+├── test/                         # 540+ tests (per-AC; per-round test files q01–q88)
+└── tools/                        # Product CLIs: demo scenarios, canned-demo + browser-bundle
+                                  #   builders, coverage/envelope generators, baseline curation,
+                                  #   vendored calibrators (tools/calibrators/*)
 ```
+
+(The pipeline's `coordination/` working directory is local-only and gitignored — see Methodology.)
 
 ## Coverage
 
@@ -221,28 +246,6 @@ The wrapper applies conservative defaults inherited from `tools/curate-baseline-
 Three artifacts land under `<out-dir>/`: the curated `curated-baseline.json`, the markdown `curation-report.md`, and the per-decision audit trail `curation-decisions.jsonl` (one JSON line per `BaselineCurationDecision` record — D11 Stage 2a, D12 Stage 2b, D13 Stage 3b wire format).
 
 Source: [`tools/curate-baseline.ts`](./tools/curate-baseline.ts).
-
-## Quick demo
-
-Open `demos/demo.html` directly in any modern browser — no server required. Eight pre-recorded
-scenarios cover clean, drift, common-mode, event-conditional, FDR, hierarchical, sparse, and
-topology-spanning behaviors. Each runs deterministically from an LCG-seeded synthetic substrate.
-
-### Controls
-
-- **Scrubber** — drag the slider in the top controls to jump to any window (0 through 29).
-  Scrubbing pauses playback automatically; release the slider to resume manual control.
-- **Keyboard** — `space` toggles play/pause; `→` and `←` step forward and backward one window;
-  `r` resets the current scenario.
-- **Speed** — 1×, 2×, 4× playback (500ms / 250ms / 125ms per window).
-- **Per-firing receipts** — the provenance panel collapses individual firing receipts; click
-  any receipt summary to expand its evidence JSON.
-
-### 10-minute walkthrough
-
-See [`demos/DEMO-SCRIPT.md`](demos/DEMO-SCRIPT.md) for a minute-by-minute script that walks
-through clean-baseline → SDC-drift → common-mode-rack → event-conditional with talking points
-matched to the dashboard's per-tick state. Analogous to DeploySignal's `DEMO-SCRIPT-10MIN.md`.
 
 ## License
 
