@@ -121,8 +121,8 @@ Tessera's product code (curation pipeline, demo scenarios, envelope/coverage too
 ## Prioritized remediation checklist
 
 - [x] **C1** Repoint `tools/build-browser-bundle.ts` `ENTRY_SOURCE` imports from `./engine/*` to `@johnpatrickwarren-oss/deploysignal-engine/*`; confirm `node tools/build-browser-bundle.js` emits `demos/engine-bundle.mjs`.
-- [ ] **H1** Commit `pnpm-workspace.yaml` with `onlyBuiltDependencies: [esbuild]` (and drop the `.gitignore` entry); verify fresh-clone `pnpm install && pnpm test` exits 0.
-- [ ] **H2** Re-run the suite → expect 543/543 (minus documented skips); change q84's bundle bootstrap to call `node` directly or implement the documented skip path.
+- [x] **H1** Commit `pnpm-workspace.yaml` with `onlyBuiltDependencies: [esbuild]` (and drop the `.gitignore` entry); verify fresh-clone `pnpm install && pnpm test` exits 0.
+- [x] **H2** Re-run the suite → expect 543/543 (minus documented skips); change q84's bundle bootstrap to call `node` directly or implement the documented skip path.
 - [ ] **M1** Rewrite README Layout / Engine-sourcing / Methodology sections to reflect the post-R90 engine-as-npm-dependency reality and the local-only `coordination/` directory.
 - [ ] **M2** Document HTTP serving for Live mode (or add a `file://` detection banner in `demos/demo.html`); scope the "no server required" claim to canned mode.
 - [ ] **M3** Fix or remove the no-op `pnpm build` script (`tsconfig.json` `include: []`).
