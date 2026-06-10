@@ -1,0 +1,41 @@
+# Minimal CI: typecheck + full test suite + browser-bundle build on every push/PR.
+#
+# Scope note: the ratchet gates declared in arch-invariants.json (complexity,
+# function length, time-bomb tests, product-not-read-process) are enforced by
+# the external Anchor pipeline harness during rounds, not by this workflow —
+# the gate runner is not vendored into this repo. This workflow exists so that
+# a red test suite or a broken build can never again sit unnoticed at HEAD.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm/action-setup reads the pinned version from package.json#packageManager.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        # 10 clustersynth tests skip without locally generated fixtures
+        # (see bench/README.md); skips are expected in CI.
+        run: pnpm test
+
+      - name: Browser bundle builds
+        run: pnpm build:browser
