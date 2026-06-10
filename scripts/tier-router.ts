@@ -26,6 +26,15 @@ interface CLIArgs {
   confidenceThreshold: number;
 }
 
+function requireFlagValue(argv: string[], i: number, flag: string, tool: string): string {
+  const v = argv[i + 1];
+  if (v === undefined || v.startsWith('--')) {
+    process.stderr.write(`${tool}: ${flag} requires a value\n`);
+    process.exit(1);
+  }
+  return v;
+}
+
 function parseArgs(argv: string[]): CLIArgs {
   let directive = 'coordination/NEXT-ROLE.md';
   let mode: CLIArgs['mode'] = 'hybrid';
@@ -34,10 +43,12 @@ function parseArgs(argv: string[]): CLIArgs {
   for (let i = 2; i < argv.length; i++) {
     switch (argv[i]) {
       case '--directive':
-        directive = argv[++i];
+        directive = requireFlagValue(argv, i, '--directive', 'tier-router');
+        i++;
         break;
       case '--mode': {
-        const m = argv[++i];
+        const m = requireFlagValue(argv, i, '--mode', 'tier-router');
+        i++;
         if (m !== 'heuristic' && m !== 'haiku' && m !== 'hybrid') {
           process.stderr.write(`tier-router: invalid --mode value: ${m}\n`);
           process.exit(1);
@@ -45,9 +56,17 @@ function parseArgs(argv: string[]): CLIArgs {
         mode = m as CLIArgs['mode'];
         break;
       }
-      case '--confidence-threshold':
-        confidenceThreshold = parseFloat(argv[++i]);
+      case '--confidence-threshold': {
+        const raw = requireFlagValue(argv, i, '--confidence-threshold', 'tier-router');
+        i++;
+        const v = parseFloat(raw);
+        if (!Number.isFinite(v) || v < 0 || v > 1) {
+          process.stderr.write(`tier-router: invalid --confidence-threshold value: ${raw} (expected number in [0,1])\n`);
+          process.exit(1);
+        }
+        confidenceThreshold = v;
         break;
+      }
       default:
         process.stderr.write(`tier-router: unknown argument: ${argv[i]}\n`);
         process.exit(1);
@@ -323,4 +342,7 @@ function main(): void {
   process.exit(0);
 }
 
-main();
+// CLI guard (matches tools/* convention): importing this module must not run the CLI.
+if (require.main === module) {
+  main();
+}

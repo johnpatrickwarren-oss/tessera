@@ -27,6 +27,15 @@ interface CLIArgs {
   muSonnet: boolean;
 }
 
+function requireFlagValue(argv: string[], i: number, flag: string): string {
+  const v = argv[i + 1];
+  if (v === undefined || v.startsWith('--')) {
+    process.stderr.write(`mu-model-select: ${flag} requires a value\n`);
+    process.exit(1);
+  }
+  return v;
+}
+
 function parseArgs(argv: string[]): CLIArgs {
   let directive = 'coordination/NEXT-ROLE.md';
   let tier: string | undefined;
@@ -34,8 +43,8 @@ function parseArgs(argv: string[]): CLIArgs {
 
   for (let i = 2; i < argv.length; i++) {
     switch (argv[i]) {
-      case '--directive': directive = argv[++i]; break;
-      case '--tier':      tier = argv[++i]; break;
+      case '--directive': directive = requireFlagValue(argv, i, '--directive'); i++; break;
+      case '--tier':      tier = requireFlagValue(argv, i, '--tier'); i++; break;
       case '--mu-sonnet': muSonnet = true; break;
       default:
         process.stderr.write(`mu-model-select: unknown argument: ${argv[i]}\n`);
@@ -181,4 +190,7 @@ function main(): void {
   process.exit(0);
 }
 
-main();
+// CLI guard (matches tools/* convention): importing this module must not run the CLI.
+if (require.main === module) {
+  main();
+}

@@ -14,15 +14,35 @@ const CACHE_HIT_INPUT_RATIO = 0.1;  // Cached tokens billed at ~10% of standard 
 type Role = 'IMPLEMENTER' | 'REVIEWER' | 'MEMORIAL-UPDATER';
 const DEFAULT_ROLES: Role[] = ['IMPLEMENTER', 'REVIEWER', 'MEMORIAL-UPDATER'];
 
+function requireFlagValue(argv: string[], i: number, flag: string): string {
+  const v = argv[i + 1];
+  if (v === undefined || v.startsWith('--')) {
+    process.stderr.write(`measure-cache-effect: ${flag} requires a value\n`);
+    process.exit(1);
+  }
+  return v;
+}
+
 function parseArgs(argv: string[]): { round: string; projectRoot: string; roles: Role[] } {
   let round: string | undefined;
   let projectRoot: string = process.cwd();
   let roles: Role[] = DEFAULT_ROLES;
   for (let i = 2; i < argv.length; i++) {
     switch (argv[i]) {
-      case '--round':         round = argv[++i]; break;
-      case '--project-root':  projectRoot = resolve(argv[++i]); break;
-      case '--roles':         roles = argv[++i].split(',').map(s => s.trim()) as Role[]; break;
+      case '--round':         round = requireFlagValue(argv, i, '--round'); i++; break;
+      case '--project-root':  projectRoot = resolve(requireFlagValue(argv, i, '--project-root')); i++; break;
+      case '--roles': {
+        const parsed = requireFlagValue(argv, i, '--roles').split(',').map(s => s.trim());
+        i++;
+        for (const r of parsed) {
+          if (!(DEFAULT_ROLES as string[]).includes(r)) {
+            process.stderr.write(`measure-cache-effect: invalid --roles member: ${r} (expected ${DEFAULT_ROLES.join('|')})\n`);
+            process.exit(1);
+          }
+        }
+        roles = parsed as Role[];
+        break;
+      }
       default:
         process.stderr.write(`measure-cache-effect: unknown argument: ${argv[i]}\n`);
         process.exit(1);
@@ -80,4 +100,7 @@ function main(): void {
   process.exit(0);
 }
 
-main();
+// CLI guard (matches tools/* convention): importing this module must not run the CLI.
+if (require.main === module) {
+  main();
+}
