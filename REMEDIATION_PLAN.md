@@ -125,7 +125,7 @@ Tessera's product code (curation pipeline, demo scenarios, envelope/coverage too
 - [x] **H2** Re-run the suite → expect 543/543 (minus documented skips); change q84's bundle bootstrap to call `node` directly or implement the documented skip path.
 - [x] **M1** Rewrite README Layout / Engine-sourcing / Methodology sections to reflect the post-R90 engine-as-npm-dependency reality and the local-only `coordination/` directory.
 - [x] **M2** Document HTTP serving for Live mode (or add a `file://` detection banner in `demos/demo.html`); scope the "no server required" claim to canned mode.
-- [ ] **M3** Fix or remove the no-op `pnpm build` script (`tsconfig.json` `include: []`).
+- [x] **M3** Fix or remove the no-op `pnpm build` script (`tsconfig.json` `include: []`).
 - [ ] **M4** Add a CI workflow (install + typecheck + test + build:browser); wire up or document the `arch-invariants.json` gate runner.
 - [ ] **L1** Add `require.main` guards + flag validation to `scripts/tier-router.ts`, `scripts/measure-cache-effect.ts`, `scripts/mu-model-select.ts`.
 - [ ] **L2** Make `run-pipeline.sh` lock acquisition atomic (`noclobber`/`mkdir`).

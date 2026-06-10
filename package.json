@@ -10,7 +10,7 @@
     "pnpm": ">=11"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.test.json",
     "curate-baseline": "pnpm exec node tools/curate-baseline.js",
     "predemo": "tsc -p tsconfig.test.json",
     "demo": "node tools/demo-scenario.js",
