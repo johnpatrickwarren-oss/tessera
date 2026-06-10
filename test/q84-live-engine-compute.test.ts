@@ -11,6 +11,7 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 
 const WORKER_PATH = path.join(REPO_ROOT, 'demos/engine-worker.js');
 const BUNDLE_PATH = path.join(REPO_ROOT, 'demos/engine-bundle.mjs');
+const BUILD_TOOL_PATH = path.join(REPO_ROOT, 'tools/build-browser-bundle.js');
 const DEMO_HTML_PATH = path.join(REPO_ROOT, 'demos/demo.html');
 const WORKER_SRC = fs.readFileSync(WORKER_PATH, 'utf8');
 const HTML = fs.readFileSync(DEMO_HTML_PATH, 'utf8');
@@ -133,10 +134,10 @@ test('AC-R84-12: #engine-error-banner exists; r84ShowError helper sets text + re
 
 // ── AC-R84-13: end-to-end — Node Worker round-trip emits ≥1 'window' + 1 'terminal' ──
 test('AC-R84-13: end-to-end Node Worker round-trip — receives window + terminal messages', async () => {
-  // Skip with explicit reason if bundle isn't present (gitignored / not built).
+  // Bundle is gitignored: build it on demand. Call node directly (not via
+  // `pnpm exec`) so a pnpm dep-check failure can't mask a bundle-build failure.
   if (!fs.existsSync(BUNDLE_PATH)) {
-    // Build the bundle deterministically; halts on failure.
-    execSync('pnpm exec node tools/build-browser-bundle.js',
+    execSync(`node ${JSON.stringify(BUILD_TOOL_PATH)}`,
       { cwd: REPO_ROOT, stdio: 'pipe' });
   }
   assert.ok(fs.existsSync(BUNDLE_PATH), 'engine-bundle.mjs must be buildable');
@@ -176,7 +177,7 @@ test('AC-R84-13: end-to-end Node Worker round-trip — receives window + termina
 // ── AC-R84-14: end-to-end Cancel — terminate() stops further messages ──
 test('AC-R84-14: worker.terminate() halts further message emission', async () => {
   if (!fs.existsSync(BUNDLE_PATH)) {
-    execSync('pnpm exec node tools/build-browser-bundle.js',
+    execSync(`node ${JSON.stringify(BUILD_TOOL_PATH)}`,
       { cwd: REPO_ROOT, stdio: 'pipe' });
   }
   const worker = new Worker(pathToFileURL(WORKER_PATH));

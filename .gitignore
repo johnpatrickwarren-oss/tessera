@@ -18,8 +18,6 @@ coverage/
 
 # R82: engine browser-bundle (build output of `pnpm build:browser`)
 demos/engine-bundle.mjs
-# R82: pnpm v11 build-approval file (auto-created by pnpm; project-local; not tracked)
-pnpm-workspace.yaml
 
 # Anchor pipeline working state. coordination/ is the orchestrator's LOCAL working directory
 # (PRD, role directives, memorials, specs, reviews, round logs) — not part of the published product:

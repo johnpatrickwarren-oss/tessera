@@ -1,0 +1,5 @@
+# pnpm v11 build-script approval (committed so fresh clones work; pnpm 11 does NOT
+# honor package.json#pnpm.onlyBuiltDependencies for this — without this file every
+# `pnpm run/test/exec` fails with ERR_PNPM_IGNORED_BUILDS for esbuild).
+allowBuilds:
+  esbuild: true
