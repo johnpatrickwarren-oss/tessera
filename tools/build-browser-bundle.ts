@@ -10,24 +10,26 @@
 import * as esbuild from 'esbuild';
 
 // Hardcoded re-export entry. Imports resolved by esbuild from the script's CWD
-// (project root). Public surface is intentionally minimal for R82; R83/R84 may
-// expand as live-compute needs grow.
+// (project root) against the extracted engine npm package
+// @johnpatrickwarren-oss/deploysignal-engine (post-R90; was the in-repo
+// ./engine/ tree before the extract). Public surface is intentionally minimal
+// for R82; R83/R84 may expand as live-compute needs grow.
 const ENTRY_SOURCE = `
 export {
   computeSnapshotHash,
   pureJsSha256,
   StaticTopologySource,
   TopologyEnricher,
-} from './engine/topology-overlay';
+} from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
 
-export * as detectors from './engine/detectors/betting-e-process';
-export * as familyA from './engine/detectors/family-a-mixture-supermartingale';
-export * as familyC from './engine/detectors/family-c-betting-e-process';
-export * as eBH from './engine/fleet/e-bh';
-export * as runtime from './engine/per-shard/runtime';
-export * as freezeHook from './engine/events/freeze-hook';
-export * as commonMode from './engine/topology/common-mode-attribution';
-export * as types from './engine/types';
+export * as detectors from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
+export * as familyA from '@johnpatrickwarren-oss/deploysignal-engine/detectors/family-a-mixture-supermartingale';
+export * as familyC from '@johnpatrickwarren-oss/deploysignal-engine/detectors/family-c-betting-e-process';
+export * as eBH from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
+export * as runtime from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
+export * as freezeHook from '@johnpatrickwarren-oss/deploysignal-engine/events/freeze-hook';
+export * as commonMode from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+export * as types from '@johnpatrickwarren-oss/deploysignal-engine/types';
 `;
 
 async function main(): Promise<void> {
