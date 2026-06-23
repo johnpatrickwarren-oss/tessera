@@ -30,16 +30,18 @@ e-process under autocorrelated telemetry, and standing up the sprag + Anchor qua
   (M1), wired sprag into CI + fixed stale CI comment (M2/L3), documented the power-drift magnitude
   and seasonal-variance framing (L4/L5).
 
-## In flight
-- **Upstream the betting-path fix into `deploysignal-engine`** (decision A, 2026-06-22): consume
-  `ar1_phi` in `updateBettingState`/`evaluateBettingEProcess`, mirroring the mixture-supermartingale
-  pattern. Separate repo PR + ADR. Tessera picks it up on the next pinned engine bump.
+- **Engine betting-path fix shipped + pinned.** `deploysignal-engine` PR #16 (consume `ar1_phi`) +
+  #17 (make `last_x_centered` optional — backward-compat, caught by this bump) merged; tagged
+  `v0.3.3-pre`. Tessera pin bumped `v0.3.1-pre → v0.3.3-pre`. The bump also pulled the engine's
+  public-hardening sweep (18 commits); its "truthful activation flag" change required aligning
+  `q66 AC-R66-1` to assert honest non-activation for the unwired consumer. Suite 548/0/10-skip;
+  `calibration-envelope` matrix byte-identical (the validator drives `updateBettingState` with
+  phi=0, so the bump is correctly a no-op there).
 
 ## Next
-- Commit/PR the Tessera validator work (branch + PR).
-- After the engine PR merges + a version bump: bump Tessera's pinned engine dep and re-run
-  `pnpm calibration-envelope` to confirm the betting path now whitens in-engine.
 - (Future engine ADR) AR(p>1) / near-unit-root (rho=0.95) whitening.
+- Optional: a follow-up to exercise the in-engine betting-path whitening through a stamped
+  `ar1_phi` config (the validator currently demonstrates the fix via its own transform).
 
 ## Open questions / blockers
 - None blocking. Whether to push the whitening fix upstream into the shared engine package (vs
