@@ -1,10 +1,12 @@
-# Minimal CI: typecheck + full test suite + browser-bundle build on every push/PR.
+# CI: typecheck + full test suite + browser-bundle build + the sprag architectural
+# gate, on every push/PR.
 #
-# Scope note: the ratchet gates declared in arch-invariants.json (complexity,
-# function length, time-bomb tests, product-not-read-process) are enforced by
-# the external Anchor pipeline harness during rounds, not by this workflow —
-# the gate runner is not vendored into this repo. This workflow exists so that
-# a red test suite or a broken build can never again sit unnoticed at HEAD.
+# The ratchet gates declared in invariants.json (complexity, function length,
+# time-bomb tests, product-not-read-process, require-tests, durable-trail,
+# config-relaxations) are enforced by the published sprag gate runner
+# (@johnpwarren.dev/sprag) in the "Architectural gate" step below — no longer an
+# external-harness-only claim. This workflow exists so that a red test suite, a
+# broken build, or architectural regression can never sit unnoticed at HEAD.
 name: CI
 
 on:
@@ -39,3 +41,8 @@ jobs:
 
       - name: Browser bundle builds
         run: pnpm build:browser
+
+      - name: Architectural gate (sprag)
+        # Deterministic, offline ratchet vs the committed baseline. Exit 3 = a
+        # blocked regression; exit 2 = engine unavailable (fails closed).
+        run: npx --yes @johnpwarren.dev/sprag check . --invariants invariants.json --baseline-in baseline.json

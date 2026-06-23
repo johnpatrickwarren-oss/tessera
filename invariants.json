@@ -1,0 +1,59 @@
+[
+  {
+    "id": "no-complex-functions",
+    "intent": "PRIMARY function-health gate: no NEW function with cyclomatic complexity over 12 (1 + decision points + &&/||). Flags BRANCHY hard-to-test functions, not merely long ones (McCabe ~10; 12 is forgiving). Ratchet grandfathers today's complex functions and blocks any new one. (Scans git-non-ignored .ts; the vendored calibrators/family-c.ts is fixed upstream.)",
+    "check": { "kind": "max_complexity", "maxComplexity": 12 },
+    "mode": "ratchet",
+    "severity": "block",
+    "lang": "ts",
+    "engine": "ast-grep"
+  },
+  {
+    "id": "no-god-functions",
+    "intent": "Coarse BACKSTOP: no NEW function over 150 lines (huge-but-flat functions only; complexity above is the primary gate). Ratchet.",
+    "check": { "kind": "max_function_lines", "maxLines": 150 },
+    "mode": "ratchet",
+    "severity": "block",
+    "lang": "ts",
+    "engine": "ast-grep"
+  },
+  {
+    "id": "no-time-bomb-tests",
+    "intent": "No test pinned to a frozen git ref/SHA (git diff <ref>..HEAD, --name-only, git show <sha>). Such tests can only rot once HEAD moves past the change.",
+    "check": { "kind": "time_bomb_tests", "dirs": ["test"] },
+    "max": 0,
+    "mode": "ratchet",
+    "severity": "block"
+  },
+  {
+    "id": "product-not-read-process",
+    "intent": "Product tests must not read local process state (coordination/ is a gitignored working dir). Tests depend only on tools/ + fixtures + coverage-matrices/. (Comment citations are fine — only code references count.)",
+    "check": { "kind": "forbid_path", "dirs": ["test"], "path": "coordination/" },
+    "max": 0,
+    "mode": "ratchet",
+    "severity": "block"
+  },
+  {
+    "id": "require-tests",
+    "intent": "No NEW untested source module under tools/. Ratchet grandfathers existing untested helpers and blocks any new module that ships without a base-name-matched *.test.ts (Anchor: require_tests is the deterministic half of test-discipline).",
+    "check": { "kind": "require_tests", "dirs": ["tools"] },
+    "mode": "ratchet",
+    "severity": "block"
+  },
+  {
+    "id": "durable-trail",
+    "intent": "Durable project trail must exist (Anchor Discipline 6 deterministic backstop): a STATE.md snapshot and a decisions/ ADR directory. Existence only — accuracy/legibility is the human's call.",
+    "check": { "kind": "require_paths", "paths": ["STATE.md", "decisions"] },
+    "max": 0,
+    "mode": "ratchet",
+    "severity": "block"
+  },
+  {
+    "id": "config-relaxations",
+    "intent": "Meta-ratchet: invariants.json + baseline.json may only move forward vs HEAD — no raised max, dropped rule, severity downgrade, raised baseline, or grown exemption list without ARCH_ALLOW_RELAX=1 and review. The gate can't be quietly relaxed to pass.",
+    "check": { "kind": "config_relaxations", "invariants": "invariants.json", "baseline": "baseline.json", "against": "HEAD" },
+    "max": 0,
+    "mode": "ratchet",
+    "severity": "block"
+  }
+]
