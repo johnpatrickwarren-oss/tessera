@@ -4,7 +4,7 @@ Adaptive (regime-aware) baselining cut false alarms ~5x on a null dataset (ADR 0
 
 ## A. Synthetic AR(1)+ramp sweep (controlled)
 
-AR(1) ρ=0.5, length 1200, ramp onset at 600, 1500 trials/slope, α=0.01, adaptive window=300. `detect` = fired after onset; `pre-FP` = fired before onset (false positive). slope = ramp per step (unit-variance noise).
+AR(1) ρ=0.5, length 1200, ramp onset at 600, 1500 trials/slope, α=0.01, adaptive window=300. `detect` = fired **within the 600-step post-onset horizon** (so it captures both detection AND latency); `pre-FP` = fired before onset. slope = ramp per step (unit-variance noise). The slope=0 row's "detect" is the cumulative type-I rate over 600 steps, not the per-step α.
 
 | ramp slope/step | static detect | adaptive detect | static pre-FP | adaptive pre-FP |
 |---|---|---|---|---|
@@ -15,11 +15,13 @@ AR(1) ρ=0.5, length 1200, ramp onset at 600, 1500 trials/slope, α=0.01, adapti
 | 0.1 | 100.0% | 100.0% | 7.8% | 2.3% |
 | 0.3 | 100.0% | 100.0% | 6.6% | 2.3% |
 
-Read it as the tradeoff: at **slope 0** (no anomaly) adaptive pre-FP << static (the ~5x FP win). As slope grows, **static detects across the range** (a fixed baseline always eventually deviates) while **adaptive only detects once the ramp outpaces its window** — below that it MASKS the drift. The masking threshold is the slope where adaptive detect rises to meet static.
+Read it as the tradeoff: at **slope 0** (no anomaly) adaptive pre-FP << static (the ~4-5x FP win). As slope grows, **static detects across the range** (a fixed baseline always eventually deviates) while **adaptive only detects once the ramp outpaces its window** — below that it tracks the drift into "normal". The shortfall (e.g. 76.5% vs 99% at slope 0.003) is *within-horizon* detection, so it bundles **permanent masking AND detection delayed past the horizon** — both operationally bad for monitoring (a fault caught much later is nearly as costly as one missed). The threshold is the slope where adaptive detect rises to meet static (~0.01/step here).
 
 ## B. GWDG real GPU faults (static vs adaptive)
 
-| mode | windows det/scored | detection | FP/1k (pre-incident) |
+Metrics: XID_ERRORS, GPU_TEMP, POWER_USAGE (a 3-metric subset of gwdg-replay's 5). FP/1k denominator = normal regions of **incident files only** (non-incident files skipped), so it is NOT directly comparable to gwdg-replay's full-dataset FP — read the static-vs-adaptive DELTA, not the absolute.
+
+| mode | windows det/scored | detection | FP/1k (incident-file normal) |
 |---|---|---|---|
 | static | 56/168 | 33.3% | 29.1 |
 | adaptive | 4/168 | 2.4% | 6.9 |

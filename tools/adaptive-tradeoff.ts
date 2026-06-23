@@ -116,7 +116,7 @@ function renderMd(r: TradeoffReport): string {
   L.push('');
   L.push('## A. Synthetic AR(1)+ramp sweep (controlled)');
   L.push('');
-  L.push(`AR(1) ρ=${r.params.rho}, length ${r.params.n}, ramp onset at ${r.params.onset}, ${r.params.trials} trials/slope, α=${r.params.alpha}, adaptive window=${r.params.adapt.window}. \`detect\` = fired after onset; \`pre-FP\` = fired before onset (false positive). slope = ramp per step (unit-variance noise).`);
+  L.push(`AR(1) ρ=${r.params.rho}, length ${r.params.n}, ramp onset at ${r.params.onset}, ${r.params.trials} trials/slope, α=${r.params.alpha}, adaptive window=${r.params.adapt.window}. \`detect\` = fired **within the ${r.params.n - r.params.onset}-step post-onset horizon** (so it captures both detection AND latency); \`pre-FP\` = fired before onset. slope = ramp per step (unit-variance noise). The slope=0 row's "detect" is the cumulative type-I rate over ${r.params.n - r.params.onset} steps, not the per-step α.`);
   L.push('');
   L.push('| ramp slope/step | static detect | adaptive detect | static pre-FP | adaptive pre-FP |');
   L.push('|---|---|---|---|---|');
@@ -124,12 +124,14 @@ function renderMd(r: TradeoffReport): string {
     L.push(`| ${s.slope} | ${pct(s.static_detect)} | ${pct(s.adaptive_detect)} | ${pct(s.static_preonset_fp)} | ${pct(s.adaptive_preonset_fp)} |`);
   }
   L.push('');
-  L.push('Read it as the tradeoff: at **slope 0** (no anomaly) adaptive pre-FP << static (the ~5x FP win). As slope grows, **static detects across the range** (a fixed baseline always eventually deviates) while **adaptive only detects once the ramp outpaces its window** — below that it MASKS the drift. The masking threshold is the slope where adaptive detect rises to meet static.');
+  L.push('Read it as the tradeoff: at **slope 0** (no anomaly) adaptive pre-FP << static (the ~4-5x FP win). As slope grows, **static detects across the range** (a fixed baseline always eventually deviates) while **adaptive only detects once the ramp outpaces its window** — below that it tracks the drift into "normal". The shortfall (e.g. 76.5% vs 99% at slope 0.003) is *within-horizon* detection, so it bundles **permanent masking AND detection delayed past the horizon** — both operationally bad for monitoring (a fault caught much later is nearly as costly as one missed). The threshold is the slope where adaptive detect rises to meet static (~0.01/step here).');
   L.push('');
   if (r.gwdg) {
     L.push('## B. GWDG real GPU faults (static vs adaptive)');
     L.push('');
-    L.push('| mode | windows det/scored | detection | FP/1k (pre-incident) |');
+    L.push('Metrics: XID_ERRORS, GPU_TEMP, POWER_USAGE (a 3-metric subset of gwdg-replay\'s 5). FP/1k denominator = normal regions of **incident files only** (non-incident files skipped), so it is NOT directly comparable to gwdg-replay\'s full-dataset FP — read the static-vs-adaptive DELTA, not the absolute.');
+    L.push('');
+    L.push('| mode | windows det/scored | detection | FP/1k (incident-file normal) |');
     L.push('|---|---|---|---|');
     for (const g of r.gwdg) {
       const fpPer1k = g.scored_normal > 0 ? Math.round((g.fp_fires / g.scored_normal) * 1000 * 10) / 10 : 0;

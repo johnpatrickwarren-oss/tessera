@@ -52,6 +52,11 @@ ability to catch exactly the slow-onset faults it exists to catch.
 
 ## Ruled out / gotchas
 
+- "Detection" is **within the trial horizon**, so the slow-slope shortfall (76.5% vs 99%) bundles
+  *permanent masking* with *detection delayed past the horizon*. We do not separate them — both are
+  operationally bad for monitoring (a fault caught much later ≈ one missed), and the verdict (don't
+  upstream as a static replacement) is identical either way. A horizon-extended decomposition is
+  future work if the exact `window` is to be tuned.
 - Single AR(1) ρ + linear ramps; step-vs-ramp and AR(p) not swept (first characterization).
 - GWDG detection is detachment-heavy + day-level — but the direction (massive masking) is stark and
   consistent with the synthetic threshold, so the verdict holds.
