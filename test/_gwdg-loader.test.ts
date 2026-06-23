@@ -25,7 +25,10 @@ test('parseIncidents maps node -> [incidentDay, collectEnd] windows + category',
 test('parseManifest maps tidy outputFile -> node', () => {
   const csv = 'inputFile,outputFile,inputType,node,minTime,maxTime,rows\n'
     + 'a.csv.bz2,a_tidy.csv.bz2,t,node_q,2025-01-01 00:00:00,2025-01-02 00:00:00,10\n';
-  assert.equal(parseManifest(csv).get('a_tidy.csv.bz2'), 'node_q');
+  const e = parseManifest(csv).get('a_tidy.csv.bz2')!;
+  assert.equal(e.node, 'node_q');
+  assert.equal(e.minMs, Date.UTC(2025, 0, 1, 0, 0, 0));
+  assert.equal(e.maxMs, Date.UTC(2025, 0, 2, 0, 0, 0));
 });
 
 test('loadGwdgTraces pivots long-form to per-(gpu,metric) traces with anomaly flags', () => {

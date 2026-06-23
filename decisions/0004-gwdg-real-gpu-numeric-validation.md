@@ -16,8 +16,13 @@ traces and reuse the shadow-replay scoring core. 16 incident files (detachment-h
 Ship the GWDG validation harness and record the result honestly. At α=0.01 with a static baseline,
 over 5 numeric DCGM metrics (XID, temps, power, util) on 64 GPU-shards:
 
-- **Detection: 32.3%** of the 2h post-onset incident windows (110/341).
-- **False positives: ~30/1000** (~3%) on the incident files' real pre-incident normal regions.
+- **Detection: 32.9%** of the per-(window×gpu×metric) shards (92/280; 15 unique incident windows).
+- **False positives: ~30/1000** (~3%) on real normal GPU telemetry (incident files' pre/inter-window
+  regions + non-incident files).
+
+(Cold-eye H1/H2 fix: each file is joined to only its own incident — matched by the file's date in its
+name — so a window is scored in exactly one file. Read 32.9% as fraction of (window×gpu×metric)
+detection opportunities, NOT fraction of incident events.)
 
 **Interpreting honestly:** a detector firing ~3% of the time will hit many 2h windows by chance, so
 the 32% detection is **not clearly above-chance** given that FP rate. The conclusion is consistent

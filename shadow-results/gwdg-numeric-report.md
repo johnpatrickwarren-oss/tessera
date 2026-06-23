@@ -4,18 +4,18 @@ Tessera's per-shard NUMERIC betting e-process run on REAL A100 telemetry (GWDG, 
 
 > **Scope:** validates the per-shard NUMERIC detector on real GPU faults. The labeled incidents are **detachment-heavy** (minimal numeric precursor), so low numeric detection is EXPECTED and quantifies the blind spot the structural detector (gap B) targets. Does NOT validate topology / common-mode / fleet (independent HPC nodes, no coupled fabric). Labels are day-level (coarse latency).
 
-Files: 21 (16 incident, rest "when-good"). α=0.01.
+Files: 21 (15 with an in-range incident, rest normal). Unique incident windows scored (filtered to each file's time range): 15. α=0.01.
 
 ## Per-metric (numeric)
 
-`FP/1k` = false-positive fires per 1000 scored-normal points in the incident files' **pre-incident regions** (real normal GPU telemetry). `detection` = the 2h post-onset incident windows with ≥1 in-window fire. (The "when-good" files are healthy-GPU-**count** aggregates, not per-GPU DCGM metrics — so they yield no numeric shards; FP is measured from the incident files' own normal regions instead.)
+Per-metric `FP/1k` = false-positive fires per 1000 scored-normal points in incident files' **normal (pre/inter-window) regions**; the overall FP also folds in non-incident files' normal data. `detection` = the 2h post-onset incident windows (filtered to each file's time range) with ≥1 in-window fire. (The "when-good" files are healthy-GPU-**count** aggregates, not per-GPU DCGM, so they yield no numeric shards.)
 
-| metric | incident shards | FP/1k (pre-incident) | windows det/scored |
+| metric | incident shards | FP/1k (incident-file normal) | windows det/scored |
 |---|---|---|---|
-| DCGM_FI_DEV_XID_ERRORS | 64 | 27.774 | 25/69 |
-| DCGM_FI_DEV_GPU_TEMP | 64 | 28.786 | 19/68 |
-| DCGM_FI_DEV_MEMORY_TEMP | 64 | 30.174 | 24/68 |
-| DCGM_FI_DEV_POWER_USAGE | 64 | 30.853 | 22/68 |
-| DCGM_FI_DEV_GPU_UTIL | 64 | 30.853 | 20/68 |
+| DCGM_FI_DEV_XID_ERRORS | 60 | 27.67 | 23/56 |
+| DCGM_FI_DEV_GPU_TEMP | 60 | 28.984 | 15/56 |
+| DCGM_FI_DEV_MEMORY_TEMP | 60 | 29.239 | 20/56 |
+| DCGM_FI_DEV_POWER_USAGE | 60 | 30.746 | 18/56 |
+| DCGM_FI_DEV_GPU_UTIL | 60 | 29.89 | 16/56 |
 
-**Overall:** detection 32.3% (110/341 windows); FP 29.688/1k on real pre-incident normal telemetry. Interpret detection against this FP (a detector firing everywhere would also "detect"). Deterministic; byte-identical on re-run.
+**Overall:** detection 32.9% (92/280 windows); FP 29.683/1k on real pre-incident normal telemetry. Interpret detection against this FP (a detector firing everywhere would also "detect"). Deterministic; byte-identical on re-run.

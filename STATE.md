@@ -109,9 +109,9 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
 ## Done (this branch — gwdg-real-gpu-validation)
 - **Gap A: numeric detector run on REAL GPU faults (GWDG/Zenodo).** New `tools/_gwdg-loader.ts`
   (long-form tidy CSV → per-(node,gpu,metric) traces) + `tools/gwdg-replay.ts` (reuses shadow-replay
-  scoring). Honest result @ α=0.01, static baseline: detection 32.3% of 2h post-onset windows, but
+  scoring). Honest result @ α=0.01, static baseline: detection 32.9% (92/280 window×gpu×metric shards; 15 unique windows), but
   ~30 FP/1k on real pre-incident normal — so detection is NOT clearly above-chance; static-baseline
   numeric detection over-fires on real telemetry (consistent with NAB) and isn't production-viable
   alone. Incidents are detachment-heavy (minimal numeric precursor). See ADR 0004; report
   `shadow-results/gwdg-numeric-report.md`. +5 tests; suite 568/0/10; gate green.
-  NOTE: independent cold-eye pending before merge.
+  Cold-eye done (SHIP-WITH-FIXES): H1/H2 window-double-count fixed (join each file to its own incident by filename date), M1 test gap closed, M2 unique-window-count added.

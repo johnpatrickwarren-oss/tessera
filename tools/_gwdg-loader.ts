@@ -47,17 +47,34 @@ export function parseIncidents(text: string): Map<string, Array<{ window: [numbe
   return out;
 }
 
-/** Map tidy output filename -> node, from manifest.csv. */
-export function parseManifest(text: string): Map<string, string> {
+export interface ManifestEntry { node: string; minMs: number; maxMs: number; }
+
+function safeParseTs(s: string): number | null {
+  try { return parseTs(s); } catch { return null; }
+}
+
+/** Map tidy output filename -> {node, file time range}, from manifest.csv.
+ *  Time range is used to filter a node's incident windows to those that actually
+ *  fall within the file (a node's other-date incidents must not be attached). */
+export function parseManifest(text: string): Map<string, ManifestEntry> {
   const lines = text.trim().split('\n');
-  const out = new Map<string, string>();
+  const out = new Map<string, ManifestEntry>();
   // header: inputFile,outputFile,inputType,node,minTime,maxTime,rows,...
   for (let i = 1; i < lines.length; i++) {
     const c = cols(lines[i]);
-    if (c.length < 4) continue;
-    out.set(c[1], c[3]); // outputFile -> node
+    if (c.length < 6) continue;
+    out.set(c[1], { node: c[3], minMs: safeParseTs(c[4]) ?? -Infinity, maxMs: safeParseTs(c[5]) ?? Infinity });
   }
   return out;
+}
+
+/** The dataset is one-file-per-incident, named by date (e.g. ggpu142_2025-02-17_...).
+ *  Extract that YYYY-MM-DD as UTC midnight, so a file is joined ONLY to its own
+ *  incident — not every incident the node ever had (the H1/H2 double-count fix). */
+export function parseFileDate(filename: string): number | null {
+  const m = /(\d{4})-(\d{2})-(\d{2})/.exec(filename);
+  if (!m) return null; // e.g. the "when-good" aggregate files
+  return Date.UTC(+m[1], +m[2] - 1, +m[3]);
 }
 
 /** Read one decompressed tidy CSV, extracting per-(gpu) series for the given metrics.

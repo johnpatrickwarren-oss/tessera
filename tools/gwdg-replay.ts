@@ -9,7 +9,7 @@
 // fabric). See docs/SPEC-gwdg-real-gpu-validation.md. Tessera-original; NOT vendored.
 
 import { calibrateBaseline, replayFires, scoreDataset, probationaryEnd } from './shadow-replay.js';
-import { parseIncidents, parseManifest, loadGwdgTraces } from './_gwdg-loader.js';
+import { parseIncidents, parseManifest, loadGwdgTraces, parseFileDate } from './_gwdg-loader.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -30,7 +30,7 @@ function round3(x: number): number { return Math.round(x * 1000) / 1000; }
 
 export interface GwdgReport {
   schema_version: 'tessera-gwdg-numeric-v1';
-  provenance: { dataset: string; alpha: number; metrics: string[]; n_files: number; n_incident_files: number };
+  provenance: { dataset: string; alpha: number; metrics: string[]; n_files: number; n_incident_files: number; n_incident_windows_scored: number };
   per_metric: MetricAgg[];
   totals: { detection_rate: number; windows_detected: number; windows_scored: number; fp_per_1k_normal: number };
 }
@@ -46,12 +46,19 @@ export function runGwdgReplay(datasetDir: string): GwdgReport {
   const acc = new Map<string, MetricAgg>();
   for (const m of NUMERIC_METRICS) acc.set(m, { metric: m, good_shards: 0, good_scored_normal: 0, good_fp_fires: 0, good_fp_per_1k: 0, incident_shards: 0, windows_scored: 0, windows_detected: 0, incident_fp_fires: 0, incident_scored_normal: 0, incident_fp_per_1k: 0 });
   let nIncidentFiles = 0;
+  let nWindowsScored = 0; // unique incident windows that actually fall within a scored file
 
   for (const csv of csvs) {
-    const node = manifest.get(csv + '.bz2') ?? '';
-    const windows = (incidents.get(node) ?? []).map((e) => e.window);
+    const entry = manifest.get(csv + '.bz2');
+    const node = entry?.node ?? '';
+    // H1/H2 fix: this file is named for ONE incident date; attach only the node's
+    // incident(s) on that date, so a window is scored in exactly one file (no
+    // cross-file double-counting, no ghost-incident files).
+    const fileDate = parseFileDate(csv);
+    const windows = fileDate === null ? []
+      : (incidents.get(node) ?? []).filter((e) => e.window[0] === fileDate).map((e) => e.window);
     const isIncidentFile = windows.length > 0;
-    if (isIncidentFile) nIncidentFiles++;
+    if (isIncidentFile) { nIncidentFiles++; nWindowsScored += windows.length; }
     const traces = loadGwdgTraces(path.join(telemetryDir, csv), node, metricSet, windows);
     for (const trace of traces) {
       const metric = trace.dataset_key.split('/')[2];
@@ -75,13 +82,14 @@ export function runGwdgReplay(datasetDir: string): GwdgReport {
   }));
   const wDet = per_metric.reduce((s, m) => s + m.windows_detected, 0);
   const wScored = per_metric.reduce((s, m) => s + m.windows_scored, 0);
-  const iFp = per_metric.reduce((s, m) => s + m.incident_fp_fires, 0);
-  const iNorm = per_metric.reduce((s, m) => s + m.incident_scored_normal, 0);
+  // FP over ALL real normal telemetry: incident files' pre/inter-window regions + non-incident files.
+  const fp = per_metric.reduce((s, m) => s + m.incident_fp_fires + m.good_fp_fires, 0);
+  const norm = per_metric.reduce((s, m) => s + m.incident_scored_normal + m.good_scored_normal, 0);
   return {
     schema_version: 'tessera-gwdg-numeric-v1',
-    provenance: { dataset: 'GWDG-GPU-node-telemetry-zenodo-19052367', alpha: ALPHA, metrics: [...NUMERIC_METRICS], n_files: csvs.length, n_incident_files: nIncidentFiles },
+    provenance: { dataset: 'GWDG-GPU-node-telemetry-zenodo-19052367', alpha: ALPHA, metrics: [...NUMERIC_METRICS], n_files: csvs.length, n_incident_files: nIncidentFiles, n_incident_windows_scored: nWindowsScored },
     per_metric,
-    totals: { detection_rate: wScored > 0 ? round3(wDet / wScored) : 0, windows_detected: wDet, windows_scored: wScored, fp_per_1k_normal: iNorm > 0 ? round3((iFp / iNorm) * 1000) : 0 },
+    totals: { detection_rate: wScored > 0 ? round3(wDet / wScored) : 0, windows_detected: wDet, windows_scored: wScored, fp_per_1k_normal: norm > 0 ? round3((fp / norm) * 1000) : 0 },
   };
 }
 
@@ -93,13 +101,13 @@ function renderMd(r: GwdgReport): string {
   L.push('');
   L.push('> **Scope:** validates the per-shard NUMERIC detector on real GPU faults. The labeled incidents are **detachment-heavy** (minimal numeric precursor), so low numeric detection is EXPECTED and quantifies the blind spot the structural detector (gap B) targets. Does NOT validate topology / common-mode / fleet (independent HPC nodes, no coupled fabric). Labels are day-level (coarse latency).');
   L.push('');
-  L.push(`Files: ${r.provenance.n_files} (${r.provenance.n_incident_files} incident, rest "when-good"). α=${r.provenance.alpha}.`);
+  L.push(`Files: ${r.provenance.n_files} (${r.provenance.n_incident_files} with an in-range incident, rest normal). Unique incident windows scored (filtered to each file's time range): ${r.provenance.n_incident_windows_scored}. α=${r.provenance.alpha}.`);
   L.push('');
   L.push('## Per-metric (numeric)');
   L.push('');
-  L.push('`FP/1k` = false-positive fires per 1000 scored-normal points in the incident files\' **pre-incident regions** (real normal GPU telemetry). `detection` = the 2h post-onset incident windows with ≥1 in-window fire. (The "when-good" files are healthy-GPU-**count** aggregates, not per-GPU DCGM metrics — so they yield no numeric shards; FP is measured from the incident files\' own normal regions instead.)');
+  L.push('Per-metric `FP/1k` = false-positive fires per 1000 scored-normal points in incident files\' **normal (pre/inter-window) regions**; the overall FP also folds in non-incident files\' normal data. `detection` = the 2h post-onset incident windows (filtered to each file\'s time range) with ≥1 in-window fire. (The "when-good" files are healthy-GPU-**count** aggregates, not per-GPU DCGM, so they yield no numeric shards.)');
   L.push('');
-  L.push('| metric | incident shards | FP/1k (pre-incident) | windows det/scored |');
+  L.push('| metric | incident shards | FP/1k (incident-file normal) | windows det/scored |');
   L.push('|---|---|---|---|');
   for (const m of r.per_metric) {
     L.push(`| ${m.metric} | ${m.incident_shards} | ${m.incident_fp_per_1k} | ${m.windows_detected}/${m.windows_scored} |`);
