@@ -115,3 +115,13 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
   alone. Incidents are detachment-heavy (minimal numeric precursor). See ADR 0004; report
   `shadow-results/gwdg-numeric-report.md`. +5 tests; suite 568/0/10; gate green.
   Cold-eye done (SHIP-WITH-FIXES): H1/H2 window-double-count fixed (join each file to its own incident by filename date), M1 test gap closed, M2 unique-window-count added.
+
+## Done (this branch — mit-supercloud-fp-calibration)
+- **Gap #2 validated on REAL GPU fleet telemetry (MIT Supercloud).** New `tools/_mit-supercloud-loader.ts`
+  + `tools/mit-replay.ts` measure FP-at-scale (null dataset; every fire = false alarm) with a STATIC
+  vs ADAPTIVE (trailing-window, regime-aware) baseline. Result (11 per-job files, 36 shard×metric,
+  α=0.01): **static 12.95/1k → adaptive 2.57/1k (~5×)** — regime-aware baselining cuts the over-firing
+  the NAB/GWDG results demanded. CAVEAT: null dataset (no anomalies to mask); the detection tradeoff
+  must be measured on labeled data before upstreaming. `replayFiresAdaptive` is a harness prototype,
+  not engine code. See ADR 0005; report `shadow-results/mit-fp-report.md`. +3 tests; gate green.
+  NOTE: independent cold-eye pending before merge.
