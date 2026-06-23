@@ -180,3 +180,21 @@ fail on real telemetry because the e-value is invalid under estimated baselines 
 e-value is valid only in the ideal (true-baseline + iid) case. Honest claim: strong detection +
 correct-under-assumptions framework; NOT a calibrated guarantee on real data. Next: valid e-value
 redesign.
+
+## Done (this branch — baseline-power-validation)
+- **m≫n refinement of the guarantee failure (ADR 0009, refines 0007/0008).** New
+  `tools/baseline-power.ts` (`pnpm baseline-power`). Plug-in error scales E[e]≈1/√(1−n/m). SYNTHETIC
+  (stationary): m≫n restores validity (n/m≤0.5 → E[e]≤1, P(fire)=0) — so 0007/0008's failure was
+  partly an under-powered-baseline artifact. REAL GWDG structural: a long FLAT baseline does NOT
+  restore it — P(fire) 31–44% across m (even n/m=0.4), because real streams drift WITHIN the window.
+  → Validity needs BOTH (a) m≫n (confirmed) AND (b) a baseline capturing within-window structure
+  (seasonal/2D) — a flat mean fails (b). Build A (exchangeability) SHELVED — the problem is baseline
+  spec + horizon, not the e-value form. Caught + guarded a vacuous-row "✅" bug in review. +2 tests;
+  gate green.
+
+## Next (the real open question)
+- **Does the SEASONAL (2D) baseline restore validity on real telemetry?** Test engine
+  `decomposeSeasonal` on a long window (m≫n) → E[e]≤1 / FP≤α? This validates the operator's model
+  (long seasonal baseline + LSE filtering + drift-triggered re-record/shadow/cutover). Needs a long
+  periodic dataset (MIT Supercloud workload seasonality is the likely substrate; GWDG scrape counts
+  are near-flat-with-drift, weakly seasonal).
