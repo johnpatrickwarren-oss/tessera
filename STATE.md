@@ -38,10 +38,19 @@ e-process under autocorrelated telemetry, and standing up the sprag + Anchor qua
   `calibration-envelope` matrix byte-identical (the validator drives `updateBettingState` with
   phi=0, so the bump is correctly a no-op there).
 
+- **Validator now exercises the engine's production whitening path.** `calibration-envelope`'s
+  whitened mode passes the calibrated `phi` to `updateBettingState`'s `ar1Phi` param (engine whitens
+  internally) instead of a Tessera-side transform — `raw` and `whiten` feed identical inputs and
+  differ only in `phi`. All whitened AR rows control type-I (incl. rho=0.95), partly via the engine's
+  conservative marginal-variance standardization (a low-drift power cost, noted honestly).
+  `per-shard-whitening.ts` is now calibration/reference only (bias-corrected estimator + reference
+  transform). Suite 548/0/10; matrix idempotent; gate green.
+
 ## Next
-- (Future engine ADR) AR(p>1) / near-unit-root (rho=0.95) whitening.
-- Optional: a follow-up to exercise the in-engine betting-path whitening through a stamped
-  `ar1_phi` config (the validator currently demonstrates the fix via its own transform).
+- (Future engine ADR) AR(p>1); innovation-variance standardization (the engine uses marginal sigma
+  on the whitened residual — conservative, costs power at low drift / high rho).
+- (Future engine ADR) adopt the bias-corrected (Kendall) phi estimator in the engine's calibrator;
+  its Yule-Walker omits it (negligible at long baselines, material at short ones / high rho).
 
 ## Open questions / blockers
 - None blocking. Whether to push the whitening fix upstream into the shared engine package (vs

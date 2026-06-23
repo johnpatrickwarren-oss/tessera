@@ -17,21 +17,21 @@ The Ville guarantee is `FPR <= alpha`. A cell is `FAIL (inflated)` only when the
 | student-t df=3 | raw | 0.01 | — | 0.50% | [0.32%, 0.77%] | 0.5× | — | PASS |
 | student-t df=3 | raw | 0.005 | — | 0.38% | [0.23%, 0.62%] | 0.8× | — | PASS |
 | ar1 rho=0.30 | raw | 0.01 | — | 6.65% | [5.92%, 7.46%] | 6.7× | — | FAIL (inflated) |
-| ar1 rho=0.30 | whiten | 0.01 | 0.310 | 0.65% | [0.44%, 0.95%] | 0.7× | 100.00% | PASS |
+| ar1 rho=0.30 | whiten | 0.01 | 0.310 | 0.68% | [0.46%, 0.98%] | 0.7× | 100.00% | PASS |
 | ar1 rho=0.30 | raw | 0.005 | — | 4.72% | [4.11%, 5.43%] | 9.4× | — | FAIL (inflated) |
-| ar1 rho=0.30 | whiten | 0.005 | 0.305 | 0.43% | [0.27%, 0.68%] | 0.8× | 100.00% | PASS |
+| ar1 rho=0.30 | whiten | 0.005 | 0.305 | 0.40% | [0.25%, 0.65%] | 0.8× | 100.00% | PASS |
 | ar1 rho=0.60 | raw | 0.01 | — | 34.17% | [32.72%, 35.66%] | 34.2× | — | FAIL (inflated) |
-| ar1 rho=0.60 | whiten | 0.01 | 0.600 | 0.57% | [0.38%, 0.86%] | 0.6× | 100.00% | PASS |
+| ar1 rho=0.60 | whiten | 0.01 | 0.600 | 0.53% | [0.34%, 0.80%] | 0.5× | 100.00% | PASS |
 | ar1 rho=0.60 | raw | 0.005 | — | 27.22% | [25.87%, 28.63%] | 54.5× | — | FAIL (inflated) |
-| ar1 rho=0.60 | whiten | 0.005 | 0.587 | 0.50% | [0.32%, 0.77%] | 1.0× | 100.00% | PASS |
+| ar1 rho=0.60 | whiten | 0.005 | 0.587 | 0.40% | [0.25%, 0.65%] | 0.8× | 100.00% | PASS |
 | ar1 rho=0.90 | raw | 0.01 | — | 90.97% | [90.05%, 91.82%] | 91.0× | — | FAIL (inflated) |
-| ar1 rho=0.90 | whiten | 0.01 | 0.899 | 0.65% | [0.44%, 0.95%] | 0.7× | 100.00% | PASS |
+| ar1 rho=0.90 | whiten | 0.01 | 0.899 | 0.13% | [0.05%, 0.29%] | 0.1× | 100.00% | PASS |
 | ar1 rho=0.90 | raw | 0.005 | — | 85.92% | [84.81%, 86.97%] | 171.8× | — | FAIL (inflated) |
-| ar1 rho=0.90 | whiten | 0.005 | 0.892 | 0.50% | [0.32%, 0.77%] | 1.0× | 100.00% | PASS |
+| ar1 rho=0.90 | whiten | 0.005 | 0.892 | 0.07% | [0.03%, 0.22%] | 0.1× | 100.00% | PASS |
 | ar1 rho=0.95 | raw | 0.01 | — | 97.45% | [96.91%, 97.89%] | 97.5× | — | FAIL (inflated) |
-| ar1 rho=0.95 | whiten | 0.01 | 0.942 | 1.77% | [1.41%, 2.23%] | 1.8× | 100.00% | FAIL (inflated) |
+| ar1 rho=0.95 | whiten | 0.01 | 0.942 | 0.18% | [0.08%, 0.36%] | 0.2× | 100.00% | PASS |
 | ar1 rho=0.95 | raw | 0.005 | — | 96.00% | [95.35%, 96.56%] | 192.0× | — | FAIL (inflated) |
-| ar1 rho=0.95 | whiten | 0.005 | 0.961 | 0.05% | [0.01%, 0.18%] | 0.1× | 100.00% | PASS |
+| ar1 rho=0.95 | whiten | 0.005 | 0.961 | 0.00% | [0.00%, 0.10%] | 0.0× | 100.00% | PASS |
 | seasonal (period=24) | raw | 0.01 | — | 0.45% | [0.28%, 0.71%] | 0.5× | — | PASS |
 | seasonal (period=24) | raw | 0.005 | — | 0.05% | [0.01%, 0.18%] | 0.1× | — | PASS |
 | variance-regime (0.5/1.5) | raw | 0.01 | — | 0.47% | [0.30%, 0.74%] | 0.5× | — | PASS |
@@ -45,17 +45,19 @@ N=20 shards, K=3 truly drifting, 2000 trials. `PASS` iff empirical-FDR 95% upper
 |---|---|---|---|---|---|
 | gaussian-iid | 0.05 | 0.20% | 0.30% | 100.00% | PASS |
 | ar1 rho=0.9 (raw) | 0.05 | 72.71% | 72.97% | 100.00% | FAIL (FDR > q) |
-| ar1 rho=0.9 (whitened) | 0.05 | 0.30% | 0.42% | 100.00% | PASS |
+| ar1 rho=0.9 (whitened) | 0.05 | 0.39% | 0.52% | 100.00% | PASS |
 | student-t df=3 | 0.05 | 0.10% | 0.17% | 100.00% | PASS |
 | gaussian-iid | 0.1 | 0.31% | 0.43% | 100.00% | PASS |
 | ar1 rho=0.9 (raw) | 0.1 | 73.90% | 74.14% | 100.00% | FAIL (FDR > q) |
-| ar1 rho=0.9 (whitened) | 0.1 | 0.34% | 0.46% | 100.00% | PASS |
+| ar1 rho=0.9 (whitened) | 0.1 | 0.66% | 0.83% | 100.00% | PASS |
 | student-t df=3 | 0.1 | 0.40% | 0.53% | 100.00% | PASS |
 
 ## Method & honest-measurement notes
 
 - **`obs FPR` measures the full sticky-fire false-positive rate** over the whole window (P(sup_t M_t >= 1/alpha)), not a per-tick rate.
-- **The fix is AR(1) pre-whitening only.** The near-unit-root regime (rho=0.95) leaves residual autocorrelation that lag-1 whitening cannot fully remove, so its whitened row may still show mild inflation — reported, not hidden. AR(p>1) / seasonal whitening is future work (see `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`).
+- **The whitened rows exercise the ENGINE's production path** (`@johnpatrickwarren-oss/deploysignal-engine` >= 0.3.3-pre): the calibrated `phi` is passed to `updateBettingState`'s `ar1Phi` parameter and the engine pre-whitens internally (tracking `last_x_centered`) and standardizes against the marginal variance. This is NOT a Tessera-side transform — `raw` and `whiten` feed identical inputs and differ only in whether `phi` is passed.
+- **The fix is AR(1) pre-whitening only.** All whitened AR rows (incl. near-unit-root rho=0.95) control type-I here — but partly *because* the engine standardizes the whitened residual against the MARGINAL variance, not the smaller innovation variance sigma^2*(1-phi^2). That under-scales z and makes the detector conservative (lower FPR), at a power cost the strong-ramp `power` column does not reveal — sensitivity at low drift / high rho degrades. AR(p>1) / innovation-variance standardization are future work (see `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`).
+- **`phi` is computed by the bias-corrected estimator in `tools/per-shard-whitening.ts`** (mirroring a good calibrator). The engine's built-in Yule-Walker calibrator omits the small-sample bias correction — negligible at this `baseline_n` but material at short baselines / high rho; adopting it upstream is a recommended future engine change.
 - **Heavy tails and heteroscedasticity pass unwhitened** — the engine's bounded-z clip absorbs them. The load-bearing failure is temporal autocorrelation.
-- **Power is reported for a strong ramp drift** (0.15/window over 200 windows — a large cumulative shift). 100% here confirms whitening does not "control by never firing"; it does NOT characterize sensitivity near the detection floor — see R77 (`coverage-matrices/R77-detection-envelope.md`) for the low-magnitude regime.
+- **Power is reported for a strong ramp drift** — a per-window ramp `x += 0.15*(w+1)`, so the offset grows to ≈ 30σ by the final window (window=200). 100% here confirms whitening does not "control by never firing"; it does NOT characterize sensitivity near the detection floor — see R77 (`coverage-matrices/R77-detection-envelope.md`) for the low-magnitude regime.
 - Seeds are scramble-hashed per trial (no serially-correlated LCG seeds). Re-running `pnpm calibration-envelope` produces byte-identical output.

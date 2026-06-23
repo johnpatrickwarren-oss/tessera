@@ -10,9 +10,18 @@
 // martingale-difference property under the AR(1) null, so the UNMODIFIED engine
 // (updateBettingState) regains its Ville guarantee.
 //
-// This is a Tessera-side pre-transform only; it does NOT modify the vendored
-// engine package (A12 vendored-at-pin). It feeds the engine through the existing
-// updateBettingState(state, obs, baselineMean=0, sigmaSquared=sigma2, alpha) surface.
+// ROLE (post engine >= 0.3.3-pre): the ENGINE now applies AR(1) pre-whitening
+// internally on the betting path (updateBettingState's ar1Phi parameter consumes
+// a stamped per-signal phi). This module is therefore the CALIBRATION + REFERENCE
+// side, not a runtime transform:
+//   - estimateAr1: a bias-corrected (Kendall) phi estimator. `tools/calibration-
+//     envelope.ts` uses it to produce the `phi` it passes to the engine. The
+//     engine's own Yule-Walker calibrator omits the bias correction; adopting it
+//     upstream is a recommended future engine change.
+//   - whiten: the reference closed form of the transform the engine applies
+//     internally (x_centered - phi*x_{t-1,centered}); kept for documentation and
+//     unit-level parity, not called on the runtime path.
+// It does NOT modify the vendored engine package (A12 vendored-at-pin).
 //
 // Anti-scope: AR(1) only (no AR(p>1) / seasonal). The near-unit-root regime
 // (phi -> 1) leaves residual autocorrelation and is a documented limitation
@@ -24,7 +33,11 @@
 export interface Ar1Fit {
   /** Bias-corrected lag-1 autoregressive coefficient. */
   phi: number;
-  /** Innovation (residual) variance of x_t - phi*x_{t-1} on the baseline. */
+  /** Innovation (residual) variance of x_t - phi*x_{t-1} on the baseline.
+   *  NOTE: do NOT pass this as the engine's `sigmaSquared` argument. The engine
+   *  pre-whitens then standardizes the residual against the MARGINAL variance
+   *  (its established convention); substituting the smaller innovation variance
+   *  would over-scale z. This field is informational (calibration diagnostics). */
   sigma2: number;
 }
 

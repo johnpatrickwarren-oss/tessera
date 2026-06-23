@@ -60,9 +60,11 @@ test('AC-7: classifyFleetSelection splits true/false discoveries at the K bounda
   assert.equal(classifyFleetSelection([], 3).fdp, 0); // empty selection -> 0, no divide-by-zero
 });
 
-// AC-8/AC-9/AC-10: the fix actually works, asserted deterministically at small scale.
-// Raw AR(0.9) must be massively inflated; whitening must restore control and keep power.
-test('AC-8/9/10: whitening restores type-I control on AR(0.9) and preserves power', () => {
+// AC-8/AC-9/AC-10/AC-15: the fix actually works, asserted deterministically at small scale,
+// driving the ENGINE's ar1_phi path (runTypeICell mode 'whiten' passes phi to
+// updateBettingState; the engine whitens internally). Raw AR(0.9) must be massively
+// inflated; whitening must restore control and keep power — same inputs, phi off vs on.
+test('AC-8/9/10/15: engine ar1_phi whitening restores type-I control on AR(0.9) and preserves power', () => {
   const ar = ar1Generator(0.9);
   const small = { window: 120, trials: 600, powTrials: 300 };
   const raw = runTypeICell(ar, 'raw', 0.01, 1234, small);

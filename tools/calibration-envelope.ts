@@ -16,7 +16,7 @@
 
 import { freshBettingState, updateBettingState } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
-import { estimateAr1, whiten, type Ar1Fit } from './per-shard-whitening.js';
+import { estimateAr1, type Ar1Fit } from './per-shard-whitening.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -130,22 +130,22 @@ export const DRIFT = 0.15;               // ramp/window for the whitened-power c
 const SEED_PREFIX = 0xCA11B;             // 'calib'; recorded in JSON
 
 // ── One null stream: returns true if wealth ever crosses 1/alpha (sticky fire) ──
+// The whitened mode exercises the ENGINE's production path: it passes the
+// calibrated phi to updateBettingState's ar1Phi param and lets the engine whiten
+// internally (it tracks last_x_centered). Both modes feed identical raw inputs
+// (x + true marginal mean/variance); the ONLY difference is whether phi is passed.
+// This validates the engine's ar1_phi consumption, not a Tessera-side transform.
 function streamFires(
   gen: Generator, mode: 'raw' | 'whiten', fit: Ar1Fit | null, alpha: number, seed: number, drift: number, window: number,
 ): boolean {
   const step = gen.make(mulberry32(scramble(seed)));
   const state = freshBettingState();
   const threshold = 1 / alpha;
-  let prevX: number | null = null;
+  const ar1Phi = mode === 'whiten' && fit ? fit.phi : 0;
   for (let w = 0; w < window; w++) {
     let x = step(w);
     if (drift) x += drift * (w + 1);
-    const centered = x - gen.trueMean;
-    let obs: number, bvar: number;
-    if (mode === 'whiten' && fit) { obs = whiten(centered, prevX, fit.phi); bvar = fit.sigma2; }
-    else { obs = centered; bvar = gen.trueVar; }
-    prevX = centered;
-    updateBettingState(state, obs, 0, bvar, alpha);
+    updateBettingState(state, x, gen.trueMean, gen.trueVar, alpha, ar1Phi);
     if (state.M >= threshold) return true;
   }
   return false;
@@ -209,16 +209,11 @@ interface FdrCell { regime: string; q: number; empirical_fdr: number; fdr95_uppe
 function shardTerminalEValue(gen: Generator, mode: 'raw' | 'whiten', fit: Ar1Fit | null, isDrift: boolean, seed: number): number {
   const step = gen.make(mulberry32(scramble(seed)));
   const state = freshBettingState();
-  let prevX: number | null = null;
+  const ar1Phi = mode === 'whiten' && fit ? fit.phi : 0;
   for (let w = 0; w < WINDOW; w++) {
     let x = step(w);
     if (isDrift) x += DRIFT * (w + 1);
-    const centered = x - gen.trueMean;
-    let obs: number, bvar: number;
-    if (mode === 'whiten' && fit) { obs = whiten(centered, prevX, fit.phi); bvar = fit.sigma2; }
-    else { obs = centered; bvar = gen.trueVar; }
-    prevX = centered;
-    updateBettingState(state, obs, 0, bvar, 0.005);
+    updateBettingState(state, x, gen.trueMean, gen.trueVar, 0.005, ar1Phi); // engine whitens internally when phi != 0
   }
   return state.M;
 }
@@ -312,9 +307,11 @@ function renderMd(m: CalibrationMatrix): string {
   L.push('## Method & honest-measurement notes');
   L.push('');
   L.push('- **`obs FPR` measures the full sticky-fire false-positive rate** over the whole window (P(sup_t M_t >= 1/alpha)), not a per-tick rate.');
-  L.push('- **The fix is AR(1) pre-whitening only.** The near-unit-root regime (rho=0.95) leaves residual autocorrelation that lag-1 whitening cannot fully remove, so its whitened row may still show mild inflation — reported, not hidden. AR(p>1) / seasonal whitening is future work (see `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`).');
+  L.push('- **The whitened rows exercise the ENGINE\'s production path** (`@johnpatrickwarren-oss/deploysignal-engine` >= 0.3.3-pre): the calibrated `phi` is passed to `updateBettingState`\'s `ar1Phi` parameter and the engine pre-whitens internally (tracking `last_x_centered`) and standardizes against the marginal variance. This is NOT a Tessera-side transform — `raw` and `whiten` feed identical inputs and differ only in whether `phi` is passed.');
+  L.push('- **The fix is AR(1) pre-whitening only.** All whitened AR rows (incl. near-unit-root rho=0.95) control type-I here — but partly *because* the engine standardizes the whitened residual against the MARGINAL variance, not the smaller innovation variance sigma^2*(1-phi^2). That under-scales z and makes the detector conservative (lower FPR), at a power cost the strong-ramp `power` column does not reveal — sensitivity at low drift / high rho degrades. AR(p>1) / innovation-variance standardization are future work (see `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`).');
+  L.push('- **`phi` is computed by the bias-corrected estimator in `tools/per-shard-whitening.ts`** (mirroring a good calibrator). The engine\'s built-in Yule-Walker calibrator omits the small-sample bias correction — negligible at this `baseline_n` but material at short baselines / high rho; adopting it upstream is a recommended future engine change.');
   L.push('- **Heavy tails and heteroscedasticity pass unwhitened** — the engine\'s bounded-z clip absorbs them. The load-bearing failure is temporal autocorrelation.');
-  L.push(`- **Power is reported for a strong ramp drift** (${m.params.drift}/window over ${m.params.window} windows — a large cumulative shift). 100% here confirms whitening does not "control by never firing"; it does NOT characterize sensitivity near the detection floor — see R77 (\`coverage-matrices/R77-detection-envelope.md\`) for the low-magnitude regime.`);
+  L.push(`- **Power is reported for a strong ramp drift** — a per-window ramp \`x += ${m.params.drift}*(w+1)\`, so the offset grows to ≈ ${m.params.drift * m.params.window}σ by the final window (window=${m.params.window}). 100% here confirms whitening does not "control by never firing"; it does NOT characterize sensitivity near the detection floor — see R77 (\`coverage-matrices/R77-detection-envelope.md\`) for the low-magnitude regime.`);
   L.push('- Seeds are scramble-hashed per trial (no serially-correlated LCG seeds). Re-running `pnpm calibration-envelope` produces byte-identical output.');
   L.push('');
   return L.join('\n');
