@@ -19,7 +19,9 @@
     "n_stable": 16,
     "stable_streams_fired": 16,
     "stable_per_stream_fp": 1,
-    "stable_honors_guarantee": false
+    "stable_honors_guarantee": false,
+    "n_unique_stable_sources": 7,
+    "unique_stable_sources_fired": 7
   },
   "fd": [
     {

@@ -18,9 +18,10 @@ characterizes detection power against injected collapse.
   collapse beyond the noise floor (≈75% of full collapses within a 24-scrape window; latency a few
   scrapes). The detector *works*.
 - **The FP guarantee: NOT honored on real data — and the reason is fundamental.** Even on the most
-  stable, highest-count real scrape targets, realized per-stream FP was **100%** (vs α=1%).
-  Inspection shows it fires on *persistent sub-percent level shifts* (a target settling from 5620 to
-  5627 samples as series are added) — not on collapses. An anytime-valid e-process accumulates wealth
+  stable, highest-count real scrape targets, **all 7 unique stable physical sources fired** (per-trace
+  100% across 16 correlated windows; vs α=1%).
+  Inspection shows it fires on *persistent sub-percent level shifts* (a target settling from 5596 to
+  5627 samples, +0.55%, as series are added) — not on collapses. An anytime-valid e-process accumulates wealth
   on *any* persistent deviation, so on a signal that is never exactly stationary over days (every
   real scrape count), P(fire) → 1, not ≤ α. Raising the variance floor only defers it.
 

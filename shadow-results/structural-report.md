@@ -4,7 +4,7 @@ A betting e-process (Ville: P(ever fire | healthy) ≤ α=0.01) on the structura
 
 ## A. False-alarm rate on REAL healthy structural telemetry (the guarantee)
 
-55 real per-(node,instance) healthy streams. Every fire is a false alarm (no labeled collapse in GWDG).
+55 real per-(node,job,instance) healthy traces. The same physical source recurs across per-incident files, so the stable set is **7 unique physical sources** (each appears in 2–6 files; the per-trace counts below are correlated windows of these). Every fire is a false alarm (no labeled collapse in GWDG).
 
 Detector: betting e-process on the RELATIVE level (value / healthy median), variance floored at 0.05 (benign scrape wiggle). "Stable" = healthy median ≥ 200 samples (where the Gaussian-relative null is valid; low-count integer targets are inherently noisy and need a Poisson e-process — out of scope).
 
@@ -13,11 +13,11 @@ Detector: betting e-process on the RELATIVE level (value / healthy median), vari
 | **stable (median ≥ 200)** | 16 | 16 | 100.0% | 1.0% | ❌ NO |
 | all targets | 55 | 36 | 65.5% | 1.0% | ❌ NO |
 
-**The guarantee is VIOLATED even on the most stable, highest-count targets:** realized FP 100.0% ≫ α=1.0%. Inspection shows *why*: the e-process fires on sub-percent PERSISTENT level shifts (e.g. a target settling from 5620 to 5627 samples as series are added) — not on collapses. This is fundamental to anytime-valid methods: they accumulate wealth on *any* persistent deviation, so on a non-stationary signal (which every real scrape count is, over days) P(fire) → 1, not ≤ α. Raising the floor only defers it. The α bound is mathematically correct but conditional on exact stationarity that real telemetry does not satisfy.
+**The guarantee is VIOLATED even on the most stable, highest-count targets:** 7/7 unique stable sources fired (per-trace 100.0% ≫ α=1.0%). Inspection shows *why*: the e-process fires on sub-percent PERSISTENT level shifts (e.g. a target settling from 5596 to 5627 samples, +0.55%, as series are added) — not on collapses. This is fundamental to anytime-valid methods: they accumulate wealth on *any persistent* deviation, so on a signal with persistent level drift (which every real scrape count has over days) P(fire) → 1, not ≤ α. Widening the floor only defers it (it widens the per-tick null band; it cannot absorb a persistent bias). The α bound is mathematically correct but conditional on exact stationarity that real telemetry does not satisfy.
 
 ## B. Detection power vs INJECTED collapse (severity × duration)
 
-Power on a CLEAN synthetic baseline (level 1000 + 1% relative noise, 40 trials) — real streams over-fire (above), which would confound power. A collapse scales the count by severity for N scrapes; `detection` = fired within the collapse + 10 scrapes. NOTE: the relative bet saturates (bounded-z) once the drop exceeds the 5% floor, so severities ×0–×0.75 behave identically — only DURATION drives latency; ×0.9 (a 10% dip) is the near-floor case.
+Power on a CLEAN synthetic baseline (level 1000 + 1% relative noise, 40 trials) — real streams over-fire (above), which would confound power. A collapse scales the count by severity for N scrapes; `detection` = fired within the collapse + 10 scrapes. NOTE: the bet uses bounded-z (clip at B·σ with B=3, σ=0.05), so a drop **saturates at ≈15%** (3×floor); severities ×0–×0.75 (drops ≥25%) all saturate and behave identically — only DURATION drives latency; ×0.9 (a 10% dip, below saturation) is the near-floor case. A median latency of 0 in a cell reflects a trial where baseline-noise wealth was already positioned at threshold when the collapse hit.
 
 Detection rate (median latency in scrapes):
 

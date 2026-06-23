@@ -62,7 +62,7 @@ export function detectStructuralCollapse(values: ReadonlyArray<number>, probEnd:
 
 function round3(x: number): number { return Math.round(x * 1000) / 1000; }
 
-export interface FpResult { metric: string; n_streams: number; streams_fired: number; per_stream_fp: number; total_fires: number; scored_points: number; fp_per_1k: number; alpha: number; honors_guarantee: boolean; n_stable: number; stable_streams_fired: number; stable_per_stream_fp: number; stable_honors_guarantee: boolean; }
+export interface FpResult { metric: string; n_streams: number; streams_fired: number; per_stream_fp: number; total_fires: number; scored_points: number; fp_per_1k: number; alpha: number; honors_guarantee: boolean; n_stable: number; stable_streams_fired: number; stable_per_stream_fp: number; stable_honors_guarantee: boolean; n_unique_stable_sources: number; unique_stable_sources_fired: number; }
 export interface FdCell { severity: number; duration: number; detected: number; n: number; detection_rate: number; median_latency: number; }
 
 export interface StructuralReport {
@@ -74,8 +74,12 @@ export interface StructuralReport {
 
 /** A. FP on real healthy telemetry (every fire is a false alarm — no labeled collapse).
  *  Broken out for STABLE high-count targets (Gaussian-relative null valid) vs all targets. */
-function computeFp(streams: ReadonlyArray<{ values: number[] }>, metric: string): FpResult {
+function computeFp(streams: ReadonlyArray<{ values: number[]; dataset_key: string }>, metric: string): FpResult {
   let streamsFired = 0, totalFires = 0, scored = 0, nStable = 0, stableFired = 0;
+  // The same physical source (node,job,instance = the dataset_key) recurs across per-incident
+  // files; track unique stable SOURCES (each may appear in several files) so the headline isn't
+  // inflated by correlated windows of the same source.
+  const stableSourceFired = new Map<string, boolean>();
   for (const t of streams) {
     const probEnd = probationaryEnd(t.values.length);
     const isStable = median(t.values.slice(0, probEnd)) >= STABLE_MIN;
@@ -83,7 +87,10 @@ function computeFp(streams: ReadonlyArray<{ values: number[] }>, metric: string)
     if (nFires > 0) streamsFired++;
     totalFires += nFires;
     scored += t.values.length - probEnd;
-    if (isStable) { nStable++; if (nFires > 0) stableFired++; }
+    if (isStable) {
+      nStable++; if (nFires > 0) stableFired++;
+      stableSourceFired.set(t.dataset_key, (stableSourceFired.get(t.dataset_key) || false) || nFires > 0);
+    }
   }
   const perStreamFp = streams.length > 0 ? round3(streamsFired / streams.length) : 0;
   const stableFp = nStable > 0 ? round3(stableFired / nStable) : 0;
@@ -92,6 +99,7 @@ function computeFp(streams: ReadonlyArray<{ values: number[] }>, metric: string)
     total_fires: totalFires, scored_points: scored, fp_per_1k: scored > 0 ? round3((totalFires / scored) * 1000) : 0,
     alpha: ALPHA, honors_guarantee: perStreamFp <= ALPHA,
     n_stable: nStable, stable_streams_fired: stableFired, stable_per_stream_fp: stableFp, stable_honors_guarantee: stableFp <= ALPHA,
+    n_unique_stable_sources: stableSourceFired.size, unique_stable_sources_fired: [...stableSourceFired.values()].filter(Boolean).length,
   };
 }
 
@@ -128,7 +136,7 @@ function renderMd(r: StructuralReport): string {
   L.push('');
   L.push('## A. False-alarm rate on REAL healthy structural telemetry (the guarantee)');
   L.push('');
-  L.push(`${r.fp.n_streams} real per-(node,instance) healthy streams. Every fire is a false alarm (no labeled collapse in GWDG).`);
+  L.push(`${r.fp.n_streams} real per-(node,job,instance) healthy traces. The same physical source recurs across per-incident files, so the stable set is **${r.fp.n_unique_stable_sources} unique physical sources** (each appears in 2–6 files; the per-trace counts below are correlated windows of these). Every fire is a false alarm (no labeled collapse in GWDG).`);
   L.push('');
   L.push(`Detector: betting e-process on the RELATIVE level (value / healthy median), variance floored at ${REL_FLOOR} (benign scrape wiggle). "Stable" = healthy median ≥ ${STABLE_MIN} samples (where the Gaussian-relative null is valid; low-count integer targets are inherently noisy and need a Poisson e-process — out of scope).`);
   L.push('');
@@ -139,11 +147,11 @@ function renderMd(r: StructuralReport): string {
   L.push('');
   L.push(r.fp.stable_honors_guarantee
     ? `**The guarantee holds on real data for stable scrape targets:** realized per-stream false-alarm rate ${pct(r.fp.stable_per_stream_fp)} ≤ α=${pct(r.fp.alpha)} across ${r.fp.n_stable} real healthy high-count streams.`
-    : `**The guarantee is VIOLATED even on the most stable, highest-count targets:** realized FP ${pct(r.fp.stable_per_stream_fp)} ≫ α=${pct(r.fp.alpha)}. Inspection shows *why*: the e-process fires on sub-percent PERSISTENT level shifts (e.g. a target settling from 5620 to 5627 samples as series are added) — not on collapses. This is fundamental to anytime-valid methods: they accumulate wealth on *any* persistent deviation, so on a non-stationary signal (which every real scrape count is, over days) P(fire) → 1, not ≤ α. Raising the floor only defers it. The α bound is mathematically correct but conditional on exact stationarity that real telemetry does not satisfy.`);
+    : `**The guarantee is VIOLATED even on the most stable, highest-count targets:** ${r.fp.unique_stable_sources_fired}/${r.fp.n_unique_stable_sources} unique stable sources fired (per-trace ${pct(r.fp.stable_per_stream_fp)} ≫ α=${pct(r.fp.alpha)}). Inspection shows *why*: the e-process fires on sub-percent PERSISTENT level shifts (e.g. a target settling from 5596 to 5627 samples, +0.55%, as series are added) — not on collapses. This is fundamental to anytime-valid methods: they accumulate wealth on *any persistent* deviation, so on a signal with persistent level drift (which every real scrape count has over days) P(fire) → 1, not ≤ α. Widening the floor only defers it (it widens the per-tick null band; it cannot absorb a persistent bias). The α bound is mathematically correct but conditional on exact stationarity that real telemetry does not satisfy.`);
   L.push('');
   L.push('## B. Detection power vs INJECTED collapse (severity × duration)');
   L.push('');
-  L.push(`Power on a CLEAN synthetic baseline (level ${FD_LEVEL} + ${FD_NOISE * 100}% relative noise, ${FD_TRIALS} trials) — real streams over-fire (above), which would confound power. A collapse scales the count by severity for N scrapes; \`detection\` = fired within the collapse + ${GRACE} scrapes. NOTE: the relative bet saturates (bounded-z) once the drop exceeds the ${REL_FLOOR * 100}% floor, so severities ×0–×0.75 behave identically — only DURATION drives latency; ×0.9 (a 10% dip) is the near-floor case.`);
+  L.push(`Power on a CLEAN synthetic baseline (level ${FD_LEVEL} + ${FD_NOISE * 100}% relative noise, ${FD_TRIALS} trials) — real streams over-fire (above), which would confound power. A collapse scales the count by severity for N scrapes; \`detection\` = fired within the collapse + ${GRACE} scrapes. NOTE: the bet uses bounded-z (clip at B·σ with B=3, σ=${REL_FLOOR}), so a drop **saturates at ≈${(3 * REL_FLOOR * 100).toFixed(0)}%** (3×floor); severities ×0–×0.75 (drops ≥25%) all saturate and behave identically — only DURATION drives latency; ×0.9 (a 10% dip, below saturation) is the near-floor case. A median latency of 0 in a cell reflects a trial where baseline-noise wealth was already positioned at threshold when the collapse hit.`);
   L.push('');
   const sevs = [...new Set(r.fd.map((c) => c.severity))];
   const durs = [...new Set(r.fd.map((c) => c.duration))];

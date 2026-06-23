@@ -16,7 +16,7 @@ const COL = { ts: 0, node: 1, metric: 2, value: 3, job: 7, instance: 8 } as cons
  *  drops when an exporter/GPU stops reporting. */
 export const STRUCTURAL_METRIC = 'scrape_samples_scraped';
 
-/** Extract per-(node,instance) time series for one structural metric, sorted by time.
+/** Extract per-(node,job,instance) time series for one structural metric, sorted by time.
  *  Each stream is a healthy NULL (windows empty) — there is no labeled collapse in GWDG. */
 export function loadStructuralStreams(csvPath: string, metric: string = STRUCTURAL_METRIC): NabTrace[] {
   const text = fs.readFileSync(csvPath, 'utf8');

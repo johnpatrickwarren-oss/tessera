@@ -23,6 +23,12 @@ test('FP guarantee: benign integer steps in a high count do NOT false-fire (rela
   assert.equal(detectStructuralCollapse(v, probEnd, 0.01).length, 0, 'benign 1% steps must not fire');
 });
 
+test('FP guarantee: a perfectly constant series (zero probationary variance) does not fire', () => {
+  const v = new Array(1500).fill(2000); // var=0 -> floor must apply, benign
+  const probEnd = probationaryEnd(v.length);
+  assert.equal(detectStructuralCollapse(v, probEnd, 0.01).length, 0, 'constant series must not fire (floor applied)');
+});
+
 test('FD: an injected sustained collapse IS detected, with bounded latency', () => {
   const v: number[] = [];
   for (let i = 0; i < 1500; i++) v.push(2000 + (i % 7 === 0 ? 20 : 0));
