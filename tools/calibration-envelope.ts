@@ -117,7 +117,7 @@ function genVarianceRegime(sLo: number, sHi: number, blockLen: number): Generato
 
 const GENERATORS: Generator[] = [
   genGaussian(), genStudentT(5), genStudentT(3),
-  genAr1(0.3), genAr1(0.6), genAr1(0.9), genAr1(0.95),
+  genAr1(0.3), genAr1(0.6), genAr1(0.9), genAr1(0.95), genAr1(0.99),
   genSeasonal(1.0, 24, 1.0), genVarianceRegime(0.5, 1.5, 10),
 ];
 
@@ -314,7 +314,7 @@ function renderMd(m: CalibrationMatrix): string {
   L.push('');
   L.push('- **`obs FPR` measures the full sticky-fire false-positive rate** over the whole window (P(sup_t M_t >= 1/alpha)), not a per-tick rate.');
   L.push('- **The whitened rows exercise the ENGINE\'s production path** (`@johnpatrickwarren-oss/deploysignal-engine` >= 0.3.3-pre): the calibrated `phi` is passed to `updateBettingState`\'s `ar1Phi` parameter and the engine pre-whitens internally (tracking `last_x_centered`). The variance passed is the **innovation variance** sigma^2*(1-phi^2) — exactly what `fit-production-substrate` stamps as `baseline_sigma_squared` whenever `ar1_phi` is set — so the whitened residual is standardized at unit scale (properly calibrated, not conservative). This is NOT a Tessera-side transform — `raw` and `whiten` feed identical inputs and differ only in whether `phi` (and the matching innovation variance) is passed.');
-  L.push('- **The fix is AR(1) pre-whitening only.** Whitening restores type-I control (FPR ~ alpha) for rho <= 0.9. The near-unit-root regime rho=0.95 retains a genuine **~1.8x residual inflation** — lag-1 whitening with a finite-sample phi estimate cannot fully decorrelate a near-unit-root process; reported, not hidden. AR(p>1) / near-unit-root handling is future work (see `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`).');
+  L.push('- **Whitening restores type-I control (FPR ~ alpha) for rho <= 0.9.** Near-unit-root is a hard boundary: the phi estimate is clipped to [-0.95, 0.95] (matching the engine; the clip guards against innovation-variance → 0 instability), so a rho=0.99 signal is whitened with phi=0.95 and stays grossly inflated (**~43% FPR** here). rho=0.95 is borderline (clip + estimation noise → ~1.8x at alpha=0.01). This is NOT fixable by AR(p>1) — a true near-unit-root AR(1) has no higher-order structure. It is a stationarity-premise violation: such signals should route to the self-normalized e-process fallback, not be trusted to whiten. See engine ADR 0003 (`deploysignal-engine/decisions/0003-near-unit-root-handling.md`) and `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`.');
   L.push('- **`phi` is computed by the bias-corrected estimator in `tools/per-shard-whitening.ts`** (mirroring a good calibrator). The engine\'s built-in Yule-Walker calibrator omits the small-sample bias correction — negligible at this `baseline_n` but material at short baselines / high rho; adopting it upstream is a recommended future engine change.');
   L.push('- **Heavy tails and heteroscedasticity pass unwhitened** — the engine\'s bounded-z clip absorbs them. The load-bearing failure is temporal autocorrelation.');
   L.push(`- **Power is reported for a strong ramp drift** — a per-window ramp \`x += ${m.params.drift}*(w+1)\`, so the offset grows to ≈ ${m.params.drift * m.params.window}σ by the final window (window=${m.params.window}). 100% here confirms whitening does not "control by never firing"; it does NOT characterize sensitivity near the detection floor — see R77 (\`coverage-matrices/R77-detection-envelope.md\`) for the low-magnitude regime.`);

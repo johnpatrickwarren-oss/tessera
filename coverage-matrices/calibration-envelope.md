@@ -31,11 +31,15 @@ The Ville guarantee is `FPR <= alpha`. A cell is `FAIL (inflated)` only when the
 | ar1 rho=0.95 | raw | 0.01 | — | 97.45% | [96.91%, 97.89%] | 97.5× | — | FAIL (inflated) |
 | ar1 rho=0.95 | whiten | 0.01 | 0.942 | 1.82% | [1.45%, 2.29%] | 1.8× | 100.00% | FAIL (inflated) |
 | ar1 rho=0.95 | raw | 0.005 | — | 96.00% | [95.35%, 96.56%] | 192.0× | — | FAIL (inflated) |
-| ar1 rho=0.95 | whiten | 0.005 | 0.961 | 0.07% | [0.03%, 0.22%] | 0.1× | 100.00% | PASS |
-| seasonal (period=24) | raw | 0.01 | — | 0.45% | [0.28%, 0.71%] | 0.5× | — | PASS |
-| seasonal (period=24) | raw | 0.005 | — | 0.05% | [0.01%, 0.18%] | 0.1× | — | PASS |
-| variance-regime (0.5/1.5) | raw | 0.01 | — | 0.47% | [0.30%, 0.74%] | 0.5× | — | PASS |
-| variance-regime (0.5/1.5) | raw | 0.005 | — | 0.13% | [0.05%, 0.29%] | 0.3× | — | PASS |
+| ar1 rho=0.95 | whiten | 0.005 | 0.950 | 0.13% | [0.05%, 0.29%] | 0.3× | 100.00% | PASS |
+| ar1 rho=0.99 | raw | 0.01 | — | 99.25% | [98.93%, 99.47%] | 99.3× | — | FAIL (inflated) |
+| ar1 rho=0.99 | whiten | 0.01 | 0.950 | 43.38% | [41.85%, 44.92%] | 43.4× | 100.00% | FAIL (inflated) |
+| ar1 rho=0.99 | raw | 0.005 | — | 98.20% | [97.74%, 98.57%] | 196.4× | — | FAIL (inflated) |
+| ar1 rho=0.99 | whiten | 0.005 | 0.950 | 37.97% | [36.48%, 39.49%] | 76.0× | 100.00% | FAIL (inflated) |
+| seasonal (period=24) | raw | 0.01 | — | 0.40% | [0.25%, 0.65%] | 0.4× | — | PASS |
+| seasonal (period=24) | raw | 0.005 | — | 0.25% | [0.14%, 0.46%] | 0.5× | — | PASS |
+| variance-regime (0.5/1.5) | raw | 0.01 | — | 0.70% | [0.48%, 1.01%] | 0.7× | — | PASS |
+| variance-regime (0.5/1.5) | raw | 0.005 | — | 0.25% | [0.14%, 0.46%] | 0.5× | — | PASS |
 
 ## Fleet e-BH FDR
 
@@ -43,20 +47,20 @@ N=20 shards, K=3 truly drifting, 2000 trials. `PASS` iff empirical-FDR 95% upper
 
 | regime | q | empirical FDR | FDR95 upper | power | verdict |
 |---|---|---|---|---|---|
-| gaussian-iid | 0.05 | 0.20% | 0.30% | 100.00% | PASS |
-| ar1 rho=0.9 (raw) | 0.05 | 72.71% | 72.97% | 100.00% | FAIL (FDR > q) |
-| ar1 rho=0.9 (whitened) | 0.05 | 0.30% | 0.42% | 100.00% | PASS |
-| student-t df=3 | 0.05 | 0.10% | 0.17% | 100.00% | PASS |
-| gaussian-iid | 0.1 | 0.31% | 0.43% | 100.00% | PASS |
-| ar1 rho=0.9 (raw) | 0.1 | 73.90% | 74.14% | 100.00% | FAIL (FDR > q) |
-| ar1 rho=0.9 (whitened) | 0.1 | 0.35% | 0.48% | 100.00% | PASS |
-| student-t df=3 | 0.1 | 0.40% | 0.53% | 100.00% | PASS |
+| gaussian-iid | 0.05 | 0.15% | 0.23% | 100.00% | PASS |
+| ar1 rho=0.9 (raw) | 0.05 | 72.38% | 72.65% | 100.00% | FAIL (FDR > q) |
+| ar1 rho=0.9 (whitened) | 0.05 | 0.19% | 0.28% | 100.00% | PASS |
+| student-t df=3 | 0.05 | 0.23% | 0.34% | 100.00% | PASS |
+| gaussian-iid | 0.1 | 0.35% | 0.48% | 100.00% | PASS |
+| ar1 rho=0.9 (raw) | 0.1 | 74.08% | 74.32% | 100.00% | FAIL (FDR > q) |
+| ar1 rho=0.9 (whitened) | 0.1 | 1.42% | 1.68% | 100.00% | PASS |
+| student-t df=3 | 0.1 | 0.29% | 0.40% | 100.00% | PASS |
 
 ## Method & honest-measurement notes
 
 - **`obs FPR` measures the full sticky-fire false-positive rate** over the whole window (P(sup_t M_t >= 1/alpha)), not a per-tick rate.
 - **The whitened rows exercise the ENGINE's production path** (`@johnpatrickwarren-oss/deploysignal-engine` >= 0.3.3-pre): the calibrated `phi` is passed to `updateBettingState`'s `ar1Phi` parameter and the engine pre-whitens internally (tracking `last_x_centered`). The variance passed is the **innovation variance** sigma^2*(1-phi^2) — exactly what `fit-production-substrate` stamps as `baseline_sigma_squared` whenever `ar1_phi` is set — so the whitened residual is standardized at unit scale (properly calibrated, not conservative). This is NOT a Tessera-side transform — `raw` and `whiten` feed identical inputs and differ only in whether `phi` (and the matching innovation variance) is passed.
-- **The fix is AR(1) pre-whitening only.** Whitening restores type-I control (FPR ~ alpha) for rho <= 0.9. The near-unit-root regime rho=0.95 retains a genuine **~1.8x residual inflation** — lag-1 whitening with a finite-sample phi estimate cannot fully decorrelate a near-unit-root process; reported, not hidden. AR(p>1) / near-unit-root handling is future work (see `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`).
+- **Whitening restores type-I control (FPR ~ alpha) for rho <= 0.9.** Near-unit-root is a hard boundary: the phi estimate is clipped to [-0.95, 0.95] (matching the engine; the clip guards against innovation-variance → 0 instability), so a rho=0.99 signal is whitened with phi=0.95 and stays grossly inflated (**~43% FPR** here). rho=0.95 is borderline (clip + estimation noise → ~1.8x at alpha=0.01). This is NOT fixable by AR(p>1) — a true near-unit-root AR(1) has no higher-order structure. It is a stationarity-premise violation: such signals should route to the self-normalized e-process fallback, not be trusted to whiten. See engine ADR 0003 (`deploysignal-engine/decisions/0003-near-unit-root-handling.md`) and `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`.
 - **`phi` is computed by the bias-corrected estimator in `tools/per-shard-whitening.ts`** (mirroring a good calibrator). The engine's built-in Yule-Walker calibrator omits the small-sample bias correction — negligible at this `baseline_n` but material at short baselines / high rho; adopting it upstream is a recommended future engine change.
 - **Heavy tails and heteroscedasticity pass unwhitened** — the engine's bounded-z clip absorbs them. The load-bearing failure is temporal autocorrelation.
 - **Power is reported for a strong ramp drift** — a per-window ramp `x += 0.15*(w+1)`, so the offset grows to ≈ 30σ by the final window (window=200). 100% here confirms whitening does not "control by never firing"; it does NOT characterize sensitivity near the detection floor — see R77 (`coverage-matrices/R77-detection-envelope.md`) for the low-magnitude regime.
