@@ -74,10 +74,16 @@ export function estimateAr1(samples: ReadonlyArray<number>): Ar1Fit {
   const phiOls = num / den;
   // Kendall median-unbiased AR(1) small-sample correction.
   let phi = phiOls + (1 + 3 * phiOls) / n;
-  // Clamp to the stationary region; a phi at/above 1 is non-stationary and the
-  // residual would no longer be a valid whitening target.
-  if (phi >= 1) phi = 0.999;
-  if (phi <= -1) phi = -0.999;
+  // Clip to [-0.95, 0.95] — IDENTICAL to the engine's ar1Phi /
+  // computePerSignalAr1Phi clip, so this validator's stamped phi mirrors what
+  // production would whiten with. The ceiling caps near-unit-root signals
+  // (rho > 0.95), which the matrix exposes as a genuine cliff (e.g. rho=0.99 ->
+  // severe under-whitening); near-unit-root handling is a stationarity-premise
+  // concern routed to the self-normalized fallback (engine ADR 0003), not a
+  // clip the validator should loosen.
+  const CLIP = 0.95;
+  if (phi > CLIP) phi = CLIP;
+  if (phi < -CLIP) phi = -CLIP;
 
   // Innovation variance of the whitened baseline.
   let rss = 0;

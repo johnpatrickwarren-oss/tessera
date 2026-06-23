@@ -70,10 +70,18 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
   its own bias-corrected estimator, so the engine calibrator change is a no-op for it; this just
   keeps Tessera on current engine). Both queued follow-ups now closed.
 
+- **Near-unit-root investigated + ADR'd.** Diagnosis overturned the "AR(p) / ~1.8x" framing: at the
+  TRUE phi even rho=0.99 is controlled, so it is NOT a model-order problem. The failure is the phi
+  CLIP ceiling (0.95) — a rho=0.99 signal is whitened with phi=0.95 and stays ~43% inflated. AR(p)
+  would not help (no higher-order structure); loosening the clip is unsafe (innovation variance ->
+  0). Aligned the validator's estimator clip to the engine's 0.95 and added rho=0.99 to the matrix
+  so the cliff is visible. Recommended fix = route near-unit-root to the self-normalized fallback —
+  engine ADR 0003 (Proposed), pending sign-off (behavior change on the betting path).
+
 ## Next
-- (Future engine ADR) AR(p>1) / near-unit-root (rho=0.95) handling — the ~1.8x residual the lag-1
-  fix can't remove. Innovation-variance standardization needs no engine change (already stamped in
-  production).
+- **DECISION NEEDED:** implement engine ADR 0003 (betting path respects the near-unit-root /
+  self-normalized-fallback threshold the mixture path already uses)? Behavior change for high-phi
+  signals; needs operator sign-off + threshold confirmation.
 
 ## Open questions / blockers
 - None blocking. Whether to push the whitening fix upstream into the shared engine package (vs

@@ -277,59 +277,107 @@
       "generator": "ar1 rho=0.95",
       "mode": "whiten",
       "alpha": 0.005,
-      "phi": 0.960679,
-      "observed_fpr": 0.00075,
-      "wilson95_lower": 0.000255,
-      "wilson95_upper": 0.002203,
-      "inflation": 0.15,
-      "power": 1,
-      "verdict": "PASS"
-    },
-    {
-      "generator": "seasonal (period=24)",
-      "mode": "raw",
-      "alpha": 0.01,
-      "phi": null,
-      "observed_fpr": 0.0045,
-      "wilson95_lower": 0.002848,
-      "wilson95_upper": 0.007102,
-      "inflation": 0.45,
-      "power": null,
-      "verdict": "PASS"
-    },
-    {
-      "generator": "seasonal (period=24)",
-      "mode": "raw",
-      "alpha": 0.005,
-      "phi": null,
-      "observed_fpr": 0.0005,
-      "wilson95_lower": 0.000137,
-      "wilson95_upper": 0.001821,
-      "inflation": 0.1,
-      "power": null,
-      "verdict": "PASS"
-    },
-    {
-      "generator": "variance-regime (0.5/1.5)",
-      "mode": "raw",
-      "alpha": 0.01,
-      "phi": null,
-      "observed_fpr": 0.00475,
-      "wilson95_lower": 0.003043,
-      "wilson95_upper": 0.007407,
-      "inflation": 0.475,
-      "power": null,
-      "verdict": "PASS"
-    },
-    {
-      "generator": "variance-regime (0.5/1.5)",
-      "mode": "raw",
-      "alpha": 0.005,
-      "phi": null,
+      "phi": 0.95,
       "observed_fpr": 0.00125,
       "wilson95_lower": 0.000534,
       "wilson95_upper": 0.002923,
       "inflation": 0.25,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "ar1 rho=0.99",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.9925,
+      "wilson95_lower": 0.989314,
+      "wilson95_upper": 0.994741,
+      "inflation": 99.25,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.99",
+      "mode": "whiten",
+      "alpha": 0.01,
+      "phi": 0.95,
+      "observed_fpr": 0.43375,
+      "wilson95_lower": 0.418462,
+      "wilson95_upper": 0.449165,
+      "inflation": 43.375,
+      "power": 1,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.99",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.982,
+      "wilson95_lower": 0.977393,
+      "wilson95_upper": 0.985682,
+      "inflation": 196.4,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.99",
+      "mode": "whiten",
+      "alpha": 0.005,
+      "phi": 0.95,
+      "observed_fpr": 0.37975,
+      "wilson95_lower": 0.364832,
+      "wilson95_upper": 0.394899,
+      "inflation": 75.95,
+      "power": 1,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "seasonal (period=24)",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.004,
+      "wilson95_lower": 0.002464,
+      "wilson95_upper": 0.006488,
+      "inflation": 0.4,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "seasonal (period=24)",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.0025,
+      "wilson95_lower": 0.001359,
+      "wilson95_upper": 0.004596,
+      "inflation": 0.5,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "variance-regime (0.5/1.5)",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.007,
+      "wilson95_lower": 0.004848,
+      "wilson95_upper": 0.010098,
+      "inflation": 0.7,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "variance-regime (0.5/1.5)",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.0025,
+      "wilson95_lower": 0.001359,
+      "wilson95_upper": 0.004596,
+      "inflation": 0.5,
       "power": null,
       "verdict": "PASS"
     }
@@ -338,53 +386,37 @@
     {
       "regime": "gaussian-iid",
       "q": 0.05,
-      "empirical_fdr": 0.002,
-      "fdr95_upper": 0.002976,
+      "empirical_fdr": 0.0015,
+      "fdr95_upper": 0.002346,
       "power": 1,
       "verdict": "PASS"
     },
     {
       "regime": "ar1 rho=0.9 (raw)",
       "q": 0.05,
-      "empirical_fdr": 0.727074,
-      "fdr95_upper": 0.729682,
+      "empirical_fdr": 0.723766,
+      "fdr95_upper": 0.726517,
       "power": 1,
       "verdict": "FAIL (FDR > q)"
     },
     {
       "regime": "ar1 rho=0.9 (whitened)",
       "q": 0.05,
-      "empirical_fdr": 0.003,
-      "fdr95_upper": 0.004193,
+      "empirical_fdr": 0.001875,
+      "fdr95_upper": 0.00282,
       "power": 1,
       "verdict": "PASS"
     },
     {
       "regime": "student-t df=3",
       "q": 0.05,
-      "empirical_fdr": 0.001,
-      "fdr95_upper": 0.001692,
+      "empirical_fdr": 0.002325,
+      "fdr95_upper": 0.003404,
       "power": 1,
       "verdict": "PASS"
     },
     {
       "regime": "gaussian-iid",
-      "q": 0.1,
-      "empirical_fdr": 0.003125,
-      "fdr95_upper": 0.004342,
-      "power": 1,
-      "verdict": "PASS"
-    },
-    {
-      "regime": "ar1 rho=0.9 (raw)",
-      "q": 0.1,
-      "empirical_fdr": 0.738993,
-      "fdr95_upper": 0.741433,
-      "power": 1,
-      "verdict": "FAIL (FDR > q)"
-    },
-    {
-      "regime": "ar1 rho=0.9 (whitened)",
       "q": 0.1,
       "empirical_fdr": 0.0035,
       "fdr95_upper": 0.004787,
@@ -392,10 +424,26 @@
       "verdict": "PASS"
     },
     {
+      "regime": "ar1 rho=0.9 (raw)",
+      "q": 0.1,
+      "empirical_fdr": 0.740815,
+      "fdr95_upper": 0.743227,
+      "power": 1,
+      "verdict": "FAIL (FDR > q)"
+    },
+    {
+      "regime": "ar1 rho=0.9 (whitened)",
+      "q": 0.1,
+      "empirical_fdr": 0.014225,
+      "fdr95_upper": 0.016797,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
       "regime": "student-t df=3",
       "q": 0.1,
-      "empirical_fdr": 0.00395,
-      "fdr95_upper": 0.005337,
+      "empirical_fdr": 0.002875,
+      "fdr95_upper": 0.004043,
       "power": 1,
       "verdict": "PASS"
     }
