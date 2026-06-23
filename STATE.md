@@ -48,13 +48,16 @@ e-process under autocorrelated telemetry, and standing up the sprag + Anchor qua
   Result: FPR ~ alpha for rho <= 0.9; rho=0.95 retains a genuine ~1.8x near-unit-root residual.
   `per-shard-whitening.ts` is now calibration/reference only. Suite 548/0/10; matrix idempotent; gate green.
 
+- **Engine: bias-corrected phi estimator shipped.** `deploysignal-engine` PR #18 added the Kendall
+  `(1+3*phi)/n` correction to `ar1Phi` + `computePerSignalAr1Phi`; merged, tagged `v0.3.4-pre`.
+  Tessera pinned `v0.3.3-pre -> v0.3.4-pre` (matrix byte-identical — the validator computes phi via
+  its own bias-corrected estimator, so the engine calibrator change is a no-op for it; this just
+  keeps Tessera on current engine). Both queued follow-ups now closed.
+
 ## Next
-- **Engine: adopt the bias-corrected (Kendall) phi estimator** in `fit-production-substrate.ts`
-  `ar1Phi` (and the mixture `computePerSignalAr1Phi`); plain Yule-Walker is biased low — negligible at
-  long baselines, material at short ones / high rho. (In progress.)
-- (Future engine ADR) AR(p>1) / near-unit-root (rho=0.95) handling — the residual the lag-1 fix can't
-  remove. Innovation-variance standardization is ALREADY correct in production (it's stamped); no
-  engine change needed there.
+- (Future engine ADR) AR(p>1) / near-unit-root (rho=0.95) handling — the ~1.8x residual the lag-1
+  fix can't remove. Innovation-variance standardization needs no engine change (already stamped in
+  production).
 
 ## Open questions / blockers
 - None blocking. Whether to push the whitening fix upstream into the shared engine package (vs
