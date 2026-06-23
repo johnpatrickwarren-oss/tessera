@@ -1,0 +1,970 @@
+{
+  "schema_version": "tessera-nab-shadow-v1",
+  "provenance": {
+    "nab_dir": "NAB",
+    "categories": [
+      "realKnownCause",
+      "realAWSCloudwatch",
+      "realTraffic",
+      "artificialNoAnomaly"
+    ],
+    "n_datasets": 36,
+    "alphas": [
+      0.01,
+      0.001
+    ],
+    "probationary_percent": 0.15,
+    "probationary_cap": 5000,
+    "phi_clip": 0.95
+  },
+  "per_dataset": [
+    {
+      "dataset_key": "realKnownCause/ambient_temperature_system_failure.csv",
+      "alpha": 0.01,
+      "n": 7267,
+      "prob_end": 1090,
+      "scored_normal_points": 5451,
+      "fp_fires": 14,
+      "fp_per_1k_normal": 2.568,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        39
+      ]
+    },
+    {
+      "dataset_key": "realKnownCause/ambient_temperature_system_failure.csv",
+      "alpha": 0.001,
+      "n": 7267,
+      "prob_end": 1090,
+      "scored_normal_points": 5451,
+      "fp_fires": 9,
+      "fp_per_1k_normal": 1.651,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        16
+      ]
+    },
+    {
+      "dataset_key": "realKnownCause/cpu_utilization_asg_misconfiguration.csv",
+      "alpha": 0.01,
+      "n": 18050,
+      "prob_end": 2707,
+      "scored_normal_points": 13844,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realKnownCause/cpu_utilization_asg_misconfiguration.csv",
+      "alpha": 0.001,
+      "n": 18050,
+      "prob_end": 2707,
+      "scored_normal_points": 13844,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realKnownCause/ec2_request_latency_system_failure.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3082,
+      "fp_fires": 43,
+      "fp_per_1k_normal": 13.952,
+      "windows_scored": 3,
+      "windows_detected": 2,
+      "latencies_samples": [
+        35,
+        25
+      ]
+    },
+    {
+      "dataset_key": "realKnownCause/ec2_request_latency_system_failure.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3082,
+      "fp_fires": 33,
+      "fp_per_1k_normal": 10.707,
+      "windows_scored": 3,
+      "windows_detected": 2,
+      "latencies_samples": [
+        33,
+        33
+      ]
+    },
+    {
+      "dataset_key": "realKnownCause/machine_temperature_system_failure.csv",
+      "alpha": 0.01,
+      "n": 22695,
+      "prob_end": 3404,
+      "scored_normal_points": 17590,
+      "fp_fires": 96,
+      "fp_per_1k_normal": 5.458,
+      "windows_scored": 3,
+      "windows_detected": 3,
+      "latencies_samples": [
+        18,
+        104,
+        27
+      ]
+    },
+    {
+      "dataset_key": "realKnownCause/machine_temperature_system_failure.csv",
+      "alpha": 0.001,
+      "n": 22695,
+      "prob_end": 3404,
+      "scored_normal_points": 17590,
+      "fp_fires": 59,
+      "fp_per_1k_normal": 3.354,
+      "windows_scored": 3,
+      "windows_detected": 3,
+      "latencies_samples": [
+        189,
+        298,
+        55
+      ]
+    },
+    {
+      "dataset_key": "realKnownCause/nyc_taxi.csv",
+      "alpha": 0.01,
+      "n": 10320,
+      "prob_end": 1548,
+      "scored_normal_points": 7737,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 5,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realKnownCause/nyc_taxi.csv",
+      "alpha": 0.001,
+      "n": 10320,
+      "prob_end": 1548,
+      "scored_normal_points": 7737,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 5,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realKnownCause/rogue_agent_key_hold.csv",
+      "alpha": 0.01,
+      "n": 1882,
+      "prob_end": 282,
+      "scored_normal_points": 1410,
+      "fp_fires": 36,
+      "fp_per_1k_normal": 25.532,
+      "windows_scored": 2,
+      "windows_detected": 2,
+      "latencies_samples": [
+        13,
+        5
+      ]
+    },
+    {
+      "dataset_key": "realKnownCause/rogue_agent_key_hold.csv",
+      "alpha": 0.001,
+      "n": 1882,
+      "prob_end": 282,
+      "scored_normal_points": 1410,
+      "fp_fires": 25,
+      "fp_per_1k_normal": 17.73,
+      "windows_scored": 2,
+      "windows_detected": 2,
+      "latencies_samples": [
+        7,
+        7
+      ]
+    },
+    {
+      "dataset_key": "realKnownCause/rogue_agent_key_updown.csv",
+      "alpha": 0.01,
+      "n": 5315,
+      "prob_end": 797,
+      "scored_normal_points": 3988,
+      "fp_fires": 2,
+      "fp_per_1k_normal": 0.502,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realKnownCause/rogue_agent_key_updown.csv",
+      "alpha": 0.001,
+      "n": 5315,
+      "prob_end": 797,
+      "scored_normal_points": 3988,
+      "fp_fires": 1,
+      "fp_per_1k_normal": 0.251,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 8,
+      "fp_per_1k_normal": 2.644,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        108
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 6,
+      "fp_per_1k_normal": 1.983,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        53
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 223,
+      "fp_per_1k_normal": 73.695,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        1
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 158,
+      "fp_per_1k_normal": 52.214,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        4
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3025,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3025,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3085,
+      "fp_fires": 76,
+      "fp_per_1k_normal": 24.635,
+      "windows_scored": 1,
+      "windows_detected": 1,
+      "latencies_samples": [
+        232
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3085,
+      "fp_fires": 49,
+      "fp_per_1k_normal": 15.883,
+      "windows_scored": 1,
+      "windows_detected": 1,
+      "latencies_samples": [
+        257
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3025,
+      "fp_fires": 10,
+      "fp_per_1k_normal": 3.306,
+      "windows_scored": 1,
+      "windows_detected": 1,
+      "latencies_samples": [
+        219
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3025,
+      "fp_fires": 7,
+      "fp_per_1k_normal": 2.314,
+      "windows_scored": 1,
+      "windows_detected": 1,
+      "latencies_samples": [
+        248
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3023,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 3,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3023,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 3,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv",
+      "alpha": 0.01,
+      "n": 4730,
+      "prob_end": 709,
+      "scored_normal_points": 3548,
+      "fp_fires": 1,
+      "fp_per_1k_normal": 0.282,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv",
+      "alpha": 0.001,
+      "n": 4730,
+      "prob_end": 709,
+      "scored_normal_points": 3548,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3023,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 3,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3023,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 3,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_network_in_257a54.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3025,
+      "fp_fires": 76,
+      "fp_per_1k_normal": 25.124,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_network_in_257a54.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3025,
+      "fp_fires": 51,
+      "fp_per_1k_normal": 16.86,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_network_in_5abac7.csv",
+      "alpha": 0.01,
+      "n": 4730,
+      "prob_end": 709,
+      "scored_normal_points": 3547,
+      "fp_fires": 1,
+      "fp_per_1k_normal": 0.282,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/ec2_network_in_5abac7.csv",
+      "alpha": 0.001,
+      "n": 4730,
+      "prob_end": 709,
+      "scored_normal_points": 3547,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/elb_request_count_8c0756.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 10,
+      "fp_per_1k_normal": 3.305,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        18
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/elb_request_count_8c0756.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 3,
+      "fp_per_1k_normal": 0.991,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/grok_asg_anomaly.csv",
+      "alpha": 0.01,
+      "n": 4621,
+      "prob_end": 693,
+      "scored_normal_points": 3463,
+      "fp_fires": 92,
+      "fp_per_1k_normal": 26.567,
+      "windows_scored": 3,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/grok_asg_anomaly.csv",
+      "alpha": 0.001,
+      "n": 4621,
+      "prob_end": 693,
+      "scored_normal_points": 3463,
+      "fp_fires": 71,
+      "fp_per_1k_normal": 20.502,
+      "windows_scored": 3,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv",
+      "alpha": 0.01,
+      "n": 1243,
+      "prob_end": 186,
+      "scored_normal_points": 931,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv",
+      "alpha": 0.001,
+      "n": 1243,
+      "prob_end": 186,
+      "scored_normal_points": 931,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 96,
+      "fp_per_1k_normal": 31.725,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        5
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 66,
+      "fp_per_1k_normal": 21.811,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        1
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 350,
+      "fp_per_1k_normal": 115.664,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        4
+      ]
+    },
+    {
+      "dataset_key": "realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3026,
+      "fp_fires": 254,
+      "fp_per_1k_normal": 83.939,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        5
+      ]
+    },
+    {
+      "dataset_key": "realTraffic/TravelTime_387.csv",
+      "alpha": 0.01,
+      "n": 2500,
+      "prob_end": 375,
+      "scored_normal_points": 1876,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 3,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realTraffic/TravelTime_387.csv",
+      "alpha": 0.001,
+      "n": 2500,
+      "prob_end": 375,
+      "scored_normal_points": 1876,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 3,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realTraffic/TravelTime_451.csv",
+      "alpha": 0.01,
+      "n": 2162,
+      "prob_end": 324,
+      "scored_normal_points": 1621,
+      "fp_fires": 5,
+      "fp_per_1k_normal": 3.085,
+      "windows_scored": 1,
+      "windows_detected": 1,
+      "latencies_samples": [
+        38
+      ]
+    },
+    {
+      "dataset_key": "realTraffic/TravelTime_451.csv",
+      "alpha": 0.001,
+      "n": 2162,
+      "prob_end": 324,
+      "scored_normal_points": 1621,
+      "fp_fires": 3,
+      "fp_per_1k_normal": 1.851,
+      "windows_scored": 1,
+      "windows_detected": 1,
+      "latencies_samples": [
+        100
+      ]
+    },
+    {
+      "dataset_key": "realTraffic/occupancy_6005.csv",
+      "alpha": 0.01,
+      "n": 2380,
+      "prob_end": 357,
+      "scored_normal_points": 1784,
+      "fp_fires": 2,
+      "fp_per_1k_normal": 1.121,
+      "windows_scored": 1,
+      "windows_detected": 1,
+      "latencies_samples": [
+        86
+      ]
+    },
+    {
+      "dataset_key": "realTraffic/occupancy_6005.csv",
+      "alpha": 0.001,
+      "n": 2380,
+      "prob_end": 357,
+      "scored_normal_points": 1784,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 1,
+      "windows_detected": 1,
+      "latencies_samples": [
+        43
+      ]
+    },
+    {
+      "dataset_key": "realTraffic/occupancy_t4013.csv",
+      "alpha": 0.01,
+      "n": 2500,
+      "prob_end": 375,
+      "scored_normal_points": 1875,
+      "fp_fires": 15,
+      "fp_per_1k_normal": 8,
+      "windows_scored": 2,
+      "windows_detected": 1,
+      "latencies_samples": [
+        2
+      ]
+    },
+    {
+      "dataset_key": "realTraffic/occupancy_t4013.csv",
+      "alpha": 0.001,
+      "n": 2500,
+      "prob_end": 375,
+      "scored_normal_points": 1875,
+      "fp_fires": 11,
+      "fp_per_1k_normal": 5.867,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realTraffic/speed_6005.csv",
+      "alpha": 0.01,
+      "n": 2500,
+      "prob_end": 375,
+      "scored_normal_points": 1886,
+      "fp_fires": 7,
+      "fp_per_1k_normal": 3.712,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realTraffic/speed_6005.csv",
+      "alpha": 0.001,
+      "n": 2500,
+      "prob_end": 375,
+      "scored_normal_points": 1886,
+      "fp_fires": 4,
+      "fp_per_1k_normal": 2.121,
+      "windows_scored": 1,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realTraffic/speed_7578.csv",
+      "alpha": 0.01,
+      "n": 1127,
+      "prob_end": 169,
+      "scored_normal_points": 842,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 4,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realTraffic/speed_7578.csv",
+      "alpha": 0.001,
+      "n": 1127,
+      "prob_end": 169,
+      "scored_normal_points": 842,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 4,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realTraffic/speed_t4013.csv",
+      "alpha": 0.01,
+      "n": 2495,
+      "prob_end": 374,
+      "scored_normal_points": 1871,
+      "fp_fires": 28,
+      "fp_per_1k_normal": 14.965,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "realTraffic/speed_t4013.csv",
+      "alpha": 0.001,
+      "n": 2495,
+      "prob_end": 374,
+      "scored_normal_points": 1871,
+      "fp_fires": 19,
+      "fp_per_1k_normal": 10.155,
+      "windows_scored": 2,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_daily_no_noise.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_daily_no_noise.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_daily_perfect_square_wave.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_daily_perfect_square_wave.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_daily_small_noise.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_daily_small_noise.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_flatline.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_flatline.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_noisy.csv",
+      "alpha": 0.01,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    },
+    {
+      "dataset_key": "artificialNoAnomaly/art_noisy.csv",
+      "alpha": 0.001,
+      "n": 4032,
+      "prob_end": 604,
+      "scored_normal_points": 3428,
+      "fp_fires": 0,
+      "fp_per_1k_normal": 0,
+      "windows_scored": 0,
+      "windows_detected": 0,
+      "latencies_samples": []
+    }
+  ],
+  "aggregate": [
+    {
+      "alpha": 0.01,
+      "datasets": 36,
+      "total_scored_normal": 133276,
+      "total_fp_fires": 1191,
+      "fp_per_1k_normal": 8.936,
+      "windows_scored": 62,
+      "windows_detected": 18,
+      "detection_rate": 0.29,
+      "median_latency_samples": 25
+    },
+    {
+      "alpha": 0.001,
+      "datasets": 36,
+      "total_scored_normal": 133276,
+      "total_fp_fires": 829,
+      "fp_per_1k_normal": 6.22,
+      "windows_scored": 62,
+      "windows_detected": 16,
+      "detection_rate": 0.258,
+      "median_latency_samples": 33
+    }
+  ]
+}

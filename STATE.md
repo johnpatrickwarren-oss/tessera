@@ -1,12 +1,28 @@
 # Project state
 
-**Last updated:** 2026-06-22 · **by:** John Warren (with Claude)
+**Last updated:** 2026-06-23 · **by:** John Warren (with Claude)
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
-DeploySignal statistical-detector engine. Current work: closing a validity gap in the per-shard
-e-process under autocorrelated telemetry, and standing up the sprag + Anchor quality stack
-(replacing the retired AI-reviewing-AI pipeline).
+DeploySignal statistical-detector engine. Current work: moving from caveated artifact toward
+production by validating on REAL telemetry (Tier 2: ingestion + shadow harness), on top of the
+per-shard e-process validity work and the sprag + Anchor quality stack.
+
+## Done (this branch — shadow-replay-nab)
+- **First real-data validation (crosses the artifact line).** `tools/shadow-replay.ts`
+  (`pnpm shadow-replay <nab-dir>`) + `tools/_nab-loader.ts` replay REAL labeled telemetry (Numenta
+  Anomaly Benchmark) through the production betting e-process (engine `updateBettingState`, AR(1)
+  whitening calibrated to mirror production), observe-only, and score real calibration (FP rate on
+  real quiescent data) + detection (TP/latency on labeled anomalies). See ADR 0002 +
+  `docs/SPEC-shadow-replay-real-telemetry.md`; report at `shadow-results/nab-shadow-report.md`.
+- **Honest first numbers (36 datasets, α=0.01):** detection 29% of labeled windows; FP ≈ 8.9/1k
+  normal pts. Quiet on clean data + some real signals (0 FP), detects real failures well on others
+  (machine_temperature 3/3, rogue_agent 2/2), but MISCALIBRATED on real signals with non-AR(1)
+  structure (regime shifts/multimodality, e.g. rds_cpu ~116 FP/1k) and misses subtle anomalies at
+  default α. This is the real compass for production gaps.
+- Tests +9 (NAB parsing + scoring logic); suite 557 pass / 0 fail / 10 skip; gate green; report idempotent.
+- **Scope boundary (stated in the report):** validates the PER-SIGNAL detector on real telemetry
+  only — NOT cluster/topology/fleet (no real multi-shard data); NAB anomalies are operational, not GPU-SDC.
 
 ## Done
 - **Validity gap found + validated.** The Family A *betting e-process* loses its Ville guarantee
