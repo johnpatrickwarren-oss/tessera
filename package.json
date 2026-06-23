@@ -33,6 +33,8 @@
     "mit-replay": "node tools/mit-replay.js",
     "preadaptive-tradeoff": "tsc -p tsconfig.test.json",
     "adaptive-tradeoff": "node tools/adaptive-tradeoff.js",
+    "prestructural-replay": "tsc -p tsconfig.test.json",
+    "structural-replay": "node tools/structural-replay.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",

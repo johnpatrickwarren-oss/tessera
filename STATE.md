@@ -143,3 +143,21 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
   measure it on the same NAB/GWDG/MIT + synthetic-sweep substrates before any engine change.
 - (Open) gap B structural-degradation detector (GWDG substrate ready); topology/fleet (needs real
   coupled-cluster faults).
+
+## Done (this branch — structural-collapse-detector)
+- **Gap B structural detector + the FP-guarantee test (the answer to "can we guarantee low FP?").**
+  New `tools/_gwdg-structural-loader.ts` (per-(node,job,instance) scrape_samples_scraped) +
+  `tools/structural-replay.ts` (`pnpm structural-replay`): betting e-process on the relative scrape
+  level. FINDING: detection power is genuine (≈75% of full collapses caught in a 24-scrape window),
+  but the per-shard FP guarantee is **NOT honored on real telemetry** — even the most stable
+  high-count targets fire 100% (vs α=1%), because the anytime-valid e-process accumulates on
+  persistent sub-percent level drift (P(fire)→1 under real nonstationarity). Fundamental, not tuning
+  — and it mirrors the numeric over-firing (NAB/GWDG/MIT). The "guaranteed low FP" promise does not
+  survive per-shard on real data; FLEET-level e-BH FDR (common-mode drift cancels in ranking) is the
+  remaining hope. See ADR 0007. +5 tests; gate green. NOTE: cold-eye pending before merge.
+
+## Next
+- **Validate fleet-level e-BH FDR on real telemetry** — the one place a real guarantee could survive
+  (does common-mode drift cancel so a failing shard still ranks out, bounding the false-discovery
+  proportion?). Tessera's most important unvalidated claim.
+- (Open) hybrid baseline (ADR 0006); real-labeled structural FD (verify SURF Lisa); topology/fleet.

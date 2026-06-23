@@ -1,0 +1,186 @@
+{
+  "schema_version": "tessera-structural-v1",
+  "provenance": {
+    "dataset": "GWDG-structural-scrape_samples_scraped",
+    "metric": "scrape_samples_scraped",
+    "alpha": 0.01,
+    "n_files": 21
+  },
+  "fp": {
+    "metric": "scrape_samples_scraped",
+    "n_streams": 55,
+    "streams_fired": 36,
+    "per_stream_fp": 0.655,
+    "total_fires": 1151,
+    "scored_points": 62588,
+    "fp_per_1k": 18.39,
+    "alpha": 0.01,
+    "honors_guarantee": false,
+    "n_stable": 16,
+    "stable_streams_fired": 16,
+    "stable_per_stream_fp": 1,
+    "stable_honors_guarantee": false
+  },
+  "fd": [
+    {
+      "severity": 0,
+      "duration": 3,
+      "detected": 1,
+      "n": 40,
+      "detection_rate": 0.025,
+      "median_latency": 0
+    },
+    {
+      "severity": 0,
+      "duration": 6,
+      "detected": 9,
+      "n": 40,
+      "detection_rate": 0.225,
+      "median_latency": 5
+    },
+    {
+      "severity": 0,
+      "duration": 12,
+      "detected": 14,
+      "n": 40,
+      "detection_rate": 0.35,
+      "median_latency": 5
+    },
+    {
+      "severity": 0,
+      "duration": 24,
+      "detected": 30,
+      "n": 40,
+      "detection_rate": 0.75,
+      "median_latency": 12
+    },
+    {
+      "severity": 0.25,
+      "duration": 3,
+      "detected": 1,
+      "n": 40,
+      "detection_rate": 0.025,
+      "median_latency": 0
+    },
+    {
+      "severity": 0.25,
+      "duration": 6,
+      "detected": 9,
+      "n": 40,
+      "detection_rate": 0.225,
+      "median_latency": 5
+    },
+    {
+      "severity": 0.25,
+      "duration": 12,
+      "detected": 14,
+      "n": 40,
+      "detection_rate": 0.35,
+      "median_latency": 5
+    },
+    {
+      "severity": 0.25,
+      "duration": 24,
+      "detected": 30,
+      "n": 40,
+      "detection_rate": 0.75,
+      "median_latency": 12
+    },
+    {
+      "severity": 0.5,
+      "duration": 3,
+      "detected": 1,
+      "n": 40,
+      "detection_rate": 0.025,
+      "median_latency": 0
+    },
+    {
+      "severity": 0.5,
+      "duration": 6,
+      "detected": 9,
+      "n": 40,
+      "detection_rate": 0.225,
+      "median_latency": 5
+    },
+    {
+      "severity": 0.5,
+      "duration": 12,
+      "detected": 14,
+      "n": 40,
+      "detection_rate": 0.35,
+      "median_latency": 5
+    },
+    {
+      "severity": 0.5,
+      "duration": 24,
+      "detected": 30,
+      "n": 40,
+      "detection_rate": 0.75,
+      "median_latency": 12
+    },
+    {
+      "severity": 0.75,
+      "duration": 3,
+      "detected": 1,
+      "n": 40,
+      "detection_rate": 0.025,
+      "median_latency": 0
+    },
+    {
+      "severity": 0.75,
+      "duration": 6,
+      "detected": 9,
+      "n": 40,
+      "detection_rate": 0.225,
+      "median_latency": 5
+    },
+    {
+      "severity": 0.75,
+      "duration": 12,
+      "detected": 14,
+      "n": 40,
+      "detection_rate": 0.35,
+      "median_latency": 5
+    },
+    {
+      "severity": 0.75,
+      "duration": 24,
+      "detected": 30,
+      "n": 40,
+      "detection_rate": 0.75,
+      "median_latency": 12
+    },
+    {
+      "severity": 0.9,
+      "duration": 3,
+      "detected": 1,
+      "n": 40,
+      "detection_rate": 0.025,
+      "median_latency": 1
+    },
+    {
+      "severity": 0.9,
+      "duration": 6,
+      "detected": 3,
+      "n": 40,
+      "detection_rate": 0.075,
+      "median_latency": 5
+    },
+    {
+      "severity": 0.9,
+      "duration": 12,
+      "detected": 13,
+      "n": 40,
+      "detection_rate": 0.325,
+      "median_latency": 7
+    },
+    {
+      "severity": 0.9,
+      "duration": 24,
+      "detected": 35,
+      "n": 40,
+      "detection_rate": 0.875,
+      "median_latency": 18
+    }
+  ]
+}
