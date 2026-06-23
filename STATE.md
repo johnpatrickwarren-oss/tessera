@@ -124,4 +124,4 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
   the NAB/GWDG results demanded. CAVEAT: null dataset (no anomalies to mask); the detection tradeoff
   must be measured on labeled data before upstreaming. `replayFiresAdaptive` is a harness prototype,
   not engine code. See ADR 0005; report `shadow-results/mit-fp-report.md`. +3 tests; gate green.
-  NOTE: independent cold-eye pending before merge.
+  Cold-eye done (SHIP-WITH-FIXES): report prototype caveat added (H1), regime test tightened to >5x (M1), trailing-window/CJS comments (M2/L1). No correctness defects (loader, no-lookahead adaptive, apples-to-apples all confirmed).

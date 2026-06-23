@@ -30,8 +30,12 @@ export function replayFiresAdaptive(values: ReadonlyArray<number>, probEnd: numb
     updateBettingState(state, values[i], cal.mean, cal.innovationVar, alpha, cal.phi);
     if (state.M >= threshold) { fires.push(i); state = freshBettingState(); }
     if ((i - probEnd) % ADAPT_RECAL_EVERY === 0 && i > probEnd) {
+      // Trailing-window recalibration. NOTE: while i <= ADAPT_WINDOW, lo=0 so this
+      // is a growing prefix, not yet a true trailing window (matters only for short
+      // traces); it becomes strictly trailing once i > ADAPT_WINDOW. No lookahead
+      // either way (slice ends at i, the current tick is scored with the prior cal).
       const lo = Math.max(0, i - ADAPT_WINDOW);
-      cal = calibrateBaseline(values.slice(lo, i), 'simple'); // trailing-window recalibration
+      cal = calibrateBaseline(values.slice(lo, i), 'simple');
     }
   }
   return fires;
@@ -87,7 +91,7 @@ function renderMd(r: MitReport): string {
   L.push('');
   L.push('Tessera\'s per-shard detector on REAL MIT Supercloud GPU telemetry (nvidia-smi @100ms), observe-only. **No GPU-fault labels → every fire is a false alarm**, so this is a pure false-alarm (null) calibration. `static` = single baseline from the first 15%; `adaptive` = trailing-window recalibration (gap #2, regime-aware).');
   L.push('');
-  L.push(`> **Scope:** per-shard NUMERIC FP calibration on a real GPU fleet sample. NOT detection (no faults) and NOT topology/fleet. On a null dataset adaptive baselining has no anomalies to mask; on labeled data it would risk masking slow drifts (a tradeoff to measure later).`);
+  L.push(`> **Scope:** per-shard NUMERIC FP calibration on a real GPU fleet sample. NOT detection (no faults) and NOT topology/fleet. On a null dataset adaptive baselining has no anomalies to mask; on labeled data it would risk masking slow drifts (a tradeoff to measure later). \`replayFiresAdaptive\` is a **prototype** scoped to this harness — NOT promoted into the engine/production detector.`);
   L.push('');
   L.push(`Files: ${r.provenance.n_files} per-job GPU traces. α=${r.provenance.alpha}; adaptive window=${r.provenance.adapt_window}, recal every ${r.provenance.adapt_recal_every}.`);
   L.push('');
@@ -115,6 +119,7 @@ export function writeMitReport(gpuDir: string, outDir: string): { json: string; 
   return { json, md };
 }
 
+// CLI guard (CommonJS — tsconfig compiles to CJS; matches the other tools/*).
 if (require.main === module) {
   const dir = process.argv[2] ?? process.env.MIT_GPU_DIR;
   if (!dir) { process.stderr.write('usage: node tools/mit-replay.js <dir-of-per-job-gpu-csvs>\n'); process.exit(64); }

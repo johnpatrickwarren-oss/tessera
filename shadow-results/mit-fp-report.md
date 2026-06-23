@@ -2,7 +2,7 @@
 
 Tessera's per-shard detector on REAL MIT Supercloud GPU telemetry (nvidia-smi @100ms), observe-only. **No GPU-fault labels → every fire is a false alarm**, so this is a pure false-alarm (null) calibration. `static` = single baseline from the first 15%; `adaptive` = trailing-window recalibration (gap #2, regime-aware).
 
-> **Scope:** per-shard NUMERIC FP calibration on a real GPU fleet sample. NOT detection (no faults) and NOT topology/fleet. On a null dataset adaptive baselining has no anomalies to mask; on labeled data it would risk masking slow drifts (a tradeoff to measure later).
+> **Scope:** per-shard NUMERIC FP calibration on a real GPU fleet sample. NOT detection (no faults) and NOT topology/fleet. On a null dataset adaptive baselining has no anomalies to mask; on labeled data it would risk masking slow drifts (a tradeoff to measure later). `replayFiresAdaptive` is a **prototype** scoped to this harness — NOT promoted into the engine/production detector.
 
 Files: 11 per-job GPU traces. α=0.01; adaptive window=500, recal every 100.
 

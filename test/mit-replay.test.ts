@@ -15,7 +15,11 @@ test('adaptive baselining fires far less than static on a sustained regime shift
   const staticFires = replayFires(v, probEnd, cal, 0.01).length;
   const adaptiveFires = replayFiresAdaptive(v, probEnd, 0.01).length;
   assert.ok(staticFires > 0, `static must over-fire on the regime shift; got ${staticFires}`);
-  assert.ok(adaptiveFires < staticFires, `adaptive (${adaptiveFires}) must fire less than static (${staticFires})`);
+  // Tightened (M1): require a SUBSTANTIAL reduction (>5x), not merely "fewer" — so an
+  // adaptive variant that barely helps (or a degenerate window) would fail. It should
+  // still fire a few times during the catch-up after the step (not zero).
+  assert.ok(adaptiveFires > 0, `adaptive should fire during catch-up; got ${adaptiveFires}`);
+  assert.ok(adaptiveFires < staticFires / 5, `adaptive (${adaptiveFires}) must be << static (${staticFires})`);
 });
 
 test('adaptive == no spurious fires on a flat (stationary) series', () => {
