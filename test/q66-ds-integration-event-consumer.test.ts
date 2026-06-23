@@ -87,8 +87,13 @@ describe('R66 WU-Phase3-3C DS→Tessera event consumer + freeze-hook factory', (
       assert.ok(body !== null);
       assert.strictEqual(body!.contract_version, 'v1');
       assert.strictEqual(body!.status, 'accepted');
-      assert.strictEqual(body!.freeze_hook_activated, true);
-      assert.strictEqual(typeof body!.freeze_hook_activated_at_ts, 'number');
+      // Truthful activation flag (engine remediation 2026-06-10 H1/L4, pulled in
+      // at the v0.3.3-pre pin bump): this minimal consumer wires no 'activate'
+      // subscriber / freeze hook, so nothing is delivered — activation is honestly
+      // false and no timestamp is emitted. Activation-when-wired is covered by
+      // AC-R66-6 and AC-R66-9..13.
+      assert.strictEqual(body!.freeze_hook_activated, false);
+      assert.strictEqual(body!.freeze_hook_activated_at_ts, undefined);
     } finally {
       await c.stop();
     }

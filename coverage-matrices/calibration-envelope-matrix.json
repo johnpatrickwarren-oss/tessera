@@ -1,0 +1,403 @@
+{
+  "schema_version": "tessera-calibration-envelope-v1",
+  "seed_prefix": 827675,
+  "params": {
+    "window": 200,
+    "trials": 4000,
+    "baseline_n": 4000,
+    "drift": 0.15,
+    "alphas": [
+      0.01,
+      0.005
+    ],
+    "fleet": {
+      "N": 20,
+      "K": 3,
+      "trials": 2000,
+      "qs": [
+        0.05,
+        0.1
+      ]
+    }
+  },
+  "type_i": [
+    {
+      "generator": "gaussian-iid (control)",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.0075,
+      "wilson95_lower": 0.005259,
+      "wilson95_upper": 0.010686,
+      "inflation": 0.75,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "gaussian-iid (control)",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.002,
+      "wilson95_lower": 0.001014,
+      "wilson95_upper": 0.003942,
+      "inflation": 0.4,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "student-t df=5",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.005,
+      "wilson95_lower": 0.003239,
+      "wilson95_upper": 0.007711,
+      "inflation": 0.5,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "student-t df=5",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.00175,
+      "wilson95_lower": 0.000848,
+      "wilson95_upper": 0.003608,
+      "inflation": 0.35,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "student-t df=3",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.005,
+      "wilson95_lower": 0.003239,
+      "wilson95_upper": 0.007711,
+      "inflation": 0.5,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "student-t df=3",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.00375,
+      "wilson95_lower": 0.002274,
+      "wilson95_upper": 0.006178,
+      "inflation": 0.75,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "ar1 rho=0.30",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.0665,
+      "wilson95_lower": 0.059187,
+      "wilson95_upper": 0.074645,
+      "inflation": 6.65,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.30",
+      "mode": "whiten",
+      "alpha": 0.01,
+      "phi": 0.310493,
+      "observed_fpr": 0.0065,
+      "wilson95_lower": 0.00444,
+      "wilson95_upper": 0.009507,
+      "inflation": 0.65,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "ar1 rho=0.30",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.04725,
+      "wilson95_lower": 0.041098,
+      "wilson95_upper": 0.054271,
+      "inflation": 9.45,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.30",
+      "mode": "whiten",
+      "alpha": 0.005,
+      "phi": 0.305153,
+      "observed_fpr": 0.004,
+      "wilson95_lower": 0.002464,
+      "wilson95_upper": 0.006488,
+      "inflation": 0.8,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "ar1 rho=0.60",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.34175,
+      "wilson95_lower": 0.32721,
+      "wilson95_upper": 0.356594,
+      "inflation": 34.175,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.60",
+      "mode": "whiten",
+      "alpha": 0.01,
+      "phi": 0.599767,
+      "observed_fpr": 0.00575,
+      "wilson95_lower": 0.003835,
+      "wilson95_upper": 0.008614,
+      "inflation": 0.575,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "ar1 rho=0.60",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.27225,
+      "wilson95_lower": 0.258679,
+      "wilson95_upper": 0.286258,
+      "inflation": 54.45,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.60",
+      "mode": "whiten",
+      "alpha": 0.005,
+      "phi": 0.586708,
+      "observed_fpr": 0.005,
+      "wilson95_lower": 0.003239,
+      "wilson95_upper": 0.007711,
+      "inflation": 1,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "ar1 rho=0.90",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.90975,
+      "wilson95_lower": 0.900472,
+      "wilson95_upper": 0.918241,
+      "inflation": 90.975,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.90",
+      "mode": "whiten",
+      "alpha": 0.01,
+      "phi": 0.898858,
+      "observed_fpr": 0.0065,
+      "wilson95_lower": 0.00444,
+      "wilson95_upper": 0.009507,
+      "inflation": 0.65,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "ar1 rho=0.90",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.85925,
+      "wilson95_lower": 0.848128,
+      "wilson95_upper": 0.869683,
+      "inflation": 171.85,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.90",
+      "mode": "whiten",
+      "alpha": 0.005,
+      "phi": 0.891851,
+      "observed_fpr": 0.005,
+      "wilson95_lower": 0.003239,
+      "wilson95_upper": 0.007711,
+      "inflation": 1,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "ar1 rho=0.95",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.9745,
+      "wilson95_lower": 0.969141,
+      "wilson95_upper": 0.978949,
+      "inflation": 97.45,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.95",
+      "mode": "whiten",
+      "alpha": 0.01,
+      "phi": 0.942315,
+      "observed_fpr": 0.01825,
+      "wilson95_lower": 0.01454,
+      "wilson95_upper": 0.022884,
+      "inflation": 1.825,
+      "power": 1,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.95",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.96,
+      "wilson95_lower": 0.953473,
+      "wilson95_upper": 0.965645,
+      "inflation": 192,
+      "power": null,
+      "verdict": "FAIL (inflated)"
+    },
+    {
+      "generator": "ar1 rho=0.95",
+      "mode": "whiten",
+      "alpha": 0.005,
+      "phi": 0.960679,
+      "observed_fpr": 0.00075,
+      "wilson95_lower": 0.000255,
+      "wilson95_upper": 0.002203,
+      "inflation": 0.15,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "seasonal (period=24)",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.0045,
+      "wilson95_lower": 0.002848,
+      "wilson95_upper": 0.007102,
+      "inflation": 0.45,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "seasonal (period=24)",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.0005,
+      "wilson95_lower": 0.000137,
+      "wilson95_upper": 0.001821,
+      "inflation": 0.1,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "variance-regime (0.5/1.5)",
+      "mode": "raw",
+      "alpha": 0.01,
+      "phi": null,
+      "observed_fpr": 0.00475,
+      "wilson95_lower": 0.003043,
+      "wilson95_upper": 0.007407,
+      "inflation": 0.475,
+      "power": null,
+      "verdict": "PASS"
+    },
+    {
+      "generator": "variance-regime (0.5/1.5)",
+      "mode": "raw",
+      "alpha": 0.005,
+      "phi": null,
+      "observed_fpr": 0.00125,
+      "wilson95_lower": 0.000534,
+      "wilson95_upper": 0.002923,
+      "inflation": 0.25,
+      "power": null,
+      "verdict": "PASS"
+    }
+  ],
+  "fleet_fdr": [
+    {
+      "regime": "gaussian-iid",
+      "q": 0.05,
+      "empirical_fdr": 0.002,
+      "fdr95_upper": 0.002976,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "regime": "ar1 rho=0.9 (raw)",
+      "q": 0.05,
+      "empirical_fdr": 0.727074,
+      "fdr95_upper": 0.729682,
+      "power": 1,
+      "verdict": "FAIL (FDR > q)"
+    },
+    {
+      "regime": "ar1 rho=0.9 (whitened)",
+      "q": 0.05,
+      "empirical_fdr": 0.003,
+      "fdr95_upper": 0.004193,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "regime": "student-t df=3",
+      "q": 0.05,
+      "empirical_fdr": 0.001,
+      "fdr95_upper": 0.001692,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "regime": "gaussian-iid",
+      "q": 0.1,
+      "empirical_fdr": 0.003125,
+      "fdr95_upper": 0.004342,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "regime": "ar1 rho=0.9 (raw)",
+      "q": 0.1,
+      "empirical_fdr": 0.738993,
+      "fdr95_upper": 0.741433,
+      "power": 1,
+      "verdict": "FAIL (FDR > q)"
+    },
+    {
+      "regime": "ar1 rho=0.9 (whitened)",
+      "q": 0.1,
+      "empirical_fdr": 0.0035,
+      "fdr95_upper": 0.004787,
+      "power": 1,
+      "verdict": "PASS"
+    },
+    {
+      "regime": "student-t df=3",
+      "q": 0.1,
+      "empirical_fdr": 0.00395,
+      "fdr95_upper": 0.005337,
+      "power": 1,
+      "verdict": "PASS"
+    }
+  ]
+}

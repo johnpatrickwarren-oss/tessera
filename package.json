@@ -23,6 +23,8 @@
     "detector-envelope": "node tools/detector-envelope.js",
     "prebuild:topology-walk-tuning": "tsc -p tsconfig.test.json",
     "topology-walk-tuning": "node tools/topology-walk-tuning.js",
+    "precalibration-envelope": "tsc -p tsconfig.test.json",
+    "calibration-envelope": "node tools/calibration-envelope.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",
@@ -37,7 +39,7 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit"
   },
   "dependencies": {
-    "@johnpatrickwarren-oss/deploysignal-engine": "github:johnpatrickwarren-oss/deploysignal-engine#v0.3.1-pre"
+    "@johnpatrickwarren-oss/deploysignal-engine": "github:johnpatrickwarren-oss/deploysignal-engine#v0.3.4-pre"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
