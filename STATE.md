@@ -161,3 +161,22 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
   (does common-mode drift cancel so a failing shard still ranks out, bounding the false-discovery
   proportion?). Tessera's most important unvalidated claim.
 - (Open) hybrid baseline (ADR 0006); real-labeled structural FD (verify SURF Lisa); topology/fleet.
+
+## Done (this branch — fleet-fdr-validation)
+- **Fleet-level e-BH FDR validated → does NOT rescue the guarantee; root cause pinned.** New
+  `tools/fleet-fdr.ts` (`pnpm fleet-fdr`): e-value validity diagnostic + naive/fleet-relative e-BH on
+  synthetic ground truth + real GWDG null. FINDING: the betting-e-process e-value is valid (E[e|H0]≤1,
+  P(fire)≤α) ONLY with the true baseline AND iid data; plug-in baseline estimation inflates E[e]→6.6e8
+  and autocorrelation→3.8e3 (compounding to 8.4e32). So e-BH (which needs valid e-values) cannot
+  control FDR: real null rejects 34/55 healthy shards; synthetic naive FDP 78% / fleet-relative 74% vs
+  q=10%. Fleet layer can't fix an invalid marginal e-value. VERDICT: claim detection, not a calibrated
+  FP/FDR guarantee, on real telemetry. The only path: a valid e-value construction (nuisance-robust
+  mixture/confidence-sequence + whitening) — a per-shard redesign. See ADR 0008. +5 tests; suite
+  587/0/10; gate green; idempotent. NOTE: cold-eye pending before merge.
+
+## Arc summary (decisions 0001–0008)
+Detection works (numeric + structural); the per-shard FP guarantee (0007) AND fleet-FDR (0008) both
+fail on real telemetry because the e-value is invalid under estimated baselines + autocorrelation; the
+e-value is valid only in the ideal (true-baseline + iid) case. Honest claim: strong detection +
+correct-under-assumptions framework; NOT a calibrated guarantee on real data. Next: valid e-value
+redesign.
