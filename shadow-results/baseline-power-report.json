@@ -1,0 +1,56 @@
+{
+  "schema_version": "tessera-baseline-power-v1",
+  "provenance": {
+    "dataset": "GWDG-structural-scrape_samples_scraped",
+    "metric": "scrape_samples_scraped",
+    "alpha": 0.01,
+    "n_test": 200
+  },
+  "rows": [
+    {
+      "m": 100,
+      "n_over_m": 2,
+      "n_streams": 55,
+      "mean_e": 4.5341208356552665e+54,
+      "median_e": 1,
+      "p_fire": 0.309,
+      "honors_alpha": false
+    },
+    {
+      "m": 200,
+      "n_over_m": 1,
+      "n_streams": 55,
+      "mean_e": 1.4607082917672787e+58,
+      "median_e": 1,
+      "p_fire": 0.327,
+      "honors_alpha": false
+    },
+    {
+      "m": 500,
+      "n_over_m": 0.4,
+      "n_streams": 55,
+      "mean_e": 2.28806048097827e+56,
+      "median_e": 1,
+      "p_fire": 0.436,
+      "honors_alpha": false
+    },
+    {
+      "m": 1000,
+      "n_over_m": 0.2,
+      "n_streams": 47,
+      "mean_e": 8.702767381776688e+34,
+      "median_e": 1,
+      "p_fire": 0.426,
+      "honors_alpha": false
+    },
+    {
+      "m": 2000,
+      "n_over_m": 0.1,
+      "n_streams": 0,
+      "mean_e": 0,
+      "median_e": 0,
+      "p_fire": 0,
+      "honors_alpha": false
+    }
+  ]
+}

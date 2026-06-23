@@ -37,6 +37,8 @@
     "structural-replay": "node tools/structural-replay.js",
     "prefleet-fdr": "tsc -p tsconfig.test.json",
     "fleet-fdr": "node tools/fleet-fdr.js",
+    "prebaseline-power": "tsc -p tsconfig.test.json",
+    "baseline-power": "node tools/baseline-power.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",
