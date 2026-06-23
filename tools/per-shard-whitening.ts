@@ -33,11 +33,12 @@
 export interface Ar1Fit {
   /** Bias-corrected lag-1 autoregressive coefficient. */
   phi: number;
-  /** Innovation (residual) variance of x_t - phi*x_{t-1} on the baseline.
-   *  NOTE: do NOT pass this as the engine's `sigmaSquared` argument. The engine
-   *  pre-whitens then standardizes the residual against the MARGINAL variance
-   *  (its established convention); substituting the smaller innovation variance
-   *  would over-scale z. This field is informational (calibration diagnostics). */
+  /** Innovation (residual) variance of x_t - phi*x_{t-1} on the baseline — i.e.
+   *  ~ sigma^2_marginal * (1 - phi^2). This IS the quantity production passes as the
+   *  engine's `sigmaSquared` when `ar1_phi` is set: fit-production-substrate stamps
+   *  `baseline_sigma_squared = innovation variance`, and updateBettingState
+   *  standardizes the whitened residual against it. (Passing the raw MARGINAL
+   *  variance instead would over-scale and over-conservatize z — see ADR 0001.) */
   sigma2: number;
 }
 
