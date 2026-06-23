@@ -68,8 +68,28 @@
   detects on real autocorrelated operational telemetry," nothing more.
 - **AS-5** No live/streaming production runtime — replay of recorded traces only (the shadow step).
 
+## Gap #1 extension — production calibration + operating-point sweep
+
+The first run (simple static `(mean,σ²,φ)` baseline) over-fired on real signals with non-AR(1)
+structure. This extension tests whether the engine's **production calibration** reduces that, and
+characterizes the operating point.
+
+- **AC-12** A **rich** calibration mode composes the engine's importable production primitives —
+  `detectors/seasonal:decomposeSeasonal` + AR(1) — mirroring `fit-production-substrate`'s seasonal
+  path: if a dominant period is detected, deseasonalize (subtract per-phase means) and calibrate
+  `(φ, innovation σ²)` on the deseasonalized residual; else fall back to the simple baseline. Reuses
+  engine functions (NOT a Tessera reimplementation of the math).
+- **AC-13** The harness runs **both** `simple` and `rich` modes and reports the FP/detection **delta**
+  (per dataset + aggregate), so the effect of production calibration on real data is measured.
+- **AC-14** An **operating-point sweep** over α reports aggregate detection rate vs FP/1k per (mode,α).
+- **AC-15** Honest framing: seasonal calibration addresses *periodic* structure; it is **not**
+  expected to fix regime-shift / multimodal over-firing (a single stationary baseline can't). The
+  report states which datasets improved, rather than claiming a blanket fix.
+
 ## Traceability
 - AC-1..AC-3 ← real-telemetry intake (replaces synthetic generators).
 - AC-4..AC-8 ← real calibration + detection numbers via the production detection path.
 - AC-9..AC-10 ← Anchor honest-measurement (the scope boundary is the whole point).
 - AC-11 ← Anchor durable trail + sprag gate.
+- AC-12..AC-15 ← gap #1: does production (seasonal) calibration reduce real-data FP, and at what
+  operating point — measured, with honest scope on what it cannot fix.

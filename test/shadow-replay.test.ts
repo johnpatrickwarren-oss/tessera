@@ -6,6 +6,13 @@ import {
 } from '../tools/shadow-replay.js';
 import type { NabTrace } from '../tools/_nab-loader.js';
 
+// A clean periodic series (period P, amplitude A) + tiny deterministic noise.
+function periodic(n: number, period: number, amp: number): number[] {
+  const out: number[] = [];
+  for (let i = 0; i < n; i++) out.push(amp * Math.sin((2 * Math.PI * i) / period) + 0.01 * ((i * 7) % 5 - 2));
+  return out;
+}
+
 test('AC-4: probationaryEnd = first 15%, capped at 5000', () => {
   assert.equal(probationaryEnd(1000), 150);
   assert.equal(probationaryEnd(100000), 5000); // cap
@@ -57,8 +64,55 @@ test('AC-7: a window with no in-window fire is scored-but-undetected', () => {
   assert.deepEqual(r.latencies_samples, []);
 });
 
+test('AC-12: rich calibration detects a dominant period; simple does not seasonal-decompose', () => {
+  const prob = periodic(360, 30, 8); // 12 periods of 30 -> detectable from this window
+  const rich = calibrateBaseline(prob, 'rich');
+  const simple = calibrateBaseline(prob, 'simple');
+  assert.ok(rich.period > 0, `rich should detect a period; got ${rich.period}`);
+  assert.equal(rich.seasonal_means.length, rich.period, 'one seasonal mean per phase');
+  assert.equal(simple.period, 0, 'simple mode never seasonal-decomposes');
+});
+
+test('AC-12: rich falls back to simple (period 0) on a non-periodic series', () => {
+  // Deterministic LCG pseudo-noise -> no periodic structure -> no period detected.
+  let s = 12345; const prob: number[] = [];
+  for (let i = 0; i < 300; i++) { s = (s * 1103515245 + 12345) & 0x7fffffff; prob.push(s / 0x7fffffff); }
+  assert.equal(calibrateBaseline(prob, 'rich').period, 0);
+});
+
+test('AC-13: rich deseasonalization removes the seasonal variance (mechanism)', () => {
+  const prob = periodic(360, 30, 8);
+  const rich = calibrateBaseline(prob, 'rich');
+  const simple = calibrateBaseline(prob, 'simple');
+  // The deseasonalized residual variance is far below the raw (seasonal) variance.
+  assert.ok(rich.sigma2 < simple.sigma2 * 0.5, `rich σ²=${rich.sigma2} should be << simple σ²=${simple.sigma2}`);
+});
+
+test('AC-13: rich fires no more than simple on a purely-periodic normal series', () => {
+  const values = periodic(900, 30, 8); // period 30, N=900 -> detectable from the 135-pt probationary window
+  const probEnd = probationaryEnd(values.length);
+  const richCal = calibrateBaseline(values.slice(0, probEnd), 'rich');
+  const simpleCal = calibrateBaseline(values.slice(0, probEnd), 'simple');
+  const richFires = replayFires(values, probEnd, richCal, 0.05).length;
+  const simpleFires = replayFires(values, probEnd, simpleCal, 0.05).length;
+  assert.ok(richCal.period > 0, 'period must be detected for this to be meaningful');
+  assert.ok(richFires <= simpleFires, `rich (${richFires}) must not exceed simple (${simpleFires}) on a periodic-normal signal`);
+});
+
+test('AC-12/13: replay deseasonalization is phase-correct — a PURE periodic stream fires zero times', () => {
+  // No noise: the deseasonalized stream is ~0 everywhere ONLY if the replay phase
+  // matches the calibration phase. A phase offset would leave residual structure
+  // that could fire. So richFires===0 structurally pins the replay phase alignment.
+  const pure: number[] = [];
+  for (let i = 0; i < 900; i++) pure.push(8 * Math.sin((2 * Math.PI * i) / 30));
+  const probEnd = probationaryEnd(pure.length);
+  const richCal = calibrateBaseline(pure.slice(0, probEnd), 'rich');
+  assert.ok(richCal.period > 0, 'period must be detected');
+  assert.equal(replayFires(pure, probEnd, richCal, 0.01).length, 0, 'deseasonalized pure-periodic stream must not fire');
+});
+
 test('AC-6: replayFires restarts after a fire (constant series never fires; a step does)', () => {
-  const cal = { mean: 0, sigma2: 1, phi: 0, innovationVar: 1 };
+  const cal = { mean: 0, sigma2: 1, phi: 0, innovationVar: 1, period: 0, seasonal_means: [] };
   // Constant-at-mean series: z=0 every tick -> wealth never grows -> no fire.
   const flat = new Array(300).fill(0);
   assert.deepEqual(replayFires(flat, 0, cal, 0.01), []);

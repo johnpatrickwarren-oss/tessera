@@ -8,7 +8,16 @@ DeploySignal statistical-detector engine. Current work: moving from caveated art
 production by validating on REAL telemetry (Tier 2: ingestion + shadow harness), on top of the
 per-shard e-process validity work and the sprag + Anchor quality stack.
 
-## Done (this branch — shadow-replay-nab)
+## Done (this branch — shadow-rich-calibration)
+- **Gap #1: production (seasonal) calibration tested on real data — hypothesis refuted, usefully.**
+  Added a `rich` mode (engine `decomposeSeasonal` + AR(1), mirroring `fit-production-substrate`) +
+  an α operating-point sweep to the shadow harness; ran simple-vs-rich on real NAB. Result: rich
+  **improves detection** (29%→34% at α=0.01, period found in 15/36) but does **NOT** reduce FP
+  (8.9→9.3/1k) — confirming the FP driver is **regime-shift / multimodal**, not seasonal (AC-15).
+  Next real gap = adaptive / regime-aware baselining. See ADR 0003. +6 tests; suite 562/0/10; gate
+  green; report idempotent. (Builds on the merged shadow-replay harness below.)
+
+## Done (merged — shadow-replay-nab, PR #14)
 - **First real-data validation (crosses the artifact line).** `tools/shadow-replay.ts`
   (`pnpm shadow-replay <nab-dir>`) + `tools/_nab-loader.ts` replay REAL labeled telemetry (Numenta
   Anomaly Benchmark) through the production betting e-process (engine `updateBettingState`, AR(1)
@@ -79,9 +88,13 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
   engine ADR 0003 (Proposed), pending sign-off (behavior change on the betting path).
 
 ## Next
+- **Gap #2 (the real FP driver): adaptive / regime-aware baselining** — rolling recalibration or
+  change-point-segmented baselines, measured on real NAB via the shadow harness (with the explicit
+  mask-slow-drift tradeoff). This is what the gap-#1 refutation points to.
 - **DECISION NEEDED:** implement engine ADR 0003 (betting path respects the near-unit-root /
   self-normalized-fallback threshold the mixture path already uses)? Behavior change for high-phi
   signals; needs operator sign-off + threshold confirmation.
+- (Still blocked on real multi-shard data) cluster / topology / fleet-FDR validation.
 
 ## Open questions / blockers
 - None blocking. Whether to push the whitening fix upstream into the shared engine package (vs
