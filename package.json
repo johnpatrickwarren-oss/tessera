@@ -29,6 +29,8 @@
     "shadow-replay": "node tools/shadow-replay.js",
     "pregwdg-replay": "tsc -p tsconfig.test.json",
     "gwdg-replay": "node tools/gwdg-replay.js",
+    "premit-replay": "tsc -p tsconfig.test.json",
+    "mit-replay": "node tools/mit-replay.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",

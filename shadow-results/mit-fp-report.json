@@ -1,0 +1,77 @@
+{
+  "schema_version": "tessera-mit-fp-v1",
+  "provenance": {
+    "dataset": "MIT-Supercloud-gpu-per-job-sample",
+    "alpha": 0.01,
+    "metrics": [
+      "utilization_gpu_pct",
+      "temperature_gpu",
+      "power_draw_W"
+    ],
+    "n_files": 11,
+    "adapt_window": 500,
+    "adapt_recal_every": 100
+  },
+  "per_mode_metric": [
+    {
+      "mode": "static",
+      "metric": "utilization_gpu_pct",
+      "shards": 12,
+      "scored_normal": 148925,
+      "fp_fires": 755,
+      "fp_per_1k": 5.07
+    },
+    {
+      "mode": "static",
+      "metric": "temperature_gpu",
+      "shards": 12,
+      "scored_normal": 148925,
+      "fp_fires": 4240,
+      "fp_per_1k": 28.471
+    },
+    {
+      "mode": "static",
+      "metric": "power_draw_W",
+      "shards": 12,
+      "scored_normal": 148925,
+      "fp_fires": 792,
+      "fp_per_1k": 5.318
+    },
+    {
+      "mode": "adaptive",
+      "metric": "utilization_gpu_pct",
+      "shards": 12,
+      "scored_normal": 148925,
+      "fp_fires": 21,
+      "fp_per_1k": 0.141
+    },
+    {
+      "mode": "adaptive",
+      "metric": "temperature_gpu",
+      "shards": 12,
+      "scored_normal": 148925,
+      "fp_fires": 775,
+      "fp_per_1k": 5.204
+    },
+    {
+      "mode": "adaptive",
+      "metric": "power_draw_W",
+      "shards": 12,
+      "scored_normal": 148925,
+      "fp_fires": 350,
+      "fp_per_1k": 2.35
+    }
+  ],
+  "totals": [
+    {
+      "mode": "static",
+      "fp_per_1k": 12.953,
+      "shards": 36
+    },
+    {
+      "mode": "adaptive",
+      "fp_per_1k": 2.565,
+      "shards": 36
+    }
+  ]
+}
