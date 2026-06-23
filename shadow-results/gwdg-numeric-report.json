@@ -1,0 +1,89 @@
+{
+  "schema_version": "tessera-gwdg-numeric-v1",
+  "provenance": {
+    "dataset": "GWDG-GPU-node-telemetry-zenodo-19052367",
+    "alpha": 0.01,
+    "metrics": [
+      "DCGM_FI_DEV_XID_ERRORS",
+      "DCGM_FI_DEV_GPU_TEMP",
+      "DCGM_FI_DEV_MEMORY_TEMP",
+      "DCGM_FI_DEV_POWER_USAGE",
+      "DCGM_FI_DEV_GPU_UTIL"
+    ],
+    "n_files": 21,
+    "n_incident_files": 16
+  },
+  "per_metric": [
+    {
+      "metric": "DCGM_FI_DEV_XID_ERRORS",
+      "good_shards": 0,
+      "good_scored_normal": 0,
+      "good_fp_fires": 0,
+      "good_fp_per_1k": 0,
+      "incident_shards": 64,
+      "windows_scored": 69,
+      "windows_detected": 25,
+      "incident_fp_fires": 1882,
+      "incident_scored_normal": 67760,
+      "incident_fp_per_1k": 27.774
+    },
+    {
+      "metric": "DCGM_FI_DEV_GPU_TEMP",
+      "good_shards": 0,
+      "good_scored_normal": 0,
+      "good_fp_fires": 0,
+      "good_fp_per_1k": 0,
+      "incident_shards": 64,
+      "windows_scored": 68,
+      "windows_detected": 19,
+      "incident_fp_fires": 1951,
+      "incident_scored_normal": 67777,
+      "incident_fp_per_1k": 28.786
+    },
+    {
+      "metric": "DCGM_FI_DEV_MEMORY_TEMP",
+      "good_shards": 0,
+      "good_scored_normal": 0,
+      "good_fp_fires": 0,
+      "good_fp_per_1k": 0,
+      "incident_shards": 64,
+      "windows_scored": 68,
+      "windows_detected": 24,
+      "incident_fp_fires": 2045,
+      "incident_scored_normal": 67774,
+      "incident_fp_per_1k": 30.174
+    },
+    {
+      "metric": "DCGM_FI_DEV_POWER_USAGE",
+      "good_shards": 0,
+      "good_scored_normal": 0,
+      "good_fp_fires": 0,
+      "good_fp_per_1k": 0,
+      "incident_shards": 64,
+      "windows_scored": 68,
+      "windows_detected": 22,
+      "incident_fp_fires": 2091,
+      "incident_scored_normal": 67774,
+      "incident_fp_per_1k": 30.853
+    },
+    {
+      "metric": "DCGM_FI_DEV_GPU_UTIL",
+      "good_shards": 0,
+      "good_scored_normal": 0,
+      "good_fp_fires": 0,
+      "good_fp_per_1k": 0,
+      "incident_shards": 64,
+      "windows_scored": 68,
+      "windows_detected": 20,
+      "incident_fp_fires": 2091,
+      "incident_scored_normal": 67773,
+      "incident_fp_per_1k": 30.853
+    }
+  ],
+  "totals": {
+    "detection_rate": 0.323,
+    "windows_detected": 110,
+    "windows_scored": 341,
+    "fp_per_1k_normal": 29.688
+  }
+}

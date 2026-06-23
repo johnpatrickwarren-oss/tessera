@@ -27,6 +27,8 @@
     "calibration-envelope": "node tools/calibration-envelope.js",
     "preshadow-replay": "tsc -p tsconfig.test.json",
     "shadow-replay": "node tools/shadow-replay.js",
+    "pregwdg-replay": "tsc -p tsconfig.test.json",
+    "gwdg-replay": "node tools/gwdg-replay.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",
@@ -49,7 +51,9 @@
     "typescript": "^5.4.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   },
   "repository": {
     "type": "git",
