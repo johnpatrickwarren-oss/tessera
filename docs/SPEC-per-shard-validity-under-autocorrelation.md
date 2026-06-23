@@ -64,14 +64,15 @@ Each criterion is independently checkable; the AC list is the test list and the 
   empirical FDR vs q with a verdict.
 - **AC-8** The matrix includes, for the AR(1) rows, **both** the unwhitened (raw) result **and** the
   whitened result, so the table itself demonstrates the fix. *(This is the core "fix is real" check.)*
-- **AC-9** Whitened AR(1) null FPR verdict is `PASS` (not significantly above alpha) across the
-  swept rho, including near-unit-root rho=0.95. The MD honestly attributes the rho=0.95 pass partly
-  to the engine's conservative marginal-variance standardization (a power cost at low drift), rather
-  than claiming lag-1 whitening fully decorrelates a near-unit-root process (honest measurement —
-  see AC-12).
+- **AC-9** Whitened AR(1) null FPR verdict is `PASS` (not significantly above alpha) for rho <= 0.9.
+  The near-unit-root rho=0.95 retains a genuine ~1.8x residual inflation (lag-1 whitening with a
+  finite-sample phi cannot fully decorrelate a near-unit-root process) — reported, not hidden
+  (honest measurement — see AC-12).
 - **AC-15** The whitened mode exercises the **engine's** production whitening path: it passes the
-  calibrated `phi` to `updateBettingState`'s `ar1Phi` parameter and the engine pre-whitens
-  internally — `raw` and `whiten` feed identical inputs and differ only in whether `phi` is passed.
+  calibrated `phi` to `updateBettingState`'s `ar1Phi` parameter AND the matching innovation variance
+  `sigma^2*(1-phi^2)` as `sigmaSquared` — exactly what `fit-production-substrate` stamps as
+  `baseline_sigma_squared` when `ar1_phi` is set. The engine pre-whitens internally; `raw` and
+  `whiten` feed identical inputs and differ only in whether `phi` (+ innovation variance) is passed.
   It is NOT a Tessera-side transform. (Requires engine >= 0.3.3-pre.)
 - **AC-10** Whitened detection power on a ramp drift is reported alongside, and is >= the
   documented floor (no "control by never firing").

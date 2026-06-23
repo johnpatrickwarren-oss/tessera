@@ -142,10 +142,15 @@ function streamFires(
   const state = freshBettingState();
   const threshold = 1 / alpha;
   const ar1Phi = mode === 'whiten' && fit ? fit.phi : 0;
+  // Mirror production: fit-production-substrate stamps baseline_sigma_squared =
+  // INNOVATION variance sigma^2*(1-phi^2) (not the marginal) whenever ar1_phi is
+  // set, so the engine standardizes the whitened residual at unit scale. Passing
+  // the marginal here would over-scale z and make the detector over-conservative.
+  const bvar = mode === 'whiten' && fit ? gen.trueVar * (1 - fit.phi * fit.phi) : gen.trueVar;
   for (let w = 0; w < window; w++) {
     let x = step(w);
     if (drift) x += drift * (w + 1);
-    updateBettingState(state, x, gen.trueMean, gen.trueVar, alpha, ar1Phi);
+    updateBettingState(state, x, gen.trueMean, bvar, alpha, ar1Phi);
     if (state.M >= threshold) return true;
   }
   return false;
@@ -210,10 +215,11 @@ function shardTerminalEValue(gen: Generator, mode: 'raw' | 'whiten', fit: Ar1Fit
   const step = gen.make(mulberry32(scramble(seed)));
   const state = freshBettingState();
   const ar1Phi = mode === 'whiten' && fit ? fit.phi : 0;
+  const bvar = mode === 'whiten' && fit ? gen.trueVar * (1 - fit.phi * fit.phi) : gen.trueVar;
   for (let w = 0; w < WINDOW; w++) {
     let x = step(w);
     if (isDrift) x += DRIFT * (w + 1);
-    updateBettingState(state, x, gen.trueMean, gen.trueVar, 0.005, ar1Phi); // engine whitens internally when phi != 0
+    updateBettingState(state, x, gen.trueMean, bvar, 0.005, ar1Phi); // innovation variance + phi: mirrors production
   }
   return state.M;
 }
@@ -307,8 +313,8 @@ function renderMd(m: CalibrationMatrix): string {
   L.push('## Method & honest-measurement notes');
   L.push('');
   L.push('- **`obs FPR` measures the full sticky-fire false-positive rate** over the whole window (P(sup_t M_t >= 1/alpha)), not a per-tick rate.');
-  L.push('- **The whitened rows exercise the ENGINE\'s production path** (`@johnpatrickwarren-oss/deploysignal-engine` >= 0.3.3-pre): the calibrated `phi` is passed to `updateBettingState`\'s `ar1Phi` parameter and the engine pre-whitens internally (tracking `last_x_centered`) and standardizes against the marginal variance. This is NOT a Tessera-side transform — `raw` and `whiten` feed identical inputs and differ only in whether `phi` is passed.');
-  L.push('- **The fix is AR(1) pre-whitening only.** All whitened AR rows (incl. near-unit-root rho=0.95) control type-I here — but partly *because* the engine standardizes the whitened residual against the MARGINAL variance, not the smaller innovation variance sigma^2*(1-phi^2). That under-scales z and makes the detector conservative (lower FPR), at a power cost the strong-ramp `power` column does not reveal — sensitivity at low drift / high rho degrades. AR(p>1) / innovation-variance standardization are future work (see `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`).');
+  L.push('- **The whitened rows exercise the ENGINE\'s production path** (`@johnpatrickwarren-oss/deploysignal-engine` >= 0.3.3-pre): the calibrated `phi` is passed to `updateBettingState`\'s `ar1Phi` parameter and the engine pre-whitens internally (tracking `last_x_centered`). The variance passed is the **innovation variance** sigma^2*(1-phi^2) — exactly what `fit-production-substrate` stamps as `baseline_sigma_squared` whenever `ar1_phi` is set — so the whitened residual is standardized at unit scale (properly calibrated, not conservative). This is NOT a Tessera-side transform — `raw` and `whiten` feed identical inputs and differ only in whether `phi` (and the matching innovation variance) is passed.');
+  L.push('- **The fix is AR(1) pre-whitening only.** Whitening restores type-I control (FPR ~ alpha) for rho <= 0.9. The near-unit-root regime rho=0.95 retains a genuine **~1.8x residual inflation** — lag-1 whitening with a finite-sample phi estimate cannot fully decorrelate a near-unit-root process; reported, not hidden. AR(p>1) / near-unit-root handling is future work (see `decisions/0001-pre-whitening-over-rho-stamped-threshold.md`).');
   L.push('- **`phi` is computed by the bias-corrected estimator in `tools/per-shard-whitening.ts`** (mirroring a good calibrator). The engine\'s built-in Yule-Walker calibrator omits the small-sample bias correction — negligible at this `baseline_n` but material at short baselines / high rho; adopting it upstream is a recommended future engine change.');
   L.push('- **Heavy tails and heteroscedasticity pass unwhitened** — the engine\'s bounded-z clip absorbs them. The load-bearing failure is temporal autocorrelation.');
   L.push(`- **Power is reported for a strong ramp drift** — a per-window ramp \`x += ${m.params.drift}*(w+1)\`, so the offset grows to ≈ ${m.params.drift * m.params.window}σ by the final window (window=${m.params.window}). 100% here confirms whitening does not "control by never firing"; it does NOT characterize sensitivity near the detection floor — see R77 (\`coverage-matrices/R77-detection-envelope.md\`) for the low-magnitude regime.`);

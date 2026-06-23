@@ -39,18 +39,22 @@ e-process under autocorrelated telemetry, and standing up the sprag + Anchor qua
   phi=0, so the bump is correctly a no-op there).
 
 - **Validator now exercises the engine's production whitening path.** `calibration-envelope`'s
-  whitened mode passes the calibrated `phi` to `updateBettingState`'s `ar1Phi` param (engine whitens
-  internally) instead of a Tessera-side transform — `raw` and `whiten` feed identical inputs and
-  differ only in `phi`. All whitened AR rows control type-I (incl. rho=0.95), partly via the engine's
-  conservative marginal-variance standardization (a low-drift power cost, noted honestly).
-  `per-shard-whitening.ts` is now calibration/reference only (bias-corrected estimator + reference
-  transform). Suite 548/0/10; matrix idempotent; gate green.
+  whitened mode passes the calibrated `phi` to `updateBettingState`'s `ar1Phi` param AND the matching
+  innovation variance `sigma^2*(1-phi^2)` as `sigmaSquared` — exactly what `fit-production-substrate`
+  stamps (`baseline_sigma_squared` = innovation variance when `ar1_phi` is set). So the validator now
+  mirrors production: the whitened residual is standardized at unit scale (properly calibrated, not
+  conservative). Fixes a prior validator bug that passed the marginal variance (over-conservative,
+  and the basis of an incorrect "engine standardizes against marginal" claim — now corrected).
+  Result: FPR ~ alpha for rho <= 0.9; rho=0.95 retains a genuine ~1.8x near-unit-root residual.
+  `per-shard-whitening.ts` is now calibration/reference only. Suite 548/0/10; matrix idempotent; gate green.
 
 ## Next
-- (Future engine ADR) AR(p>1); innovation-variance standardization (the engine uses marginal sigma
-  on the whitened residual — conservative, costs power at low drift / high rho).
-- (Future engine ADR) adopt the bias-corrected (Kendall) phi estimator in the engine's calibrator;
-  its Yule-Walker omits it (negligible at long baselines, material at short ones / high rho).
+- **Engine: adopt the bias-corrected (Kendall) phi estimator** in `fit-production-substrate.ts`
+  `ar1Phi` (and the mixture `computePerSignalAr1Phi`); plain Yule-Walker is biased low — negligible at
+  long baselines, material at short ones / high rho. (In progress.)
+- (Future engine ADR) AR(p>1) / near-unit-root (rho=0.95) handling — the residual the lag-1 fix can't
+  remove. Innovation-variance standardization is ALREADY correct in production (it's stamped); no
+  engine change needed there.
 
 ## Open questions / blockers
 - None blocking. Whether to push the whitening fix upstream into the shared engine package (vs
