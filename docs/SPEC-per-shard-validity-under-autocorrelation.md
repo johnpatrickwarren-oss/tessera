@@ -65,9 +65,10 @@ Each criterion is independently checkable; the AC list is the test list and the 
 - **AC-8** The matrix includes, for the AR(1) rows, **both** the unwhitened (raw) result **and** the
   whitened result, so the table itself demonstrates the fix. *(This is the core "fix is real" check.)*
 - **AC-9** Whitened AR(1) null FPR verdict is `PASS` (not significantly above alpha) for rho <= 0.9.
-  The near-unit-root rho=0.95 retains a genuine ~1.8x residual inflation (lag-1 whitening with a
-  finite-sample phi cannot fully decorrelate a near-unit-root process) — reported, not hidden
-  (honest measurement — see AC-12).
+  Near-unit-root is a documented boundary, not hidden: the phi estimate is clipped to [-0.95, 0.95]
+  (matching the engine), so rho=0.99 is whitened with phi=0.95 and stays grossly inflated (~43%
+  FPR); rho=0.95 is borderline (~1.8x at alpha=0.01). This is a stationarity-premise violation, NOT
+  an AR(p) gap — see engine ADR 0003 (route near-unit-root to the self-normalized fallback).
 - **AC-15** The whitened mode exercises the **engine's** production whitening path: it passes the
   calibrated `phi` to `updateBettingState`'s `ar1Phi` parameter AND the matching innovation variance
   `sigma^2*(1-phi^2)` as `sigmaSquared` — exactly what `fit-production-substrate` stamps as
