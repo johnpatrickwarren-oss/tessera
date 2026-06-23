@@ -190,7 +190,7 @@ redesign.
   → Validity needs BOTH (a) m≫n (confirmed) AND (b) a baseline capturing within-window structure
   (seasonal/2D) — a flat mean fails (b). Build A (exchangeability) SHELVED — the problem is baseline
   spec + horizon, not the e-value form. Caught + guarded a vacuous-row "✅" bug in review. +2 tests;
-  gate green. NOTE: cold-eye pending before merge.
+  gate green.
 
 ## Next (the real open question)
 - **Does the SEASONAL (2D) baseline restore validity on real telemetry?** Test engine

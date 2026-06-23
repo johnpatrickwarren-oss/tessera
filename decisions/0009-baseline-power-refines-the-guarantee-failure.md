@@ -15,9 +15,9 @@ tests whether a long baseline (m≫n) restores validity.
 ## Finding (two parts — the second corrects the first's naive reading)
 
 **1. Synthetic (stationary) — m≫n DOES restore validity.** Sweeping the calibration window on
-stationary iid/AR(1)+whitened data: at n/m ≤ 0.5, E[e] ≤ 1 and P(fire) = 0 (valid); it only blows up
-as n/m → 1+. So the ADR 0007/0008 failure was, in part, an under-powered-baseline artifact — the
-plug-in failure is **n/m-dependent**, not unconditional.
+stationary iid/AR(1)+whitened data: at **n/m ≤ 0.4, P(fire) ≈ 0** (valid; n/m = 0.5 is borderline,
+~0.5%); it only blows up as n/m → 1+. So the ADR 0007/0008 failure was, in part, an
+under-powered-baseline artifact — the plug-in failure is **n/m-dependent**, not unconditional.
 
 **2. Real GWDG structural telemetry — a long FLAT baseline does NOT restore validity.** On the same
 shards that fired 100% under a short baseline, sweeping m at fixed n=200 (whitened):
@@ -26,12 +26,19 @@ shards that fired 100% under a short baseline, sweeping m at fixed n=200 (whiten
 |---|---|---|---|---|
 | 100 | 2.0 | 55 | 30.9% | ❌ |
 | 200 | 1.0 | 55 | 32.7% | ❌ |
-| 500 | 0.4 | 55 | 43.6% | ❌ |
-| 1000 | 0.2 | 47 | 42.6% | ❌ |
+| 500 | 0.4 | 55 | 38.2% | ❌ |
+| 1000 | 0.2 | 47 | 31.9% | ❌ |
 
-Even well-powered (n/m=0.4), ~⅓–½ of real shards fire. The synthetic m≫n win held only because the
+(Post-fix: a variance double-application bug — `cal.innovationVar·(1−φ²)` on an already-whitened
+`innovationVar` — was caught in review and corrected; it shifted these by 5–11pp, not the verdict.)
+Even well-powered (n/m=0.2–0.4), ~⅓ of real shards fire. The synthetic m≫n win held only because the
 synthetic was **stationary**; real streams drift / vary **within** the baseline window, so a single
 flat mean over a long window is a poor fit for the test window and keeps firing.
+
+Honesty caveat (review): some of these fires come from near-constant-baseline streams whose variance
+floors to 1, where a genuine scrape-count level shift in the test window fires — those are *real*
+structural events, not pure FP. So the reported P(fire) is an **upper bound** on the stationary-null
+FP; the conclusion rests on the noisy / near-unit-root streams (which fire on the flat-mean misfit).
 
 ## Decision
 

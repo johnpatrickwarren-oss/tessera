@@ -18,7 +18,7 @@
     },
     {
       "label": "iid · PLUG-IN baseline",
-      "mean_e": 449806518998.317,
+      "mean_e": 449786677510.47,
       "median_e": 0.204,
       "p_fire": 0.108,
       "valid": false
@@ -39,20 +39,20 @@
     },
     {
       "label": "AR(1) · PLUG-IN baseline · WHITENED (est. φ)",
-      "mean_e": 20151367.803,
-      "median_e": 0.131,
-      "p_fire": 0.115,
+      "mean_e": 23427567.924,
+      "median_e": 0.178,
+      "p_fire": 0.12,
       "valid": false
     }
   ],
   "synthetic": {
-    "naive_mean_fdp": 0.776,
-    "rel_mean_fdp": 0.739,
-    "rel_whitened_mean_fdp": 0.587,
-    "naive_mean_power": 0.861,
+    "naive_mean_fdp": 0.784,
+    "rel_mean_fdp": 0.745,
+    "rel_whitened_mean_fdp": 0.602,
+    "naive_mean_power": 0.91,
     "rel_mean_power": 1,
-    "naive_mean_rej": 51.393,
-    "rel_mean_rej": 38.633
+    "naive_mean_rej": 53.053,
+    "rel_mean_rej": 39.533
   },
   "real_null": {
     "dataset": "GWDG-structural-scrape_samples_scraped",

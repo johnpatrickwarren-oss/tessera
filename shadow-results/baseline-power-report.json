@@ -11,7 +11,7 @@
       "m": 100,
       "n_over_m": 2,
       "n_streams": 55,
-      "mean_e": 4.5341208356552665e+54,
+      "mean_e": 4.3894657138764425e+54,
       "median_e": 1,
       "p_fire": 0.309,
       "honors_alpha": false
@@ -20,7 +20,7 @@
       "m": 200,
       "n_over_m": 1,
       "n_streams": 55,
-      "mean_e": 1.4607082917672787e+58,
+      "mean_e": 8.315887896612848e+51,
       "median_e": 1,
       "p_fire": 0.327,
       "honors_alpha": false
@@ -29,18 +29,18 @@
       "m": 500,
       "n_over_m": 0.4,
       "n_streams": 55,
-      "mean_e": 2.28806048097827e+56,
+      "mean_e": 2.288056657604449e+56,
       "median_e": 1,
-      "p_fire": 0.436,
+      "p_fire": 0.382,
       "honors_alpha": false
     },
     {
       "m": 1000,
       "n_over_m": 0.2,
       "n_streams": 47,
-      "mean_e": 8.702767381776688e+34,
+      "mean_e": 8.906486704237955e+32,
       "median_e": 1,
-      "p_fire": 0.426,
+      "p_fire": 0.319,
       "honors_alpha": false
     },
     {

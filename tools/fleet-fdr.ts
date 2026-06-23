@@ -41,20 +41,21 @@ export function terminalEValueWith(values: ReadonlyArray<number>, probEnd: numbe
   return state.M;
 }
 
-/** Terminal-wealth e-value with a PLUG-IN baseline (mean/var estimated from the prefix), no
- *  whitening — what the unwhitened detector does. NOTE (the finding): NOT a valid e-value on
- *  real(istic) data — plug-in baseline estimation alone inflates E[·|H0] far above 1. */
+/** Terminal-wealth e-value with a PLUG-IN baseline, NO whitening — the unwhitened detector.
+ *  Uses the MARGINAL variance (cal.sigma2) with φ=0 (consistent: no whitening anywhere).
+ *  NOTE (the finding): NOT a valid e-value on real(istic) data — plug-in baseline estimation
+ *  alone inflates E[·|H0] far above 1. */
 export function terminalEValue(values: ReadonlyArray<number>, probEnd: number): number {
   const cal = calibrateBaseline(values.slice(0, probEnd), 'simple');
-  return terminalEValueWith(values, probEnd, cal.mean, cal.innovationVar, 0);
+  return terminalEValueWith(values, probEnd, cal.mean, cal.sigma2, 0);
 }
 
-/** Plug-in baseline WITH AR(1) whitening (the production path: estimated φ + innovation var).
- *  Still invalid on real data — whitening removes autocorrelation, but the plug-in baseline remains. */
+/** Plug-in baseline WITH AR(1) whitening (the production path). calibrateBaseline already
+ *  returns the consistent (innovationVar = σ²(1−φ²), φ) — pass them as-is (do NOT re-apply
+ *  (1−φ²)). Still invalid on real data — whitening removes autocorrelation, plug-in remains. */
 export function terminalEValueWhitened(values: ReadonlyArray<number>, probEnd: number): number {
   const cal = calibrateBaseline(values.slice(0, probEnd), 'simple');
-  const a = estimateAr1(values.slice(0, probEnd));
-  return terminalEValueWith(values, probEnd, cal.mean, cal.innovationVar * (1 - a.phi * a.phi), a.phi);
+  return terminalEValueWith(values, probEnd, cal.mean, cal.innovationVar, cal.phi);
 }
 
 /** A stationary healthy shard: BASE + AR(1) noise (no drift, no failure). */

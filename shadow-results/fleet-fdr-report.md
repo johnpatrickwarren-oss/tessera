@@ -12,7 +12,7 @@ Terminal wealth on healthy nulls, for {iid, AR(1)} × {true baseline, plug-in (e
 | iid · PLUG-IN baseline | 4.50e+11 | 0.204 | 0.108 | ❌ |
 | AR(1) · true baseline · NO whitening (φ=0) | 2.51e+2 | 0.158 | 0.033 | ❌ |
 | AR(1) · true baseline · WHITENED (est. φ) | 2.12e-1 | 0.065 | 0 | ✅ |
-| AR(1) · PLUG-IN baseline · WHITENED (est. φ) | 2.02e+7 | 0.131 | 0.115 | ❌ |
+| AR(1) · PLUG-IN baseline · WHITENED (est. φ) | 2.34e+7 | 0.178 | 0.12 | ❌ |
 
 **Whitening fixes autocorrelation; the plug-in baseline is the unavoidable invalidator.** Read the rows: AR(1) with *no* whitening is invalid, but AR(1) **whitened** (estimated φ — the production path we already ship) is **valid** — so autocorrelation is solved. What is NOT solved is the **plug-in baseline**: estimating mean/variance from a finite prefix invalidates the e-value even for iid data, and even with whitening applied. Since e-BH *requires* valid marginal e-values, it cannot control FDR when fed these — **the failure is upstream of the fleet layer, in the plug-in baseline of the e-value itself.**
 
@@ -28,11 +28,11 @@ Terminal wealth on healthy nulls, for {iid, AR(1)} × {true baseline, plug-in (e
 
 | construction | mean FDP | target q | mean power |
 |---|---|---|---|
-| naive (raw) | 77.6% | 10.0% | 86.1% |
-| fleet-relative (common-mode removed) | 73.9% | 10.0% | 100.0% |
-| **fleet-relative + whitening** | 58.7% | 10.0% | — |
+| naive (raw) | 78.4% | 10.0% | 91.0% |
+| fleet-relative (common-mode removed) | 74.5% | 10.0% | 100.0% |
+| **fleet-relative + whitening** | 60.2% | 10.0% | — |
 
-All three fail to control FDP vs q=10.0%: naive 77.6%, fleet-relative 73.9%, **fleet-relative + whitening 58.7%**. Removing common-mode AND whitening (every mitigation we have) does NOT rescue it — the plug-in baseline keeps each healthy shard's e-value invalid (Part A), and e-BH faithfully propagates invalid inputs into an uncontrolled FDP. Power stays high (100.0%): the failures are found, then drowned in false discoveries.
+All three fail to control FDP vs q=10.0%: naive 78.4%, fleet-relative 74.5%, **fleet-relative + whitening 60.2%**. Removing common-mode AND whitening (every mitigation we have) does NOT rescue it — the plug-in baseline keeps each healthy shard's e-value invalid (Part A), and e-BH faithfully propagates invalid inputs into an uncontrolled FDP. Power stays high (100.0%): the failures are found, then drowned in false discoveries.
 
 ## Verdict
 

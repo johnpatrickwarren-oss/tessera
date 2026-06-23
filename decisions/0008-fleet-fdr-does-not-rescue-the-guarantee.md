@@ -14,7 +14,11 @@ e-BH (naive vs fleet-relative) FDP.
 ## Finding (root cause, measured)
 
 The betting-e-process terminal-wealth e-value, on healthy nulls (the configuration isolates whitening
-from the plug-in baseline):
+from the plug-in baseline). NOTE (added in ADR 0009 review): the **E[e]** column is heavy-tailed (its
+mean is dominated by rare large draws; **P(e ≥ 1/α) and the median are the stable statistics** — read
+those). A later variance-fix (`cal.innovationVar·(1−φ²)` double-application in `terminalEValueWhitened`)
+shifted the whitened-plug-in E[e] (e.g. ~1.6e14 → ~2e7) and the synthetic FDPs by a few pp; the verdict
+(invalid / does-not-rescue) is unchanged.
 
 | configuration | E[e] | P(e ≥ 1/α) | valid? |
 |---|---|---|---|
