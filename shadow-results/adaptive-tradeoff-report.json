@@ -1,0 +1,82 @@
+{
+  "schema_version": "tessera-adaptive-tradeoff-v1",
+  "params": {
+    "alpha": 0.01,
+    "rho": 0.5,
+    "n": 1200,
+    "onset": 600,
+    "trials": 1500,
+    "adapt": {
+      "window": 300,
+      "recalEvery": 50
+    },
+    "slopes": [
+      0,
+      0.003,
+      0.01,
+      0.03,
+      0.1,
+      0.3
+    ]
+  },
+  "sweep": [
+    {
+      "slope": 0,
+      "static_detect": 0.139,
+      "adaptive_detect": 0,
+      "static_preonset_fp": 0.079,
+      "adaptive_preonset_fp": 0.021
+    },
+    {
+      "slope": 0.003,
+      "static_detect": 0.99,
+      "adaptive_detect": 0.765,
+      "static_preonset_fp": 0.061,
+      "adaptive_preonset_fp": 0.013
+    },
+    {
+      "slope": 0.01,
+      "static_detect": 1,
+      "adaptive_detect": 1,
+      "static_preonset_fp": 0.065,
+      "adaptive_preonset_fp": 0.021
+    },
+    {
+      "slope": 0.03,
+      "static_detect": 1,
+      "adaptive_detect": 1,
+      "static_preonset_fp": 0.073,
+      "adaptive_preonset_fp": 0.019
+    },
+    {
+      "slope": 0.1,
+      "static_detect": 1,
+      "adaptive_detect": 1,
+      "static_preonset_fp": 0.078,
+      "adaptive_preonset_fp": 0.023
+    },
+    {
+      "slope": 0.3,
+      "static_detect": 1,
+      "adaptive_detect": 1,
+      "static_preonset_fp": 0.066,
+      "adaptive_preonset_fp": 0.023
+    }
+  ],
+  "gwdg": [
+    {
+      "mode": "static",
+      "windows_detected": 56,
+      "windows_scored": 168,
+      "fp_fires": 5512,
+      "scored_normal": 189200
+    },
+    {
+      "mode": "adaptive",
+      "windows_detected": 4,
+      "windows_scored": 168,
+      "fp_fires": 1309,
+      "scored_normal": 189200
+    }
+  ]
+}

@@ -31,6 +31,8 @@
     "gwdg-replay": "node tools/gwdg-replay.js",
     "premit-replay": "tsc -p tsconfig.test.json",
     "mit-replay": "node tools/mit-replay.js",
+    "preadaptive-tradeoff": "tsc -p tsconfig.test.json",
+    "adaptive-tradeoff": "node tools/adaptive-tradeoff.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",

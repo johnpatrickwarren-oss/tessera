@@ -125,3 +125,21 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
   must be measured on labeled data before upstreaming. `replayFiresAdaptive` is a harness prototype,
   not engine code. See ADR 0005; report `shadow-results/mit-fp-report.md`. +3 tests; gate green.
   Cold-eye done (SHIP-WITH-FIXES): report prototype caveat added (H1), regime test tightened to >5x (M1), trailing-window/CJS comments (M2/L1). No correctness defects (loader, no-lookahead adaptive, apples-to-apples all confirmed).
+
+## Done (this branch — adaptive-baseline-tradeoff)
+- **Adaptive-baseline detection tradeoff measured (the gate before upstreaming).** Promoted
+  `replayFiresAdaptive` to shared `tools/adaptive-baseline.ts`; built `tools/adaptive-tradeoff.ts`
+  (`pnpm adaptive-tradeoff`): synthetic AR(1)+ramp drift-rate sweep + GWDG real faults, static vs
+  adaptive. RESULT: adaptive cuts FP ~4× but **MASKS slow drifts** — synthetic detection 99%→76.5%
+  at slope 0.003 (threshold ~0.01/step); GWDG real-fault detection collapses **33.3%→2.4%**. So the
+  MIT "5× FP win" was a null-dataset artifact; on labeled data adaptive trades away detection.
+  **Verdict: do NOT upstream adaptive as a static replacement — pursue a hybrid.** See ADR 0006
+  (qualifies ADR 0005). +4 tests; suite 575/0/10; gate green; report idempotent. NOTE: cold-eye
+  pending before merge.
+
+## Next
+- **Design a HYBRID baseline** (static for slow-drift detection + adaptive to suppress regime-shift
+  FP only when no slow-drift hypothesis is active, or freeze/widen the window on suspicion) — then
+  measure it on the same NAB/GWDG/MIT + synthetic-sweep substrates before any engine change.
+- (Open) gap B structural-degradation detector (GWDG substrate ready); topology/fleet (needs real
+  coupled-cluster faults).
