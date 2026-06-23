@@ -8,38 +8,18 @@
 // a labeled dataset adaptive baselining would risk masking slow drifts (noted).
 // See docs/SPEC-mit-supercloud-fp-calibration.md. Tessera-original; NOT vendored.
 
-import { freshBettingState, updateBettingState } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
-import { calibrateBaseline, replayFires, scoreDataset, probationaryEnd, type Baseline } from './shadow-replay.js';
+import { calibrateBaseline, replayFires, scoreDataset, probationaryEnd } from './shadow-replay.js';
 import { loadMitTraces, listMitGpuCsvs, MIT_METRIC_COL } from './_mit-supercloud-loader.js';
+import { replayFiresAdaptive, ADAPT_WINDOW, ADAPT_RECAL_EVERY } from './adaptive-baseline.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+// replayFiresAdaptive moved to ./adaptive-baseline.js (shared); re-export so
+// existing importers/tests keep resolving it from here.
+export { replayFiresAdaptive, ADAPT_WINDOW, ADAPT_RECAL_EVERY } from './adaptive-baseline.js';
+
 export const METRICS = Object.keys(MIT_METRIC_COL);
 export const ALPHA = 0.01;
-export const ADAPT_WINDOW = 500;   // trailing samples for the rolling baseline (~50s @100ms)
-export const ADAPT_RECAL_EVERY = 100;
-
-/** Adaptive replay: recompute the baseline from a trailing window every
- *  ADAPT_RECAL_EVERY ticks, so it tracks regime shifts. Restart-on-fire. */
-export function replayFiresAdaptive(values: ReadonlyArray<number>, probEnd: number, alpha: number): number[] {
-  let cal: Baseline = calibrateBaseline(values.slice(0, probEnd), 'simple');
-  let state = freshBettingState();
-  const threshold = 1 / alpha;
-  const fires: number[] = [];
-  for (let i = probEnd; i < values.length; i++) {
-    updateBettingState(state, values[i], cal.mean, cal.innovationVar, alpha, cal.phi);
-    if (state.M >= threshold) { fires.push(i); state = freshBettingState(); }
-    if ((i - probEnd) % ADAPT_RECAL_EVERY === 0 && i > probEnd) {
-      // Trailing-window recalibration. NOTE: while i <= ADAPT_WINDOW, lo=0 so this
-      // is a growing prefix, not yet a true trailing window (matters only for short
-      // traces); it becomes strictly trailing once i > ADAPT_WINDOW. No lookahead
-      // either way (slice ends at i, the current tick is scored with the prior cal).
-      const lo = Math.max(0, i - ADAPT_WINDOW);
-      cal = calibrateBaseline(values.slice(lo, i), 'simple');
-    }
-  }
-  return fires;
-}
 
 function round3(x: number): number { return Math.round(x * 1000) / 1000; }
 
