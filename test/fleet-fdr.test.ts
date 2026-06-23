@@ -16,7 +16,7 @@ test('eBH rejects the k* largest e-values per the N/(q*k) rule', () => {
 test('terminalEValue: flat series ~1 (no evidence); persistent shift -> large e-value', () => {
   const flat = new Array(800).fill(1000);
   const probEnd = probationaryEnd(flat.length);
-  assert.ok(terminalEValue(flat, probEnd) <= 2, 'flat null e-value must stay ~1');
+  assert.ok(terminalEValue(flat, probEnd) <= 1, 'flat null e-value must stay ~<=1');
   const shifted = flat.map((v, i) => (i >= 400 ? v + 30 : v));
   assert.ok(terminalEValue(shifted, probEnd) >= 1 / Q, 'a persistent shift must accumulate a large e-value');
 });
@@ -29,18 +29,20 @@ test('fleetResiduals removes the common-mode (per-timestamp median)', () => {
   assert.deepEqual(R[2], [4, 4, 4]); // the offset shard's deviation from the fleet
 });
 
-test('root cause: e-value valid ONLY with true baseline + iid; plug-in and autocorrelation break it', () => {
+test('root cause: whitening fixes autocorrelation; the PLUG-IN baseline is the invalidator', () => {
   const rows = eValueValidity(200);
-  const get = (regime: string, baseline: string) => rows.find((v) => v.regime.startsWith(regime) && v.baseline === baseline)!;
-  assert.ok(get('iid', 'true').valid, 'iid + true baseline must be a valid e-value (E[e]<=1, P(fire)<=alpha)');
-  assert.ok(!get('iid', 'plug-in').valid, 'plug-in baseline must invalidate the e-value (inflated)');
-  assert.ok(!get('AR', 'true').valid, 'autocorrelation must invalidate even with the true baseline');
-  assert.ok(!get('AR', 'plug-in').valid, 'plug-in + AR is the worst case');
+  const get = (frag: string) => rows.find((v) => v.label.includes(frag))!;
+  assert.ok(get('iid · true').valid, 'iid + true baseline is a valid e-value (E[e]<=1, P(fire)<=alpha)');
+  assert.ok(!get('iid · PLUG-IN').valid, 'plug-in baseline alone invalidates the e-value (even iid)');
+  assert.ok(!get('NO whitening').valid, 'AR(1) UN-whitened is invalid (ignoring autocorrelation)');
+  assert.ok(get('true baseline · WHITENED').valid, 'AR(1) WHITENED with true baseline is VALID — whitening fixes autocorrelation');
+  assert.ok(!get('PLUG-IN baseline · WHITENED').valid, 'plug-in baseline survives whitening -> still invalid (the root cause)');
 });
 
-test('consequence: fleet e-BH does NOT rescue the guarantee — neither naive nor fleet-relative controls FDP', () => {
+test('consequence: fleet e-BH does NOT rescue the guarantee — naive, relative, AND relative+whitening all fail', () => {
   const r = runFleetFdr(); // synthetic only (no gwdg dir)
   assert.ok(r.synthetic.naive_mean_fdp > Q + 0.05, `naive FDP (${r.synthetic.naive_mean_fdp}) must exceed q`);
-  assert.ok(r.synthetic.rel_mean_fdp > Q + 0.05, `fleet-relative FDP (${r.synthetic.rel_mean_fdp}) must ALSO exceed q (invalid e-values)`);
-  assert.ok(r.synthetic.rel_mean_power >= 0.5, `relative still has power (${r.synthetic.rel_mean_power}) — it finds failures but drowns them in false discoveries`);
+  assert.ok(r.synthetic.rel_mean_fdp > Q + 0.05, `fleet-relative FDP (${r.synthetic.rel_mean_fdp}) must exceed q`);
+  assert.ok(r.synthetic.rel_whitened_mean_fdp > Q + 0.05, `relative+whitening FDP (${r.synthetic.rel_whitened_mean_fdp}) must ALSO exceed q — plug-in baseline survives every mitigation`);
+  assert.ok(r.synthetic.rel_mean_power >= 0.5, `relative still has power (${r.synthetic.rel_mean_power}) — finds failures but drowns them`);
 });

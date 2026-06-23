@@ -15,6 +15,7 @@
 import { freshBettingState, updateBettingState } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
 import { calibrateBaseline, probationaryEnd } from './shadow-replay.js';
 import { loadStructuralStreams, STRUCTURAL_METRIC } from './_gwdg-structural-loader.js';
+import { estimateAr1 } from './per-shard-whitening.js';
 import { mulberry32, scramble, gaussian } from './calibration-envelope.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -32,19 +33,28 @@ function median(xs: ReadonlyArray<number>): number {
 }
 function round3(x: number): number { return Math.round(x * 1000) / 1000; }
 
-/** Terminal wealth of the betting e-process over [probEnd, n) with a given baseline. */
-export function terminalEValueWith(values: ReadonlyArray<number>, probEnd: number, mean: number, sigma2: number): number {
+/** Terminal wealth of the betting e-process over [probEnd, n) with a given baseline + AR(1) φ
+ *  (φ=0 = no whitening). Terminal wealth of the test martingale = a candidate e-value. */
+export function terminalEValueWith(values: ReadonlyArray<number>, probEnd: number, mean: number, sigma2: number, phi: number = 0): number {
   const state = freshBettingState();
-  for (let i = probEnd; i < values.length; i++) updateBettingState(state, values[i], mean, sigma2, E_ALPHA, 0);
+  for (let i = probEnd; i < values.length; i++) updateBettingState(state, values[i], mean, sigma2, E_ALPHA, phi);
   return state.M;
 }
 
-/** Terminal-wealth e-value with a PLUG-IN baseline (mean/var estimated from the prefix) —
- *  what a real detector must do. NOTE (the finding): this is NOT a valid e-value on real(istic)
- *  data — plug-in estimation and autocorrelation both inflate E[·|H0] far above 1. */
+/** Terminal-wealth e-value with a PLUG-IN baseline (mean/var estimated from the prefix), no
+ *  whitening — what the unwhitened detector does. NOTE (the finding): NOT a valid e-value on
+ *  real(istic) data — plug-in baseline estimation alone inflates E[·|H0] far above 1. */
 export function terminalEValue(values: ReadonlyArray<number>, probEnd: number): number {
   const cal = calibrateBaseline(values.slice(0, probEnd), 'simple');
-  return terminalEValueWith(values, probEnd, cal.mean, cal.innovationVar);
+  return terminalEValueWith(values, probEnd, cal.mean, cal.innovationVar, 0);
+}
+
+/** Plug-in baseline WITH AR(1) whitening (the production path: estimated φ + innovation var).
+ *  Still invalid on real data — whitening removes autocorrelation, but the plug-in baseline remains. */
+export function terminalEValueWhitened(values: ReadonlyArray<number>, probEnd: number): number {
+  const cal = calibrateBaseline(values.slice(0, probEnd), 'simple');
+  const a = estimateAr1(values.slice(0, probEnd));
+  return terminalEValueWith(values, probEnd, cal.mean, cal.innovationVar * (1 - a.phi * a.phi), a.phi);
 }
 
 /** A stationary healthy shard: BASE + AR(1) noise (no drift, no failure). */
@@ -55,27 +65,30 @@ function genHealthy(rng: () => number, rho: number): number[] {
   return v;
 }
 
-export interface ValidityRow { regime: string; baseline: 'true' | 'plug-in'; mean_e: number; median_e: number; p_fire: number; valid: boolean; }
+export interface ValidityRow { label: string; mean_e: number; median_e: number; p_fire: number; valid: boolean; }
+
+// Each diagnostic row: data regime (rho) + how the e-value is configured.
+const VALIDITY_ROWS: Array<{ label: string; rho: number; e: (v: number[], pe: number) => number }> = [
+  { label: 'iid · true baseline', rho: 0, e: (v, pe) => terminalEValueWith(v, pe, BASE, NOISE_SD * NOISE_SD, 0) },
+  { label: 'iid · PLUG-IN baseline', rho: 0, e: (v, pe) => terminalEValue(v, pe) },
+  { label: 'AR(1) · true baseline · NO whitening (φ=0)', rho: 0.5, e: (v, pe) => terminalEValueWith(v, pe, BASE, NOISE_SD * NOISE_SD, 0) },
+  { label: 'AR(1) · true baseline · WHITENED (est. φ)', rho: 0.5, e: (v, pe) => { const a = estimateAr1(v.slice(0, pe)); return terminalEValueWith(v, pe, BASE, a.sigma2, a.phi); } },
+  { label: 'AR(1) · PLUG-IN baseline · WHITENED (est. φ)', rho: 0.5, e: (v, pe) => terminalEValueWhitened(v, pe) },
+];
 
 /** The root-cause diagnostic: is the betting-e-process terminal wealth a VALID e-value
- *  (E[e|H0] ≤ 1)? Measured on healthy nulls for {iid, AR(1)} × {true baseline, plug-in}. */
+ *  (E[e|H0] ≤ 1, P(fire) ≤ α)? Isolates whitening (fixes autocorrelation) from the plug-in
+ *  baseline (the unavoidable invalidator whitening cannot touch). */
 export function eValueValidity(K: number = 400): ValidityRow[] {
   const probEnd = probationaryEnd(T);
-  const rows: ValidityRow[] = [];
-  for (const [regime, rho] of [['iid', 0], ['AR(1) ρ=0.5', 0.5]] as const) {
-    for (const baseline of ['true', 'plug-in'] as const) {
-      const es: number[] = [];
-      for (let s = 0; s < K; s++) {
-        const v = genHealthy(mulberry32(scramble(7 + s * 17 + (rho > 0 ? 100000 : 0))), rho);
-        es.push(baseline === 'true' ? terminalEValueWith(v, probEnd, BASE, NOISE_SD * NOISE_SD) : terminalEValue(v, probEnd));
-      }
-      const mean = es.reduce((a, b) => a + b, 0) / K;
-      const sorted = [...es].sort((a, b) => a - b);
-      const pFire = es.filter((e) => e >= 1 / E_ALPHA).length / K;
-      rows.push({ regime, baseline, mean_e: round3(mean), median_e: round3(sorted[Math.floor(K / 2)]), p_fire: round3(pFire), valid: mean <= 1 && pFire <= E_ALPHA });
-    }
-  }
-  return rows;
+  return VALIDITY_ROWS.map((row, ri) => {
+    const es: number[] = [];
+    for (let s = 0; s < K; s++) es.push(row.e(genHealthy(mulberry32(scramble(7 + s * 17 + ri * 100000)), row.rho), probEnd));
+    const mean = es.reduce((a, b) => a + b, 0) / K;
+    const sorted = [...es].sort((a, b) => a - b);
+    const pFire = es.filter((e) => e >= 1 / E_ALPHA).length / K;
+    return { label: row.label, mean_e: round3(mean), median_e: round3(sorted[Math.floor(K / 2)]), p_fire: round3(pFire), valid: mean <= 1 && pFire <= E_ALPHA };
+  });
 }
 
 /** e-BH (Wang–Ramdas): reject the k* shards with largest e-values, k* = max{k : e_(k) ≥ N/(q·k)}. */
@@ -99,7 +112,7 @@ export function fleetResiduals(X: number[][]): number[][] {
   return R;
 }
 
-interface TrialOut { naiveFdp: number; relFdp: number; naivePower: number; relPower: number; naiveRej: number; relRej: number; }
+interface TrialOut { naiveFdp: number; relFdp: number; relWhitenFdp: number; naivePower: number; relPower: number; naiveRej: number; relRej: number; }
 
 function genFleet(rng: () => number): { X: number[][]; failed: boolean[] } {
   // shared common-mode random walk (the persistent drift that breaks per-shard e-values)
@@ -129,18 +142,20 @@ function score(rej: number[], failed: boolean[]): { fdp: number; power: number }
 function syntheticTrial(seed: number): TrialOut {
   const { X, failed } = genFleet(mulberry32(scramble(seed)));
   const probEnd = probationaryEnd(T);
+  const R = fleetResiduals(X);
   const naiveE = X.map((v) => terminalEValue(v, probEnd));
-  const relE = fleetResiduals(X).map((v) => terminalEValue(v, probEnd));
-  const nR = eBH(naiveE, Q), rR = eBH(relE, Q);
+  const relE = R.map((v) => terminalEValue(v, probEnd));
+  const relWhitenE = R.map((v) => terminalEValueWhitened(v, probEnd)); // common-mode removed AND whitened
+  const nR = eBH(naiveE, Q), rR = eBH(relE, Q), rwR = eBH(relWhitenE, Q);
   const ns = score(nR, failed), rs = score(rR, failed);
-  return { naiveFdp: ns.fdp, relFdp: rs.fdp, naivePower: ns.power, relPower: rs.power, naiveRej: nR.length, relRej: rR.length };
+  return { naiveFdp: ns.fdp, relFdp: rs.fdp, relWhitenFdp: score(rwR, failed).fdp, naivePower: ns.power, relPower: rs.power, naiveRej: nR.length, relRej: rR.length };
 }
 
 export interface FleetReport {
   schema_version: 'tessera-fleet-fdr-v1';
   params: { q: number; e_alpha: number; n: number; t: number; m_fail: number; trials: number };
   validity: ValidityRow[];
-  synthetic: { naive_mean_fdp: number; rel_mean_fdp: number; naive_mean_power: number; rel_mean_power: number; naive_mean_rej: number; rel_mean_rej: number };
+  synthetic: { naive_mean_fdp: number; rel_mean_fdp: number; rel_whitened_mean_fdp: number; naive_mean_power: number; rel_mean_power: number; naive_mean_rej: number; rel_mean_rej: number };
   real_null: { dataset: string; n_shards: number; rejected: number; note: string } | null;
 }
 
@@ -151,7 +166,7 @@ export function runFleetFdr(gwdgDir?: string): FleetReport {
   for (let s = 0; s < TRIALS; s++) outs.push(syntheticTrial(0xF1EE7 + s * 7919));
   const mean = (f: (o: TrialOut) => number) => round3(outs.reduce((a, o) => a + f(o), 0) / outs.length);
   const synthetic = {
-    naive_mean_fdp: mean((o) => o.naiveFdp), rel_mean_fdp: mean((o) => o.relFdp),
+    naive_mean_fdp: mean((o) => o.naiveFdp), rel_mean_fdp: mean((o) => o.relFdp), rel_whitened_mean_fdp: mean((o) => o.relWhitenFdp),
     naive_mean_power: mean((o) => o.naivePower), rel_mean_power: mean((o) => o.relPower),
     naive_mean_rej: mean((o) => o.naiveRej), rel_mean_rej: mean((o) => o.relRej),
   };
@@ -182,11 +197,11 @@ function renderMd(r: FleetReport): string {
   L.push('');
   L.push('Terminal wealth on healthy nulls, for {iid, AR(1)} × {true baseline, plug-in (estimated) baseline}. A valid e-value needs E[e] ≤ 1 and P(fire) ≤ α.');
   L.push('');
-  L.push('| regime | baseline | E[e] | median e | P(e ≥ 1/α) | valid? |');
-  L.push('|---|---|---|---|---|---|');
-  for (const v of r.validity) L.push(`| ${v.regime} | ${v.baseline} | ${v.mean_e.toExponential(2)} | ${v.median_e} | ${v.p_fire} | ${v.valid ? '✅' : '❌'} |`);
+  L.push('| configuration | E[e] | median e | P(e ≥ 1/α) | valid? |');
+  L.push('|---|---|---|---|---|');
+  for (const v of r.validity) L.push(`| ${v.label} | ${v.mean_e.toExponential(2)} | ${v.median_e} | ${v.p_fire} | ${v.valid ? '✅' : '❌'} |`);
   L.push('');
-  L.push(`**The e-value is valid ONLY with the true baseline AND iid data.** Plug-in baseline estimation (unavoidable — a real detector must estimate mean/variance) inflates E[e] by orders of magnitude; autocorrelation (ubiquitous in telemetry) breaks it independently; together they compound. Since e-BH *requires* valid marginal e-values, it cannot control FDR when fed these — **the failure is upstream of the fleet layer**, in the e-value itself.`);
+  L.push(`**Whitening fixes autocorrelation; the plug-in baseline is the unavoidable invalidator.** Read the rows: AR(1) with *no* whitening is invalid, but AR(1) **whitened** (estimated φ — the production path we already ship) is **valid** — so autocorrelation is solved. What is NOT solved is the **plug-in baseline**: estimating mean/variance from a finite prefix invalidates the e-value even for iid data, and even with whitening applied. Since e-BH *requires* valid marginal e-values, it cannot control FDR when fed these — **the failure is upstream of the fleet layer, in the plug-in baseline of the e-value itself.**`);
   L.push('');
   L.push('## B. Consequence — real null: naive fleet e-BH on real healthy GWDG structural shards');
   L.push('');
@@ -202,16 +217,17 @@ function renderMd(r: FleetReport): string {
   L.push('');
   L.push(`${r.params.n} shards sharing a common-mode random-walk drift + idiosyncratic AR(1) noise; ${r.params.m_fail} carry an injected step failure after onset. ${r.params.trials} trials. **Naive** = e-value on the raw shard; **fleet-relative** = e-value on the residual after subtracting the per-timestamp cross-shard median (common-mode removed).`);
   L.push('');
-  L.push('| construction | mean FDP | target q | mean power | mean rejections |');
-  L.push('|---|---|---|---|---|');
-  L.push(`| naive (raw) | ${pct(s.naive_mean_fdp)} | ${pct(r.params.q)} | ${pct(s.naive_mean_power)} | ${s.naive_mean_rej} |`);
-  L.push(`| **fleet-relative** | ${pct(s.rel_mean_fdp)} | ${pct(r.params.q)} | ${pct(s.rel_mean_power)} | ${s.rel_mean_rej} |`);
+  L.push('| construction | mean FDP | target q | mean power |');
+  L.push('|---|---|---|---|');
+  L.push(`| naive (raw) | ${pct(s.naive_mean_fdp)} | ${pct(r.params.q)} | ${pct(s.naive_mean_power)} |`);
+  L.push(`| fleet-relative (common-mode removed) | ${pct(s.rel_mean_fdp)} | ${pct(r.params.q)} | ${pct(s.rel_mean_power)} |`);
+  L.push(`| **fleet-relative + whitening** | ${pct(s.rel_whitened_mean_fdp)} | ${pct(r.params.q)} | — |`);
   L.push('');
-  L.push(`Both fail to control FDP: naive ${pct(s.naive_mean_fdp)}, **fleet-relative ${pct(s.rel_mean_fdp)}** vs q=${pct(r.params.q)} (relative power ${pct(s.rel_mean_power)} — it finds the failures, but drowns them in false discoveries). Removing the common-mode does NOT rescue it, because the e-value is invalid for a reason the fleet layer can't touch: plug-in baseline + idiosyncratic per-shard offsets still inflate each healthy shard's wealth (Part A). e-BH faithfully propagates invalid inputs into an uncontrolled FDP.`);
+  L.push(`All three fail to control FDP vs q=${pct(r.params.q)}: naive ${pct(s.naive_mean_fdp)}, fleet-relative ${pct(s.rel_mean_fdp)}, **fleet-relative + whitening ${pct(s.rel_whitened_mean_fdp)}**. Removing common-mode AND whitening (every mitigation we have) does NOT rescue it — the plug-in baseline keeps each healthy shard's e-value invalid (Part A), and e-BH faithfully propagates invalid inputs into an uncontrolled FDP. Power stays high (${pct(s.rel_mean_power)}): the failures are found, then drowned in false discoveries.`);
   L.push('');
   L.push('## Verdict');
   L.push('');
-  L.push('**Fleet-level e-BH does NOT rescue the guarantee.** The root cause (Part A) is upstream: the betting-e-process terminal wealth is not a valid e-value under plug-in baselines or autocorrelation, and e-BH requires valid e-values. A real guarantee would require a **valid e-value construction** — one robust to an unknown/estimated baseline and to autocorrelation (e.g. a mixture / confidence-sequence martingale that integrates over the nuisance mean, with whitening) — i.e. a redesign of the per-shard test, not a fleet wrapper. That is the honest next direction; until then, Tessera should claim *detection*, not a calibrated FP/FDR guarantee, on real telemetry.');
+  L.push('**Fleet-level e-BH does NOT rescue the guarantee.** The root cause (Part A) is upstream and specific: the betting-e-process terminal wealth is invalidated by the **plug-in baseline** (estimating mean/variance from a finite prefix). Autocorrelation is NOT the problem — the whitening we already ship makes the AR(1) case valid. So the one remaining fix is a **nuisance-baseline-robust e-value**: instead of plugging in a point estimate of mean/variance, integrate over the unknown baseline (a method-of-mixtures / confidence-sequence martingale), combined with the existing whitening. That is a redesign of the per-shard test, not a fleet wrapper, and it is the honest next direction (ADR 0008). Until then, Tessera should claim *detection*, not a calibrated FP/FDR guarantee, on real telemetry.');
   L.push('');
   L.push('> **Scope:** ground-truth FDP needs failure labels (absent in real fleet telemetry), so Parts A & C are synthetic, parameterized to the *measured* real behavior (ADR 0007); Part B confirms the naive failure on actual healthy telemetry. A real labeled fleet remains the outstanding validation.');
   L.push('');

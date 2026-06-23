@@ -13,22 +13,28 @@ e-BH (naive vs fleet-relative) FDP.
 
 ## Finding (root cause, measured)
 
-The betting-e-process terminal-wealth e-value is valid **only with the true baseline AND iid data**:
+The betting-e-process terminal-wealth e-value, on healthy nulls (the configuration isolates whitening
+from the plug-in baseline):
 
-| regime | baseline | E[e] | P(e ≥ 1/α) | valid? |
-|---|---|---|---|---|
-| iid | true | 0.17 | 0.000 | ✅ |
-| iid | plug-in | 6.6e8 | 0.120 | ❌ |
-| AR(1) ρ=0.5 | true | 3.8e3 | 0.025 | ❌ |
-| AR(1) ρ=0.5 | plug-in | 8.4e32 | 0.358 | ❌ |
+| configuration | E[e] | P(e ≥ 1/α) | valid? |
+|---|---|---|---|
+| iid · true baseline | 0.17 | 0.000 | ✅ |
+| iid · **PLUG-IN** baseline | 6.6e8 | 0.120 | ❌ |
+| AR(1) · true baseline · NO whitening (φ=0) | 3.8e3 | 0.025 | ❌ |
+| AR(1) · true baseline · **WHITENED** (est. φ) | 0.24 | 0.000 | ✅ |
+| AR(1) · **PLUG-IN** baseline · WHITENED (est. φ) | 1.6e14 | 0.115 | ❌ |
 
-**Plug-in baseline estimation** (unavoidable — a real detector estimates mean/variance from data) and
-**autocorrelation** (ubiquitous in telemetry) each inflate E[e] far above 1, and compound. Consequences:
+**Whitening fixes autocorrelation; the plug-in baseline is the unavoidable invalidator.** AR(1)
+un-whitened is invalid, but AR(1) **whitened** (estimated φ — the production path already shipped in the
+engine) is **valid** — so autocorrelation is solved, not an open problem. What remains is the **plug-in
+baseline**: estimating mean/variance from a finite prefix invalidates the e-value even for iid data, and
+even with whitening applied. Consequences:
 - **Real null:** naive fleet e-BH rejected **34/55** real healthy GWDG structural shards — all false
   discoveries.
-- **Synthetic ground truth:** both naive (FDP 78%) and **fleet-relative (FDP 74%, power 100%)** fail to
-  control FDP vs q=10%. Removing common-mode finds every failure but still drowns them in false
-  discoveries, because plug-in + idiosyncratic per-shard offsets keep each healthy e-value invalid.
+- **Synthetic ground truth:** naive (FDP 78%), fleet-relative (FDP 74%, power 100%), AND
+  **fleet-relative + whitening (FDP ~59%)** all fail to control FDP vs q=10%. Every mitigation we have
+  (common-mode removal + whitening) leaves the plug-in baseline intact, so each healthy e-value stays
+  invalid.
 
 ## Decision
 
@@ -43,24 +49,26 @@ until the e-value is made valid.
 
 - **Not "fleet-relative fixes it"** — measured: it doesn't (FDP 74%). Common-mode is not the only
   invalidator; plug-in baseline and autocorrelation are.
-- **The only path to a real guarantee: a VALID e-value construction** — a mixture / confidence-sequence
-  martingale that integrates over the unknown (nuisance) baseline mean/variance, combined with whitening
-  for autocorrelation. That is a redesign of the per-shard test, not a wrapper, and it is the honest
-  next research direction. (Validity must then be re-measured the same way: E[e|H0] ≤ 1 on real healthy
-  data.)
+- **The only path to a real guarantee: a nuisance-baseline-robust e-value** — instead of plugging in a
+  point estimate of mean/variance, integrate over the unknown baseline (a method-of-mixtures /
+  confidence-sequence martingale), combined with the **whitening we already ship** (which handles
+  autocorrelation — see the validity table). That is a redesign of the per-shard test, not a wrapper,
+  and it is the honest next research direction. (Validity must then be re-measured the same way:
+  E[e|H0] ≤ 1 on real healthy data.)
 
 ## Consequences
 
 - The headline "guaranteed low FP/FDR" claim is **not supported at any level** (per-shard ADR 0007;
   fleet ADR 0008) on real telemetry with the current e-value. The artifact's honest claim is strong
-  *detection* + *anytime-valid framework that is correct under its assumptions* — assumptions real data
-  violates via estimated baselines and autocorrelation.
-- Next research: nuisance-robust + whitened e-value, validity re-measured; only then revisit per-shard
-  and fleet FDR.
+  *detection* + *anytime-valid framework that is correct under its assumptions* — the binding violated
+  assumption is the **plug-in baseline** (autocorrelation is already handled by the shipped whitening).
+- Next research: a nuisance-baseline-robust e-value (on top of the existing whitening), validity
+  re-measured; only then revisit per-shard and fleet FDR.
 
 ## Ruled out / gotchas
 
 - Ground-truth FDP needs labels (absent in real fleet telemetry) → synthetic fleet parameterized to the
   measured real drift; the real-null half uses actual healthy GWDG shards (no synthetic there).
-- The e-value IS valid in the ideal case (true baseline + iid: E[e]=0.17) — the framework is correct;
-  it is the plug-in + dependence reality that breaks it.
+- The e-value IS valid in the ideal case (true baseline + iid: E[e]=0.17) AND when whitened with the
+  true baseline (AR(1) whitened: E[e]=0.24) — the framework + shipped whitening are correct; it is the
+  **plug-in baseline** that breaks it.

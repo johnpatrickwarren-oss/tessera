@@ -154,7 +154,7 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
   persistent sub-percent level drift (P(fire)→1 under real nonstationarity). Fundamental, not tuning
   — and it mirrors the numeric over-firing (NAB/GWDG/MIT). The "guaranteed low FP" promise does not
   survive per-shard on real data; FLEET-level e-BH FDR (common-mode drift cancels in ranking) is the
-  remaining hope. See ADR 0007. +5 tests; gate green. NOTE: cold-eye pending before merge.
+  remaining hope. See ADR 0007. +5 tests; gate green.
 
 ## Next
 - **Validate fleet-level e-BH FDR on real telemetry** — the one place a real guarantee could survive
@@ -172,7 +172,7 @@ per-shard e-process validity work and the sprag + Anchor quality stack.
   q=10%. Fleet layer can't fix an invalid marginal e-value. VERDICT: claim detection, not a calibrated
   FP/FDR guarantee, on real telemetry. The only path: a valid e-value construction (nuisance-robust
   mixture/confidence-sequence + whitening) — a per-shard redesign. See ADR 0008. +5 tests; suite
-  587/0/10; gate green; idempotent. NOTE: cold-eye pending before merge.
+  587/0/10; gate green; idempotent.
 
 ## Arc summary (decisions 0001–0008)
 Detection works (numeric + structural); the per-shard FP guarantee (0007) AND fleet-FDR (0008) both

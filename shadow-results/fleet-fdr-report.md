@@ -6,14 +6,15 @@ ADR 0007 left fleet-FDR as the one place a real guarantee could live. e-BH (Wang
 
 Terminal wealth on healthy nulls, for {iid, AR(1)} × {true baseline, plug-in (estimated) baseline}. A valid e-value needs E[e] ≤ 1 and P(fire) ≤ α.
 
-| regime | baseline | E[e] | median e | P(e ≥ 1/α) | valid? |
-|---|---|---|---|---|---|
-| iid | true | 1.69e-1 | 0.065 | 0 | ✅ |
-| iid | plug-in | 6.59e+8 | 0.197 | 0.12 | ❌ |
-| AR(1) ρ=0.5 | true | 3.83e+3 | 0.141 | 0.025 | ❌ |
-| AR(1) ρ=0.5 | plug-in | 8.43e+32 | 3.622 | 0.358 | ❌ |
+| configuration | E[e] | median e | P(e ≥ 1/α) | valid? |
+|---|---|---|---|---|
+| iid · true baseline | 1.69e-1 | 0.065 | 0 | ✅ |
+| iid · PLUG-IN baseline | 4.50e+11 | 0.204 | 0.108 | ❌ |
+| AR(1) · true baseline · NO whitening (φ=0) | 2.51e+2 | 0.158 | 0.033 | ❌ |
+| AR(1) · true baseline · WHITENED (est. φ) | 2.12e-1 | 0.065 | 0 | ✅ |
+| AR(1) · PLUG-IN baseline · WHITENED (est. φ) | 2.02e+7 | 0.131 | 0.115 | ❌ |
 
-**The e-value is valid ONLY with the true baseline AND iid data.** Plug-in baseline estimation (unavoidable — a real detector must estimate mean/variance) inflates E[e] by orders of magnitude; autocorrelation (ubiquitous in telemetry) breaks it independently; together they compound. Since e-BH *requires* valid marginal e-values, it cannot control FDR when fed these — **the failure is upstream of the fleet layer**, in the e-value itself.
+**Whitening fixes autocorrelation; the plug-in baseline is the unavoidable invalidator.** Read the rows: AR(1) with *no* whitening is invalid, but AR(1) **whitened** (estimated φ — the production path we already ship) is **valid** — so autocorrelation is solved. What is NOT solved is the **plug-in baseline**: estimating mean/variance from a finite prefix invalidates the e-value even for iid data, and even with whitening applied. Since e-BH *requires* valid marginal e-values, it cannot control FDR when fed these — **the failure is upstream of the fleet layer, in the plug-in baseline of the e-value itself.**
 
 ## B. Consequence — real null: naive fleet e-BH on real healthy GWDG structural shards
 
@@ -25,15 +26,16 @@ Terminal wealth on healthy nulls, for {iid, AR(1)} × {true baseline, plug-in (e
 
 60 shards sharing a common-mode random-walk drift + idiosyncratic AR(1) noise; 10 carry an injected step failure after onset. 150 trials. **Naive** = e-value on the raw shard; **fleet-relative** = e-value on the residual after subtracting the per-timestamp cross-shard median (common-mode removed).
 
-| construction | mean FDP | target q | mean power | mean rejections |
-|---|---|---|---|---|
-| naive (raw) | 77.6% | 10.0% | 86.1% | 51.393 |
-| **fleet-relative** | 73.9% | 10.0% | 100.0% | 38.633 |
+| construction | mean FDP | target q | mean power |
+|---|---|---|---|
+| naive (raw) | 77.6% | 10.0% | 86.1% |
+| fleet-relative (common-mode removed) | 73.9% | 10.0% | 100.0% |
+| **fleet-relative + whitening** | 58.7% | 10.0% | — |
 
-Both fail to control FDP: naive 77.6%, **fleet-relative 73.9%** vs q=10.0% (relative power 100.0% — it finds the failures, but drowns them in false discoveries). Removing the common-mode does NOT rescue it, because the e-value is invalid for a reason the fleet layer can't touch: plug-in baseline + idiosyncratic per-shard offsets still inflate each healthy shard's wealth (Part A). e-BH faithfully propagates invalid inputs into an uncontrolled FDP.
+All three fail to control FDP vs q=10.0%: naive 77.6%, fleet-relative 73.9%, **fleet-relative + whitening 58.7%**. Removing common-mode AND whitening (every mitigation we have) does NOT rescue it — the plug-in baseline keeps each healthy shard's e-value invalid (Part A), and e-BH faithfully propagates invalid inputs into an uncontrolled FDP. Power stays high (100.0%): the failures are found, then drowned in false discoveries.
 
 ## Verdict
 
-**Fleet-level e-BH does NOT rescue the guarantee.** The root cause (Part A) is upstream: the betting-e-process terminal wealth is not a valid e-value under plug-in baselines or autocorrelation, and e-BH requires valid e-values. A real guarantee would require a **valid e-value construction** — one robust to an unknown/estimated baseline and to autocorrelation (e.g. a mixture / confidence-sequence martingale that integrates over the nuisance mean, with whitening) — i.e. a redesign of the per-shard test, not a fleet wrapper. That is the honest next direction; until then, Tessera should claim *detection*, not a calibrated FP/FDR guarantee, on real telemetry.
+**Fleet-level e-BH does NOT rescue the guarantee.** The root cause (Part A) is upstream and specific: the betting-e-process terminal wealth is invalidated by the **plug-in baseline** (estimating mean/variance from a finite prefix). Autocorrelation is NOT the problem — the whitening we already ship makes the AR(1) case valid. So the one remaining fix is a **nuisance-baseline-robust e-value**: instead of plugging in a point estimate of mean/variance, integrate over the unknown baseline (a method-of-mixtures / confidence-sequence martingale), combined with the existing whitening. That is a redesign of the per-shard test, not a fleet wrapper, and it is the honest next direction (ADR 0008). Until then, Tessera should claim *detection*, not a calibrated FP/FDR guarantee, on real telemetry.
 
 > **Scope:** ground-truth FDP needs failure labels (absent in real fleet telemetry), so Parts A & C are synthetic, parameterized to the *measured* real behavior (ADR 0007); Part B confirms the naive failure on actual healthy telemetry. A real labeled fleet remains the outstanding validation.
