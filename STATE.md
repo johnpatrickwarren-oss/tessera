@@ -252,3 +252,21 @@ A calibrated FP/FDR GUARANTEE on real nonstationary telemetry is NOT achieved by
 engineering here; it rests on two unbuilt pieces: nuisance-baseline-robust e-value (0008) +
 contamination-robust fleet common-mode (0012). Honest artifact claim: strong complementary DETECTION,
 not a calibrated guarantee, on real telemetry.
+
+## Done (this branch — nuisance-robust-evalue) — THE CONSTRUCTIVE FIX
+- **Nuisance-baseline-robust e-value (ADR 0013) — solves the ADR 0008 plug-in invalidity.** New
+  `tools/nuisance-robust-evalue.ts` (`pnpm evalue`): two-sample sequential Bayes factor (separate vs
+  common mean) on whitened residuals — integrates the unknown baseline OUT (E[BF|H0]≤1 by construction;
+  location-invariant; never freezes μ̂). RESULT: VALID in both well- and under-powered regimes (BF
+  E[e]=0.03, P(fire)=0%) where the plug-in is catastrophically invalid (under-powered E[e]=440,
+  P(fire)=2.2%), while detecting shifts (power 1.0). Breaches the ADR 0008 wall. HONEST real-data: on
+  GWDG structural the BF ≈ terminal plug-in (~25-44%, both benign-change-dominated, not estimation
+  error) → the e-value fix is decisive for VALIDITY but moves real FP only a few pp where benign change
+  dominates. Pays off with the LIFECYCLE (fresh short calibration = under-powered, where BF valid/plug-in
+  invalid). +3 tests; gate green; idempotent. NOTE: cold-eye pending.
+
+## Arc status: blocker REMOVED
+The single converged blocker (invalid e-value, ADR 0008) is now fixed (0013). End-to-end real-data
+calibrated guarantee still needs: (a) BF+lifecycle integration (fresh short calibration), (b)
+contamination-robust fleet common-mode (0012) for fleet-FDR. Both now well-posed. Engine promotion of
+the BF e-value is the natural follow-on.

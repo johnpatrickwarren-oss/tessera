@@ -1,0 +1,72 @@
+{
+  "schema_version": "tessera-nuisance-robust-evalue-v1",
+  "params": {
+    "alpha": 0.01,
+    "tau_mult": 25
+  },
+  "validity": [
+    {
+      "regime": "well-powered (m=1500, n=300)",
+      "bf_mean_e": 0.031,
+      "bf_p_ge_10": 0,
+      "bf_p_ge_100": 0,
+      "bf_p_ge_1000": 0,
+      "bf_valid_all_scales": true,
+      "plugin_mean_e": 0.534,
+      "plugin_p_ge_100": 0.002,
+      "plugin_valid": true,
+      "bf_detect": 1,
+      "plugin_detect": 1
+    },
+    {
+      "regime": "UNDER-powered (m=300, n=680) — the plug-in failure regime",
+      "bf_mean_e": 0.033,
+      "bf_p_ge_10": 0,
+      "bf_p_ge_100": 0,
+      "bf_p_ge_1000": 0,
+      "bf_valid_all_scales": true,
+      "plugin_mean_e": 436.563,
+      "plugin_p_ge_100": 0.022,
+      "plugin_valid": false,
+      "bf_detect": 1,
+      "plugin_detect": 1
+    }
+  ],
+  "variance_sensitivity": [
+    {
+      "std_mult": 1,
+      "bf_p_fire": 0
+    },
+    {
+      "std_mult": 2,
+      "bf_p_fire": 0.025
+    },
+    {
+      "std_mult": 3,
+      "bf_p_fire": 0.143
+    }
+  ],
+  "real_gwdg": [
+    {
+      "m": 600,
+      "n": 200,
+      "n_streams": 55,
+      "bf_fire_rate": 0.418,
+      "plugin_fire_rate": 0.436
+    },
+    {
+      "m": 300,
+      "n": 200,
+      "n_streams": 55,
+      "bf_fire_rate": 0.273,
+      "plugin_fire_rate": 0.309
+    },
+    {
+      "m": 150,
+      "n": 200,
+      "n_streams": 55,
+      "bf_fire_rate": 0.255,
+      "plugin_fire_rate": 0.309
+    }
+  ]
+}

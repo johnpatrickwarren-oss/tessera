@@ -45,6 +45,8 @@
     "lifecycle": "node tools/lifecycle-monitor.js",
     "precapstone": "tsc -p tsconfig.test.json",
     "capstone": "node tools/fleet-relative-capstone.js",
+    "preevalue": "tsc -p tsconfig.test.json",
+    "evalue": "node tools/nuisance-robust-evalue.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",
