@@ -233,3 +233,22 @@ validated piece-by-piece.
 - periodic within-window structure → fixed seasonal 2D baseline (ADR 0010) ✓ (~⅓ FP cut)
 - discrete cross-epoch drift → lifecycle re-record/shadow/cutover (ADR 0011) ✓ (beats static+adaptive)
 - continuous workload / shard-specific-vs-fleet-wide → fleet-relative (OPEN; needs valid e-value, 0008)
+
+## Done (this branch — fleet-relative-capstone)
+- **Fleet-relative capstone (ADR 0012, closes the arc).** New `tools/fleet-relative-capstone.ts`
+  (`pnpm capstone`). Fleet-relative (residual = value − cross-shard median) + m≫n + whitening + e-BH on
+  a heavy-common-mode synthetic fleet with shard-specific faults. RESULT: SEPARATES faults (power 1.0 —
+  common-mode cancels, failing shard isolated) but does NOT control FDR (FDP 0.72–0.77 ≫ q). Reason is
+  NOT an invalid e-value (null-fleet residual is VALID) — the FAULTS contaminate the common-mode
+  estimate (onset injects a step into the center → every healthy residual → false-fires); FDP grows
+  with the fault fraction (2/60→15%, 10/60→79%); trimmed-mean center doesn't fix it. A calibrated
+  guarantee needs (a) contamination-robust common-mode + (b) nuisance-robust e-value (0008). +4 tests;
+  gate green; idempotent. NOTE: cold-eye pending before merge.
+
+## ARC CLOSE (ADRs 0001–0012)
+Detection/separation FULLY solvable + decomposed: estimation error→m≫n (0009); periodic→seasonal 2D
+(0010); discrete drift→lifecycle (0011); fleet-wide-vs-shard-specific→fleet-relative (0012, power 1.0).
+A calibrated FP/FDR GUARANTEE on real nonstationary telemetry is NOT achieved by any baseline/fleet
+engineering here; it rests on two unbuilt pieces: nuisance-baseline-robust e-value (0008) +
+contamination-robust fleet common-mode (0012). Honest artifact claim: strong complementary DETECTION,
+not a calibrated guarantee, on real telemetry.
