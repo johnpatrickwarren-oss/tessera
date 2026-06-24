@@ -23,15 +23,24 @@ established it re-fires as fast as a fault. So the drift trigger must be EPOCH-l
 | **slow fault (adaptive's masking zone) — detection** | 70% | **28% (masks)** | **70%** |
 | continuous workload (no fault) — FP | 116 alarms | 15 | **21** |
 
-- **Drift FP:** the lifecycle re-records the stale baseline → ~3× fewer false alarms than static
-  (toward adaptive) — *without* continuous adaptation.
-- **The needle:** on a SLOW fault (slope inside adaptive's masking zone), **adaptive masks (28%) but the
-  lifecycle keeps 70% = static.** A slow fault's *occasional* alarms don't trip the rate trigger (it
-  barely re-records), so the lifecycle stays static-like and detects what adaptive adapts away. This is
-  the value the lifecycle adds over continuous adaptation (ADR 0006).
-- **The limit:** on CONTINUOUS within-epoch workload variability, the alarm rate is permanently high, so
-  the lifecycle re-records constantly and collapses toward adaptive (and would then mask). A single-shard
-  lifecycle cannot separate legitimate continuous change from faults.
+(Detection metrics: sharp fault = alarm within 200 ticks of onset; slow fault = ANY alarm in the full
+~600-tick post-onset window — a slow ramp needs the unbounded window; a bounded-latency metric would
+require a far steeper slope to register.)
+
+- **Drift FP:** the lifecycle re-records the stale baseline → ~3× fewer false alarms than static. It does
+  NOT match adaptive (51 vs 35, ~1.4× above) — it improves on static without continuous adaptation.
+- **The needle (mechanism, corrected):** on a SLOW fault (slope inside adaptive's masking zone),
+  **adaptive masks (28%) but the lifecycle keeps 70%.** The reason is NOT "barely re-records" (it does
+  re-record): adaptive *continuously* absorbs the ramp so it never accumulates enough to cross threshold,
+  whereas the lifecycle is STATIC between re-records, so the ramp accumulates and FIRES on the first 1–3
+  alarms — that IS the detection — *before* the 4th alarm trips the rate trigger and re-records (which
+  then suppresses the rest). The lifecycle detects by firing early, not by avoiding re-records. Tuning
+  tension: a more sensitive rate trigger would suppress sooner and mask more.
+- **The limit:** on CONTINUOUS within-epoch workload variability (here random-walk level, step=0.5 →
+  level SD ~19 noise units by end), the alarm rate is permanently high, so the lifecycle re-records
+  constantly: it cuts FP ~5.5× vs static (116→21) but stays ~1.4× above adaptive (15) and is degenerating
+  toward it (and would then mask). The gap shrinks at lower workload volatility. A single-shard lifecycle
+  cannot separate legitimate continuous change from faults.
 
 ## Decision
 
