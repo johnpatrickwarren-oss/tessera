@@ -1,7 +1,7 @@
 // test/nuisance-robust-evalue.test.ts
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { nuisanceRobustEValue, pluginEValue, ALPHA } from '../tools/nuisance-robust-evalue.js';
+import { nuisanceRobustEValue, runEValue } from '../tools/nuisance-robust-evalue.js';
 import { mulberry32, scramble, gaussian } from '../tools/calibration-envelope.js';
 
 const RHO = 0.5;
@@ -11,30 +11,27 @@ function ar1(seed: number, len: number, shiftAt: number, shift: number): number[
   return v;
 }
 
-test('VALID even under-powered: BF honors α where the plug-in catastrophically does not', () => {
-  // m=300, n=680 (n/m=2.3) — the ADR 0008 regime where plug-in E[e] explodes.
-  const m = 300, n = 680, K = 200;
-  let bfFire = 0, plFire = 0, bfSum = 0;
-  for (let s = 0; s < K; s++) {
-    const v = ar1(11 + s * 7, m + n, -1, 0); // null: no shift
-    const e = nuisanceRobustEValue(v, m, n); bfSum += e; if (e >= 1 / ALPHA) bfFire++;
-    if (pluginEValue(v, m, n) >= 1 / ALPHA) plFire++;
+test('VALID at ALL scales in both regimes (incl. under-powered, where the plug-in is invalid)', () => {
+  const r = runEValue(); // synthetic only
+  for (const row of r.validity) {
+    assert.ok(row.bf_valid_all_scales, `BF must satisfy P(e≥k)≤1/k at k=10/100/1000 (${row.regime}): ${row.bf_p_ge_10}/${row.bf_p_ge_100}/${row.bf_p_ge_1000}`);
+    assert.ok(row.bf_detect >= 0.9, `BF must detect the shift in ${row.regime} (${row.bf_detect})`);
   }
-  assert.ok(bfFire / K <= 0.02, `BF must honor α even under-powered (fire rate ${bfFire / K})`);
-  assert.ok(bfSum / K <= 1.5, `BF E[e] must stay ~≤1 (${bfSum / K})`);
-  assert.ok(plFire / K > bfFire / K, `plug-in must fire more (invalid) than BF here (${plFire / K} vs ${bfFire / K})`);
+  const up = r.validity.find((x) => x.regime.startsWith('UNDER'))!;
+  assert.ok(!up.plugin_valid, 'plug-in must be INVALID under-powered (the contrast the BF fixes)');
 });
 
-test('detects a real mean shift (power)', () => {
-  const m = 1500, n = 300;
-  let det = 0, K = 60;
-  for (let s = 0; s < K; s++) if (nuisanceRobustEValue(ar1(9001 + s * 7, m + n, m + 20, 4), m, n) >= 1 / ALPHA) det++;
-  assert.ok(det / K >= 0.9, `must detect a +4 shift (rate ${det / K})`);
+test('SCOPE (H2): same-variance null is valid (1×), but a large test-variance change inflates P(fire)', () => {
+  const r = runEValue();
+  const v1 = r.variance_sensitivity.find((x) => x.std_mult === 1)!;
+  const v3 = r.variance_sensitivity.find((x) => x.std_mult === 3)!;
+  assert.ok(v1.bf_p_fire <= 0.02, `equal-variance null must honor α (${v1.bf_p_fire})`);
+  assert.ok(v3.bf_p_fire > 0.01, `a 3× std test window must inflate P(fire) — the disclosed scope limit (${v3.bf_p_fire})`);
 });
 
-test('location-invariant: a constant offset to ALL data does not change the e-value (mean nuisance is integrated out)', () => {
+test('location-invariant: a constant offset to ALL data leaves the e-value unchanged', () => {
   const v = ar1(42, 1800, -1, 0);
   const e1 = nuisanceRobustEValue(v, 1500, 300);
   const e2 = nuisanceRobustEValue(v.map((x) => x + 5000), 1500, 300);
-  assert.ok(Math.abs(e1 - e2) <= 1e-6 * Math.max(1, e1), `e-value must be invariant to a common shift (${e1} vs ${e2})`);
+  assert.ok(Math.abs(e1 - e2) <= 1e-6 * Math.max(1, e1), `must be invariant to a common shift (${e1} vs ${e2})`);
 });

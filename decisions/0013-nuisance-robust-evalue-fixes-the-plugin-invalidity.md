@@ -67,7 +67,15 @@ remains the lifecycle/fleet's.
 
 ## Ruled out / gotchas
 
-- Synthetic validity is rigorous (E[BF|H0]≤1 is structural); real-data is a single metric/dataset.
+- Synthetic validity is rigorous and checked at MULTIPLE scales — P(e≥k)≤1/k at k=10/100/1000 (not just
+  k=1/α; that single-scale check is the exact property an earlier PR conflated). Real-data is a single
+  metric/dataset.
+- **Scope — same-variance assumption (H2):** the BF tests a MEAN shift assuming equal innovation
+  variance in calibration and test. A test-window VARIANCE change with no mean shift inflates P(fire)
+  (1×std→0%, 2×→2.5%, 3×→14.3%). So "valid by construction" is for the mean-shift null with stable
+  variance; a variance change is out of the model. A variance-robust e-value (integrate the variance out
+  via an NIG/t mixture) is the extension. Large variance jumps are rare for GPU counters over short
+  windows, but the limit is real and disclosed.
 - φ is plug-in (whitening); the BF handles the mean nuisance, not a misspecified φ (second order).
 - τ²=25×innovation-var (diffuse but proper); a different proper prior changes the constant, not the
   validity.
