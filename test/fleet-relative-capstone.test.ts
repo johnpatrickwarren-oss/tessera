@@ -25,9 +25,17 @@ test('the residual e-value is VALID on a null fleet — FDR fails from fault-con
   assert.ok(r.null_residual_validity.p_ge_10 <= 0.1, `null-fleet residual not heavy-tailed (P(e≥10)=${r.null_residual_validity.p_ge_10})`);
 });
 
-test('FDR control degrades with the fault fraction (contamination mechanism)', () => {
+test('FDR contamination: FDP rises with fault fraction (low regime) and stays ≫ q throughout', () => {
   const r = runCapstone();
-  const lo = r.by_fault_fraction.find((x) => x.mfail === 2)!;
-  const hi = r.by_fault_fraction.find((x) => x.mfail === 10)!;
-  assert.ok(hi.rel_fdp > lo.rel_fdp + 0.2, `more faults must inflate FDP (mfail2=${lo.rel_fdp} vs mfail10=${hi.rel_fdp})`);
+  const f = (mf: number) => r.by_fault_fraction.find((x) => x.mfail === mf)!.rel_fdp;
+  assert.ok(f(10) > f(2) + 0.2, `FDP must rise from low to mid fault load (mfail2=${f(2)} vs mfail10=${f(10)})`);
+  // ratio is non-monotone at high contamination, but FDP stays well above q at every load (incl 33%)
+  assert.ok(r.by_fault_fraction.every((x) => x.rel_fdp > 0.1), 'FDP must exceed q at every fault load');
+  assert.ok(f(20) > 0.3, `even at 33% fault load FDP stays high (${f(20)})`);
+});
+
+test('a trimmed-mean common-mode does NOT fix FDR (contamination is structural)', () => {
+  const r = runCapstone();
+  assert.ok(r.trimmed_center.power >= 0.9, 'trimmed center still separates faults');
+  assert.ok(r.trimmed_center.fdp > 0.3, `trimmed center does not control FDR either (FDP=${r.trimmed_center.fdp})`);
 });

@@ -19,7 +19,7 @@ Fleet-relative comparison (residual = value − cross-shard median per tick) rem
 | 10 | 78.7% | 100.0% |
 | 20 | 66.7% | 100.0% |
 
-The residual e-value is **VALID on a null fleet** (no faults): median 0.108, P(e≥10) 1.0%, P(e≥1/α) 0.1%. So FDR does NOT fail from an invalid e-value. It fails because the **faults contaminate the cross-shard common-mode estimate**: their onset injects a spurious step into the center (median), hence a persistent step into every HEALTHY shard's residual, which then accumulates and false-fires. FDP therefore grows with the fault fraction. A trimmed-mean center does NOT fix it (tested: same FDP) — the contamination is structural (correlated onset), not just outlier magnitude.
+The residual e-value is **VALID on a null fleet** (no faults): median 0.108, P(e≥10) 1.0%, P(e≥1/α) 0.1%. So FDR does NOT fail from an invalid e-value. It fails because the **faults contaminate the cross-shard common-mode estimate**: their onset shifts the center UP, so every HEALTHY shard's residual gets a persistent DOWNWARD step (the two-sided betting process fires on either sign), which accumulates and false-fires. FDP rises with the fault fraction in the low-contamination regime then the RATIO falls as contamination grows enough to move the median itself (mfail=10→78.7%, 20→66.7%) — but stays ≫ q throughout. A **trimmed-mean center does NOT fix it** (30%-trimmed center at the default load: FDP 79.9%, power 100.0% — no better than the median's 77.2%) — the contamination is structural (correlated onset), not just outlier magnitude.
 
 ## Verdict (the honest capstone)
 

@@ -25,10 +25,13 @@ throughout).
   single-shard schemes (ADR 0009–0011) could not do for fleet-wide variation.
 - **It does NOT control FDR (FDP ≈ 0.72–0.77, ≫ q).** And the reason is NOT an invalid e-value: the
   null-fleet residual e-value is **valid** (median 0.11, P(e≥10) 1%, P(e≥1/α) 0.1%). FDR fails because
-  the **faults themselves contaminate the cross-shard common-mode estimate** — their onset injects a
-  spurious step into the center (median), hence a persistent step into every HEALTHY shard's residual,
-  which accumulates and false-fires. So **FDP grows with the fault fraction**, and a trimmed-mean center
-  does not fix it (structural, correlated-onset contamination, not outlier magnitude).
+  the **faults themselves contaminate the cross-shard common-mode estimate** — their onset shifts the
+  center UP, so every HEALTHY shard's residual gets a persistent DOWNWARD step (the two-sided betting
+  process fires on either sign), which accumulates and false-fires. FDP **rises with the fault fraction
+  in the low-contamination regime then the ratio falls** as contamination grows enough to move the
+  median itself (mfail=10→78.7%, 20→66.7% — fewer rejections are false once a third of shards fail),
+  but stays ≫ q throughout. A 30%-trimmed-mean center does **not** fix it either (FDP ≈ same as median
+  at the default load) — the contamination is structural (correlated onset), not outlier magnitude.
 
 ## Decision
 

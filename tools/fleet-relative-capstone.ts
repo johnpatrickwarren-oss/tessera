@@ -5,9 +5,11 @@
 // HONEST RESULT (verified; do not dress up): fleet-relative SEPARATES faults (power = 1.0 — the
 // failing shard is isolated) but does NOT control FDR. The reason is NOT an invalid e-value (the
 // residual e-value is VALID on a null fleet) — it is that the FAULTS THEMSELVES CONTAMINATE the
-// cross-shard common-mode estimate: their onset injects a spurious step into the center, hence into
-// every healthy shard's residual, so healthy shards false-fire. FDP grows with the fault fraction
-// (MFAIL=2→~0.13, 10→~0.79) and a trimmed-mean center does not fix it. So the fleet gives detection/
+// cross-shard common-mode estimate: their onset shifts the center UP, so every healthy shard's
+// residual gets a persistent DOWNWARD step (the two-sided betting process fires on either sign).
+// FDP rises with the fault fraction in the low-contamination regime (MFAIL=2→~0.15, 10→~0.79) then
+// the RATIO falls as contamination grows enough to move the median itself (20→~0.67), but stays ≫ q
+// throughout. A trimmed-mean center does NOT fix it (reported below). So the fleet gives detection/
 // separation; a calibrated FDR guarantee needs a contamination-robust common-mode (factor model /
 // leave-faults-out) AND the nuisance-baseline-robust e-value (ADR 0008). See ADR 0012.
 // Tessera-original; NOT vendored.
@@ -48,6 +50,22 @@ function eValue(v: ReadonlyArray<number>): number {
 const rawEValues = (X: number[][]): number[] => X.map(eValue);
 const relEValues = (X: number[][]): number[] => fleetResiduals(X).map(eValue);
 
+/** Per-tick TRIMMED-mean common-mode (drop the top/bottom `trim` fraction) — a more
+ *  contamination-resistant center than the median, to test whether it rescues FDR. */
+function trimmedResiduals(X: number[][], trim: number): number[][] {
+  const n = X.length, t = X[0].length, R = X.map(() => new Array(t));
+  const k = Math.floor(n * trim);
+  for (let j = 0; j < t; j++) {
+    const col = X.map((r) => r[j]).sort((a, b) => a - b);
+    let sum = 0;
+    for (let i = k; i < n - k; i++) sum += col[i];
+    const c = sum / (n - 2 * k);
+    for (let i = 0; i < n; i++) R[i][j] = X[i][j] - c;
+  }
+  return R;
+}
+const trimmedEValues = (X: number[][]): number[] => trimmedResiduals(X, 0.3).map(eValue);
+
 function fdpPower(evals: number[], failed: boolean[], q: number): { fdp: number; power: number } {
   const rej = eBH(evals, q);
   const fp = rej.filter((i) => !failed[i]).length, tp = rej.filter((i) => failed[i]).length;
@@ -62,6 +80,7 @@ export interface CapstoneReport {
   params: { alpha: number; n: number; m: number; n_test: number; default_mfail: number; trials: number };
   by_q: Array<{ q: number; naive_fdp: number; naive_power: number; rel_fdp: number; rel_power: number }>;
   by_fault_fraction: Array<{ mfail: number; rel_fdp: number; rel_power: number }>;
+  trimmed_center: { fdp: number; power: number };
   null_residual_validity: { p_ge_10: number; p_ge_100: number; median_e: number };
 }
 
@@ -83,10 +102,13 @@ export function runCapstone(): CapstoneReport {
     const rs = Array.from({ length: TRIALS }, (_, s) => { const { X, failed } = genFleet(mulberry32(scramble(7 + s * 53)), mfail); return fdpPower(relEValues(X), failed, 0.1); });
     return { mfail, rel_fdp: round3(mean(rs.map((x) => x.fdp))), rel_power: round3(mean(rs.map((x) => x.power))) };
   });
+  const tr = trials.map(({ X, failed }) => fdpPower(trimmedEValues(X), failed, 0.1));
   return {
     schema_version: 'tessera-fleet-relative-capstone-v2',
     params: { alpha: ALPHA, n: N, m: M, n_test: N_TEST, default_mfail: DEFAULT_MFAIL, trials: TRIALS },
-    by_q, by_fault_fraction, null_residual_validity: nullValidity(),
+    by_q, by_fault_fraction,
+    trimmed_center: { fdp: round3(mean(tr.map((x) => x.fdp))), power: round3(mean(tr.map((x) => x.power))) },
+    null_residual_validity: nullValidity(),
   };
 }
 
@@ -110,7 +132,7 @@ function renderMd(r: CapstoneReport): string {
   L.push('|---|---|---|');
   for (const x of r.by_fault_fraction) L.push(`| ${x.mfail} | ${pct(x.rel_fdp)} | ${pct(x.rel_power)} |`);
   L.push('');
-  L.push(`The residual e-value is **VALID on a null fleet** (no faults): median ${v.median_e}, P(e≥10) ${pct(v.p_ge_10)}, P(e≥1/α) ${pct(v.p_ge_100)}. So FDR does NOT fail from an invalid e-value. It fails because the **faults contaminate the cross-shard common-mode estimate**: their onset injects a spurious step into the center (median), hence a persistent step into every HEALTHY shard's residual, which then accumulates and false-fires. FDP therefore grows with the fault fraction. A trimmed-mean center does NOT fix it (tested: same FDP) — the contamination is structural (correlated onset), not just outlier magnitude.`);
+  L.push(`The residual e-value is **VALID on a null fleet** (no faults): median ${v.median_e}, P(e≥10) ${pct(v.p_ge_10)}, P(e≥1/α) ${pct(v.p_ge_100)}. So FDR does NOT fail from an invalid e-value. It fails because the **faults contaminate the cross-shard common-mode estimate**: their onset shifts the center UP, so every HEALTHY shard's residual gets a persistent DOWNWARD step (the two-sided betting process fires on either sign), which accumulates and false-fires. FDP rises with the fault fraction in the low-contamination regime then the RATIO falls as contamination grows enough to move the median itself (mfail=10→${pct(r.by_fault_fraction.find((x) => x.mfail === 10)?.rel_fdp ?? 0)}, 20→${pct(r.by_fault_fraction.find((x) => x.mfail === 20)?.rel_fdp ?? 0)}) — but stays ≫ q throughout. A **trimmed-mean center does NOT fix it** (30%-trimmed center at the default load: FDP ${pct(r.trimmed_center.fdp)}, power ${pct(r.trimmed_center.power)} — no better than the median's ${pct(r.by_q[0].rel_fdp)}) — the contamination is structural (correlated onset), not just outlier magnitude.`);
   L.push('');
   L.push('## Verdict (the honest capstone)');
   L.push('');
