@@ -1,6 +1,6 @@
 # Project state
 
-**Last updated:** 2026-06-23 · **by:** John Warren (with Claude)
+**Last updated:** 2026-06-24 · **by:** John Warren (with Claude)
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
@@ -270,3 +270,71 @@ The single converged blocker (invalid e-value, ADR 0008) is now fixed (0013). En
 calibrated guarantee still needs: (a) BF+lifecycle integration (fresh short calibration), (b)
 contamination-robust fleet common-mode (0012) for fleet-FDR. Both now well-posed. Engine promotion of
 the BF e-value is the natural follow-on.
+
+## Done (this branch — bf-lifecycle-integration) — ADR 0014, honest negative
+- **BF + lifecycle: substitute, not complement.** New `tools/bf-lifecycle.ts` (`pnpm bf-lifecycle`).
+  Prompted by "don't we already use a BF e-value?" → YES, the production Family-A detector is the
+  Howard-Ramdas Gaussian mixture supermartingale (mixes the ALTERNATIVE, plugs in the null mean) →
+  shares the plug-in invalidity (verified 3-way under-powered: mixSM E[e]=1700/2% ❌, betting 437/2.2% ❌,
+  BF 0.03/0% ✅). RESULT: (A) horizon sweep — mixSM over-fires as n grows past m (n/m=4 → 8.4% ≫α, E[e|H0]
+  → ~3e9 vs BF ≤0.44), BF stays ≤α, both detect; (B) real GWDG fresh-cal small-n blocks — mixSM 19.1% vs
+  BF 11.2%. So BF (valid-at-large-n) and lifecycle (keep-n-small via re-record) are SUBSTITUTES; the
+  lifecycle's short horizons keep the EXISTING production mixture VALID → BF's estimation-error fix is moot
+  in-lifecycle. The corrected mixSM fires MORE than BF on real data, but that is the plug-in's greater
+  SENSITIVITY (it also detects more, Part A n=30: 72.8% vs 50.4%), not a BF validity edge. BF's niche =
+  long-horizon/no-re-record. See ADR 0014. +2 tests; gate green; idempotent.
+  - **Production-parity fix + cold-eye (2026-06-24).** `mixWin` was using the MARGINAL variance where the
+    engine standardizes whitened residuals against the INNOVATION variance σ²·(1−φ²) (`estimateAr1.sigma2`,
+    = `baseline_sigma_squared` when `ar1_phi` set; same bug class as the validator fix at lines 66–74).
+    Under-fired the mixSM; corrected. Sharpened Part A (E[e|H0] column) and raised Part B mixSM 7.6%→19.1%
+    (above BF) — conclusion unchanged (sensitivity, not validity). Cold-eye (independent fresh-context):
+    SHIP-WITH-FIXES, variance/parity/boundary/guards confirmed correct; the one HIGH (stale inverted Part-B
+    prose) fixed in report + ADR + here.
+
+## Practical bottom line (constructive phase closed)
+Keep the production mixture detector + add the lifecycle (0011) for drift. The nuisance-robust BF (0013)
+is the rigorous fixability proof + a tool for sparse-re-record/long-horizon. The remaining end-to-end
+guarantee lever is the CONTAMINATION-ROBUST FLEET COMMON-MODE (0012), not a BF-lifecycle merge.
+
+## Done (this branch — bf-lifecycle-integration) — ADR 0015, LEVER A (the guarantee, by construction)
+- **Contamination-robust fleet-FDR (ADR 0015) — the BF e-value closes the FP/FDR guarantee.** New
+  `tools/contamination-robust-fleet.ts` (`pnpm crfleet`). Builds the two unbuilt ADR-0012 pieces:
+  (1) demean each shard by its calibration LEVEL → faults become cross-sectional outliers (the rank-flip
+  trimmed-mean lacked); (2) a REDESCENDING Tukey-biweight common-mode rejects them (Huber's soft
+  downweight leaked → 42% FDP; biweight → 1.6%); (3) the nuisance-robust BF e-value (0013) on the
+  residual; (4) e-BH. RESULT: synthetic FDP **0.72–0.77 → ≤ q at full power** (ablation: both pieces
+  necessary); null residual e-value valid (E[e]=0.067) → FDR controlled BY CONSTRUCTION. Honest envelope:
+  breakdown ~12/60 (20% contamination, NARROW margin above the default load); FD is CONDITIONAL (power
+  curve in δ: δ=1→10%, δ≥3→100%), not unconditional. Real GWDG (genuinely co-sampled 15-shard cohort,
+  ts-aligned): robust does NOT help (naive 5→robust 7, mildly worse) — GWDG is heterogeneous exporters
+  with little common-mode, so fleet-relative is conditional on genuine coupling, NOT a free win; the
+  residual firing is shard-SPECIFIC benign change → Lever B. +6 tests; suite 612/0/10; gate green;
+  idempotent. Cold-eye SHIP-WITH-FIXES — all 6 findings addressed (H1 breakdown was 20/60-mislabelled →
+  fixed to 12/60; H2 real cross-section was index-aligned across 12 start-dates → fixed to ts-aligned
+  cohort; M1 spec Huber→Tukey; M2 naive-baseline note; L1 softened "guaranteed"; L2 tightened AC-4).
+
+## Done (this branch — bf-lifecycle-integration) — ADR 0016, LEVER B (the discriminator)
+- **Benign-change vs fault discriminator (ADR 0016).** New `tools/fault-discriminator.ts`
+  (`pnpm fault-disc`). Lever A removes COMMON-MODE benign change; the shard-SPECIFIC residual (which
+  dominates real GWDG) needs this. Construction: a fault-SIGNATURE test on the whitened residual —
+  variance F-ratio (SDC), trend t-stat on WHITENED innovations (degradation; whitening essential — raw
+  values' AR(1) inflates the t-stat ~400×), downward collapse in σ (detachment). classify: signature →
+  fault; else a mean fire → benign. RESULT (confusion, 400 trials/type): healthy→healthy, benign→benign,
+  fault-{variance,trend,collapse}→fault all ~100%, benign false-fault floor ~0.3%; detection does NOT
+  cliff at the chosen fault sizes (cold-eye-verified down to ×1.5 var / t≈5 trend / 6σ collapse).
+  THE IRREDUCIBLE LIMIT: a mean-only fault → 100% benign (MISSED) — statistically identical to a benign
+  mean step; only an EVENT signal resolves it (event-gating shows the dependence SHAPE, but
+  meanonly_caught=100% / benign_FF=1−coverage are model IDENTITIES, not measured power; real event
+  coverage unknown = Tessera's freeze-hook). +4 tests; suite 616/0/10; gate green; idempotent. Cold-eye
+  SHIP-WITH-FIXES — all addressed (H1 event-power-assumed disclosure; M1 spec AC-5→out-of-scope; M2
+  collapse one-sided/downward disclosure; L1 ADR 0016 written; L2 dead const removed).
+
+## Two-lever picture (ADRs 0015 + 0016) — the BF e-value delivers a bounded guarantee
+Fleet **FP/FDR ≤ q by construction** on a common-mode-coupled fleet (Lever A) PLUS a per-shard
+**benign/fault discriminator** for signature-bearing faults (Lever B), both built on the nuisance-robust
+**BF e-value** (0013). Honest remaining gaps to an end-to-end REAL guarantee: (a) a genuinely
+common-mode-coupled real substrate (GWDG is heterogeneous, not coupled — Lever A gives no benefit there);
+(b) the mean-only fault (needs a real deploy/event feed); (c) a multi-factor common-mode for
+heterogeneous loadings. The arc's "use the BF e-value to guarantee an FP and FD rate" is achieved
+**conditionally and by construction** (FP/FDR guaranteed within the envelope; FD characterized, not
+unconditional) — NOT yet demonstrated end-to-end on real coupled-fleet data (none available).

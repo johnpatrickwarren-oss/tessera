@@ -1,0 +1,158 @@
+{
+  "schema_version": "tessera-contamination-robust-fleet-v1",
+  "params": {
+    "alpha": 0.01,
+    "n": 60,
+    "m": 1500,
+    "n_test": 300,
+    "default_mfail": 10,
+    "trials": 100,
+    "tukey_c": 4.685
+  },
+  "ablation": [
+    {
+      "center": "median (ADR 0012)",
+      "evalue": "plug-in",
+      "fdp": 0.768,
+      "power": 1
+    },
+    {
+      "center": "median",
+      "evalue": "BF",
+      "fdp": 0.685,
+      "power": 1
+    },
+    {
+      "center": "robust (Tukey+demean)",
+      "evalue": "plug-in",
+      "fdp": 0.113,
+      "power": 1
+    },
+    {
+      "center": "robust (Tukey+demean)",
+      "evalue": "BF",
+      "fdp": 0.016,
+      "power": 1
+    }
+  ],
+  "by_fault_fraction": [
+    {
+      "mfail": 2,
+      "old_fdp": 0.145,
+      "old_power": 1,
+      "new_fdp": 0,
+      "new_power": 1
+    },
+    {
+      "mfail": 5,
+      "old_fdp": 0.531,
+      "old_power": 1,
+      "new_fdp": 0,
+      "new_power": 1
+    },
+    {
+      "mfail": 10,
+      "old_fdp": 0.789,
+      "old_power": 1,
+      "new_fdp": 0.02,
+      "new_power": 1
+    },
+    {
+      "mfail": 12,
+      "old_fdp": 0.787,
+      "old_power": 1,
+      "new_fdp": 0.137,
+      "new_power": 1
+    },
+    {
+      "mfail": 14,
+      "old_fdp": 0.762,
+      "old_power": 1,
+      "new_fdp": 0.577,
+      "new_power": 1
+    },
+    {
+      "mfail": 16,
+      "old_fdp": 0.733,
+      "old_power": 1,
+      "new_fdp": 0.725,
+      "new_power": 1
+    },
+    {
+      "mfail": 20,
+      "old_fdp": 0.667,
+      "old_power": 1,
+      "new_fdp": 0.667,
+      "new_power": 1
+    },
+    {
+      "mfail": 30,
+      "old_fdp": 0.5,
+      "old_power": 1,
+      "new_fdp": 0.5,
+      "new_power": 1
+    },
+    {
+      "mfail": 40,
+      "old_fdp": 0.333,
+      "old_power": 1,
+      "new_fdp": 0.333,
+      "new_power": 1
+    }
+  ],
+  "by_q": [
+    {
+      "q": 0.1,
+      "new_fdp": 0.016,
+      "new_power": 1
+    },
+    {
+      "q": 0.05,
+      "new_fdp": 0.01,
+      "new_power": 1
+    },
+    {
+      "q": 0.01,
+      "new_fdp": 0.003,
+      "new_power": 1
+    }
+  ],
+  "power_by_delta": [
+    {
+      "delta": 1,
+      "detect": 0.101
+    },
+    {
+      "delta": 2,
+      "detect": 0.989
+    },
+    {
+      "delta": 3,
+      "detect": 1
+    },
+    {
+      "delta": 5,
+      "detect": 1
+    },
+    {
+      "delta": 8,
+      "detect": 1
+    }
+  ],
+  "null_validity": {
+    "p_ge_10": 0.001,
+    "p_ge_100": 0,
+    "median_e": 0.016,
+    "mean_e": 0.067,
+    "valid": true
+  },
+  "breakdown_mfail": 12,
+  "real_fleet": {
+    "dataset": "GWDG-structural-scrape_samples_scraped",
+    "n_shards": 15,
+    "window": 800,
+    "naive_rejected": 5,
+    "robust_rejected": 7,
+    "note": "largest same-day co-sampled cohort (launch 2025-03-14, shared 600s grid, 800 aligned ticks), m=600/n=200; all healthy → every rejection is a false discovery"
+  }
+}
