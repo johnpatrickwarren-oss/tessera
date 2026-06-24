@@ -202,8 +202,9 @@ redesign.
 ## Done (this branch — seasonal-baseline-validation)
 - **Seasonal (2D) baseline test (ADR 0010, continues 0009).** New `tools/seasonal-power.ts`
   (`pnpm seasonal-power`) on real GWDG GPU_UTIL: flat vs fixed-daily-period seasonal (operator's 2D
-  model) vs ACF-auto. RESULT: fixed-daily seasonal helps 48.3%→31.7% (real, ~⅓ fewer FP); ACF-auto
-  does NOT (finds short periods 10-25, not daily 144). But not ≤α: residual is workload-driven
+  model) vs ACF-auto. RESULT (first-crossing FP): fixed-daily seasonal helps 56.7%→43.3% (real, ~⅓
+  fewer FP); ACF-auto does NOT (finds short periods 10-25, not daily 144; HARMFUL where it fires: 64%).
+  But not ≤α: residual is workload-driven
   non-periodic variation (legitimate GPU_UTIL swings) — irreducible at the single-shard level; handled
   by the operational lifecycle (re-record/refresh) + fleet-relative. So each piece of the operator's
   model addresses a distinct measured component. +2 tests; gate green; idempotent. (Pre-existing flaky:

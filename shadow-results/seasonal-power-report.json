@@ -10,23 +10,24 @@
   },
   "n_streams": 60,
   "n_auto_period_detected": 50,
+  "auto_detected_fires": 32,
   "arms": [
     {
       "label": "flat (ADR 0009)",
-      "fires": 29,
-      "p_fire": 0.483,
+      "fires": 34,
+      "p_fire": 0.567,
       "honors_alpha": false
     },
     {
       "label": "seasonal · fixed daily (P=144)",
-      "fires": 19,
-      "p_fire": 0.317,
+      "fires": 26,
+      "p_fire": 0.433,
       "honors_alpha": false
     },
     {
       "label": "seasonal · ACF auto-period",
-      "fires": 29,
-      "p_fire": 0.483,
+      "fires": 34,
+      "p_fire": 0.567,
       "honors_alpha": false
     }
   ]

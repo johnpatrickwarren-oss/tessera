@@ -13,20 +13,27 @@ streams.
 
 ## Finding
 
+P(fire) is the **first-crossing** rate (Ville / production: did the e-process ever cross 1/α in the
+horizon, restart-on-fire — corrected from terminal-e-value in review):
+
 | baseline | P(fire) | honors α? |
 |---|---|---|
-| flat (ADR 0009) | 48.3% | ❌ |
-| **seasonal · fixed daily (P=144) — the operator's model** | **31.7%** | ❌ |
-| seasonal · ACF auto-period | 48.3% | ❌ |
+| flat (ADR 0009) | 56.7% | ❌ |
+| **seasonal · fixed daily (P=144) — the operator's model** | **43.3%** | ❌ |
+| seasonal · ACF auto-period | 56.7% | ❌ |
 
-- **The operator's fixed daily-period 2D baseline genuinely helps: 48.3% → 31.7%** (a third fewer false
+- **The operator's fixed daily-period 2D baseline genuinely helps: 56.7% → 43.3%** (~⅓ fewer false
   alarms) — it captures real within-window structure a flat mean misses.
-- **The engine's ACF auto-detection does NOT help** (48.3%) — on load metrics its first ACF peak is
-  short-range autocorrelation (periods 10–25), not the daily cycle (144). So a *fixed calendar period*
-  (the operator's approach) is materially better than ACF auto-detection here.
+- **The engine's ACF auto-detection does NOT help in aggregate (56.7%) and is HARMFUL where it fires:**
+  on the 50/60 streams where it detected a (short) period it fired 64% — *worse* than flat — because
+  its first ACF peak is short-range autocorrelation (periods 10–25), not the daily cycle (144), and
+  deseasonalizing a spurious period contaminates the residual. So a *fixed calendar period* (the
+  operator's approach) is not just better but ACF auto-detection actively hurts; whitening (not seasonal
+  decomposition) is the right tool for short-range AR structure.
 - **But it does not reach ≤ α.** The residual over-firing is **workload-driven, non-periodic**: GPU_UTIL
-  legitimately swings as jobs start/stop. No single-shard baseline (flat, seasonal, or otherwise) can
-  remove a *real* level change — it is not estimation error and not seasonality.
+  legitimately swings as jobs start/stop, and within the baseline window those level shifts contaminate
+  the per-phase seasonal-mean estimates themselves. No single-shard baseline (flat, seasonal, or
+  otherwise) can remove a *real* level change — it is not estimation error and not seasonality.
 
 ## Decision
 

@@ -7,8 +7,7 @@
 // See ADR 0010. Tessera-original; NOT vendored.
 
 import { decomposeSeasonal, seasonalMeans, deseasonalize } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/seasonal';
-import { calibrateBaseline } from './shadow-replay.js';
-import { terminalEValueWith } from './fleet-fdr.js';
+import { calibrateBaseline, replayFires } from './shadow-replay.js';
 import { readTidySeries } from './_gwdg-loader.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -23,29 +22,31 @@ export const MIN_STREAMS = 20;
 function mean(xs: ReadonlyArray<number>): number { return xs.reduce((a, b) => a + b, 0) / xs.length; }
 function round3(x: number): number { return Math.round(x * 1000) / 1000; }
 
-function eValueOn(v: ReadonlyArray<number>, m: number, n: number): number {
+/** Does the betting e-process FIRE (first-crossing of 1/α, the production + Ville criterion) over the
+ *  test horizon [m, m+n)? — calibrate on [0,m), replay (restart-on-fire) the bounded horizon. */
+function fires(v: ReadonlyArray<number>, m: number, n: number): boolean {
   const cal = calibrateBaseline(v.slice(0, m), 'simple');
-  return terminalEValueWith(v.slice(0, m + n), m, cal.mean, cal.innovationVar, cal.phi);
+  return replayFires(v.slice(0, m + n), m, cal, ALPHA).length > 0;
 }
 
 /** Flat baseline (ADR 0009). */
-export function flatEValue(v: ReadonlyArray<number>, m: number, n: number): number { return eValueOn(v, m, n); }
+export function flatFires(v: ReadonlyArray<number>, m: number, n: number): boolean { return fires(v, m, n); }
 
 /** FIXED calendar-period seasonal baseline (the operator's 2D matrix): per-phase means from [0,m),
- *  deseasonalize the whole window (no lookahead — means are from [0,m) only), then the flat construction. */
-export function seasonalEValueFixed(v: ReadonlyArray<number>, m: number, n: number, period: number): number {
+ *  deseasonalize the whole window (no lookahead — means are from [0,m) only), then the flat path. */
+export function seasonalFiresFixed(v: ReadonlyArray<number>, m: number, n: number, period: number): boolean {
   const base = v.slice(0, m);
   const s = seasonalMeans(base, period, mean(base));
-  return eValueOn(deseasonalize(v.slice(0, m + n), s, period, 0), m, n);
+  return fires(deseasonalize(v.slice(0, m + n), s, period, 0), m, n);
 }
 
-/** Engine ACF-auto-detected seasonal baseline (for contrast — finds the dominant period, which on
- *  load metrics is short-range autocorrelation, not the daily cycle). Returns {e, period}. */
-export function seasonalEValueAuto(v: ReadonlyArray<number>, m: number, n: number): { e: number; period: number } {
+/** Engine ACF-auto-detected seasonal baseline (contrast — finds the dominant period, which on load
+ *  metrics is short-range autocorrelation, not the daily cycle). Returns {fired, period}. */
+export function seasonalFiresAuto(v: ReadonlyArray<number>, m: number, n: number): { fired: boolean; period: number } {
   const base = v.slice(0, m);
   const dec = decomposeSeasonal(base, mean(base));
-  if (dec.period === 0) return { e: flatEValue(v, m, n), period: 0 };
-  return { e: eValueOn(deseasonalize(v.slice(0, m + n), dec.seasonal_means, dec.period, 0), m, n), period: dec.period };
+  if (dec.period === 0) return { fired: flatFires(v, m, n), period: 0 };
+  return { fired: fires(deseasonalize(v.slice(0, m + n), dec.seasonal_means, dec.period, 0), m, n), period: dec.period };
 }
 
 interface Arm { label: string; fires: number; p_fire: number; honors_alpha: boolean; }
@@ -53,7 +54,7 @@ interface Arm { label: string; fires: number; p_fire: number; honors_alpha: bool
 export interface SeasonalReport {
   schema_version: 'tessera-seasonal-power-v1';
   provenance: { dataset: string; metric: string; alpha: number; m: number; n_test: number; daily_period: number };
-  n_streams: number; n_auto_period_detected: number;
+  n_streams: number; n_auto_period_detected: number; auto_detected_fires: number;
   arms: Arm[];
 }
 
@@ -69,28 +70,28 @@ function collectStreams(telem: string, metric: string): number[][] {
   return streams;
 }
 
-/** Fire counts for the three baselines (flat / fixed-daily-seasonal / ACF-auto-seasonal). */
-function scoreStreams(streams: number[][]): { flat: number; daily: number; auto: number; autoDetected: number } {
-  let flat = 0, daily = 0, auto = 0, autoDetected = 0;
+/** Fire counts (first-crossing) for the three baselines (flat / fixed-daily-seasonal / ACF-auto). */
+function scoreStreams(streams: number[][]): { flat: number; daily: number; auto: number; autoDetected: number; autoDetectedFires: number } {
+  let flat = 0, daily = 0, auto = 0, autoDetected = 0, autoDetectedFires = 0;
   for (const v of streams) {
-    if (flatEValue(v, M, N_TEST) >= 1 / ALPHA) flat++;
-    if (seasonalEValueFixed(v, M, N_TEST, DAILY) >= 1 / ALPHA) daily++;
-    const a = seasonalEValueAuto(v, M, N_TEST);
-    if (a.period > 0) autoDetected++;
-    if (a.e >= 1 / ALPHA) auto++;
+    if (flatFires(v, M, N_TEST)) flat++;
+    if (seasonalFiresFixed(v, M, N_TEST, DAILY)) daily++;
+    const a = seasonalFiresAuto(v, M, N_TEST);
+    if (a.period > 0) { autoDetected++; if (a.fired) autoDetectedFires++; }
+    if (a.fired) auto++;
   }
-  return { flat, daily, auto, autoDetected };
+  return { flat, daily, auto, autoDetected, autoDetectedFires };
 }
 
 export function runSeasonalPower(gwdgDir: string, metric: string = METRIC): SeasonalReport {
   const streams = collectStreams(path.join(gwdgDir, 'telemetry'), metric);
-  const { flat, daily, auto, autoDetected } = scoreStreams(streams);
+  const { flat, daily, auto, autoDetected, autoDetectedFires } = scoreStreams(streams);
   const n = streams.length;
   const arm = (label: string, fires: number): Arm => ({ label, fires, p_fire: n ? round3(fires / n) : 0, honors_alpha: n >= MIN_STREAMS && (n ? fires / n : 0) <= ALPHA });
   return {
     schema_version: 'tessera-seasonal-power-v1',
     provenance: { dataset: 'GWDG-' + metric, metric, alpha: ALPHA, m: M, n_test: N_TEST, daily_period: DAILY },
-    n_streams: n, n_auto_period_detected: autoDetected,
+    n_streams: n, n_auto_period_detected: autoDetected, auto_detected_fires: autoDetectedFires,
     arms: [arm('flat (ADR 0009)', flat), arm(`seasonal · fixed daily (P=${DAILY})`, daily), arm('seasonal · ACF auto-period', auto)],
   };
 }
@@ -109,13 +110,15 @@ function renderMd(r: SeasonalReport): string {
   const L: string[] = [];
   L.push('# Tessera — does a SEASONAL (2D) baseline restore the FP guarantee on real telemetry?');
   L.push('');
-  L.push(`ADR 0009: a long FLAT baseline still over-fires on real data (within-window variation). The operator's model is a fixed-calendar-period 2D baseline. On real GWDG \`${r.provenance.metric}\` (daily-cycle load metric) we compare FLAT vs **fixed daily-period** seasonal (P=${r.provenance.daily_period}, the operator's model) vs ACF-auto-detected seasonal. Calibrated on [0,m) only; all healthy → every fire is a false alarm. m=${r.provenance.m}, n=${r.provenance.n_test}, α=${r.provenance.alpha}.`);
+  L.push(`ADR 0009: a long FLAT baseline still over-fires on real data (within-window variation). The operator's model is a fixed-calendar-period 2D baseline. On real GWDG \`${r.provenance.metric}\` (daily-cycle load metric) we compare FLAT vs **fixed daily-period** seasonal (P=${r.provenance.daily_period}, the operator's model) vs ACF-auto-detected seasonal. Calibrated on [0,m) only; all healthy → every fire is a false alarm. P(fire) is the **first-crossing** rate (Ville / production semantic: did the e-process EVER cross 1/α in [m, m+n), restart-on-fire). m=${r.provenance.m}, n=${r.provenance.n_test}, α=${r.provenance.alpha}.`);
   L.push('');
   L.push(`${r.n_streams} real per-GPU streams; the ACF auto-detector found a period in ${r.n_auto_period_detected}/${r.n_streams}.`);
   L.push('');
   L.push('| baseline | fires | P(fire) | honors α? |');
   L.push('|---|---|---|---|');
   for (const a of r.arms) L.push(`| ${a.label} | ${a.fires}/${r.n_streams} | ${pct(a.p_fire)} | ${a.honors_alpha ? '✅' : '❌'} |`);
+  L.push('');
+  if (r.n_auto_period_detected > 0) L.push(`**ACF-auto is actively harmful where it fires:** on the ${r.n_auto_period_detected} streams where it detected a (short) period, it fired ${r.auto_detected_fires}/${r.n_auto_period_detected} (${pct(r.auto_detected_fires / r.n_auto_period_detected)}) — *worse* than flat (${pct(r.arms[0].p_fire)}). The aggregate "same as flat" masks this: deseasonalizing a spurious short period contaminates rather than cleans the residual. Use a FIXED calendar period, not ACF auto-detection.`);
   L.push('');
   L.push(seasonalVerdict(r.arms[0], r.arms[1]));
   L.push('');
