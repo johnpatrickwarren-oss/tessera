@@ -198,3 +198,21 @@ redesign.
   (long seasonal baseline + LSE filtering + drift-triggered re-record/shadow/cutover). Needs a long
   periodic dataset (MIT Supercloud workload seasonality is the likely substrate; GWDG scrape counts
   are near-flat-with-drift, weakly seasonal).
+
+## Done (this branch — seasonal-baseline-validation)
+- **Seasonal (2D) baseline test (ADR 0010, continues 0009).** New `tools/seasonal-power.ts`
+  (`pnpm seasonal-power`) on real GWDG GPU_UTIL: flat vs fixed-daily-period seasonal (operator's 2D
+  model) vs ACF-auto. RESULT: fixed-daily seasonal helps 48.3%→31.7% (real, ~⅓ fewer FP); ACF-auto
+  does NOT (finds short periods 10-25, not daily 144). But not ≤α: residual is workload-driven
+  non-periodic variation (legitimate GPU_UTIL swings) — irreducible at the single-shard level; handled
+  by the operational lifecycle (re-record/refresh) + fleet-relative. So each piece of the operator's
+  model addresses a distinct measured component. +2 tests; gate green; idempotent. (Pre-existing flaky:
+  q84 worker.terminate timing test fails under full-suite load, passes 15/0 in isolation — not ours.)
+
+## Arc convergence (decisions 0001–0010)
+Detection works. Per-shard calibrated guarantee bounded by real non-stationarity, decomposed:
+estimation-error → fixed by m≫n (0009); periodic within-window structure → fixed by the fixed-period
+seasonal 2D baseline (0010, ~⅓ FP cut); legitimate workload change → operational refresh + fleet
+(open). e-value validity needs nuisance-baseline-robustness for any tighter guarantee (0008). The
+operator's model (long seasonal baseline + LSE + drift-refresh + fleet-relative) is directionally
+validated piece-by-piece.

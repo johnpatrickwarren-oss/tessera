@@ -1,0 +1,33 @@
+{
+  "schema_version": "tessera-seasonal-power-v1",
+  "provenance": {
+    "dataset": "GWDG-DCGM_FI_DEV_GPU_UTIL",
+    "metric": "DCGM_FI_DEV_GPU_UTIL",
+    "alpha": 0.01,
+    "m": 800,
+    "n_test": 200,
+    "daily_period": 144
+  },
+  "n_streams": 60,
+  "n_auto_period_detected": 50,
+  "arms": [
+    {
+      "label": "flat (ADR 0009)",
+      "fires": 29,
+      "p_fire": 0.483,
+      "honors_alpha": false
+    },
+    {
+      "label": "seasonal · fixed daily (P=144)",
+      "fires": 19,
+      "p_fire": 0.317,
+      "honors_alpha": false
+    },
+    {
+      "label": "seasonal · ACF auto-period",
+      "fires": 29,
+      "p_fire": 0.483,
+      "honors_alpha": false
+    }
+  ]
+}
