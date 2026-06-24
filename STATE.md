@@ -270,3 +270,19 @@ The single converged blocker (invalid e-value, ADR 0008) is now fixed (0013). En
 calibrated guarantee still needs: (a) BF+lifecycle integration (fresh short calibration), (b)
 contamination-robust fleet common-mode (0012) for fleet-FDR. Both now well-posed. Engine promotion of
 the BF e-value is the natural follow-on.
+
+## Done (this branch — bf-lifecycle-integration) — ADR 0014, honest negative
+- **BF + lifecycle: substitute, not complement.** New `tools/bf-lifecycle.ts` (`pnpm bf-lifecycle`).
+  Prompted by "don't we already use a BF e-value?" → YES, the production Family-A detector is the
+  Howard-Ramdas Gaussian mixture supermartingale (mixes the ALTERNATIVE, plugs in the null mean) →
+  shares the plug-in invalidity (verified 3-way under-powered: mixSM E[e]=1700/2% ❌, betting 437/2.2% ❌,
+  BF 0.03/0% ✅). RESULT: (A) horizon sweep — mixSM over-fires as n grows past m (n/m=4 → 4.6% ≫α), BF
+  stays ≤α, both detect; (B) real GWDG fresh-cal small-n blocks — mixSM 7.6% ≈ BF 11.2% (BF no better).
+  So BF (valid-at-large-n) and lifecycle (keep-n-small via re-record) are SUBSTITUTES; the lifecycle's
+  short horizons keep the EXISTING production mixture valid → BF adds nothing in-lifecycle. BF's niche =
+  long-horizon/no-re-record. See ADR 0014. +2 tests; gate green; idempotent. NOTE: cold-eye pending.
+
+## Practical bottom line (constructive phase closed)
+Keep the production mixture detector + add the lifecycle (0011) for drift. The nuisance-robust BF (0013)
+is the rigorous fixability proof + a tool for sparse-re-record/long-horizon. The remaining end-to-end
+guarantee lever is the CONTAMINATION-ROBUST FLEET COMMON-MODE (0012), not a BF-lifecycle merge.
