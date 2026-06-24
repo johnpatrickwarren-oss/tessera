@@ -1,6 +1,6 @@
 # Project state
 
-**Last updated:** 2026-06-23 · **by:** John Warren (with Claude)
+**Last updated:** 2026-06-24 · **by:** John Warren (with Claude)
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
@@ -276,11 +276,20 @@ the BF e-value is the natural follow-on.
   Prompted by "don't we already use a BF e-value?" → YES, the production Family-A detector is the
   Howard-Ramdas Gaussian mixture supermartingale (mixes the ALTERNATIVE, plugs in the null mean) →
   shares the plug-in invalidity (verified 3-way under-powered: mixSM E[e]=1700/2% ❌, betting 437/2.2% ❌,
-  BF 0.03/0% ✅). RESULT: (A) horizon sweep — mixSM over-fires as n grows past m (n/m=4 → 4.6% ≫α), BF
-  stays ≤α, both detect; (B) real GWDG fresh-cal small-n blocks — mixSM 7.6% ≈ BF 11.2% (BF no better).
-  So BF (valid-at-large-n) and lifecycle (keep-n-small via re-record) are SUBSTITUTES; the lifecycle's
-  short horizons keep the EXISTING production mixture valid → BF adds nothing in-lifecycle. BF's niche =
-  long-horizon/no-re-record. See ADR 0014. +2 tests; gate green; idempotent. NOTE: cold-eye pending.
+  BF 0.03/0% ✅). RESULT: (A) horizon sweep — mixSM over-fires as n grows past m (n/m=4 → 8.4% ≫α, E[e|H0]
+  → ~3e9 vs BF ≤0.44), BF stays ≤α, both detect; (B) real GWDG fresh-cal small-n blocks — mixSM 19.1% vs
+  BF 11.2%. So BF (valid-at-large-n) and lifecycle (keep-n-small via re-record) are SUBSTITUTES; the
+  lifecycle's short horizons keep the EXISTING production mixture VALID → BF's estimation-error fix is moot
+  in-lifecycle. The corrected mixSM fires MORE than BF on real data, but that is the plug-in's greater
+  SENSITIVITY (it also detects more, Part A n=30: 72.8% vs 50.4%), not a BF validity edge. BF's niche =
+  long-horizon/no-re-record. See ADR 0014. +2 tests; gate green; idempotent.
+  - **Production-parity fix + cold-eye (2026-06-24).** `mixWin` was using the MARGINAL variance where the
+    engine standardizes whitened residuals against the INNOVATION variance σ²·(1−φ²) (`estimateAr1.sigma2`,
+    = `baseline_sigma_squared` when `ar1_phi` set; same bug class as the validator fix at lines 66–74).
+    Under-fired the mixSM; corrected. Sharpened Part A (E[e|H0] column) and raised Part B mixSM 7.6%→19.1%
+    (above BF) — conclusion unchanged (sensitivity, not validity). Cold-eye (independent fresh-context):
+    SHIP-WITH-FIXES, variance/parity/boundary/guards confirmed correct; the one HIGH (stale inverted Part-B
+    prose) fixed in report + ADR + here.
 
 ## Practical bottom line (constructive phase closed)
 Keep the production mixture detector + add the lifecycle (0011) for drift. The nuisance-robust BF (0013)

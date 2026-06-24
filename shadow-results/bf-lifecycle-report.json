@@ -9,34 +9,44 @@
       "n": 30,
       "mix_fp": 0,
       "bf_fp": 0,
-      "mix_detect": 0.57,
+      "mix_mean_e": 1.023,
+      "bf_mean_e": 0.133,
+      "mix_detect": 0.728,
       "bf_detect": 0.504
     },
     {
       "n": 75,
-      "mix_fp": 0.006,
+      "mix_fp": 0.008,
       "bf_fp": 0,
-      "mix_detect": 0.998,
+      "mix_mean_e": 22.397,
+      "bf_mean_e": 0.166,
+      "mix_detect": 1,
       "bf_detect": 0.996
     },
     {
       "n": 150,
-      "mix_fp": 0.006,
+      "mix_fp": 0.014,
       "bf_fp": 0,
+      "mix_mean_e": 1069.071,
+      "bf_mean_e": 0.186,
       "mix_detect": 1,
       "bf_detect": 1
     },
     {
       "n": 300,
-      "mix_fp": 0.01,
+      "mix_fp": 0.018,
       "bf_fp": 0.002,
+      "mix_mean_e": 37303060.955,
+      "bf_mean_e": 0.437,
       "mix_detect": 1,
       "bf_detect": 1
     },
     {
       "n": 600,
-      "mix_fp": 0.046,
+      "mix_fp": 0.084,
       "bf_fp": 0,
+      "mix_mean_e": 3069217410.49,
+      "bf_mean_e": 0.091,
       "mix_detect": 1,
       "bf_detect": 1
     }
@@ -46,7 +56,7 @@
     "windows": 1277,
     "cal_len": 150,
     "test_len": 50,
-    "mix_fp": 0.076,
+    "mix_fp": 0.191,
     "bf_fp": 0.112
   }
 }
