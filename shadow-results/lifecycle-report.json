@@ -1,0 +1,46 @@
+{
+  "schema_version": "tessera-lifecycle-v1",
+  "params": {
+    "alpha": 0.01,
+    "m0": 300,
+    "rate_window": 150,
+    "rate_thresh": 4,
+    "trials": 80
+  },
+  "scenarios": [
+    {
+      "scenario": "slow drift (no fault) — FP",
+      "static_alarms": 153.7,
+      "adaptive_alarms": 35.29,
+      "lifecycle_alarms": 51.2,
+      "lifecycle_rerecords": 8.81
+    },
+    {
+      "scenario": "SHARP fault — detection rate",
+      "static_alarms": 53.4,
+      "adaptive_alarms": 7.04,
+      "lifecycle_alarms": 6.59,
+      "lifecycle_rerecords": 0,
+      "static_detect": 1,
+      "adaptive_detect": 1,
+      "lifecycle_detect": 1
+    },
+    {
+      "scenario": "SLOW fault — detection rate",
+      "static_alarms": 3.95,
+      "adaptive_alarms": 0.33,
+      "lifecycle_alarms": 2.71,
+      "lifecycle_rerecords": 0.44,
+      "static_detect": 0.7,
+      "adaptive_detect": 0.28,
+      "lifecycle_detect": 0.7
+    },
+    {
+      "scenario": "continuous workload (no fault) — FP",
+      "static_alarms": 115.69,
+      "adaptive_alarms": 15.09,
+      "lifecycle_alarms": 20.85,
+      "lifecycle_rerecords": 3.63
+    }
+  ]
+}
