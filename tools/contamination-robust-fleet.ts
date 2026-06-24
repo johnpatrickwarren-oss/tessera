@@ -18,6 +18,7 @@
 import { genFleet, N, T, M, N_TEST, FONSET, RHO, DRIFT, NOISE, LVL, STEP, DEFAULT_MFAIL } from './fleet-relative-capstone.js';
 import { nuisanceRobustEValue, pluginEValue } from './nuisance-robust-evalue.js';
 import { eBH, fleetResiduals } from './fleet-fdr.js';
+import { robustLocation, perShardLevel as enginePerShardLevel, contaminationRobustResiduals } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/common-mode';
 import { loadStructuralStreams, STRUCTURAL_METRIC } from './_gwdg-structural-loader.js';
 import { mulberry32, scramble, gaussian } from './calibration-envelope.js';
 import * as fs from 'node:fs';
@@ -29,59 +30,27 @@ export const FAULT_FRACS = [2, 5, 10, 12, 14, 16, 20, 30, 40] as const; // break
 export const DELTAS = [1, 2, 3, 5, 8] as const;             // effect-size sweep (fault step in σ-ish units)
 export const TUKEY_C = 4.685;                                // 95% efficiency at the Gaussian; redescends to 0 beyond C·scale
 
-function median(xs: ReadonlyArray<number>): number {
-  if (xs.length === 0) return 0;
-  const s = [...xs].sort((a, b) => a - b);
-  const n = s.length;
-  return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2;
-}
-function mad(xs: ReadonlyArray<number>, center: number): number {
-  return median(xs.map((x) => Math.abs(x - center))) * 1.4826; // → σ for Gaussian
-}
 function round3(x: number): number { return Math.round(x * 1000) / 1000; }
 function mean(xs: ReadonlyArray<number>): number { return xs.reduce((a, b) => a + b, 0) / xs.length; }
 
-/** Redescending (Tukey biweight) M-estimator of location: IRLS from a high-breakdown median start with
- *  a fixed MAD scale. Unlike Huber's SOFT downweight (a δ-σ outlier keeps weight k/δ), the biweight gives
- *  any point beyond C·scale weight EXACTLY 0 — so a minority of faulty shards is fully rejected, pushing
- *  the breakdown toward its theoretical ≈50% (vs Huber's leakage that biases the center at heavy load). */
-export function robustCenter(xs: ReadonlyArray<number>, c: number = TUKEY_C, tol: number = 1e-9, maxIter: number = 50): number {
-  if (xs.length === 0) return 0;
-  let mu = median(xs);
-  const scale = Math.max(mad(xs, mu), 1e-9);
-  for (let it = 0; it < maxIter; it++) {
-    let wsum = 0, wxsum = 0;
-    for (const x of xs) {
-      const r = (x - mu) / scale;
-      const u = r / c;
-      const w = Math.abs(u) < 1 ? (1 - u * u) ** 2 : 0; // Tukey biweight: redescends to 0 beyond C·scale
-      wsum += w; wxsum += w * x;
-    }
-    if (wsum === 0) break; // all points rejected (pathological) — keep the median
-    const next = wxsum / wsum;
-    if (Math.abs(next - mu) < tol * scale) { mu = next; break; }
-    mu = next;
-  }
-  return mu;
+// ADR 0004 step 6: the robust common-mode is now the engine's promoted PR-B surface; these are thin
+// cross-check wrappers (the report re-validates the engine on Tessera's fleets). The engine's
+// robustLocation/perShardLevel/contaminationRobustResiduals are byte-faithful ports of the originals.
+
+/** Redescending (Tukey biweight) M-estimator of location — delegates to the engine's `robustLocation`. */
+export function robustCenter(xs: ReadonlyArray<number>, c: number = TUKEY_C): number {
+  return robustLocation(xs, c);
 }
 
-/** Per-shard level (fixed effect) = robust location over the healthy calibration window [0, m). */
+/** Per-shard level (fixed effect) = median over the healthy calibration window [0, m). */
 export function perShardLevel(X: number[][], m: number): number[] {
-  return X.map((row) => median(row.slice(0, m)));
+  return enginePerShardLevel(X, m);
 }
 
-/** Robust contamination-resistant residual matrix: R[i][t] = X[i][t] − ℓ̂_i − c_t, where ℓ̂_i is the
- *  per-shard calibration level and c_t = redescending (Tukey biweight) center of the level-adjusted cross-section at t. */
+/** Robust contamination-resistant residual matrix R[i][t] = X[i][t] − ℓ̂_i − c_t — delegates to the
+ *  engine's `contaminationRobustResiduals`. */
 export function robustResiduals(X: number[][], m: number): number[][] {
-  const n = X.length, t = X[0].length;
-  const lvl = perShardLevel(X, m);
-  const R: number[][] = X.map(() => new Array(t));
-  for (let j = 0; j < t; j++) {
-    const colAdj = X.map((row, i) => row[j] - lvl[i]);
-    const c = robustCenter(colAdj);
-    for (let i = 0; i < n; i++) R[i][j] = colAdj[i] - c;
-  }
-  return R;
+  return contaminationRobustResiduals(X, m);
 }
 
 // ── fleet substrate (matches the capstone's genFleet, parameterized by fault step δ for the power curve) ──

@@ -14,7 +14,7 @@
 // EVENT signal (deploy/schedule — Tessera's freeze-hook) breaks the tie: an unexplained mean fire (no
 // event) is treated as a fault, at a benign-FP cost of (1 − event_coverage). Tessera-original; NOT vendored.
 
-import { estimateAr1 } from './per-shard-whitening.js';
+import { distributionalSignature } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/distributional-signature';
 import { nuisanceRobustEValue } from './nuisance-robust-evalue.js';
 import { mulberry32, scramble, gaussian } from './calibration-envelope.js';
 import * as fs from 'node:fs';
@@ -33,39 +33,19 @@ export const TRIALS = 400;
 export type ShardType = 'healthy' | 'benign' | 'fault-variance' | 'fault-trend' | 'fault-collapse' | 'fault-meanonly';
 export type Verdict = 'healthy' | 'benign' | 'fault';
 
-function mean(xs: ReadonlyArray<number>): number { return xs.reduce((a, b) => a + b, 0) / xs.length; }
-function variance(xs: ReadonlyArray<number>, mu: number): number { return xs.reduce((a, b) => a + (b - mu) ** 2, 0) / Math.max(1, xs.length - 1); }
 function round3(x: number): number { return Math.round(x * 1000) / 1000; }
-
-/** Whitened innovations r_t = x_t − φ·x_{t−1} over [a,b) using a calibration φ. */
-function whiten(v: ReadonlyArray<number>, phi: number, a: number, b: number): number[] {
-  const r: number[] = [];
-  for (let t = Math.max(a, 1); t < b; t++) r.push(v[t] - phi * v[t - 1]);
-  return r;
-}
 
 export interface Signature { fRatio: number; tStat: number; collapseSigma: number; hasSignature: boolean; }
 
 /** Fault-signature scores on the test window vs calibration — evidence of a change OTHER than a clean
- *  mean step: (a) innovation-variance ratio (F), (b) trend t-stat, (c) downward collapse in σ units. */
+ *  mean step: (a) innovation-variance ratio (F), (b) trend t-stat, (c) downward collapse in σ units.
+ *
+ *  ADR 0004 step 6: delegates to the engine's promoted `distributionalSignature` (PR C; this harness
+ *  now cross-checks the engine). The engine field `trendT` maps to this surface's `tStat`; thresholds
+ *  match (F>2, trend t>4, collapse>6σ), so `hasSignature` is identical. */
 export function faultSignature(v: ReadonlyArray<number>, m: number, n: number): Signature {
-  const phi = estimateAr1(v.slice(0, m)).phi;
-  const wc = whiten(v, phi, 1, m), wt = whiten(v, phi, m, m + n);
-  const s2c = Math.max(variance(wc, mean(wc)), 1e-9);
-  const fRatio = Math.max(variance(wt, mean(wt)), 1e-9) / s2c;
-  // trend: OLS slope on the WHITENED test innovations (iid → the iid slope-se is valid; raw values
-  // are autocorrelated and would inflate the t-stat → spurious trends). A real ramp survives whitening
-  // as a slope ≈ b·(1−φ), so a degradation still trips; AR(1) noise no longer does.
-  const nt = wt.length, tbar = (nt - 1) / 2, wtbar = mean(wt);
-  let stt = 0, sty = 0;
-  for (let k = 0; k < nt; k++) { stt += (k - tbar) ** 2; sty += (k - tbar) * (wt[k] - wtbar); }
-  const slope = stt > 0 ? sty / stt : 0;
-  const tStat = Math.abs(slope) / Math.sqrt(s2c / Math.max(stt, 1e-9));
-  // collapse: how far the test RAW mean sits BELOW the cal RAW mean, in cal-σ units (detachment → large)
-  const calMean = mean(v.slice(0, m)), testMean = mean(v.slice(m, m + n));
-  const sigmaCal = Math.sqrt(Math.max(variance(v.slice(0, m), calMean), 1e-9));
-  const collapseSigma = Math.max(0, (calMean - testMean) / sigmaCal);
-  return { fRatio, tStat, collapseSigma, hasSignature: fRatio > F_THRESH || tStat > T_THRESH || collapseSigma > COLLAPSE_THRESH };
+  const s = distributionalSignature(v, { start: 0, len: m }, { start: m, len: n });
+  return { fRatio: s.fRatio, tStat: s.trendT, collapseSigma: s.collapseSigma, hasSignature: s.hasSignature };
 }
 
 /** Did the mean-shift BF e-value fire? (the "a change happened" trigger). */

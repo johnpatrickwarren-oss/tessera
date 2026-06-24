@@ -22,7 +22,7 @@
 
 import { calibrateBaseline } from './shadow-replay.js';
 import { terminalEValueWith } from './fleet-fdr.js';
-import { estimateAr1 } from './per-shard-whitening.js';
+import { nuisanceRobustBFEValue } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/nuisance-robust-bf-e-value';
 import { loadStructuralStreams, STRUCTURAL_METRIC } from './_gwdg-structural-loader.js';
 import { mulberry32, scramble, gaussian } from './calibration-envelope.js';
 import * as fs from 'node:fs';
@@ -31,27 +31,17 @@ import * as path from 'node:path';
 export const ALPHA = 0.01;
 export const TAU_MULT = 25; // prior variance on the (whitened) mean = TAU_MULT × innovation variance (diffuse but proper)
 
-/** Log marginal likelihood of a Gaussian sample (sufficient stat: centered sum S over n points,
- *  innovation variance s2) under a N(0, tau2) prior on the mean. Data-only constants cancel in the BF. */
-function logMarginal(S: number, n: number, s2: number, tau2: number): number {
-  return (tau2 * S * S) / (2 * s2 * (s2 + n * tau2)) - 0.5 * Math.log(1 + (n * tau2) / s2);
-}
-
 /** Nuisance-robust e-value over the test window [m, m+n): two-sample Bayes factor (separate vs common
  *  mean) on whitened residuals. Robust to the unknown baseline mean (integrated out) and to AR(1)
- *  autocorrelation (whitened). Returns the BF (a valid e-value: E[·|H0] ≤ 1). */
+ *  autocorrelation (whitened). Returns the BF (a valid e-value: E[·|H0] ≤ 1).
+ *
+ *  ADR 0004 step 6: delegates to the engine's promoted `nuisanceRobustBFEValue` (this harness now
+ *  cross-checks the engine on Tessera's data). The engine uses its native Kendall-corrected AR(1) (vs
+ *  Tessera's mirror), so e-values shift slightly but the validity properties this report measures hold;
+ *  it also enforces the cal ≥ 100 floor (all call sites here use m ≥ 150). TAU_MULT (25) matches the
+ *  engine's DEFAULT_TAU_MULT. */
 export function nuisanceRobustEValue(values: ReadonlyArray<number>, m: number, n: number): number {
-  const phi = estimateAr1(values.slice(0, m)).phi;
-  const w: number[] = [];
-  for (let t = 1; t < m + n && t < values.length; t++) w.push(values[t] - phi * values[t - 1]);
-  const wc = w.slice(0, m - 1), wt = w.slice(m - 1, m - 1 + n);
-  if (wc.length < 2 || wt.length < 2) return 0;
-  const mc = wc.reduce((a, b) => a + b, 0) / wc.length;
-  const s2 = Math.max(wc.reduce((a, b) => a + (b - mc) ** 2, 0) / (wc.length - 1), 1e-9);
-  const tau2 = TAU_MULT * s2;
-  // recenter both samples by the calibration mean (a common shift — the BF is invariant to it)
-  const Sc = wc.reduce((a, b) => a + (b - mc), 0), St = wt.reduce((a, b) => a + (b - mc), 0);
-  return Math.exp(logMarginal(Sc, wc.length, s2, tau2) + logMarginal(St, wt.length, s2, tau2) - logMarginal(Sc + St, wc.length + wt.length, s2, tau2));
+  return nuisanceRobustBFEValue(values, { start: 0, len: m }, { start: m, len: n });
 }
 
 /** Plug-in betting e-value (the ADR 0008 baseline) for side-by-side comparison. */
