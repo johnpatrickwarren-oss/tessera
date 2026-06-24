@@ -8,6 +8,7 @@
 // See ADR 0011. Tessera-original; NOT vendored.
 
 import { freshBettingState, updateBettingState } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
+import { freshBaselineLifecycle, updateBaselineLifecycle } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/baseline-lifecycle';
 import { calibrateBaseline } from './shadow-replay.js';
 import { replayFiresAdaptive } from './adaptive-baseline.js';
 import { mulberry32, scramble, gaussian } from './calibration-envelope.js';
@@ -24,28 +25,37 @@ export const COOLDOWN = 150;      // after a re-record, suppress re-triggering f
 export interface LifecycleOpts { rateWindow?: number; rateThresh?: number; recordWindow?: number; cooldown?: number; }
 
 /** Monitor with epoch-level drift-triggered re-record. Returns alarm indices + re-record count.
- *  rateThresh = Infinity ⇒ never re-record (= static monitor). */
+ *  rateThresh = Infinity ⇒ never re-record (= static monitor).
+ *
+ *  ADR 0004 step 6: the epoch-level rate-trigger DECISION is now the engine's promoted baseline-lifecycle
+ *  machine (PR D); this harness keeps the betting loop (consumer data-plane) and feeds its alarms to the
+ *  engine, which decides WHEN to re-record. Behaviorally equivalent to the original at the default
+ *  cooldown = window (the engine clears its window on re-record; the original relied on cooldown). The
+ *  static case (rateThresh = Infinity) maps to a never-reached integer threshold. */
 export function monitorLifecycle(values: ReadonlyArray<number>, m0: number, alpha: number, opts: LifecycleOpts = {}): { alarms: number[]; reRecords: number } {
   const rateWindow = opts.rateWindow ?? RATE_WINDOW, rateThresh = opts.rateThresh ?? RATE_THRESH;
   const recordWindow = opts.recordWindow ?? RECORD_WINDOW, cooldown = opts.cooldown ?? COOLDOWN;
   let cal = calibrateBaseline(values.slice(0, m0), 'simple');
   let state = freshBettingState();
   const threshold = 1 / alpha;
-  const alarms: number[] = []; let reRecords = 0; let cooldownUntil = m0;
+  const alarms: number[] = [];
+  // The engine machine requires an integer threshold; Infinity (static monitor) → never-reached integer.
+  const life = freshBaselineLifecycle({
+    window: rateWindow,
+    rateThreshold: Number.isFinite(rateThresh) ? rateThresh : Number.MAX_SAFE_INTEGER,
+    cooldown,
+  });
   for (let i = m0; i < values.length; i++) {
     updateBettingState(state, values[i], cal.mean, cal.innovationVar, alpha, cal.phi);
-    if (state.M >= threshold) {
-      alarms.push(i);
+    let fired = false;
+    if (state.M >= threshold) { alarms.push(i); fired = true; state = freshBettingState(); }
+    // Epoch-level drift trigger: the engine counts the trailing alarm rate and says when to re-record.
+    if (updateBaselineLifecycle(life, fired).reRecord) {
+      cal = calibrateBaseline(values.slice(Math.max(0, i - recordWindow), i), 'simple');
       state = freshBettingState();
-      // Epoch-level drift trigger: too many alarms recently ⇒ the baseline is stale ⇒ re-record.
-      const recent = alarms.filter((a) => a > i - rateWindow).length;
-      if (i >= cooldownUntil && recent >= rateThresh) {
-        cal = calibrateBaseline(values.slice(Math.max(0, i - recordWindow), i), 'simple');
-        reRecords++; cooldownUntil = i + cooldown;
-      }
     }
   }
-  return { alarms, reRecords };
+  return { alarms, reRecords: life.reRecords };
 }
 
 /** Static monitor (never re-record) = the ADR 0009 fixed baseline. */

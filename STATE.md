@@ -8,6 +8,19 @@ DeploySignal statistical-detector engine. Current work: moving from caveated art
 production by validating on REAL telemetry (Tier 2: ingestion + shadow harness), on top of the
 per-shard e-process validity work and the sprag + Anchor quality stack.
 
+## Done (this branch — engine-v0.4.0-migration)
+- **The nuisance-robust evidence stack is promoted to the engine; tools/* are now thin harnesses (ADR
+  0017).** ADRs 0013/0015/0016/0011 validated four engine-shaped primitives in Tessera; they shipped in
+  `deploysignal-engine` **v0.4.0-pre** (PRs A–E) and Tessera now pins it. `tools/{fleet-fdr,
+  nuisance-robust-evalue,contamination-robust-fleet,fault-discriminator,lifecycle-monitor}.ts` delegate
+  to the engine (`eBenjaminiHochberg`, `nuisanceRobustBFEValue`, `robustLocation`/
+  `contaminationRobustResiduals`, `distributionalSignature`, `baseline-lifecycle`) — signatures
+  preserved, so they keep cross-checking the engine on Tessera's data. Engine uses its native
+  Kendall-corrected AR(1), so e-values shift slightly but the measured validity PROPERTIES are
+  unchanged; full suite **616/0/10** (= pin-bump baseline). Cold-eye SHIP. The math's single source of
+  truth is now the engine; future levers (variance-robust NIG/t BF, multi-factor common-mode) land
+  there and flow via the pin.
+
 ## Done (this branch — shadow-rich-calibration)
 - **Gap #1: production (seasonal) calibration tested on real data — hypothesis refuted, usefully.**
   Added a `rich` mode (engine `decomposeSeasonal` + AR(1), mirroring `fit-production-substrate`) +

@@ -13,6 +13,7 @@
 // See docs/SPEC-fleet-fdr-validation.md. Tessera-original; NOT vendored.
 
 import { freshBettingState, updateBettingState } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
+import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 import { calibrateBaseline, probationaryEnd } from './shadow-replay.js';
 import { loadStructuralStreams, STRUCTURAL_METRIC } from './_gwdg-structural-loader.js';
 import { estimateAr1 } from './per-shard-whitening.js';
@@ -92,13 +93,14 @@ export function eValueValidity(K: number = 400): ValidityRow[] {
   });
 }
 
-/** e-BH (Wang–Ramdas): reject the k* shards with largest e-values, k* = max{k : e_(k) ≥ N/(q·k)}. */
+/** e-BH (Wang–Ramdas): reject the k* shards with largest e-values, k* = max{k : e_(k) ≥ N/(q·k)}.
+ *  ADR 0004 step 6: delegates to the engine's `eBenjaminiHochberg` (the promoted operator; this local
+ *  copy is now a thin cross-check wrapper). Returns the rejected indices (engine returns them sorted
+ *  ascending; callers use set membership, so order is irrelevant). Empty input → [] (the engine throws
+ *  on N=0; preserved here for the harness's lenient contract). */
 export function eBH(evalues: ReadonlyArray<number>, q: number): number[] {
-  const sorted = evalues.map((e, i) => ({ e, i })).sort((a, b) => b.e - a.e);
-  const Nn = evalues.length;
-  let kstar = 0;
-  for (let k = 1; k <= Nn; k++) if (sorted[k - 1].e >= Nn / (q * k)) kstar = k;
-  return sorted.slice(0, kstar).map((p) => p.i);
+  if (evalues.length === 0) return [];
+  return [...eBenjaminiHochberg(evalues, q).selected];
 }
 
 /** Cross-shard residual at each time (subtract the common-mode = per-timestamp median). */

@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@johnpatrickwarren-oss/deploysignal-engine':
-        specifier: github:johnpatrickwarren-oss/deploysignal-engine#v0.3.4-pre
-        version: https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/50ea5e7f86fc18a085c445f1585a350a0ee79481
+        specifier: github:johnpatrickwarren-oss/deploysignal-engine#v0.4.0-pre
+        version: https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/cf3a901794324678bce7b61351003d22a1466c19
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -180,9 +180,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@johnpatrickwarren-oss/deploysignal-engine@https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/50ea5e7f86fc18a085c445f1585a350a0ee79481':
-    resolution: {gitHosted: true, integrity: sha512-sLEX9KX5co3YGSG9M2pC3ml3K0JGUAVJhRYIiEap2IPVThdLdw3BaacwiJtCOmjaGy9kNWkP2PVJRTeZGvSEkA==, tarball: https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/50ea5e7f86fc18a085c445f1585a350a0ee79481}
-    version: 0.3.4-pre
+  '@johnpatrickwarren-oss/deploysignal-engine@https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/cf3a901794324678bce7b61351003d22a1466c19':
+    resolution: {gitHosted: true, integrity: sha512-jgSaxC4PXayZe6BhBsiAp/shbAyC9hNWLIqE/RnJ4e218fhwGaihEjMZEH8JRi2VW6h3Zr8uebxsH6RPXoONBA==, tarball: https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/cf3a901794324678bce7b61351003d22a1466c19}
+    version: 0.4.0-pre
     hasBin: true
 
   '@types/node@22.19.19':
@@ -281,7 +281,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.0':
     optional: true
 
-  '@johnpatrickwarren-oss/deploysignal-engine@https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/50ea5e7f86fc18a085c445f1585a350a0ee79481': {}
+  '@johnpatrickwarren-oss/deploysignal-engine@https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/cf3a901794324678bce7b61351003d22a1466c19': {}
 
   '@types/node@22.19.19':
     dependencies:
