@@ -41,6 +41,8 @@
     "baseline-power": "node tools/baseline-power.js",
     "preseasonal-power": "tsc -p tsconfig.test.json",
     "seasonal-power": "node tools/seasonal-power.js",
+    "prelifecycle": "tsc -p tsconfig.test.json",
+    "lifecycle": "node tools/lifecycle-monitor.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",

@@ -217,3 +217,19 @@ seasonal 2D baseline (0010, ~⅓ FP cut); legitimate workload change → operati
 (open). e-value validity needs nuisance-baseline-robustness for any tighter guarantee (0008). The
 operator's model (long seasonal baseline + LSE + drift-refresh + fleet-relative) is directionally
 validated piece-by-piece.
+
+## Done (this branch — lifecycle-monitor)
+- **Operational baseline lifecycle (ADR 0011, addresses the 0009/0010 residual).** New
+  `tools/lifecycle-monitor.ts` (`pnpm lifecycle`). First: the per-fire drift-vs-fault discriminator
+  FAILS (slow drift & sharp faults both fire at run-length ~9) → the drift trigger is epoch-level
+  (sustained alarm RATE → re-record). RESULT (synthetic, 80 trials): lifecycle beats BOTH static
+  (drift FP 154→51) AND adaptive (slow-fault detection 70% vs adaptive's 28% masking) — the needle —
+  for DISCRETE drift. DEGENERATES on continuous within-epoch workload (re-records constantly → toward
+  adaptive) → that residual needs the FLEET (+ valid e-value, 0008). Third complementary piece of the
+  operator's model (m≫n / seasonal-2D / lifecycle). +3 tests; gate green; idempotent.
+
+## Operator-model status (the convergence)
+- estimation error → m≫n (ADR 0009) ✓
+- periodic within-window structure → fixed seasonal 2D baseline (ADR 0010) ✓ (~⅓ FP cut)
+- discrete cross-epoch drift → lifecycle re-record/shadow/cutover (ADR 0011) ✓ (beats static+adaptive)
+- continuous workload / shard-specific-vs-fleet-wide → fleet-relative (OPEN; needs valid e-value, 0008)
