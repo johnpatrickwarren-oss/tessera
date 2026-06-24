@@ -51,6 +51,8 @@
     "bf-lifecycle": "node tools/bf-lifecycle.js",
     "precrfleet": "tsc -p tsconfig.test.json",
     "crfleet": "node tools/contamination-robust-fleet.js",
+    "prefault-disc": "tsc -p tsconfig.test.json",
+    "fault-disc": "node tools/fault-discriminator.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",

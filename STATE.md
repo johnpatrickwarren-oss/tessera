@@ -313,10 +313,28 @@ guarantee lever is the CONTAMINATION-ROBUST FLEET COMMON-MODE (0012), not a BF-l
   fixed to 12/60; H2 real cross-section was index-aligned across 12 start-dates → fixed to ts-aligned
   cohort; M1 spec Huber→Tukey; M2 naive-baseline note; L1 softened "guaranteed"; L2 tightened AC-4).
 
-## Next — LEVER B (the discriminator)
-- **Benign-change vs fault discriminator (ADR 0016, spec drafted `docs/SPEC-fault-discriminator.md`).**
-  Lever A removes COMMON-MODE benign change; the shard-SPECIFIC residual (what dominates real GWDG) needs
-  a discriminator. Hypothesis: benign = stable MEAN step (re-recordable); fault = DISTRIBUTIONAL change
-  (variance/trend/collapse), which the BF (mean-shift, stable-variance) does not model. Irreducible
-  limit: a mean-only fault is indistinguishable from benign change without an event/topology signal
-  (Tessera's freeze-hook). Build next.
+## Done (this branch — bf-lifecycle-integration) — ADR 0016, LEVER B (the discriminator)
+- **Benign-change vs fault discriminator (ADR 0016).** New `tools/fault-discriminator.ts`
+  (`pnpm fault-disc`). Lever A removes COMMON-MODE benign change; the shard-SPECIFIC residual (which
+  dominates real GWDG) needs this. Construction: a fault-SIGNATURE test on the whitened residual —
+  variance F-ratio (SDC), trend t-stat on WHITENED innovations (degradation; whitening essential — raw
+  values' AR(1) inflates the t-stat ~400×), downward collapse in σ (detachment). classify: signature →
+  fault; else a mean fire → benign. RESULT (confusion, 400 trials/type): healthy→healthy, benign→benign,
+  fault-{variance,trend,collapse}→fault all ~100%, benign false-fault floor ~0.3%; detection does NOT
+  cliff at the chosen fault sizes (cold-eye-verified down to ×1.5 var / t≈5 trend / 6σ collapse).
+  THE IRREDUCIBLE LIMIT: a mean-only fault → 100% benign (MISSED) — statistically identical to a benign
+  mean step; only an EVENT signal resolves it (event-gating shows the dependence SHAPE, but
+  meanonly_caught=100% / benign_FF=1−coverage are model IDENTITIES, not measured power; real event
+  coverage unknown = Tessera's freeze-hook). +4 tests; suite 616/0/10; gate green; idempotent. Cold-eye
+  SHIP-WITH-FIXES — all addressed (H1 event-power-assumed disclosure; M1 spec AC-5→out-of-scope; M2
+  collapse one-sided/downward disclosure; L1 ADR 0016 written; L2 dead const removed).
+
+## Two-lever picture (ADRs 0015 + 0016) — the BF e-value delivers a bounded guarantee
+Fleet **FP/FDR ≤ q by construction** on a common-mode-coupled fleet (Lever A) PLUS a per-shard
+**benign/fault discriminator** for signature-bearing faults (Lever B), both built on the nuisance-robust
+**BF e-value** (0013). Honest remaining gaps to an end-to-end REAL guarantee: (a) a genuinely
+common-mode-coupled real substrate (GWDG is heterogeneous, not coupled — Lever A gives no benefit there);
+(b) the mean-only fault (needs a real deploy/event feed); (c) a multi-factor common-mode for
+heterogeneous loadings. The arc's "use the BF e-value to guarantee an FP and FD rate" is achieved
+**conditionally and by construction** (FP/FDR guaranteed within the envelope; FD characterized, not
+unconditional) — NOT yet demonstrated end-to-end on real coupled-fleet data (none available).

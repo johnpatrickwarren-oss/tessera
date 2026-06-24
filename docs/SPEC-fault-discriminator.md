@@ -1,7 +1,7 @@
 # Spec — benign-change vs fault discriminator (Lever B)
 
 - **Date:** 2026-06-24
-- **Status:** Draft (build after Lever A / ADR 0015 cold-eye lands)
+- **Status:** Accepted (cold-eye SHIP-WITH-FIXES — all findings addressed; ADR 0016)
 - **Need:** Lever A (ADR 0015) removes COMMON-MODE benign change and delivers FDR ≤ q on a
   common-mode-coupled fleet. What it leaves — and what dominates the real GWDG firing — is
   **shard-SPECIFIC** change: a legitimate workload/phase shift on one shard fires the e-value exactly
@@ -52,9 +52,7 @@ On a shard that Lever A flags (fire on the robust residual R[i]), classify the p
 - **AC-4** Event-gated variant: with an event channel covering fraction p of benign changes, the
   benign FP falls with p; quantify. States that the discriminator's ceiling without events is set by
   the mean-only-fault confusion (AC-3).
-- **AC-5** Re-record does not MASK faults beyond a stated latency (the ADR 0006 adaptive-masking
-  tradeoff): a fault that onsets is still caught within L even if a re-record fires first. Measured.
-- **AC-6** Deterministic, idempotent; tests pin the signature scores (AC-1), the confusion matrix
+- **AC-5** Deterministic, idempotent; tests pin the signature scores (AC-1), the confusion matrix
   direction (AC-2), and the irreducible-limit collapse (AC-3).
 - **AC-7** Honest verdict: the per-shard guarantee is FP/FDR ≤ q (Lever A) PLUS a benign/fault
   discriminator that works for faults with a distributional signature; mean-only faults are
@@ -62,7 +60,12 @@ On a shard that Lever A flags (fire on the robust residual R[i]), classify the p
   exactly the role of Tessera's event-conditioned freeze-hook.
 
 ## Out of scope
+- **Re-record masking latency** (the original AC-5): whether re-recording on a benign step masks a
+  later slow fault. This is the ADR 0006 adaptive-masking tradeoff, already measured there — NOT
+  re-measured here. (Moved from acceptance criteria to out-of-scope to match what the tool builds.)
 - Topology-correlation discrimination (rack/NVLink-local fault vs idiosyncratic benign) — needs a real
   coupled-topology substrate; named as future.
 - A real labeled benign-vs-fault dataset (none available) — synthetic ground truth for the confusion
   matrix; real GWDG used to show the residual firing is benign-mean-step-like (FP-only).
+- The event channel's REAL coverage is unknown/unmeasured — the event-gating sweep shows the SHAPE of
+  the dependence (an identity given the model), not a measured catch rate.
