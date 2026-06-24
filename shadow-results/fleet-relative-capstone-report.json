@@ -1,0 +1,61 @@
+{
+  "schema_version": "tessera-fleet-relative-capstone-v2",
+  "params": {
+    "alpha": 0.01,
+    "n": 60,
+    "m": 1500,
+    "n_test": 300,
+    "default_mfail": 10,
+    "trials": 120
+  },
+  "by_q": [
+    {
+      "q": 0.1,
+      "naive_fdp": 0.579,
+      "naive_power": 0.628,
+      "rel_fdp": 0.772,
+      "rel_power": 1
+    },
+    {
+      "q": 0.05,
+      "naive_fdp": 0.563,
+      "naive_power": 0.614,
+      "rel_fdp": 0.758,
+      "rel_power": 1
+    },
+    {
+      "q": 0.01,
+      "naive_fdp": 0.55,
+      "naive_power": 0.594,
+      "rel_fdp": 0.715,
+      "rel_power": 1
+    }
+  ],
+  "by_fault_fraction": [
+    {
+      "mfail": 2,
+      "rel_fdp": 0.149,
+      "rel_power": 1
+    },
+    {
+      "mfail": 5,
+      "rel_fdp": 0.542,
+      "rel_power": 1
+    },
+    {
+      "mfail": 10,
+      "rel_fdp": 0.787,
+      "rel_power": 1
+    },
+    {
+      "mfail": 20,
+      "rel_fdp": 0.667,
+      "rel_power": 1
+    }
+  ],
+  "null_residual_validity": {
+    "p_ge_10": 0.01,
+    "p_ge_100": 0.001,
+    "median_e": 0.108
+  }
+}
