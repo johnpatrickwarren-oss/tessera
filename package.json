@@ -49,6 +49,8 @@
     "evalue": "node tools/nuisance-robust-evalue.js",
     "prebf-lifecycle": "tsc -p tsconfig.test.json",
     "bf-lifecycle": "node tools/bf-lifecycle.js",
+    "precrfleet": "tsc -p tsconfig.test.json",
+    "crfleet": "node tools/contamination-robust-fleet.js",
     "prebench:clustersynth": "tsc -p tsconfig.test.json",
     "bench:clustersynth": "node bench/clustersynth-perf.js",
     "prebench:mmd-sampling": "tsc -p tsconfig.test.json",

@@ -295,3 +295,28 @@ the BF e-value is the natural follow-on.
 Keep the production mixture detector + add the lifecycle (0011) for drift. The nuisance-robust BF (0013)
 is the rigorous fixability proof + a tool for sparse-re-record/long-horizon. The remaining end-to-end
 guarantee lever is the CONTAMINATION-ROBUST FLEET COMMON-MODE (0012), not a BF-lifecycle merge.
+
+## Done (this branch — bf-lifecycle-integration) — ADR 0015, LEVER A (the guarantee, by construction)
+- **Contamination-robust fleet-FDR (ADR 0015) — the BF e-value closes the FP/FDR guarantee.** New
+  `tools/contamination-robust-fleet.ts` (`pnpm crfleet`). Builds the two unbuilt ADR-0012 pieces:
+  (1) demean each shard by its calibration LEVEL → faults become cross-sectional outliers (the rank-flip
+  trimmed-mean lacked); (2) a REDESCENDING Tukey-biweight common-mode rejects them (Huber's soft
+  downweight leaked → 42% FDP; biweight → 1.6%); (3) the nuisance-robust BF e-value (0013) on the
+  residual; (4) e-BH. RESULT: synthetic FDP **0.72–0.77 → ≤ q at full power** (ablation: both pieces
+  necessary); null residual e-value valid (E[e]=0.067) → FDR controlled BY CONSTRUCTION. Honest envelope:
+  breakdown ~12/60 (20% contamination, NARROW margin above the default load); FD is CONDITIONAL (power
+  curve in δ: δ=1→10%, δ≥3→100%), not unconditional. Real GWDG (genuinely co-sampled 15-shard cohort,
+  ts-aligned): robust does NOT help (naive 5→robust 7, mildly worse) — GWDG is heterogeneous exporters
+  with little common-mode, so fleet-relative is conditional on genuine coupling, NOT a free win; the
+  residual firing is shard-SPECIFIC benign change → Lever B. +6 tests; suite 612/0/10; gate green;
+  idempotent. Cold-eye SHIP-WITH-FIXES — all 6 findings addressed (H1 breakdown was 20/60-mislabelled →
+  fixed to 12/60; H2 real cross-section was index-aligned across 12 start-dates → fixed to ts-aligned
+  cohort; M1 spec Huber→Tukey; M2 naive-baseline note; L1 softened "guaranteed"; L2 tightened AC-4).
+
+## Next — LEVER B (the discriminator)
+- **Benign-change vs fault discriminator (ADR 0016, spec drafted `docs/SPEC-fault-discriminator.md`).**
+  Lever A removes COMMON-MODE benign change; the shard-SPECIFIC residual (what dominates real GWDG) needs
+  a discriminator. Hypothesis: benign = stable MEAN step (re-recordable); fault = DISTRIBUTIONAL change
+  (variance/trend/collapse), which the BF (mean-shift, stable-variance) does not model. Irreducible
+  limit: a mean-only fault is indistinguishable from benign change without an event/topology signal
+  (Tessera's freeze-hook). Build next.
