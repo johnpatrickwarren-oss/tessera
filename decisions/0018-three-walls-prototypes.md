@@ -175,6 +175,38 @@ structure; it is NOT a fix for integration order. The remaining wall is genuinel
 integration-order + detector choice (mean-shift vs trend vs differenced) is the open design, gated by the
 diagnostic. clustersynth's removable common-mode means the four certified counters approach the oracle.
 
+### Metric-aware router — `tools/metric-router.ts` (`pnpm metric-router <healthy> <mon>`)
+
+The "honest open design": no single preprocessing+detector fits every metric, so the router CHARACTERISES
+each counter's integration order, routes it to a matching pipeline, and GATES the fleet with the
+diagnostic (e-BH earns its aggregate guarantee only on valid-null inputs).
+
+| counter | character | detector | recall | agg-FDP | markov-plaus | gate |
+|---|---|---|---|---|---|---|
+| power_w / sm_util / hbm / nvlink | stationary | mean-shift e-detector | **100%** | **0.000** | 88–97% | CERTIFIED |
+| gpu_temp_c | **integrated** | difference + magnitude | 11% | N/A | 87% | **CERTIFIED** |
+
+Findings:
+- **Integration order MUST be characterised cross-window (on healthy shards of a fresh realization), not
+  in-sample.** An in-sample / same-realization split-half loading fit SPURIOUSLY whitens a random walk
+  (regressing it on collinear factors) — every counter then looks stationary (lag-1 ≈ 0.03). The
+  cross-window residual on monitoring's healthy shards (faults excluded) is the honest signal:
+  gpu_temp_c level-lag-1 = 0.98 / Δ = 0.07 → integrated; the others level-lag-1 ≈ 0.04 → stationary.
+  This is a structural per-counter nuisance characterisation (not per-hypothesis selection on the
+  candidate faults), so it does not leak the FDR guarantee; production decides it on a held-out healthy
+  window before monitoring.
+- **The router turns gpu_temp_c from FLAGGED (abstain) into CERTIFIED:** differencing restores a valid
+  (white) null. Two honest limits remain on that path: (1) RECALL is low (11%) because the step faults
+  here (mag ≈ 4.5) are *smaller* than the random walk's wander √(dur) ≈ 9 over the fault window —
+  sub-threshold on an I(1) metric (ADR 0003/0012), not a detector bug (a step ≫ √dur is detectable);
+  (2) the magnitude score is NOT yet an e-value, so e-BH carries no FDR theorem on it (FDP = N/A) — a
+  valid variance/magnitude e-value is the follow-up to extend the aggregate guarantee to the integrated
+  path. **The win is the architecture** — characterise → route → restore a valid null → gate → report
+  honestly, never feeding e-BH a broken null (the prior baseline-monitor ran a broken-null mean-shift
+  e-BH on the raw random walk → FDP 0.99; the router refuses that). Follow-ups: a variance/magnitude
+  e-value for the I(1) path; a dedicated random-walk changepoint detector; per-shard (not just
+  per-counter) routing; and porting the router to the engine alongside the detector families.
+
 ## Cold-eye verdicts (two independent adversarial reviews)
 
 - **`e-detector.ts` — SOUND.** No correctness bugs; window bounds verified end-to-end (0 UI throws
