@@ -40,10 +40,18 @@ agnostic — it assumes each input is a valid e-process and does NOT touch Wall 
 conditionally Markov given the covariate (Assumption 3.1), the fleet inherits a *conditional* stopped-
 e-BH FDR theorem. This makes "common-mode estimation is the lever" (ADR 0016/0017, a power result) ALSO
 a *validity* result. The `walls-validation` sweep demonstrates the consequence empirically: removal
-completeness oracle→none ⇒ diagnostic 0.06→0.60, stopped-FDR 0.02→0.55. **The per-alert guarantee
-stays dead (ADR 0012); on real GWDG the per-shard nonstationarity is irreducible so no covariate earns
-it — the diagnostic is the honest readout that says so.** The metric to control for the streaming
-detector remains **EOP**, not worst-case FDR (RESEARCH-INDEX O1; worst-case FDR is uncontrollable at
+completeness oracle→none ⇒ diagnostic 0.06→0.60, stopped-FDR 0.02→0.55.
+
+**Framing correction (the guarantee is AGGREGATE, never per-alert).** FDR is the expected proportion of
+false discoveries *across the whole selected set* — you cannot label any individual alert as the false
+one; the guarantee is on the *rate* across all alerts, capped at q (or close). There is no "per-alert
+guarantee" to lose. What ADR 0007/0012 actually show is that the per-shard e-value *validity* (E[e|H0]≤1
+for each input) fails on real telemetry — that validity is the *input condition* that makes the
+*aggregate* FDR hold. So: the per-shard validity is the lever (and the diagnostic reads it); the
+controlled quantity is always the aggregate FP/FDR rate. On real GWDG the per-shard nonstationarity is
+irreducible so that input condition fails and the aggregate guarantee becomes empirical — the diagnostic
+is the honest readout that says which inputs still satisfy it. For the streaming detector the right
+aggregate metric is **EOP**, not worst-case FDR (RESEARCH-INDEX O1; worst-case FDR is uncontrollable at
 finite ARL by the Dandapanthula–Ramdas impossibility theorem).
 
 ## Engineering decisions (and honest caveats)
@@ -123,15 +131,41 @@ dropped residual \|ρ₁\| from ≈0.27 to ≈0.06.)
 **The correct design is the engine's existing baseline kit** — `compile-baseline.ts` (per-shard
 seasonal + multivariate baseline; ADR 0019) + contamination-robust trimming (Tukey, ADR 0015 — the "toss
 large anomalies to get an accurate healthy null" step). The detector's calibration should be that
-weeks-long, anomaly-trimmed baseline, NOT a short prefix; the prototypes' `calLen` is exactly the seam
-where it plugs in. **Follow-up (high priority): wire the compiled long baseline as the e-detector /
-diagnostic calibration and re-measure transient recall** — expected to rise toward the favourable-
-synthetic regime on clustersynth.
+weeks-long, anomaly-trimmed baseline, NOT a short prefix.
 
-**Caveat (do not over-correct):** clustersynth's nonstationarity is *removable* common-mode (ADR 0016),
-so a long baseline approaches the oracle there. On REAL GWDG telemetry the within-window per-shard
-nonstationarity is *irreducible* (ADR 0012) — a long baseline helps but leaves a residual floor that no
-baseline removes. The per-alert guarantee still stays dead.
+### Wired and validated — `tools/baseline-monitor.ts` (`pnpm baseline-monitor <healthy-dir> <mon-dir>`)
+
+Two same-topology bundles: a **2-month healthy baseline** (gb200, 720 shards, 1440 ticks @ hourly,
+faults off) → a robust, **anomaly-trimmed** per-shard loading+scale fit (the "toss anomalies" step,
+trim |resid| > 3·MAD and re-fit); applied to a **monitoring** bundle (240 ticks, faults on). Loadings
+are a structural property of the topology/seed, so they transfer (0 membership mismatches). The Wall-A
+diagnostic **gates** the fleet — e-BH earns its aggregate guarantee only on diagnostic-certified counters.
+
+| counter | transient mean_shifts | e-detector | terminal | residual \|ρ₁\| | markov-plausible | gate |
+|---|---|---|---|---|---|---|
+| power_w | 5 | **5/5** | 1/5 | 0.039 | 96% | CERTIFIED |
+| sm_util | 5 | **5/5** | 0/5 | 0.033 | 92% | CERTIFIED |
+| hbm_bw_gbps | 7 | **7/7** | 1/7 | 0.052 | 94% | CERTIFIED |
+| nvlink_tx_gbps | 4 | **4/4** | 0/4 | 0.047 | 88% | CERTIFIED |
+| gpu_temp_c | 9 | 0/9 | 0/9 | 0.977 | 0% | **FLAGGED (abstain)** |
+
+- **Transient recall 21/30 vs terminal 2/30** (was 1/4 with the short prefix). On the certified counters
+  the residual is white (ρ≈0.04, ~90% markov-plausible) and the **aggregate fleet FDP = 0.000** (0 false
+  of 21 selected) — the aggregate FDR guarantee holds.
+- **gpu_temp_c is the ADR 0012 wall made concrete:** its residual is high-autocorrelation **even
+  in-sample** (ρ≈0.94 — not a window/trend artifact; trend corr only 0.19), i.e. irreducible per-shard
+  nonstationarity the common-mode factors don't explain (a per-shard thermal process). The Wall-A
+  diagnostic flags it (0% plausible) and **abstains** rather than emit an uncontrolled FDR.
+- This is the **composition of all three walls + the baseline**: the 2-month anomaly-trimmed baseline (A)
+  whitens the removable-common-mode counters; the diagnostic (A) gates which counters earn the guarantee;
+  the e-detector (B) recovers transient recall on the certified set; e-BH (Fleet) controls the **aggregate**
+  false-discovery rate there. No per-alert claim — the guarantee is the rate across the selected set.
+
+**Caveat (do not over-correct):** clustersynth's *shared-factor* nonstationarity is removable (the four
+certified counters → near oracle). Per-shard nonstationarity (gpu_temp_c here; real GWDG broadly, ADR
+0012) is irreducible — no baseline removes it, and the aggregate guarantee there is empirical at best, so
+the diagnostic abstains. Follow-up: route the certified residual through the engine's seasonal per-cell
+baseline (`compile-baseline.ts`) to test whether a per-(hour×day) model rescues counters like gpu_temp_c.
 
 ## Cold-eye verdicts (two independent adversarial reviews)
 

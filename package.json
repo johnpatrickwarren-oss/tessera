@@ -55,6 +55,8 @@
     "walls-validation": "node tools/walls-validation.js",
     "preclustersynth-edetector": "tsc -p tsconfig.test.json",
     "clustersynth-edetector": "node tools/clustersynth-edetector.js",
+    "prebaseline-monitor": "tsc -p tsconfig.test.json",
+    "baseline-monitor": "node tools/baseline-monitor.js",
     "preevalue": "tsc -p tsconfig.test.json",
     "evalue": "node tools/nuisance-robust-evalue.js",
     "prebf-lifecycle": "tsc -p tsconfig.test.json",
