@@ -13,8 +13,9 @@
 // typed handoff; wired handoff into tools/calibrate.ts main() deferred to R08+ when
 // calibrate.ts is itself vendored — see Q-R06-SPEC § Mechanism primitive 2).
 //
-// Tessera-original code (NOT vendored from DeploySignal). Composes vendored estimator
-// surfaces from tools/calibrators/family-c.ts + tools/calibrators/_shared.ts.
+// Tessera-original code (NOT vendored from DeploySignal). Composes the engine's
+// robust-covariance estimator surface (@…/deploysignal-engine/baseline/robust-covariance)
+// via the tools/robust-mcd-screen.ts adapter.
 
 import type {
   BaselineBundle,
@@ -22,13 +23,15 @@ import type {
   BaselineCurationDecisionId,
 } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 import {
-  fastMCD,
+  choleskyLocal,
   mahalanobisSqFromL,
   chiSqQuantile975,
+} from '@johnpatrickwarren-oss/deploysignal-engine/baseline/robust-covariance';
+import {
+  robustScreenCov,
   FASTMCD_DEFAULT_ALPHA,
   FASTMCD_DEFAULT_SEED,
-} from './calibrators/family-c';
-import { choleskyLocal } from './calibrators/_shared';
+} from './robust-mcd-screen';
 
 /** Options for `curateBaselinePrePass`. All fields are optional; defaults
  *  mirror the inherited family-c.ts MCD constants. */
@@ -67,7 +70,7 @@ interface ScreenCounters {
  *    - Collect signal names by sorted Object.keys for deterministic column ordering.
  *    - Form an N×p sample matrix where N = min length across the run's signal_series and p = number of signals.
  *    - If N < p + 1 (insufficient for MCD): pass run through unchanged, increment skip counter.
- *    - Else: run fastMCD(rows, α, seed). If MCD fails (null result, non-PD): pass through, increment skip counter.
+ *    - Else: run robustScreenCov(rows, α, seed) (engine robust-covariance MCD). If it fails (null result, non-PD): pass through, increment skip counter.
  *    - Else: compute Mahalanobis d² per tick under (mcd.mean, mcd.cov); flag ticks where d² > chiSqQuantile975(p).
  *    - Build curated run: filter signal_series / hour_of_day / day_of_week at non-contaminated indices.
  *
@@ -99,16 +102,16 @@ function screenRun(
     }
     rows.push(row);
   }
-  const mcd = fastMCD(rows, mcdAlpha, mcdSeed);
+  const mcd = robustScreenCov(rows, mcdAlpha, mcdSeed);
   if (mcd === null) {
     c.nRunsSkippedMcdFailed += 1;
     return run;
   }
   const L = choleskyLocal(mcd.cov);
   if (L === null) {
-    // MCD produced a non-PD cov (defensive; should not normally happen since fastMCD
-    // internally Choleskys the candidate covs — but the explicit check here is the
-    // belt-and-suspenders against a marginal-PD result).
+    // MCD produced a non-PD cov (defensive; should not normally happen since the
+    // engine robust-covariance internally Choleskys the candidate covs — but the
+    // explicit check here is the belt-and-suspenders against a marginal-PD result).
     c.nRunsSkippedMcdFailed += 1;
     return run;
   }
@@ -156,7 +159,7 @@ function buildD11Decision(
     inputs: {
       upstream_decisions: undefined,
       compile_state_ref:
-        'BaselineBundle.runs[].signal_series[sig][tick] → fastMCD(α=' + mcdAlpha + ', seed=' + mcdSeed
+        'BaselineBundle.runs[].signal_series[sig][tick] → robustCovariance MCD(α=' + mcdAlpha + ', seed=' + mcdSeed
         + ') + Mahalanobis cutoff χ²_p(0.975)',
     },
     output_summary: {

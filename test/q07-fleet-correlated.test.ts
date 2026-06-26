@@ -357,11 +357,15 @@ test('R07 AC-15 — clean fleet 3-run bundle: fcp1State.fired===false; D12 fire_
   assert.strictEqual(result.fcp1State.fired, false);
   assert.strictEqual(result.decisions.D12!.output_summary.fired, false);
   assert.strictEqual(result.decisions.D12!.output_summary.fire_window, -1);
-  // R09 empirical finding: MCD flags 2 ticks per run on this fixture (not zero as R08 spec claimed).
-  // n_ticks_contaminated=6 (2 ticks × 3 runs; origLen=8/run, curatedLen=6/run).
-  // This binding documents the MCD's actual Stage-2a behavior on the clean alternating-pattern fixture.
-  assert.strictEqual(result.decisions.D11!.output_summary.n_ticks_contaminated, 6,
-    'MCD flags 2 ticks per run × 3 runs = 6 total contaminated ticks on clean-fleet-v1 fixture (empirically verified at R09; correcting R08 spec premise that claimed zero flags)');
+  // Empirical Stage-2a count. The engine robust-covariance MCD (baseline-kit
+  // consolidation: tools/calibrators/* → @…/deploysignal-engine/baseline/robust-covariance)
+  // applies the Croux–Haesbroeck consistency correction, which properly scales the
+  // robust covariance and spuriously flags FEWER clean ticks than the prior
+  // (uncorrected) vendored fastMCD: 1 tick per run × 3 runs = 3 total (was 2/run=6
+  // under R09's raw-MCD binding). The load-bearing invariant (clean fleet does NOT
+  // fire) is asserted above; this binding documents the incidental Stage-2a trim count.
+  assert.strictEqual(result.decisions.D11!.output_summary.n_ticks_contaminated, 3,
+    'engine consistency-corrected MCD flags 1 tick per run × 3 runs = 3 total on clean-fleet-v1 (was 6 under the pre-consolidation uncorrected fastMCD; clean fleet still does not fire)');
   // Stage 2b does NOT fire: curated bundle runs are shorter only due to Stage 2a (MCD), not Stage 2b (FCP-1 drop).
   for (let i = 0; i < 3; i++) {
     const origLen = bundle.runs[i].signal_series.a.length;
