@@ -47,6 +47,8 @@
     "capstone": "node tools/fleet-relative-capstone.js",
     "preinstrumented-capstone": "tsc -p tsconfig.test.json",
     "instrumented-capstone": "node tools/instrumented-capstone.js",
+    "preclustersynth-e2e": "tsc -p tsconfig.test.json",
+    "clustersynth-e2e": "node tools/clustersynth-e2e.js",
     "preevalue": "tsc -p tsconfig.test.json",
     "evalue": "node tools/nuisance-robust-evalue.js",
     "prebf-lifecycle": "tsc -p tsconfig.test.json",
