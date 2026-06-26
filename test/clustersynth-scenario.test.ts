@@ -58,3 +58,13 @@ test('scoreCounter: a clean window-aligned mean_shift fault is detected with FDR
   // The signature FP accounting is wired (healthy shards counted).
   assert.strictEqual(s.sigHealthy.nHealthy, 7);
 });
+
+test('scoreCounter: Lee–Ren boosting is a deterministic superset of plain e-BH (free power)', { skip }, () => {
+  const b = loadScenarioBundle(DIR);
+  const s = scoreCounter(b, 'gpu_temp_c', 25, 0.1);
+  // Boosting can only add selections at the same FDR target (Lee–Ren Theorem 2).
+  assert.ok(s.glr.boosted.K >= s.glr.plain.K,
+    `boosted K=${s.glr.boosted.K} must be ≥ plain K=${s.glr.plain.K}`);
+  // The Gaussian-LR e-value detects the clean mean-shift fault (powered base detector).
+  assert.strictEqual(s.glr.plain.power, 1, 'plain Gaussian-LR detects the injected mean_shift');
+});
