@@ -1,0 +1,1 @@
+{"faults":[{"fault_id":"f0","level":"gpu","target":"rack-1-gpu-3","counter":"gpu_temp_c","type":"mean_shift","t_onset":25,"t_offset":60,"magnitude":25,"affected_shards":["rack-1-gpu-3"]}]}
