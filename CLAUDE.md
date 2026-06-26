@@ -65,3 +65,11 @@
 #
 # Coordination artifacts live in coordination/. Vendoring policy + manifest:
 # coordination/SCOPING-MEMO-v0.3.md § 9 + coordination/VENDORING-MANIFEST.md.
+#
+# ── PRIOR DECISIONS — READ BEFORE PROPOSING STATISTICAL TUNINGS ────────────────
+# BEFORE proposing any detector / FDR / e-value tuning, or commissioning new
+# literature research, READ RESEARCH-INDEX.md. Its § 1 negative-results registry
+# lists what is already CLOSED (walls / rejections — φ-integration, cross-sectional
+# recalibration, boosting-as-FDR-fix, per-alert guarantee, etc.) with pointers to
+# the engine ADRs (../deploysignal-engine/decisions/) and the e-value literature.
+# This exists because we repeatedly re-derived settled findings; consult it first.

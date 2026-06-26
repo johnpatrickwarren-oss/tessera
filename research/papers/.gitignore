@@ -1,0 +1,3 @@
+# PDFs are not committed (copyright + size); the bibliography in RESEARCH-INDEX.md is the record.
+*.pdf
+*.PDF
