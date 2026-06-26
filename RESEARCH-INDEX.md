@@ -54,7 +54,7 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
   post-hoc reporting layer, not a live target.
 - **O2 — principled robust / contaminated e-process** to replace the ad-hoc Tukey center
   (with breakdown guarantees). No off-the-shelf construction exists (ADR 0005 Thread C). _Still open._
-- **O3 — transient-fault early detection. ✅ RESOLVED IN PRINCIPLE (2026-06-26 focused pass).**
+- **O3 — transient-fault early detection. ✅ RESOLVED IN PRINCIPLE + 🔧 PROTOTYPED (2026-06-26).**
   The named construction is the **e-detector** (Shin–Ramdas–Rinaldo, **arXiv:2203.03532**):
   Shiryaev–Roberts `M^SR_n = Σ_{j≤n} Λ^(j)_n` (recommended) or CUSUM `max_{j≤n} Λ^(j)_n`,
   each `Λ^(j)` an e-process started at candidate onset `j`; threshold `1/α` → ARL control with
@@ -63,19 +63,31 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
   does not add transient power. **CRITICAL:** this is a SEPARATE wall from O2/per-stream
   validity — the e-detector's validity reduces to each `Λ^(j)` being a valid e-process under
   the nonstationary null, i.e. our open `E[e|H0]≤1` wall persists inside the increments. Two
-  walls, one closed. _Still open: detection-delay/power cost vs oracle; Clerico (2603.19551) /
-  Taga–Oymak–Shekhar reward-early betting (unverified)._
+  walls, one closed. **PROTOTYPE: `tools/e-detector.ts` (Tessera ADR 0018)** — e-SR over
+  sequentialized UI increments; ~90% transient detection vs 0% terminal (ROC-matched). _Still open:
+  whether the UI's fixed-horizon validity survives promotion to anytime `Λ^(j)`; detection-delay/power
+  cost vs oracle; Clerico (2603.19551) / Taga–Oymak–Shekhar reward-early betting (unverified)._
 - **O4 — stopped/online e-BH validity. PARTLY RESOLVED.** The exact no-leakage condition is
   the Markov causal **Assumption 3.1** (Wang–Dandapanthula–Ramdas, arXiv:2502.08539):
   `Y_n ⊥ past | X_n`. Per-shard e-processes are LOCAL by default; naive fleet stopping leaks
   (E[M_τ]=1.25 counterexample). Our nonstationarity plausibly VIOLATES 3.1 → no automatic
   fleet-FDR theorem (corroborates the empirical-only finding).
-- **O5 — Assumption-3.1 via the common-mode covariate (NEW, high-value direction).** If a
-  good observed common-mode estimate `X_n` makes the per-shard residual conditionally Markov
-  (`Y_n ⊥ past | X_n`), it RESTORES the global-e-process property and EARNS a *conditional*
-  theorem-backed fleet-FDR (Cor 3.4 of 2502.08539). This makes "better common-mode
+- **O5 — Assumption-3.1 via the common-mode covariate (NEW, high-value direction). 🔧 PROTOTYPED
+  (2026-06-26).** If a good observed common-mode estimate `X_n` makes the per-shard residual
+  conditionally Markov (`Y_n ⊥ past | X_n`), it RESTORES the global-e-process property and EARNS a
+  *conditional* theorem-backed fleet-FDR (Cor 3.4 of 2502.08539). This makes "better common-mode
   estimation" (ADR 0016's lever, P5) not just a power knob but the path to a real conditional
-  guarantee. Per-alert stays dead; conditional fleet may be recoverable. _Open — test empirically._
+  guarantee. Per-alert stays dead; conditional fleet may be recoverable. **PROTOTYPE:
+  `tools/conditional-markov.ts` + the `tools/walls-validation.ts` sweep (Tessera ADR 0018)** — an
+  operational Assumption-3.1 diagnostic (residual conditional-whiteness); empirically, as common-mode
+  removal degrades the diagnostic rises AND stopped-e-BH fleet-FDR crosses q. NECESSARY-condition gate,
+  not a sufficiency proof. _Open — test on real GWDG (expected to FAIL; the diagnostic should say so)._
+
+- **Fleet SupFDR (FDR-at-all-times). 🔧 PROTOTYPED (2026-06-26).** `tools/supfdr.ts` (Tessera ADR
+  0018): the √E−1 adjuster (Carefree, arXiv:2501.19360) makes a running-max e-process a valid all-times
+  e-value (`∫_1^∞ A(e)/e² de = 1`), so e-BH controls **SupFDR ≤ q** under arbitrary dependence where
+  naive running-max e-BH leaks (≈1.08α). Accept-to-reject monotone; real (√-shrinkage) power penalty.
+  _Open: donation-e-LOND (arXiv:2603.24792) as the tighter alternative SupFDR route._
 
 ---
 
