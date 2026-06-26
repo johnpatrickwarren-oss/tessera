@@ -57,6 +57,8 @@
     "clustersynth-edetector": "node tools/clustersynth-edetector.js",
     "prebaseline-monitor": "tsc -p tsconfig.test.json",
     "baseline-monitor": "node tools/baseline-monitor.js",
+    "preseasonal-probe": "tsc -p tsconfig.test.json",
+    "seasonal-probe": "node tools/seasonal-probe.js",
     "preevalue": "tsc -p tsconfig.test.json",
     "evalue": "node tools/nuisance-robust-evalue.js",
     "prebf-lifecycle": "tsc -p tsconfig.test.json",

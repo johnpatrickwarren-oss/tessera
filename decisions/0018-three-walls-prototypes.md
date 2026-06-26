@@ -152,20 +152,28 @@ diagnostic **gates** the fleet — e-BH earns its aggregate guarantee only on di
 - **Transient recall 21/30 vs terminal 2/30** (was 1/4 with the short prefix). On the certified counters
   the residual is white (ρ≈0.04, ~90% markov-plausible) and the **aggregate fleet FDP = 0.000** (0 false
   of 21 selected) — the aggregate FDR guarantee holds.
-- **gpu_temp_c is the ADR 0012 wall made concrete:** its residual is high-autocorrelation **even
-  in-sample** (ρ≈0.94 — not a window/trend artifact; trend corr only 0.19), i.e. irreducible per-shard
-  nonstationarity the common-mode factors don't explain (a per-shard thermal process). The Wall-A
-  diagnostic flags it (0% plausible) and **abstains** rather than emit an uncontrolled FDR.
-- This is the **composition of all three walls + the baseline**: the 2-month anomaly-trimmed baseline (A)
-  whitens the removable-common-mode counters; the diagnostic (A) gates which counters earn the guarantee;
-  the e-detector (B) recovers transient recall on the certified set; e-BH (Fleet) controls the **aggregate**
-  false-discovery rate there. No per-alert claim — the guarantee is the rate across the selected set.
+- **gpu_temp_c is a NEAR-UNIT-ROOT I(1) counter (ADR 0003), not "irreducible".** Followed up by routing it
+  through the engine seasonal baseline (`tools/seasonal-probe.ts`): the per-(hour-of-day) model whitens
+  *nothing extra* (seasonal ≈ raw ≈ 0.96), because gpu_temp_c's leftover is NOT a diurnal cycle — it is a
+  STOCHASTIC INTEGRATED DRIFT (a random walk): raw/seasonal/common-mode/seasonal+common-mode all ≈0.96,
+  but **first-differencing whitens it** (Δ lag-1 ≈ 0.09; differenced+common-mode ≈0.06). A per-cell mean
+  baseline cannot remove an integrated trend. **The catch:** differencing destroys the mean-shift SIGNAL
+  (a sustained fault → two impulses), trading validity for power (ADR 0016 near-unit-root power collapse),
+  and over-differences the stationary counters (their diff+CM ≈0.48, worse). So an I(1) counter needs a
+  TREND/drift detector (distributionalSignature.trendT), NOT the mean-shift e-detector — and the Wall-A
+  diagnostic abstaining on gpu_temp_c is exactly right (no valid stationary null for a mean-shift e-BH).
+- This is the **composition of all three walls + the baseline**: the 2-month anomaly-trimmed baseline
+  whitens the removable-common-mode counters; the diagnostic (A) gates which counters earn the guarantee
+  and routes I(1) counters elsewhere; the e-detector (B) recovers transient recall on the certified set;
+  e-BH (Fleet) controls the **aggregate** false-discovery rate there. No per-alert claim.
 
-**Caveat (do not over-correct):** clustersynth's *shared-factor* nonstationarity is removable (the four
-certified counters → near oracle). Per-shard nonstationarity (gpu_temp_c here; real GWDG broadly, ADR
-0012) is irreducible — no baseline removes it, and the aggregate guarantee there is empirical at best, so
-the diagnostic abstains. Follow-up: route the certified residual through the engine's seasonal per-cell
-baseline (`compile-baseline.ts`) to test whether a per-(hour×day) model rescues counters like gpu_temp_c.
+**Note on the seasonal model.** On clustersynth the diurnal/regime nonstationarity lives in the SHARED
+FACTORS (removed by the measured-factor common-mode), so the per-(hour×day) seasonal baseline adds nothing
+here (seasonal ≈ raw across all counters). It is the right tool on REAL telemetry with per-shard calendar
+structure; it is NOT a fix for integration order. The remaining wall is genuinely ADR 0003 (near-unit-root)
++ ADR 0012 (irreducible per-shard nonstationarity on real data) — a per-counter/per-shard adaptive
+integration-order + detector choice (mean-shift vs trend vs differenced) is the open design, gated by the
+diagnostic. clustersynth's removable common-mode means the four certified counters approach the oracle.
 
 ## Cold-eye verdicts (two independent adversarial reviews)
 
