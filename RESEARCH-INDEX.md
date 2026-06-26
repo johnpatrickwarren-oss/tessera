@@ -46,17 +46,31 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
 
 ## 2. Open questions (genuinely unsettled — fair game for new work)
 
-- **O1 — error metric choice.** Which should we commit to controlling: FDR vs SupFDR vs
-  FWER vs **EOP (error over patience)** vs a TDP lower bound? Dandapanthula–Ramdas argue
-  worst-case FDR/FWER and finite ARL are in *fundamental tension* in multi-stream change
-  detection. **This is the highest-value open decision.** (Being researched — see § 4.)
+- **O1 — error metric choice. ✅ RESOLVED (2026-06-26 audit).** Control **EOP (error over
+  patience)** for the streaming detector: Dandapanthula–Ramdas (arXiv:2501.04130) PROVE
+  that finite ARL ⇒ worst-case FDR/FWER/PFER = 1, so worst-case FDR is uncontrollable for a
+  fast-detection live detector. EOP is controllable (`ARL ≥ 1/α`). Keep anytime-valid
+  fleet-FDR (stopped e-BH) only as a CONDITIONAL guarantee (see O4). FWER = worse; TDP = a
+  post-hoc reporting layer, not a live target.
 - **O2 — principled robust / contaminated e-process** to replace the ad-hoc Tukey center
-  (with breakdown guarantees). No off-the-shelf construction exists (ADR 0005 Thread C).
-- **O3 — transient-fault early detection.** A fault with onset→offset *inside* the test
-  window is diluted by a fixed cal/test split (power → ~0). Do horizon-aware / time-sensitive
-  betting or online-upgrade procedures help? (Being researched — see § 4.)
-- **O4 — stopped/online e-BH validity** for per-shard→fleet aggregation under a global
-  stopping rule (no-leakage condition). (Being researched — see § 4.)
+  (with breakdown guarantees). No off-the-shelf construction exists (ADR 0005 Thread C). _Still open._
+- **O3 — transient-fault early detection (THE core wall). ⚠ NOT resolved by the audit**
+  (verification budget, not paywall). A fault with onset→offset *inside* the test window is
+  diluted by a fixed cal/test split (power → ~0). The **e-detector** formulation (bound
+  scales with E[τ], continuous monitoring) is the structural candidate vs our terminal-window
+  e-value. Dedicated read pending: Clerico 2026 (2603.19551), Taga–Oymak–Shekhar 2026,
+  Koning–van Meer 2026 (2605.06521), e-LOND / online e-BH (2501.19360, 2407.20683) — all arXiv.
+- **O4 — stopped/online e-BH validity. PARTLY RESOLVED.** The exact no-leakage condition is
+  the Markov causal **Assumption 3.1** (Wang–Dandapanthula–Ramdas, arXiv:2502.08539):
+  `Y_n ⊥ past | X_n`. Per-shard e-processes are LOCAL by default; naive fleet stopping leaks
+  (E[M_τ]=1.25 counterexample). Our nonstationarity plausibly VIOLATES 3.1 → no automatic
+  fleet-FDR theorem (corroborates the empirical-only finding).
+- **O5 — Assumption-3.1 via the common-mode covariate (NEW, high-value direction).** If a
+  good observed common-mode estimate `X_n` makes the per-shard residual conditionally Markov
+  (`Y_n ⊥ past | X_n`), it RESTORES the global-e-process property and EARNS a *conditional*
+  theorem-backed fleet-FDR (Cor 3.4 of 2502.08539). This makes "better common-mode
+  estimation" (ADR 0016's lever, P5) not just a power knob but the path to a real conditional
+  guarantee. Per-alert stays dead; conditional fleet may be recoverable. _Open — test empirically._
 
 ---
 
@@ -70,20 +84,21 @@ the § 4 deep-research pass.
 
 | Paper | arXiv / venue | Tag | Status |
 |---|---|---|---|
-| Dandapanthula & Ramdas 2025 — Multiple testing in multi-stream sequential change detection | (pending) | **[WALL]** metric choice (EOP) | pending verification |
-| Wang, Dandapanthula & Ramdas 2025 — Anytime-valid FDR control with the stopped e-BH procedure | (pending) | [WALL]? aggregation validity | pending |
-| Tavyrikov, Goeman & de Heide 2025 — Carefree multiple testing with e-processes | (pending) | [LAYER] suprema/running-max | pending |
-| Xu & Ramdas 2024 — Online multiple testing with e-values (e-LOND) | (pending) | [LAYER] online | pending |
-| Fischer, Xu & Ramdas 2024/25 — Online generalization of (e-)BH (SupFDR) | (pending) | [WALL]? late-upgrade | pending |
-| Wang & Ramdas 2022 — FDR control with e-values (e-BH) | JRSS-B 2022 | [LAYER] foundational | confirmed (P3) |
+| Dandapanthula & Ramdas 2025 — Multiple testing in multi-stream sequential change detection | **arXiv:2501.04130** | **[WALL]** metric choice (EOP) + impossibility | ✅ VERIFIED 3-0 (O1) |
+| Wang, Dandapanthula & Ramdas 2025 — Anytime-valid FDR control with the stopped e-BH procedure | **arXiv:2502.08539** | **[WALL]** aggregation validity (Assumption 3.1) | ✅ VERIFIED 3-0 (O4/O5) |
+| Xu, Fischer & Ramdas 2025 — Bringing closure to FDR control (closed e-BH) | **arXiv:2504.11759** | [LAYER] power upgrade | ✅ VERIFIED 3-0 (free power, same boosting caveat) |
+| Tavyrikov, Goeman & de Heide 2025 — Carefree multiple testing with e-processes | (pending) | [LAYER] suprema/running-max | not verified this pass |
+| Xu & Ramdas 2024 — Online multiple testing with e-values (e-LOND) | arXiv:2501.19360 | [WALL]? late-upgrade | not verified this pass (O3) |
+| Fischer, Xu & Ramdas 2024/25 — Online generalization of (e-)BH (SupFDR) | arXiv:2407.20683 | [WALL]? late-upgrade | not verified this pass (O3) |
+| Wang & Ramdas 2022 — FDR control with e-values (e-BH) | arXiv:2009.02824 / JRSS-B 84(3):822 | [LAYER] foundational | ✅ confirmed (P3) |
 | Choe & Ramdas 2024/26 — Combining Evidence Across Filtrations | (pending) | [WALL]? cross-filtration | pending |
-| Blier-Wong & Wang 2024 — Improved thresholds for e-values | (pending) | [LAYER] thresholds | confirmed dropped (N5) |
+| Blier-Wong & Wang 2024 — Improved thresholds for e-values | arXiv:2408.11307 | [LAYER] thresholds | confirmed dropped (N5) |
 | Goeman/de Heide/Solari 2025 — e-Partitioning Principle | (pending) | [LAYER] post-hoc/RCA | pending |
 | Xu/Solari/Fischer/de Heide/Ramdas/Goeman 2025/26 — Bringing Closure to FDR Control | (pending) | [LAYER] post-hoc/RCA | pending |
 | Preuße 2025/26 — Anytime-valid simultaneous TDP lower bounds | (pending) | [WALL]? post-alert TDP | pending |
-| Clerico 2026 — Time-sensitive anytime-valid testing | (pending) | [WALL]? transient/early | pending |
-| Taga, Oymak & Shekhar 2026 — Learning to Bet for Horizon-Aware AVT | (pending) | [WALL]? transient/early | pending |
-| Koning & van Meer 2026 — Anytime validity is free | JRSS-B 2026 | [WALL]? sequentialize | pending |
+| Clerico 2026 — Time-sensitive anytime-valid testing | arXiv:2603.19551 | **[WALL]?** transient/early — O3 | NOT verified — priority follow-up |
+| Taga, Oymak & Shekhar 2026 — Learning to Bet for Horizon-Aware AVT | (pending) | **[WALL]?** transient/early — O3 | NOT verified — priority follow-up |
+| Koning & van Meer 2026 — Anytime validity is free | arXiv:2605.06521 / JRSS-B 2026 | **[WALL]?** sequentialize — O3 | NOT verified — priority follow-up |
 | Grünwald, de Heide & Koolen 2024 — Safe Testing | JRSS-B 2024 (1906.07801) | [LAYER] foundational | confirmed (P2) |
 | Vovk & Wang 2024 — Merging sequential e-values via martingales | EJS 2024 | [LAYER] combination | pending |
 | Ramdas 2025 — Hypothesis Testing with E-values (monograph) | — | reference | pending |
@@ -97,10 +112,14 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
 
 ## 4. Deep-research outputs
 
-- **2026-06-26 — primary-source audit of the priority papers** (run `wf_b69c520a-589`):
-  reads the actual PDFs, adversarially verifies each claim, classifies [WALL]/[LAYER], and
-  answers O1/O3/O4. **Report:** _pending — link the saved report here on completion, and
-  backfill the § 3 tags + § 2 open-question resolutions from it._
+- **2026-06-26 — primary-source audit of the priority papers** (run `wf_b69c520a-589`;
+  24/25 claims verified 3-vote, all priority papers read from open arXiv). **Report:**
+  [research/2026-06-26-evalue-metric-audit.md](research/2026-06-26-evalue-metric-audit.md).
+  Headline: control **EOP** for the streaming detector (a verified impossibility theorem
+  makes worst-case FDR uncontrollable at finite ARL); fleet-FDR stays conditional on the
+  stopped-e-BH no-leakage condition (Assumption 3.1), which our nonstationarity plausibly
+  violates — corroborating "fleet-FDR is empirical, not a theorem." No source contradicts
+  ADR 0005/0006/0009/0013.
 
 ---
 
