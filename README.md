@@ -65,8 +65,9 @@ Requires Node ≥ 20 and pnpm ≥ 11.
 git clone https://github.com/johnpatrickwarren-oss/tessera.git
 cd tessera
 pnpm install
-pnpm test      # runs the full test suite (~540 tests; 10 skip without local clustersynth fixtures)
+pnpm test      # runs the full test suite (~650 tests; ~10 skip without local clustersynth s2/c0 fixtures)
 pnpm build     # tsc compile (tools + scripts + tests, via tsconfig.test.json)
+pnpm clustersynth-e2e   # end-to-end pipeline on clustersynth topology (s0 in-repo; s1/s2 need local fixtures)
 ```
 
 ## Quick demo
@@ -169,7 +170,7 @@ tessera/
 ├── demos/                        # Browser dashboard + worker + DEMO-SCRIPT + scenario JSON
 ├── scripts/                      # Pipeline scripts (verify-*.sh, finalize-round.sh, tier-router, …)
 ├── templates/                    # Anchor project templates
-├── test/                         # 540+ tests (per-AC; per-round test files q01–q88)
+├── test/                         # 650+ tests (per-AC; per-round files q01–q88 + e2e harnesses)
 └── tools/                        # Product CLIs: demo scenarios, canned-demo + browser-bundle
                                   #   builders, coverage/envelope generators, baseline curation,
                                   #   vendored calibrators (tools/calibrators/*)

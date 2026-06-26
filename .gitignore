@@ -28,5 +28,8 @@ coordination/
 # clustersynth perf bench: per-run reports (timestamped, regenerable)
 bench/results/
 
-# clustersynth fixtures dropped into _substrate for bench/smoke tests
+# clustersynth fixtures dropped into _substrate for bench/smoke tests.
+# Large tiers (s1/s2/c0/s3, up to 18 MB+) stay local-only; the small s0 tier
+# (~141 KB, 72 shards) is committed so the e2e pipeline test runs in CI.
 test/_substrate/clustersynth-*.json
+!test/_substrate/clustersynth-gb200-s0.json
