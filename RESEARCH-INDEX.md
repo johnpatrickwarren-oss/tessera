@@ -54,12 +54,17 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
   post-hoc reporting layer, not a live target.
 - **O2 — principled robust / contaminated e-process** to replace the ad-hoc Tukey center
   (with breakdown guarantees). No off-the-shelf construction exists (ADR 0005 Thread C). _Still open._
-- **O3 — transient-fault early detection (THE core wall). ⚠ NOT resolved by the audit**
-  (verification budget, not paywall). A fault with onset→offset *inside* the test window is
-  diluted by a fixed cal/test split (power → ~0). The **e-detector** formulation (bound
-  scales with E[τ], continuous monitoring) is the structural candidate vs our terminal-window
-  e-value. Dedicated read pending: Clerico 2026 (2603.19551), Taga–Oymak–Shekhar 2026,
-  Koning–van Meer 2026 (2605.06521), e-LOND / online e-BH (2501.19360, 2407.20683) — all arXiv.
+- **O3 — transient-fault early detection. ✅ RESOLVED IN PRINCIPLE (2026-06-26 focused pass).**
+  The named construction is the **e-detector** (Shin–Ramdas–Rinaldo, **arXiv:2203.03532**):
+  Shiryaev–Roberts `M^SR_n = Σ_{j≤n} Λ^(j)_n` (recommended) or CUSUM `max_{j≤n} Λ^(j)_n`,
+  each `Λ^(j)` an e-process started at candidate onset `j`; threshold `1/α` → ARL control with
+  NO assumption on changepoint location/post-change law. It dissolves the fixed-split dilution.
+  Koning–van Meer "free" sequentialization (arXiv:**2501.03982**) only matches terminal power,
+  does not add transient power. **CRITICAL:** this is a SEPARATE wall from O2/per-stream
+  validity — the e-detector's validity reduces to each `Λ^(j)` being a valid e-process under
+  the nonstationary null, i.e. our open `E[e|H0]≤1` wall persists inside the increments. Two
+  walls, one closed. _Still open: detection-delay/power cost vs oracle; Clerico (2603.19551) /
+  Taga–Oymak–Shekhar reward-early betting (unverified)._
 - **O4 — stopped/online e-BH validity. PARTLY RESOLVED.** The exact no-leakage condition is
   the Markov causal **Assumption 3.1** (Wang–Dandapanthula–Ramdas, arXiv:2502.08539):
   `Y_n ⊥ past | X_n`. Per-shard e-processes are LOCAL by default; naive fleet stopping leaks
@@ -87,18 +92,19 @@ the § 4 deep-research pass.
 | Dandapanthula & Ramdas 2025 — Multiple testing in multi-stream sequential change detection | **arXiv:2501.04130** | **[WALL]** metric choice (EOP) + impossibility | ✅ VERIFIED 3-0 (O1) |
 | Wang, Dandapanthula & Ramdas 2025 — Anytime-valid FDR control with the stopped e-BH procedure | **arXiv:2502.08539** | **[WALL]** aggregation validity (Assumption 3.1) | ✅ VERIFIED 3-0 (O4/O5) |
 | Xu, Fischer & Ramdas 2025 — Bringing closure to FDR control (closed e-BH) | **arXiv:2504.11759** | [LAYER] power upgrade | ✅ VERIFIED 3-0 (free power, same boosting caveat) |
-| Tavyrikov, Goeman & de Heide 2025 — Carefree multiple testing with e-processes | (pending) | [LAYER] suprema/running-max | not verified this pass |
-| Xu & Ramdas 2024 — Online multiple testing with e-values (e-LOND) | arXiv:2501.19360 | [WALL]? late-upgrade | not verified this pass (O3) |
-| Fischer, Xu & Ramdas 2024/25 — Online generalization of (e-)BH (SupFDR) | arXiv:2407.20683 | [WALL]? late-upgrade | not verified this pass (O3) |
+| **Shin, Ramdas & Rinaldo — E-detectors: nonparametric sequential change detection** | **arXiv:2203.03532** | **[WALL]** transient onset — O3 | ✅ VERIFIED 3-0 — the construction that closes the transient wall |
+| **Koning & van Meer 2026 — Anytime validity is free** | **arXiv:2501.03982** (JRSS-B; ~~2605.06521~~) | [WALL] sequentialize | ✅ VERIFIED — "free" = terminal-equivalence only; no transient gain |
+| Tavyrikov, Goeman & de Heide 2025 — Carefree multiple testing with e-processes (FDR-sup adjuster) | **arXiv:2501.19360** | [LAYER] suprema/running-max | ✅ VERIFIED 3-0 — naive running-max e-BH fails (1.08α); adjuster needed |
+| Xu & Ramdas 2024 — Online multiple testing with e-values (e-LOND) | **arXiv:2311.06412** (~~2501.19360~~) | [LAYER] online FDR | ✅ VERIFIED — FDR at stopped config, NOT time-uniform |
+| Xu, Fischer & Ramdas 2026 — Online e-closure + donation compound e-values (SupFDR) | **arXiv:2603.24792** | [LAYER] SupFDR / late-upgrade | ✅ VERIFIED 3-0 — SupFDR under arbitrary dependence |
 | Wang & Ramdas 2022 — FDR control with e-values (e-BH) | arXiv:2009.02824 / JRSS-B 84(3):822 | [LAYER] foundational | ✅ confirmed (P3) |
 | Choe & Ramdas 2024/26 — Combining Evidence Across Filtrations | (pending) | [WALL]? cross-filtration | pending |
 | Blier-Wong & Wang 2024 — Improved thresholds for e-values | arXiv:2408.11307 | [LAYER] thresholds | confirmed dropped (N5) |
 | Goeman/de Heide/Solari 2025 — e-Partitioning Principle | (pending) | [LAYER] post-hoc/RCA | pending |
 | Xu/Solari/Fischer/de Heide/Ramdas/Goeman 2025/26 — Bringing Closure to FDR Control | (pending) | [LAYER] post-hoc/RCA | pending |
 | Preuße 2025/26 — Anytime-valid simultaneous TDP lower bounds | (pending) | [WALL]? post-alert TDP | pending |
-| Clerico 2026 — Time-sensitive anytime-valid testing | arXiv:2603.19551 | **[WALL]?** transient/early — O3 | NOT verified — priority follow-up |
-| Taga, Oymak & Shekhar 2026 — Learning to Bet for Horizon-Aware AVT | (pending) | **[WALL]?** transient/early — O3 | NOT verified — priority follow-up |
-| Koning & van Meer 2026 — Anytime validity is free | arXiv:2605.06521 / JRSS-B 2026 | **[WALL]?** sequentialize — O3 | NOT verified — priority follow-up |
+| Clerico 2026 — Time-sensitive anytime-valid testing | arXiv:2603.19551 | **[WALL]?** reward-early betting — O3 | NOT verified (2 passes) — open follow-up |
+| Taga, Oymak & Shekhar 2026 — Learning to Bet for Horizon-Aware AVT | (pending) | **[WALL]?** horizon-aware betting — O3 | NOT verified (2 passes) — open follow-up |
 | Grünwald, de Heide & Koolen 2024 — Safe Testing | JRSS-B 2024 (1906.07801) | [LAYER] foundational | confirmed (P2) |
 | Vovk & Wang 2024 — Merging sequential e-values via martingales | EJS 2024 | [LAYER] combination | pending |
 | Ramdas 2025 — Hypothesis Testing with E-values (monograph) | — | reference | pending |
@@ -120,6 +126,16 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   stopped-e-BH no-leakage condition (Assumption 3.1), which our nonstationarity plausibly
   violates — corroborating "fleet-FDR is empirical, not a theorem." No source contradicts
   ADR 0005/0006/0009/0013.
+- **2026-06-26 — transient-fault detection, focused pass** (run `wf_54ed96dd-e49`; 24/25
+  verified). **Report:**
+  [research/2026-06-26-transient-fault-detection.md](research/2026-06-26-transient-fault-detection.md).
+  Headline: transient power and per-stream validity are **two separate walls**. The
+  **e-detector** (Shin–Ramdas–Rinaldo, arXiv:2203.03532; SR `Σ_j Λ^(j)` / CUSUM `max_j`
+  over candidate onsets) is the named construction that closes the transient wall; the
+  nonstationary-null validity wall persists inside the increments `Λ^(j)`. Koning–van Meer
+  "free" = terminal-equivalence only (sequentializes, doesn't add transient power). Fleet
+  layer: naive running-max e-BH FAILS (FDR≈1.08α); SupFDR needs an adjuster / donation-e-LOND
+  (power penalty).
 
 ---
 
