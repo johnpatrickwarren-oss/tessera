@@ -28,6 +28,7 @@
 
 import { autocorr, conditionalMarkovDiagnostic } from './conditional-markov.js';
 import { eDetector, type EDetectorOptions } from './e-detector.js';
+import { universalInferenceScaleEValue } from './ui-scale-evalue.js';
 import { fitBaseline, applyBaseline, type ShardBaseline } from './baseline-monitor.js';
 import { loadScenarioBundle, type ScenarioBundle } from './clustersynth-scenario.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
@@ -45,14 +46,6 @@ function quantile(xs: number[], q: number): number {
 function difference(a: ReadonlyArray<number>): number[] {
   return a.slice(1).map((v, i) => v - a[i]);
 }
-/** Robust max-magnitude score: max |residual| in the test window over the cal-window RMS. */
-function magnitudeScore(r: ReadonlyArray<number>, calLen: number): number {
-  let s2 = 0; for (let t = 0; t < calLen; t++) s2 += r[t] * r[t];
-  const scale = Math.sqrt(s2 / calLen) || 1;
-  let mx = 0; for (let t = calLen; t < r.length; t++) mx = Math.max(mx, Math.abs(r[t]));
-  return mx / scale;
-}
-
 /** Determine a counter's integration order from the CROSS-WINDOW common-mode residual on a set of
  *  HEALTHY shards (a fresh realization, faults excluded). Integrated (I(1)) when the level is near-unit-
  *  root (lag-1 high) but the first difference is white.
@@ -74,8 +67,16 @@ export function integrationOrder(levelResidual: number[][], healthyIdx: number[]
 export interface RouterRow {
   counter: string; character: MetricCharacter; detector: string;
   nFault: number; recall: number; aggregateFdp: number; selected: number;
-  markovPlausibleFrac: number; certified: boolean;
+  markovPlausibleFrac: number;
+  /** Integrated path only: empirical mean of the scale e-value over HEALTHY shards. The scale e-value's
+   *  null requires E[e|H0] ≤ 1; a value ≫ 1 means the differenced residual violates its iid-Gaussian-
+   *  stationary null (heavy tails / heteroskedasticity) → e-BH FDR is NOT controlled. NaN for stationary. */
+  scaleNullMean: number;
+  certified: boolean;
 }
+
+/** The scale e-value's null is empirically valid when its healthy-shard mean is ≤ this (≈1, with slack). */
+const SCALE_NULL_TOL = 1.3;
 
 /** gpu mean_shift faulted shard ids on this counter (active in the monitoring window). */
 function faultedSet(mon: ScenarioBundle, counter: string): Set<number> {
@@ -98,31 +99,55 @@ export function routeCounter(mon: ScenarioBundle, counter: string, fits: ShardBa
   const { character } = integrationOrder(levelR, healthyIdx);
   const useMeanShift = character === 'stationary';
   const R = useMeanShift ? levelR : levelR.map(difference); // I(1) → difference to restore a valid null
-  const detector = useMeanShift ? 'mean-shift e-detector' : 'difference + magnitude';
+  const detector = useMeanShift ? 'mean-shift e-detector' : 'difference + scale e-value';
   const opts: EDetectorOptions = { calLen, onsetTarget: 16, evalTarget: 20, mixture: 'SR' };
+  const testW = (len: number) => ({ start: calLen, len: len - calLen });
 
   const zero = R[0].map(() => 0);
   const plaus = healthyIdx.filter((i) => conditionalMarkovDiagnostic(R[i], zero).markovPlausible).length;
-  const score = (i: number) => useMeanShift ? eDetector(R[i], opts).peak : magnitudeScore(R[i], calLen);
-  const thr = quantile(healthyIdx.map(score), 0.95);
-  let hits = 0; for (const i of faulted) if (score(i) >= thr) hits++;
-
-  // e-BH FDR control is reported ONLY on the mean-shift path, whose score is the UI e-value (a valid
-  // e-value). The integrated path's magnitude score is NOT an e-value, so e-BH carries no FDR theorem
-  // on it (running it anyway over-selects → FDP→1) — a valid variance/magnitude e-value is the
-  // follow-up. We therefore report aggregate FDP as N/A there, NOT a spurious number.
-  let aggregateFdp = NaN, selected = NaN;
-  if (useMeanShift) {
-    const sel = eBenjaminiHochberg(R.map((_, i) => score(i)), 0.1).selected;
-    let falsePos = 0; for (const i of sel) if (!faulted.has(i)) falsePos++;
-    aggregateFdp = sel.length ? falsePos / sel.length : 0; selected = sel.length;
-  }
+  // Both paths score with a VALID e-value so e-BH controls the aggregate FDR: stationary → mean-shift
+  // e-detector peak; integrated → the universal-inference SCALE-change e-value on the differenced (white)
+  // residual (tools/ui-scale-evalue.ts), which catches the impulse-pair signature of a step on a random
+  // walk and has E[e|H0] ≤ 1 by construction.
+  const score = (i: number) => useMeanShift
+    ? eDetector(R[i], opts).peak
+    : safeScale(R[i], calLen, testW(R[i].length));
+  const fleet = scoreFleet(R, score, faulted, healthyIdx);
   const markovPlausibleFrac = healthyIdx.length ? plaus / healthyIdx.length : NaN;
+  // Validity gating per path: the mean-shift path is gated by the conditional-Markov (mean) diagnostic;
+  // the integrated path additionally requires its SCALE e-value's null to hold empirically (healthy-shard
+  // mean ≤ 1) — differencing whitens the MEAN, but the differenced residual can still violate the scale
+  // null via heavy tails / heteroskedasticity (the second-moment layer of Wall A), which breaks e-BH FDR.
+  const scaleNullMean = useMeanShift ? NaN : fleet.healthyScores.reduce((a, b) => a + b, 0) / Math.max(1, fleet.healthyScores.length);
+  const meanGate = markovPlausibleFrac >= 0.5;
+  const certified = useMeanShift ? meanGate : (meanGate && scaleNullMean <= SCALE_NULL_TOL);
   return {
     counter, character, detector, nFault: faulted.size,
-    recall: faulted.size ? hits / faulted.size : NaN,
-    aggregateFdp, selected, markovPlausibleFrac, certified: markovPlausibleFrac >= 0.5,
+    recall: fleet.recall, aggregateFdp: fleet.aggregateFdp, selected: fleet.selected,
+    markovPlausibleFrac, scaleNullMean, certified,
   };
+}
+
+/** ROC-matched recall (faulted vs healthy 95th-pct threshold) + e-BH aggregate FDP over the fleet. */
+function scoreFleet(R: number[][], score: (i: number) => number, faulted: Set<number>, healthyIdx: number[]): { recall: number; aggregateFdp: number; selected: number; healthyScores: number[] } {
+  const healthyScores = healthyIdx.map(score);
+  const thr = quantile(healthyScores, 0.95);
+  let hits = 0; for (const i of faulted) if (score(i) >= thr) hits++;
+  const sel = eBenjaminiHochberg(R.map((_, i) => score(i)), 0.1).selected;
+  let falsePos = 0; for (const i of sel) if (!faulted.has(i)) falsePos++;
+  return {
+    recall: faulted.size ? hits / faulted.size : NaN,
+    aggregateFdp: sel.length ? falsePos / sel.length : 0,
+    selected: sel.length, healthyScores,
+  };
+}
+
+/** Scale e-value with a guard (0 on a degenerate window — never a false alarm). */
+function safeScale(r: ReadonlyArray<number>, calLen: number, testWindow: { start: number; len: number }): number {
+  try {
+    const e = universalInferenceScaleEValue(r, { start: 0, len: calLen }, testWindow);
+    return Number.isFinite(e) && e > 0 ? e : 0;
+  } catch { return 0; }
 }
 
 export function renderMetricRouter(healthyDir: string, monDir: string, calLen?: number): string {
@@ -132,29 +157,36 @@ export function renderMetricRouter(healthyDir: string, monDir: string, calLen?: 
   L.push('═══ METRIC-AWARE ROUTER — characterise on the baseline, route, gate with the diagnostic ═══');
   L.push(`baseline T=${healthy.T} → monitoring T=${mon.T}. Integration order decided from HEALTHY shards (faults excluded), not the candidate faults.`);
   L.push('');
-  L.push('counter          character   detector                 nFault  recall  agg-FDP  markovPlaus  gate');
+  L.push('counter          character   detector                    recall  agg-FDP  meanWhite  scaleNull  gate');
   for (const counter of mon.counters.map((c) => c.name)) {
     const fits = fitBaseline(healthy, counter);
     if (fits.length !== mon.shardIds.length) { L.push(`  ${counter}: SKIP (topology mismatch)`); continue; }
     const r = routeCounter(mon, counter, fits, cl);
     if (r.nFault === 0) continue;
-    const fdp = Number.isNaN(r.aggregateFdp) ? '  —  ' : r.aggregateFdp.toFixed(3);
-    L.push(`  ${r.counter.padEnd(14)} ${r.character.padEnd(11)} ${r.detector.padEnd(24)} ${String(r.nFault).padStart(5)}  ${(r.recall * 100).toFixed(0).padStart(5)}%  ${fdp}  ${(r.markovPlausibleFrac * 100).toFixed(0).padStart(9)}%  ${r.certified ? 'CERTIFIED' : 'FLAGGED'}`);
+    const sv = r.scaleNullMean;
+    const scaleCol = Number.isNaN(sv) ? '   —   ' : `${sv > 1000 ? sv.toExponential(1) : sv.toFixed(2)}${sv <= SCALE_NULL_TOL ? ' ok' : ' BAD'}`;
+    L.push(`  ${r.counter.padEnd(14)} ${r.character.padEnd(11)} ${r.detector.padEnd(26)} ${(r.recall * 100).toFixed(0).padStart(4)}%  ${r.aggregateFdp.toFixed(3)}  ${(r.markovPlausibleFrac * 100).toFixed(0).padStart(7)}%  ${scaleCol.padStart(9)}  ${r.certified ? 'CERTIFIED' : 'FLAGGED'}`);
   }
   L.push('');
-  L.push('READING: the router classifies each metric from its integration order (cross-window common-mode residual');
-  L.push('on HEALTHY shards — an in-sample fit spuriously whitens a random walk, so it must be cross-window) and');
-  L.push('routes it. The four STATIONARY counters → mean-shift e-detector → ~full recall at aggregate FDP≈0 (e-BH');
-  L.push('on the UI e-value, theorem-backed). gpu_temp_c → INTEGRATED: differencing restores a valid (white) null,');
-  L.push('so the diagnostic now CERTIFIES it (vs abstaining before) — the metric is no longer un-monitorable.');
-  L.push('Two honest limits remain on the integrated path: (1) RECALL is low (11%) because these step faults');
-  L.push('(mag≈4.5) are SMALLER than the random walk\'s wander √(dur)≈9 over the fault window — sub-threshold on an');
-  L.push('I(1) metric (ADR 0003/0012), not a detector bug (a step ≫ √dur is detectable); (2) the magnitude score');
-  L.push('is NOT yet an e-value, so e-BH carries no FDR theorem on it (FDP shown N/A) — a valid variance/magnitude');
-  L.push('e-value is the follow-up to extend the aggregate guarantee to this path. The win is the ARCHITECTURE:');
-  L.push('characterise → route → restore a valid null → gate → report honestly, never feeding e-BH a broken null.');
-  L.push('Integration order is a structural per-counter property from HEALTHY shards (faults excluded) — a nuisance');
-  L.push('characterisation, not per-hypothesis selection; production decides it on a held-out healthy window.');
+  L.push('READING: the router classifies each metric by integration order (cross-window common-mode residual on');
+  L.push('HEALTHY shards — an in-sample fit spuriously whitens a random walk, so it must be cross-window) and routes');
+  L.push('it, gating each path on ITS detector\'s null. The four STATIONARY counters → mean-shift e-detector → ~full');
+  L.push('recall at aggregate FDP≈0 (UI e-value, theorem-backed). gpu_temp_c → INTEGRATED: differencing restores a');
+  L.push('white MEAN (passes the conditional-Markov gate), and we score it with a VALID scale e-value (E[e|H0]≤1 by');
+  L.push('construction, unit-tested on Gaussian data). BUT the real differenced residual is HEAVY-TAILED (excess');
+  L.push('kurtosis ≈11) and heteroskedastic, and the Gaussian scale e-value is UNBOUNDED → it EXPLODES (healthy-shard');
+  L.push('mean scale-e ≫1, here ~1e5) — exactly the safe-t catastrophe the UI mean e-value was built to avoid for the');
+  L.push('MEAN (ADR 0009/0010), now recurring for the VARIANCE. So e-BH does NOT control FDR there (FDP≈0.99), and the');
+  L.push('scale-null gate correctly FLAGS gpu_temp_c → abstain, rather than emit a false guarantee. This is the');
+  L.push('SECOND-MOMENT layer of Wall A: differencing whitened the mean, but the variance is still non-Gaussian /');
+  L.push('nonstationary (ADR 0012). The scale e-value is the right primitive AND it made the violation MEASURABLE');
+  L.push('(the readout that gates it) — without it we could not detect the second-moment break. Honest close: FDR is');
+  L.push('guaranteed where the null holds (the gate verifies it); gpu_temp_c needs a BOUNDED heavy-tail-robust scale');
+  L.push('e-value (the UI/split-LR construction for variance) + a time-varying-variance baseline to certify (open');
+  L.push('follow-up). The recall on the integrated path is also intrinsically low — these step faults');
+  L.push('(mag≈4.5) are sub-threshold vs the random walk\'s wander √dur≈9 (ADR 0003), not a detector bug. The win is');
+  L.push('the ARCHITECTURE: characterise → route → score with a valid e-value → gate on that e-value\'s null → never');
+  L.push('emit an uncontrolled FDR. Routing/gating use HEALTHY-shard structure (faults excluded), so no FDR leak.');
   return L.join('\n');
 }
 

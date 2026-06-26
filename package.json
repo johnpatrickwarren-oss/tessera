@@ -80,7 +80,8 @@
     "test": "node --test test/*.test.js",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "premetric-router": "tsc -p tsconfig.test.json",
-    "metric-router": "node tools/metric-router.js"
+    "metric-router": "node tools/metric-router.js",
+    "preui-scale-evalue": "tsc -p tsconfig.test.json"
   },
   "dependencies": {
     "@johnpatrickwarren-oss/deploysignal-engine": "github:johnpatrickwarren-oss/deploysignal-engine#v0.6.0-pre"

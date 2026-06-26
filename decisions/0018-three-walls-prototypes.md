@@ -207,6 +207,33 @@ Findings:
   e-value for the I(1) path; a dedicated random-walk changepoint detector; per-shard (not just
   per-counter) routing; and porting the router to the engine alongside the detector families.
 
+### Variance/scale e-value for the integrated path — `tools/ui-scale-evalue.ts`
+
+Built the variance/magnitude e-value to give the integrated path a *valid* e-BH input (the dual of the
+engine's mean-shift UI e-value, ADR 0010): `universalInferenceScaleEValue` — split cal/test each into
+train/eval, ALT = separate cal/test scales (from train), NULL = common scale (MLE on eval),
+`e = exp(ℓ_alt − ℓ_null)`. `E[e|H0] ≤ 1` BY CONSTRUCTION, scale-invariant, no tuning. Unit-tested:
+validity across σ∈{1,5,50}, power on a 3× variance increase, and detection of the differenced step-fault's
+impulse-pair signature.
+
+**But it did NOT close the integrated-path FDR — and that is the honest payload.** On the *real*
+differenced gpu_temp_c residual the iid-Gaussian null is violated: the residual is **heavy-tailed**
+(excess kurtosis ≈ 11) and **heteroskedastic** (variance drifts across the window). The Gaussian scale
+e-value is **unbounded**, so it **EXPLODES** — healthy-shard mean scale-e ≈ **4.5e5** (≫ 1), exactly the
+safe-t catastrophe the UI mean e-value was built to avoid for the MEAN (ADR 0009/0010), now recurring for
+the VARIANCE. e-BH consequently does NOT control FDR (FDP ≈ 0.99). The router's **scale-null gate**
+(healthy-shard mean scale-e ≤ ~1) catches this and correctly **FLAGS** gpu_temp_c → abstain, not a false
+guarantee.
+
+**This is the second-moment layer of Wall A:** differencing whitened the MEAN (passes the conditional-
+Markov gate), but the VARIANCE is still non-Gaussian / nonstationary (ADR 0012). The scale e-value is the
+right primitive AND it made the violation *measurable* (the readout that gates it). **Honest close: FDR is
+guaranteed where the null holds — and the gate now verifies it PER MOMENT (mean-whiteness AND scale-null);
+gpu_temp_c needs a BOUNDED heavy-tail-robust scale e-value (a split-LR/UI construction for variance so it
+cannot explode) + a time-varying-variance baseline to certify.** Open follow-up. The architecture stands:
+characterise → route → score with a valid e-value → **gate on that e-value's own null (every moment it
+assumes)** → never emit an uncontrolled FDR.
+
 ## Cold-eye verdicts (two independent adversarial reviews)
 
 - **`e-detector.ts` — SOUND.** No correctness bugs; window bounds verified end-to-end (0 UI throws
