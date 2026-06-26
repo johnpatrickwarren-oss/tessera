@@ -226,13 +226,37 @@ the VARIANCE. e-BH consequently does NOT control FDR (FDP ≈ 0.99). The router'
 guarantee.
 
 **This is the second-moment layer of Wall A:** differencing whitened the MEAN (passes the conditional-
-Markov gate), but the VARIANCE is still non-Gaussian / nonstationary (ADR 0012). The scale e-value is the
-right primitive AND it made the violation *measurable* (the readout that gates it). **Honest close: FDR is
-guaranteed where the null holds — and the gate now verifies it PER MOMENT (mean-whiteness AND scale-null);
-gpu_temp_c needs a BOUNDED heavy-tail-robust scale e-value (a split-LR/UI construction for variance so it
-cannot explode) + a time-varying-variance baseline to certify.** Open follow-up. The architecture stands:
-characterise → route → score with a valid e-value → **gate on that e-value's own null (every moment it
-assumes)** → never emit an uncontrolled FDR.
+Markov gate), but the VARIANCE is still non-Gaussian / nonstationary (ADR 0012). The scale e-value made
+the violation *measurable* (the readout that gates it). The gate now verifies validity PER MOMENT
+(mean-whiteness AND scale-null).
+
+### Bounded heavy-tail-robust scale e-value — `robustScaleEValue` (FDR validity SOLVED; power is the gap)
+
+Built the bounded version (`tools/ui-scale-evalue.ts`, `robustScaleEValue`): the same UI split-LR but
+scored under a **Student-t_ν** density (default ν=4) instead of Gaussian. The t tail log-density grows
+only like −((ν+1)/2)·log(x²), so a single outlier contributes a BOUNDED amount to the log-LR → it cannot
+explode (the same exponent-taming fix ADR 0010 applied to the mean). Unit-tested: bounded `E[e|H0]` on
+heavy-tailed t(3) data where the Gaussian version explodes (max ≫ 50× the robust max); valid + powered on
+a sustained variance increase.
+
+**Wired into the router, it CLOSES the FDR story on the integrated path:** gpu_temp_c's healthy-shard mean
+scale-e drops 4.5e5 → **0.18** (≤ 1), aggregate **FDP 0.99 → 0.000** → CERTIFIED = FDR-VALID. The
+explosion is gone; e-BH controls FDR there.
+
+**But this surfaced the real tension — recall ≈ 0%, even for a 100σ injected step.** The outlier-
+insensitivity that makes the robust e-value FDR-safe on heavy tails ALSO makes it ignore the **sparse
+impulse-pair** signature of a mean-STEP on a random walk (differencing a sustained step → +δ at onset,
+−δ at offset, ≈0 between; differencing discarded the sustained-level information). The robust scale
+e-value is the right detector for a **sustained variance change**, the WRONG one for a sparse mean-step.
+**So: FDR VALIDITY on the integrated path is now solved (no explosion, controlled FDP); detection POWER
+for the mean-step × I(1) combination is the open piece** — it needs a CHANGEPOINT detector on the LEVEL
+(random-walk-aware), routed by metric character × FAULT TYPE (not character alone). "CERTIFIED" means the
+FDR guarantee holds, NOT that faults are detected — the router now distinguishes the two honestly.
+
+The architecture stands and is now demonstrated end-to-end on both moments: characterise → route → score
+with a valid BOUNDED e-value → **gate on that e-value's own null (every moment it assumes)** → never emit
+an uncontrolled FDR. Open follow-ups: a random-walk changepoint detector + fault-type-aware routing for
+I(1) mean-step power; a time-varying-variance baseline for the heteroskedasticity; port to the engine.
 
 ## Cold-eye verdicts (two independent adversarial reviews)
 

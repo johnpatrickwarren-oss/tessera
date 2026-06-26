@@ -28,7 +28,7 @@
 
 import { autocorr, conditionalMarkovDiagnostic } from './conditional-markov.js';
 import { eDetector, type EDetectorOptions } from './e-detector.js';
-import { universalInferenceScaleEValue } from './ui-scale-evalue.js';
+import { robustScaleEValue } from './ui-scale-evalue.js';
 import { fitBaseline, applyBaseline, type ShardBaseline } from './baseline-monitor.js';
 import { loadScenarioBundle, type ScenarioBundle } from './clustersynth-scenario.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
@@ -142,10 +142,12 @@ function scoreFleet(R: number[][], score: (i: number) => number, faulted: Set<nu
   };
 }
 
-/** Scale e-value with a guard (0 on a degenerate window — never a false alarm). */
+/** Heavy-tail-robust (Student-t) scale e-value with a guard (0 on a degenerate window — never a false
+ *  alarm). The robust version is bounded on the heavy-tailed differenced residual; the Gaussian one
+ *  explodes (E[e|H0]≈4.5e5) and breaks e-BH FDR. */
 function safeScale(r: ReadonlyArray<number>, calLen: number, testWindow: { start: number; len: number }): number {
   try {
-    const e = universalInferenceScaleEValue(r, { start: 0, len: calLen }, testWindow);
+    const e = robustScaleEValue(r, { start: 0, len: calLen }, testWindow);
     return Number.isFinite(e) && e > 0 ? e : 0;
   } catch { return 0; }
 }
@@ -172,21 +174,21 @@ export function renderMetricRouter(healthyDir: string, monDir: string, calLen?: 
   L.push('HEALTHY shards — an in-sample fit spuriously whitens a random walk, so it must be cross-window) and routes');
   L.push('it, gating each path on ITS detector\'s null. The four STATIONARY counters → mean-shift e-detector → ~full');
   L.push('recall at aggregate FDP≈0 (UI e-value, theorem-backed). gpu_temp_c → INTEGRATED: differencing restores a');
-  L.push('white MEAN (passes the conditional-Markov gate), and we score it with a VALID scale e-value (E[e|H0]≤1 by');
-  L.push('construction, unit-tested on Gaussian data). BUT the real differenced residual is HEAVY-TAILED (excess');
-  L.push('kurtosis ≈11) and heteroskedastic, and the Gaussian scale e-value is UNBOUNDED → it EXPLODES (healthy-shard');
-  L.push('mean scale-e ≫1, here ~1e5) — exactly the safe-t catastrophe the UI mean e-value was built to avoid for the');
-  L.push('MEAN (ADR 0009/0010), now recurring for the VARIANCE. So e-BH does NOT control FDR there (FDP≈0.99), and the');
-  L.push('scale-null gate correctly FLAGS gpu_temp_c → abstain, rather than emit a false guarantee. This is the');
-  L.push('SECOND-MOMENT layer of Wall A: differencing whitened the mean, but the variance is still non-Gaussian /');
-  L.push('nonstationary (ADR 0012). The scale e-value is the right primitive AND it made the violation MEASURABLE');
-  L.push('(the readout that gates it) — without it we could not detect the second-moment break. Honest close: FDR is');
-  L.push('guaranteed where the null holds (the gate verifies it); gpu_temp_c needs a BOUNDED heavy-tail-robust scale');
-  L.push('e-value (the UI/split-LR construction for variance) + a time-varying-variance baseline to certify (open');
-  L.push('follow-up). The recall on the integrated path is also intrinsically low — these step faults');
-  L.push('(mag≈4.5) are sub-threshold vs the random walk\'s wander √dur≈9 (ADR 0003), not a detector bug. The win is');
-  L.push('the ARCHITECTURE: characterise → route → score with a valid e-value → gate on that e-value\'s null → never');
-  L.push('emit an uncontrolled FDR. Routing/gating use HEALTHY-shard structure (faults excluded), so no FDR leak.');
+  L.push('white MEAN, scored with the BOUNDED heavy-tail-robust (Student-t) scale e-value (tools/ui-scale-evalue.ts).');
+  L.push('That CLOSES the FDR story on this path: the Gaussian scale e-value EXPLODED on the heavy-tailed differenced');
+  L.push('residual (healthy mean scale-e ≈1e5 → FDP≈0.99, the safe-t catastrophe recurring for the VARIANCE, ADR');
+  L.push('0009/0010); the robust t-version is bounded (scale-null ≈0.18 ≤1, FDP≈0.000) → CERTIFIED = FDR-VALID.');
+  L.push('');
+  L.push('BUT note recall ≈0% — and "CERTIFIED" means the FDR guarantee holds, NOT that faults are detected. The');
+  L.push('outlier-insensitivity that makes the robust e-value FDR-safe on heavy tails ALSO makes it ignore the SPARSE');
+  L.push('impulse-pair signature of a mean-STEP on a random walk (differencing a sustained step → two impulses + ~0');
+  L.push('between; differencing discarded the sustained-level info). The robust scale e-value is the right detector');
+  L.push('for a SUSTAINED variance change, the WRONG one for a sparse mean-step. So detecting a mean-step on an I(1)');
+  L.push('metric needs a CHANGEPOINT detector on the LEVEL (random-walk-aware), routed by metric character × FAULT');
+  L.push('TYPE — the remaining follow-up. Honest state: FDR VALIDITY is now solved on the integrated path (no');
+  L.push('explosion, controlled FDP); detection POWER for the mean-step×I(1) combo is the open piece. The win is the');
+  L.push('ARCHITECTURE: characterise → route → score with a valid BOUNDED e-value → gate on its null → never emit an');
+  L.push('uncontrolled FDR; routing/gating use HEALTHY-shard structure (faults excluded), so no FDR leak.');
   return L.join('\n');
 }
 
