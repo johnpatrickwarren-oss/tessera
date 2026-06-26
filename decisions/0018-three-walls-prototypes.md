@@ -305,6 +305,43 @@ Open follow-ups: regenerate at a realistic cadence in a generator that models su
 validity + full power together); a time-varying-variance baseline for the heteroskedasticity; per-shard
 routing; port the router + detectors to the engine.
 
+## 72,000-shard fleet-scale validation
+
+Generated a real 72k-GPU cluster (gb200, 100 pods, 1,000 racks ≈ 72 GPU/rack): a 1-month healthy baseline
+(720 hourly ticks, 2.0 GB) + a monitoring window (240 ticks, 685 MB, 867 faults). Ran the pipeline
+(instrumented common-mode → e-value → flat **and** per-rack e-BH).
+
+**Findings:**
+- **The pipeline scales.** Full run over all 72,000 shards × 5 counters in **188s** (single counter 44s):
+  streaming load 6s, robust per-shard loading fit + residualisation + scoring + 1,000 per-rack e-BH. No
+  blow-up. (Generation is cheap too — 12s for the monitoring window.)
+- **FDR control holds at 72k.** FDP = 0.000 throughout — the e-BH guarantee is N-independent, confirmed
+  empirically at fleet scale.
+- **Flat e-BH FIRES at 72k for detectable faults — correcting my own earlier assumption.** I had said the
+  UI e-value is "bounded ~800" so flat e-BH (threshold N/q = 720,000) couldn't fire at scale. WRONG for a
+  strong clean step: the UI mean-shift e-value is UNBOUNDED (a clean +8σ persistent step → e ≈ 1e14–1e19),
+  far above 720,000. With 60 strong persistent faults injected across 20 racks, **flat e-BH: 98% recall,
+  FDP 0.000; per-rack e-BH: 98% recall, FDP 0.000** — both work. So the ADR-0016 "bounded e-value can't
+  reach N/q at scale → need topology partitioning" caveat applies specifically to the **bounded** detectors
+  (the e-detector peak, the changepoint e-value ≈ tens–hundreds), NOT the unbounded UI mean-shift e-value.
+- **The natural transient faults fired nothing at 72k (flat or per-rack)** — the known Wall-B dilution +
+  sub-threshold magnitude, not a scale failure (FDP stays 0).
+
+**Two real engineering findings surfaced:**
+1. **`loadScenarioBundle` cannot load a fleet-scale bundle** — it `readFileSync`s counters.ndjson, which
+   exceeds Node's ~512 MB string limit at 72k (the file is 685 MB / 2.0 GB). The 72k run used a streaming
+   (readline) loader. **Follow-up: give the loader a streaming path** (async) so fleet-scale bundles load.
+2. **The e-detector does not scale to an all-shards fleet e-BH.** It is ~300× the terminal e-value per
+   shard (the SR mixture is onsetGrid × evalGrid UI evaluations), so scoring all 72k with it would take
+   hours. The scale-appropriate pattern is a two-stage screen: the cheap valid UI e-value for the fleet
+   e-BH (fires flat at 72k for strong faults), then the expensive e-detector / changepoint only on the
+   triaged / per-rack subset for transient power. (This is consistent with localizeFaults being a ranking
+   aid + topology partitioning, ADR 0016/0017.)
+
+**Cadence caveat (stated honestly):** this ran at hourly cadence. Real DCGM (~1 Hz) cannot be tested in
+clustersynth (`dt_s` only relabels timestamps; the per-tick noise is iid — verified), so "72k at DCGM
+cadence" is not a clustersynth-testable claim; what 72k validates is SCALE (and it passes).
+
 ## Cold-eye verdicts (two independent adversarial reviews)
 
 - **`e-detector.ts` — SOUND.** No correctness bugs; window bounds verified end-to-end (0 UI throws
