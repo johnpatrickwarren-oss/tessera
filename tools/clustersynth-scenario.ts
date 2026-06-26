@@ -26,8 +26,11 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { instrumentedCommonModeResiduals } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/instrumented-common-mode';
 import { universalInferenceMeanShiftEValue } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/universal-inference-e-value';
+import { nuisanceRobustBFEValue, MIN_CALIBRATION_FOR_VALIDITY } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/nuisance-robust-bf-e-value';
 import { distributionalSignature } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/distributional-signature';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
+import { eBHConditionalCalibration } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh-conditional-calibration';
+import { gaussianLrEValue, gaussianLrNullSurvival } from './gaussian-lr-evalue.js';
 
 export type FaultType = 'mean_shift' | 'drift' | 'variance_collapse' | 'detachment';
 export type FaultLevel = 'gpu' | 'cdu' | 'pod';
@@ -111,10 +114,19 @@ function failedShardsByType(b: ScenarioBundle, counterName: string, calLen: numb
   return out;
 }
 
+export interface FdrPathScore { nFault: number; K: number; power: number; fdp: number; }
+
 export interface CounterScore {
   counter: string;
-  /** e-BH on the UI mean-shift e-value: FDP + power vs mean_shift gpu faults (the valid-FDR path). */
-  meanShift: { nFault: number; K: number; power: number; fdp: number };
+  /** e-BH on the plug-in UI mean-shift e-value, vs mean_shift gpu faults. */
+  meanShift: FdrPathScore;
+  /** e-BH on the NUISANCE-ROBUST BF e-value (baseline mean integrated out; E[BF|H0]≤1 by
+   *  construction). NaN/zeroed when cal < the validity floor (cal must be ≥ MIN_CALIBRATION). */
+  bf: FdrPathScore & { valid: boolean };
+  /** Gaussian-LR mean-shift e-value: plain e-BH vs Lee–Ren conditional-calibration BOOSTING
+   *  (engine ADR 0006). Boosting is a deterministic superset at the same FDR target — the
+   *  free-power lever. K_boosted ≥ K_plain always. */
+  glr: { plain: FdrPathScore; boosted: FdrPathScore };
   /** Per fault type: detection recall by the mean-shift e-value vs distributionalSignature. */
   byType: Record<FaultType, { nFault: number; uiHits: number; sigHits: number }>;
   /** distributionalSignature on shards with NO gpu fault — the nuisance false-positive rate.
@@ -125,14 +137,18 @@ export interface CounterScore {
 
 const FAULT_TYPES: FaultType[] = ['mean_shift', 'drift', 'variance_collapse', 'detachment'];
 
-/** e-BH on the UI e-value, scored against the counter's mean_shift gpu faults. */
-function meanShiftScore(b: ScenarioBundle, counterName: string, calLen: number, uiE: number[], q: number): CounterScore['meanShift'] {
+/** Indices of shards with a mean_shift gpu fault active in the test window. */
+function meanShiftIdx(b: ScenarioBundle, counterName: string, calLen: number): Set<number> {
   const failed = failedShardsByType(b, counterName, calLen, 'mean_shift');
-  const idx = new Set(b.shardIds.map((s, i) => (failed.has(s) ? i : -1)).filter((i) => i >= 0));
-  const sel = eBenjaminiHochberg(uiE, q);
+  return new Set(b.shardIds.map((s, i) => (failed.has(s) ? i : -1)).filter((i) => i >= 0));
+}
+
+/** Score an e-BH selection set against the mean_shift fault indices. */
+function scoreSelection(idx: Set<number>, selected: ReadonlyArray<number>): FdrPathScore {
   let tp = 0;
-  for (const i of sel.selected) if (idx.has(i)) tp++;
-  return { nFault: idx.size, K: sel.K, power: idx.size ? tp / idx.size : NaN, fdp: sel.K ? (sel.K - tp) / sel.K : 0 };
+  for (const i of selected) if (idx.has(i)) tp++;
+  const K = selected.length;
+  return { nFault: idx.size, K, power: idx.size ? tp / idx.size : NaN, fdp: K ? (K - tp) / K : 0 };
 }
 
 /** Per-fault-type recall: mean-shift e-value (e>1) vs distributionalSignature.hasSignature. */
@@ -165,7 +181,7 @@ function signatureHealthyFP(b: ScenarioBundle, counterName: string, calLen: numb
   return { nHealthy, sigFP };
 }
 
-/** Run the instrumented pipeline + both detectors on one counter and score by fault type. */
+/** Run the instrumented pipeline + the detectors on one counter and score by fault type. */
 export function scoreCounter(b: ScenarioBundle, counterName: string, calLen: number, q: number): CounterScore {
   const { X, factorSignals, membership } = counterMatrices(b, counterName);
   const R = instrumentedCommonModeResiduals(X, calLen, factorSignals, membership);
@@ -173,9 +189,21 @@ export function scoreCounter(b: ScenarioBundle, counterName: string, calLen: num
   const test = { start: calLen, len: b.T - calLen };
   const uiE = R.map((r) => safeUi(r, cal, test));
   const sig = R.map((r) => safeSig(r, cal, test));
+  // Nuisance-robust BF e-value (baseline mean integrated out) — only valid for cal ≥ the floor.
+  const bfValid = calLen >= MIN_CALIBRATION_FOR_VALIDITY;
+  const bfE = bfValid ? R.map((r) => safeBf(r, cal, test)) : R.map(() => 0);
+  // Gaussian-LR e-value (known null survival) — plain e-BH vs conditional-calibration boosting.
+  const glrE = R.map((r) => gaussianLrEValue(r, cal, test));
+  const survival = gaussianLrNullSurvival();
+  const idx = meanShiftIdx(b, counterName, calLen);
   return {
     counter: counterName,
-    meanShift: meanShiftScore(b, counterName, calLen, uiE, q),
+    meanShift: scoreSelection(idx, eBenjaminiHochberg(uiE, q).selected),
+    bf: { ...scoreSelection(idx, eBenjaminiHochberg(bfE, q).selected), valid: bfValid },
+    glr: {
+      plain: scoreSelection(idx, eBenjaminiHochberg(glrE, q).selected),
+      boosted: scoreSelection(idx, eBHConditionalCalibration(glrE, q, (_j, x) => survival(x)).selected),
+    },
     byType: recallByType(b, counterName, calLen, uiE, sig),
     sigHealthy: signatureHealthyFP(b, counterName, calLen, sig),
   };
@@ -183,6 +211,9 @@ export function scoreCounter(b: ScenarioBundle, counterName: string, calLen: num
 
 function safeUi(r: number[], cal: { start: number; len: number }, test: { start: number; len: number }): number {
   try { return universalInferenceMeanShiftEValue(r, cal, test); } catch { return 0; }
+}
+function safeBf(r: number[], cal: { start: number; len: number }, test: { start: number; len: number }): number {
+  try { return nuisanceRobustBFEValue(r, cal, test); } catch { return 0; }
 }
 function safeSig(r: number[], cal: { start: number; len: number }, test: { start: number; len: number }): boolean {
   try { return distributionalSignature(r, cal, test).hasSignature; } catch { return false; }
@@ -203,11 +234,21 @@ export function renderScenario(dir: string, q = 0.05): string {
   lines.push(`clustersynth SCENARIO bundle — adversarial, labeled telemetry. dir=${dir}`);
   lines.push(`${bundle.shardIds.length} shards, T=${bundle.T}, ${bundle.counters.length} counters, ${bundle.faults.length} faults. FDR q=${q}.`);
   lines.push('');
-  lines.push('Valid-FDR path (UI mean-shift e-value → e-BH), scored vs gpu mean_shift faults:');
-  lines.push('  counter           nFault  K  power   FDP');
+  const bfValid = scores.some((s) => s.bf.valid);
+  lines.push('Valid-FDR path (mean-shift e-value → e-BH), scored vs gpu mean_shift faults.');
+  lines.push(`  ui = plug-in UI e-value;  bf = NUISANCE-ROBUST BF e-value (baseline integrated out, cal≥${MIN_CALIBRATION_FOR_VALIDITY})${bfValid ? '' : ' — SKIPPED: cal below validity floor'}`);
+  lines.push('  counter           nFault  ui:K power  FDP   bf:K power  FDP');
   for (const s of scores) {
-    const m = s.meanShift;
-    lines.push(`  ${s.counter.padEnd(16)} ${String(m.nFault).padStart(5)} ${String(m.K).padStart(3)}  ${fmt(m.power)}  ${fmt(m.fdp)}`);
+    const m = s.meanShift, bf = s.bf;
+    const bfCols = bf.valid ? `${String(bf.K).padStart(3)} ${fmt(bf.power)} ${fmt(bf.fdp)}` : ' (cal<floor)';
+    lines.push(`  ${s.counter.padEnd(16)} ${String(m.nFault).padStart(5)}  ${String(m.K).padStart(3)} ${fmt(m.power)} ${fmt(m.fdp)}   ${bfCols}`);
+  }
+  lines.push('');
+  lines.push('Conditional-calibration BOOSTING (Lee–Ren, ADR 0006) on the Gaussian-LR e-value — free power at same q:');
+  lines.push('  counter           nFault  plain:K power  FDP   boost:K power  FDP');
+  for (const s of scores) {
+    const p = s.glr.plain, bo = s.glr.boosted;
+    lines.push(`  ${s.counter.padEnd(16)} ${String(p.nFault).padStart(5)}  ${String(p.K).padStart(5)} ${fmt(p.power)} ${fmt(p.fdp)}  ${String(bo.K).padStart(5)} ${fmt(bo.power)} ${fmt(bo.fdp)}`);
   }
   lines.push('');
   lines.push('Per-fault-type recall — mean-shift e-value (ui) vs distributionalSignature (sig), summed over counters:');
@@ -233,10 +274,15 @@ export function renderScenario(dir: string, q = 0.05): string {
   lines.push('  • the UI mean-shift e-value is VALID but UNDERPOWERED — it selects ~nothing (transient faults');
   lines.push('    diluted over a fixed test window; it cannot see drift or variance changes by construction);');
   lines.push(`  • distributionalSignature has high raw recall but a ~${(100 * fpRate).toFixed(0)}% nuisance FP rate — the nonstationary`);
-  lines.push('    residual trips its thresholds, so the recall is not usable as an FDR-controlled discovery set.');
+  lines.push('    residual trips its thresholds, so the recall is not usable as an FDR-controlled discovery set;');
+  lines.push('  • Lee–Ren BOOSTING does what it promises (K_boosted ≥ K_plain, a deterministic superset) — but it');
+  lines.push('    is a POWER lever, NOT an FDR fix: the Gaussian-LR base e-value\'s null is already violated by the');
+  lines.push('    nonstationarity, so the boost amplifies true AND false positives together (FDP rises). Free power');
+  lines.push('    holds only at the STATED FDR, which nonstationarity has already broken. Orthogonal to the problem.');
   lines.push('This is the project\'s core finding at scale (ADR 0011/0012): the guarantee that holds on stationary');
-  lines.push('synthetic data does NOT transfer to nonstationary telemetry without nuisance-robust detection. The');
-  lines.push('instrumented common-mode REMOVAL itself stays clean — the gap is the per-shard NULL, not the factors.');
+  lines.push('synthetic data does NOT transfer to nonstationary telemetry — and no detector tuning (nuisance-robust');
+  lines.push('BF, boosting) closes it; the φ-integration + cross-sectional-recalibration routes are documented WALLS');
+  lines.push('(ADR 0009/0013). The instrumented common-mode REMOVAL stays clean — the gap is the per-shard NULL.');
   return lines.join('\n');
 }
 
