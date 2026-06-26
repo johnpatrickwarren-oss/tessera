@@ -1,9 +1,9 @@
 {
-  "no-complex-functions": 9,
-  "no-god-functions": 3,
+  "no-complex-functions": 5,
+  "no-god-functions": 2,
   "no-time-bomb-tests": 0,
   "product-not-read-process": 0,
-  "require-tests": 28,
+  "require-tests": 26,
   "durable-trail": 0,
   "config-relaxations": 0
 }

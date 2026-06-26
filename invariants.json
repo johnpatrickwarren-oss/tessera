@@ -1,7 +1,7 @@
 [
   {
     "id": "no-complex-functions",
-    "intent": "PRIMARY function-health gate: no NEW function with cyclomatic complexity over 12 (1 + decision points + &&/||). Flags BRANCHY hard-to-test functions, not merely long ones (McCabe ~10; 12 is forgiving). Ratchet grandfathers today's complex functions and blocks any new one. (Scans git-non-ignored .ts; the vendored calibrators/family-c.ts is fixed upstream.)",
+    "intent": "PRIMARY function-health gate: no NEW function with cyclomatic complexity over 12 (1 + decision points + &&/||). Flags BRANCHY hard-to-test functions, not merely long ones (McCabe ~10; 12 is forgiving). Ratchet grandfathers today's complex functions and blocks any new one. (Scans git-non-ignored .ts; the robust-covariance numerics now live in the engine baseline kit, not Tessera.)",
     "check": { "kind": "max_complexity", "maxComplexity": 12 },
     "mode": "ratchet",
     "severity": "block",

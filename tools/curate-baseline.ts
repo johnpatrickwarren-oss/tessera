@@ -40,7 +40,7 @@ export const DEFAULT_OUT_DIR = './curated-baseline/';
 export const REPORT_DEFAULTS = {
   alpha_fleet: 1e-3,        // DEFAULT_ALPHA_FLEET at curate-baseline-fleet-correlated.ts:50
   chi_sq_p: 0.975,           // chiSqQuantile975 at curate-baseline-pre-pass.ts:115
-  mcd_alpha: 0.75,           // FASTMCD_DEFAULT_ALPHA inherited via tools/calibrators/family-c.ts
+  mcd_alpha: 0.75,           // FASTMCD_DEFAULT_ALPHA from tools/robust-mcd-screen.ts
 } as const;
 
 // ─── Types ─────────────────────────────────────────────────────────────

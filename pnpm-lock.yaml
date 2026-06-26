@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@johnpatrickwarren-oss/deploysignal-engine':
-        specifier: github:johnpatrickwarren-oss/deploysignal-engine#v0.5.0-pre
-        version: https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/725b71d4db5c5b53e7777865d0910fde24a48372
+        specifier: github:johnpatrickwarren-oss/deploysignal-engine#v0.6.0-pre
+        version: https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/b942b5b2410518d8a8cd8f0e81ac165a1399f900
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -180,8 +180,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@johnpatrickwarren-oss/deploysignal-engine@https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/725b71d4db5c5b53e7777865d0910fde24a48372':
-    resolution: {gitHosted: true, integrity: sha512-CXVR+feMetxwqHFYQVg+u3NLcFHBau79JdjWAiQKBjy6mBc9ZashgspRRf9S71Nma2NzFVt8alvC4rrfq/tdQg==, tarball: https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/725b71d4db5c5b53e7777865d0910fde24a48372}
+  '@johnpatrickwarren-oss/deploysignal-engine@https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/b942b5b2410518d8a8cd8f0e81ac165a1399f900':
+    resolution: {gitHosted: true, integrity: sha512-8G6rdTTM1SsFz5AM2KoHzU+5Hp6K9fwOGVCAamFqKk05ayRxxwKthP0zzMBZ4bNfU2M4HXVih4vRLGFjq5D//A==, tarball: https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/b942b5b2410518d8a8cd8f0e81ac165a1399f900}
     version: 0.5.0-pre
     hasBin: true
 
@@ -281,7 +281,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.0':
     optional: true
 
-  '@johnpatrickwarren-oss/deploysignal-engine@https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/725b71d4db5c5b53e7777865d0910fde24a48372': {}
+  '@johnpatrickwarren-oss/deploysignal-engine@https://codeload.github.com/johnpatrickwarren-oss/deploysignal-engine/tar.gz/b942b5b2410518d8a8cd8f0e81ac165a1399f900': {}
 
   '@types/node@22.19.19':
     dependencies:

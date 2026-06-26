@@ -18,10 +18,10 @@
 // prefix), Q-JC4c (separate pipe from Q-J1 e-BH), Q-JC5 (residual_seed_hash sentinel
 // wire format) all bound at primitives 5/6/7/8/10 of Q-R07-SPEC.md § Mechanism.
 //
-// Tessera-original code (NOT vendored from DeploySignal). Composes vendored estimator
-// surfaces from tools/calibrators/family-c.ts + tools/calibrators/_shared.ts (same
-// imports R06's tools/curate-baseline-pre-pass.ts uses; deliberate code-duplication
-// of per-run MCD screening logic for architectural separation per D-R07-1).
+// Tessera-original code (NOT vendored from DeploySignal). Composes the engine's
+// robust-covariance estimator surface via tools/robust-mcd-screen.ts (the per-run
+// MCD screening logic is shared with R06's tools/curate-baseline-pre-pass.ts; the
+// architectural separation per D-R07-1 is preserved at the helper boundary).
 
 import type {
   BaselineBundle,
@@ -31,7 +31,7 @@ import type {
 import {
   FASTMCD_DEFAULT_ALPHA,
   FASTMCD_DEFAULT_SEED,
-} from './calibrators/family-c';
+} from './robust-mcd-screen';
 import {
   DEFAULT_ALPHA_FLEET,
   DEFAULT_P_BASE_PRIOR,

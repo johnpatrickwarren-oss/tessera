@@ -11,11 +11,11 @@ import type {
   BaselineCurationDecision,
 } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 import {
-  fastMCD,
+  choleskyLocal,
   mahalanobisSqFromL,
   chiSqQuantile975,
-} from './calibrators/family-c';
-import { choleskyLocal } from './calibrators/_shared';
+} from '@johnpatrickwarren-oss/deploysignal-engine/baseline/robust-covariance';
+import { robustScreenCov } from './robust-mcd-screen';
 import type { Fcp1State, FleetCorrelatedOpts } from './curate-baseline-fleet-correlated';
 
 export const DEFAULT_ALPHA_FLEET = 1e-3;
@@ -53,7 +53,7 @@ export function screenRunMask(
     }
     rows.push(row);
   }
-  const mcd = fastMCD(rows, mcdAlpha, mcdSeed);
+  const mcd = robustScreenCov(rows, mcdAlpha, mcdSeed);
   if (mcd === null) {
     return { keptIndices: [], contaminationMask: [], totalTicks: 0, outcome: 'skipped_mcd_failed' };
   }
@@ -222,7 +222,7 @@ export function buildD11(
     inputs: {
       upstream_decisions: undefined,
       compile_state_ref:
-        'BaselineBundle.runs[].signal_series[sig][tick] → fastMCD(α=' + mcdAlpha + ', seed=' + mcdSeed
+        'BaselineBundle.runs[].signal_series[sig][tick] → robustCovariance MCD(α=' + mcdAlpha + ', seed=' + mcdSeed
         + ') + Mahalanobis cutoff χ²_p(0.975)',
     },
     output_summary: {
