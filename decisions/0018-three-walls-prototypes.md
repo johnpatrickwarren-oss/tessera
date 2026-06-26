@@ -255,8 +255,39 @@ FDR guarantee holds, NOT that faults are detected — the router now distinguish
 
 The architecture stands and is now demonstrated end-to-end on both moments: characterise → route → score
 with a valid BOUNDED e-value → **gate on that e-value's own null (every moment it assumes)** → never emit
-an uncontrolled FDR. Open follow-ups: a random-walk changepoint detector + fault-type-aware routing for
-I(1) mean-step power; a time-varying-variance baseline for the heteroskedasticity; port to the engine.
+an uncontrolled FDR.
+
+### Random-walk changepoint detector — `tools/rw-changepoint.ts` (the right detector for mean-step × I(1))
+
+The robust scale e-value was FDR-valid on the integrated path but had ~0 power — it is matched to a
+*sustained variance change*, not a sparse mean-step. So built the purpose-built detector: a **windowed
+local level-contrast** on the LEVEL (post-window mean − adjacent pre-window mean), mixed over candidate
+onsets (Shiryaev–Roberts), with a **CLIPPED** bet so the e-value is bounded. Window-averaging uses the
+*sustained* level (not just the boundary increments) and tames the heavy tails; the local (adjacent)
+reference keeps the random-walk variance small. Unit-tested: `E[e|H0] ≈ 1` and BOUNDED on Gaussian I(1)
+AND heavy-tailed t(3) I(1) (where an unclipped bet explodes); ROC-matched it detects super-threshold steps
+(**97% @ 25σ, 33% @ 12σ, 4% @ 6σ** — power scales with step ÷ random-walk-wander exactly as the physics
+dictates).
+
+**On the real gpu_temp_c it is a clear improvement: recall 0% → ~33%** (vs every wrong detector's 0), and
+its null stays **BOUNDED** (detNull ≈ 5, not the scale e-value's 4.5e5). **But detNull > 1 → its null is
+still mildly violated by the residual's heavy tails → the gate FLAGS it (FDR not certified).** Two honest
+limits: (1) the real faults (mag ≈ 4.5) sit near the random walk's own local wander → intrinsically
+sub-threshold (ADR 0003/0012); (2) the heavy-tailed null keeps E[e|H0] above 1 even clipped — a DENSER
+baseline (real DCGM ~1 Hz → millions of samples vs the 1,440 hourly ticks used here) or a heavier clip
+would likely bring it under the gate.
+
+**Net, after four detectors triangulating the same metric:** mean-shift-on-level (invalid null) → scale-on-
+differences Gaussian (explodes) → robust-t scale (valid but no power) → **rw-changepoint (the right tool:
+real power, bounded, but the thin heavy-tailed null keeps it just shy of FDR-certifiable)**. gpu_temp_c is
+precisely characterised as **I(1) + heavy-tailed + sub-threshold faults** — each property defeats a
+different detector; together they are the deepest, most precise statement of the ADR 0012 wall this work
+produced. The architecture is the durable result: characterise → route by character **× fault type** →
+score with a bounded e-value → gate on the detector's OWN null → CERTIFIED means the guarantee holds,
+FLAGGED means abstain (never a silent miss).
+
+Open follow-ups: a denser/real baseline + heavier-tailed null to push the changepoint detNull under the
+gate; a time-varying-variance baseline for the heteroskedasticity; per-shard routing; port to the engine.
 
 ## Cold-eye verdicts (two independent adversarial reviews)
 
