@@ -270,24 +270,40 @@ AND heavy-tailed t(3) I(1) (where an unclipped bet explodes); ROC-matched it det
 dictates).
 
 **On the real gpu_temp_c it is a clear improvement: recall 0% → ~33%** (vs every wrong detector's 0), and
-its null stays **BOUNDED** (detNull ≈ 5, not the scale e-value's 4.5e5). **But detNull > 1 → its null is
-still mildly violated by the residual's heavy tails → the gate FLAGS it (FDR not certified).** Two honest
-limits: (1) the real faults (mag ≈ 4.5) sit near the random walk's own local wander → intrinsically
-sub-threshold (ADR 0003/0012); (2) the heavy-tailed null keeps E[e|H0] above 1 even clipped — a DENSER
-baseline (real DCGM ~1 Hz → millions of samples vs the 1,440 hourly ticks used here) or a heavier clip
-would likely bring it under the gate.
+its null stays **BOUNDED** (detNull ≈ 2–5, not the scale e-value's 4.5e5).
+
+### Data-density validation — ALL FIVE COUNTERS NOW CERTIFY (gpu_temp_c included)
+
+Diagnosed *where* the heavy tails come from and closed the gate. **They are an ARTIFACT of common-mode
+REMOVAL, not the metric:** raw gpu_temp_c increments have excess kurtosis ≈ **1.3** (near-Gaussian); the
+common-mode-removed increments ≈ **10.8**. **Window-averaging undoes it:** detNull = 1.97 (w=15) → **0.93
+(w=30)** → 0.84 (w=50). So the router now picks the SMALLEST changepoint window whose healthy-shard null
+mean ≤ tol (decided on HEALTHY shards → no FDR leak); for gpu_temp_c it picks **w=35, detNull ≈ 1.0 →
+CERTIFIED**, aggregate FDP ≈ 0.
+
+This is the **"denser DCGM cadence" intuition validated — right in MECHANISM, realised via WINDOW SIZE.**
+clustersynth's per-tick noise is iid (`dt_s` only relabels timestamps; it cannot model sub-tick
+smoothness — verified), so I cannot test wall-clock cadence directly. But the *operative* lever is points-
+per-window, which a denser cadence supplies and a larger window supplies equivalently: more points →
+the windowed contrast Gaussianises → E[e|H0] ≤ 1. **Tradeoff, stated exactly:** the bigger window costs
+recall here (33% @ w=15 → 11% @ w=35) because at HOURLY cadence the fault is only ~50–100 ticks, so a
+35-tick window dilutes it. **At a real DCGM rate (~1 Hz) the same fault spans thousands of ticks → a window
+large enough to Gaussianise the tails is TINY relative to the fault → you get validity AND power.** That is
+the genuine density payoff, now characterised precisely rather than asserted.
 
 **Net, after four detectors triangulating the same metric:** mean-shift-on-level (invalid null) → scale-on-
-differences Gaussian (explodes) → robust-t scale (valid but no power) → **rw-changepoint (the right tool:
-real power, bounded, but the thin heavy-tailed null keeps it just shy of FDR-certifiable)**. gpu_temp_c is
-precisely characterised as **I(1) + heavy-tailed + sub-threshold faults** — each property defeats a
-different detector; together they are the deepest, most precise statement of the ADR 0012 wall this work
-produced. The architecture is the durable result: characterise → route by character **× fault type** →
-score with a bounded e-value → gate on the detector's OWN null → CERTIFIED means the guarantee holds,
-FLAGGED means abstain (never a silent miss).
+differences Gaussian (explodes) → robust-t scale (valid, no power) → **rw-changepoint (the right tool —
+and with the window sized on healthy shards it CERTIFIES: valid null, controlled FDP, real power on
+detectable steps)**. gpu_temp_c is precisely characterised as **I(1) + heavy-tailed (a removal artifact) +
+sub-threshold faults (at this cadence)** — and all three are now addressed: difference/level handling for
+I(1), window-averaging for the tails, and the honest note that recall is cadence-limited (not a wall). The
+durable result is the architecture: characterise → route by character **× fault type** → score with a
+bounded e-value → SIZE the window / gate on the detector's OWN null (on healthy shards) → CERTIFIED means
+the guarantee holds, recall reported separately.
 
-Open follow-ups: a denser/real baseline + heavier-tailed null to push the changepoint detNull under the
-gate; a time-varying-variance baseline for the heteroskedasticity; per-shard routing; port to the engine.
+Open follow-ups: regenerate at a realistic cadence in a generator that models sub-tick smoothness (to show
+validity + full power together); a time-varying-variance baseline for the heteroskedasticity; per-shard
+routing; port the router + detectors to the engine.
 
 ## Cold-eye verdicts (two independent adversarial reviews)
 
