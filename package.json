@@ -45,6 +45,8 @@
     "lifecycle": "node tools/lifecycle-monitor.js",
     "precapstone": "tsc -p tsconfig.test.json",
     "capstone": "node tools/fleet-relative-capstone.js",
+    "preinstrumented-capstone": "tsc -p tsconfig.test.json",
+    "instrumented-capstone": "node tools/instrumented-capstone.js",
     "preevalue": "tsc -p tsconfig.test.json",
     "evalue": "node tools/nuisance-robust-evalue.js",
     "prebf-lifecycle": "tsc -p tsconfig.test.json",
