@@ -98,6 +98,41 @@ test on the committed mini bundle in `test/clustersynth-edetector.test.ts`.
   more valuable result than the synthetic 90%: the three tools compose to a coherent, self-explaining
   picture on genuine clustersynth telemetry.
 
+## Calibration regime — these prototypes use a SHORT in-window prefix, NOT a long baseline (KNOWN GAP)
+
+Every prototype here calibrates its null from a SHORT in-window prefix — `calLen = floor(0.1·T)` ≈ 25–30
+ticks (the e-detector's `cal` window, the e-process scale σ̂, the diagnostic's reference). It is **NOT**
+a 6-week+ baseline built by seeing weeks of healthy data and trimming large anomalies. The synthetic and
+clustersynth bundles are themselves short (T ≤ 768 ticks), so no long history is even present in them.
+
+**This understates how clean the null can be, and partly explains the real-bundle cap.** On a long
+HEALTHY clustersynth window (T=512), lengthening the calibration transforms the residual:
+
+| calLen | residual median \|ρ₁\| | markov-plausible (healthy shards) |
+|---|---|---|
+| 25 (short, what the prototypes use) | ≈0.10–0.22 | **15–40%** |
+| 100 | ≈0.04 | ≈74–79% |
+| 300 ("weeks") | ≈0.03 | **≈94%** |
+
+So a longer baseline lets the instrumented common-mode estimate the per-shard loadings far better → the
+residual becomes conditionally white (the Assumption-3.1 null) → the UI increments become valid and
+powerful. The "Wall A caps the e-detector at 1–2/4" result above is therefore **partly a
+short-calibration artifact**, not purely the validity wall. (On a longer faulted bundle, calLen 25→70
+dropped residual \|ρ₁\| from ≈0.27 to ≈0.06.)
+
+**The correct design is the engine's existing baseline kit** — `compile-baseline.ts` (per-shard
+seasonal + multivariate baseline; ADR 0019) + contamination-robust trimming (Tukey, ADR 0015 — the "toss
+large anomalies to get an accurate healthy null" step). The detector's calibration should be that
+weeks-long, anomaly-trimmed baseline, NOT a short prefix; the prototypes' `calLen` is exactly the seam
+where it plugs in. **Follow-up (high priority): wire the compiled long baseline as the e-detector /
+diagnostic calibration and re-measure transient recall** — expected to rise toward the favourable-
+synthetic regime on clustersynth.
+
+**Caveat (do not over-correct):** clustersynth's nonstationarity is *removable* common-mode (ADR 0016),
+so a long baseline approaches the oracle there. On REAL GWDG telemetry the within-window per-shard
+nonstationarity is *irreducible* (ADR 0012) — a long baseline helps but leaves a residual floor that no
+baseline removes. The per-alert guarantee still stays dead.
+
 ## Cold-eye verdicts (two independent adversarial reviews)
 
 - **`e-detector.ts` — SOUND.** No correctness bugs; window bounds verified end-to-end (0 UI throws
