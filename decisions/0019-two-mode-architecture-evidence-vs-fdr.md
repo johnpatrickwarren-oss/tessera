@@ -128,7 +128,13 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
 
 ## Follow-ups (flagged)
 
-- Implement `validity_class` as a code gate on the e-BH entry (mirror `tools/baseline-guard.ts`).
+- ~~Implement `validity_class` as a code gate on the e-BH entry (mirror `tools/baseline-guard.ts`).~~
+  **DONE (commit 4733e62):** `tools/emitter-contract.ts` — `EmitterContract`/`ValidityClass`,
+  `isFdrBearing`/`modeOf`, throwing `assertFdrEligible` (CS_ALLOW_UNVALIDATED=1 plumbing escape), gated
+  `fdrBenjaminiHochberg`, `routeEmitters`. `construction_valid` is FDR-bearing only while
+  `calibrationMonitorPassing===true` (pre-wires the runtime monitor below). `baseline-monitor` is wired
+  as `empirically_audited` → routed Mode A; the renderer no longer claims an FDR guarantee for it.
+  `test/emitter-contract.test.ts` (8) locks it; suite 709 pass.
 - ~~Promote the normalized convex-mixture increment to the default e-value in `baseline-monitor`~~ **DONE
   (commit 6cf8c10):** `tools/mixture-evalue.ts` (`normalizedMixtureEValue`) is now the object fed to fleet
   e-BH in both paths; the e-detector peak is kept only for the Mode-A recall metric. End-to-end the
