@@ -34,7 +34,28 @@ import { eDetector, terminalUiEValue, type EDetectorOptions } from './e-detector
 import { loadScenarioBundle, counterMatrices, ndjsonLines, ndjsonRange, type ScenarioBundle } from './clustersynth-scenario.js';
 import { assertLongBaseline } from './baseline-guard.js';
 import { normalizedMixtureEValue } from './mixture-evalue.js';
+import { type EmitterContract, modeOf, ineligibilityReason } from './emitter-contract.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
+
+/** The emitter contract for the baseline-monitor detector (ADR 0019). Its validity_class is
+ *  `empirically_audited`: the Wall-A whiteness diagnostic is an EMPIRICAL audit of the residual null,
+ *  NOT a construction proof — and ADR 0019 proved the per-shard temporal null is uncertifiable on
+ *  nonstationary GPU telemetry (time-varying drift; healthy mean(e) ~ 1e150 even certified). So this
+ *  emitter is Mode A: the e-BH selection is a RANKING with a MEASURED false-discovery proportion, NOT
+ *  an FDR-guaranteed Mode-B result. The validity-class gate (tools/emitter-contract.ts) enforces that
+ *  routing here, so the renderer can never silently regress to "every counter gets a guarantee". */
+export function baselineMonitorEmitter(): EmitterContract {
+  return {
+    id: 'baseline-monitor/wall-A-certified',
+    baselineVersion: 'robust-anomaly-trimmed-multifactor (≥2mo)',
+    conditioningVariables: ['measured common-mode factors', 'per-shard loadings'],
+    residualizer: 'baseline loadings + monitoring-cadence robust scale',
+    increment: 'normalized convex-mixture e-value (mixture-evalue.ts)',
+    stoppingAggregation: 'per-shard running-max → fleet e-BH (q=0.1)',
+    horizon: 'monitoring window',
+    validityClass: 'empirically_audited', // Wall-A audit, NOT construction_valid (ADR 0019 § Evidence)
+  };
+}
 
 /** Minimum baseline length we will accept, in ticks. At hourly cadence this is 60 days. */
 export const MIN_BASELINE_TICKS = 1440;
@@ -194,13 +215,19 @@ export function scoreCounterBaseline(mon: ScenarioBundle, counter: string, R: nu
 
 /** Shared renderer from per-counter results (used by both the in-memory and parallel paths). */
 function renderResults(healthyShards: number, healthyT: number, monT: number, monFaults: number, cl: number, results: BaselineMonitorResult[]): string {
+  const emitter = baselineMonitorEmitter();
+  const mode = modeOf(emitter); // 'A' — empirically_audited is NOT FDR-bearing (ADR 0019 validity gate)
   const L: string[] = [];
   L.push('═══ BASELINE-MONITOR — long (≥2-month) anomaly-trimmed baseline, then monitor ═══');
   L.push(`baseline: ${healthyShards} shards × T=${healthyT} ticks (healthy)  |  monitoring: T=${monT}, ${monFaults} faults, e-detector calLen=${cl}`);
+  L.push(`emitter: ${emitter.id}  validity_class=${emitter.validityClass}  →  MODE ${mode}` +
+    (mode === 'A' ? ` (evidence/ranking + abstain, NO FDR claim — ${ineligibilityReason(emitter)})` : ' (FDR-guaranteed)'));
   L.push('');
   L.push('The Wall-A diagnostic GATES the fleet: a counter is CERTIFIED only if its residual is broadly');
-  L.push('conditionally white (≥ 50% markov-plausible). e-BH earns its aggregate FDR guarantee on the');
-  L.push('certified set; flagged counters are abstained on (their null is not valid → no guarantee).');
+  L.push('conditionally white (≥ 50% markov-plausible); flagged counters are abstained on. The validity-');
+  L.push('class gate (ADR 0019) then decides what the e-BH selection on the certified set MEANS: a real');
+  L.push('FDR guarantee (Mode B) only for theorem/construction-valid emitters; otherwise a RANKING whose');
+  L.push('false-discovery proportion is MEASURED, not guaranteed (Mode A).');
   L.push('');
   L.push('counter          nFault  e-detector  terminal | residual |ρ₁|  markovPlausible | gate');
   let eT = 0, tT = 0, fT = 0, selOk = 0, fpOk = 0;
@@ -214,16 +241,23 @@ function renderResults(healthyShards: number, healthyT: number, monT: number, mo
   }
   L.push('');
   L.push(`TRANSIENT mean_shift recall (all counters): e-detector ${eT}/${fT}  vs  terminal ${tT}/${fT}`);
-  L.push(`AGGREGATE fleet FDP on the CERTIFIED set (e-BH q=0.1): ${selOk ? (fpOk / selOk).toFixed(3) : '0.000'}  (${fpOk} false of ${selOk} selected)`);
-  L.push('  — the guarantee is on this RATE across the whole selected set, NOT any individual alert (you');
-  L.push('    cannot label one alert false; FDR is the false-discovery proportion in aggregate, capped at q).');
+  const fdpLabel = mode === 'B'
+    ? `AGGREGATE fleet FDP on the CERTIFIED set (e-BH q=0.1, FDR-GUARANTEED)`
+    : `MEASURED fleet FDP on the CERTIFIED ranking (e-BH q=0.1, Mode A — NO guarantee)`;
+  L.push(`${fdpLabel}: ${selOk ? (fpOk / selOk).toFixed(3) : '0.000'}  (${fpOk} false of ${selOk} selected)`);
+  L.push('  — FDR is a property of the RATE across the whole selected set, NOT any individual alert (you');
+  L.push('    cannot label one alert false; it is the false-discovery proportion in aggregate, capped at q).');
   if (flagged.length) L.push(`FLAGGED / abstained (diagnostic says null invalid): ${flagged.join(', ')}`);
   L.push('');
   L.push('READING: with the long anomaly-trimmed baseline the residual is far whiter than the short-prefix');
-  L.push('regime. On the CERTIFIED counters the residual is white, the e-detector recovers transient recall,');
-  L.push('and the aggregate FDP is ≈0 — the FDR guarantee holds in aggregate. The FLAGGED counter has');
-  L.push('IRREDUCIBLE per-shard nonstationarity (the ADR 0012 wall, typically temperature — near unit-root);');
-  L.push('the Wall-A diagnostic correctly abstains rather than emit an uncontrolled FDR.');
+  L.push('regime. On the CERTIFIED counters the residual is white and the e-detector recovers transient');
+  L.push('recall. But this emitter is empirically_audited, NOT construction_valid: ADR 0019 proved the');
+  L.push('per-shard TEMPORAL null is uncertifiable on nonstationary telemetry (time-varying drift), so the');
+  L.push('validity-class gate routes it to MODE A — the e-BH selection is a RANKING and the FDP above is');
+  L.push('MEASURED, not guaranteed. A real fleet FDR guarantee needs Mode B: a theorem/construction-valid');
+  L.push('emitter with a live calibration monitor, or a SPATIAL null (concurrent control). The FLAGGED');
+  L.push('counter has IRREDUCIBLE per-shard nonstationarity (the ADR 0012 wall, typically temperature —');
+  L.push('near unit-root); the Wall-A diagnostic correctly abstains.');
   return L.join('\n');
 }
 
