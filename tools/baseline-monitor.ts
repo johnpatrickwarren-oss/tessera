@@ -33,6 +33,7 @@ import { autocorr, conditionalMarkovDiagnostic } from './conditional-markov.js';
 import { eDetector, terminalUiEValue, type EDetectorOptions } from './e-detector.js';
 import { loadScenarioBundle, counterMatrices, ndjsonLines, ndjsonRange, type ScenarioBundle } from './clustersynth-scenario.js';
 import { assertLongBaseline } from './baseline-guard.js';
+import { supAdjuster } from './supfdr.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
 /** Minimum baseline length we will accept, in ticks. At hourly cadence this is 60 days. */
@@ -178,9 +179,11 @@ export function scoreCounterBaseline(mon: ScenarioBundle, counter: string, R: nu
     if (eDetector(R[i], opts).peak >= eThr) eHits++;
     if (terminalUiEValue(R[i], calLen) >= tThr) terminalHits++;
   }
-  // AGGREGATE FDR: run e-BH over the whole fleet's terminal-time e-detector peaks; FDP = false/selected.
+  // AGGREGATE SupFDR: the e-detector peak is a running-max e-process — NOT a valid e-value on its
+  // own (Ville bounds only its tail). Apply the √E−1 SupFDR adjuster (supfdr.ts) to make each a
+  // valid all-times e-value, THEN e-BH → SupFDR ≤ q under arbitrary cross-shard dependence.
   const peaks = R.map((r) => eDetector(r, opts).peak);
-  const sel = eBenjaminiHochberg(peaks, 0.1).selected;
+  const sel = eBenjaminiHochberg(peaks.map(supAdjuster), 0.1).selected;
   let falsePos = 0;
   for (const i of sel) if (!faultIdx.has(i)) falsePos++;
   return {
@@ -360,7 +363,8 @@ function reduceCounter(counter: string, m: Map<string, BmRecord>, monShardIds: s
   let eHits = 0, terminalHits = 0;
   for (const i of faultIdx) { const s = monShardIds[i]; if (peak(s) >= eThr) eHits++; if (term(s) >= tThr) terminalHits++; }
   const plaus = healthyIds.filter((s) => m.get(s)?.markov).length;
-  const sel = eBenjaminiHochberg(monShardIds.map(peak), 0.1).selected;
+  // SupFDR adjuster (√E−1) on the running-max peaks → valid all-times e-values → e-BH SupFDR ≤ q.
+  const sel = eBenjaminiHochberg(monShardIds.map(peak).map(supAdjuster), 0.1).selected;
   let falsePos = 0; for (const i of sel) if (!faultIdx.has(i)) falsePos++;
   return {
     counter, nFault: faultIdx.size, eHits, terminalHits,
