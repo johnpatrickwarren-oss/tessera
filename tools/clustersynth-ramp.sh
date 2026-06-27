@@ -76,6 +76,12 @@ log "=== RAMP START — baseline-monitor pipeline ==="
 log "baseline ${BASE_DAYS}d@${BASE_DT}s (${BASE_STEPS} ticks)  monitoring ${MON_DAYS}d@${MON_DT}s (${MON_STEPS} ticks)  counters='${COUNTERS:-all}'  workers=${WORKERS}  racks:${RACKS}"
 
 for R in $RACKS; do
+  # Resume: if this tier already has a logged analysis result (e.g. a prior run died to a
+  # reboot), skip it. Re-running the SAME command with the SAME OUTDIR continues the ramp.
+  if [ -f "$LOG" ] && grep -q "\[analysis\] R=$R in" "$LOG" 2>/dev/null; then
+    log "==== R=$R racks ($((72*R)) GPUs) — already complete, resuming past it ===="
+    continue
+  fi
   log "==== R=$R racks ($((72*R)) GPUs) ===="
   cat > "$OUTDIR/base-$R.json" <<JSON
 { "family":"gb200","pods":1,"racksPerPod":$R,"seed":$SEED,
