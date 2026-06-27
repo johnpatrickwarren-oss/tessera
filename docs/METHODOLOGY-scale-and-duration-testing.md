@@ -60,7 +60,7 @@ and the work fans out across `worker_threads`. Consequences for the resource mod
 | **RAM (analysis)** | factor series held in RAM × workers + a small per-shard working set | factor count is **sublinear** in racks (R=1→4, 8→9, 32→18, 64→26 series); each series is `T` doubles | rarely — flat ~3 GB single-core at 1,152 shards; with `W` workers ≈ `W × (#factors · T · 8 B)` |
 | **CPU (analysis)** | per-shard residualise + 4 detectors over `T` ticks | linear in shards | **usually the wall** — ~2.7 s/shard single-core; ÷ ~(workers, measured 5.3× at 9 workers on a 10-core box) |
 | **disk** | `counters.ndjson` | ~2.4 GB per rack at 2-month 1 Hz (1 counter) | sometimes |
-| **gen time** | `counterTicks` per shard×tick, single-threaded per process | linear in shards | ~2.3 s/shard; parallelise by running rack-tiers in separate processes |
+| **gen time** | `counterTicks` per shard×tick, single-threaded per process | linear in shards×counters | ~2.3 s/shard (×counters); split across cores with `CS_SHARD_RANGE` (below) |
 
 **Picking max racks for a given (cores, RAM, disk, time budget):**
 
@@ -76,7 +76,14 @@ and the work fans out across `worker_threads`. Consequences for the resource mod
    binding term**, so a faster/more-core machine raises the ceiling more than more RAM.
 
 **Default worker count** is `cores − 1` (override `CS_WORKERS=N`; `=1` for single-core,
-e.g. to reproduce a baseline number or debug).
+e.g. to reproduce a baseline number or debug). On a dedicated box, use all cores.
+
+**Generation is the long pole** (single-threaded per process, ~5× cost with all 5 DCGM
+counters). Split a tier's generation across cores with clustersynth's `CS_SHARD_RANGE=
+"start:count"`: run one process per core, one of them writing the shared sidecars and the
+rest with `CS_COUNTERS_ONLY=1`, then concatenate the `counters.ndjson` parts (order is
+irrelevant — the scorer maps by shard id). Output is byte-identical to a single-process
+gen. This is the difference between a ~10 h and a ~45 min R=64 5-counter generation.
 
 ---
 
