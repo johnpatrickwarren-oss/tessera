@@ -42,6 +42,18 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
 > **ALIVE**; the per-alert guarantee is **DEAD**; fleet-FDR is **EMPIRICAL not a theorem**;
 > localization is **achievable but bottlenecked by common-mode estimation**.
 
+> **ARCHITECTURE — ADR 0019 (2026-06-27), two modes.** Tessera ships **Mode A —
+> evidence/ranking + abstention (DEFAULT, NO FDR claim)** for continuous fleet observation, and
+> **Mode B — FDR-guaranteed (CONDITIONAL, narrow)** only for emitter contracts whose conditional
+> null is theorem/construction-valid over the horizon. Unit of validity = the **emitter contract**
+> (baseline+conditioning+residualizer+increment+stopping), carried as `validity_class`; only
+> `theorem_valid`/`construction_valid` enter e-BH (enforce in code like `baseline-guard`). **Mode B's
+> guarantee is a SPATIAL null (concurrent control: treatment/canary), not a certified temporal null** —
+> the temporal per-shard null is uncertifiable on nonstationary GPU telemetry (2026-06-27: time-varying
+> drift defeats finite-sample certification; `tools/emitter-prototype.ts` audit = NO-GO). Default
+> increment object = **normalized convex-mixture e-value** (raw Shiryaev–Roberts sum is E≈T, not an
+> e-value, so the SupFDR √E−1 adjuster can't rescue it). See `decisions/0019-*`.
+
 ---
 
 ## 2. Open questions (genuinely unsettled — fair game for new work)
