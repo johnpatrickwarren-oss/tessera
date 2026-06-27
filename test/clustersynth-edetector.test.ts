@@ -9,6 +9,10 @@ import * as path from 'node:path';
 import { loadScenarioBundle } from '../tools/clustersynth-scenario.js';
 import { scoreCounterEDetector, renderClustersynthEDetector } from '../tools/clustersynth-edetector.js';
 
+// Plumbing/wiring tests on a tiny committed fixture — NOT findings. Brand with the
+// short-window override so the baseline-guard does not (correctly) throw on the short fixture.
+process.env.CS_ALLOW_SHORT = '1';
+
 const MINI = path.join(__dirname, '_substrate', 'clustersynth-scenario-mini');
 
 test('clustersynth-edetector runs end-to-end on the mini bundle and the e-detector ≥ terminal', () => {

@@ -32,9 +32,29 @@ contain those cycles, so:
 
 So a snapshot tells you nothing about whether detection works on real telemetry — it
 only measures behaviour on an unrepresentative slice. **The minimum window is 60 days
-(5,184,000 ticks at 1 Hz).** `clustersynth-ramp.sh` enforces this and refuses a
-shorter window unless `FORCE=1` is set (use only for a plumbing smoke test, never to
-report a finding).
+(5,184,000 ticks at 1 Hz; 1,440 ticks hourly).**
+
+**This is ENFORCED IN CODE, not by convention.** `tools/baseline-guard.ts`
+(`assertLongBaseline`) is called by every e-betting entry point (the scenario scorer's
+`scoreCounter` / `scoreBundleStreaming` / `scoreBundleParallel`, `baseline-monitor`,
+`clustersynth-edetector`) and **throws** when the calibration/baseline spans
+< `MIN_BASELINE_DAYS` (56 d), computed cadence-agnostically as `ticks × dt_s / 86400`.
+The ONLY escape is `CS_ALLOW_SHORT=1`, which prints a loud "PLUMBING ONLY / INVALID FOR
+FINDINGS" banner — used solely by the tiny-fixture wiring tests, never to report a
+result. `clustersynth-ramp.sh` additionally refuses a short `DURATION_DAYS` (the
+`FORCE=1` escape is the same idea at the orchestration layer). `test/baseline-guard.test.ts`
+asserts the guard fires, so the enforcement cannot regress silently.
+
+### Canonical harness — use `baseline-monitor`, not the scenario scorer
+
+`tools/clustersynth-scenario.ts` (the scenario *scorer*) is **diagnostic-only**: it runs
+only the terminal mean-shift e-value, with no e-detector and no Wall-A gate, so it is
+underpowered on transients and runs mean-shift e-BH even on I(1) counters it should
+abstain on. **The production-faithful pipeline is `tools/baseline-monitor.ts`**: robust
+anomaly-trimmed long baseline → e-detector (transient power) → conditional-Markov gate
+(certify vs abstain; routes I(1)/drift counters to a trend detector) → e-BH. For the
+localization/enrichment view, add `tools/clustersynth-e2e.ts` (`localizeFaults`). Report
+findings from those, not from the bare scenario scorer.
 
 **Cadence vs duration.** The DCGM band is 1–30 s; 1 Hz is supported. A coarse run is
 statistically ≈ a downsampled fine run (clustersynth `REALISM-PLAN.md`), so a long

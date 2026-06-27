@@ -28,6 +28,7 @@
 import { autocorr, conditionalMarkovDiagnostic } from './conditional-markov.js';
 import { eDetector, terminalUiEValue, type EDetectorOptions } from './e-detector.js';
 import { loadScenarioBundle, counterMatrices, type ScenarioBundle } from './clustersynth-scenario.js';
+import { assertLongBaseline } from './baseline-guard.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
 /** Minimum baseline length we will accept, in ticks. At hourly cadence this is 60 days. */
@@ -101,9 +102,8 @@ function shardCols(factorSignals: number[][], membership: number[][], i: number)
 
 /** Fit a robust, anomaly-trimmed baseline per shard from the long HEALTHY bundle. */
 export function fitBaseline(healthy: ScenarioBundle, counter: string): ShardBaseline[] {
-  if (healthy.T < MIN_BASELINE_TICKS) {
-    process.stderr.write(`baseline-monitor: WARNING baseline is ${healthy.T} ticks < ${MIN_BASELINE_TICKS} (2 months hourly)\n`);
-  }
+  // HARD short-window guard: the healthy baseline must span ~2 months (cadence-agnostic).
+  assertLongBaseline(healthy.T, healthy.dt_s, 'baseline-monitor (healthy baseline)');
   const { X, factorSignals, membership } = counterMatrices(healthy, counter);
   return X.map((y, i) => robustFitShard(y, shardCols(factorSignals, membership, i)));
 }

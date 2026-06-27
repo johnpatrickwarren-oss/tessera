@@ -26,6 +26,7 @@
 import { conditionalMarkovDiagnostic, autocorr } from './conditional-markov.js';
 import { eDetector, terminalUiEValue, type EDetectorOptions } from './e-detector.js';
 import { loadScenarioBundle, counterMatrices, type ScenarioBundle } from './clustersynth-scenario.js';
+import { assertLongBaseline } from './baseline-guard.js';
 import { instrumentedCommonModeResiduals } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/instrumented-common-mode';
 
 function quantile(xs: number[], q: number): number {
@@ -103,6 +104,7 @@ export function scoreCounterEDetector(b: ScenarioBundle, counter: string, faultS
 export function renderClustersynthEDetector(dir: string, calLen?: number): string {
   const b = loadScenarioBundle(dir);
   const cl = calLen ?? Math.floor(0.1 * b.T);
+  assertLongBaseline(cl, b.dt_s, 'clustersynth-edetector');
   const opts: EDetectorOptions = { calLen: cl, onsetTarget: 16, evalTarget: 20, mixture: 'SR' };
   const groups = transientMeanShifts(b, cl);
 

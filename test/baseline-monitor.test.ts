@@ -9,6 +9,10 @@ import * as path from 'node:path';
 import { loadScenarioBundle } from '../tools/clustersynth-scenario.js';
 import { robustFitShard, fitBaseline, applyBaseline } from '../tools/baseline-monitor.js';
 
+// Plumbing/wiring tests on a tiny committed fixture — NOT findings. Brand with the
+// short-window override so the baseline-guard does not (correctly) throw on the short fixture.
+process.env.CS_ALLOW_SHORT = '1';
+
 const MINI = path.join(__dirname, '_substrate', 'clustersynth-scenario-mini');
 
 test('robustFitShard recovers loadings and trims an injected anomaly', () => {

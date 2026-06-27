@@ -75,10 +75,16 @@
 # This exists because we repeatedly re-derived settled findings; consult it first.
 #
 # ── BEFORE ANY SCALE / DURATION TEST (clustersynth scenario telemetry) ─────────
-# READ docs/METHODOLOGY-scale-and-duration-testing.md first. Two recurring traps it
-# enforces against: (1) WINDOW ≥ 2 MONTHS — never report numbers from a snapshot; the
-# nonstationarity is wall-clock-keyed, so a short window is unrepresentative, not a
-# result. (2) Ramp racks with a resource model (cores/RAM/disk/time), not by guessing.
-# Harness: tools/clustersynth-ramp.sh (enforces the 2-month minimum) +
-# tools/clustersynth-scenario.ts (streaming + multi-core; CS_WORKERS). Counter subset
-# at generation via CS_COUNTERS (clustersynth-side).
+# READ docs/METHODOLOGY-scale-and-duration-testing.md first.
+# (1) WINDOW ≥ 2 MONTHS — ENFORCED IN CODE. tools/baseline-guard.ts assertLongBaseline()
+#     is called by every e-betting entry point and THROWS below 56 days (ticks×dt_s/86400,
+#     cadence-agnostic). Short windows make e-betting invalid, period. The only escape is
+#     CS_ALLOW_SHORT=1 (plumbing smokes only; prints an INVALID-FOR-FINDINGS banner). Do
+#     NOT set it to make a real run pass. test/baseline-guard.test.ts locks this in.
+# (2) RIGHT HARNESS — the CANONICAL pipeline is tools/baseline-monitor.ts (robust long
+#     baseline → e-detector → Wall-A gate → e-BH; routes I(1) counters to a trend detector),
+#     plus tools/clustersynth-e2e.ts for localization. tools/clustersynth-scenario.ts is a
+#     DIAGNOSTIC scorer only (terminal mean-shift, no e-detector/gate) — underpowered; do
+#     not report findings from it.
+# (3) Ramp racks with a resource model (cores/RAM/disk/time): tools/clustersynth-ramp.sh.
+#     Counter subset + parallel generation: CS_COUNTERS / CS_SHARD_RANGE (clustersynth-side).

@@ -10,6 +10,10 @@ import { loadScenarioBundle } from '../tools/clustersynth-scenario.js';
 import { fitBaseline } from '../tools/baseline-monitor.js';
 import { integrationOrder, routeCounter, renderMetricRouter } from '../tools/metric-router.js';
 
+// Plumbing/wiring tests on a tiny committed fixture — NOT findings. Brand with the
+// short-window override so the baseline-guard does not (correctly) throw on the short fixture.
+process.env.CS_ALLOW_SHORT = '1';
+
 const MINI = path.join(__dirname, '_substrate', 'clustersynth-scenario-mini');
 
 test('integrationOrder classifies a random walk as integrated and white noise as stationary', () => {

@@ -19,6 +19,10 @@ import {
   scoreCounter,
 } from '../tools/clustersynth-scenario';
 
+// Plumbing/wiring tests on a tiny committed fixture — NOT findings. The short-window guard
+// (tools/baseline-guard.ts) would otherwise (correctly) throw; brand these as plumbing.
+process.env.CS_ALLOW_SHORT = '1';
+
 const DIR = join(__dirname, '_substrate', 'clustersynth-scenario-mini');
 const skip = !existsSync(join(DIR, 'factors.json')) && 'mini scenario fixture missing';
 

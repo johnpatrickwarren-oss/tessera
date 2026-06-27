@@ -34,6 +34,7 @@ import { distributionalSignature } from '@johnpatrickwarren-oss/deploysignal-eng
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 import { eBHConditionalCalibration } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh-conditional-calibration';
 import { gaussianLrEValue, gaussianLrNullSurvival } from './gaussian-lr-evalue.js';
+import { assertLongBaseline } from './baseline-guard.js';
 
 export type FaultType = 'mean_shift' | 'drift' | 'variance_collapse' | 'detachment';
 export type FaultLevel = 'gpu' | 'cdu' | 'pod';
@@ -47,6 +48,8 @@ interface FaultLabel {
 
 export interface ScenarioBundle {
   T: number;
+  /** Cadence (seconds per tick) — needed by the short-window guard to compute baseline days. */
+  dt_s: number;
   shardIds: string[];
   counters: CounterSpec[];
   factors: Record<string, FactorEntry>;
@@ -99,6 +102,7 @@ export function loadScenarioBundle(dir: string, counterFilter?: ReadonlySet<stri
   }
   return {
     T: factorsDoc.T,
+    dt_s: factorsDoc.dt_s ?? 1,
     shardIds: [...shardSet].sort(),
     counters: factorsDoc.counters,
     factors: factorsDoc.factors,
@@ -215,6 +219,7 @@ function signatureHealthyFP(b: ScenarioBundle, counterName: string, calLen: numb
 
 /** Run the instrumented pipeline + the detectors on one counter and score by fault type. */
 export function scoreCounter(b: ScenarioBundle, counterName: string, calLen: number, q: number): CounterScore {
+  assertLongBaseline(calLen, b.dt_s, `scoreCounter(${counterName})`);
   const { X, factorSignals, membership } = counterMatrices(b, counterName);
   const R = instrumentedCommonModeResiduals(X, calLen, factorSignals, membership);
   const cal = { start: 0, len: calLen };
@@ -398,7 +403,7 @@ function scoreFromAcc(
   dir: string, T: number, shardIds: string[], counters: CounterSpec[], faults: FaultLabel[],
   cl: number, q: number, acc: Acc[], bfValid: boolean,
 ): { meta: ReportMeta; scores: CounterScore[] } {
-  const b: ScenarioBundle = { T, shardIds, counters, factors: {}, membership: {}, faults, series: new Map() };
+  const b: ScenarioBundle = { T, dt_s: 1, shardIds, counters, factors: {}, membership: {}, faults, series: new Map() };
   const survival = gaussianLrNullSurvival();
   const scores: CounterScore[] = counters.map((c, ci) => {
     const a = acc[ci];
@@ -427,6 +432,7 @@ export function scoreBundleStreaming(dir: string, q = 0.05, calLen?: number): { 
   const shardIndex = new Map(shardIds.map((s, i) => [s, i] as const));
   const T = fmeta.T;
   const cl = calLen ?? Math.floor(0.1 * T);
+  assertLongBaseline(cl, fmeta.dt_s ?? 1, 'scoreBundleStreaming');
   const cal = { start: 0, len: cl };
   const test = { start: cl, len: T - cl };
   const bfValid = cl >= MIN_CALIBRATION_FOR_VALIDITY;
@@ -523,6 +529,7 @@ export async function scoreBundleParallel(dir: string, q = 0.05, calLen: number 
   const shardIndex = new Map(shardIds.map((s, i) => [s, i] as const));
   const T = fmeta.T;
   const cl = calLen ?? Math.floor(0.1 * T);
+  assertLongBaseline(cl, fmeta.dt_s ?? 1, 'scoreBundleParallel');
   const bfValid = cl >= MIN_CALIBRATION_FOR_VALIDITY;
   const counters = fmeta.counters;
   const counterIndex = new Map(counters.map((c, i) => [c.name, i] as const));
@@ -568,6 +575,9 @@ if (!isMainThread && (workerData as Partial<WorkerInput> | undefined)?.__cs_work
   if (!dir) { process.stderr.write('usage: node tools/clustersynth-scenario.js <bundle-dir> [q] [calLen]\n  env: CS_WORKERS=N (parallel, default cores-1; 1=single-core), CS_INMEMORY=1 (legacy)\n'); process.exit(2); }
   const q = process.argv[3] ? Number(process.argv[3]) : 0.05;
   const calLen = process.argv[4] ? Number(process.argv[4]) : undefined;
+  process.stderr.write(
+    '\nNOTE: this is the DIAGNOSTIC scorer (terminal mean-shift only — no e-detector, no Wall-A gate).\n' +
+    'For findings use the production pipeline: tools/baseline-monitor.ts (+ clustersynth-e2e for localization).\n\n');
   (async () => {
     if (process.env.CS_INMEMORY === '1') { process.stdout.write(renderScenario(dir, q) + '\n'); return; }
     const nWorkers = defaultWorkers();
