@@ -76,9 +76,9 @@ log "=== RAMP START — baseline-monitor pipeline ==="
 log "baseline ${BASE_DAYS}d@${BASE_DT}s (${BASE_STEPS} ticks)  monitoring ${MON_DAYS}d@${MON_DT}s (${MON_STEPS} ticks)  counters='${COUNTERS:-all}'  workers=${WORKERS}  racks:${RACKS}"
 
 for R in $RACKS; do
-  # Resume: if this tier already has a logged analysis result (e.g. a prior run died to a
-  # reboot), skip it. Re-running the SAME command with the SAME OUTDIR continues the ramp.
-  if [ -f "$LOG" ] && grep -q "\[analysis\] R=$R in" "$LOG" 2>/dev/null; then
+  # Resume: a completed tier drops a marker (survives bundle deletion + reboot). Re-running
+  # the SAME command with the SAME OUTDIR skips finished tiers and continues the ramp.
+  if [ -f "$OUTDIR/.done-$R" ]; then
     log "==== R=$R racks ($((72*R)) GPUs) — already complete, resuming past it ===="
     continue
   fi
@@ -103,6 +103,7 @@ JSON
   CS_WORKERS="$WORKERS" node "$HERE/tools/baseline-monitor.js" "$OUTDIR/base-$R" "$OUTDIR/mon-$R" 2>>"$OUTDIR/ana.err" \
     | grep -E "baseline:|^  (gpu_temp_c|power_w|sm_util|hbm_bw_gbps|nvlink_tx_gbps) |TRANSIENT|AGGREGATE|FLAGGED" | tee -a "$LOG"
   log "  analysed in $((SECONDS-t1))s"
+  touch "$OUTDIR/.done-$R"   # resume marker (survives bundle deletion + reboot)
   [ "$KEEP" = "1" ] || rm -rf "$OUTDIR/base-$R" "$OUTDIR/mon-$R"
 done
 log "=== RAMP DONE ==="
