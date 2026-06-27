@@ -139,7 +139,16 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
   (commit 6cf8c10):** `tools/mixture-evalue.ts` (`normalizedMixtureEValue`) is now the object fed to fleet
   e-BH in both paths; the e-detector peak is kept only for the Mode-A recall metric. End-to-end the
   selections drop from ~576/counter (raw SR) to ~50 total; the residual-ceiling FDP remains (N1/O5).
-- Runtime calibration monitor (anytime-valid; `Farran 2026`) to make `validity_class` revocable.
+- ~~Runtime calibration monitor (anytime-valid; `Farran 2026`) to make `validity_class` revocable.~~
+  **DONE (commit pending):** `tools/calibration-monitor.ts` — an anytime-valid calibration test
+  martingale W_t = ∏ g(r_s) over a believed-null reference stream; Ville: P(sup W ≥ 1/α | H0) ≤ α. Crosses
+  1/α_cal ⇒ revoke (sticky), setting `calibrationMonitorPassing=false`, which the gate consumes to demote
+  the emitter B→A. `applyCalibrationMonitor(contract, referenceNullResiduals)` binds it to the contract.
+  Sound vs the prefix-audit NO-GO: that tried to CERTIFY THE FUTURE (failed on time-varying drift); this
+  REVOKES THE PRESENT (anytime-valid, runs forever at a controlled false-revocation rate). Scope named:
+  tests MARGINAL calibration (the binding mean/scale failure), weak against pure serial dependence
+  (the harder O5 frontier). `test/calibration-monitor.test.ts` (7) — null stays Mode B, drift demotes
+  B→A. Live wiring lands with the Mode-B harness below (it feeds the control cohort to the monitor).
 - Mode B comparative/concurrent-control evaluation (treatment vs control, canary vs fleet) — the spatial
   null is the achievable guarantee; build the harness for it.
 - `tools/emitter-prototype.ts` retained as the research artifact behind this ADR (prototype; not pipeline).
