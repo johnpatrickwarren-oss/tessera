@@ -75,14 +75,31 @@ export function clustersynthModeBEmitter(calibrationMonitorPassing: boolean): Em
   };
 }
 
-/** gpu mean_shift faulted treatment shards on a counter (the scored fault type, as in baseline-monitor). */
+/** The ANOMALOUS treatment shards for a counter — the FDR positive set for the per-shard spatial null.
+ *  Mode B detects PER-SHARD (gpu-level) anomalies: a fault applied to one treatment shard but NOT its
+ *  control twin, so it survives the contrast. CDU/POD faults are SHARED-INFRA / COMMON-MODE events
+ *  (faults.ts: "a shared-infra fault IS a factor perturbation") — the concurrent control loads on the
+ *  same factor, so the contrast CANCELS them BY DESIGN. That is the point of a spatial null, not a miss:
+ *  fleet-wide events are out of scope for a per-shard detector (a fleet-level monitor owns them). So the
+ *  positive set is the gpu-level faults that actually perturb THIS counter (its own counter, or
+ *  counter=null = all counters). A pure variance_collapse (no mean change) may evade the mean-shift
+ *  e-value → it only lowers recall, never inflating FDP. */
 function faultedSet(mon: ScenarioBundle, counter: string): Set<string> {
+  const load = (mon.counters.find((c) => c.name === counter) as { load?: Record<string, number> } | undefined)?.load ?? {};
   const out = new Set<string>();
   for (const f of mon.faults) {
-    if (f.level !== 'gpu' || (f as { type?: string }).type !== 'mean_shift') continue;
-    const fc = (f as { counter?: string | null }).counter;
-    if (!(fc === counter || fc === null || fc === undefined)) continue;
-    for (const s of (f as { affected_shards?: string[] }).affected_shards ?? []) out.add(s);
+    const ff = f as { level?: string; type?: string; counter?: string | null; detach_factor?: string | null; affected_shards?: string[] };
+    if (ff.level !== 'gpu') continue; // per-shard only; common-mode (cdu/pod) is cancelled by design
+    let hits: boolean;
+    if (ff.type === 'detachment') {
+      // detachment drops a FACTOR KIND for the shard (counter-agnostic) → it perturbs every counter that
+      // LOADS on that factor, regardless of the label's `counter` field. Credit those.
+      hits = ff.detach_factor != null && (load[ff.detach_factor] ?? 0) !== 0;
+    } else {
+      // mean_shift / drift / variance_collapse apply to the labeled counter (or all when counter=null).
+      hits = ff.counter === counter || ff.counter === null || ff.counter === undefined;
+    }
+    if (hits) for (const s of ff.affected_shards ?? []) out.add(s);
   }
   return out;
 }

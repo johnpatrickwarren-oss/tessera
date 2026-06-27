@@ -83,12 +83,15 @@ for R in $RACKS; do
   "window":{"steps":$BASE_STEPS,"dt_s":$DT},
   "nonstationarity":["thermal","diurnal","regime"], "faults": false }
 JSON
+  # PER-SHARD faults only (gpu level): the spatial null detects idiosyncratic per-shard anomalies, and
+  # CANCELS common-mode (cdu/pod) events by design — so injecting cdu/pod faults would have the contrast
+  # correctly ignore them (cool-loaded counters aside) and is out of scope here. Mean-affecting types.
   cat > "$OUTDIR/mon-$R.json" <<JSON
 { "family":"gb200","pods":1,"racksPerPod":$R,"seed":$SEED, "controlArm":true,
   "window":{"steps":$MON_STEPS,"dt_s":$DT},
   "nonstationarity":["thermal","diurnal","regime"],
-  "faults":{"rate":0.05,"sharedFaults":2,"levels":["gpu","cdu"],
-    "types":["mean_shift","drift","variance_collapse","detachment"]} }
+  "faults":{"rate":0.05,"sharedFaults":0,"levels":["gpu"],
+    "types":["mean_shift","drift","detachment"]} }
 JSON
   t0=$SECONDS
   gen_split base "$R" "$OUTDIR/base-$R.json"
