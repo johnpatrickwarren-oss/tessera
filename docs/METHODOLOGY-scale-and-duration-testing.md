@@ -47,7 +47,17 @@ temperature-only run cuts volume 5×).
 
 ## Rule 2 — ramp racks with a resource model, not by guessing.
 
-**Rack knob:** a rack is one NVL72 (72 GPU shards). In a scenario config,
+> **Convention: shard = GPU.** A "shard" is tessera's per-device *observation unit*
+> (from the DeploySignal engine); clustersynth maps it 1:1 to a single Blackwell GPU
+> (`gpu_shard`). So shard counts here ARE GPU counts the way NVIDIA counts them
+> (72 GPUs / NVL72 rack). Caveats when reporting externally: "shard" is **our** term,
+> not NVIDIA's (they count GPUs / Superchips / racks / SuperPODs); and in ML/distributed
+> usage "shard" usually means a *data or model-state partition* (FSDP/ZeRO), which is not
+> a 1:1 GPU unit. For an external audience, relabel shard → GPU or state this definition
+> up front. (Companion topology nodes — NIC, `cpu_shard`, `superchip`, `nvlink_switch`,
+> `psu`, `cooling_zone` — are NOT scored shards; only the 72 `gpu_shard`s per rack are.)
+
+**Rack knob:** a rack is one NVL72 (72 GPU shards = 72 GPUs). In a scenario config,
 `{"pods":1, "racksPerPod":R}` → `72·R` shards. (`pods:0` yields **zero** shards — do
 not use it.)
 
