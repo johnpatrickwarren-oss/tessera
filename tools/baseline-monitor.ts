@@ -33,7 +33,7 @@ import { autocorr, conditionalMarkovDiagnostic } from './conditional-markov.js';
 import { eDetector, terminalUiEValue, type EDetectorOptions } from './e-detector.js';
 import { loadScenarioBundle, counterMatrices, ndjsonLines, ndjsonRange, type ScenarioBundle } from './clustersynth-scenario.js';
 import { assertLongBaseline } from './baseline-guard.js';
-import { supAdjuster } from './supfdr.js';
+import { normalizedMixtureEValue } from './mixture-evalue.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
 /** Minimum baseline length we will accept, in ticks. At hourly cadence this is 60 days. */
@@ -179,11 +179,10 @@ export function scoreCounterBaseline(mon: ScenarioBundle, counter: string, R: nu
     if (eDetector(R[i], opts).peak >= eThr) eHits++;
     if (terminalUiEValue(R[i], calLen) >= tThr) terminalHits++;
   }
-  // AGGREGATE SupFDR: the e-detector peak is a running-max e-process — NOT a valid e-value on its
-  // own (Ville bounds only its tail). Apply the √E−1 SupFDR adjuster (supfdr.ts) to make each a
-  // valid all-times e-value, THEN e-BH → SupFDR ≤ q under arbitrary cross-shard dependence.
-  const peaks = R.map((r) => eDetector(r, opts).peak);
-  const sel = eBenjaminiHochberg(peaks.map(supAdjuster), 0.1).selected;
+  // AGGREGATE FDR (ADR 0019): feed e-BH the NORMALIZED CONVEX-MIXTURE e-value (a valid e-value,
+  // E≤1), NOT the raw Shiryaev–Roberts statistic (E≈T, not an e-value — the adjuster can't rescue
+  // it). The e-detector peak above is kept only for the Mode-A transient-recall metric.
+  const sel = eBenjaminiHochberg(R.map(normalizedMixtureEValue), 0.1).selected;
   let falsePos = 0;
   for (const i of sel) if (!faultIdx.has(i)) falsePos++;
   return {
@@ -253,7 +252,7 @@ export function renderBaselineMonitor(healthyDir: string, monDir: string, calLen
 interface MonMeta { T: number; dt_s?: number; counters: CounterSpec[]; membership: Record<string, Record<string, string>>; }
 interface CounterSpec { name: string; load: Record<string, number>; }
 interface FaultLabel { level: string; counter: string | null; type: string; affected_shards: string[] }
-interface BmRecord { c: string; s: string; peak: number; terminal: number; lag1: number; markov: boolean }
+interface BmRecord { c: string; s: string; peak: number; mixE: number; terminal: number; lag1: number; markov: boolean }
 interface BmWorkerInput { __bm_worker: true; monDir: string; byteStart: number; byteEnd: number; cl: number; fits: Record<string, Record<string, ShardBaseline>> }
 
 /** Load mon factor series (factors.ndjson; fallback to legacy factors.json `.factors`). */
@@ -289,7 +288,7 @@ function runBmWorker(input: BmWorkerInput): BmRecord[] {
     const scale = robustScale(e, prefix) || fit.scale;
     const resid = e.map((ev) => ev / scale);
     const zero = resid.map(() => 0);
-    out.push({ c: row.counter, s: row.shard, peak: eDetector(resid, opts).peak, terminal: terminalUiEValue(resid, cl), lag1: Math.abs(autocorr(resid, 1)), markov: conditionalMarkovDiagnostic(resid, zero).markovPlausible });
+    out.push({ c: row.counter, s: row.shard, peak: eDetector(resid, opts).peak, mixE: normalizedMixtureEValue(resid), terminal: terminalUiEValue(resid, cl), lag1: Math.abs(autocorr(resid, 1)), markov: conditionalMarkovDiagnostic(resid, zero).markovPlausible });
   }
   return out;
 }
@@ -363,8 +362,9 @@ function reduceCounter(counter: string, m: Map<string, BmRecord>, monShardIds: s
   let eHits = 0, terminalHits = 0;
   for (const i of faultIdx) { const s = monShardIds[i]; if (peak(s) >= eThr) eHits++; if (term(s) >= tThr) terminalHits++; }
   const plaus = healthyIds.filter((s) => m.get(s)?.markov).length;
-  // SupFDR adjuster (√E−1) on the running-max peaks → valid all-times e-values → e-BH SupFDR ≤ q.
-  const sel = eBenjaminiHochberg(monShardIds.map(peak).map(supAdjuster), 0.1).selected;
+  // FDR e-BH on the NORMALIZED CONVEX-MIXTURE e-value (ADR 0019), already a valid adjusted e-value.
+  const mixE = (s: string): number => m.get(s)?.mixE ?? 0;
+  const sel = eBenjaminiHochberg(monShardIds.map(mixE), 0.1).selected;
   let falsePos = 0; for (const i of sel) if (!faultIdx.has(i)) falsePos++;
   return {
     counter, nFault: faultIdx.size, eHits, terminalHits,
