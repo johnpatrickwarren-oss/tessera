@@ -136,6 +136,36 @@ pnpm build:demos        # regenerates demos/scenarios/*.json + demos/demo.html
 
 Idempotent: re-running produces byte-identical files. The 8 scenario JSON files double as audit-inspectable evidence of what the dashboard shows. Source: [`tools/build-canned-demos.ts`](./tools/build-canned-demos.ts).
 
+## Scale-and-duration testing
+
+Running tessera detection against clustersynth scenario telemetry at scale (many racks)
+or over a long window follows a fixed methodology — **read it before any such test**:
+[`docs/METHODOLOGY-scale-and-duration-testing.md`](./docs/METHODOLOGY-scale-and-duration-testing.md).
+Two rules it exists to enforce, because both mistakes keep recurring:
+
+- **Window ≥ 2 months, never a snapshot.** Tessera needs a ~2-month baseline, and the
+  nonstationarity is wall-clock-keyed (diurnal/weekly/regime). A short window measures
+  an unrepresentative slice, not whether detection works.
+- **Ramp racks with a resource model** (cores/RAM/disk/time), not by guessing. The
+  scenario scorer is streaming + multi-core, so RAM is rarely the wall — single-core
+  CPU time usually is.
+
+The harness:
+
+```bash
+# ramp racks at the 2-month 1Hz temperature window (auto cores-1 workers); enforces the
+# 2-month minimum. RACKS="1 4 8 16" or MAX_RACKS=64; see the doc for all env knobs.
+tools/clustersynth-ramp.sh
+
+# or run one bundle directly:
+node tools/clustersynth-scenario.js <bundle-dir> [q]   # CS_WORKERS=N (default cores-1; 1=single-core)
+```
+
+`tools/clustersynth-scenario.ts` streams `counters.ndjson`/`factors.ndjson` (no
+~512 MB single-string cap), scores one shard at a time (flat RAM), and fans the
+per-shard work across `worker_threads` (the e-BH FDR combine is central and cheap).
+Generation restricts to a counter subset via `CS_COUNTERS` (clustersynth-side).
+
 ## Methodology
 
 Tessera was developed using the [Anchor](https://github.com/johnpatrickwarren-oss/anchor) coordination methodology — a four-role pipeline (Architect → Implementer → Reviewer → Memorial-Updater) with cold-eye discipline, threshold-aware reinforcement accretion, and explicit ESCALATE patterns for spec/reality mismatches.

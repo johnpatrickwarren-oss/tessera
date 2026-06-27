@@ -73,3 +73,12 @@
 # recalibration, boosting-as-FDR-fix, per-alert guarantee, etc.) with pointers to
 # the engine ADRs (../deploysignal-engine/decisions/) and the e-value literature.
 # This exists because we repeatedly re-derived settled findings; consult it first.
+#
+# ── BEFORE ANY SCALE / DURATION TEST (clustersynth scenario telemetry) ─────────
+# READ docs/METHODOLOGY-scale-and-duration-testing.md first. Two recurring traps it
+# enforces against: (1) WINDOW ≥ 2 MONTHS — never report numbers from a snapshot; the
+# nonstationarity is wall-clock-keyed, so a short window is unrepresentative, not a
+# result. (2) Ramp racks with a resource model (cores/RAM/disk/time), not by guessing.
+# Harness: tools/clustersynth-ramp.sh (enforces the 2-month minimum) +
+# tools/clustersynth-scenario.ts (streaming + multi-core; CS_WORKERS). Counter subset
+# at generation via CS_COUNTERS (clustersynth-side).
