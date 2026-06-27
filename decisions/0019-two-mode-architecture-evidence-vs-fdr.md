@@ -129,8 +129,10 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
 ## Follow-ups (flagged)
 
 - Implement `validity_class` as a code gate on the e-BH entry (mirror `tools/baseline-guard.ts`).
-- Promote the normalized convex-mixture increment to the default e-value in `baseline-monitor` (currently
-  raw e-detector peak → SupFDR adjuster; the adjuster is correct only on a genuine e-process).
+- ~~Promote the normalized convex-mixture increment to the default e-value in `baseline-monitor`~~ **DONE
+  (commit 6cf8c10):** `tools/mixture-evalue.ts` (`normalizedMixtureEValue`) is now the object fed to fleet
+  e-BH in both paths; the e-detector peak is kept only for the Mode-A recall metric. End-to-end the
+  selections drop from ~576/counter (raw SR) to ~50 total; the residual-ceiling FDP remains (N1/O5).
 - Runtime calibration monitor (anytime-valid; `Farran 2026`) to make `validity_class` revocable.
 - Mode B comparative/concurrent-control evaluation (treatment vs control, canary vs fleet) — the spatial
   null is the achievable guarantee; build the harness for it.
