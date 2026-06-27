@@ -1,6 +1,6 @@
 # Handoff — ADR 0019 follow-ups (next session)
 
-**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `cffb7eb` (three ADR-0019 code follow-ups DONE; tree clean)
+**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `5b6df18` (3 code follow-ups + clustersynth control arm + 2-month scale validation DONE; tree clean)
 **Read first:** `decisions/0019-two-mode-architecture-evidence-vs-fdr.md`, then `RESEARCH-INDEX.md` (§1–2 + the
 ADR-0019 architecture note), then `docs/METHODOLOGY-scale-and-duration-testing.md`. Memory carries the
 condensed version (`project_adr0019_two_mode_architecture`, `feedback_two_month_baseline_and_harness`,
@@ -55,16 +55,36 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
    construction validity (whiteness covers the marginal monitor's serial-dependence blind spot — catch
    12%→76% on a broken integrated-drift control). `test/mode-b-control.test.ts` (3). Suite 719 pass.
 
-## REMAINING — productionization (the work for the new session)
-- **Clustersynth labeled control arm.** Add a fault-free CONTROL cohort to the clustersynth scenario harness
-  that shares the treatment's FACTOR INSTANCES (so the contrast cancels the common-mode exactly, as in the
-  synthetic harness). Then run `tools/mode-b-control.ts` semantics on real-topology scale (≥2-month baseline)
-  on the mac mini. The synthetic harness proves the statistics; this validates at fleet scale on the
-  canonical substrate. Separate repo `../clustersynth`, branch `scenario-counter-subset-streamed-factors`.
+## DONE — productionization (clustersynth control arm + 2-month scale validation)
+- **Clustersynth labeled control arm** (commit clustersynth `4e0797e`, branch
+  `scenario-counter-subset-streamed-factors`): `controlArm`/`CS_CONTROL_ARM=1` emits a matched control twin
+  per GPU (same factor instances + loadings, independent noise, never faulted); `control.json` pairs them.
+  The contrast cancels the common-mode bit-for-bit (gpu_temp_c var 254→0.56 at hourly). 90 CS tests pass.
+- **Tessera Mode-B pipeline** (commits `fddec22`, `5b6df18`): `tools/clustersynth-mode-b.ts` (model-free
+  contrast → whiten → standardize → mixture e-value → gate → e-BH; PER-SHARD calibration, NOT pooled) +
+  `tools/clustersynth-mode-b-ramp.sh` (control-arm gen + harness, resumable, ≥2-month guard). Mini fixture
+  `test/_substrate/clustersynth-mode-b-mini`; `test/clustersynth-mode-b.test.ts` (5). Suite 724 pass.
+- **2-MONTH SCALE VALIDATION (mac mini, real gb200, 60d hourly baseline + 60d monitoring):** spatial-null
+  contrast controls FDR with near-full recall to **2304 shards** — R=1/4/8/16 **FDP 0.000** (recall ≥0.99);
+  R=8 × 5 seeds **mean FDP 0.002**. All counters Mode B. Common-mode (cdu/pod) faults are cancelled BY
+  DESIGN (fleet-level events, out of a per-shard detector's scope). Mini T9 cleaned after the run.
+  SCORING NOTE (learned the hard way): the FDR positive set is gpu-level (per-shard) faults; detachment is
+  factor-wide so the scorer is detachment→loaded-counters aware (commit `5b6df18`).
+
+## REMAINING — lower priority
+- (scale) Mixed-cadence: hourly baseline + 1-min/1Hz monitoring. The contrast removes the near-unit-root
+  common-mode the temporal null could not, so 1 Hz should be TRACTABLE here (where baseline-monitor abstained).
+  Needs streaming/multi-core analysis in clustersynth-mode-b (the in-memory path is fine at hourly scale).
 - (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done:
   baseline-monitor's renderer now states Mode A / no-guarantee honestly.
 - (research) Strengthen the calibration monitor against serial dependence directly (the O5 frontier), to
-  retire the whiteness-check composition crutch — would lift the broken-construction catch past ~76%.
+  retire the whiteness-check composition crutch — would lift the synthetic broken-construction catch past ~76%.
+
+## Mac-mini re-sync note
+The mini's `~/concord/{tessera,clustersynth}` were rsync'd (tools/ + src/ + package.json) and rebuilt this
+session; they are AHEAD of their last git-synced point but NOT committed there. If you git-pull on the mini,
+reconcile. The 2-month hourly ramp ran in SECONDS (hourly is cheap) — only 1 Hz/mixed-cadence needs an
+overnight + the auto-reboot-resumable handling.
 
 ## Test infra (mac mini — persists; re-usable)
 - **Tailscale:** `ssh 100.84.57.58` (user `johnwarren`, key auth works). 14 cores, 64GB, macOS 15. Drive **T9**
@@ -84,7 +104,9 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
 ## File map (the load-bearing pieces)
 - `tools/emitter-contract.ts` — the validity_class gate (follow-up #1).
 - `tools/calibration-monitor.ts` — the anytime-valid runtime monitor (follow-up #2).
-- `tools/mode-b-control.ts` — the Mode B concurrent-control harness (follow-up #3).
+- `tools/mode-b-control.ts` — the Mode B concurrent-control harness, SYNTHETIC (follow-up #3).
+- `tools/clustersynth-mode-b.ts` — the Mode B pipeline on REAL clustersynth topology (productionization).
+- `tools/clustersynth-mode-b-ramp.sh` — the Mode B scale entry point (control-arm gen + harness, resumable).
 - `tools/mixture-evalue.ts` — default fleet-e-BH e-value object (ADR 0019).
 - `tools/baseline-monitor.ts` — canonical pipeline (streaming + multi-core; gate + e-detector + e-BH).
 - `tools/baseline-guard.ts` — 2-month enforcement.

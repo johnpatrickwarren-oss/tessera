@@ -165,8 +165,22 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
   rate from 12%→76%). `test/mode-b-control.test.ts` (3). **PRODUCTION follow-up:** a clustersynth
   scenario with a labeled fault-free CONTROL ARM sharing the same factor instances + a ≥2-month scale run
   on the mac mini — see the new follow-up below.
-- **NEW (productionization):** add a labeled control arm to clustersynth (a fault-free cohort sharing the
-  treatment's factor instances) and run `mode-b-control` semantics on real-topology scale on the mini.
-  The synthetic harness proves the statistics; this validates them at fleet scale on the canonical
-  substrate. Small clustersynth addition (separate repo, branch `scenario-counter-subset-streamed-factors`).
+- ~~**NEW (productionization):** add a labeled control arm to clustersynth ... and run `mode-b-control`
+  semantics on real-topology scale on the mini.~~ **DONE.**
+  - **clustersynth (commit 4e0797e):** `controlArm` / `CS_CONTROL_ARM=1` emits a matched control twin per
+    GPU — same factor instances + loadings, independent idiosyncratic noise, NEVER faulted; `control.json`
+    pairs treatment→control. The contrast cancels the common-mode bit-for-bit (model-free).
+  - **Tessera (commits fddec22, 5b6df18):** `tools/clustersynth-mode-b.ts` + `clustersynth-mode-b-ramp.sh`
+    consume the control arm: model-free contrast → whiten at idiosyncratic φ → baseline-standardize →
+    normalized-mixture e-value → gate (construction_valid + PER-SHARD calibration monitor + Wall-A
+    whiteness) → e-BH. Per-shard calibration (not pooled — pooling 100s×1000s of increments over-revokes).
+  - **2-MONTH SCALE VALIDATION (mac mini, real gb200 topology, 60d hourly baseline + 60d monitoring):**
+    the spatial-null contrast controls FDR with near-full recall up to **2304 shards (1152 treatment +
+    1152 control)** — R=1/4/8/16: **FDP 0.000**, recall 1.00/1.00/0.99/0.99; R=8 × 5 seeds: **mean FDP
+    0.002**, recall 0.98–1.00. All counters Mode B. The contrast cancels common-mode (cdu/pod) faults BY
+    DESIGN — those are fleet-level events out of a per-shard detector's scope. This is the achievable
+    guarantee from a SPATIAL null, validated at scale on the canonical substrate.
+  - **Remaining (lower):** mixed-cadence (hourly baseline + 1-min/1Hz monitoring) — the contrast should
+    make even 1 Hz tractable since it removes the near-unit-root common-mode the temporal null could not;
+    streaming/multi-core analysis if going to 1 Hz (the in-memory path is fine at hourly scale).
 - `tools/emitter-prototype.ts` retained as the research artifact behind this ADR (prototype; not pipeline).
