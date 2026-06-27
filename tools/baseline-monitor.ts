@@ -25,9 +25,13 @@
 // adds the seasonal per-(hour×day) baseline (compile-baseline.ts), and ADR 0012's irreducible per-shard
 // nonstationarity still leaves a floor no baseline removes. Tessera-original; NOT vendored.
 
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { Worker, isMainThread, workerData, parentPort } from 'node:worker_threads';
 import { autocorr, conditionalMarkovDiagnostic } from './conditional-markov.js';
 import { eDetector, terminalUiEValue, type EDetectorOptions } from './e-detector.js';
-import { loadScenarioBundle, counterMatrices, type ScenarioBundle } from './clustersynth-scenario.js';
+import { loadScenarioBundle, counterMatrices, ndjsonLines, ndjsonRange, type ScenarioBundle } from './clustersynth-scenario.js';
 import { assertLongBaseline } from './baseline-guard.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
@@ -108,13 +112,28 @@ export function fitBaseline(healthy: ScenarioBundle, counter: string): ShardBase
   return X.map((y, i) => robustFitShard(y, shardCols(factorSignals, membership, i)));
 }
 
-/** Residualise the MONITORING bundle against the baseline loadings + scale (standardised). */
+/** Robust scale (1.4826·MAD) of a slice, for cadence-correct standardisation. */
+function robustScale(xs: number[], len: number): number {
+  const a = xs.slice(0, Math.max(1, len));
+  const med = quantile(a, 0.5);
+  const mad = quantile(a.map((x) => Math.abs(x - med)), 0.5);
+  return 1.4826 * mad;
+}
+
+/** Residualise the MONITORING bundle against the baseline LOADINGS (structural, transfer across
+ *  cadence), then standardise by a robust scale estimated at the MONITORING cadence from the
+ *  bundle's HEALTHY pre-fault prefix (first 10% of T — the harness places onsets in [0.1T, 0.5T]).
+ *  This lets a coarse (hourly) 2-month baseline calibrate a fine (1Hz) monitoring window: the
+ *  loadings are cadence-independent, but the residual scale is NOT, so it must be re-estimated. */
 export function applyBaseline(mon: ScenarioBundle, counter: string, fits: ShardBaseline[]): number[][] {
   const { X, factorSignals, membership } = counterMatrices(mon, counter);
+  const prefix = Math.max(1, Math.floor(0.1 * mon.T)); // healthy, pre-onset
   return X.map((y, i) => {
     const cols = shardCols(factorSignals, membership, i);
     const f = fits[i];
-    return y.map((v, t) => (v - f.intercept - cols.reduce((s, c, j) => s + (f.loadings[j] ?? 0) * c[t], 0)) / f.scale);
+    const e = y.map((v, t) => v - f.intercept - cols.reduce((s, c, j) => s + (f.loadings[j] ?? 0) * c[t], 0));
+    const scale = robustScale(e, prefix) || f.scale; // monitoring-cadence scale; fall back to baseline
+    return e.map((ev) => ev / scale);
   });
 }
 
@@ -171,14 +190,11 @@ export function scoreCounterBaseline(mon: ScenarioBundle, counter: string, R: nu
   };
 }
 
-export function renderBaselineMonitor(healthyDir: string, monDir: string, calLen?: number): string {
-  const healthy = loadScenarioBundle(healthyDir);
-  const mon = loadScenarioBundle(monDir);
-  const cl = calLen ?? Math.min(30, Math.floor(0.15 * mon.T));
-  const opts: EDetectorOptions = { calLen: cl, onsetTarget: 16, evalTarget: 20, mixture: 'SR' };
+/** Shared renderer from per-counter results (used by both the in-memory and parallel paths). */
+function renderResults(healthyShards: number, healthyT: number, monT: number, monFaults: number, cl: number, results: BaselineMonitorResult[]): string {
   const L: string[] = [];
   L.push('═══ BASELINE-MONITOR — long (≥2-month) anomaly-trimmed baseline, then monitor ═══');
-  L.push(`baseline: ${healthy.shardIds.length} shards × T=${healthy.T} ticks (healthy)  |  monitoring: T=${mon.T}, ${mon.faults.length} faults, e-detector calLen=${cl}`);
+  L.push(`baseline: ${healthyShards} shards × T=${healthyT} ticks (healthy)  |  monitoring: T=${monT}, ${monFaults} faults, e-detector calLen=${cl}`);
   L.push('');
   L.push('The Wall-A diagnostic GATES the fleet: a counter is CERTIFIED only if its residual is broadly');
   L.push('conditionally white (≥ 50% markov-plausible). e-BH earns its aggregate FDR guarantee on the');
@@ -187,15 +203,12 @@ export function renderBaselineMonitor(healthyDir: string, monDir: string, calLen
   L.push('counter          nFault  e-detector  terminal | residual |ρ₁|  markovPlausible | gate');
   let eT = 0, tT = 0, fT = 0, selOk = 0, fpOk = 0;
   const flagged: string[] = [];
-  for (const counter of mon.counters.map((c) => c.name)) {
-    const fits = fitBaseline(healthy, counter);
-    if (fits.length !== mon.shardIds.length) { L.push(`  ${counter}: SKIP (topology mismatch baseline≠monitoring)`); continue; }
-    const r = scoreCounterBaseline(mon, counter, applyBaseline(mon, counter, fits), cl, opts);
+  for (const r of results) {
     if (r.nFault === 0) continue;
     const certified = r.markovPlausibleFrac >= 0.5;
     eT += r.eHits; tT += r.terminalHits; fT += r.nFault;
-    if (certified) { selOk += r.selected; fpOk += r.falsePos; } else flagged.push(counter);
-    L.push(`  ${counter.padEnd(14)} ${String(r.nFault).padStart(5)}  ${String(r.eHits).padStart(8)}/${r.nFault}  ${String(r.terminalHits).padStart(6)}/${r.nFault} | ${r.residMedianLag1.toFixed(3).padStart(11)}  ${(r.markovPlausibleFrac * 100).toFixed(0).padStart(13)}% | ${certified ? 'CERTIFIED' : 'FLAGGED (abstain)'}`);
+    if (certified) { selOk += r.selected; fpOk += r.falsePos; } else flagged.push(r.counter);
+    L.push(`  ${r.counter.padEnd(14)} ${String(r.nFault).padStart(5)}  ${String(r.eHits).padStart(8)}/${r.nFault}  ${String(r.terminalHits).padStart(6)}/${r.nFault} | ${r.residMedianLag1.toFixed(3).padStart(11)}  ${(r.markovPlausibleFrac * 100).toFixed(0).padStart(13)}% | ${certified ? 'CERTIFIED' : 'FLAGGED (abstain)'}`);
   }
   L.push('');
   L.push(`TRANSIENT mean_shift recall (all counters): e-detector ${eT}/${fT}  vs  terminal ${tT}/${fT}`);
@@ -205,21 +218,177 @@ export function renderBaselineMonitor(healthyDir: string, monDir: string, calLen
   if (flagged.length) L.push(`FLAGGED / abstained (diagnostic says null invalid): ${flagged.join(', ')}`);
   L.push('');
   L.push('READING: with the long anomaly-trimmed baseline the residual is far whiter than the short-prefix');
-  L.push('regime (clustersynth-edetector: |ρ₁|≈0.25, ~15% plausible). On the CERTIFIED counters the residual');
-  L.push('is white, the e-detector recovers transient recall, and the aggregate FDP is ≈0 — the FDR guarantee');
-  L.push('holds in aggregate. The FLAGGED counter has IRREDUCIBLE per-shard nonstationarity (ρ≈0.94 even');
-  L.push('in-sample — the ADR 0012 wall, on the temperature counter; no baseline removes it), and the Wall-A');
-  L.push('diagnostic correctly abstains rather than emit an uncontrolled FDR. This is the composition: the');
-  L.push('conditional-Markov diagnostic (A) decides which inputs earn the aggregate fleet guarantee (Fleet).');
+  L.push('regime. On the CERTIFIED counters the residual is white, the e-detector recovers transient recall,');
+  L.push('and the aggregate FDP is ≈0 — the FDR guarantee holds in aggregate. The FLAGGED counter has');
+  L.push('IRREDUCIBLE per-shard nonstationarity (the ADR 0012 wall, typically temperature — near unit-root);');
+  L.push('the Wall-A diagnostic correctly abstains rather than emit an uncontrolled FDR.');
   return L.join('\n');
 }
 
-if (require.main === module) {
+/** In-memory path (loads both bundles whole) — fine for small bundles / fixtures. */
+export function renderBaselineMonitor(healthyDir: string, monDir: string, calLen?: number): string {
+  const healthy = loadScenarioBundle(healthyDir);
+  const mon = loadScenarioBundle(monDir);
+  const cl = calLen ?? Math.min(30, Math.floor(0.15 * mon.T));
+  const opts: EDetectorOptions = { calLen: cl, onsetTarget: 16, evalTarget: 20, mixture: 'SR' };
+  const results: BaselineMonitorResult[] = [];
+  for (const counter of mon.counters.map((c) => c.name)) {
+    const fits = fitBaseline(healthy, counter);
+    if (fits.length !== mon.shardIds.length) continue; // topology mismatch
+    results.push(scoreCounterBaseline(mon, counter, applyBaseline(mon, counter, fits), cl, opts));
+  }
+  return renderResults(healthy.shardIds.length, healthy.T, mon.T, mon.faults.length, cl, results);
+}
+
+// ─── STREAMING + MULTI-CORE PATH (default; scales to long 1Hz monitoring at fleet size) ──────
+// Same scaling we use for the scenario scorer: the per-shard e-detector work is independent, so
+// we fan it across worker_threads by byte-range over the monitoring counters.ndjson, and stream
+// it (never load the whole monitoring bundle). The main thread fits the (small, hourly) baseline,
+// passes per-shard fits to workers, and reduces the per-shard scalars (thresholds, recall, e-BH,
+// gate) centrally. Default for the CLI; CS_WORKERS=1 forces the in-memory path.
+
+interface MonMeta { T: number; dt_s?: number; counters: CounterSpec[]; membership: Record<string, Record<string, string>>; }
+interface CounterSpec { name: string; load: Record<string, number>; }
+interface FaultLabel { level: string; counter: string | null; type: string; affected_shards: string[] }
+interface BmRecord { c: string; s: string; peak: number; terminal: number; lag1: number; markov: boolean }
+interface BmWorkerInput { __bm_worker: true; monDir: string; byteStart: number; byteEnd: number; cl: number; fits: Record<string, Record<string, ShardBaseline>> }
+
+/** Load mon factor series (factors.ndjson; fallback to legacy factors.json `.factors`). */
+function loadMonFactors(dir: string): Map<string, number[]> {
+  const m = new Map<string, number[]>();
+  const nd = path.join(dir, 'factors.ndjson');
+  if (fs.existsSync(nd)) {
+    for (const line of ndjsonLines(nd)) { const r = JSON.parse(line) as { id: string; v: number[] }; m.set(r.id, r.v); }
+  } else {
+    const doc = JSON.parse(fs.readFileSync(path.join(dir, 'factors.json'), 'utf8'));
+    for (const id of Object.keys(doc.factors ?? {})) m.set(id, doc.factors[id].series);
+  }
+  return m;
+}
+
+/** Worker: residualise + e-detector per shard over an assigned byte-range; return scalars. */
+function runBmWorker(input: BmWorkerInput): BmRecord[] {
+  const { monDir, byteStart, byteEnd, cl, fits } = input;
+  const meta = JSON.parse(fs.readFileSync(path.join(monDir, 'factors.json'), 'utf8')) as MonMeta;
+  const factors = loadMonFactors(monDir);
+  const opts: EDetectorOptions = { calLen: cl, onsetTarget: 16, evalTarget: 20, mixture: 'SR' };
+  const prefix = Math.max(1, Math.floor(0.1 * meta.T));
+  const kindsByCounter = new Map(meta.counters.map((c) => [c.name, Object.keys(c.load).filter((k) => c.load[k] !== 0)] as const));
+  const out: BmRecord[] = [];
+  for (const line of ndjsonRange(path.join(monDir, 'counters.ndjson'), byteStart, byteEnd)) {
+    const row = JSON.parse(line) as { shard: string; counter: string; v: number[] };
+    const kinds = kindsByCounter.get(row.counter);
+    const fit = fits[row.counter]?.[row.shard];
+    if (!kinds || !fit) continue;
+    const cols: number[][] = [];
+    for (const k of kinds) { const inst = meta.membership[row.shard]?.[k]; if (inst == null) continue; const ser = factors.get(inst); if (ser) cols.push(ser); }
+    const e = row.v.map((val, t) => val - fit.intercept - cols.reduce((s, c, j) => s + (fit.loadings[j] ?? 0) * c[t], 0));
+    const scale = robustScale(e, prefix) || fit.scale;
+    const resid = e.map((ev) => ev / scale);
+    const zero = resid.map(() => 0);
+    out.push({ c: row.counter, s: row.shard, peak: eDetector(resid, opts).peak, terminal: terminalUiEValue(resid, cl), lag1: Math.abs(autocorr(resid, 1)), markov: conditionalMarkovDiagnostic(resid, zero).markovPlausible });
+  }
+  return out;
+}
+
+/** gpu mean_shift faulted shard ids on a counter, from the labels doc. */
+function faultedFromLabels(faults: FaultLabel[], counter: string): Set<string> {
+  const out = new Set<string>();
+  for (const f of faults) {
+    if (f.level !== 'gpu' || f.type !== 'mean_shift') continue;
+    if (!(f.counter === counter || f.counter === null)) continue;
+    for (const s of f.affected_shards) out.add(s);
+  }
+  return out;
+}
+
+/** Streaming + multi-core baseline-monitor. */
+export async function renderBaselineMonitorParallel(healthyDir: string, monDir: string, calLen: number | undefined, nWorkers: number): Promise<string> {
+  const healthy = loadScenarioBundle(healthyDir); // small (hourly 2-month)
+  const meta = JSON.parse(fs.readFileSync(path.join(monDir, 'factors.json'), 'utf8')) as MonMeta;
+  const faults: FaultLabel[] = JSON.parse(fs.readFileSync(path.join(monDir, 'labels.json'), 'utf8')).faults;
+  const cl = calLen ?? Math.min(30, Math.floor(0.15 * meta.T));
+  const monShardIds = Object.keys(meta.membership).sort();
+
+  // Fit the baseline loadings per counter on the (small) healthy bundle; index by shard id.
+  const fits: Record<string, Record<string, ShardBaseline>> = {};
+  for (const counter of meta.counters.map((c) => c.name)) {
+    const f = fitBaseline(healthy, counter); // guards the >=2-month baseline
+    if (f.length !== healthy.shardIds.length) continue;
+    const byId: Record<string, ShardBaseline> = {};
+    healthy.shardIds.forEach((sid, i) => { byId[sid] = f[i]; });
+    fits[counter] = byId;
+  }
+
+  // Fan out across byte-ranges of the monitoring counters.ndjson.
+  const file = path.join(monDir, 'counters.ndjson');
+  const size = fs.statSync(file).size;
+  const ranges: Array<[number, number]> = [];
+  for (let i = 0; i < nWorkers; i++) ranges.push([Math.floor((i * size) / nWorkers), Math.floor(((i + 1) * size) / nWorkers)]);
+  const recs = (await Promise.all(ranges.map(([byteStart, byteEnd]) => new Promise<BmRecord[]>((resolve, reject) => {
+    const w = new Worker(__filename, { workerData: { __bm_worker: true, monDir, byteStart, byteEnd, cl, fits } as BmWorkerInput });
+    w.once('message', (m: BmRecord[]) => resolve(m));
+    w.once('error', reject);
+    w.once('exit', (code) => { if (code !== 0) reject(new Error(`bm worker exited ${code}`)); });
+  })))).flat();
+
+  // Reduce per counter → BaselineMonitorResult.
+  const byCounter = new Map<string, Map<string, BmRecord>>();
+  for (const r of recs) { let m = byCounter.get(r.c); if (!m) { m = new Map(); byCounter.set(r.c, m); } m.set(r.s, r); }
+  const results: BaselineMonitorResult[] = [];
+  for (const counter of meta.counters.map((c) => c.name)) {
+    const m = byCounter.get(counter);
+    if (m) results.push(reduceCounter(counter, m, monShardIds, faults));
+  }
+  return renderResults(healthy.shardIds.length, healthy.T, meta.T, faults.length, cl, results);
+}
+
+function bmQuantile(xs: number[], qq: number): number {
+  return xs.length ? xs.slice().sort((a, b) => a - b)[Math.min(xs.length - 1, Math.floor(qq * xs.length))] : NaN;
+}
+
+/** Reduce one counter's per-shard worker records into a BaselineMonitorResult (thresholds from
+ *  the healthy sample, recall over faults, e-BH FDP across the fleet, Wall-A gate). */
+function reduceCounter(counter: string, m: Map<string, BmRecord>, monShardIds: string[], faults: FaultLabel[]): BaselineMonitorResult {
+  const faulted = faultedFromLabels(faults, counter);
+  const faultIdx = new Set([...faulted].map((s) => monShardIds.indexOf(s)).filter((i) => i >= 0));
+  const healthyIds = monShardIds.filter((_, i) => !faultIdx.has(i)).filter((_, k) => k % 12 === 0).slice(0, 50);
+  const peak = (s: string): number => m.get(s)?.peak ?? 0;
+  const term = (s: string): number => m.get(s)?.terminal ?? 0;
+  const eThr = bmQuantile(healthyIds.map(peak), 0.95);
+  const tThr = bmQuantile(healthyIds.map(term), 0.95);
+  let eHits = 0, terminalHits = 0;
+  for (const i of faultIdx) { const s = monShardIds[i]; if (peak(s) >= eThr) eHits++; if (term(s) >= tThr) terminalHits++; }
+  const plaus = healthyIds.filter((s) => m.get(s)?.markov).length;
+  const sel = eBenjaminiHochberg(monShardIds.map(peak), 0.1).selected;
+  let falsePos = 0; for (const i of sel) if (!faultIdx.has(i)) falsePos++;
+  return {
+    counter, nFault: faultIdx.size, eHits, terminalHits,
+    residMedianLag1: bmQuantile(healthyIds.map((s) => m.get(s)?.lag1 ?? 0), 0.5),
+    markovPlausibleFrac: healthyIds.length ? plaus / healthyIds.length : NaN,
+    aggregateFdp: sel.length ? falsePos / sel.length : 0, selected: sel.length, falsePos,
+  };
+}
+
+/** Default worker count: all cores (dedicated boxes); override CS_WORKERS. */
+function defaultWorkers(): number {
+  if (process.env.CS_WORKERS) return Math.max(1, Number(process.env.CS_WORKERS) | 0);
+  return Math.max(1, os.availableParallelism?.() ?? os.cpus().length);
+}
+
+if (!isMainThread && (workerData as Partial<BmWorkerInput> | undefined)?.__bm_worker) {
+  try { parentPort!.postMessage(runBmWorker(workerData as BmWorkerInput)); }
+  catch (err) { parentPort!.postMessage([]); throw err; }
+} else if (require.main === module) {
   const [healthyDir, monDir] = [process.argv[2], process.argv[3]];
   if (!healthyDir || !monDir) {
-    process.stderr.write('usage: node tools/baseline-monitor.js <healthy-baseline-dir> <monitoring-dir> [calLen]\n');
+    process.stderr.write('usage: node tools/baseline-monitor.js <healthy-baseline-dir> <monitoring-dir> [calLen]\n  env: CS_WORKERS=N (default all cores; 1=in-memory single-thread)\n');
     process.exit(2);
   }
-  process.stdout.write(renderBaselineMonitor(healthyDir, monDir, process.argv[4] ? Number(process.argv[4]) : undefined) + '\n');
-  process.exit(0);
+  const calLen = process.argv[4] ? Number(process.argv[4]) : undefined;
+  const nWorkers = defaultWorkers();
+  (async () => {
+    if (nWorkers > 1) process.stdout.write(await renderBaselineMonitorParallel(healthyDir, monDir, calLen, nWorkers) + `\n(${nWorkers} worker threads)\n`);
+    else process.stdout.write(renderBaselineMonitor(healthyDir, monDir, calLen) + '\n');
+  })().then(() => process.exit(0)).catch((e) => { process.stderr.write(String(e?.stack ?? e) + '\n'); process.exit(1); });
 }

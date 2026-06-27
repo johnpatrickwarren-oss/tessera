@@ -62,7 +62,7 @@ export interface ScenarioBundle {
 /** Yield complete lines from a file via chunked reads — never materialises the whole file
  *  as one JS string, so it is immune to V8's ~512 MB max-string-length cap. This matters for
  *  long-duration high-cadence (1 Hz) bundles whose counters.ndjson runs to multiple GB. */
-function* ndjsonLines(filePath: string): Generator<string> {
+export function* ndjsonLines(filePath: string): Generator<string> {
   const fd = fs.openSync(filePath, 'r');
   try {
     const CHUNK = 1 << 22; // 4 MB
@@ -92,6 +92,18 @@ function* ndjsonLines(filePath: string): Generator<string> {
 export function loadScenarioBundle(dir: string, counterFilter?: ReadonlySet<string>): ScenarioBundle {
   const factorsDoc = JSON.parse(fs.readFileSync(path.join(dir, 'factors.json'), 'utf8'));
   const faults: FaultLabel[] = JSON.parse(fs.readFileSync(path.join(dir, 'labels.json'), 'utf8')).faults;
+  // Factor series: stream factors.ndjson (new format; factors.json is meta-only), else fall back
+  // to the legacy factors.json `.factors` field (old committed fixtures).
+  const factors: Record<string, FactorEntry> = {};
+  const ndFactors = path.join(dir, 'factors.ndjson');
+  if (fs.existsSync(ndFactors)) {
+    for (const line of ndjsonLines(ndFactors)) {
+      const row = JSON.parse(line) as { id: string; kind: string; v: number[] };
+      factors[row.id] = { kind: row.kind, series: row.v };
+    }
+  } else if (factorsDoc.factors) {
+    for (const id of Object.keys(factorsDoc.factors)) factors[id] = factorsDoc.factors[id];
+  }
   const series = new Map<string, number[]>();
   const shardSet = new Set<string>();
   for (const line of ndjsonLines(path.join(dir, 'counters.ndjson'))) {
@@ -105,7 +117,7 @@ export function loadScenarioBundle(dir: string, counterFilter?: ReadonlySet<stri
     dt_s: factorsDoc.dt_s ?? 1,
     shardIds: [...shardSet].sort(),
     counters: factorsDoc.counters,
-    factors: factorsDoc.factors,
+    factors,
     membership: factorsDoc.membership,
     faults,
     series,
@@ -469,7 +481,7 @@ interface WorkerRecord { c: string; s: string; ui: number; sig: boolean; bf: num
 interface WorkerInput { __cs_worker: true; dir: string; byteStart: number; byteEnd: number; cl: number; bfValid: boolean; }
 
 /** Yield lines whose START byte offset is in [byteStart, byteEnd). ASCII (offset == char). */
-function* ndjsonRange(filePath: string, byteStart: number, byteEnd: number): Generator<string> {
+export function* ndjsonRange(filePath: string, byteStart: number, byteEnd: number): Generator<string> {
   const fd = fs.openSync(filePath, 'r');
   try {
     const CHUNK = 1 << 22;

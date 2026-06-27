@@ -135,23 +135,32 @@ gen. This is the difference between a ~10 h and a ~45 min R=64 5-counter generat
 git -C .. clone https://github.com/johnpatrickwarren-oss/clustersynth.git || true
 ( cd ../clustersynth && pnpm install )
 
-# ramp racks at the 2-month 1 Hz temperature window, auto-using cores-1 workers
-#   RACKS="1 4 8 16 32"  explicit tiers, or  MAX_RACKS=64  for 1,2,4,...,64
+# The defaults ARE the correct pipeline — just run it. Per tier it generates a 60-day
+# HOURLY healthy baseline + a 14-day 1Hz monitoring window (same topology/seed), splits
+# generation across all cores (CS_SHARD_RANGE), and runs baseline-monitor in parallel.
+#   RACKS="1 4 8 16"  explicit tiers, or  MAX_RACKS=64  for 1,2,4,...,64
 tools/clustersynth-ramp.sh
 
-# knobs (env):
-#   RACKS="1 4 16"      tiers to run (default "1 4 8 16")
-#   DURATION_DAYS=60    window length; MIN 60 (snapshot guard); FORCE=1 to override
-#   COUNTERS=gpu_temp_c counter subset passed as CS_COUNTERS
-#   WORKERS=9           analysis worker threads (default cores-1)
-#   Q=0.05  SEED=1
+# knobs (env) — defaults shown:
+#   RACKS="1 4 8 16"           tiers (or MAX_RACKS=N → 1,2,4,...,N)
+#   BASE_DAYS=60  BASE_DT=3600 healthy baseline span/cadence (>=56d enforced; hourly)
+#   MON_DAYS=14   MON_DT=1     monitoring span/cadence (1Hz). MON_DT=60 → 1-min (cheaper).
+#   COUNTERS=                  CS_COUNTERS subset ('' = all 5 DCGM counters)
+#   WORKERS=<all cores>  SEED=1  Q=0.05
 #   CLUSTERSYNTH=../clustersynth   OUTDIR=<scratch>   KEEP=1 (don't delete bundles)
 ```
 
-The script enforces Rule 1, generates each tier (`CS_COUNTERS`), runs the parallel
-analysis (`CS_WORKERS`), and prints the scaling curve (shards, gen time, analysis
-time, peak RSS, and the per-counter finding). It deletes each bundle after analysis
-unless `KEEP=1` (a 2-month rack tier is ~2.4 GB/rack on disk).
+The script runs the **canonical pipeline by default**: `baseline-monitor` (not the
+diagnostic scorer), a real ≥2-month baseline (guard-enforced), a long monitoring window,
+all-core generation and analysis. It prints the per-counter gate/recall/FDP curve per tier
+and deletes each tier's bundles after analysis unless `KEEP=1`.
+
+**Cost note (the real wall is now CPU, not RAM):** the e-detector is ~O(monitoring ticks)
+per shard. At 1Hz a 14-day monitoring window is ~1.2M ticks/series ⇒ ~30s/shard-counter, so
+even fully parallel a tier is heavy (≈ shards·counters·30s ÷ cores). 1-min monitoring
+(`MON_DT=60`) is ~60× cheaper and, for *sustained* aberrations over weeks, statistically
+comparable (1Hz samples are autocorrelated/redundant; 1-min ≈ independent). Use 1Hz when
+sub-minute transients matter; otherwise 1-min buys far more racks at the same wall-clock.
 
 ### Known finding this methodology reproduces
 
