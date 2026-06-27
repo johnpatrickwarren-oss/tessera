@@ -3,10 +3,13 @@
 **Last updated:** 2026-06-27 · **by:** John Warren (with Claude)
 
 > **CURRENT FOCUS → see `HANDOFF-ADR0019.md`.** ADR 0019 (two-mode architecture: evidence/ranking default
-> vs FDR-guaranteed conditional) is decided + memorialized; the normalized-mixture e-value, the 2-month
-> guard, and the scaled/resumable ramp are shipped (branch `three-walls-prototypes`, `d7bd0f5`). Next session
-> picks up the three ADR-0019 follow-ups (validity_class code gate; runtime calibration monitor; Mode B
-> concurrent-control harness). Mac-mini test infra is set up and reusable — details in the handoff.
+> vs FDR-guaranteed conditional) is decided + memorialized. The three code-side follow-ups are now DONE on
+> branch `three-walls-prototypes`: (1) `validity_class` code gate `tools/emitter-contract.ts` (`4733e62`);
+> (2) runtime calibration monitor `tools/calibration-monitor.ts` (`e162b83`); (3) Mode B concurrent-control
+> harness `tools/mode-b-control.ts` (`cffb7eb`) — spatial null FDP 0.099 ≤ q where temporal = 0.28. Suite
+> 719 pass. **Remaining = productionization:** a clustersynth labeled control arm (fault-free cohort sharing
+> factor instances) + a ≥2-month scale run on the mac mini (reusable infra in the handoff). The normalized-
+> mixture e-value, the 2-month guard, and the scaled/resumable ramp were shipped earlier (`d7bd0f5`).
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the

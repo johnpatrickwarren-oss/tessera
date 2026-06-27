@@ -1,6 +1,6 @@
 # Handoff — ADR 0019 follow-ups (next session)
 
-**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `d7bd0f5` (all pushed; tree clean)
+**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `cffb7eb` (three ADR-0019 code follow-ups DONE; tree clean)
 **Read first:** `decisions/0019-two-mode-architecture-evidence-vs-fdr.md`, then `RESEARCH-INDEX.md` (§1–2 + the
 ADR-0019 architecture note), then `docs/METHODOLOGY-scale-and-duration-testing.md`. Memory carries the
 condensed version (`project_adr0019_two_mode_architecture`, `feedback_two_month_baseline_and_harness`,
@@ -39,19 +39,32 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
   time-varying, not in the prefix) → empirical certification can't deliver FDR. This is registry **N1** with a
   concrete mechanism; it's why `empirically_audited` must not be FDR-bearing.
 
-## NEXT — ADR 0019 follow-ups (the work for the new session)
-1. **`validity_class` code gate.** Make it impossible to feed e-BH a non-(theorem|construction)_valid emitter —
-   mirror `baseline-guard` (throw/exclude). Define the emitter-contract type + the gate; default to Mode A.
-2. **Runtime calibration monitor** (anytime-valid) so `construction_valid` is REVOCABLE — demote an emitter
-   Mode B→A when its conditional null assumptions break at runtime. Biblio lead: `Farran 2026 — Anytime-Valid
-   Calibration Monitoring` (RESEARCH-INDEX, pending). This is what makes the class honest, not a static stamp.
-3. **Mode B comparative / concurrent-control harness** — the achievable guarantee. Build the treatment-vs-control
-   (or canary-vs-fleet) path where the concurrent control IS the null (spatial, not temporal). This is where
-   FDR actually holds on nonstationary telemetry; it's the DeploySignal heritage. Likely a new
-   `tools/*` + a clustersynth scenario with a control arm.
-   - **Open design Q:** does clustersynth's scenario harness emit a labeled control arm? If not, that's a
-     small clustersynth addition (a fault-free cohort sharing the same common-mode factors).
-4. (lower) Update README/capstone claim language to the two-mode statement (ADR 0019 § Consequences).
+## DONE — the three code-side ADR 0019 follow-ups (this session, all committed; see decisions/0019 for detail)
+1. **`validity_class` code gate** — `tools/emitter-contract.ts` (`4733e62`). EmitterContract/ValidityClass,
+   `isFdrBearing`/`modeOf`, throwing `assertFdrEligible` (CS_ALLOW_UNVALIDATED escape), gated
+   `fdrBenjaminiHochberg`, `routeEmitters`. construction_valid is FDR-bearing only while
+   `calibrationMonitorPassing===true`. baseline-monitor wired as empirically_audited → Mode A (the
+   renderer's old "FDR guarantee holds" overclaim is gone). `test/emitter-contract.test.ts` (8).
+2. **Runtime calibration monitor** — `tools/calibration-monitor.ts` (`e162b83`). Anytime-valid ∏g test
+   martingale over a believed-null reference; crosses 1/α ⇒ revoke (sticky) ⇒ demote B→A. Sound vs the
+   prefix-audit NO-GO (revoke-the-present, not certify-the-future). Scope: marginal calibration; serial
+   dependence is the documented blind spot. `test/calibration-monitor.test.ts` (7).
+3. **Mode B concurrent-control harness** — `tools/mode-b-control.ts` (`cffb7eb`). Synthetic ground truth:
+   paired concurrent control cancels the common-mode exactly → spatial null → **FDP 0.099 ≤ q, power 0.64**
+   (temporal no-control = 0.28). Wires #1+#2 live; the monitor (∏g) **+ a Wall-A whiteness check** gate
+   construction validity (whiteness covers the marginal monitor's serial-dependence blind spot — catch
+   12%→76% on a broken integrated-drift control). `test/mode-b-control.test.ts` (3). Suite 719 pass.
+
+## REMAINING — productionization (the work for the new session)
+- **Clustersynth labeled control arm.** Add a fault-free CONTROL cohort to the clustersynth scenario harness
+  that shares the treatment's FACTOR INSTANCES (so the contrast cancels the common-mode exactly, as in the
+  synthetic harness). Then run `tools/mode-b-control.ts` semantics on real-topology scale (≥2-month baseline)
+  on the mac mini. The synthetic harness proves the statistics; this validates at fleet scale on the
+  canonical substrate. Separate repo `../clustersynth`, branch `scenario-counter-subset-streamed-factors`.
+- (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done:
+  baseline-monitor's renderer now states Mode A / no-guarantee honestly.
+- (research) Strengthen the calibration monitor against serial dependence directly (the O5 frontier), to
+  retire the whiteness-check composition crutch — would lift the broken-construction catch past ~76%.
 
 ## Test infra (mac mini — persists; re-usable)
 - **Tailscale:** `ssh 100.84.57.58` (user `johnwarren`, key auth works). 14 cores, 64GB, macOS 15. Drive **T9**
@@ -69,6 +82,9 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
 - Re-sync needed next session: the mini's `~/concord/tessera` is a few commits behind (last synced ~`3747a17`).
 
 ## File map (the load-bearing pieces)
+- `tools/emitter-contract.ts` — the validity_class gate (follow-up #1).
+- `tools/calibration-monitor.ts` — the anytime-valid runtime monitor (follow-up #2).
+- `tools/mode-b-control.ts` — the Mode B concurrent-control harness (follow-up #3).
 - `tools/mixture-evalue.ts` — default fleet-e-BH e-value object (ADR 0019).
 - `tools/baseline-monitor.ts` — canonical pipeline (streaming + multi-core; gate + e-detector + e-BH).
 - `tools/baseline-guard.ts` — 2-month enforcement.
