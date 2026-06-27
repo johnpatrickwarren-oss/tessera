@@ -1,0 +1,938 @@
+{
+  "T": 150,
+  "dt_s": 3600,
+  "counters": [
+    {
+      "name": "gpu_temp_c",
+      "base": 55,
+      "baseSd": 3,
+      "noiseSd": 0.6,
+      "tauIdio": 120,
+      "load": {
+        "cool": 6,
+        "power": 2,
+        "job": 2,
+        "fabric": 0
+      }
+    },
+    {
+      "name": "power_w",
+      "base": 700,
+      "baseSd": 40,
+      "noiseSd": 8,
+      "tauIdio": 5,
+      "load": {
+        "cool": 0,
+        "power": 30,
+        "job": 60,
+        "fabric": 0
+      }
+    },
+    {
+      "name": "sm_util",
+      "base": 0.6,
+      "baseSd": 0.08,
+      "noiseSd": 0.02,
+      "tauIdio": 0.5,
+      "load": {
+        "cool": 0,
+        "power": 0,
+        "job": 0.15,
+        "fabric": 0.03
+      }
+    },
+    {
+      "name": "hbm_bw_gbps",
+      "base": 2000,
+      "baseSd": 150,
+      "noiseSd": 30,
+      "tauIdio": 5,
+      "load": {
+        "cool": 0,
+        "power": 0,
+        "job": 250,
+        "fabric": 120
+      }
+    },
+    {
+      "name": "nvlink_tx_gbps",
+      "base": 300,
+      "baseSd": 30,
+      "noiseSd": 6,
+      "tauIdio": 3,
+      "load": {
+        "cool": 0,
+        "power": 0,
+        "job": 40,
+        "fabric": 50
+      }
+    }
+  ],
+  "membership": {
+    "cluster-0-pod-0-rack-0-tray-0-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-0-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-0-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-0-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-0-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-0-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-0-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-0-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-1-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-1-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-1-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-1-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-1-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-1-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-1-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-1-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-2-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-2-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-2-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-2-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-2-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-2-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-2-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-2-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-3-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-3-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-3-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-3-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-3-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-3-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-3-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-3-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-0"
+    },
+    "cluster-0-pod-0-rack-0-tray-4-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-4-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-4-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-4-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-4-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-4-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-4-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-4-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-5-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-5-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-5-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-5-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-5-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-5-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-5-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-5-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-6-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-6-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-6-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-6-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-6-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-6-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-6-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-6-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-7-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-7-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-7-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-7-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-7-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-7-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-7-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-7-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-8-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-8-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-8-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-8-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-8-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-8-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-8-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-8-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-9-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-9-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-9-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-9-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-9-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-9-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-9-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-9-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-10-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-10-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-10-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-10-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-10-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-10-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-10-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-10-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-11-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-11-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-11-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-11-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-11-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-11-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-11-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-11-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-12-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-12-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-12-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-12-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-12-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-12-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-12-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-12-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-13-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-13-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-13-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-13-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-13-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-13-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-13-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-13-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-14-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-14-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-14-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-14-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-14-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-14-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-14-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-14-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-15-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-15-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-15-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-15-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-15-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-15-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-15-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-15-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-16-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-16-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-16-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-16-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-16-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-16-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-16-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-16-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-17-gpu-0": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-17-gpu-0#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-17-gpu-1": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-17-gpu-1#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-17-gpu-2": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-17-gpu-2#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-17-gpu-3": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    },
+    "cluster-0-pod-0-rack-0-tray-17-gpu-3#ctrl": {
+      "cool": "cdu-0",
+      "power": "power-feed-0",
+      "fabric": "cluster-0-pod-0",
+      "job": "job-1"
+    }
+  },
+  "controlArm": true
+}
