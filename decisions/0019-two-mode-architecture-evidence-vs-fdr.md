@@ -149,6 +149,24 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
   tests MARGINAL calibration (the binding mean/scale failure), weak against pure serial dependence
   (the harder O5 frontier). `test/calibration-monitor.test.ts` (7) — null stays Mode B, drift demotes
   B→A. Live wiring lands with the Mode-B harness below (it feeds the control cohort to the monitor).
-- Mode B comparative/concurrent-control evaluation (treatment vs control, canary vs fleet) — the spatial
-  null is the achievable guarantee; build the harness for it.
+- ~~Mode B comparative/concurrent-control evaluation (treatment vs control, canary vs fleet) — the spatial
+  null is the achievable guarantee; build the harness for it.~~ **DONE (commit pending):**
+  `tools/mode-b-control.ts` — a self-contained synthetic ground-truth harness (house pattern, cf.
+  `fleet-fdr.ts`). Over a persistent stationary AR(1) ρ=0.95 common-mode with heterogeneous loadings +
+  injected mean-shift faults, the paired concurrent control cancels the common-mode EXACTLY (per shard,
+  not via a cross-sectional median), giving a construction-valid spatial null. Measured (300 trials,
+  q=0.1): **Mode B FDP 0.099 ≤ q, power 0.64; temporal (no control) FDP 0.28** — the spatial null
+  controls FDR where the temporal one does not. Wires #1 + #2 LIVE: the control cohort feeds the calib
+  monitor; a `construction_valid` emitter enters gated `fdrBenjaminiHochberg` only while the monitor (∏g
+  marginal calibration) AND a Wall-A whiteness check both pass. A BROKEN control (independent INTEGRATED
+  drift → genuinely breaks FDR, ungated FDP 0.64) is revoked ~72–76% and demoted B→A, so the gate
+  prevents the wrong guarantee. The ~25% it misses is the integrated-after-whitening serial-dependence
+  residual the marginal monitor is documented-weak against (the whiteness check is what lifts the catch
+  rate from 12%→76%). `test/mode-b-control.test.ts` (3). **PRODUCTION follow-up:** a clustersynth
+  scenario with a labeled fault-free CONTROL ARM sharing the same factor instances + a ≥2-month scale run
+  on the mac mini — see the new follow-up below.
+- **NEW (productionization):** add a labeled control arm to clustersynth (a fault-free cohort sharing the
+  treatment's factor instances) and run `mode-b-control` semantics on real-topology scale on the mini.
+  The synthetic harness proves the statistics; this validates them at fleet scale on the canonical
+  substrate. Small clustersynth addition (separate repo, branch `scenario-counter-subset-streamed-factors`).
 - `tools/emitter-prototype.ts` retained as the research artifact behind this ADR (prototype; not pipeline).
