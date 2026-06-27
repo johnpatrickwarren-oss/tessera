@@ -1,6 +1,12 @@
 # Project state
 
-**Last updated:** 2026-06-24 · **by:** John Warren (with Claude)
+**Last updated:** 2026-06-27 · **by:** John Warren (with Claude)
+
+> **CURRENT FOCUS → see `HANDOFF-ADR0019.md`.** ADR 0019 (two-mode architecture: evidence/ranking default
+> vs FDR-guaranteed conditional) is decided + memorialized; the normalized-mixture e-value, the 2-month
+> guard, and the scaled/resumable ramp are shipped (branch `three-walls-prototypes`, `d7bd0f5`). Next session
+> picks up the three ADR-0019 follow-ups (validity_class code gate; runtime calibration monitor; Mode B
+> concurrent-control harness). Mac-mini test infra is set up and reusable — details in the handoff.
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
