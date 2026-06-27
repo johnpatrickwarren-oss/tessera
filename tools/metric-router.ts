@@ -14,15 +14,17 @@
 //     (a step → impulse pair), so this path uses a MAGNITUDE detector and reports honest recall.
 //   • (extensible: variance-change → distributionalSignature.fRatio; calendar → seasonal baseline.)
 //
-// THE HONEST RESULT (gb200, 2-month baseline → 240-tick monitoring). The router classifies the four
-// stationary counters → mean-shift e-detector → ~full recall at aggregate FDP≈0; and gpu_temp_c →
-// INTEGRATED. Differencing restores a valid null (the diagnostic now CERTIFIES it instead of
-// abstaining), but recall stays low — NOT a detector failure: the gpu_temp_c step faults here have
-// magnitude ≈4.5 < the random walk's own wander √(dur)≈9 over the fault window, i.e. they are
-// SUB-THRESHOLD on an I(1) metric (ADR 0003/0012). A step ≫ √(dur) IS detectable. So the router does
-// the right thing — restore a valid null + report honest, SNR-limited recall — rather than run a
-// broken-null mean-shift e-BH (uncontrolled FDR) on a raw random walk. The remaining gap is a dedicated
-// random-walk changepoint detector, surfaced rather than hidden.
+// THE HONEST RESULT is CADENCE-DEPENDENT — clustersynth now models sampling cadence (continuous-time
+// Ornstein–Uhlenbeck dynamics sampled at dt_s; dt_s is no longer a relabel, so a 1 Hz run is genuinely
+// smoother than hourly). Stationary counters → mean-shift e-detector → ~full recall at aggregate FDP≈0.
+// gpu_temp_c's CHARACTER depends on cadence: at a fine DCGM rate (~1 Hz) its level is smooth/INTEGRATED →
+// the random-walk CHANGEPOINT detector (tools/rw-changepoint.ts) on the level certifies at a SMALL window
+// — a fixed wall-clock fault spans many ticks, so the window that Gaussianises the removal-induced heavy
+// tails is tiny relative to the fault → validity AND recall together. At coarse (hourly) cadence the fast
+// thermal dynamics alias toward iid → gpu_temp_c reads stationary and routes to the mean-shift e-detector.
+// Either way the router gates on the detector's OWN null and never emits an uncontrolled FDR. (Earlier this
+// counter was stuck integrated-with-heavy-tails at every cadence because clustersynth's per-tick noise was
+// iid and dt_s only relabeled time; that generator bug is fixed.)
 //
 // Tessera-original; NOT vendored.
 
@@ -167,6 +169,17 @@ function pickChangepointWindow(R: number[][], healthyIdx: number[], calLen: numb
   return window;
 }
 
+/** One-line, run-specific summary of how gpu_temp_c routed (keeps the prose in sync with the table). */
+function tempSummary(temp: RouterRow | undefined): string {
+  if (!temp) return 'gpu_temp_c carried no faults in this run.';
+  const detNull =
+    temp.character === 'integrated' && !Number.isNaN(temp.scaleNullMean)
+      ? ` (detNull ${temp.scaleNullMean.toFixed(2)} ≤ ${DETECTOR_NULL_TOL})`
+      : '';
+  const gate = temp.certified ? 'CERTIFIED' : 'FLAGGED';
+  return `Here gpu_temp_c read ${temp.character} → ${temp.detector} → ${(temp.recall * 100).toFixed(0)}% recall, ${gate}${detNull}.`;
+}
+
 export function renderMetricRouter(healthyDir: string, monDir: string, calLen?: number): string {
   const healthy = loadScenarioBundle(healthyDir), mon = loadScenarioBundle(monDir);
   const cl = calLen ?? Math.min(30, Math.floor(0.15 * mon.T));
@@ -175,38 +188,43 @@ export function renderMetricRouter(healthyDir: string, monDir: string, calLen?: 
   L.push(`baseline T=${healthy.T} → monitoring T=${mon.T}. Integration order decided from HEALTHY shards (faults excluded), not the candidate faults.`);
   L.push('');
   L.push('counter          character   detector                    recall  agg-FDP  meanWhite  detNull  gate');
+  const rows = new Map<string, RouterRow>();
   for (const counter of mon.counters.map((c) => c.name)) {
     const fits = fitBaseline(healthy, counter);
     if (fits.length !== mon.shardIds.length) { L.push(`  ${counter}: SKIP (topology mismatch)`); continue; }
     const r = routeCounter(mon, counter, fits, cl);
     if (r.nFault === 0) continue;
+    rows.set(counter, r);
     const sv = r.scaleNullMean;
     const dn = Number.isNaN(sv) ? '   —   ' : `${sv > 1000 ? sv.toExponential(1) : sv.toFixed(2)}${sv <= DETECTOR_NULL_TOL ? ' ok' : ' BAD'}`;
     const mw = Number.isNaN(r.markovPlausibleFrac) ? '   —  ' : `${(r.markovPlausibleFrac * 100).toFixed(0).padStart(5)}%`;
     L.push(`  ${r.counter.padEnd(14)} ${r.character.padEnd(11)} ${r.detector.padEnd(26)} ${(r.recall * 100).toFixed(0).padStart(4)}%  ${r.aggregateFdp.toFixed(3)}  ${mw.padStart(7)}  ${dn.padStart(8)}  ${r.certified ? 'CERTIFIED' : 'FLAGGED'}`);
   }
   L.push('');
+  const certified = [...rows.values()].filter((x) => x.certified).length;
+  const tempLine = tempSummary(rows.get('gpu_temp_c'));
   L.push('READING: the router classifies each metric by integration order (cross-window common-mode residual on');
   L.push('HEALTHY shards — an in-sample fit spuriously whitens a random walk, so it must be cross-window) and routes');
-  L.push('it, gating each path on ITS detector\'s own null. The four STATIONARY counters → mean-shift e-detector →');
-  L.push('~full recall at aggregate FDP≈0 (UI e-value, theorem-backed). gpu_temp_c → INTEGRATED → the random-walk');
-  L.push('CHANGEPOINT detector on the LEVEL (tools/rw-changepoint.ts): a windowed local level-contrast (post-window');
-  L.push('mean − adjacent pre-window mean), mixed over onsets, CLIPPED → bounded. ALL FIVE COUNTERS NOW CERTIFY,');
-  L.push('gpu_temp_c included (detNull ≈1.0 ≤ tol, aggregate FDP≈0).');
+  L.push('it: STATIONARY (white residual) → mean-shift e-detector (UI e-value, theorem-backed); INTEGRATED (near-');
+  L.push('unit-root level, white Δ) → the random-walk CHANGEPOINT detector on the LEVEL (tools/rw-changepoint.ts): a');
+  L.push('windowed local level-contrast (post-window mean − adjacent pre-window mean), mixed over onsets, CLIPPED →');
+  L.push('bounded. Each path is gated on ITS detector\'s OWN null (mean-whiteness for stationary; the changepoint');
+  L.push(`e-value's healthy-shard mean ≤ tol for integrated). This run: ${certified}/${rows.size} counters certify, aggregate FDP≈0.`);
   L.push('');
-  L.push('HOW gpu_temp_c got certified (the data-density validation). Its heavy tails are an ARTIFACT of common-mode');
-  L.push('REMOVAL, not the metric: raw increments have excess kurtosis ≈1.3 (near-Gaussian), the removed residual');
-  L.push('≈10.8. WINDOW-AVERAGING undoes it — the router picks the SMALLEST changepoint window whose healthy-shard');
-  L.push('null mean ≤ tol (here w=35: detNull 1.97@w15 → 0.93@w30), decided on HEALTHY shards (no FDR leak). So the');
-  L.push('"denser DCGM cadence" intuition was RIGHT in mechanism — more points per window Gaussianise the contrast →');
-  L.push('valid null — just realised via WINDOW SIZE, since clustersynth\'s per-tick noise is iid (dt_s only relabels');
-  L.push('time; it cannot model sub-tick smoothness). Caveat/tradeoff: the bigger window costs recall here (33%@w15 →');
-  L.push('11%@w35) because at HOURLY cadence the fault is only ~50–100 ticks, so a 35-tick window dilutes it. At a');
-  L.push('REAL DCGM rate (~1 Hz) the same fault spans thousands of ticks → a window large enough to Gaussianise is');
-  L.push('TINY relative to the fault → you get validity AND power. That is the genuine density payoff, stated exactly.');
-  L.push('The architecture: characterise → route by character × fault type → score with a bounded e-value → SIZE the');
-  L.push('window / gate on the detector\'s OWN null (on healthy shards) → never emit an uncontrolled FDR. CERTIFIED =');
-  L.push('the FDR guarantee holds; recall is reported separately (here intrinsically low — sub-threshold faults).');
+  L.push('HOW gpu_temp_c is handled — CADENCE-DEPENDENT (clustersynth now models sampling cadence: continuous-time');
+  L.push('Ornstein–Uhlenbeck dynamics sampled at dt_s, so a 1 Hz run is genuinely smoother than hourly — dt_s is NO');
+  L.push('LONGER a relabel). The level can be near-unit-root, and common-mode REMOVAL on a coarsely-sampled near-');
+  L.push('random-walk induces heavy-tailed differenced residuals — an ARTIFACT of removal × coarse sampling, not the');
+  L.push('metric. The router\'s lever is WINDOW SIZE: a windowed level-contrast Gaussianises the contrast, and it');
+  L.push('picks the SMALLEST window whose healthy-shard null mean ≤ tol — decided on HEALTHY shards, so it does not');
+  L.push(`leak the FDR guarantee. ${tempLine}`);
+  L.push('The density payoff is now REAL, not hypothetical: at a fine DCGM rate (~1 Hz) a fixed wall-clock fault');
+  L.push('spans thousands of ticks, so the window needed to Gaussianise is TINY relative to the fault → validity AND');
+  L.push('power together. At coarse (hourly) cadence the fast thermal dynamics alias toward iid → the metric reads');
+  L.push('stationary and routes to the mean-shift e-detector. Architecture unchanged: characterise → route by');
+  L.push('character × fault type → score with a bounded e-value → SIZE the window / gate on the detector\'s OWN null');
+  L.push('(on healthy shards) → never emit an uncontrolled FDR. CERTIFIED = the FDR guarantee holds; recall reported');
+  L.push('separately.');
   return L.join('\n');
 }
 
