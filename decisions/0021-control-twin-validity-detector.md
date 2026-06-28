@@ -1,128 +1,91 @@
-# ADR 0021 — runtime control-twin validity detector (contamination + non-comparability)
+# ADR 0021 — control-twin validity detector: built, validated, found INSUFFICIENT (negative result; control-triad is the real fix)
 
 - **Date:** 2026-06-28
-- **Status:** **Proposed (design/spec).** Implementation + validation plan in §§ Implementation / Validation;
-  no code yet. Closes the gap surfaced by the 2026-06-28 deep research (`research/2026-06-28-concurrent-
-  control-spatial-null.md`) and named in ADR 0019 § Prior art.
-- **Builds on:** ADR 0019 (Mode B spatial null: `d_i = treatment_i − control_i`); ADR 0020 (the runtime
-  calibration monitor + whiteness gate, which watch the *standardized residual* of the contrast). This ADR
-  adds a gate on the *raw twin pairing itself*, BEFORE the contrast destroys the evidence.
+- **Status:** **Built + validated + NOT shipped as a gate (negative result).** The detector and its
+  ground-truth fault modes were implemented and rigorously validated; the validation showed a twin-PAIR
+  detector cannot restore the FDR guarantee, so it is **not wired into the Mode B gate** (Mode B is
+  byte-identical to before). Kept as research artifacts: `tools/contamination-detector.ts` (the κ
+  machinery), the clustersynth fault modes (`CS_CONTAMINATE` / `CS_DECORRELATE_FRAC`), and the
+  `tools/contrast.ts` refactor. The real fix — a **control triad** — is proposed below (ADR 0022 candidate).
+- **Builds on:** ADR 0019 (Mode B spatial null `d = treatment − control`); ADR 0020 (residual monitors);
+  the 2026-06-28 deep research (`research/2026-06-28-concurrent-control-spatial-null.md`) that named the gap
+  and the DiD-under-interference framing; ADR 0012/0015 (the fleet-relative heterogeneous-loading wall).
 
-## Problem
+## Problem (unchanged — the gap is real)
 
-Mode B's guarantee rests on two unchecked assumptions about each treatment↔control pair:
-1. **The control twin is healthy** (no fault present in the control — neither its own, nor the treatment's
-   fault spilling over).
-2. **The twin is comparable** (shares the treatment's common-mode loadings, so the contrast actually
-   cancels it).
-
-ADR 0020's monitors operate on the *standardized residual* of `d_i`. They cannot see violations of either
-assumption, because **the contrast is sign-blind**: `d_i = treatment_i − control_i` collapses "which member
-moved" into a single difference. The deep-research DiD-under-interference result makes the cost precise — if
-a fault contaminates the control, the contrast estimand becomes `τ_treatment − τ_control` (TATT − ASC), which
-**identifies neither magnitude, direction, nor sign** (Mealli–Viviens arXiv:2512.21176; Xiao–Sun
-arXiv:2509.24259). Concretely, contamination has TWO failure modes, and ADR 0019/0020 only named the first:
+Mode B assumes each treatment↔control pair is a MATCHED twin (shared common-mode loadings) and the control
+is HEALTHY. The residual monitors (ADR 0020) operate on the standardized contrast AFTER the damage, so they
+miss violations of either assumption. Two failure modes, and the contrast is **sign-blind** (it collapses
+"which member moved" into one difference):
 
 | treatment vs cohort | control vs cohort | meaning | contrast outcome |
 |---|---|---|---|
-| outlier | normal | genuine per-shard fault | **fires correctly** ✓ |
-| normal | **outlier** | control contaminated (fault in control only) | **FALSE POSITIVE** — `d` shows a spurious shift |
-| **outlier** | **outlier (same dir)** | fault hit both (spillover / shared sub-component) | **MISS** — `d` cancels the fault (false negative) |
-| outlier | outlier (opp dir) | pathological | uninterpretable |
-| normal | normal | healthy or pure common-mode | correct (no fire / cancels) |
+| outlier | normal | genuine per-shard fault | fires correctly ✓ |
+| normal | **outlier** | control contaminated | **FALSE POSITIVE** |
+| **outlier** | **outlier (same dir)** | fault hit both (spillover) | **MISS** (cancels) |
+| normal | normal | healthy / pure common-mode | correct |
 
-So contamination is not only a *miss* risk (row 3, the only one ADR 0019 noted) — it is also a **false-positive
-source** (row 2). Non-comparability is a separate, also-uncaught false-positive source: differing loadings
-leave residual common-mode in `d` that the residual monitor may read as a shift.
+Plus NON-COMPARABILITY: divergent loadings leave residual common-mode in `d` → false positives. The DiD
+econometrics (Mealli–Viviens; Xiao–Sun) shows a nonzero control effect makes the estimand `TATT − ASC` —
+uninterpretable.
+
+## What was built (and is kept)
+
+1. **clustersynth ground-truth modes** (committed `d2a5e0e`, env-only, off by default): `CS_DECORRELATE_FRAC`
+   (twins use their own loadings → non-comparability), `CS_CONTAMINATE=both|control` (duplicate / move a
+   fault onto the control); ground truth in `control.json`. A `faultId` seam on `counterTicks` lets a twin
+   carry its treatment's fault with independent noise.
+2. **`tools/contamination-detector.ts`** — the cancellation ratio `κ_i = Var(t_i−c_i) / avg(Var(t_i),Var(c_i))`
+   + cohort thresholding (`max(absFloor, relMult·p25(κ))`, p25 robust to a contaminated cohort). Unit-tested.
+3. **`tools/contrast.ts`** — extracted `fitContrast`/`applyContrast` (shared, no import cycle). A clean
+   refactor kept regardless.
+
+## Validation — why it does NOT ship (the negative result)
+
+Generated matched clean / decorrelated / contaminated bundles and measured the existing Mode B harness, then
+the κ gate. Evidence (1-rack hourly, q=0.1):
+
+- **Non-comparability inflates FDR and the existing gates miss it:** decorrelated bundle **FDP 0.250** (e.g.
+  power_w 0.667), whiteness/calibration pass → confirms a gap exists.
+- **But κ-gating does NOT restore it.** A threshold sweep (absFloor 0.05–0.1 × relMult 3–6, up to 100 twins
+  excluded) bottoms out at **FDP ≈ 0.20–0.21 — still > q** — because **the false positives come from
+  LOW-κ pairs**. κ measures *variance* leak, but the harm is a **sustained shift** (un-cancelled
+  non-stationary regime/ramp), which a pair leaks with small total-variance change. κ is the wrong statistic
+  for the harm. Worse, it **over-excludes clean pairs**: ~6 healthy pair-counters dropped on a clean bundle
+  (weak-common-mode counters have naturally high κ, e.g. sm_util clean κ up to 0.56). A gate that violates
+  the guarantee AND costs coverage in the common case is net-negative → not shipped.
+- **Contamination is undetectable by twin-pair statistics at all:** a SHARED fault cancels in the contrast
+  (verified: `both`-contamination → recall 1.0→0.42 at FDP 0.000 — the structural blind spot, = fleet-wide
+  common-mode by design); a CONTROL-ONLY fault fires the sign-blind contrast, and the only external
+  reference (the control cohort) inherits the heterogeneous-loading wall (ADR 0012/0015) — level-demeaned
+  `control_i − cohort-center` residual-std distributions for clean vs contaminated **overlap heavily**
+  (clean med 4.18 / max 11.7 vs contaminated med 5.4 / min 1.6), so a cohort gate would over-exclude.
+
+**Root cause (one sentence):** non-comparability re-introduces the temporal-null wall (the residual
+common-mode differs across windows — exactly what the matched twin existed to avoid), and contamination
+needs a clean per-control reference that a heterogeneous-loading cohort cannot provide.
 
 ## Decision
 
-Add a **control-twin validity detector** — a construction-validity gate, like whiteness, that runs on the
-RAW (pre-contrast) twin series over the healthy calibration feed, with two complementary tests. It is a
-DIAGNOSTIC gate (threshold-based, not an FDR-bearing e-value), consistent with how ADR 0020 treats whiteness:
-it can demote a pair/emitter to Mode A but never itself carries an FDR claim.
+**Do not gate Mode B on a twin-pair validity detector.** Keep the κ machinery + ground-truth modes as
+research artifacts. Mode B's construction-validity decision is unchanged (validity-class gate + ADR 0020
+residual monitors). Non-comparability and contamination remain **characterized, not closed**.
 
-### Test A — cancellation quality (catches non-comparability / partial common-mode leak)
+## The real fix — a CONTROL TRIAD (ADR 0022 candidate)
 
-A well-matched twin shares the common-mode, so the contrast must have far smaller variance than either
-member. Per pair `i`, on the healthy feed (members centered):
-
-```
-ρ_tc(i)  = Cov(treatment_i, control_i) / sqrt(Var(treatment_i)·Var(control_i))   # twin coupling
-κ(i)     = Var(treatment_i − control_i) / ((Var(treatment_i)+Var(control_i))/2)  # = 2(1 − ρ_tc) at equal var
-```
-
-A good twin: `ρ_tc → 1`, `κ → 0` (in the clustersynth control arm the contrast collapsed gpu_temp_c variance
-254 → 0.56, a >400× drop). Non-comparable: low coupling (`ρ_tc` small, `κ` large) → the spatial null does not
-hold for this pair. **Gate: require `ρ_tc(i) ≥ ρ*` (default ρ* = 0.5, i.e. κ ≤ 1).** Measured on the
-HEALTHY feed only (a real fault also inflates `Var(d)`; we must not read a fault as non-comparability — same
-discipline as ADR 0020's calibration feed).
-
-*Sharper refinement (Test A′, optional):* regress `d_i(t)` on the fleet common-mode estimate `X̂(t)` (robust
-cohort center); a cancelled pair has residual loading `β_i ≈ 0`, a non-comparable pair has `β_i ≠ 0`. Test
-`β_i = 0`. More principled (it targets the actual leak — residual common-mode in `d`) but needs `X̂`; the
-variance-ratio gate is the cheap first line.
-
-### Test B — control-cohort consistency (catches contamination)
-
-The control twins must be mutually exchangeable and healthy. Run a SECOND spatial null *on the controls*:
-standardize `control_i − robustCenter_j(control_j)` against the control cohort and apply the same
-normalized-mixture e-value. **A control that fires against its own cohort is not healthy → its pair is
-contaminated** (rows 2–4 above). This reuses the Mode B machinery, pointed sideways at the control arm, and
-is exactly the disambiguation the sign-blind contrast cannot do.
-
-### Action semantics
-
-- **Per-pair exclusion (default).** A pair failing Test A or Test B is dropped from BOTH the detection set
-  (e-BH input) and the calibration cohort for that cycle — its contrast is untrustworthy (false-positive or
-  masked-miss source). Excluded pairs are logged (audit), not silently dropped.
-- **Emitter-level demotion.** If the surviving-pair fraction falls below the construction-validity threshold
-  (reuse `calibFrac ≥ 0.8`), the control arm is compromised fleet-wide → demote the emitter B→A (abstain).
-  This composes with ADR 0019's gate and ADR 0020's monitors via AND (all must pass for Mode B).
-
-## Honest scope / limitations
-
-- **Diagnostic, not an e-value.** Tests A/B are thresholded gates (like whiteness); they tighten the
-  construction-validity decision, they do not extend the FDR guarantee. State this in the renderer.
-- **Majority-healthy blind spot (inherited).** Test B is a spatial null on the controls, so it inherits the
-  same assumption as Mode B: if contamination is *identical across the whole control cohort*, it looks like
-  common-mode and is invisible — exactly the structural blind spot the deep research documented for all
-  peer-comparison methods. Name it; it is not fixable at this layer.
-- **Test B vs a real per-shard fault that spills:** a fault hitting treatment AND control of one pair (row 3)
-  is caught (control fires vs cohort) and the pair excluded — correctly trading a guaranteed-miss for an
-  honest abstention on that pair, not a false guarantee.
-- **Threshold ρ\* is a tuning knob**, to be set from the validation sweep, not asserted.
-
-## Implementation (sketch)
-
-- `tools/contamination-detector.ts` — `twinValidity(treatmentHealthy, controlHealthy, controlCohort)` →
-  `{ rhoTc, kappa, controlFiresVsCohort, valid }` per pair; pure, unit-testable. Reuses `robustLocation` /
-  MAD, `normalizedMixtureEValue`, and the cohort-center logic already in `clustersynth-mode-b.ts`.
-- Wire into `scoreCounterModeB` (in-memory) and `reduceCmbCounter` (streaming): compute per-pair validity on
-  the healthy/prefix feed, exclude failing pairs before e-BH, fold the surviving fraction into
-  `monitorPassing`. Add a per-emitter `twinExcluded` count to `ModeBCounterResult` + the report.
-- `mode-b-loop.ts`: extend `EmitterCycle` with the per-pair validity verdict (computed by the caller, like
-  the calibration samples), exclude in `stepEmitter`.
-
-## Validation plan (clustersynth)
-
-Needs two NEW fault modes in the control arm (clustersynth side):
-1. **Contaminated control** (`CS_CONTAMINATE`): inject a gpu fault into the *control* twin (control-only, and
-   both-members) — to exercise Test B (rows 2–3). Expect: contaminated pairs flagged + excluded; without the
-   detector, control-only contamination inflates FDP (false positives) and both-member contamination
-   depresses recall (misses); with it, FDP/recall restored on the surviving pairs.
-2. **Non-comparable twin** (`CS_DECORRELATE` / loading perturbation): give the control twin a perturbed
-   loading on a common factor — to exercise Test A. Expect: low `ρ_tc`, pair excluded, FDP restored.
-
-Re-run the mini fixture + a mac-mini hourly ramp; confirm (a) zero healthy pairs excluded (no false
-exclusion on a clean control arm — the matched twins have `ρ_tc ≈ 1`), (b) contaminated/non-comparable pairs
-excluded with the expected FDP/recall recovery, (c) FDP stays ≤ q. The 1 Hz run is not required for this ADR
-(twin validity is cadence-agnostic) but should be spot-checked for false exclusions.
+Both failure modes dissolve with **two independent control twins per treatment**. A matched
+**control-vs-control** contrast is a clean per-control null (no cohort heterogeneity, no temporal wall):
+- **Contamination:** a contaminated control fires against its *sibling* control (a matched null) — the clean
+  per-control reference the cohort couldn't give. Disambiguates the sign-blind treatment-fault vs
+  control-fault case directly.
+- **Non-comparability:** the two controls' mutual contrast directly measures whether the twins track the
+  common-mode, without the variance-ratio's weak-common-mode confound.
+Cost: a second canary per shard (control overhead 1×→2×). Worth specifying + validating as ADR 0022.
 
 ## Consequences
 
-- Mode B gains an explicit guard for the assumption the DiD-interference theory proves is load-bearing, and
-  the previously-unnamed contamination FALSE-POSITIVE mode (row 2) becomes detectable.
-- The construction-validity decision becomes: `validity_class` gate (ADR 0019) AND calibration+whiteness on
-  the residual (ADR 0020) AND twin validity on the raw pairing (this ADR) — three complementary layers,
-  composed by AND, all per-emitter/per-pair and revocable.
+- No behavior change to Mode B (gate not wired; suite green, mini FDP still 0.000).
+- The deep-research gap is now precisely characterized: a twin-PAIR detector is insufficient; a control
+  TRIAD is the construction that can close it.
+- Reusable assets for ADR 0022: the clustersynth contamination/decorrelation modes (ground truth) and the
+  κ machinery.

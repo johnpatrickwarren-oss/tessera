@@ -27,8 +27,10 @@ import { assertLongBaseline } from './baseline-guard.js';
 import { normalizedMixtureEValue } from './mixture-evalue.js';
 import { freshCalibrationMonitor, updateCalibrationBatch } from './calibration-monitor.js';
 import { fdrBenjaminiHochberg, modeOf, ineligibilityReason, type EmitterContract } from './emitter-contract.js';
-import { estimateAr1, whiten } from './per-shard-whitening.js';
+import { fitContrast, applyContrast, type ContrastFit } from './contrast.js';
 import { autocorr } from './conditional-markov.js';
+// re-export so existing importers (mode-b-loop, telemetry-source) keep their import site.
+export { fitContrast, applyContrast, type ContrastFit } from './contrast.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
 interface ControlPair { treatment: string; control: string; }
@@ -38,32 +40,6 @@ export function loadControlPairs(dir: string): ControlPair[] {
   const p = path.join(dir, 'control.json');
   if (!fs.existsSync(p)) throw new Error(`${dir}: no control.json — generate the bundle with CS_CONTROL_ARM=1 / controlArm:true`);
   return JSON.parse(fs.readFileSync(p, 'utf8')).pairs as ControlPair[];
-}
-
-const median = (xs: number[]): number => { const s = xs.slice().sort((a, b) => a - b); return s[s.length >> 1]; };
-const madScale = (xs: number[]): number => { const m = median(xs); return Math.max(1.4826 * median(xs.map((x) => Math.abs(x - m))), 1e-9); };
-
-/** The contrast fit estimated on the HEALTHY baseline contrast: a centering offset (the treatment and
- *  control have INDEPENDENT baselines, so the contrast has a nonzero mean), AR(1) φ, and robust
- *  location/scale of the whitened residual. CENTER BEFORE WHITENING: `whiten` returns the first tick
- *  unchanged (no prior sample), so without centering that seed tick carries the full baseline offset and
- *  standardizes to a many-σ outlier — one fat tail per series that spuriously trips the ∏g calibration. */
-export interface ContrastFit { phi: number; loc: number; scale: number; center: number; }
-
-export function fitContrast(d0: number[]): ContrastFit {
-  const center = median(d0);
-  const dc = d0.map((x) => x - center);
-  const { phi } = estimateAr1(dc);
-  const w = dc.map((x, t) => whiten(x, t > 0 ? dc[t - 1] : null, phi));
-  return { phi, loc: median(w), scale: madScale(w), center };
-}
-
-/** Apply a baseline contrast fit to a (monitoring) contrast: center, whiten at φ, standardize by loc/scale.
- *  The baseline is keyed by (seed, shard, counter) so it is identical across the same-seed healthy/mon
- *  bundles — the fit's `center` removes it consistently. */
-export function applyContrast(d: number[], fit: ContrastFit): number[] {
-  const dc = d.map((x) => x - fit.center);
-  return dc.map((x, t) => (whiten(x, t > 0 ? dc[t - 1] : null, fit.phi) - fit.loc) / fit.scale);
 }
 
 const sub = (a: number[], b: number[]): number[] => a.map((x, t) => x - b[t]);
