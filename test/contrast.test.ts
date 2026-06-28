@@ -5,7 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32, gaussian } from '../tools/calibration-envelope.js';
-import { fitContrast, applyContrast, median, madScale } from '../tools/contrast.js';
+import { fitContrast, fitContrastFast, applyContrast, median, madScale } from '../tools/contrast.js';
 
 /** A persistent AR(1) contrast with a large independent-baseline OFFSET (treatment − control). */
 function offsetAr1(rng: () => number, n: number, phi: number, offset: number, scale: number): number[] {
@@ -35,6 +35,18 @@ test('standardizes a healthy contrast to ~unit scale (the e-value N(0,1) input a
   const m = std.reduce((s, x) => s + x, 0) / std.length;
   const v = std.reduce((s, x) => s + (x - m) ** 2, 0) / std.length;
   assert.ok(v > 0.5 && v < 2, `standardized contrast ~unit variance, got ${v.toFixed(2)}`);
+});
+
+test('fitContrastFast (mean/SD, no sort) ≈ fitContrast (median/MAD) on a healthy contrast', () => {
+  const d = offsetAr1(mulberry32(2024), 4000, 0.7, 30, 2.5); // healthy AR(1), no outliers
+  const a = fitContrast(d), b = fitContrastFast(d);
+  assert.ok(Math.abs(a.phi - b.phi) < 0.03, `φ should match: ${a.phi.toFixed(3)} vs ${b.phi.toFixed(3)}`);
+  assert.ok(Math.abs(a.center - b.center) < 0.5, 'center (median≈mean) should match');
+  assert.ok(Math.abs(a.scale - b.scale) / a.scale < 0.1, 'scale (MAD≈SD) within 10%');
+  // the standardized outputs should be close → equivalent e-value behavior
+  const sa = applyContrast(d, a), sb = applyContrast(d, b);
+  const maxDiff = Math.max(...sa.map((x, i) => Math.abs(x - sb[i])));
+  assert.ok(maxDiff < 0.25, `standardized outputs should be close, max diff ${maxDiff.toFixed(3)}`);
 });
 
 test('applyContrast is prefix-stable (causal): applying to a prefix == prefix of applying to the whole', () => {

@@ -27,7 +27,7 @@ import { assertLongBaseline } from './baseline-guard.js';
 import { normalizedMixtureEValue } from './mixture-evalue.js';
 import { freshCalibrationMonitor, updateCalibrationBatch } from './calibration-monitor.js';
 import { fdrBenjaminiHochberg, modeOf, ineligibilityReason, type EmitterContract } from './emitter-contract.js';
-import { fitContrast, applyContrast, type ContrastFit } from './contrast.js';
+import { fitContrast, fitContrastFast, applyContrast, type ContrastFit } from './contrast.js';
 import { autocorr } from './conditional-markov.js';
 // re-export so existing importers (mode-b-loop, telemetry-source) keep their import site.
 export { fitContrast, applyContrast, type ContrastFit } from './contrast.js';
@@ -402,6 +402,94 @@ export async function renderModeBStreaming(healthyDir: string, monDir: string, q
   return renderModeBReport(h, results, q);
 }
 
+// ─── STREAMING SAME-CADENCE LONG-BASELINE PATH (ADR 0022: consume a 2-month 1 Hz baseline at scale) ──
+// The mixed-cadence streaming path above fits from the mon PRE-FAULT PREFIX (~minutes) — the short-baseline
+// shortcut. To actually fit from a long fine-cadence (e.g. 60d @ 1 Hz) baseline, that baseline must be the
+// fit feed. It does not fit in memory at scale (47 GB at 8 racks), so we stream it too, in two phases:
+//   Phase 1 — stream the BASELINE counters.ndjson, pair treatment↔control rows, compute each shard's
+//             ContrastFit from its FULL baseline contrast via fitContrastFast (O(n), no sort) + the
+//             calibration/whiteness verdict on the baseline-standardized contrast. Memory O(2 rows × T).
+//   Phase 2 — stream the MON counters.ndjson, apply each shard's baseline fit to the monitoring contrast,
+//             emit the detection (+ temporal) e-values.
+// The per-shard fit map (4 floats/shard) is tiny and passes to the Phase-2 workers via workerData.
+
+interface LbFitRecord { c: string; s: string; fit: ContrastFit; calibPass: boolean; white: boolean }
+interface LbFitInput { __cmb_lb: 'fit'; baseDir: string; byteStart: number; byteEnd: number }
+interface LbDetectInput { __cmb_lb: 'detect'; monDir: string; byteStart: number; byteEnd: number; prefixN: number; fits: Record<string, ContrastFit> }
+interface LbDetectRecord { c: string; s: string; e: number; tE: number }
+
+/** Phase 1 worker: per-shard fit + calibration/whiteness from the FULL (long) baseline contrast. */
+function runLbFitWorker(input: LbFitInput): LbFitRecord[] {
+  const out: LbFitRecord[] = [];
+  for (const [t, c] of monPairs(path.join(input.baseDir, 'counters.ndjson'), input.byteStart, input.byteEnd)) {
+    const d = t.v.map((x, i) => x - c.v[i]);
+    const fit = fitContrastFast(d); // mean/SD, O(n) no sort — the long-baseline fit feed
+    const std = applyContrast(d, fit);
+    const calFeed = std.length > CALIB_FEED_CAP ? std.slice(0, CALIB_FEED_CAP) : std;
+    out.push({ c: t.counter, s: t.shard, fit, calibPass: prefixCalibrationPass(calFeed), white: Math.abs(autocorr(calFeed, 1)) <= 0.1 });
+  }
+  return out;
+}
+
+/** Phase 2 worker: apply each shard's baseline fit to the monitoring contrast → detection + temporal e-values. */
+function runLbDetectWorker(input: LbDetectInput): LbDetectRecord[] {
+  const out: LbDetectRecord[] = [];
+  for (const [t, c] of monPairs(path.join(input.monDir, 'counters.ndjson'), input.byteStart, input.byteEnd)) {
+    const fit = input.fits[`${t.counter}\0${t.shard}`];
+    if (!fit) continue; // no baseline fit for this shard (shouldn't happen for a matched bundle)
+    const dMon = t.v.map((x, i) => x - c.v[i]);
+    const tFit = fitContrastFast(t.v.slice(0, input.prefixN)); // temporal comparator (no control), mon prefix
+    out.push({ c: t.counter, s: t.shard, e: normalizedMixtureEValue(applyContrast(dMon, fit)), tE: normalizedMixtureEValue(applyContrast(t.v, tFit)) });
+  }
+  return out;
+}
+
+function byteRanges(file: string, nWorkers: number): Array<[number, number]> {
+  const size = fs.statSync(file).size;
+  const ranges: Array<[number, number]> = [];
+  for (let i = 0; i < nWorkers; i++) ranges.push([Math.floor((i * size) / nWorkers), Math.floor(((i + 1) * size) / nWorkers)]);
+  return ranges;
+}
+function runWorkers<T>(input: object, ranges: Array<[number, number]>): Promise<T[]> {
+  return Promise.all(ranges.map(([byteStart, byteEnd]) => new Promise<T[]>((resolve, reject) => {
+    const w = new Worker(__filename, { workerData: { ...input, byteStart, byteEnd } });
+    w.once('message', (m: T[]) => resolve(m));
+    w.once('error', reject);
+    w.once('exit', (code) => { if (code !== 0) reject(new Error(`worker exited ${code}`)); });
+  }))).then((rs) => rs.flat());
+}
+
+/** Streaming SAME-CADENCE long-baseline path: fit from the streamed long baseline (Phase 1), detect on the
+ *  streamed monitoring window (Phase 2). The fit finally consumes the full 2-month fine-cadence baseline. */
+export async function renderModeBLongBaseline(baseDir: string, monDir: string, q: number, nWorkers: number): Promise<string> {
+  const hMeta = JSON.parse(fs.readFileSync(path.join(baseDir, 'factors.json'), 'utf8')) as { T: number; dt_s?: number; membership?: Record<string, unknown> };
+  assertLongBaseline(hMeta.T, hMeta.dt_s ?? 1, 'clustersynth-mode-b (long-baseline streaming)');
+  const meta = JSON.parse(fs.readFileSync(path.join(monDir, 'factors.json'), 'utf8')) as { T: number; dt_s?: number; counters: CounterLoad[] };
+  const faults: unknown[] = JSON.parse(fs.readFileSync(path.join(monDir, 'labels.json'), 'utf8')).faults;
+  const pairs = loadControlPairs(monDir);
+  const prefixN = Math.max(50, Math.floor(0.08 * meta.T));
+
+  // Phase 1: fits from the long baseline.
+  const fitRecs = await runWorkers<LbFitRecord>({ __cmb_lb: 'fit', baseDir }, byteRanges(path.join(baseDir, 'counters.ndjson'), nWorkers));
+  const fits: Record<string, ContrastFit> = {};
+  const gateByKey = new Map<string, { calibPass: boolean; white: boolean }>();
+  for (const r of fitRecs) { const k = `${r.c}\0${r.s}`; fits[k] = r.fit; gateByKey.set(k, { calibPass: r.calibPass, white: r.white }); }
+
+  // Phase 2: detect on the monitoring window using the baseline fits.
+  const detRecs = await runWorkers<LbDetectRecord>({ __cmb_lb: 'detect', monDir, prefixN, fits }, byteRanges(path.join(monDir, 'counters.ndjson'), nWorkers));
+
+  const byCounter = new Map<string, CmbRecord[]>();
+  for (const r of detRecs) {
+    const g = gateByKey.get(`${r.c}\0${r.s}`);
+    if (!g) continue;
+    let a = byCounter.get(r.c); if (!a) { a = []; byCounter.set(r.c, a); }
+    a.push({ c: r.c, s: r.s, e: r.e, tE: r.tE, calibPass: g.calibPass, white: g.white });
+  }
+  const results = meta.counters.map((c) => reduceCmbCounter(c.name, byCounter.get(c.name) ?? [], faults, meta.counters, q)).filter((r): r is ModeBCounterResult => r != null);
+  const h: ModeBHeader = { healthyShards: Object.keys(hMeta.membership ?? {}).length, healthyT: hMeta.T, healthyDt: hMeta.dt_s ?? 1, monT: meta.T, monDt: meta.dt_s ?? 1, faults: faults.length, pairs: pairs.length };
+  return renderModeBReport(h, results, q);
+}
+
 /** Default worker count: all cores; CS_WORKERS=N overrides (1 = in-memory single-thread). */
 function defaultWorkers(): number {
   if (process.env.CS_WORKERS) return Math.max(1, Number(process.env.CS_WORKERS) | 0);
@@ -410,6 +498,10 @@ function defaultWorkers(): number {
 
 if (!isMainThread && (workerData as Partial<CmbWorkerInput> | undefined)?.__cmb_worker) {
   try { parentPort!.postMessage(runCmbWorker(workerData as CmbWorkerInput)); }
+  catch (err) { parentPort!.postMessage([]); throw err; }
+} else if (!isMainThread && (workerData as { __cmb_lb?: string } | undefined)?.__cmb_lb) {
+  const wd = workerData as LbFitInput | LbDetectInput;
+  try { parentPort!.postMessage(wd.__cmb_lb === 'fit' ? runLbFitWorker(wd as LbFitInput) : runLbDetectWorker(wd as LbDetectInput)); }
   catch (err) { parentPort!.postMessage([]); throw err; }
 } else if (require.main === module) {
   const [healthyDir, monDir] = [process.argv[2], process.argv[3]];
@@ -425,9 +517,15 @@ if (!isMainThread && (workerData as Partial<CmbWorkerInput> | undefined)?.__cmb_
   // calibration window — so streaming would NOT match; keep same-cadence on the in-memory path.
   const baseDt = (JSON.parse(fs.readFileSync(path.join(healthyDir, 'factors.json'), 'utf8')) as { dt_s?: number }).dt_s ?? 1;
   const monDt = (JSON.parse(fs.readFileSync(path.join(monDir, 'factors.json'), 'utf8')) as { dt_s?: number }).dt_s ?? 1;
+  const baseSize = fs.statSync(path.join(healthyDir, 'counters.ndjson')).size;
+  // SAME-cadence + a big baseline (e.g. 60d @ 1 Hz) → the long-baseline streaming path (fit from the full
+  // streamed baseline; ADR 0022). Small same-cadence (hourly) stays in-memory. MIXED-cadence → the prefix-fit
+  // streaming path. CS_LONG_BASELINE=1 forces the long-baseline path.
+  const longBaseline = nWorkers > 1 && baseDt === monDt && (process.env.CS_LONG_BASELINE === '1' || baseSize > (1 << 30));
   const useStream = nWorkers > 1 && baseDt !== monDt;
   (async () => {
-    if (useStream) process.stdout.write(await renderModeBStreaming(healthyDir, monDir, q, nWorkers) + `\n(${nWorkers} worker threads, streaming)\n`);
+    if (longBaseline) process.stdout.write(await renderModeBLongBaseline(healthyDir, monDir, q, nWorkers) + `\n(${nWorkers} worker threads, long-baseline streaming)\n`);
+    else if (useStream) process.stdout.write(await renderModeBStreaming(healthyDir, monDir, q, nWorkers) + `\n(${nWorkers} worker threads, streaming)\n`);
     else process.stdout.write(renderModeB(healthyDir, monDir, q) + '\n');
   })().then(() => process.exit(0)).catch((e) => { process.stderr.write(String(e?.stack ?? e) + '\n'); process.exit(1); });
 }

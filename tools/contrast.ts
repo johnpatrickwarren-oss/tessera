@@ -29,3 +29,18 @@ export function applyContrast(d: number[], fit: ContrastFit): number[] {
   const dc = d.map((x) => x - fit.center);
   return dc.map((x, t) => (whiten(x, t > 0 ? dc[t - 1] : null, fit.phi) - fit.loc) / fit.scale);
 }
+
+const mean = (xs: number[]): number => xs.reduce((a, b) => a + b, 0) / xs.length;
+const sd = (xs: number[]): number => { const m = mean(xs); return Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / xs.length); };
+
+/** Like fitContrast but using mean/SD instead of median/MAD — O(n) with NO sort, so it scales to a long
+ *  (multi-million-tick) HEALTHY baseline where the median sorts dominate. On a healthy (outlier-free) feed
+ *  mean ≈ median and SD ≈ 1.4826·MAD, so the fit is statistically equivalent; it uses the SAME whiten/φ so
+ *  applyContrast stays consistent. Use ONLY on a known-healthy baseline (ADR 0022 long-1Hz-baseline path). */
+export function fitContrastFast(d0: number[]): ContrastFit {
+  const center = mean(d0);
+  const dc = d0.map((x) => x - center);
+  const { phi } = estimateAr1(dc);
+  const w = dc.map((x, t) => whiten(x, t > 0 ? dc[t - 1] : null, phi));
+  return { phi, loc: mean(w), scale: Math.max(sd(w), 1e-9), center };
+}
