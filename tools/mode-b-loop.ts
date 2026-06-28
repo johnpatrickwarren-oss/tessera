@@ -146,6 +146,24 @@ export function runModeBLoop(cycles: Iterable<{ cycle: number; emitters: Emitter
   return reports;
 }
 
+/** Drive the loop over an ASYNC cycle source — the production shape, where each cycle is pulled from a live
+ *  telemetry+control feed (tools/telemetry-source.ts). `afterCycle` runs after each step; the live runner
+ *  uses it to drain a buffered ActionSink (flush the cycle's webhook/command effects) so the loop's step()
+ *  stays synchronous while real I/O happens between cycles, in order. Returns the per-cycle reports. */
+export async function runModeBLoopAsync(
+  cycles: AsyncIterable<{ cycle: number; emitters: EmitterCycle[] }>,
+  loop: ModeBLoop,
+  afterCycle?: (report: CycleReport) => Promise<void> | void,
+): Promise<CycleReport[]> {
+  const reports: CycleReport[] = [];
+  for await (const c of cycles) {
+    const r = loop.step(c.cycle, c.emitters);
+    reports.push(r);
+    if (afterCycle) await afterCycle(r);
+  }
+  return reports;
+}
+
 // ─── DEMO: replay a clustersynth bundle as an always-on loop (end-to-end on real topology) ───────────
 // Each cycle reveals more of the monitoring window: the contrast e-values grow as a fault accrues
 // evidence (so a discovery fires at the cycle where the evidence first suffices — early warning → action),
