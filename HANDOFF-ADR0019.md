@@ -1,6 +1,6 @@
 # Handoff — ADR 0019 follow-ups (next session)
 
-**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `5b6df18` (3 code follow-ups + clustersynth control arm + 2-month scale validation DONE; tree clean)
+**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `59b4da5` (3 code follow-ups + control arm + 2-month hourly AND 1 Hz mixed-cadence scale validation DONE; tree clean)
 **Read first:** `decisions/0019-two-mode-architecture-evidence-vs-fdr.md`, then `RESEARCH-INDEX.md` (§1–2 + the
 ADR-0019 architecture note), then `docs/METHODOLOGY-scale-and-duration-testing.md`. Memory carries the
 condensed version (`project_adr0019_two_mode_architecture`, `feedback_two_month_baseline_and_harness`,
@@ -71,10 +71,22 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
   SCORING NOTE (learned the hard way): the FDR positive set is gpu-level (per-shard) faults; detachment is
   factor-wide so the scorer is detachment→loaded-counters aware (commit `5b6df18`).
 
+## DONE — 1 Hz mixed-cadence validation (commit `59b4da5`)
+- **The contrast makes 1 Hz TRACTABLE where the temporal null fails.** Hourly 60d baseline + 6h 1 Hz
+  monitoring, mac mini, to 2304 shards (R=1/4/8) and 5 seeds: spatial-null **FDP 0.000**; naive TEMPORAL
+  null over-selects **FDP ≈0.97** (flags up to ALL 576 shards — the documented 1 Hz failure at scale).
+  4/5 counters get a clean Mode-B guarantee at 1 Hz; **gpu_temp_c abstains (Mode A)** — τ=120 s →
+  idiosyncratic φ≈0.99, still near-unit-root after the common-mode cancels (honest revoke).
+- Two enabling fixes (commit `59b4da5`): (1) cadence-aware fitting (estimate φ/scale + calibration at the
+  monitoring cadence from the mon pre-fault prefix, since the OU φ=exp(−dt/τ) is cadence-dependent);
+  (2) **center-before-whiten** — independent treatment/control baselines give the contrast a nonzero mean,
+  and `whiten` returns the seed tick unchanged → without centering it was an ~8σ outlier that spuriously
+  tripped the calibration monitor (revoking power_w/hbm/nvlink despite 100% whiteness). The ramp gained
+  `BASE_DT`/`MON_DT`/`MON_HOURS` (set `MON_DT=1 MON_HOURS=6` for the 1 Hz run).
+
 ## REMAINING — lower priority
-- (scale) Mixed-cadence: hourly baseline + 1-min/1Hz monitoring. The contrast removes the near-unit-root
-  common-mode the temporal null could not, so 1 Hz should be TRACTABLE here (where baseline-monitor abstained).
-  Needs streaming/multi-core analysis in clustersynth-mode-b (the in-memory path is fine at hourly scale).
+- (scale) Streaming/multi-core analysis in clustersynth-mode-b for a LONG (≥ days) 1 Hz window — the
+  in-memory path handled 6 h × 1 Hz to 2304 shards, but a multi-day 1 Hz window would exceed RAM.
 - (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done:
   baseline-monitor's renderer now states Mode A / no-guarantee honestly.
 - (research) Strengthen the calibration monitor against serial dependence directly (the O5 frontier), to

@@ -180,7 +180,17 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
     0.002**, recall 0.98–1.00. All counters Mode B. The contrast cancels common-mode (cdu/pod) faults BY
     DESIGN — those are fleet-level events out of a per-shard detector's scope. This is the achievable
     guarantee from a SPATIAL null, validated at scale on the canonical substrate.
-  - **Remaining (lower):** mixed-cadence (hourly baseline + 1-min/1Hz monitoring) — the contrast should
-    make even 1 Hz tractable since it removes the near-unit-root common-mode the temporal null could not;
-    streaming/multi-core analysis if going to 1 Hz (the in-memory path is fine at hourly scale).
+  - **1 Hz MIXED-CADENCE VALIDATION (mac mini, hourly 60d baseline + 6h 1 Hz monitoring) — DONE
+    (commit 59b4da5):** the contrast makes 1 Hz TRACTABLE where the temporal null catastrophically
+    fails. To 2304 shards (R=1/4/8) and across 5 seeds: spatial-null **FDP 0.000**; the naive TEMPORAL
+    null over-selects **FDP ≈ 0.97** (flags up to ALL 576 shards — the documented 1 Hz failure,
+    reproduced at scale). 4/5 counters get a clean Mode-B guarantee at 1 Hz (power_w/sm_util/hbm/nvlink,
+    recall ~1.0); **gpu_temp_c consistently abstains (Mode A)** — τ=120 s → idiosyncratic φ≈0.99, still
+    near-unit-root after the common-mode cancels, so the monitor honestly revokes. Two enabling fixes:
+    (i) cadence-aware fitting (estimate φ/scale at the monitoring cadence from the mon pre-fault prefix,
+    since the OU φ=exp(−dt/τ) is cadence-dependent); (ii) CENTER-BEFORE-WHITEN — the independent
+    treatment/control baselines give the contrast a nonzero mean, and `whiten` returns the seed tick
+    unchanged, so without centering it was an ~8σ outlier that spuriously tripped the monitor. The
+    in-memory path handles 6 h × 1 Hz at these scales; a long (≥days) 1 Hz window would want
+    streaming/multi-core.
 - `tools/emitter-prototype.ts` retained as the research artifact behind this ADR (prototype; not pipeline).

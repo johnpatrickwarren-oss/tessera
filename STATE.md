@@ -11,9 +11,12 @@
 > commit clustersynth `4e0797e`) + `tools/clustersynth-mode-b.ts` + ramp (Tessera `fddec22`, `5b6df18`).
 > **2-month scale validation on the mac mini (real gb200, 60d hourly baseline + 60d monitoring):** the
 > spatial-null contrast controls FDR with near-full recall up to 2304 shards — R=1/4/8/16 FDP 0.000 (recall
-> ≥0.99); R=8 × 5 seeds mean FDP 0.002. Suite 724 pass. The normalized-mixture e-value, the 2-month guard,
-> and the scaled/resumable ramp were shipped earlier (`d7bd0f5`). **Remaining (lower):** mixed-cadence
-> (hourly baseline + 1-min/1Hz monitoring) — the contrast should make even 1 Hz tractable.
+> ≥0.99); R=8 × 5 seeds mean FDP 0.002. **1 Hz MIXED-CADENCE also DONE (commit `59b4da5`):** hourly 60d
+> baseline + 6h 1Hz monitoring → spatial-null **FDP 0.000** (5 seeds, to 2304 shards) where the naive
+> temporal null over-selects **FDP ≈0.97** (the documented 1Hz failure at scale); 4/5 counters get a clean
+> Mode-B guarantee at 1Hz, gpu_temp_c honestly abstains (near-unit-root idiosyncratic OU). Suite 725 pass.
+> The normalized-mixture e-value, the 2-month guard, and the scaled/resumable ramp were shipped earlier
+> (`d7bd0f5`). **Remaining (lower):** streaming/multi-core for LONG (≥days) 1Hz windows; README two-mode language.
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
