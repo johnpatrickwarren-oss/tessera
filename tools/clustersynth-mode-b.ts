@@ -19,7 +19,9 @@
 // make even 1 Hz tractable since it kills the common-mode the temporal path could not. Tessera-original.
 
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
+import { Worker, isMainThread, workerData, parentPort } from 'node:worker_threads';
 import { loadScenarioBundle, type ScenarioBundle } from './clustersynth-scenario.js';
 import { assertLongBaseline } from './baseline-guard.js';
 import { normalizedMixtureEValue } from './mixture-evalue.js';
@@ -92,10 +94,15 @@ export function clustersynthModeBEmitter(calibrationMonitorPassing: boolean): Em
  *  positive set is the gpu-level faults that actually perturb THIS counter (its own counter, or
  *  counter=null = all counters). A pure variance_collapse (no mean change) may evade the mean-shift
  *  e-value → it only lowers recall, never inflating FDP. */
+interface CounterLoad { name: string; load?: Record<string, number> }
 function faultedSet(mon: ScenarioBundle, counter: string): Set<string> {
-  const load = (mon.counters.find((c) => c.name === counter) as { load?: Record<string, number> } | undefined)?.load ?? {};
+  return faultedSetFrom(mon.faults, mon.counters as unknown as CounterLoad[], counter);
+}
+/** As faultedSet, from raw labels + counter specs (so the streaming path can reuse it without a bundle). */
+function faultedSetFrom(faults: ReadonlyArray<unknown>, counterSpecs: CounterLoad[], counter: string): Set<string> {
+  const load = counterSpecs.find((c) => c.name === counter)?.load ?? {};
   const out = new Set<string>();
-  for (const f of mon.faults) {
+  for (const f of faults) {
     const ff = f as { level?: string; type?: string; counter?: string | null; detach_factor?: string | null; affected_shards?: string[] };
     if (ff.level !== 'gpu') continue; // per-shard only; common-mode (cdu/pod) is cancelled by design
     let hits: boolean;
@@ -136,15 +143,16 @@ const CALIB_FEED_CAP = 500;
  *  control contrasts whose own ∏g test martingale never crosses 1/α (marginal calibration holds) over a
  *  bounded feed. Per shard rather than pooled, and length-bounded — both to keep the monitor's power
  *  reasonable rather than revoking on negligible mis-calibration. */
+/** One control contrast's anytime-valid ∏g calibration verdict over a bounded feed. */
+function prefixCalibrationPass(standardized: number[], alpha = 0.01): boolean {
+  const m = freshCalibrationMonitor({ alpha });
+  updateCalibrationBatch(m, standardized.length > CALIB_FEED_CAP ? standardized.slice(0, CALIB_FEED_CAP) : standardized);
+  return m.passing;
+}
+
 function calibrationPassFraction(standardized: number[][], alpha = 0.01): number {
   if (!standardized.length) return 0;
-  let pass = 0;
-  for (const r of standardized) {
-    const m = freshCalibrationMonitor({ alpha });
-    updateCalibrationBatch(m, r.length > CALIB_FEED_CAP ? r.slice(0, CALIB_FEED_CAP) : r);
-    if (m.passing) pass++;
-  }
-  return pass / standardized.length;
+  return standardized.filter((r) => prefixCalibrationPass(r, alpha)).length / standardized.length;
 }
 
 /** CADENCE-AWARE contrast fit + the known-null calibration feed. The contrast's idiosyncratic-OU φ is
@@ -208,26 +216,23 @@ export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, 
 
 function fmt(x: number): string { return Number.isNaN(x) ? '  -  ' : x.toFixed(3); }
 
-export function renderModeB(healthyDir: string, monDir: string, q = 0.1): string {
-  const healthy = loadScenarioBundle(healthyDir);
-  assertLongBaseline(healthy.T, healthy.dt_s, 'clustersynth-mode-b (healthy baseline)');
-  const mon = loadScenarioBundle(monDir);
-  const pairs = loadControlPairs(monDir);
-  const counters = mon.counters.map((c) => c.name);
+/** Header facts for the report (shared by the in-memory and streaming paths). */
+export interface ModeBHeader { healthyShards: number; healthyT: number; healthyDt: number; monT: number; monDt: number; faults: number; pairs: number; }
 
+/** Render the report from per-counter results (shared by both paths). */
+function renderModeBReport(h: ModeBHeader, results: ModeBCounterResult[], q: number): string {
   const L: string[] = [];
-  const mixed = healthy.dt_s !== mon.dt_s;
+  const mixed = h.healthyDt !== h.monDt;
   L.push('═══ CLUSTERSYNTH MODE B — concurrent-control spatial null at scale (ADR 0019) ═══');
-  L.push(`baseline: ${healthy.shardIds.length} shards (incl. control twins) × T=${healthy.T} @ ${healthy.dt_s}s  |  monitoring: T=${mon.T} @ ${mon.dt_s}s, ${mon.faults.length} faults, ${pairs.length} pairs, q=${q}`);
-  if (mixed) L.push(`MIXED CADENCE (${healthy.dt_s}s baseline → ${mon.dt_s}s monitoring): φ/scale + calibration estimated at the monitoring cadence from the pre-fault prefix.`);
+  L.push(`baseline: ${h.healthyShards} shards (incl. control twins) × T=${h.healthyT} @ ${h.healthyDt}s  |  monitoring: T=${h.monT} @ ${h.monDt}s, ${h.faults} faults, ${h.pairs} pairs, q=${q}`);
+  if (mixed) L.push(`MIXED CADENCE (${h.healthyDt}s baseline → ${h.monDt}s monitoring): φ/scale + calibration estimated at the monitoring cadence from the pre-fault prefix.`);
   L.push('');
   L.push('counter        nFault | MODE | spatial FDP/power (K) | naive-temporal FDP/power (K) | monitor white');
   let selOk = 0, fpOk = 0, tpOk = 0, fT = 0;
-  for (const c of counters) {
-    const r = scoreCounterModeB(healthy, mon, pairs, c, q);
-    if (!r || r.nFault === 0) continue;
+  for (const r of results) {
+    if (r.nFault === 0) continue;
     fT += r.nFault; selOk += r.selected; fpOk += r.falsePos; tpOk += r.selected - r.falsePos;
-    L.push(`  ${c.padEnd(13)} ${String(r.nFault).padStart(5)} |  ${r.mode}   | ${fmt(r.fdp)}/${fmt(r.power)} (${String(r.selected).padStart(3)}) | ${fmt(r.temporalFdp)}/${fmt(r.temporalPower)} (${String(r.temporalSelected).padStart(3)}) | ${r.monitorPassing ? 'pass' : 'REVOKE'}  ${(100 * r.whiteFrac).toFixed(0)}%`);
+    L.push(`  ${r.counter.padEnd(13)} ${String(r.nFault).padStart(5)} |  ${r.mode}   | ${fmt(r.fdp)}/${fmt(r.power)} (${String(r.selected).padStart(3)}) | ${fmt(r.temporalFdp)}/${fmt(r.temporalPower)} (${String(r.temporalSelected).padStart(3)}) | ${r.monitorPassing ? 'pass' : 'REVOKE'}  ${(100 * r.whiteFrac).toFixed(0)}%`);
   }
   L.push('');
   L.push(`AGGREGATE spatial-null (Mode B) FDP: ${selOk ? (fpOk / selOk).toFixed(3) : '0.000'}  (${fpOk} false of ${selOk} selected)   recall: ${fT ? (tpOk / fT).toFixed(3) : '-'} (${tpOk}/${fT})`);
@@ -241,13 +246,176 @@ export function renderModeB(healthyDir: string, monDir: string, q = 0.1): string
   return L.join('\n');
 }
 
-if (require.main === module) {
+/** In-memory path (loads both bundles whole) — fine for same-cadence / hourly scale. */
+export function renderModeB(healthyDir: string, monDir: string, q = 0.1): string {
+  const healthy = loadScenarioBundle(healthyDir);
+  assertLongBaseline(healthy.T, healthy.dt_s, 'clustersynth-mode-b (healthy baseline)');
+  const mon = loadScenarioBundle(monDir);
+  const pairs = loadControlPairs(monDir);
+  const results = mon.counters.map((c) => scoreCounterModeB(healthy, mon, pairs, c.name, q)).filter((r): r is ModeBCounterResult => r != null);
+  const h: ModeBHeader = { healthyShards: healthy.shardIds.length, healthyT: healthy.T, healthyDt: healthy.dt_s, monT: mon.T, monDt: mon.dt_s, faults: mon.faults.length, pairs: pairs.length };
+  return renderModeBReport(h, results, q);
+}
+
+// ─── STREAMING + MULTI-CORE PATH (for LONG, e.g. multi-day 1 Hz, monitoring windows) ────────────────
+// The in-memory path loads every (shard×counter) series into RAM — fine at hourly scale but a multi-day
+// 1 Hz window (millions of ticks × thousands of shards) does not fit. This path NEVER materialises the
+// whole bundle: worker_threads each stream a BYTE RANGE of the monitoring counters.ndjson, pairing each
+// treatment row with its adjacent control row (clustersynth emits them consecutively), computing the
+// contrast e-value + per-shard calibration/whiteness scalars, and discarding the row arrays. The main
+// thread reduces the scalars (e-BH per counter, gate). Memory is O(2 rows × T) per worker, flat in fleet
+// size. The contrast fit is taken from each pair's OWN mon pre-fault prefix (cadence-correct and
+// self-contained), so the healthy baseline is only read for the ≥2-month guard (its meta, not its series).
+// Mirrors tools/baseline-monitor.ts's worker pattern; default for the CLI (CS_WORKERS=1 → in-memory).
+
+interface Row { shard: string; counter: string; v: number[] }
+interface CmbWorkerInput { __cmb_worker: true; monDir: string; byteStart: number; byteEnd: number }
+interface CmbRecord { c: string; s: string; e: number; tE: number; calibPass: boolean; white: boolean }
+
+/** Yield [line, startOffset] for complete lines from byteStart to EOF (skipping a partial leading line if
+ *  byteStart>0). Does NOT stop at any byteEnd — the pair state machine decides ownership/stopping. */
+function* linesFrom(filePath: string, byteStart: number): Generator<[string, number]> {
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const CHUNK = 1 << 22;
+    const buf = Buffer.allocUnsafe(CHUNK);
+    let filePos = byteStart, lineStart = byteStart;
+    let pending = Buffer.alloc(0);
+    let skipFirst = byteStart > 0;
+    let bytes: number;
+    while ((bytes = fs.readSync(fd, buf, 0, CHUNK, filePos)) > 0) {
+      filePos += bytes;
+      const chunk = pending.length ? Buffer.concat([pending, buf.subarray(0, bytes)]) : Buffer.from(buf.subarray(0, bytes));
+      let off = 0, nl: number;
+      while ((nl = chunk.indexOf(10, off)) >= 0) {
+        const thisStart = lineStart;
+        lineStart += nl - off + 1;
+        const line = chunk.subarray(off, nl);
+        off = nl + 1;
+        if (skipFirst) { skipFirst = false; continue; }
+        if (line.length) yield [line.toString('utf8'), thisStart];
+      }
+      pending = chunk.subarray(off);
+    }
+    if (!skipFirst && pending.length) yield [pending.toString('utf8'), lineStart];
+  } finally { fs.closeSync(fd); }
+}
+
+/** Yield [treatmentRow, controlRow] pairs whose TREATMENT line starts in [byteStart, byteEnd). Reads
+ *  past byteEnd to complete a boundary-straddling pair (treatment and control are adjacent), and skips a
+ *  leading orphan control (its treatment belongs to — and is completed by — the previous range). So each
+ *  pair is owned by exactly one worker. */
+export function* monPairs(filePath: string, byteStart: number, byteEnd: number): Generator<[Row, Row]> {
+  let pending: { row: Row; start: number } | null = null;
+  for (const [line, start] of linesFrom(filePath, byteStart)) {
+    const row = JSON.parse(line) as Row;
+    if (row.shard.endsWith('#ctrl')) {
+      if (pending && row.shard === `${pending.row.shard}#ctrl` && row.counter === pending.row.counter) yield [pending.row, row];
+      pending = null;
+    } else {
+      if (start >= byteEnd) return; // this treatment is owned by the next range
+      pending = { row, start };
+    }
+  }
+}
+
+/** Worker: stream a byte range, pair rows, emit per-pair scalars (contrast + temporal e-values + the
+ *  construction-validity flags). The fit is cadence-correct (each pair's own mon pre-fault prefix). */
+function runCmbWorker(input: CmbWorkerInput): CmbRecord[] {
+  const meta = JSON.parse(fs.readFileSync(path.join(input.monDir, 'factors.json'), 'utf8')) as { T: number };
+  const prefixN = Math.max(50, Math.floor(0.08 * meta.T));
+  const out: CmbRecord[] = [];
+  for (const [t, c] of monPairs(path.join(input.monDir, 'counters.ndjson'), input.byteStart, input.byteEnd)) {
+    const d = t.v.map((x, i) => x - c.v[i]); // the model-free spatial-null contrast
+    const fit = fitContrast(d.slice(0, prefixN));
+    const std = applyContrast(d, fit);
+    const prefixStd = std.slice(0, prefixN);
+    const tFit = fitContrast(t.v.slice(0, prefixN)); // temporal comparator (no control)
+    out.push({
+      c: t.counter, s: t.shard,
+      e: normalizedMixtureEValue(std),
+      tE: normalizedMixtureEValue(applyContrast(t.v, tFit)),
+      calibPass: prefixCalibrationPass(prefixStd),
+      white: Math.abs(autocorr(prefixStd, 1)) <= 0.1,
+    });
+  }
+  return out;
+}
+
+/** Reduce one counter's per-pair records → a ModeBCounterResult (gate → e-BH → FDP/recall vs temporal). */
+function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyArray<unknown>, specs: CounterLoad[], q: number): ModeBCounterResult | null {
+  if (!recs.length) return null;
+  const faulted = faultedSetFrom(faults, specs, counter);
+  const isFault = recs.map((r) => faulted.has(r.s));
+  const nFault = isFault.filter(Boolean).length;
+  const whiteFrac = recs.filter((r) => r.white).length / recs.length;
+  const monitorPassing = recs.filter((r) => r.calibPass).length / recs.length >= 0.8 && whiteFrac >= 0.5;
+  const emitter = clustersynthModeBEmitter(monitorPassing);
+  const mode = modeOf(emitter);
+  const sel = mode === 'B' ? fdrBenjaminiHochberg(recs.map((r) => r.e), q, emitter, 'clustersynth-mode-b').selected : [];
+  const fp = sel.filter((i) => !isFault[i]).length, tp = sel.filter((i) => isFault[i]).length;
+  const tSel = [...eBenjaminiHochberg(recs.map((r) => r.tE), q).selected];
+  const tFp = tSel.filter((i) => !isFault[i]).length, tTp = tSel.filter((i) => isFault[i]).length;
+  return {
+    counter, nFault, mode,
+    selected: sel.length, falsePos: fp, fdp: sel.length ? fp / sel.length : 0, power: nFault ? tp / nFault : NaN,
+    temporalSelected: tSel.length, temporalFdp: tSel.length ? tFp / tSel.length : 0, temporalPower: nFault ? tTp / nFault : NaN,
+    monitorPassing, whiteFrac,
+  };
+}
+
+/** Streaming + multi-core path. The healthy baseline is read for the ≥2-month guard + header only. */
+export async function renderModeBStreaming(healthyDir: string, monDir: string, q: number, nWorkers: number): Promise<string> {
+  const hMeta = JSON.parse(fs.readFileSync(path.join(healthyDir, 'factors.json'), 'utf8')) as { T: number; dt_s?: number; membership: Record<string, unknown> };
+  assertLongBaseline(hMeta.T, hMeta.dt_s ?? 1, 'clustersynth-mode-b (healthy baseline)');
+  const meta = JSON.parse(fs.readFileSync(path.join(monDir, 'factors.json'), 'utf8')) as { T: number; dt_s?: number; counters: CounterLoad[] };
+  const faults: unknown[] = JSON.parse(fs.readFileSync(path.join(monDir, 'labels.json'), 'utf8')).faults;
+  const pairs = loadControlPairs(monDir);
+
+  const file = path.join(monDir, 'counters.ndjson');
+  const size = fs.statSync(file).size;
+  const ranges: Array<[number, number]> = [];
+  for (let i = 0; i < nWorkers; i++) ranges.push([Math.floor((i * size) / nWorkers), Math.floor(((i + 1) * size) / nWorkers)]);
+  const recs = (await Promise.all(ranges.map(([byteStart, byteEnd]) => new Promise<CmbRecord[]>((resolve, reject) => {
+    const w = new Worker(__filename, { workerData: { __cmb_worker: true, monDir, byteStart, byteEnd } as CmbWorkerInput });
+    w.once('message', (m: CmbRecord[]) => resolve(m));
+    w.once('error', reject);
+    w.once('exit', (code) => { if (code !== 0) reject(new Error(`cmb worker exited ${code}`)); });
+  })))).flat();
+
+  const byCounter = new Map<string, CmbRecord[]>();
+  for (const r of recs) { let a = byCounter.get(r.c); if (!a) { a = []; byCounter.set(r.c, a); } a.push(r); }
+  const results = meta.counters.map((c) => reduceCmbCounter(c.name, byCounter.get(c.name) ?? [], faults, meta.counters, q)).filter((r): r is ModeBCounterResult => r != null);
+  const h: ModeBHeader = { healthyShards: Object.keys(hMeta.membership ?? {}).length, healthyT: hMeta.T, healthyDt: hMeta.dt_s ?? 1, monT: meta.T, monDt: meta.dt_s ?? 1, faults: faults.length, pairs: pairs.length };
+  return renderModeBReport(h, results, q);
+}
+
+/** Default worker count: all cores; CS_WORKERS=N overrides (1 = in-memory single-thread). */
+function defaultWorkers(): number {
+  if (process.env.CS_WORKERS) return Math.max(1, Number(process.env.CS_WORKERS) | 0);
+  return Math.max(1, os.availableParallelism?.() ?? os.cpus().length);
+}
+
+if (!isMainThread && (workerData as Partial<CmbWorkerInput> | undefined)?.__cmb_worker) {
+  try { parentPort!.postMessage(runCmbWorker(workerData as CmbWorkerInput)); }
+  catch (err) { parentPort!.postMessage([]); throw err; }
+} else if (require.main === module) {
   const [healthyDir, monDir] = [process.argv[2], process.argv[3]];
   if (!healthyDir || !monDir) {
-    process.stderr.write('usage: node tools/clustersynth-mode-b.js <healthy-baseline-dir> <monitoring-dir> [q]\n  both bundles must be generated WITH the control arm (CS_CONTROL_ARM=1).\n');
+    process.stderr.write('usage: node tools/clustersynth-mode-b.js <healthy-baseline-dir> <monitoring-dir> [q]\n  both bundles must be generated WITH the control arm (CS_CONTROL_ARM=1).\n  env: CS_WORKERS=N (default all cores; 1 = in-memory single-thread). Streaming is required for long 1 Hz windows.\n');
     process.exit(2);
   }
   const q = process.argv[4] ? Number(process.argv[4]) : 0.1;
-  process.stdout.write(renderModeB(healthyDir, monDir, q) + '\n');
-  process.exit(0);
+  const nWorkers = defaultWorkers();
+  // Streaming is for LONG MIXED-cadence windows (the multi-day 1 Hz case): there the fit comes from the
+  // mon pre-fault prefix, so it is self-contained and equivalent to the in-memory mixed path. For
+  // SAME-cadence the in-memory path fits from the (small) healthy baseline — a different, longer
+  // calibration window — so streaming would NOT match; keep same-cadence on the in-memory path.
+  const baseDt = (JSON.parse(fs.readFileSync(path.join(healthyDir, 'factors.json'), 'utf8')) as { dt_s?: number }).dt_s ?? 1;
+  const monDt = (JSON.parse(fs.readFileSync(path.join(monDir, 'factors.json'), 'utf8')) as { dt_s?: number }).dt_s ?? 1;
+  const useStream = nWorkers > 1 && baseDt !== monDt;
+  (async () => {
+    if (useStream) process.stdout.write(await renderModeBStreaming(healthyDir, monDir, q, nWorkers) + `\n(${nWorkers} worker threads, streaming)\n`);
+    else process.stdout.write(renderModeB(healthyDir, monDir, q) + '\n');
+  })().then(() => process.exit(0)).catch((e) => { process.stderr.write(String(e?.stack ?? e) + '\n'); process.exit(1); });
 }
