@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-06-27 · **by:** John Warren (with Claude)
 
-> **CURRENT FOCUS → see `HANDOFF-ADR0019.md`.** ADR 0019 (two-mode architecture: evidence/ranking default
+> **CURRENT FOCUS → see `HANDOFF.md`.** ADR 0019 (two-mode architecture: evidence/ranking default
 > vs FDR-guaranteed conditional) is decided + memorialized. The three code-side follow-ups are now DONE on
 > branch `three-walls-prototypes`: (1) `validity_class` code gate `tools/emitter-contract.ts` (`4733e62`);
 > (2) runtime calibration monitor `tools/calibration-monitor.ts` (`e162b83`); (3) Mode B concurrent-control
