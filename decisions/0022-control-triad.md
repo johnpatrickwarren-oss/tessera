@@ -1,10 +1,15 @@
 # ADR 0022 — control triad: two control twins per treatment (PROPOSED — prototype-validated)
 
 - **Date:** 2026-06-28
-- **Status:** **Proposed — prototype-validated.** A synthetic prototype (`tools/control-triad.ts`, unit-
-  tested, multi-seed) shows the triad recovers BOTH Mode B failure modes that the twin-PAIR detector could
-  not (ADR 0021). Not yet built into the pipeline; the clustersynth second-twin + the wired detector + a
-  mac-mini validation are the remaining work (§ Build plan).
+- **Status:** **BUILT + VALIDATED (in-memory path).** The synthetic prototype recovered both Mode B failure
+  modes; the construction is now built end-to-end and validated on real clustersynth topology, at scale.
+  Done: clustersynth second twin (`CS_TRIAD`, clustersynth `35c3afa`); the triad detector wired into
+  `tools/clustersynth-mode-b.ts` (in-memory path); committed triad mini fixture + tests. **Validated:** mini
+  (72 GPUs) and mac-mini R=8 (1728 shards) — control-only contamination drives the twin-pair detector to
+  **FDP ≈0.58–0.59**, the triad to **FDP 0.000 at recall 1.000** (flags the bad control via `c1−c2`, detects
+  on the clean sibling). Non-regressive (clean triad + non-triad path unchanged, FDP 0.000). **Remaining
+  (lower):** the STREAMING/multi-core path (mixed-cadence 1 Hz) triad — currently `flaggedControls:0` there;
+  and a real-topology comparable-peer study (the binding constraint, § Cost).
 - **Builds on:** ADR 0019 (Mode B spatial null); ADR 0021 (twin-PAIR validity detector — built, validated,
   found insufficient: κ misses the sustained-shift harm; contamination is undetectable by a twin pair
   because the contrast is sign-blind and the cohort reference hits the heterogeneous-loading wall of
@@ -36,24 +41,52 @@ loadings, and triad-protected detection eliminates the sign-blind false positive
 on real treatment faults. Robust across all 5 seeds. This is the construction ADR 0021 pointed to, confirmed
 worth building.
 
-## Build plan (the remaining work)
+## Build plan (status)
 
-1. **clustersynth:** emit a second matched twin per GPU (`#ctrl2`) under a `CS_TRIAD` / `CS_CONTROL2` flag —
-   same factor instances + loadings as the treatment, independent noise, never faulted; `control.json` pairs
-   become `{ treatment, controls: [c1, c2] }`. Reuse the existing `CS_CONTAMINATE` machinery (it already
-   targets `#ctrl` = c1) for ground truth.
-2. **Tessera triad detector** (`tools/clustersynth-mode-b.ts`): per shard, compute the control-vs-control
-   e-value `c1 − c2`; e-BH the controls to flag contaminated ones; for a flagged shard route detection to
-   the clean sibling (`t − c2`), else `t − c1` (or `t − median(c1,c2)` for the idio-noise power gain). Add
-   the flagged-control count + a triad-contamination FDR line to the report.
-3. **Validate** on the mini fixture (zero false flags on a clean triad arm; contaminated controls flagged +
-   the sign-blind FP eliminated) + a mac-mini hourly ramp; confirm Mode B FDP stays ≤ q with the triad.
+1. ✅ **clustersynth (DONE, `35c3afa`):** `CS_TRIAD` emits a second matched twin `#ctrl2` (shared loadings,
+   independent noise, never faulted); `control.json` carries `control2` per pair + `triad:true`. Reuses the
+   `CS_CONTAMINATE` machinery (targets `#ctrl` = c1). 2 tests.
+2. ✅ **Tessera triad detector (DONE, in-memory):** `scoreCounterModeB` computes the `c1−c2` sibling e-value,
+   e-BHs it to flag contaminated controls, and routes a flagged shard's detection to the clean sibling
+   `t−c2`. `flaggedControls` reported. `contrastEValuesFor` is the shared building block. Backward-compatible
+   (no `control2` → unchanged pair behavior). Committed triad mini fixture + 3 tests.
+3. ✅ **Validated:** mini (72 GPUs) + mac-mini R=8 (1728 shards) — twin-pair FDP ≈0.58–0.59 → triad FDP 0.000
+   / recall 1.000; clean triad + non-triad path non-regressive (FDP 0.000).
+4. ⬜ **Remaining (lower):** wire the triad into the STREAMING path (mixed-cadence 1 Hz); a real-topology
+   comparable-peer availability study (the binding constraint per § Cost).
 
 ## Cost / tradeoff (honest)
 
-- **Control overhead doubles** (2 canaries per treatment shard instead of 1). For a labeled control arm /
-  canary cohort this is real spend; worth it only where control-twin contamination/comparability is a live
-  risk (the comparative deployment/canary-gating setting Mode B targets, ADR 0019).
+"Control overhead doubles" conflates three different costs; decomposed:
+
+**Controls double, but total telemetry/analysis is +50%.** Mode B today is `treatment + 1 control` = 2N
+series (N = treatment shards); the triad is `treatment + 2 controls` = 3N. The *control count* doubles; the
+*data + compute* volume rises **1.5×**, not 2×.
+
+**Tessera-side compute: a ~1.5× linear bump, scaling class UNCHANGED.** The streaming path's memory is
+`O(window × workers)` — flat in fleet size (measured: peak RSS ≈ 2.4 GB on a 5.2 GB bundle, flat); the triad
+moves the per-worker constant `O(2 rows × T) → O(3 rows × T)`, negligible, so **memory stays flat**. CPU/IO/
+disk go ~1.5× (3N series vs 2N) plus one cheap extra `c1−c2` contrast per shard. Against measured numbers:
+the 72 h 1 Hz / R=8 run (5.2 GB, 16 s, in-memory peak ~2.4 GB) becomes ≈ 7.8 GB / ~24 s — still a single
+mac-mini-class box. The triad does NOT change "Tessera runs on one machine," nor the ≥2-month baseline /
+cadence / gate requirements (per-series properties, independent of control count).
+
+**Cluster hardware: only a 2× cost if controls are DEDICATED canaries — otherwise ~free.** Whether the triad
+costs real GPUs depends entirely on what plays the control role (the deployment-adapter decision):
+- **Dedicated held-out canary GPUs** → the reserved canary fraction doubles (e.g. 5% → 10% of the fleet off
+  production). This is the only regime where "overhead doubles" is literally a hardware cost.
+- **Existing fleet shards as peer references** (the per-shard SDC-detection case — every healthy GPU is a
+  potential control for its peers) → **no extra hardware**; each treatment is just compared against two peers
+  instead of one. The new requirement is topology/availability: two *comparable* peers per shard.
+- **Canary-gating** (deploy-vs-baseline, ADR 0019's comparative setting) → the control is the unchanged
+  production fleet; a triad is a *partition* of that baseline group into two sub-references — no extra
+  hardware, just enough baseline shards to split.
+
+**The binding new constraint is comparable-peer AVAILABILITY, not capacity.** The triad assumes both controls
+share the treatment's loadings, so it needs two matched peers (same GPU model / job / rack-role) per shard —
+abundant in a large homogeneous training cluster, scarce in a small/heterogeneous one. This is the same axis
+as the non-comparability caveat below; it's what to validate against a real topology, more than the compute.
+
 - The triad addresses CONTAMINATION + the sign-blind FP. NON-COMPARABILITY (treatment loadings diverging
   from the controls) is a separate axis the prototype does not stress; the within-triad contrast assumes the
   controls share the treatment's loadings. If real twins can't be loading-matched, that remains open.

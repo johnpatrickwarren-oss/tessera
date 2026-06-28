@@ -33,7 +33,7 @@ import { autocorr } from './conditional-markov.js';
 export { fitContrast, applyContrast, type ContrastFit } from './contrast.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
-interface ControlPair { treatment: string; control: string; }
+interface ControlPair { treatment: string; control: string; control2?: string; } // control2 = ADR 0022 triad twin
 
 /** The treatment→control pairing emitted by clustersynth (control.json). */
 export function loadControlPairs(dir: string): ControlPair[] {
@@ -100,6 +100,8 @@ export interface ModeBCounterResult {
   selected: number; falsePos: number; fdp: number; power: number;
   temporalSelected: number; temporalFdp: number; temporalPower: number;
   monitorPassing: boolean; whiteFrac: number;
+  /** controls flagged contaminated this counter via the c1−c2 sibling null (ADR 0022 triad; 0 if no triad). */
+  flaggedControls: number;
 }
 
 /** Wall-A whiteness fraction of the (whitened, standardized) healthy control-cohort contrasts. */
@@ -160,6 +162,36 @@ function temporalComparator(healthy: ScenarioBundle, mon: ScenarioBundle, usable
   return { K: tSel.length, fp: tSel.filter((i) => !isFault[i]).length, tp: tSel.filter((i) => isFault[i]).length };
 }
 
+/** Cadence-aware e-value of the contrast pickA − pickB (fit on the healthy/prefix feed, applied to the mon
+ *  window). Generalizes the detection e-value to any member pairing — used by the ADR 0022 triad to score
+ *  the c1−c2 sibling null and the t−c2 alternate contrast. */
+export function contrastEValuesFor(healthy: ScenarioBundle, mon: ScenarioBundle, usable: ControlPair[], counter: string, pickA: (p: ControlPair) => string, pickB: (p: ControlPair) => string): number[] {
+  const mixed = healthy.dt_s !== mon.dt_s;
+  const src = mixed ? mon : healthy;
+  const prefixN = Math.max(50, Math.floor(0.08 * mon.T));
+  return usable.map((p) => {
+    const d0 = sub(ser(src, pickA(p), counter)!, ser(src, pickB(p), counter)!);
+    const fit = fitContrast(mixed ? d0.slice(0, prefixN) : d0);
+    return normalizedMixtureEValue(applyContrast(sub(ser(mon, pickA(p), counter)!, ser(mon, pickB(p), counter)!), fit));
+  });
+}
+
+/** ADR 0022 control triad. If every pair has a present second twin, flag contaminated controls via the
+ *  c1−c2 sibling null (e-BH) and overwrite the detection e-value of a flagged shard with the clean-sibling
+ *  contrast t−c2 (so a control-only fault is not a sign-blind false positive on the treatment). Mutates `e`
+ *  in place; returns the flagged-control count (0 when there is no triad). */
+function applyTriadRouting(healthy: ScenarioBundle, mon: ScenarioBundle, usable: ControlPair[], counter: string, q: number, e: number[]): number {
+  const hasTriad = usable.every((p) => p.control2 && ser(healthy, p.control2, counter) && ser(mon, p.control2, counter));
+  if (!hasTriad) return 0;
+  const flagE = contrastEValuesFor(healthy, mon, usable, counter, (p) => p.control, (p) => p.control2!);
+  const badControl = new Set(eBenjaminiHochberg(flagE, q).selected);
+  if (badControl.size) {
+    const eC2 = contrastEValuesFor(healthy, mon, usable, counter, (p) => p.treatment, (p) => p.control2!);
+    for (const i of badControl) e[i] = eC2[i];
+  }
+  return badControl.size;
+}
+
 /** Score one counter end-to-end: spatial-null contrast (gated) vs the temporal per-shard null. */
 export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, pairs: ControlPair[], counter: string, q: number): ModeBCounterResult | null {
   const usable = pairs.filter((p) => ser(healthy, p.treatment, counter) && ser(healthy, p.control, counter) && ser(mon, p.treatment, counter) && ser(mon, p.control, counter));
@@ -177,6 +209,9 @@ export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, 
 
   // Detection: the spatial-null e-value per pair on the monitoring contrast; #1 gates e-BH on Mode B.
   const e = usable.map((p, i) => normalizedMixtureEValue(applyContrast(sub(ser(mon, p.treatment, counter)!, ser(mon, p.control, counter)!), fits[i])));
+  // ADR 0022 control triad: flag contaminated controls + re-route their detection to the clean sibling.
+  const flaggedControls = applyTriadRouting(healthy, mon, usable, counter, q, e);
+
   const sel = mode === 'B' ? fdrBenjaminiHochberg(e, q, emitter, 'clustersynth-mode-b').selected : [];
   const fp = sel.filter((i) => !isFault[i]).length;
   const tp = sel.filter((i) => isFault[i]).length;
@@ -186,7 +221,7 @@ export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, 
     counter, nFault, mode,
     selected: sel.length, falsePos: fp, fdp: sel.length ? fp / sel.length : 0, power: nFault ? tp / nFault : NaN,
     temporalSelected: t.K, temporalFdp: t.K ? t.fp / t.K : 0, temporalPower: nFault ? t.tp / nFault : NaN,
-    monitorPassing, whiteFrac,
+    monitorPassing, whiteFrac, flaggedControls,
   };
 }
 
@@ -208,10 +243,11 @@ function renderModeBReport(h: ModeBHeader, results: ModeBCounterResult[], q: num
   for (const r of results) {
     if (r.nFault === 0) continue;
     fT += r.nFault; selOk += r.selected; fpOk += r.falsePos; tpOk += r.selected - r.falsePos;
-    L.push(`  ${r.counter.padEnd(13)} ${String(r.nFault).padStart(5)} |  ${r.mode}   | ${fmt(r.fdp)}/${fmt(r.power)} (${String(r.selected).padStart(3)}) | ${fmt(r.temporalFdp)}/${fmt(r.temporalPower)} (${String(r.temporalSelected).padStart(3)}) | ${r.monitorPassing ? 'pass' : 'REVOKE'}  ${(100 * r.whiteFrac).toFixed(0)}%`);
+    L.push(`  ${r.counter.padEnd(13)} ${String(r.nFault).padStart(5)} |  ${r.mode}   | ${fmt(r.fdp)}/${fmt(r.power)} (${String(r.selected).padStart(3)}) | ${fmt(r.temporalFdp)}/${fmt(r.temporalPower)} (${String(r.temporalSelected).padStart(3)}) | ${r.monitorPassing ? 'pass' : 'REVOKE'}  ${(100 * r.whiteFrac).toFixed(0)}%${r.flaggedControls ? `  triad⚑${r.flaggedControls}` : ''}`);
   }
   L.push('');
-  L.push(`AGGREGATE spatial-null (Mode B) FDP: ${selOk ? (fpOk / selOk).toFixed(3) : '0.000'}  (${fpOk} false of ${selOk} selected)   recall: ${fT ? (tpOk / fT).toFixed(3) : '-'} (${tpOk}/${fT})`);
+  const flagged = results.reduce((s, r) => s + r.flaggedControls, 0);
+  L.push(`AGGREGATE spatial-null (Mode B) FDP: ${selOk ? (fpOk / selOk).toFixed(3) : '0.000'}  (${fpOk} false of ${selOk} selected)   recall: ${fT ? (tpOk / fT).toFixed(3) : '-'} (${tpOk}/${fT})${flagged ? `   contaminated controls flagged (triad, ADR 0022): ${flagged}` : ''}`);
   L.push('READING: the treatment−control contrast cancels the common-mode EXACTLY (shared factor instances +');
   L.push('loadings), so the spatial null is construction-valid and e-BH controls FDR ≤ q at scale with full');
   L.push('recall. The naive temporal per-shard null (no control) leaves the common-mode IN the residual, so it');
@@ -336,7 +372,7 @@ function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyAr
     counter, nFault, mode,
     selected: sel.length, falsePos: fp, fdp: sel.length ? fp / sel.length : 0, power: nFault ? tp / nFault : NaN,
     temporalSelected: tSel.length, temporalFdp: tSel.length ? tFp / tSel.length : 0, temporalPower: nFault ? tTp / nFault : NaN,
-    monitorPassing, whiteFrac,
+    monitorPassing, whiteFrac, flaggedControls: 0, // triad not wired in the streaming path (ADR 0022 follow-up)
   };
 }
 
