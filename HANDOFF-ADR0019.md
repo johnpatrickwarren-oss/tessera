@@ -165,15 +165,19 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
 - Artifacts kept: `tools/contamination-detector.ts` (κ machinery, unit-tested), `tools/contrast.ts`
   (fitContrast/applyContrast extraction, re-exported), clustersynth `CS_CONTAMINATE`/`CS_DECORRELATE_FRAC`.
 
-## ADR 0022 — control triad: PROTOTYPE-VALIDATED (2026-06-28, commit `4934c65`, decisions/0022)
-- Prototyped `tools/control-triad.ts` (synthetic heterogeneous-loading triads, 5 seeds). The triad RECOVERS
-  both ADR 0021 failure modes: contaminated-control detection (triad `c1−c2` FDP 0.000–0.025/recall 1.000 vs
-  cohort 0.25–0.82) and the sign-blind FP (pair `t−c1` FDP ~0.47 → triad-protected ≤0.065 at full recall).
-  Status: Proposed — prototype-validated. 2 tests.
-- **REMAINING for the full build (ADR 0022 § Build plan):** clustersynth 2nd matched twin (`CS_TRIAD`/`#ctrl2`,
-  control.json `controls:[c1,c2]`) reusing the existing `CS_CONTAMINATE` ground truth; wire the triad detector
-  into `clustersynth-mode-b.ts` (flag bad controls via `c1−c2`, route detection to the clean sibling); mini +
-  mac-mini validation. COST: control overhead doubles; non-comparability is a separate axis the triad skips.
+## ADR 0022 — control triad: BUILT + VALIDATED (in-memory path) (2026-06-28, clustersynth `35c3afa`, tessera `c7f81ce`)
+- Prototyped (`tools/control-triad.ts`, 5 seeds) then BUILT: clustersynth `CS_TRIAD` emits a 2nd matched twin
+  `#ctrl2` (control.json `control2` + `triad:true`); `scoreCounterModeB` → `applyTriadRouting` scores the
+  `c1−c2` sibling null, e-BHs it to flag contaminated controls, and re-routes a flagged shard's detection to
+  the clean sibling `t−c2`. Backward-compatible (no `control2` → unchanged pair behavior). Committed triad
+  mini fixture + 3 tests.
+- **Validated** end-to-end on real topology (control-only contamination, scored vs the corrected positive
+  set): mini (72 GPU) twin-pair FDP 0.579 → triad **0.000** recall 1.000; mac-mini R=8 (1728 shards) 0.588 →
+  **0.000** recall 1.000; non-regressive. Cost analysis in ADR 0022 § Cost (controls double but data/compute
+  +50%; memory flat; hardware doubling only if controls are dedicated canaries; binding constraint =
+  comparable-peer availability).
+- **REMAINING (lower):** the STREAMING path triad (mixed-cadence 1 Hz; `flaggedControls:0` there now);
+  non-comparability remains a separate axis the triad doesn't address; a real-topology comparable-peer study.
 
 ## REMAINING — lower priority
 - (research, ADR 0020 § Follow-ups) The mac-mini finding is for the ONE-SHOT harness. The **always-on loop
