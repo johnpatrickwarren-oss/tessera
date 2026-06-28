@@ -60,6 +60,17 @@
 > — the O(window×workers) streaming architecture holds at full cluster scale. Extends the 1 Hz envelope from
 > 2,304 → 9,216 units.
 
+> **2-MONTH 1 Hz BASELINE test (mac mini, 2026-06-28).** Closed the gap that the mixed-cadence path fits φ
+> from a ~29-min mon prefix, not the 2-month baseline. Built a STREAMING same-cadence long-baseline fit
+> (`fitContrastFast` mean/SD, no sort; Phase-1 stream baseline→per-shard fits, Phase-2 stream mon→detect;
+> flat memory; commit `01bdab0`). Ran 60d **1 Hz** baseline (5.18 M ticks/series) + 6h 1 Hz monitoring,
+> gpu_temp_c+power_w, RACKS 1/2/4/8 (R=8 baseline ~83 GB, gen 610 s, analysis 191 s). FINDING: a genuine
+> 2-month 1 Hz baseline HELPS (gpu_temp_c whiteness 41%→65–75%, FDR clean at **FDP 0.000** vs the prefix-fit
+> run's 0.003–0.007) but does NOT rescue gpu_temp_c — it still abstains (Mode A) at every tier. Its 1 Hz
+> abstention is **INTRINSIC** (τ=120 s → near-unit-root φ≈0.992; can't out-baseline the physics), and correct
+> (temporal comparator FDP ~0.97 → it would over-fire in Mode B). power_w certifies Mode B, FDP 0.000,
+> recall 1.000 at every tier. Resolves the open question from the earlier prefix-fit 1 Hz run.
+
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
 DeploySignal statistical-detector engine. Current work: moving from caveated artifact toward
