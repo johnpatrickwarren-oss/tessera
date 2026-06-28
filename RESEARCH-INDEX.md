@@ -138,7 +138,7 @@ the § 4 deep-research pass.
 | Xu & Ramdas 2024 — Online multiple testing with e-values (e-LOND) | **arXiv:2311.06412** (~~2501.19360~~) | [LAYER] online FDR | ✅ VERIFIED — FDR at stopped config, NOT time-uniform |
 | Xu, Fischer & Ramdas 2026 — Online e-closure + donation compound e-values (SupFDR) | **arXiv:2603.24792** | [LAYER] SupFDR / late-upgrade | ✅ VERIFIED 3-0 — SupFDR under arbitrary dependence |
 | Wang & Ramdas 2022 — FDR control with e-values (e-BH) | arXiv:2009.02824 / JRSS-B 84(3):822 | [LAYER] foundational | ✅ confirmed (P3) |
-| Choe & Ramdas 2024/26 — Combining Evidence Across Filtrations | (pending) | [WALL]? cross-filtration | pending |
+| Choe & Ramdas 2024/26 — Combining Evidence Across Filtrations (adjust-then-combine) | **arXiv:2402.09698** | [LAYER] cross-filtration | ✅ VERIFIED 3-0 — adjusters lift e-processes across filtrations (necessary, not just sufficient) |
 | Blier-Wong & Wang 2024 — Improved thresholds for e-values | arXiv:2408.11307 | [LAYER] thresholds | confirmed dropped (N5) |
 | Goeman/de Heide/Solari 2025 — e-Partitioning Principle | (pending) | [LAYER] post-hoc/RCA | pending |
 | Xu/Solari/Fischer/de Heide/Ramdas/Goeman 2025/26 — Bringing Closure to FDR Control | (pending) | [LAYER] post-hoc/RCA | pending |
@@ -148,7 +148,11 @@ the § 4 deep-research pass.
 | Grünwald, de Heide & Koolen 2024 — Safe Testing | JRSS-B 2024 (1906.07801) | [LAYER] foundational | confirmed (P2) |
 | Vovk & Wang 2024 — Merging sequential e-values via martingales | EJS 2024 | [LAYER] combination | pending |
 | Ramdas 2025 — Hypothesis Testing with E-values (monograph) | — | reference | pending |
-| Farran 2026 — Anytime-Valid Calibration Monitoring | (pending) | [WALL]? drift monitoring | pending |
+| Farran 2026 — Anytime-Valid Calibration Monitoring (PITMonitor) | **arXiv:2603.13156** | **[WALL]** drift/calibration monitoring | ✅ VERIFIED 3-0 — mixture e-process PIT monitor; **substantially longer delay under *local* (mild) drift** (corroborates ADR 0020) |
+| Saha & Ramdas 2024 — Testing Exchangeability by Pairwise Betting | **arXiv:2310.14293** (AISTATS) | **[WALL]** serial-dependence e-test | ✅ VERIFIED 3-0 — single-obs betting powerless; pairwise → power-one (even-stopping caveat) |
+| Podkopaev, Blöbaum, Kasiviswanathan & Ramdas 2023 — Sequential Kernelized Independence (SKIT) | **arXiv:2212.07383** (ICML) | **[WALL]** independence-via-betting; mild-regime power | ✅ VERIFIED 3-0 — detection time `~log(1/α)/√HSIC` (mild dep → long delay; ADR 0020) |
+| Grünwald, Henzi & Lardy 2024 — Anytime-valid conditional independence (e-statistics) | **arXiv:2209.12637** (JASA) | **[WALL]** CI-via-betting (model-X cost) | ✅ VERIFIED 3-0 |
+| Shaer, Maman & Romano 2023 — Model-free sequential testing of conditional independence | **arXiv:2210.00354** (AISTATS) | **[WALL]** CI-via-betting (model-X CRT) | ✅ VERIFIED 3-0 |
 | Prediction-Powered E-Values 2025 | (pending) | [WALL]? auxiliary-model FP | pending |
 
 _(Full curated list — incl. e-GAI, online closed testing, FWER-with-e-values, Vovk–Wang
@@ -176,6 +180,26 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   "free" = terminal-equivalence only (sequentializes, doesn't add transient power). Fleet
   layer: naive running-max e-BH FAILS (FDR≈1.08α); SupFDR needs an adjuster / donation-e-LOND
   (power penalty).
+- **2026-06-28 — anytime-valid serial-dependence/calibration testing & FDR-at-all-times** (run
+  `wf_ec62d949-67d`; 24/25 verified). **Report:**
+  [research/2026-06-28-anytime-valid-serial-and-fdr.md](research/2026-06-28-anytime-valid-serial-and-fdr.md).
+  Headline: the literature CORROBORATES ADR 0020's negative result — anytime-valid monitors pay a real power
+  penalty in the MILD-dependence regime (SKIT detection time `~1/√HSIC`, arXiv:2212.07383; PITMonitor/Farran
+  2026 longer delay under *local* drift, arXiv:2603.13156), and no source matches short-window `ρ̂`
+  sensitivity for mild-but-accumulating dependence. Hybrid estimate-then-bet = open lever (conjectural).
+  Constructions: pairwise-betting exchangeability (Saha–Ramdas, arXiv:2310.14293), CI-via-betting
+  (Grünwald–Henzi–Lardy 2209.12637; Shaer–Maman–Romano 2210.00354, model-X cost). The stopped-e-BH causal
+  condition (2502.08539) is the concrete check for conditional fleet-FDR (O5).
+- **2026-06-28 — concurrent-control / spatial-null methodology (Mode B prior art + pitfalls)** (run
+  `wf_34494774-318`; 23/25 verified). **Report:**
+  [research/2026-06-28-concurrent-control-spatial-null.md](research/2026-06-28-concurrent-control-spatial-null.md).
+  Headline: Mode B (ADR 0019) is established prior art — concurrent-control canarying (Google SRE; Netflix
+  Kayenta Mann-Whitney + effect-size floor) + peer/fleet "odd-one-out" (Hendrickx MSSP 2020 arXiv:1912.12941;
+  GREYHOUND ATC'25 cohort-median >10%). UPGRADE to the contamination framing: DiD-under-interference
+  (arXiv:2512.21176/2509.24259) proves a fault leaking into the control makes the contrast estimand
+  TATT−ASC — *uninterpretable* (neither magnitude/direction/sign), not merely weakened. **Gap → next-ADR
+  candidate:** a runtime control-contamination / non-comparability detector (we monitor the residual, not
+  twin divergence). GREYHOUND uses contrast for localization, temporal for detection — Mode B is more aggressive.
 
 ---
 

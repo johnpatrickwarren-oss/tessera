@@ -126,6 +126,26 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
 - **What does NOT change:** detection + ranking + localization remain strong and shippable (Mode A); the
   ≥2-month baseline rule (`baseline-guard`) and the scaled streaming/multi-core pipeline stand.
 
+## Prior art / external corroboration (deep research, 2026-06-28)
+
+A primary-source survey (run `wf_34494774-318`; 23/25 claims 3-vote-verified; report
+`research/2026-06-28-concurrent-control-spatial-null.md`) confirms Mode B's concurrent-control spatial null
+is established prior art, and names its pitfalls:
+- **Concurrent-control comparison is canonical practice** for exactly our reason — Google SRE Workbook:
+  "time is one of the biggest sources of change"; canarying (Netflix Kayenta / Spinnaker) judges a canary vs
+  a *concurrent* control with Mann-Whitney + an effect-size floor. Peer/fleet "odd-one-out" detection
+  (Hendrickx et al. MSSP 2020, arXiv:1912.12941; GREYHOUND ATC'25, cohort-median >10%) is the same idea, on
+  the same three assumptions we rely on: majority-healthy, identical signature, comparable environment.
+- **Control contamination is worse than stated here.** The DiD-under-interference econometrics (Mealli–
+  Viviens arXiv:2512.21176; Xiao–Sun arXiv:2509.24259) proves a fault leaking into the control makes the
+  contrast estimand `TATT − ASC` — **uninterpretable** (recovers neither magnitude, direction, nor sign),
+  not merely weakened. The common-mode blind spot (fleet-wide faults cancel by design) is acknowledged as
+  structural across this literature.
+- **Surfaced gap → next-ADR candidate:** a *runtime control-contamination / non-comparability detector*. We
+  monitor the residual (calibration + serial/whiteness) but have no explicit test for "the fault leaked into
+  the twin" or "the loadings diverged," which the DiD result says is precisely the failure that silently
+  invalidates the contrast.
+
 ## Follow-ups (flagged)
 
 - ~~Implement `validity_class` as a code gate on the e-BH entry (mirror `tools/baseline-guard.ts`).~~

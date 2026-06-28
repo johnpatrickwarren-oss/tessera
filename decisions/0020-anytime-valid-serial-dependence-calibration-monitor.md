@@ -124,6 +124,19 @@ estimating a parameter rather than accumulating a martingale.
   mild-but-binding 1 Hz case). So it is kept as a research artifact, not in the gate.
 - No change to the per-shard temporal FDR wall (N1) or the spatial-null architecture (ADR 0019).
 
+## External corroboration (deep research, 2026-06-28)
+
+A primary-source survey (run `wf_ec62d949-67d`; 24/25 claims 3-vote-verified; report
+`research/2026-06-28-anytime-valid-serial-and-fdr.md`) confirms this negative result is not a Tessera
+artifact — anytime-valid monitors pay a real power penalty *precisely* in the mild-dependence regime:
+**SKIT** (arXiv:2212.07383) has detection time `~log(1/α)/√HSIC` (weak dependence → long delay), and
+**PITMonitor** (Farran 2026, arXiv:2603.13156) reports *substantially longer detection delay under local
+(mild) drift*. No surveyed construction matches short-window `ρ̂`-thresholding for mild-but-accumulating
+dependence; **hybrid estimate-then-bet** is the open lever, conjectural in the literature too. The survey
+also flags the **stopped-e-BH causal/no-past-confounding condition** (Wang–Dandapanthula–Ramdas,
+arXiv:2502.08539) as the concrete check that would earn conditional fleet-FDR — relevant to the always-on
+loop route below.
+
 ## Follow-ups
 
 - **Always-on-loop accumulation (the one regime where it might still pay off).** The mac-mini finding is for
