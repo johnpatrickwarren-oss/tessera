@@ -61,6 +61,8 @@
     "mode-b-control": "node tools/mode-b-control.js",
     "preclustersynth-mode-b": "tsc -p tsconfig.test.json",
     "clustersynth-mode-b": "node tools/clustersynth-mode-b.js",
+    "premode-b-loop": "tsc -p tsconfig.test.json",
+    "mode-b-loop": "node tools/mode-b-loop.js",
     "preseasonal-probe": "tsc -p tsconfig.test.json",
     "seasonal-probe": "node tools/seasonal-probe.js",
     "preevalue": "tsc -p tsconfig.test.json",
