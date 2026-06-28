@@ -41,19 +41,27 @@ export function loadControlPairs(dir: string): ControlPair[] {
 const median = (xs: number[]): number => { const s = xs.slice().sort((a, b) => a - b); return s[s.length >> 1]; };
 const madScale = (xs: number[]): number => { const m = median(xs); return Math.max(1.4826 * median(xs.map((x) => Math.abs(x - m))), 1e-9); };
 
-/** The contrast fit estimated on the HEALTHY baseline contrast: AR(1) φ + robust location/scale of the
- *  whitened residual. */
-export interface ContrastFit { phi: number; loc: number; scale: number; }
+/** The contrast fit estimated on the HEALTHY baseline contrast: a centering offset (the treatment and
+ *  control have INDEPENDENT baselines, so the contrast has a nonzero mean), AR(1) φ, and robust
+ *  location/scale of the whitened residual. CENTER BEFORE WHITENING: `whiten` returns the first tick
+ *  unchanged (no prior sample), so without centering that seed tick carries the full baseline offset and
+ *  standardizes to a many-σ outlier — one fat tail per series that spuriously trips the ∏g calibration. */
+export interface ContrastFit { phi: number; loc: number; scale: number; center: number; }
 
 export function fitContrast(d0: number[]): ContrastFit {
-  const { phi } = estimateAr1(d0);
-  const w = d0.map((x, t) => whiten(x, t > 0 ? d0[t - 1] : null, phi));
-  return { phi, loc: median(w), scale: madScale(w) };
+  const center = median(d0);
+  const dc = d0.map((x) => x - center);
+  const { phi } = estimateAr1(dc);
+  const w = dc.map((x, t) => whiten(x, t > 0 ? dc[t - 1] : null, phi));
+  return { phi, loc: median(w), scale: madScale(w), center };
 }
 
-/** Apply a baseline contrast fit to a (monitoring) contrast: whiten at φ, standardize by baseline loc/scale. */
+/** Apply a baseline contrast fit to a (monitoring) contrast: center, whiten at φ, standardize by loc/scale.
+ *  The baseline is keyed by (seed, shard, counter) so it is identical across the same-seed healthy/mon
+ *  bundles — the fit's `center` removes it consistently. */
 export function applyContrast(d: number[], fit: ContrastFit): number[] {
-  return d.map((x, t) => (whiten(x, t > 0 ? d[t - 1] : null, fit.phi) - fit.loc) / fit.scale);
+  const dc = d.map((x) => x - fit.center);
+  return dc.map((x, t) => (whiten(x, t > 0 ? dc[t - 1] : null, fit.phi) - fit.loc) / fit.scale);
 }
 
 const sub = (a: number[], b: number[]): number[] => a.map((x, t) => x - b[t]);
@@ -117,20 +125,55 @@ function whiteFraction(standardized: number[][], thresh = 0.1): number {
   return standardized.filter((r) => Math.abs(autocorr(r, 1)) <= thresh).length / standardized.length;
 }
 
+/** Cap on the per-shard calibration feed length. An anytime-valid ∏g martingale's POWER grows with feed
+ *  length, so over a long (e.g. 1 Hz, 1000s-of-ticks) prefix a NEGLIGIBLE scale mis-estimate (a few %
+ *  MAD error) accumulates into a crossing and over-revokes a construction the FDR bound tolerates — the
+ *  same over-power lesson as pooling. Bounding the feed to a fixed window tests marginal calibration at a
+ *  consistent, reasonable power across cadences. (Whiteness is checked separately on the full prefix.) */
+const CALIB_FEED_CAP = 500;
+
 /** PER-SHARD anytime-valid calibration pass fraction over the healthy control cohort: the fraction of
- *  control contrasts whose own ∏g test martingale never crosses 1/α (marginal calibration holds). Run
- *  per shard rather than pooled — pooling 100s of shards × 1000s of ticks into one martingale is so
- *  powerful it revokes on negligible marginal mis-calibration the FDR bound tolerates; the per-shard
- *  fraction (mirroring the whiteness fraction) is the robust construction-validity signal. */
+ *  control contrasts whose own ∏g test martingale never crosses 1/α (marginal calibration holds) over a
+ *  bounded feed. Per shard rather than pooled, and length-bounded — both to keep the monitor's power
+ *  reasonable rather than revoking on negligible mis-calibration. */
 function calibrationPassFraction(standardized: number[][], alpha = 0.01): number {
   if (!standardized.length) return 0;
   let pass = 0;
   for (const r of standardized) {
     const m = freshCalibrationMonitor({ alpha });
-    updateCalibrationBatch(m, r);
+    updateCalibrationBatch(m, r.length > CALIB_FEED_CAP ? r.slice(0, CALIB_FEED_CAP) : r);
     if (m.passing) pass++;
   }
   return pass / standardized.length;
+}
+
+/** CADENCE-AWARE contrast fit + the known-null calibration feed. The contrast's idiosyncratic-OU φ is
+ *  CADENCE-dependent (φ = exp(−dt/τ)), so for a MIXED-cadence run (hourly baseline + fine, e.g. 1 Hz,
+ *  monitoring) the hourly φ does NOT transfer — fit at the MONITORING cadence from the mon PRE-FAULT
+ *  prefix (clustersynth onsets are ≥0.1·T, so the first ~8% is healthy). Same-cadence: fit from the full
+ *  healthy baseline (longer = better). Returns per-pair fits and the all-healthy standardized feed. */
+function cadenceAwareFit(healthy: ScenarioBundle, mon: ScenarioBundle, usable: ControlPair[], counter: string): { fits: ContrastFit[]; calStd: number[][] } {
+  const mixed = healthy.dt_s !== mon.dt_s;
+  const src = mixed ? mon : healthy;
+  const prefixN = Math.max(50, Math.floor(0.08 * mon.T));
+  const series = usable.map((p) => {
+    const d = sub(ser(src, p.treatment, counter)!, ser(src, p.control, counter)!);
+    return mixed ? d.slice(0, prefixN) : d;
+  });
+  const fits = series.map(fitContrast);
+  return { fits, calStd: series.map((d, i) => applyContrast(d, fits[i])) };
+}
+
+/** The TEMPORAL per-shard comparator (no control): standardize the mon treatment by its OWN healthy null,
+ *  cadence-correct, and e-BH it. Returns the selected count + false/true positives. This is the failing
+ *  baseline the spatial null beats (it leaves the common-mode in the residual). */
+function temporalComparator(healthy: ScenarioBundle, mon: ScenarioBundle, usable: ControlPair[], counter: string, q: number, isFault: boolean[]): { K: number; fp: number; tp: number } {
+  const mixed = healthy.dt_s !== mon.dt_s;
+  const prefixN = Math.max(50, Math.floor(0.08 * mon.T));
+  const tFits = usable.map((p) => fitContrast(mixed ? ser(mon, p.treatment, counter)!.slice(0, prefixN) : ser(healthy, p.treatment, counter)!));
+  const tE = usable.map((p, i) => normalizedMixtureEValue(applyContrast(ser(mon, p.treatment, counter)!, tFits[i])));
+  const tSel = [...eBenjaminiHochberg(tE, q).selected];
+  return { K: tSel.length, fp: tSel.filter((i) => !isFault[i]).length, tp: tSel.filter((i) => isFault[i]).length };
 }
 
 /** Score one counter end-to-end: spatial-null contrast (gated) vs the temporal per-shard null. */
@@ -138,40 +181,27 @@ export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, 
   const usable = pairs.filter((p) => ser(healthy, p.treatment, counter) && ser(healthy, p.control, counter) && ser(mon, p.treatment, counter) && ser(mon, p.control, counter));
   if (!usable.length) return null;
   const faulted = faultedSet(mon, counter);
-
-  // Baseline fit per pair (on the healthy contrast) + the known-null calibration feed.
-  const fits = usable.map((p) => fitContrast(sub(ser(healthy, p.treatment, counter)!, ser(healthy, p.control, counter)!)));
-  const healthyStd = usable.map((p, i) => applyContrast(sub(ser(healthy, p.treatment, counter)!, ser(healthy, p.control, counter)!), fits[i]));
-
-  // #2 + Wall-A: construction validity on the concurrent control cohort over the full healthy horizon.
-  // Require BOTH a broad per-shard marginal-calibration pass AND broad conditional whiteness.
-  const calibFrac = calibrationPassFraction(healthyStd);
-  const whiteFrac = whiteFraction(healthyStd);
-  const monitorPassing = calibFrac >= 0.8 && whiteFrac >= 0.5;
-  const emitter = clustersynthModeBEmitter(monitorPassing);
-  const mode = modeOf(emitter);
-
-  // Detection: the spatial-null e-value per pair on the monitoring contrast.
-  const e = usable.map((p, i) => normalizedMixtureEValue(applyContrast(sub(ser(mon, p.treatment, counter)!, ser(mon, p.control, counter)!), fits[i])));
   const isFault = usable.map((p) => faulted.has(p.treatment));
   const nFault = isFault.filter(Boolean).length;
 
-  // #1: gated e-BH only if Mode B; otherwise abstain.
+  // #2 + Wall-A: construction validity on the concurrent control cohort (per-shard calibration + whiteness).
+  const { fits, calStd } = cadenceAwareFit(healthy, mon, usable, counter);
+  const whiteFrac = whiteFraction(calStd);
+  const monitorPassing = calibrationPassFraction(calStd) >= 0.8 && whiteFrac >= 0.5;
+  const emitter = clustersynthModeBEmitter(monitorPassing);
+  const mode = modeOf(emitter);
+
+  // Detection: the spatial-null e-value per pair on the monitoring contrast; #1 gates e-BH on Mode B.
+  const e = usable.map((p, i) => normalizedMixtureEValue(applyContrast(sub(ser(mon, p.treatment, counter)!, ser(mon, p.control, counter)!), fits[i])));
   const sel = mode === 'B' ? fdrBenjaminiHochberg(e, q, emitter, 'clustersynth-mode-b').selected : [];
   const fp = sel.filter((i) => !isFault[i]).length;
   const tp = sel.filter((i) => isFault[i]).length;
-
-  // Temporal comparator (no control): standardize the monitoring treatment by its OWN healthy baseline.
-  const tFits = usable.map((p) => fitContrast(ser(healthy, p.treatment, counter)!));
-  const tE = usable.map((p, i) => normalizedMixtureEValue(applyContrast(ser(mon, p.treatment, counter)!, tFits[i])));
-  const tSel = [...eBenjaminiHochberg(tE, q).selected];
-  const tFp = tSel.filter((i) => !isFault[i]).length;
-  const tTp = tSel.filter((i) => isFault[i]).length;
+  const t = temporalComparator(healthy, mon, usable, counter, q, isFault);
 
   return {
     counter, nFault, mode,
     selected: sel.length, falsePos: fp, fdp: sel.length ? fp / sel.length : 0, power: nFault ? tp / nFault : NaN,
-    temporalSelected: tSel.length, temporalFdp: tSel.length ? tFp / tSel.length : 0, temporalPower: nFault ? tTp / nFault : NaN,
+    temporalSelected: t.K, temporalFdp: t.K ? t.fp / t.K : 0, temporalPower: nFault ? t.tp / nFault : NaN,
     monitorPassing, whiteFrac,
   };
 }
@@ -186,8 +216,10 @@ export function renderModeB(healthyDir: string, monDir: string, q = 0.1): string
   const counters = mon.counters.map((c) => c.name);
 
   const L: string[] = [];
+  const mixed = healthy.dt_s !== mon.dt_s;
   L.push('═══ CLUSTERSYNTH MODE B — concurrent-control spatial null at scale (ADR 0019) ═══');
-  L.push(`baseline: ${healthy.shardIds.length} shards (incl. control twins) × T=${healthy.T} @ ${healthy.dt_s}s  |  monitoring: T=${mon.T}, ${mon.faults.length} faults, ${pairs.length} treatment/control pairs, q=${q}`);
+  L.push(`baseline: ${healthy.shardIds.length} shards (incl. control twins) × T=${healthy.T} @ ${healthy.dt_s}s  |  monitoring: T=${mon.T} @ ${mon.dt_s}s, ${mon.faults.length} faults, ${pairs.length} pairs, q=${q}`);
+  if (mixed) L.push(`MIXED CADENCE (${healthy.dt_s}s baseline → ${mon.dt_s}s monitoring): φ/scale + calibration estimated at the monitoring cadence from the pre-fault prefix.`);
   L.push('');
   L.push('counter        nFault | MODE | spatial FDP/power (K) | naive-temporal FDP/power (K) | monitor white');
   let selOk = 0, fpOk = 0, tpOk = 0, fT = 0;

@@ -11,6 +11,7 @@ import { loadScenarioBundle } from '../tools/clustersynth-scenario.js';
 import {
   loadControlPairs, scoreCounterModeB, fitContrast, applyContrast, renderModeB,
 } from '../tools/clustersynth-mode-b.js';
+import { gInc } from '../tools/mixture-evalue.js';
 
 const FIX = path.join(__dirname, '_substrate', 'clustersynth-mode-b-mini');
 const BASE = path.join(FIX, 'base');
@@ -45,6 +46,24 @@ test('the contrast fit cancels the common-mode (median variance collapse ≫ 30�
   assert.ok(med(ratios) > 30, `median common-mode collapse should be large, got ${med(ratios).toFixed(0)}×`);
   // standardized contrast is ~unit scale (the e-value's N(0,1) input assumption)
   assert.ok(med(stdVars) > 0.4 && med(stdVars) < 2.5, `standardized contrast ~unit scale, median var ${med(stdVars).toFixed(2)}`);
+});
+
+test('the contrast fit CENTERS before whitening — the seed tick is not a baseline-offset outlier', () => {
+  // treatment and control have INDEPENDENT baselines, so the contrast has a large nonzero mean. Without
+  // centering, whiten() returns the first tick unchanged (no prior sample) carrying the full offset → an
+  // 8σ outlier that spuriously trips the calibration monitor (the 1Hz mixed-cadence bug). Centering fixes it.
+  const rng = (() => { let s = 12345; return () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }; })();
+  const gauss = (): number => { let u = 0, v = 0; while (!u) u = rng(); while (!v) v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const phi = 0.82, T = 1000, OFFSET = 70; // a persistent AR(1) contrast with a big baseline offset
+  const d: number[] = []; let x = gauss();
+  for (let t = 0; t < T; t++) { x = phi * x + Math.sqrt(1 - phi * phi) * gauss(); d.push(OFFSET + 3 * x); }
+  const std = applyContrast(d, fitContrast(d));
+  const maxAbs = Math.max(...std.map(Math.abs));
+  assert.ok(Math.abs(std[0]) < 5, `seed tick should not be an outlier, got ${std[0].toFixed(1)}σ`);
+  assert.ok(maxAbs < 6, `no extreme outliers after centering, max ${maxAbs.toFixed(1)}σ`);
+  // and it is a valid e-increment in aggregate (mean g ≲ 1) — i.e. the calibration monitor will pass
+  const meanG = std.reduce((s, r) => s + gInc(r), 0) / std.length;
+  assert.ok(meanG < 1.1, `whitened contrast should be ~calibrated (mean g=${meanG.toFixed(3)})`);
 });
 
 test('Mode B (spatial null) controls FDR with recall on every faulted counter; beats naive temporal', () => {

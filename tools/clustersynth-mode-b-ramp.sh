@@ -6,14 +6,17 @@
 # null → e-BH, gated by the validity-class gate + the runtime calibration monitor + Wall-A whiteness.
 #
 # Per rack tier R, two same-topology/seed bundles (each emits a control twin per GPU → 2×72×R shards):
-#   healthy  = faults OFF, BASE_DAYS @ DT  (default 60d hourly — the ≥2-month baseline, code-enforced)
-#   monitor  = faults ON,  MON_DAYS  @ DT  (default 60d hourly; SAME cadence as the baseline for v1)
+#   healthy  = faults OFF, BASE_DAYS @ BASE_DT  (default 60d hourly — the ≥2-month baseline, code-enforced)
+#   monitor  = faults ON,  MON_HOURS @ MON_DT   (default 60d hourly = same cadence; set MON_DT=1 for 1 Hz)
 #
 # Usage:   tools/clustersynth-mode-b-ramp.sh
 # Env knobs (all optional):
 #   RACKS="1 4 8"          rack tiers (default "1 4 8");  MAX_RACKS=N → 1,2,4,...,N
-#   BASE_DAYS=60 MON_DAYS=60   spans (both ≥56 enforced by the baseline guard in code)
-#   DT=3600                cadence (s) for BOTH bundles (single-cadence v1; hourly = tractable at scale)
+#   BASE_DAYS=60 BASE_DT=3600  healthy baseline span/cadence (≥56d enforced by the guard in code)
+#   MON_HOURS=1440 MON_DT=3600 monitoring window (hours) / cadence (s). For 1 Hz mixed cadence set e.g.
+#                          MON_DT=1 MON_HOURS=6 — the harness then estimates φ/scale + calibration at the
+#                          monitoring cadence from the pre-fault prefix (mixed-cadence path). Default =
+#                          same cadence as the baseline (60d hourly monitoring).
 #   COUNTERS=              CS_COUNTERS subset ('' = all 5 DCGM counters)
 #   WORKERS=<all cores>    per-tier generation split width
 #   SEED=1  Q=0.1
@@ -22,7 +25,8 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLUSTERSYNTH="${CLUSTERSYNTH:-$HERE/../clustersynth}"
-BASE_DAYS="${BASE_DAYS:-60}"; MON_DAYS="${MON_DAYS:-60}"; DT="${DT:-3600}"
+BASE_DAYS="${BASE_DAYS:-60}"; BASE_DT="${BASE_DT:-3600}"
+MON_DT="${MON_DT:-$BASE_DT}"; MON_HOURS="${MON_HOURS:-$(( BASE_DAYS * 24 ))}"
 COUNTERS="${COUNTERS:-}"
 SEED="${SEED:-1}"; Q="${Q:-0.1}"; KEEP="${KEEP:-0}"
 OUTDIR="${OUTDIR:-$(mktemp -d "${TMPDIR:-/tmp}/cs-modeb.XXXXXX")}"; mkdir -p "$OUTDIR"
@@ -46,8 +50,8 @@ TSX="$CLUSTERSYNTH/node_modules/.bin/tsx"
 ( cd "$HERE" && pnpm build >/dev/null 2>&1 ) || { echo "tessera build failed" >&2; exit 1; }
 ( cd "$CLUSTERSYNTH" && pnpm build >/dev/null 2>&1 ) || { echo "clustersynth build failed" >&2; exit 1; }
 
-BASE_STEPS=$(( BASE_DAYS * 86400 / DT ))
-MON_STEPS=$(( MON_DAYS * 86400 / DT ))
+BASE_STEPS=$(( BASE_DAYS * 86400 / BASE_DT ))
+MON_STEPS=$(( MON_HOURS * 3600 / MON_DT ))
 
 log(){ echo "$(date '+%F %T')  $*" | tee -a "$LOG"; }
 
@@ -70,7 +74,7 @@ gen_split(){
 }
 
 log "=== MODE B RAMP START — concurrent-control spatial null ==="
-log "baseline ${BASE_DAYS}d  monitoring ${MON_DAYS}d  @ ${DT}s (${BASE_STEPS}/${MON_STEPS} ticks)  counters='${COUNTERS:-all}'  workers=${WORKERS}  racks:${RACKS}"
+log "baseline ${BASE_DAYS}d@${BASE_DT}s (${BASE_STEPS} ticks)  monitoring ${MON_HOURS}h@${MON_DT}s (${MON_STEPS} ticks)  counters='${COUNTERS:-all}'  workers=${WORKERS}  racks:${RACKS}"
 
 for R in $RACKS; do
   if [ -f "$OUTDIR/.done-$R" ]; then
@@ -80,7 +84,7 @@ for R in $RACKS; do
   log "==== R=$R racks ($((72*R)) treatment + $((72*R)) control GPUs) ===="
   cat > "$OUTDIR/base-$R.json" <<JSON
 { "family":"gb200","pods":1,"racksPerPod":$R,"seed":$SEED, "controlArm":true,
-  "window":{"steps":$BASE_STEPS,"dt_s":$DT},
+  "window":{"steps":$BASE_STEPS,"dt_s":$BASE_DT},
   "nonstationarity":["thermal","diurnal","regime"], "faults": false }
 JSON
   # PER-SHARD faults only (gpu level): the spatial null detects idiosyncratic per-shard anomalies, and
@@ -88,7 +92,7 @@ JSON
   # correctly ignore them (cool-loaded counters aside) and is out of scope here. Mean-affecting types.
   cat > "$OUTDIR/mon-$R.json" <<JSON
 { "family":"gb200","pods":1,"racksPerPod":$R,"seed":$SEED, "controlArm":true,
-  "window":{"steps":$MON_STEPS,"dt_s":$DT},
+  "window":{"steps":$MON_STEPS,"dt_s":$MON_DT},
   "nonstationarity":["thermal","diurnal","regime"],
   "faults":{"rate":0.05,"sharedFaults":0,"levels":["gpu"],
     "types":["mean_shift","drift","detachment"]} }
@@ -99,7 +103,7 @@ JSON
   log "  generated baseline+monitoring in $((SECONDS-t0))s  (mon counters=$(du -sh "$OUTDIR/mon-$R/counters.ndjson" 2>/dev/null | cut -f1))"
   t1=$SECONDS
   node "$HERE/tools/clustersynth-mode-b.js" "$OUTDIR/base-$R" "$OUTDIR/mon-$R" "$Q" 2>>"$OUTDIR/ana.err" \
-    | grep -E "baseline:|^  (gpu_temp_c|power_w|sm_util|hbm_bw_gbps|nvlink_tx_gbps) |AGGREGATE|REVOKE" | tee -a "$LOG"
+    | grep -E "baseline:|MIXED CADENCE|^  (gpu_temp_c|power_w|sm_util|hbm_bw_gbps|nvlink_tx_gbps) |AGGREGATE" | tee -a "$LOG"
   log "  analysed in $((SECONDS-t1))s"
   touch "$OUTDIR/.done-$R"
   [ "$KEEP" = "1" ] || rm -rf "$OUTDIR/base-$R" "$OUTDIR/mon-$R"
