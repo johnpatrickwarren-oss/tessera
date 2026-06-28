@@ -17,7 +17,10 @@
 > Mode-B guarantee at 1Hz, gpu_temp_c honestly abstains (near-unit-root idiosyncratic OU). Suite 725 pass.
 > **STREAMING/multi-core for multi-day 1Hz also DONE (commit `9a3e2f6`):** worker_threads byte-range
 > streaming (pairs treatment↔control rows) → constant memory; validated on the mini at 60d hourly baseline +
-> **72h 1Hz** monitoring, FDP 0.000 to 2304 shards on **1.3/5.2/10 GB** bundles (analysed in 3/16/31s). The
+> **72h 1Hz** monitoring, FDP 0.000 to 2304 shards on **1.3/5.2/10 GB** bundles (analysed in 3/16/31s). **ALWAYS-ON Mode B LOOP shipped (commit `f27239e`):** `tools/mode-b-loop.ts` wires FDR discoveries to
+> actions — per cycle it accumulates the per-shard calibration monitors, routes each emitter via the gate,
+> dispatches FDR-controlled discoveries and withdraws them on resolve/revoke (no action without a live
+> guarantee; revocation withdraws; debounced). 9 invariant tests; end-to-end clustersynth replay CLI. The
 > normalized-mixture e-value, the 2-month guard, and the scaled/resumable ramp were shipped earlier
 > (`d7bd0f5`). **Remaining (lower):** README/capstone two-mode language; (research) monitor vs serial dependence.
 

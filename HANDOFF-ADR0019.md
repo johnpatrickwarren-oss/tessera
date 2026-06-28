@@ -1,6 +1,6 @@
 # Handoff — ADR 0019 follow-ups (next session)
 
-**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `9a3e2f6` (3 code follow-ups + control arm + 2-month hourly + 1 Hz mixed-cadence + multi-day 1 Hz STREAMING all DONE; tree clean)
+**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `f27239e` (3 follow-ups + control arm + 2-month hourly + 1 Hz mixed-cadence + multi-day 1 Hz streaming + ALWAYS-ON Mode B LOOP all DONE; tree clean)
 **Read first:** `decisions/0019-two-mode-architecture-evidence-vs-fdr.md`, then `RESEARCH-INDEX.md` (§1–2 + the
 ADR-0019 architecture note), then `docs/METHODOLOGY-scale-and-duration-testing.md`. Memory carries the
 condensed version (`project_adr0019_two_mode_architecture`, `feedback_two_month_baseline_and_harness`,
@@ -99,7 +99,22 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
   — so R=8's 10 GB bundle peaks at roughly the same RSS. `monPairs` boundary coverage is unit-tested
   (1/2/3/5/7/13/64-way splits incl. cuts between treatment and control).
 
+## DONE — always-on Mode B control loop (commit `f27239e`)
+- `tools/mode-b-loop.ts` operationalizes the two modes: per cycle it accumulates the per-shard calibration
+  monitors over the control cohort, routes each emitter via the validity-class gate, and (Mode B only)
+  runs gated e-BH → dispatches FDR-controlled discoveries as actions / withdraws them on resolve or revoke.
+  `ActionSink` is the injectable action layer (block/page/remediate); `ModeBLoop.step` is the unit;
+  `runModeBLoop` is the driver. Invariants tested (9): no-action-without-guarantee, revocation-withdraws,
+  debounce, resolution-withdraws, anytime-valid-accumulation (+ rearm), parallel-per-emitter. End-to-end
+  replay CLI: `node tools/mode-b-loop.js <base> <mon> [nCycles]` (FDR discoveries → actions over a bundle).
+- This is the operational "how Mode B triggers": a continuously-evaluated precondition (concurrent control
+  present + construction currently valid), NOT an event. Mode A is the always-on substrate; Mode B is a
+  per-emitter overlay that emits FDR-keyed actions only while its guarantee is live.
+
 ## REMAINING — lower priority
+- (deploy) A LIVE source for the loop (real telemetry+control feed) + concrete ActionSink wiring to the
+  actual control plane (rollout-gate / pager / remediation). The loop body + invariants are built and
+  tested; what's left is the production adapters (`mode-b-loop.ts` is source-agnostic by design).
 - (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done.
 - (research) Strengthen the calibration monitor against serial dependence directly (the O5 frontier).
 - (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done:
@@ -132,8 +147,12 @@ overnight + the auto-reboot-resumable handling.
 - `tools/emitter-contract.ts` — the validity_class gate (follow-up #1).
 - `tools/calibration-monitor.ts` — the anytime-valid runtime monitor (follow-up #2).
 - `tools/mode-b-control.ts` — the Mode B concurrent-control harness, SYNTHETIC (follow-up #3).
-- `tools/clustersynth-mode-b.ts` — the Mode B pipeline on REAL clustersynth topology (productionization).
-- `tools/clustersynth-mode-b-ramp.sh` — the Mode B scale entry point (control-arm gen + harness, resumable).
+- `tools/clustersynth-mode-b.ts` — the Mode B pipeline on REAL clustersynth topology (productionization;
+  in-memory + streaming/multi-core paths for multi-day 1 Hz).
+- `tools/clustersynth-mode-b-ramp.sh` — the Mode B scale entry point (control-arm gen + harness, resumable;
+  BASE_DT/MON_DT/MON_HOURS for mixed cadence).
+- `tools/mode-b-loop.ts` — the ALWAYS-ON Mode B control loop: wires FDR discoveries to actions (ModeBLoop +
+  ActionSink + the operational invariants), with an end-to-end clustersynth replay CLI.
 - `tools/mixture-evalue.ts` — default fleet-e-BH e-value object (ADR 0019).
 - `tools/baseline-monitor.ts` — canonical pipeline (streaming + multi-core; gate + e-detector + e-BH).
 - `tools/baseline-guard.ts` — 2-month enforcement.

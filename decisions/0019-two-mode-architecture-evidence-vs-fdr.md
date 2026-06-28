@@ -209,4 +209,20 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
     so R=8's 10 GB bundle peaks at roughly the same RSS, where the in-memory path would scale with the full
     bundle. `monPairs` boundary coverage is unit-tested (1/2/3/5/7/13/64-way splits, incl. cuts between
     treatment and control).
+- **ALWAYS-ON Mode B CONTROL LOOP — DONE (commit f27239e):** `tools/mode-b-loop.ts` is the orchestration
+  layer that makes the two-mode architecture OPERATIONAL — it wires Mode-B FDR discoveries to actions.
+  Each cycle, per emitter: update the PER-SHARD anytime-valid calibration monitors over the control cohort
+  (they ACCUMULATE across cycles); decide construction validity NOW (broad calibration pass + Wall-A
+  whiteness); route through the validity-class gate; if Mode B, run the gated e-BH and reconcile the
+  discovery set against standing actions — DISPATCH new, WITHDRAW resolved; on a B→A transition (guarantee
+  revoked) WITHDRAW ALL standing actions. Enforced + tested invariants (`test/mode-b-loop.test.ts`, 9):
+  **no action without a live guarantee**, **revocation withdraws**, **debounce**, **resolution withdraws**,
+  **anytime-valid accumulation** (drift spread across cycles revokes; healthy cohorts don't spuriously
+  revoke; `rearm` re-establishes), **parallel/per-emitter** routing. The concrete action (block/page/
+  remediate) is the injected `ActionSink`; the loop only says "FDR-controlled discovery, act"/"stand down".
+  End-to-end replay CLI over a clustersynth bundle: all 5 counters enter Mode B and 23 actions dispatch at
+  the cycles where each fault's evidence first crosses the e-BH threshold (early-warning→action), debounced.
+  This is the operational answer to "how does Mode B get triggered": NOT by an event, but by a continuously-
+  evaluated precondition (concurrent control present + construction currently valid); Mode A is the always-on
+  substrate, Mode B a per-emitter overlay that emits FDR-keyed actions only while its guarantee is live.
 - `tools/emitter-prototype.ts` retained as the research artifact behind this ADR (prototype; not pipeline).
