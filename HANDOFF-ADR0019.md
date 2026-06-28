@@ -133,23 +133,28 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
   (500×600, α=0.01): near-unit-root/integrated drift ~100% (beats 76% whiteness baseline), iid null 0%≤α,
   marginal breaks preserved. Honest tradeoffs: mild ρ low power BY DESIGN, negative-ρ weaker, lag-1. 8 tests.
 
-## DONE — serial-calibration monitor WIRED INTO PRODUCTION (2026-06-27, commit `25452f7`, ADR 0020)
-- The combined anytime-valid monitor (marginal + serial dependence) now SOLELY decides construction
-  validity; the separate Wall-A whiteness AND-gate + the `whitenessPass` plumbing are GONE (whiteFrac/white
-  survive only as informational report columns). Touched: `mode-b-loop.ts` (per-shard
-  freshConditionalMonitor; `constructionValid = calibFrac >= thresh`), `clustersynth-mode-b.ts`
-  (`prefixCalibrationPass` → conditional; in-memory + streaming gates drop `&& whiteFrac>=0.5`),
-  `telemetry-source.ts` (windowToEmitter drops whitenessPass). The 9 loop invariant tests now force Mode A
-  via broken/serially-dependent cohort residuals; + a new test proving serial revocation end-to-end.
-- **Mini re-validation:** clustersynth-mode-b **FDP 0.000 / recall 23/23**, all counters Mode B, ZERO
-  spurious revocations (the whitened healthy control does not trip the serial term); mode-b-loop +
-  telemetry-source replays = 23 actions, 0 withdrawn. Full suite **759 pass**. `mode-b-control.ts` (the
-  synthetic #3 artifact) intentionally left on its original whiteness check.
+## NEGATIVE RESULT — serial-monitor wiring ATTEMPTED + REVERTED (2026-06-28, `25452f7` → `2bf76f2`, ADR 0020)
+- The serial monitor was wired into the construction-validity gate (retiring the whiteness AND-gate) across
+  `mode-b-loop.ts` / `clustersynth-mode-b.ts` (in-memory+streaming) / `telemetry-source.ts`, then **reverted
+  after a mac-mini run**.
+- **Hourly passed** (2-month, RACKS 8/16 → 2304 shards: FDP 0.000, all Mode B, no spurious revokes).
+- **1 Hz REGRESSED.** Retiring whiteness left `gpu_temp_c` (idiosyncratic τ=120 s → near-unit-root φ≈0.99,
+  residual single-φ whitening only partly flattens) in Mode B, over-firing: **FDP 0.971, 511/576 selected →
+  aggregate FDP 0.869**. With whiteness RETAINED it correctly abstains (Mode A, whiteFrac 41%) → aggregate
+  **FDP 0.000** (confirmed on the mini with the reverted code). The serial monitor passed `gpu_temp_c`'s
+  feed even UNCAPPED (cap 500/1728/100000 identical).
+- **Why (mechanism):** whiteness *estimates ρ̂* from the prefix and thresholds it (sensitive from short
+  data); the betting monitor must *accumulate* sequential evidence, and the healthy prefix (≤1728 ticks) is
+  far shorter than the 21 600-tick detection horizon over which the mild residual is destructive — so it
+  never accumulates enough; the prefix length (not the feed cap) is the binding limit. **Whiteness RETAINED;
+  serial-calibration kept as a research artifact.** Suite back to **758 pass**.
 
 ## REMAINING — lower priority
-- (validation) A **mac-mini 2-month run + a 1 Hz mixed-cadence run** (to exercise the streaming `calibPass`
-  path) to confirm FDP stays 0.000 at scale with the combined monitor — the last step before declaring the
-  whiteness crutch fully retired in production (ADR 0020 § Follow-ups). Mini fixture already green.
+- (research, ADR 0020 § Follow-ups) The mac-mini finding is for the ONE-SHOT harness. The **always-on loop
+  accumulates the control cohort over the full monitoring duration** (a feed as long as the detection
+  horizon), so the serial monitor *might* catch the `gpu_temp_c`-style residual THERE — needs a multi-cycle
+  loop replay on a long 1 Hz bundle to confirm. Alternatively feed a calibration reference at the detection
+  length. Until then whiteness stays everywhere.
 - (research) Lag-k extension of the serial monitor if real residuals show higher-order structure.
 
 ## Mac-mini re-sync note

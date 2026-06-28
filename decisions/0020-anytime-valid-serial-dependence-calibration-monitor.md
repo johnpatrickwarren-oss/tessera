@@ -1,10 +1,12 @@
-# ADR 0020 — anytime-valid serial-dependence calibration monitor (retiring the whiteness-check crutch)
+# ADR 0020 — anytime-valid serial-dependence calibration monitor (sound mechanism; whiteness retained — negative result at 1 Hz)
 
 - **Date:** 2026-06-27
-- **Status:** Accepted (mechanism + validation). The strengthened monitor is shipped as
-  `tools/serial-calibration.ts` with a validating harness + suite. Wiring it into the production
-  construction-validity decision (so the separate Wall-A whiteness AND-gate can be dropped) is a scoped
-  follow-up that requires re-validation on the mini fixture + a mac-mini run — see § Follow-ups.
+- **Status:** Accepted as a sound, validated MECHANISM (`tools/serial-calibration.ts` + harness + suite),
+  but **NOT wired into the production gate** — the attempt to retire the Wall-A whiteness AND-gate was
+  tried and **reverted** after a mac-mini 1 Hz run showed it regresses FDR (commit `25452f7` →
+  reverted `2bf76f2`). The whiteness check is RETAINED. See § "Production wiring — attempted + reverted".
+  This is a useful negative result: the anytime-valid serial monitor does not *subsume* whiteness at
+  production cadence.
 - **Builds on:** ADR 0019 (two-mode architecture; the runtime calibration monitor, follow-up #2, that
   makes `construction_valid` revocable) and its documented blind spot; RESEARCH-INDEX O5 (conditional /
   serial calibration is the named frontier; Farran 2026 — anytime-valid calibration monitoring). This is
@@ -87,24 +89,50 @@ also the natural attribution (which failure mode revoked).
   with `r_{t-k}`, mixed over lags (a knob, not built).
 - **Averaging factor-2.** A one-time `−log 2`, negligible against the compounding growth rate.
 
+## Production wiring — ATTEMPTED + REVERTED (the negative result)
+
+The synthetic harness above (600-tick streams) made the serial monitor look like it *subsumes* whiteness.
+It does NOT in production. The monitor was wired into the construction-validity gate (replacing the
+marginal monitor + whiteness AND-gate) across `mode-b-loop.ts` / `clustersynth-mode-b.ts` (in-memory +
+streaming) / `telemetry-source.ts` (commit `25452f7`), then **reverted** (`2bf76f2`) after a mac-mini run.
+
+- **Mini fixture (hourly) passed** — FDP 0.000 / recall 23/23, all counters Mode B; and at scale (2-month
+  hourly, RACKS 8/16 → 2304 shards) FDP 0.000, no spurious revocations. So the wiring is non-regressive at
+  the cadences where the contrast residual is well-whitened.
+- **1 Hz REGRESSED.** With whiteness retired, `gpu_temp_c` (idiosyncratic τ=120 s → near-unit-root φ≈0.99
+  whose residual single-φ whitening only partly flattens) **stayed Mode B and over-fired: FDP 0.971, 511/576
+  selected** → aggregate FDP **0.869**. With whiteness retained it correctly **abstains** (Mode A, whiteFrac
+  41% < 50%) → aggregate FDP **0.000**. The serial monitor passed `gpu_temp_c`'s calibration feed even
+  **uncapped** (feed cap 500 → 1728 → 100000 all identical: still Mode B).
+
+**Why it cannot subsume whiteness (the mechanism).** Whiteness *estimates the lag-1 autocorrelation
+coefficient* `ρ̂` from the calibration prefix and thresholds it — sensitive to mild dependence from a short
+sample. The betting monitor must *accumulate sequential evidence*, and its power scales with feed length.
+The destructive quantity at 1 Hz is **mild-per-tick** residual autocorrelation (ρ̂≈0.1–0.2) that becomes
+ruinous only because the **detection horizon is long** (21 600 ticks). But the healthy calibration feed is
+the pre-fault prefix — only ≤1728 ticks — far shorter than the detection horizon, so the monitor never
+accumulates enough to revoke, while the detection e-value accumulates enough to over-fire. Uncapping does
+not help because the prefix length, not the cap, is the binding limit. Whiteness sidesteps this entirely by
+estimating a parameter rather than accumulating a martingale.
+
 ## Consequences
 
-- The strengthened monitor **subsumes the whiteness check for the breaks that matter**, so construction
-  validity can drop the separate `calibrationPass AND whitenessPass` composition in favor of one
-  anytime-valid monitor that catches both marginal mis-calibration AND serial dependence at a single
-  threshold. This is the O5 "conditional/serial calibration" direction made operational.
-- No change to the per-shard temporal FDR wall (N1) or the spatial-null architecture (ADR 0019). This is a
-  better *revocation* test, not a new guarantee.
+- **The whiteness check is RETAINED** as the construction-validity serial guard. The serial monitor is a
+  sound, validated anytime-valid mechanism (it does beat whiteness on *strong* breaks in the synthetic
+  harness) but it does **not** replace whiteness at production cadence, and offers no clear complementary
+  gain in an AND-composition (whiteness already catches everything the capped monitor catches, plus the
+  mild-but-binding 1 Hz case). So it is kept as a research artifact, not in the gate.
+- No change to the per-shard temporal FDR wall (N1) or the spatial-null architecture (ADR 0019).
 
 ## Follow-ups
 
-- **Wire it into the production construction-validity decision** (scoped, needs re-validation, NOT done
-  here): replace the marginal monitor + separate whiteness AND-gate with the conditional monitor in
-  `tools/mode-b-loop.ts` (`updateMonitors` / `constructionValid`), `tools/clustersynth-mode-b.ts`
-  (`prefixCalibrationPass`/`whiteFraction` → conditional), and the streaming `reduceCmbCounter`; then drop
-  the `whitenessPass` field plumbed through `EmitterCycle` / `windowToEmitter`. Re-validate on the mini
-  fixture (FDP must stay 0.000 / recall high — the contrast IS whitened, so the serial term should not
-  revoke a healthy control) and on a mac-mini 2-month run before claiming the crutch retired in production.
-  The 9 mode-b-loop invariant tests assert Mode A via `whitenessPass=false`; they must be rewritten to
-  force Mode A via serially-dependent / mis-calibrated cohort residuals.
+- **Always-on-loop accumulation (the one regime where it might still pay off).** The mac-mini finding is for
+  the ONE-SHOT harness (`clustersynth-mode-b.ts`), where the calibration feed is a single short prefix. The
+  always-on loop (`mode-b-loop.ts`) instead ACCUMULATES the per-cycle control cohort across the whole
+  monitoring duration — i.e. a feed as long as the detection horizon. There the serial monitor could plausibly
+  reach the power to catch a `gpu_temp_c`-style residual. Validating that needs a multi-cycle loop replay on a
+  long 1 Hz bundle (not done). Until then, whiteness stays everywhere.
+- **A calibration feed at the detection cadence/length** (a continuously-updated concurrent-control reference,
+  not just the pre-fault prefix) would remove the feed-length mismatch — the deeper fix if the loop route
+  doesn't suffice.
 - **Lag-k extension** if real residuals show higher-order structure the lag-1 bet misses.

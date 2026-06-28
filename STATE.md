@@ -28,13 +28,15 @@
 > remediation / fan-out; buffered I/O + drain), commit `4097f66`; (b) README two-mode claim language
 > (`6e9f853`); (c) **ADR 0020** anytime-valid serial-dependence calibration monitor `tools/serial-
 > calibration.ts` (`259af23`) — closes the marginal monitor's blind spot (bet λ_t=c·r_{t-1}, averaged with
-> the marginal martingale): near-unit-root/integrated drift ~100% (beats the 76% whiteness baseline), iid
-> null 0%≤α. **(d) WIRED INTO PRODUCTION (`25452f7`):** the combined monitor now solely gates construction
-> validity in mode-b-loop / clustersynth-mode-b (in-memory+streaming) / telemetry-source; the whiteness
-> AND-gate + whitenessPass plumbing removed (whiteFrac now informational). Mini re-validation: FDP 0.000 /
-> recall 23/23, all Mode B, zero spurious revokes; the 9 loop invariants rewritten + a serial-revoke test.
-> Suite 759 pass. **Remaining (lower):** mac-mini 2-month + 1 Hz re-validation at scale (ADR 0020
-> § Follow-ups); lag-k serial extension.
+> the marginal martingale): synthetic near-unit-root/integrated drift ~100%, iid null 0%≤α. **(d) WIRING
+> ATTEMPTED + REVERTED — NEGATIVE RESULT (`25452f7` → `2bf76f2`).** Wiring the monitor into the gate
+> (retiring whiteness) passed hourly at scale (FDP 0.000 to 2304 shards) but REGRESSED 1 Hz on the mac mini:
+> `gpu_temp_c` (near-unit-root residual) stayed Mode B and over-fired (FDP 0.97, aggregate 0.87) where
+> whiteness correctly abstains it (FDP 0.000). The betting monitor needs accumulation the short healthy
+> prefix (≤1728 ticks) can't provide vs the 21 600-tick detection horizon; whiteness estimates ρ̂ directly.
+> **Whiteness RETAINED**; serial-calibration kept as a research artifact (ADR 0020). Suite 758 pass.
+> **Remaining (lower):** the always-on loop accumulates the cohort over the full duration → could catch the
+> 1 Hz case there (un-validated, ADR 0020 § Follow-ups); lag-k serial extension.
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the

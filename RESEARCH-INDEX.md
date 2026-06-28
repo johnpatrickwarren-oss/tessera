@@ -100,10 +100,16 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
     fixed-threshold lag-1 whiteness AND-gate (the crutch, ~76% on integrated drift). `tools/serial-
     calibration.ts` makes it anytime-valid: bet `λ_t = c·r_{t-1}` in the canonical conditional e-value
     `exp(λ_t·r_t − λ_t²/2)` (E[·|F_{t-1}]=1 for any past), mixed over `c∈±{.3,.6}`, AVERAGED with the
-    marginal martingale. Catches near-unit-root/integrated drift ~100% (beats 76%), iid null 0%≤α,
-    marginal breaks preserved. Honest tradeoffs: mild ρ low power by design, negative-ρ weaker, lag-1.
-    Subsumes whiteness for the breaks that matter → construction validity can drop the AND-gate (wiring is
-    a scoped follow-up needing mini+mac-mini re-validation; ADR 0020 § Follow-ups).
+    marginal martingale. Synthetic harness (600-tick streams): near-unit-root/integrated drift ~100%, iid
+    null 0%≤α, marginal breaks preserved. **BUT does NOT subsume whiteness in production — NEGATIVE result
+    (mac-mini 1 Hz, commit 25452f7 wired → 2bf76f2 reverted).** The wiring regressed 1 Hz: `gpu_temp_c`
+    (near-unit-root residual) stayed Mode B and over-fired (FDP 0.97, aggregate 0.87) where whiteness
+    correctly abstains it (FDP 0.000). MECHANISM: whiteness *estimates ρ̂* from the prefix and thresholds it
+    (sensitive from short data); the betting monitor must *accumulate* evidence, and the healthy prefix
+    (≤1728 ticks) is far shorter than the 21 600-tick detection horizon over which the mild residual is
+    destructive — so it never accumulates enough (uncapping doesn't help; the prefix is the limit).
+    **Whiteness RETAINED.** Open: the always-on loop accumulates the cohort over the full duration → could
+    catch it there (un-validated); or feed a calibration reference at the detection length. ADR 0020.
 
 - **Fleet SupFDR (FDR-at-all-times). 🔧 PROTOTYPED (2026-06-26).** `tools/supfdr.ts` (Tessera ADR
   0018): the √E−1 adjuster (Carefree, arXiv:2501.19360) makes a running-max e-process a valid all-times
