@@ -52,6 +52,13 @@
 > controls)**. Spatial-null FDR control is scale-invariant: **FDP 0.000 at every tier**, recall 0.987 → 0.995
 > (R=64: 730 discoveries, 0 false, 730/734 faults caught); all 5 counters Mode B. Whole ramp ~90 s (hourly is
 > cheap; in-memory analysis 5/10/20/39 s per tier). Confirms ADR 0019's guarantee holds at full cluster scale.
+> **1 Hz FULL-CLUSTER test (mac mini, 2026-06-28).** Same ramp, MON_DT=1 MON_HOURS=6 (60d hourly baseline +
+> 6h 1 Hz monitoring = 21,600 ticks), RACKS 8/16/32/64. Spatial-null FDR controlled to **9,216 units** via
+> the STREAMING path: FDP 0.000/0.000/0.007/0.003 (≤ q at every tier), recall ~0.79; 4/5 counters Mode B,
+> `gpu_temp_c` honestly abstains (Mode A, near-unit-root, whiteness 41%) at every tier; naive temporal
+> over-selects FDP ~0.97. R=64 = 7.0 GB monitoring bundle analyzed in 22 s with FLAT memory (no OOM on 64 GB)
+> — the O(window×workers) streaming architecture holds at full cluster scale. Extends the 1 Hz envelope from
+> 2,304 → 9,216 units.
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
