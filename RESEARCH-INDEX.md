@@ -202,8 +202,11 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   INSUFFICIENT — κ (cancellation ratio) catches decorrelation but does NOT restore FDR (the harm is a
   sustained shift from low-κ pairs, not variance leak; sweep bottoms at FDP ~0.20 > q + over-excludes clean
   pairs); contamination is undetectable by twin-pair stats (sign-blind contrast + the heterogeneous-loading
-  cohort wall, ADR 0012/0015). Real fix = a CONTROL TRIAD (two twins → matched control-vs-control null) =
-  **ADR 0022 candidate**. Artifacts kept: clustersynth CS_CONTAMINATE/CS_DECORRELATE modes + the κ machinery.
+  cohort wall, ADR 0012/0015). Real fix = a CONTROL TRIAD (two twins → matched control-vs-control null) →
+  **ADR 0022, PROTOTYPE-VALIDATED (tools/control-triad.ts):** the sibling `c1−c2` detects a contaminated
+  control at FDP ≤ q (cohort gets 0.25–0.82) and triad-protected detection eliminates the sign-blind false
+  positive (pair FDP ~0.47 → triad ≤0.065 at full recall, 5 seeds). Full build (clustersynth 2nd twin +
+  wired detector + mac-mini) pending. Artifacts: clustersynth CS_CONTAMINATE/CS_DECORRELATE modes + κ machinery.
   GREYHOUND uses contrast for localization, temporal for detection — Mode B is more aggressive.
 
 ---

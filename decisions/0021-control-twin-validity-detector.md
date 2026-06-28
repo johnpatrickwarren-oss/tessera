@@ -71,7 +71,12 @@ needs a clean per-control reference that a heterogeneous-loading cohort cannot p
 research artifacts. Mode B's construction-validity decision is unchanged (validity-class gate + ADR 0020
 residual monitors). Non-comparability and contamination remain **characterized, not closed**.
 
-## The real fix — a CONTROL TRIAD (ADR 0022 candidate)
+## The real fix — a CONTROL TRIAD (→ ADR 0022, PROTOTYPE-VALIDATED 2026-06-28)
+
+> **Update:** prototyped in `tools/control-triad.ts` and confirmed — the triad recovers BOTH failure modes
+> below (contaminated-control detection FDP ≤ q where the cohort gets 0.25–0.82; sign-blind FP eliminated,
+> FDP 0.47→≤0.065 at full recall, 5 seeds). See **ADR 0022**.
+
 
 Both failure modes dissolve with **two independent control twins per treatment**. A matched
 **control-vs-control** contrast is a clean per-control null (no cohort heterogeneity, no temporal wall):
