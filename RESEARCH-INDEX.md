@@ -197,9 +197,10 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   Kayenta Mann-Whitney + effect-size floor) + peer/fleet "odd-one-out" (Hendrickx MSSP 2020 arXiv:1912.12941;
   GREYHOUND ATC'25 cohort-median >10%). UPGRADE to the contamination framing: DiD-under-interference
   (arXiv:2512.21176/2509.24259) proves a fault leaking into the control makes the contrast estimand
-  TATT−ASC — *uninterpretable* (neither magnitude/direction/sign), not merely weakened. **Gap → next-ADR
-  candidate:** a runtime control-contamination / non-comparability detector (we monitor the residual, not
-  twin divergence). GREYHOUND uses contrast for localization, temporal for detection — Mode B is more aggressive.
+  TATT−ASC — *uninterpretable* (neither magnitude/direction/sign), not merely weakened. **Gap → ADR 0021
+  (Proposed):** a runtime control-twin validity detector (cancellation-quality + control-cohort-consistency;
+  the contrast's sign-blindness makes contamination a FALSE-POSITIVE source, not only a miss). GREYHOUND uses
+  contrast for localization, temporal for detection — Mode B is more aggressive.
 
 ---
 

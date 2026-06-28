@@ -141,10 +141,11 @@ is established prior art, and names its pitfalls:
   contrast estimand `TATT − ASC` — **uninterpretable** (recovers neither magnitude, direction, nor sign),
   not merely weakened. The common-mode blind spot (fleet-wide faults cancel by design) is acknowledged as
   structural across this literature.
-- **Surfaced gap → next-ADR candidate:** a *runtime control-contamination / non-comparability detector*. We
-  monitor the residual (calibration + serial/whiteness) but have no explicit test for "the fault leaked into
-  the twin" or "the loadings diverged," which the DiD result says is precisely the failure that silently
-  invalidates the contrast.
+- **Surfaced gap → ADR 0021 (Proposed):** a *runtime control-twin validity detector*. We monitor the
+  residual (calibration + serial/whiteness) but have no explicit test for "the fault leaked into the twin"
+  or "the loadings diverged," which the DiD result says is precisely the failure that silently invalidates
+  the contrast. ADR 0021 specs it (cancellation-quality + control-cohort-consistency tests; the contrast's
+  sign-blindness makes contamination a FALSE-POSITIVE source, not only a miss).
 
 ## Follow-ups (flagged)
 
