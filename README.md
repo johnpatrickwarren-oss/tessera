@@ -25,7 +25,16 @@ Tessera detects deviations in AI cluster behavior at the per-shard level and acr
 - `TopologySource.fetchSnapshot(ctx?)` interface with sparse-data resilience
 - Per-shard residual semantics + topology-aware freeze-hook
 - Hierarchical e-value combination across shard/host/rack layers
-- e-BH FDR control over the per-shard verdict surface
+- e-BH FDR control over the per-shard verdict surface — **conditional**, see *Two operating modes* below
+
+**Two operating modes (ADR 0019).** FDR control is not unconditional on nonstationary fleet telemetry; the per-shard *temporal* null cannot be certified when drift is itself time-varying. Tessera therefore runs in two modes, gated per emitter by a `validity_class`:
+
+- **Mode A — evidence/ranking (DEFAULT).** Always-on continuous fleet observation: per-shard / per-region rankings + early warning, full audit trails, and **abstention** when validity cannot be established. **No FDR claim.**
+- **Mode B — FDR-guaranteed (CONDITIONAL, narrow).** e-BH-controlled discovery, admitted **only** for emitter contracts whose conditional null is `theorem_valid` or `construction_valid` over the horizon — in practice a **spatial null** (a concurrent control / canary, treatment − control), which cancels the common-mode the temporal null cannot. The guarantee is revocable: a live calibration monitor demotes an emitter B→A the moment its construction breaks.
+
+> Tessera provides FDR control only for detector emitters whose conditional null validity is established by construction over the monitoring horizon. For nonstationary telemetry where such validity cannot be established, Tessera operates in evidence-ranking mode with abstention and full audit trails.
+
+The always-on Mode B control loop ([`tools/mode-b-loop.ts`](./tools/mode-b-loop.ts)) wires FDR-controlled discoveries to the control plane via two deploy adapters: a live telemetry+control feed ([`tools/telemetry-source.ts`](./tools/telemetry-source.ts)) and pluggable [`ActionSink`s](./tools/action-sinks.ts) (rollout-gate / pager / remediation + durable audit). See [`decisions/0019-two-mode-architecture-evidence-vs-fdr.md`](./decisions/0019-two-mode-architecture-evidence-vs-fdr.md).
 
 **DeploySignal integration:**
 - HTTP API contract (TypeScript types + endpoint metadata) at `@johnpatrickwarren-oss/deploysignal-engine/ds-integration`
