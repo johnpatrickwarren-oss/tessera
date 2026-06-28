@@ -203,6 +203,10 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
     longer healthy baseline). **Validated (mac mini, 60d hourly baseline + 72 h 1 Hz monitoring, 3 days):**
     spatial-null **FDP 0.000** to 2304 shards on monitoring bundles of **1.3 / 5.2 / 10 GB** (R=1/4/8),
     analysed in 3 / 16 / 31 s; the temporal null still flags all 576 (FDP ≈0.97); gpu_temp_c abstains
-    (whiteness ~2% over the long window). `monPairs` boundary coverage is unit-tested (1/2/3/5/7/13/64-way
-    splits, incl. cuts between treatment and control).
+    (whiteness ~2% over the long window). Peak RSS on the 5.2 GB bundle = **~2.4 GB** (dominated by the 14
+    worker V8 isolates + GC high-water; the per-worker working set is just 2 rows) — and FLAT IN FLEET SIZE
+    (per-worker memory is O(window×workers), not O(shards×window); the per-pair records are tiny scalars),
+    so R=8's 10 GB bundle peaks at roughly the same RSS, where the in-memory path would scale with the full
+    bundle. `monPairs` boundary coverage is unit-tested (1/2/3/5/7/13/64-way splits, incl. cuts between
+    treatment and control).
 - `tools/emitter-prototype.ts` retained as the research artifact behind this ADR (prototype; not pipeline).

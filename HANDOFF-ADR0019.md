@@ -94,8 +94,10 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
   from the longer healthy baseline, not the prefix). CLI dispatches by cadence × CS_WORKERS.
 - **Validated (mac mini, 60d hourly baseline + 72 h 1 Hz monitoring, 3 days):** spatial-null **FDP 0.000**
   to 2304 shards on monitoring bundles of **1.3 / 5.2 / 10 GB** (R=1/4/8), analysed in **3 / 16 / 31 s**;
-  temporal null still flags all 576 (FDP ≈0.97); gpu_temp_c abstains (whiteness ~2%). `monPairs` boundary
-  coverage is unit-tested (1/2/3/5/7/13/64-way splits incl. cuts between treatment and control).
+  temporal null still flags all 576 (FDP ≈0.97); gpu_temp_c abstains (whiteness ~2%). Peak RSS on the
+  5.2 GB bundle ≈ **2.4 GB**, FLAT IN FLEET SIZE (per-worker mem is O(window×workers), not O(shards×window))
+  — so R=8's 10 GB bundle peaks at roughly the same RSS. `monPairs` boundary coverage is unit-tested
+  (1/2/3/5/7/13/64-way splits incl. cuts between treatment and control).
 
 ## REMAINING — lower priority
 - (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done.
