@@ -47,6 +47,12 @@
 > cohort wall). Real fix = a CONTROL TRIAD (two twins → matched control-vs-control null) = **ADR 0022
 > candidate**. Artifacts: `tools/contamination-detector.ts` (κ, unit-tested) + `tools/contrast.ts` refactor.
 > Suite 766 pass.
+> **FULL-CLUSTER Mode B test (mac mini, 2026-06-28).** `clustersynth-mode-b-ramp.sh`, 60d hourly baseline +
+> 60d hourly monitoring, RACKS 8/16/32/64 → up to **9,216 observation units (4,608 treatment GPUs + 4,608
+> controls)**. Spatial-null FDR control is scale-invariant: **FDP 0.000 at every tier**, recall 0.987 → 0.995
+> (R=64: 730 discoveries, 0 false, 730/734 faults caught); all 5 counters Mode B. Whole ramp ~90 s (hourly is
+> cheap; in-memory analysis 5/10/20/39 s per tier). Confirms ADR 0019's guarantee holds at full cluster scale.
+
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
 DeploySignal statistical-detector engine. Current work: moving from caveated artifact toward
