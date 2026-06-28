@@ -193,4 +193,16 @@ DCGM counters), per `docs/METHODOLOGY-scale-and-duration-testing.md`.
     unchanged, so without centering it was an ~8σ outlier that spuriously tripped the monitor. The
     in-memory path handles 6 h × 1 Hz at these scales; a long (≥days) 1 Hz window would want
     streaming/multi-core.
+  - **STREAMING + MULTI-CORE for multi-day 1 Hz — DONE (commit 9a3e2f6):** `tools/clustersynth-mode-b.ts`
+    gained a worker_threads byte-range streaming path (mirrors baseline-monitor) that NEVER materialises
+    the bundle — each worker streams a byte range of the mon counters.ndjson, pairs each treatment row
+    with its adjacent control row (`monPairs`, owning a pair iff its treatment starts in [byteStart,
+    byteEnd), reading past the boundary to complete a straddling pair), computes the contrast e-value +
+    calibration/whiteness scalars, and discards the arrays. Memory is O(2 rows × T) per worker, flat in
+    fleet size. Byte-identical to the in-memory mixed path; same-cadence stays in-memory (it fits from the
+    longer healthy baseline). **Validated (mac mini, 60d hourly baseline + 72 h 1 Hz monitoring, 3 days):**
+    spatial-null **FDP 0.000** to 2304 shards on monitoring bundles of **1.3 / 5.2 / 10 GB** (R=1/4/8),
+    analysed in 3 / 16 / 31 s; the temporal null still flags all 576 (FDP ≈0.97); gpu_temp_c abstains
+    (whiteness ~2% over the long window). `monPairs` boundary coverage is unit-tested (1/2/3/5/7/13/64-way
+    splits, incl. cuts between treatment and control).
 - `tools/emitter-prototype.ts` retained as the research artifact behind this ADR (prototype; not pipeline).

@@ -1,6 +1,6 @@
 # Handoff — ADR 0019 follow-ups (next session)
 
-**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `59b4da5` (3 code follow-ups + control arm + 2-month hourly AND 1 Hz mixed-cadence scale validation DONE; tree clean)
+**Date:** 2026-06-27 · **Branch:** `three-walls-prototypes` · **Latest commit:** `9a3e2f6` (3 code follow-ups + control arm + 2-month hourly + 1 Hz mixed-cadence + multi-day 1 Hz STREAMING all DONE; tree clean)
 **Read first:** `decisions/0019-two-mode-architecture-evidence-vs-fdr.md`, then `RESEARCH-INDEX.md` (§1–2 + the
 ADR-0019 architecture note), then `docs/METHODOLOGY-scale-and-duration-testing.md`. Memory carries the
 condensed version (`project_adr0019_two_mode_architecture`, `feedback_two_month_baseline_and_harness`,
@@ -84,9 +84,22 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
   tripped the calibration monitor (revoking power_w/hbm/nvlink despite 100% whiteness). The ramp gained
   `BASE_DT`/`MON_DT`/`MON_HOURS` (set `MON_DT=1 MON_HOURS=6` for the 1 Hz run).
 
+## DONE — streaming/multi-core for multi-day 1 Hz (commit `9a3e2f6`)
+- `tools/clustersynth-mode-b.ts` gained a worker_threads byte-range streaming path (mirrors
+  baseline-monitor): each worker streams a byte range of the mon counters.ndjson, pairs each treatment row
+  with its adjacent control row (`monPairs` — owns a pair iff its treatment starts in [byteStart, byteEnd),
+  reads past the boundary to complete a straddling pair, skips a leading orphan control), computes the
+  contrast e-value + calibration/whiteness scalars, discards the arrays. **Memory O(2 rows × T) per worker,
+  flat in fleet size.** Byte-identical to the in-memory mixed path; same-cadence stays in-memory (it fits
+  from the longer healthy baseline, not the prefix). CLI dispatches by cadence × CS_WORKERS.
+- **Validated (mac mini, 60d hourly baseline + 72 h 1 Hz monitoring, 3 days):** spatial-null **FDP 0.000**
+  to 2304 shards on monitoring bundles of **1.3 / 5.2 / 10 GB** (R=1/4/8), analysed in **3 / 16 / 31 s**;
+  temporal null still flags all 576 (FDP ≈0.97); gpu_temp_c abstains (whiteness ~2%). `monPairs` boundary
+  coverage is unit-tested (1/2/3/5/7/13/64-way splits incl. cuts between treatment and control).
+
 ## REMAINING — lower priority
-- (scale) Streaming/multi-core analysis in clustersynth-mode-b for a LONG (≥ days) 1 Hz window — the
-  in-memory path handled 6 h × 1 Hz to 2304 shards, but a multi-day 1 Hz window would exceed RAM.
+- (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done.
+- (research) Strengthen the calibration monitor against serial dependence directly (the O5 frontier).
 - (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done:
   baseline-monitor's renderer now states Mode A / no-guarantee honestly.
 - (research) Strengthen the calibration monitor against serial dependence directly (the O5 frontier), to

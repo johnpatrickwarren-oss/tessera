@@ -15,8 +15,11 @@
 > baseline + 6h 1Hz monitoring → spatial-null **FDP 0.000** (5 seeds, to 2304 shards) where the naive
 > temporal null over-selects **FDP ≈0.97** (the documented 1Hz failure at scale); 4/5 counters get a clean
 > Mode-B guarantee at 1Hz, gpu_temp_c honestly abstains (near-unit-root idiosyncratic OU). Suite 725 pass.
-> The normalized-mixture e-value, the 2-month guard, and the scaled/resumable ramp were shipped earlier
-> (`d7bd0f5`). **Remaining (lower):** streaming/multi-core for LONG (≥days) 1Hz windows; README two-mode language.
+> **STREAMING/multi-core for multi-day 1Hz also DONE (commit `9a3e2f6`):** worker_threads byte-range
+> streaming (pairs treatment↔control rows) → constant memory; validated on the mini at 60d hourly baseline +
+> **72h 1Hz** monitoring, FDP 0.000 to 2304 shards on **1.3/5.2/10 GB** bundles (analysed in 3/16/31s). The
+> normalized-mixture e-value, the 2-month guard, and the scaled/resumable ramp were shipped earlier
+> (`d7bd0f5`). **Remaining (lower):** README/capstone two-mode language; (research) monitor vs serial dependence.
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
