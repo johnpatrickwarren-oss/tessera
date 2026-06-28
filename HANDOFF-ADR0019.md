@@ -165,9 +165,17 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
 - Artifacts kept: `tools/contamination-detector.ts` (κ machinery, unit-tested), `tools/contrast.ts`
   (fitContrast/applyContrast extraction, re-exported), clustersynth `CS_CONTAMINATE`/`CS_DECORRELATE_FRAC`.
 
+## ADR 0022 — control triad: PROTOTYPE-VALIDATED (2026-06-28, commit `4934c65`, decisions/0022)
+- Prototyped `tools/control-triad.ts` (synthetic heterogeneous-loading triads, 5 seeds). The triad RECOVERS
+  both ADR 0021 failure modes: contaminated-control detection (triad `c1−c2` FDP 0.000–0.025/recall 1.000 vs
+  cohort 0.25–0.82) and the sign-blind FP (pair `t−c1` FDP ~0.47 → triad-protected ≤0.065 at full recall).
+  Status: Proposed — prototype-validated. 2 tests.
+- **REMAINING for the full build (ADR 0022 § Build plan):** clustersynth 2nd matched twin (`CS_TRIAD`/`#ctrl2`,
+  control.json `controls:[c1,c2]`) reusing the existing `CS_CONTAMINATE` ground truth; wire the triad detector
+  into `clustersynth-mode-b.ts` (flag bad controls via `c1−c2`, route detection to the clean sibling); mini +
+  mac-mini validation. COST: control overhead doubles; non-comparability is a separate axis the triad skips.
+
 ## REMAINING — lower priority
-- (ADR 0022 candidate) **Control triad** — spec + validate two-twin matched control-vs-control null using the
-  clustersynth contamination/decorrelation modes already built; the construction that can close both modes.
 - (research, ADR 0020 § Follow-ups) The mac-mini finding is for the ONE-SHOT harness. The **always-on loop
   accumulates the control cohort over the full monitoring duration** (a feed as long as the detection
   horizon), so the serial monitor *might* catch the `gpu_temp_c`-style residual THERE — needs a multi-cycle
