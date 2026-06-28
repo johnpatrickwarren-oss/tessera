@@ -26,7 +26,7 @@
 // (e.g. tools/clustersynth-mode-b.ts); the loop orchestrates. Tessera-original.
 
 import { fdrBenjaminiHochberg, modeOf, type EmitterContract, type Mode } from './emitter-contract.js';
-import { freshCalibrationMonitor, updateCalibrationBatch, type CalibrationMonitorState } from './calibration-monitor.js';
+import { freshConditionalMonitor, updateConditionalBatch, type ConditionalMonitorState } from './serial-calibration.js';
 
 export type WithdrawReason = 'resolved' | 'revoked';
 
@@ -56,15 +56,15 @@ export interface EmitterCycle {
   /** Per-shard contrast e-value over the data SO FAR (anytime-valid running value). */
   eValues: number[];
   /** This cycle's NEW known-null residuals, one stream per concurrent-control unit. Fed PER SHARD into
-   *  separate accumulating martingales (pooling over-powers — ADR 0019 productionization finding). */
+   *  separate accumulating ANYTIME-VALID monitors (pooling over-powers — ADR 0019 productionization
+   *  finding). Each monitor tests BOTH marginal calibration AND serial dependence (ADR 0020), so the
+   *  construction-validity decision no longer needs a separate whiteness gate. */
   calibrationSamples: number[][];
-  /** The Wall-A whiteness verdict for the construction this cycle (serial-dependence guard). */
-  whitenessPass: boolean;
 }
 
 export interface EmitterReport {
   emitter: string; mode: Mode; modeChanged: boolean; constructionValid: boolean;
-  calibFrac: number; whitenessPass: boolean;
+  calibFrac: number;
   selected: number; dispatched: number; withdrawn: number; standing: number;
 }
 export interface CycleReport { cycle: number; emitters: EmitterReport[] }
@@ -76,7 +76,7 @@ export class ModeBLoop {
   private readonly alpha: number;
   private readonly calibThresh: number;
   private readonly sink: ActionSink;
-  private readonly monitors = new Map<string, CalibrationMonitorState[]>(); // emitter → per-shard monitors
+  private readonly monitors = new Map<string, ConditionalMonitorState[]>(); // emitter → per-shard monitors
   private readonly standing = new Map<string, Map<string, FleetAction>>();   // emitter → shard → action
   private readonly lastMode = new Map<string, Mode>();
 
@@ -96,18 +96,20 @@ export class ModeBLoop {
     return { cycle, emitters: emitters.map((e) => this.stepEmitter(cycle, e)) };
   }
 
-  /** Update the per-shard accumulating calibration monitors; return the fraction still passing. */
+  /** Update the per-shard accumulating ANYTIME-VALID monitors (marginal calibration + serial dependence,
+   *  ADR 0020); return the fraction still passing. The serial term subsumes the old separate whiteness
+   *  gate — a serially-dependent (e.g. integrated-drift) control revokes its own monitor here. */
   private updateMonitors(id: string, samples: number[][]): number {
     let mons = this.monitors.get(id);
-    if (!mons || mons.length !== samples.length) { mons = samples.map(() => freshCalibrationMonitor({ alpha: this.alpha })); this.monitors.set(id, mons); }
-    samples.forEach((s, i) => updateCalibrationBatch(mons![i], s));
+    if (!mons || mons.length !== samples.length) { mons = samples.map(() => freshConditionalMonitor({ alpha: this.alpha })); this.monitors.set(id, mons); }
+    samples.forEach((s, i) => updateConditionalBatch(mons![i], s));
     return mons.length ? mons.filter((m) => m.passing).length / mons.length : 1;
   }
 
   private stepEmitter(cycle: number, ec: EmitterCycle): EmitterReport {
     const id = ec.contract.id;
     const calibFrac = this.updateMonitors(id, ec.calibrationSamples);
-    const constructionValid = calibFrac >= this.calibThresh && ec.whitenessPass;
+    const constructionValid = calibFrac >= this.calibThresh;
     const contract: EmitterContract = { ...ec.contract, calibrationMonitorPassing: constructionValid };
     const mode = modeOf(contract);
     const prev = this.lastMode.get(id) ?? 'A';
@@ -118,7 +120,7 @@ export class ModeBLoop {
     if (mode === 'B') for (const i of fdrBenjaminiHochberg(ec.eValues, this.q, contract, `mode-b-loop:${id}`).selected) discovered.set(ec.shards[i], ec.eValues[i]);
 
     const { dispatched, withdrawn, standing } = this.reconcile(id, cycle, discovered, prev === 'B' && mode === 'A');
-    return { emitter: id, mode, modeChanged: mode !== prev, constructionValid, calibFrac, whitenessPass: ec.whitenessPass, selected: discovered.size, dispatched, withdrawn, standing };
+    return { emitter: id, mode, modeChanged: mode !== prev, constructionValid, calibFrac, selected: discovered.size, dispatched, withdrawn, standing };
   }
 
   /** Diff the new discovery set against standing actions: dispatch new ones, withdraw gone ones (reason
@@ -172,9 +174,8 @@ export async function runModeBLoopAsync(
 import { loadScenarioBundle, type ScenarioBundle } from './clustersynth-scenario.js';
 import { loadControlPairs, fitContrast, applyContrast, clustersynthModeBEmitter } from './clustersynth-mode-b.js';
 import { normalizedMixtureEValue } from './mixture-evalue.js';
-import { autocorr } from './conditional-markov.js';
 
-interface CounterReplay { c: string; shards: string[]; monStd: number[][]; calStd: number[][]; whitenessPass: boolean }
+interface CounterReplay { c: string; shards: string[]; monStd: number[][]; calStd: number[][] }
 
 const seriesOf = (b: ScenarioBundle, s: string, c: string): number[] | undefined => b.series.get(`${s}\0${c}`);
 const contrastOf = (b: ScenarioBundle, p: { treatment: string; control: string }, c: string): number[] =>
@@ -188,8 +189,7 @@ function counterReplay(healthy: ScenarioBundle, mon: ScenarioBundle, pairs: Arra
   const fits = hC.map(fitContrast);
   const monStd = usable.map((p, i) => applyContrast(contrastOf(mon, p, c), fits[i]));
   const calStd = hC.map((d, i) => applyContrast(d, fits[i]));
-  const whitenessPass = calStd.filter((r) => Math.abs(autocorr(r, 1)) <= 0.1).length / calStd.length >= 0.5;
-  return { c, shards: usable.map((p) => p.treatment), monStd, calStd, whitenessPass };
+  return { c, shards: usable.map((p) => p.treatment), monStd, calStd };
 }
 
 /** Replay a same-cadence clustersynth bundle pair as nCycles of an always-on loop. */
@@ -208,7 +208,6 @@ export function replayClustersynthCycles(healthyDir: string, monDir: string, nCy
       shards: col.shards,
       eValues: col.monStd.map((s) => normalizedMixtureEValue(s.slice(0, monEnd))),
       calibrationSamples: col.calStd.map((s) => s.slice(calLo, calHi)),
-      whitenessPass: col.whitenessPass,
     }));
     cycles.push({ cycle: k, emitters });
   }

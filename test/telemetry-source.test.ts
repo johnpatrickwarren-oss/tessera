@@ -77,7 +77,6 @@ test('windowToEmitter: a fault (shift vs the baseline fit) yields a huge contras
   assert.ok(ec.eValues[0] > 1e3, `faulted shard e-value ${ec.eValues[0]} should be large`);
   assert.ok(ec.eValues[1] < 100, `healthy shard e-value ${ec.eValues[1]} should be ~null`);
   assert.equal(ec.calibrationSamples.length, SHARDS.length);
-  assert.equal(ec.whitenessPass, true, 'whitened healthy cohort passes Wall-A');
   assert.equal(ec.contract.id, 'live-mode-b/power_w');
 });
 

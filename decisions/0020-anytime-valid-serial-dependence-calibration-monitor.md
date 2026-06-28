@@ -1,10 +1,15 @@
 # ADR 0020 — anytime-valid serial-dependence calibration monitor (retiring the whiteness-check crutch)
 
 - **Date:** 2026-06-27
-- **Status:** Accepted (mechanism + validation). The strengthened monitor is shipped as
-  `tools/serial-calibration.ts` with a validating harness + suite. Wiring it into the production
-  construction-validity decision (so the separate Wall-A whiteness AND-gate can be dropped) is a scoped
-  follow-up that requires re-validation on the mini fixture + a mac-mini run — see § Follow-ups.
+- **Status:** Accepted + WIRED INTO PRODUCTION. The strengthened monitor is `tools/serial-calibration.ts`
+  with a validating harness + suite, and it now backs the construction-validity decision in
+  `tools/mode-b-loop.ts`, `tools/clustersynth-mode-b.ts` (in-memory + streaming), and
+  `tools/telemetry-source.ts` — the separate Wall-A whiteness AND-gate and the `whitenessPass` plumbing are
+  GONE (whiteness survives only as an informational report column). Re-validated on the mini fixture: FDP
+  stays 0.000 / recall 23/23, all counters Mode B, zero spurious revocations (the whitened healthy control
+  does not trip the serial term), and a new loop test proves serial-dependence revocation end-to-end. The
+  one remaining validation is a mac-mini 2-month (+ 1 Hz, to exercise the streaming path) run — see
+  § Follow-ups.
 - **Builds on:** ADR 0019 (two-mode architecture; the runtime calibration monitor, follow-up #2, that
   makes `construction_valid` revocable) and its documented blind spot; RESEARCH-INDEX O5 (conditional /
   serial calibration is the named frontier; Farran 2026 — anytime-valid calibration monitoring). This is
@@ -98,13 +103,17 @@ also the natural attribution (which failure mode revoked).
 
 ## Follow-ups
 
-- **Wire it into the production construction-validity decision** (scoped, needs re-validation, NOT done
-  here): replace the marginal monitor + separate whiteness AND-gate with the conditional monitor in
-  `tools/mode-b-loop.ts` (`updateMonitors` / `constructionValid`), `tools/clustersynth-mode-b.ts`
-  (`prefixCalibrationPass`/`whiteFraction` → conditional), and the streaming `reduceCmbCounter`; then drop
-  the `whitenessPass` field plumbed through `EmitterCycle` / `windowToEmitter`. Re-validate on the mini
-  fixture (FDP must stay 0.000 / recall high — the contrast IS whitened, so the serial term should not
-  revoke a healthy control) and on a mac-mini 2-month run before claiming the crutch retired in production.
-  The 9 mode-b-loop invariant tests assert Mode A via `whitenessPass=false`; they must be rewritten to
-  force Mode A via serially-dependent / mis-calibrated cohort residuals.
+- **Production wiring — DONE (2026-06-27).** The conditional monitor replaced the marginal monitor +
+  separate whiteness AND-gate in `tools/mode-b-loop.ts` (`updateMonitors` / `constructionValid`),
+  `tools/clustersynth-mode-b.ts` (`prefixCalibrationPass` → conditional; the in-memory and streaming gates
+  dropped `&& whiteFrac >= 0.5`), and the `whitenessPass` field was removed from `EmitterCycle` /
+  `EmitterReport` / `windowToEmitter`. whiteFrac/white remain as informational report columns only. The 9
+  mode-b-loop invariant tests were rewritten to force Mode A via broken / serially-dependent cohort
+  residuals (not the removed `whitenessPass`), plus a new test proving serial-dependence revocation
+  end-to-end through the loop. Mini-fixture re-validation: FDP 0.000 / recall 23/23, all counters Mode B,
+  zero spurious revocations; full suite 759 pass. (`tools/mode-b-control.ts`, the synthetic #3 artifact, was
+  intentionally left on its original whiteness check — it is a historical demonstration, not a pipeline.)
+- **Remaining validation:** a mac-mini 2-month run (and a 1 Hz mixed-cadence run to exercise the streaming
+  `calibPass` path) to confirm FDP stays 0.000 at scale with the combined monitor before declaring the
+  crutch fully retired in production.
 - **Lag-k extension** if real residuals show higher-order structure the lag-1 bet misses.

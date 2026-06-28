@@ -25,7 +25,6 @@
 import * as fs from 'node:fs';
 import { assertLongBaseline } from './baseline-guard.js';
 import { normalizedMixtureEValue } from './mixture-evalue.js';
-import { autocorr } from './conditional-markov.js';
 import { fitContrast, applyContrast, loadControlPairs, type ContrastFit } from './clustersynth-mode-b.js';
 import { loadScenarioBundle, type ScenarioBundle } from './clustersynth-scenario.js';
 import { ModeBLoop, RecordingSink, runModeBLoopAsync, type EmitterCycle, type CycleReport } from './mode-b-loop.js';
@@ -86,8 +85,9 @@ export function liveModeBEmitter(counter: string): EmitterContract {
 
 /** Turn one raw window into the loop's EmitterCycle, using the per-shard baseline fits where available
  *  (else a self-contained fit on the current window). Detection e-values come from the monitoring contrast;
- *  calibration residuals come from this cycle's known-null cohort; whiteness is the Wall-A serial-dependence
- *  guard on the cohort residuals. */
+ *  calibration residuals come from this cycle's known-null cohort. The loop's per-shard combined monitor
+ *  (marginal calibration + serial dependence, ADR 0020) tests those residuals — no separate whiteness
+ *  verdict is plumbed any more (the serial component subsumes it). */
 export function windowToEmitter(w: RawCounterWindow, fits: Map<string, ContrastFit> | undefined, feed: TelemetryFeed): EmitterCycle {
   const shards: string[] = [];
   const eValues: number[] = [];
@@ -98,11 +98,8 @@ export function windowToEmitter(w: RawCounterWindow, fits: Map<string, ContrastF
     eValues.push(normalizedMixtureEValue(applyContrast(d, fit)));
   }
   const calibrationSamples = w.cohort.map((c) => { const d = contrast(c); return applyContrast(d, fitContrast(d)); });
-  const whitenessPass = calibrationSamples.length
-    ? calibrationSamples.filter((r) => Math.abs(autocorr(r, 1)) <= 0.1).length / calibrationSamples.length >= 0.5
-    : false;
   const contract = feed.emitterFor?.(w.counter) ?? liveModeBEmitter(w.counter);
-  return { contract, shards, eValues, calibrationSamples, whitenessPass };
+  return { contract, shards, eValues, calibrationSamples };
 }
 
 /** The live cycle source: fit the per-shard baselines once (enforcing the ≥2-month guard), then turn each
