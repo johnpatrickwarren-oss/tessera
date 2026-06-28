@@ -25,7 +25,7 @@ import { Worker, isMainThread, workerData, parentPort } from 'node:worker_thread
 import { loadScenarioBundle, type ScenarioBundle } from './clustersynth-scenario.js';
 import { assertLongBaseline } from './baseline-guard.js';
 import { normalizedMixtureEValue } from './mixture-evalue.js';
-import { freshConditionalMonitor, updateConditionalBatch } from './serial-calibration.js';
+import { freshCalibrationMonitor, updateCalibrationBatch } from './calibration-monitor.js';
 import { fdrBenjaminiHochberg, modeOf, ineligibilityReason, type EmitterContract } from './emitter-contract.js';
 import { estimateAr1, whiten } from './per-shard-whitening.js';
 import { autocorr } from './conditional-markov.js';
@@ -132,21 +132,21 @@ function whiteFraction(standardized: number[][], thresh = 0.1): number {
   return standardized.filter((r) => Math.abs(autocorr(r, 1)) <= thresh).length / standardized.length;
 }
 
-/** Cap on the per-shard calibration feed length. An anytime-valid martingale's POWER grows with feed
+/** Cap on the per-shard calibration feed length. An anytime-valid ∏g martingale's POWER grows with feed
  *  length, so over a long (e.g. 1 Hz, 1000s-of-ticks) prefix a NEGLIGIBLE scale mis-estimate (a few %
  *  MAD error) accumulates into a crossing and over-revokes a construction the FDR bound tolerates — the
- *  same over-power lesson as pooling. Bounding the feed to a fixed window tests calibration at a
- *  consistent, reasonable power across cadences. (Applies to both the marginal and the serial component.) */
+ *  same over-power lesson as pooling. Bounding the feed to a fixed window tests marginal calibration at a
+ *  consistent, reasonable power across cadences. (Whiteness is checked separately on the full prefix.) */
 const CALIB_FEED_CAP = 500;
 
-/** PER-SHARD anytime-valid calibration pass over a bounded feed (ADR 0020): one control contrast's
- *  combined monitor — marginal calibration AND lag-1 serial dependence, averaged — never crosses 1/α. The
- *  serial component subsumes the old separate whiteness check (an integrated-drift control that single-φ
- *  whitening could not flatten revokes HERE). Per shard rather than pooled, and length-bounded — both to
- *  keep power reasonable rather than revoking on negligible mis-calibration. */
+/** PER-SHARD anytime-valid calibration pass fraction over the healthy control cohort: the fraction of
+ *  control contrasts whose own ∏g test martingale never crosses 1/α (marginal calibration holds) over a
+ *  bounded feed. Per shard rather than pooled, and length-bounded — both to keep the monitor's power
+ *  reasonable rather than revoking on negligible mis-calibration. */
+/** One control contrast's anytime-valid ∏g calibration verdict over a bounded feed. */
 function prefixCalibrationPass(standardized: number[], alpha = 0.01): boolean {
-  const m = freshConditionalMonitor({ alpha });
-  updateConditionalBatch(m, standardized.length > CALIB_FEED_CAP ? standardized.slice(0, CALIB_FEED_CAP) : standardized);
+  const m = freshCalibrationMonitor({ alpha });
+  updateCalibrationBatch(m, standardized.length > CALIB_FEED_CAP ? standardized.slice(0, CALIB_FEED_CAP) : standardized);
   return m.passing;
 }
 
@@ -192,12 +192,10 @@ export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, 
   const isFault = usable.map((p) => faulted.has(p.treatment));
   const nFault = isFault.filter(Boolean).length;
 
-  // #2 + ADR 0020: construction validity on the concurrent control cohort via the per-shard combined
-  // monitor (marginal calibration + serial dependence). whiteFrac is now an INFORMATIONAL diagnostic only —
-  // the serial component of the monitor subsumes the old whiteness AND-gate.
+  // #2 + Wall-A: construction validity on the concurrent control cohort (per-shard calibration + whiteness).
   const { fits, calStd } = cadenceAwareFit(healthy, mon, usable, counter);
   const whiteFrac = whiteFraction(calStd);
-  const monitorPassing = calibrationPassFraction(calStd) >= 0.8;
+  const monitorPassing = calibrationPassFraction(calStd) >= 0.8 && whiteFrac >= 0.5;
   const emitter = clustersynthModeBEmitter(monitorPassing);
   const mode = modeOf(emitter);
 
@@ -229,7 +227,7 @@ function renderModeBReport(h: ModeBHeader, results: ModeBCounterResult[], q: num
   L.push(`baseline: ${h.healthyShards} shards (incl. control twins) × T=${h.healthyT} @ ${h.healthyDt}s  |  monitoring: T=${h.monT} @ ${h.monDt}s, ${h.faults} faults, ${h.pairs} pairs, q=${q}`);
   if (mixed) L.push(`MIXED CADENCE (${h.healthyDt}s baseline → ${h.monDt}s monitoring): φ/scale + calibration estimated at the monitoring cadence from the pre-fault prefix.`);
   L.push('');
-  L.push('counter        nFault | MODE | spatial FDP/power (K) | naive-temporal FDP/power (K) | monitor white(info)');
+  L.push('counter        nFault | MODE | spatial FDP/power (K) | naive-temporal FDP/power (K) | monitor white');
   let selOk = 0, fpOk = 0, tpOk = 0, fT = 0;
   for (const r of results) {
     if (r.nFault === 0) continue;
@@ -243,9 +241,8 @@ function renderModeBReport(h: ModeBHeader, results: ModeBCounterResult[], q: num
   L.push('recall. The naive temporal per-shard null (no control) leaves the common-mode IN the residual, so it');
   L.push('cannot match the contrast — at a persistent cadence the fault is buried (low power), and toward unit');
   L.push('root the drift is mistaken for signal (FDP ≫ q). Either way the concurrent control is the achievable');
-  L.push('null (ADR 0019). The per-shard COMBINED calibration monitor (marginal + serial dependence, ADR 0020)');
-  L.push('gates the construction — it subsumes the old Wall-A whiteness AND-gate (whiteness is now an');
-  L.push('informational column); a counter whose control fails to cancel is revoked → Mode A → abstains.');
+  L.push('null (ADR 0019). The per-shard calibration monitor + Wall-A whiteness gate the construction; a counter');
+  L.push('whose control fails to cancel is revoked → demoted Mode A → abstains from the FDR claim.');
   return L.join('\n');
 }
 
@@ -351,8 +348,8 @@ function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyAr
   const faulted = faultedSetFrom(faults, specs, counter);
   const isFault = recs.map((r) => faulted.has(r.s));
   const nFault = isFault.filter(Boolean).length;
-  const whiteFrac = recs.filter((r) => r.white).length / recs.length; // informational diagnostic only (ADR 0020)
-  const monitorPassing = recs.filter((r) => r.calibPass).length / recs.length >= 0.8;
+  const whiteFrac = recs.filter((r) => r.white).length / recs.length;
+  const monitorPassing = recs.filter((r) => r.calibPass).length / recs.length >= 0.8 && whiteFrac >= 0.5;
   const emitter = clustersynthModeBEmitter(monitorPassing);
   const mode = modeOf(emitter);
   const sel = mode === 'B' ? fdrBenjaminiHochberg(recs.map((r) => r.e), q, emitter, 'clustersynth-mode-b').selected : [];
