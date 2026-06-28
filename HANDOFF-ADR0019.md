@@ -111,16 +111,36 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
   present + construction currently valid), NOT an event. Mode A is the always-on substrate; Mode B is a
   per-emitter overlay that emits FDR-keyed actions only while its guarantee is live.
 
+## DONE — deploy adapters + README + serial-calibration research (2026-06-27, commits 4097f66 / 6e9f853 / 259af23)
+- **DEPLOY ADAPTERS (commit `4097f66`).** The loop was source/sink-agnostic; both production seams are now
+  wired. INPUT: `tools/telemetry-source.ts` — `TelemetryFeed` (a deployment delivers raw treatment/control
+  windows; the seam forms e-values with the SAME validated contrast math), `liveCycles` (fits per-shard
+  baselines once, enforces the ≥2-month guard), `runModeBLoopAsync` (new, in `mode-b-loop.ts`; drives the
+  loop over an async feed, drains a buffered sink each cycle), `bundleFeed` reference + deploy CLI.
+  OUTPUT: `tools/action-sinks.ts` — `JsonlAuditSink` (durable NDJSON, sync), `WebhookActionSink`
+  (rollout-gate/pager via HTTP), `CommandActionSink` (remediation), `FanOutSink`. I/O is BUFFERED so
+  step() stays synchronous; `drain()` flushes, attempting every effect + throwing an aggregate on failure.
+  Endpoints/commands are deployment config; fetch/exec injected for tests. 17 tests; CLI verified
+  end-to-end on the mini fixture (5 counters Mode B, 23 actions dispatched+audited).
+- **README two-mode language (commit `6e9f853`).** Corrected the unconditional "e-BH FDR control over the
+  per-shard verdict surface" bullet + added a "Two operating modes" section (Mode A default / Mode B
+  conditional, spatial null, revocable) with the canonical honest-claim paragraph. Capstone renderers were
+  already honest. README half of the claim-language item closed.
+- **SERIAL-DEPENDENCE CALIBRATION MONITOR (commit `259af23`, ADR 0020).** Closes the monitor's marginal
+  blind spot (the O5 item the whiteness AND-gate was a crutch for). `tools/serial-calibration.ts`: bet
+  `λ_t = c·r_{t-1}` in the canonical conditional e-value (E[·|F_{t-1}]=1 for any past), mixed over
+  `c∈±{.3,.6}`, AVERAGED with the marginal martingale → one anytime-valid monitor at 1/α. Validated
+  (500×600, α=0.01): near-unit-root/integrated drift ~100% (beats 76% whiteness baseline), iid null 0%≤α,
+  marginal breaks preserved. Honest tradeoffs: mild ρ low power BY DESIGN, negative-ρ weaker, lag-1. 8 tests.
+
 ## REMAINING — lower priority
-- (deploy) A LIVE source for the loop (real telemetry+control feed) + concrete ActionSink wiring to the
-  actual control plane (rollout-gate / pager / remediation). The loop body + invariants are built and
-  tested; what's left is the production adapters (`mode-b-loop.ts` is source-agnostic by design).
-- (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done.
-- (research) Strengthen the calibration monitor against serial dependence directly (the O5 frontier).
-- (lower) README/capstone claim language → the two-mode statement (ADR 0019 § Consequences). Partly done:
-  baseline-monitor's renderer now states Mode A / no-guarantee honestly.
-- (research) Strengthen the calibration monitor against serial dependence directly (the O5 frontier), to
-  retire the whiteness-check composition crutch — would lift the synthetic broken-construction catch past ~76%.
+- (scoped follow-up, ADR 0020 § Follow-ups) **Wire the serial-calibration monitor into the production
+  construction-validity decision** — replace the marginal monitor + separate whiteness AND-gate in
+  `mode-b-loop.ts` / `clustersynth-mode-b.ts` (in-memory + streaming) with the conditional monitor, drop
+  the `whitenessPass` plumbing, and re-validate on the mini fixture + a mac-mini 2-month run (FDP must stay
+  0.000). The 9 mode-b-loop invariant tests force Mode A via `whitenessPass=false` and must be rewritten to
+  force it via serially-dependent / mis-calibrated cohort residuals.
+- (research) Lag-k extension of the serial monitor if real residuals show higher-order structure.
 
 ## Mac-mini re-sync note
 The mini's `~/concord/{tessera,clustersynth}` were rsync'd (tools/ + src/ + package.json) and rebuilt this

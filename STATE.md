@@ -22,7 +22,15 @@
 > dispatches FDR-controlled discoveries and withdraws them on resolve/revoke (no action without a live
 > guarantee; revocation withdraws; debounced). 9 invariant tests; end-to-end clustersynth replay CLI. The
 > normalized-mixture e-value, the 2-month guard, and the scaled/resumable ramp were shipped earlier
-> (`d7bd0f5`). **Remaining (lower):** README/capstone two-mode language; (research) monitor vs serial dependence.
+> (`d7bd0f5`). **DEPLOY ADAPTERS + README + SERIAL-CALIBRATION RESEARCH DONE (2026-06-27):** (a) the loop's
+> two production seams — `tools/telemetry-source.ts` (live `TelemetryFeed` + `runModeBLoopAsync` + reference
+> `bundleFeed` + CLI) and `tools/action-sinks.ts` (Jsonl audit / webhook rollout-gate+pager / command
+> remediation / fan-out; buffered I/O + drain), commit `4097f66`; (b) README two-mode claim language
+> (`6e9f853`); (c) **ADR 0020** anytime-valid serial-dependence calibration monitor `tools/serial-
+> calibration.ts` (`259af23`) — closes the marginal monitor's blind spot (bet λ_t=c·r_{t-1}, averaged with
+> the marginal martingale): near-unit-root/integrated drift ~100% (beats the 76% whiteness baseline), iid
+> null 0%≤α. Suite 758 pass. **Remaining (lower):** wire serial-calibration into the production
+> construction-validity decision + re-validate (ADR 0020 § Follow-ups); lag-k serial extension.
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
