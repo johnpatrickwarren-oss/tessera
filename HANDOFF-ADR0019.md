@@ -133,13 +133,23 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
   (500×600, α=0.01): near-unit-root/integrated drift ~100% (beats 76% whiteness baseline), iid null 0%≤α,
   marginal breaks preserved. Honest tradeoffs: mild ρ low power BY DESIGN, negative-ρ weaker, lag-1. 8 tests.
 
+## DONE — serial-calibration monitor WIRED INTO PRODUCTION (2026-06-27, commit `25452f7`, ADR 0020)
+- The combined anytime-valid monitor (marginal + serial dependence) now SOLELY decides construction
+  validity; the separate Wall-A whiteness AND-gate + the `whitenessPass` plumbing are GONE (whiteFrac/white
+  survive only as informational report columns). Touched: `mode-b-loop.ts` (per-shard
+  freshConditionalMonitor; `constructionValid = calibFrac >= thresh`), `clustersynth-mode-b.ts`
+  (`prefixCalibrationPass` → conditional; in-memory + streaming gates drop `&& whiteFrac>=0.5`),
+  `telemetry-source.ts` (windowToEmitter drops whitenessPass). The 9 loop invariant tests now force Mode A
+  via broken/serially-dependent cohort residuals; + a new test proving serial revocation end-to-end.
+- **Mini re-validation:** clustersynth-mode-b **FDP 0.000 / recall 23/23**, all counters Mode B, ZERO
+  spurious revocations (the whitened healthy control does not trip the serial term); mode-b-loop +
+  telemetry-source replays = 23 actions, 0 withdrawn. Full suite **759 pass**. `mode-b-control.ts` (the
+  synthetic #3 artifact) intentionally left on its original whiteness check.
+
 ## REMAINING — lower priority
-- (scoped follow-up, ADR 0020 § Follow-ups) **Wire the serial-calibration monitor into the production
-  construction-validity decision** — replace the marginal monitor + separate whiteness AND-gate in
-  `mode-b-loop.ts` / `clustersynth-mode-b.ts` (in-memory + streaming) with the conditional monitor, drop
-  the `whitenessPass` plumbing, and re-validate on the mini fixture + a mac-mini 2-month run (FDP must stay
-  0.000). The 9 mode-b-loop invariant tests force Mode A via `whitenessPass=false` and must be rewritten to
-  force it via serially-dependent / mis-calibrated cohort residuals.
+- (validation) A **mac-mini 2-month run + a 1 Hz mixed-cadence run** (to exercise the streaming `calibPass`
+  path) to confirm FDP stays 0.000 at scale with the combined monitor — the last step before declaring the
+  whiteness crutch fully retired in production (ADR 0020 § Follow-ups). Mini fixture already green.
 - (research) Lag-k extension of the serial monitor if real residuals show higher-order structure.
 
 ## Mac-mini re-sync note
