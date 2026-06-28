@@ -282,10 +282,18 @@ export function renderModeB(healthyDir: string, monDir: string, q = 0.1): string
 
 interface Row { shard: string; counter: string; v: number[] }
 interface CmbWorkerInput { __cmb_worker: true; monDir: string; byteStart: number; byteEnd: number }
-interface CmbRecord { c: string; s: string; e: number; tE: number; calibPass: boolean; white: boolean }
+/** Per-pair streaming scalar record. `flagE`/`eC2` are present ONLY when a triad twin (#ctrl2) exists for
+ *  the pair (ADR 0022): flagE = the c1−c2 sibling-null e-value (flags a contaminated control), eC2 = the
+ *  t−c2 clean-sibling detection e-value (the routed-to value when c1 is flagged). reduceCmbCounter does the
+ *  fleet routing. Absent ⇒ no triad ⇒ the reducer scores the bare t−c1 contrast as before. */
+interface CmbRecord { c: string; s: string; e: number; tE: number; calibPass: boolean; white: boolean; flagE?: number; eC2?: number }
 
-/** Yield [line, startOffset] for complete lines from byteStart to EOF (skipping a partial leading line if
- *  byteStart>0). Does NOT stop at any byteEnd — the pair state machine decides ownership/stopping. */
+/** Yield [line, startOffset] for complete lines from byteStart to EOF (skipping a partial leading line that
+ *  STRADDLES byteStart). Does NOT stop at any byteEnd — the pair state machine decides ownership/stopping.
+ *  A line that starts EXACTLY at byteStart is NOT skipped: the previous range stops at this same offset
+ *  (start ≥ byteEnd), so that line is owned here. Skipping it unconditionally (the old behavior) dropped a
+ *  pair whenever a byte boundary aligned to a line start — benign at scale where row lengths vary, but a
+ *  latent correctness bug the byte-range pairing relies on NOT having. */
 function* linesFrom(filePath: string, byteStart: number): Generator<[string, number]> {
   const fd = fs.openSync(filePath, 'r');
   try {
@@ -293,7 +301,13 @@ function* linesFrom(filePath: string, byteStart: number): Generator<[string, num
     const buf = Buffer.allocUnsafe(CHUNK);
     let filePos = byteStart, lineStart = byteStart;
     let pending = Buffer.alloc(0);
-    let skipFirst = byteStart > 0;
+    // Skip a leading partial line only when byteStart lands MID-line — i.e. the preceding byte is not a
+    // newline. When byteStart sits right after a '\n' (or at file start), the first line is whole and ours.
+    let skipFirst = false;
+    if (byteStart > 0) {
+      const prev = Buffer.allocUnsafe(1);
+      skipFirst = !(fs.readSync(fd, prev, 0, 1, byteStart - 1) === 1 && prev[0] === 10);
+    }
     let bytes: number;
     while ((bytes = fs.readSync(fd, buf, 0, CHUNK, filePos)) > 0) {
       filePos += bytes;
@@ -331,25 +345,66 @@ export function* monPairs(filePath: string, byteStart: number, byteEnd: number):
   }
 }
 
+/** Like monPairs, but also captures the ADR 0022 triad's SECOND twin (#ctrl2). clustersynth emits, per
+ *  (gpu,counter), the three rows treatment → #ctrl → #ctrl2 consecutively (scenario.ts streamCounters), so
+ *  the triple is contiguous. Yields [treatment, control, control2|null] — control2 is null when the bundle
+ *  has no triad (the #ctrl2 row simply never appears, and the pair is flushed when the next treatment, or
+ *  EOF, is reached). Same byte-range ownership as monPairs: a triple is owned by the worker whose range
+ *  contains its TREATMENT row; c1/c2 are read past byteEnd to complete it, and a leading orphan c1/c2 (whose
+ *  treatment was completed by the previous range) is skipped. */
+export function* monTriples(filePath: string, byteStart: number, byteEnd: number): Generator<[Row, Row, Row | null]> {
+  // True iff `row` is the twin of pending treatment `t` carrying the given suffix (#ctrl / #ctrl2).
+  const twinOf = (t: { row: Row } | null, row: Row, suffix: string): boolean =>
+    t != null && row.shard === `${t.row.shard}${suffix}` && row.counter === t.row.counter;
+  let t: { row: Row; start: number } | null = null;
+  let c1: Row | null = null;
+  for (const [line, start] of linesFrom(filePath, byteStart)) {
+    const row = JSON.parse(line) as Row;
+    if (row.shard.endsWith('#ctrl2')) {
+      if (c1 && twinOf(t, row, '#ctrl2')) yield [t!.row, c1, row];
+      t = null; c1 = null; // triple complete (or an orphan c2) → reset
+    } else if (row.shard.endsWith('#ctrl')) {
+      if (twinOf(t, row, '#ctrl')) c1 = row; // hold for a possible c2
+      else { t = null; c1 = null; }
+    } else {
+      if (c1) yield [t!.row, c1, null]; // previous pair had no #ctrl2 (no triad) → flush it
+      t = null; c1 = null;
+      if (start >= byteEnd) return; // this treatment is owned by the next range
+      t = { row, start };
+    }
+  }
+  if (c1) yield [t!.row, c1, null]; // trailing no-triad pair at EOF
+}
+
 /** Worker: stream a byte range, pair rows, emit per-pair scalars (contrast + temporal e-values + the
  *  construction-validity flags). The fit is cadence-correct (each pair's own mon pre-fault prefix). */
 function runCmbWorker(input: CmbWorkerInput): CmbRecord[] {
   const meta = JSON.parse(fs.readFileSync(path.join(input.monDir, 'factors.json'), 'utf8')) as { T: number };
   const prefixN = Math.max(50, Math.floor(0.08 * meta.T));
+  // The prefix-fit e-value of a contrast a−b (fit on its own pre-fault prefix, applied to the full window).
+  const prefixContrastE = (a: number[], b: number[]): number => {
+    const d = a.map((x, i) => x - b[i]);
+    return normalizedMixtureEValue(applyContrast(d, fitContrast(d.slice(0, prefixN))));
+  };
   const out: CmbRecord[] = [];
-  for (const [t, c] of monPairs(path.join(input.monDir, 'counters.ndjson'), input.byteStart, input.byteEnd)) {
+  for (const [t, c, c2] of monTriples(path.join(input.monDir, 'counters.ndjson'), input.byteStart, input.byteEnd)) {
     const d = t.v.map((x, i) => x - c.v[i]); // the model-free spatial-null contrast
     const fit = fitContrast(d.slice(0, prefixN));
     const std = applyContrast(d, fit);
     const prefixStd = std.slice(0, prefixN);
     const tFit = fitContrast(t.v.slice(0, prefixN)); // temporal comparator (no control)
-    out.push({
+    const rec: CmbRecord = {
       c: t.counter, s: t.shard,
       e: normalizedMixtureEValue(std),
       tE: normalizedMixtureEValue(applyContrast(t.v, tFit)),
       calibPass: prefixCalibrationPass(prefixStd),
       white: Math.abs(autocorr(prefixStd, 1)) <= 0.1,
-    });
+    };
+    if (c2) { // ADR 0022 triad: the c1−c2 sibling null (flag) + the t−c2 clean-sibling detection
+      rec.flagE = prefixContrastE(c.v, c2.v);
+      rec.eC2 = prefixContrastE(t.v, c2.v);
+    }
+    out.push(rec);
   }
   return out;
 }
@@ -364,7 +419,21 @@ function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyAr
   const monitorPassing = recs.filter((r) => r.calibPass).length / recs.length >= 0.8 && whiteFrac >= 0.5;
   const emitter = clustersynthModeBEmitter(monitorPassing);
   const mode = modeOf(emitter);
-  const sel = mode === 'B' ? fdrBenjaminiHochberg(recs.map((r) => r.e), q, emitter, 'clustersynth-mode-b').selected : [];
+
+  // ADR 0022 control triad: when every pair carries a second twin (#ctrl2), flag contaminated controls via
+  // the c1−c2 sibling null (fleet e-BH over flagE) and route a flagged shard's detection to the clean-sibling
+  // t−c2 e-value. Mirrors the in-memory applyTriadRouting, here over the streamed scalars (so it works
+  // identically on the mixed-cadence AND the long-baseline streaming paths, which both reduce through here).
+  const e = recs.map((r) => r.e);
+  const hasTriad = recs.every((r) => r.flagE !== undefined && r.eC2 !== undefined);
+  let flaggedControls = 0;
+  if (hasTriad) {
+    const badControl = new Set(eBenjaminiHochberg(recs.map((r) => r.flagE!), q).selected);
+    for (const i of badControl) e[i] = recs[i].eC2!;
+    flaggedControls = badControl.size;
+  }
+
+  const sel = mode === 'B' ? fdrBenjaminiHochberg(e, q, emitter, 'clustersynth-mode-b').selected : [];
   const fp = sel.filter((i) => !isFault[i]).length, tp = sel.filter((i) => isFault[i]).length;
   const tSel = [...eBenjaminiHochberg(recs.map((r) => r.tE), q).selected];
   const tFp = tSel.filter((i) => !isFault[i]).length, tTp = tSel.filter((i) => isFault[i]).length;
@@ -372,7 +441,7 @@ function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyAr
     counter, nFault, mode,
     selected: sel.length, falsePos: fp, fdp: sel.length ? fp / sel.length : 0, power: nFault ? tp / nFault : NaN,
     temporalSelected: tSel.length, temporalFdp: tSel.length ? tFp / tSel.length : 0, temporalPower: nFault ? tTp / nFault : NaN,
-    monitorPassing, whiteFrac, flaggedControls: 0, // triad not wired in the streaming path (ADR 0022 follow-up)
+    monitorPassing, whiteFrac, flaggedControls,
   };
 }
 
@@ -413,33 +482,48 @@ export async function renderModeBStreaming(healthyDir: string, monDir: string, q
 //             emit the detection (+ temporal) e-values.
 // The per-shard fit map (4 floats/shard) is tiny and passes to the Phase-2 workers via workerData.
 
-interface LbFitRecord { c: string; s: string; fit: ContrastFit; calibPass: boolean; white: boolean }
+interface LbFitRecord { c: string; s: string; fit: ContrastFit; calibPass: boolean; white: boolean; fitC1C2?: ContrastFit; fitTC2?: ContrastFit }
 interface LbFitInput { __cmb_lb: 'fit'; baseDir: string; byteStart: number; byteEnd: number }
-interface LbDetectInput { __cmb_lb: 'detect'; monDir: string; byteStart: number; byteEnd: number; prefixN: number; fits: Record<string, ContrastFit> }
-interface LbDetectRecord { c: string; s: string; e: number; tE: number }
+interface LbDetectInput { __cmb_lb: 'detect'; monDir: string; byteStart: number; byteEnd: number; prefixN: number; fits: Record<string, ContrastFit>; fitsC1C2: Record<string, ContrastFit>; fitsTC2: Record<string, ContrastFit> }
+interface LbDetectRecord { c: string; s: string; e: number; tE: number; flagE?: number; eC2?: number }
 
-/** Phase 1 worker: per-shard fit + calibration/whiteness from the FULL (long) baseline contrast. */
+/** Phase 1 worker: per-shard fit + calibration/whiteness from the FULL (long) baseline contrast. When a
+ *  triad twin is present, ALSO fit the c1−c2 and t−c2 contrasts from the baseline (ADR 0022) — the fits the
+ *  Phase-2 detector applies to score the sibling-null + clean-sibling on the monitoring window. */
 function runLbFitWorker(input: LbFitInput): LbFitRecord[] {
   const out: LbFitRecord[] = [];
-  for (const [t, c] of monPairs(path.join(input.baseDir, 'counters.ndjson'), input.byteStart, input.byteEnd)) {
+  for (const [t, c, c2] of monTriples(path.join(input.baseDir, 'counters.ndjson'), input.byteStart, input.byteEnd)) {
     const d = t.v.map((x, i) => x - c.v[i]);
     const fit = fitContrastFast(d); // mean/SD, O(n) no sort — the long-baseline fit feed
     const std = applyContrast(d, fit);
     const calFeed = std.length > CALIB_FEED_CAP ? std.slice(0, CALIB_FEED_CAP) : std;
-    out.push({ c: t.counter, s: t.shard, fit, calibPass: prefixCalibrationPass(calFeed), white: Math.abs(autocorr(calFeed, 1)) <= 0.1 });
+    const rec: LbFitRecord = { c: t.counter, s: t.shard, fit, calibPass: prefixCalibrationPass(calFeed), white: Math.abs(autocorr(calFeed, 1)) <= 0.1 };
+    if (c2) {
+      rec.fitC1C2 = fitContrastFast(c.v.map((x, i) => x - c2.v[i]));
+      rec.fitTC2 = fitContrastFast(t.v.map((x, i) => x - c2.v[i]));
+    }
+    out.push(rec);
   }
   return out;
 }
 
-/** Phase 2 worker: apply each shard's baseline fit to the monitoring contrast → detection + temporal e-values. */
+/** Phase 2 worker: apply each shard's baseline fit to the monitoring contrast → detection + temporal e-values.
+ *  When triad baseline fits are present, also emit the c1−c2 (flagE) + t−c2 (eC2) e-values for the reducer. */
 function runLbDetectWorker(input: LbDetectInput): LbDetectRecord[] {
   const out: LbDetectRecord[] = [];
-  for (const [t, c] of monPairs(path.join(input.monDir, 'counters.ndjson'), input.byteStart, input.byteEnd)) {
-    const fit = input.fits[`${t.counter}\0${t.shard}`];
+  for (const [t, c, c2] of monTriples(path.join(input.monDir, 'counters.ndjson'), input.byteStart, input.byteEnd)) {
+    const key = `${t.counter}\0${t.shard}`;
+    const fit = input.fits[key];
     if (!fit) continue; // no baseline fit for this shard (shouldn't happen for a matched bundle)
     const dMon = t.v.map((x, i) => x - c.v[i]);
     const tFit = fitContrastFast(t.v.slice(0, input.prefixN)); // temporal comparator (no control), mon prefix
-    out.push({ c: t.counter, s: t.shard, e: normalizedMixtureEValue(applyContrast(dMon, fit)), tE: normalizedMixtureEValue(applyContrast(t.v, tFit)) });
+    const rec: LbDetectRecord = { c: t.counter, s: t.shard, e: normalizedMixtureEValue(applyContrast(dMon, fit)), tE: normalizedMixtureEValue(applyContrast(t.v, tFit)) };
+    const fitC1C2 = input.fitsC1C2[key], fitTC2 = input.fitsTC2[key];
+    if (c2 && fitC1C2 && fitTC2) {
+      rec.flagE = normalizedMixtureEValue(applyContrast(c.v.map((x, i) => x - c2.v[i]), fitC1C2));
+      rec.eC2 = normalizedMixtureEValue(applyContrast(t.v.map((x, i) => x - c2.v[i]), fitTC2));
+    }
+    out.push(rec);
   }
   return out;
 }
@@ -469,21 +553,26 @@ export async function renderModeBLongBaseline(baseDir: string, monDir: string, q
   const pairs = loadControlPairs(monDir);
   const prefixN = Math.max(50, Math.floor(0.08 * meta.T));
 
-  // Phase 1: fits from the long baseline.
+  // Phase 1: fits from the long baseline (+ the triad sibling fits when a #ctrl2 twin is present).
   const fitRecs = await runWorkers<LbFitRecord>({ __cmb_lb: 'fit', baseDir }, byteRanges(path.join(baseDir, 'counters.ndjson'), nWorkers));
   const fits: Record<string, ContrastFit> = {};
+  const fitsC1C2: Record<string, ContrastFit> = {};
+  const fitsTC2: Record<string, ContrastFit> = {};
   const gateByKey = new Map<string, { calibPass: boolean; white: boolean }>();
-  for (const r of fitRecs) { const k = `${r.c}\0${r.s}`; fits[k] = r.fit; gateByKey.set(k, { calibPass: r.calibPass, white: r.white }); }
+  for (const r of fitRecs) {
+    const k = `${r.c}\0${r.s}`; fits[k] = r.fit; gateByKey.set(k, { calibPass: r.calibPass, white: r.white });
+    if (r.fitC1C2 && r.fitTC2) { fitsC1C2[k] = r.fitC1C2; fitsTC2[k] = r.fitTC2; }
+  }
 
-  // Phase 2: detect on the monitoring window using the baseline fits.
-  const detRecs = await runWorkers<LbDetectRecord>({ __cmb_lb: 'detect', monDir, prefixN, fits }, byteRanges(path.join(monDir, 'counters.ndjson'), nWorkers));
+  // Phase 2: detect on the monitoring window using the baseline fits (+ triad sibling e-values).
+  const detRecs = await runWorkers<LbDetectRecord>({ __cmb_lb: 'detect', monDir, prefixN, fits, fitsC1C2, fitsTC2 }, byteRanges(path.join(monDir, 'counters.ndjson'), nWorkers));
 
   const byCounter = new Map<string, CmbRecord[]>();
   for (const r of detRecs) {
     const g = gateByKey.get(`${r.c}\0${r.s}`);
     if (!g) continue;
     let a = byCounter.get(r.c); if (!a) { a = []; byCounter.set(r.c, a); }
-    a.push({ c: r.c, s: r.s, e: r.e, tE: r.tE, calibPass: g.calibPass, white: g.white });
+    a.push({ c: r.c, s: r.s, e: r.e, tE: r.tE, calibPass: g.calibPass, white: g.white, flagE: r.flagE, eC2: r.eC2 });
   }
   const results = meta.counters.map((c) => reduceCmbCounter(c.name, byCounter.get(c.name) ?? [], faults, meta.counters, q)).filter((r): r is ModeBCounterResult => r != null);
   const h: ModeBHeader = { healthyShards: Object.keys(hMeta.membership ?? {}).length, healthyT: hMeta.T, healthyDt: hMeta.dt_s ?? 1, monT: meta.T, monDt: meta.dt_s ?? 1, faults: faults.length, pairs: pairs.length };

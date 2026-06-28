@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { loadScenarioBundle } from '../tools/clustersynth-scenario.js';
-import { loadControlPairs, scoreCounterModeB, contrastEValuesFor } from '../tools/clustersynth-mode-b.js';
+import { loadControlPairs, scoreCounterModeB, contrastEValuesFor, renderModeBLongBaseline } from '../tools/clustersynth-mode-b.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
 const FIX = path.join(__dirname, '_substrate', 'clustersynth-mode-b-triad-mini');
@@ -38,6 +38,22 @@ test('scoreCounterModeB flags contaminated controls via the c1−c2 sibling null
   let flagged = 0;
   for (const c of mon.counters) { const r = scoreCounterModeB(healthy, mon, pairs, c.name, 0.1); if (r) flagged += r.flaggedControls; }
   assert.ok(flagged > 0, 'the triad detects the control-only contamination the contrast is sign-blind to');
+});
+
+test('the STREAMING path flags contaminated controls too (triad wired into reduceCmbCounter)', async () => {
+  // Drive the multi-worker long-baseline streaming path over the committed (same-cadence) triad fixture and
+  // assert the report now surfaces flagged controls — the streaming reducer routes the triad, not just the
+  // in-memory path. This path fits each shard's three contrasts (t−c1, c1−c2, t−c2) from the CLEAN baseline
+  // (Phase 1) and applies them on the monitoring window (Phase 2), so it matches the in-memory fit window.
+  // The fixture baseline is short, so override the ≥2-month guard (plumbing test, like renderModeB's).
+  process.env.CS_ALLOW_SHORT = '1';
+  try {
+    const out = await renderModeBLongBaseline(BASE, MON, 0.1, 2); // 2 worker threads → exercises byte-range triples
+    assert.match(out, /CLUSTERSYNTH MODE B/);
+    assert.match(out, /contaminated controls flagged \(triad, ADR 0022\): [1-9]/, 'streaming report flags ≥1 contaminated control');
+  } finally {
+    delete process.env.CS_ALLOW_SHORT;
+  }
 });
 
 /** FP/TP/selected of an e-BH selection against the genuine-fault mask. */

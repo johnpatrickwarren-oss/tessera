@@ -1,8 +1,8 @@
 # Handoff — Tessera two-mode architecture (ADRs 0019–0022 + scale validation)
 
-**Date:** 2026-06-28 · **Branch:** `three-walls-prototypes` · **Tessera HEAD:** `9b4e69e` · **clustersynth
-HEAD:** `35c3afa` (branch `scenario-counter-subset-streamed-factors`). Both repos clean + pushed.
-**Suite:** 771 pass / 0 fail / 7 skip (the lone intermittent "fail 1" is the pre-existing flaky q84
+**Date:** 2026-06-28 · **Branch:** `three-walls-prototypes` · **clustersynth
+HEAD:** `35c3afa` (branch `scenario-counter-subset-streamed-factors`, unchanged). Both repos clean + pushed.
+**Suite:** 775 pass / 0 fail / 7 skip (the lone intermittent "fail 1" is the pre-existing flaky q84
 worker-terminate timing test — passes in isolation; not ours).
 
 **Read first:** `decisions/0019` (architecture) → `0020` (serial monitor) → `0021` (twin-validity, negative)
@@ -23,6 +23,26 @@ construction validity and revoke (B→A) when it breaks.
 
 ## This session — what shipped (newest first)
 
+- **ADR 0022 STREAMING-PATH TRIAD: WIRED + 1 Hz VALIDATED (this session).** Closed the top remaining ADR
+  0022 item — the triad now routes in the STREAMING reducer, not just in-memory. New `monTriples` byte-range
+  generator captures clustersynth's contiguous `treatment → #ctrl → #ctrl2` triple (degrades to `[t,c1,null]`
+  for non-triad bundles); the mixed-cadence worker (`runCmbWorker`) and the long-baseline workers
+  (`runLbFitWorker`/`runLbDetectWorker`) emit `flagE` (c1−c2 sibling null) + `eC2` (t−c2 clean sibling); the
+  SHARED `reduceCmbCounter` does the fleet routing (`badControl = eBH(flagE)`, overwrite `e[i]=eC2[i]`,
+  report `flaggedControls`) — so BOTH streaming paths get the triad from one code site, mirroring the
+  in-memory `applyTriadRouting`. The ramp (`clustersynth-mode-b-ramp.sh`) now forwards
+  `CS_TRIAD`/`CS_CONTAMINATE[_FRAC]`/`CS_DECORRELATE_FRAC` (via `env`, since a bash array can't be an inline
+  assignment-prefix). **Mac-mini 1 Hz mixed-cadence ramp (hourly 2-month baseline + 6 h 1 Hz mon, streaming,
+  to R=8 = 576+576 units):** contaminated (`CS_CONTAMINATE=control`) → `power_w` (Mode B) flags 0/3/3/5
+  contaminated controls at R=1/2/4/8 (was hard-`0` before), FDP **0.000** every tier; clean (triad on, no
+  contamination) R=8 → `power_w` flags **0**, recall **1.000**, FDP 0.000 (no false-flag of healthy Mode-B
+  controls). `gpu_temp_c` abstains (Mode A, ~41% whiteness) in both — its large flag count is the known
+  near-unit-root artifact, computed but never acted on (Mode A never selects), consistent with in-memory.
+  **Also fixed a latent `linesFrom` bug** found en route: it unconditionally skipped the first line when
+  `byteStart>0`, so a byte boundary landing exactly on a line start dropped that line from BOTH workers
+  (benign at scale where row lengths vary — but `monPairs` had it too). Now skips only a genuinely mid-line
+  straddler; the `9×2` parity test locks it in. Suite 775 pass. **REMAINING ADR 0022 item is now just the
+  comparable-peer availability study.**
 - **2-MONTH 1 Hz BASELINE finding (`9b4e69e`) + streaming long-baseline fit (`01bdab0`).** Closed a real
   gap: the mixed-cadence path fits φ from a ~29-min mon **prefix**, not the 2-month baseline (the ≥56d guard
   checked an hourly baseline the fit ignored → partly illusory). Built a **streaming same-cadence
@@ -68,8 +88,8 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## REMAINING (lower priority)
-- **(ADR 0022) Streaming-path triad** — `applyTriadRouting` is in-memory only; the streaming/mixed-cadence
-  path reports `flaggedControls:0`. Wire the triad into the streaming reducer for 1 Hz at scale.
+- ~~**(ADR 0022) Streaming-path triad**~~ — DONE this session (wired into `reduceCmbCounter` for both streaming
+  paths; 1 Hz validated on the mini). See "what shipped".
 - **(ADR 0022) Comparable-peer availability study** — the triad's binding real-world constraint (two matched
   peers/shard); validate against a real topology (§ Cost). Hardware cost is ~free unless controls are
   dedicated canaries (decomposed in ADR 0022 § Cost: controls 2× but data/compute +50%, memory flat).
@@ -88,8 +108,9 @@ construction validity and revoke (B→A) when it breaks.
 - `tools/calibration-monitor.ts` — marginal runtime monitor (#2); `tools/serial-calibration.ts` — the serial
   monitor (ADR 0020, not in the gate).
 - `tools/clustersynth-mode-b.ts` — the Mode B pipeline: in-memory + mixed-cadence streaming (prefix fit) +
-  **same-cadence long-baseline streaming** (`renderModeBLongBaseline`, ADR 0022 1 Hz) + the **triad**
-  (`applyTriadRouting`). `tools/contrast.ts` — `fitContrast`/`fitContrastFast`/`applyContrast` (shared).
+  **same-cadence long-baseline streaming** (`renderModeBLongBaseline`, ADR 0022 1 Hz) + the **triad** — now
+  in BOTH the in-memory path (`applyTriadRouting`) AND the streaming reducer (`reduceCmbCounter`, fed by
+  `monTriples` + per-worker `flagE`/`eC2`). `tools/contrast.ts` — `fitContrast`/`fitContrastFast`/`applyContrast`.
 - `tools/contamination-detector.ts` — κ machinery (ADR 0021 artifact, not gated).
 - `tools/mode-b-loop.ts` — always-on loop; `tools/telemetry-source.ts` + `tools/action-sinks.ts` — deploy seams.
 - `tools/clustersynth-mode-b-ramp.sh` — the scale entry point. **GOTCHA: it reads `COUNTERS=` (env), NOT
@@ -119,6 +140,7 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## The thread that's "live" if you want to continue
-The 2-month 1 Hz finding (gpu_temp_c abstention is intrinsic) closed the methodology gap. The most natural
-next steps are the two ADR 0022 follow-ups (streaming-path triad + comparable-peer study), or finally moving
-off synthetic telemetry toward real-cluster DCGM validation (Phase 4). Nothing is mid-flight or broken.
+The streaming-path triad is now wired + 1 Hz-validated, leaving the **comparable-peer availability study** as
+the last ADR 0022 follow-up (can a real topology even supply two matched twins per shard?). After that, the
+natural frontier is finally moving off synthetic telemetry toward real-cluster DCGM validation (Phase 4).
+Nothing is mid-flight or broken.

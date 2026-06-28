@@ -63,10 +63,15 @@ gen_split(){
   local nshards=$((72*R)) K="$WORKERS" bundle="$OUTDIR/$tag-$R"
   local chunk=$(( (nshards + K - 1) / K )) k start
   rm -rf "$bundle" "$OUTDIR/parts-$tag-$R"; mkdir -p "$OUTDIR/parts-$tag-$R"
-  CS_CONTROL_ARM=1 CS_COUNTERS="$COUNTERS" CS_SHARD_RANGE="0:$chunk" "$TSX" "$CLUSTERSYNTH/src/cli.ts" scenario "$cfg" --out-dir "$bundle" >>"$OUTDIR/gen.err" 2>&1 &
+  # ADR 0022 triad / ADR 0021 contamination knobs flow through verbatim via `env` (an array can't act as an
+  # inline assignment-prefix — bash resolves prefixes before expansion). The triad twin (#ctrl2) must be in
+  # BOTH bundles (the fit needs c2 in the baseline); contamination is deterministic per seed but injects no
+  # fault in the faults-off baseline, so it only manifests in the monitoring bundle.
+  local TRIAD_ENV=(CS_TRIAD="${CS_TRIAD:-}" CS_CONTAMINATE="${CS_CONTAMINATE:-}" CS_CONTAMINATE_FRAC="${CS_CONTAMINATE_FRAC:-}" CS_DECORRELATE_FRAC="${CS_DECORRELATE_FRAC:-}")
+  env CS_CONTROL_ARM=1 "${TRIAD_ENV[@]}" CS_COUNTERS="$COUNTERS" CS_SHARD_RANGE="0:$chunk" "$TSX" "$CLUSTERSYNTH/src/cli.ts" scenario "$cfg" --out-dir "$bundle" >>"$OUTDIR/gen.err" 2>&1 &
   for (( k=1; k<K; k++ )); do
     start=$((k*chunk)); [ "$start" -ge "$nshards" ] && break
-    CS_CONTROL_ARM=1 CS_COUNTERS="$COUNTERS" CS_SHARD_RANGE="$start:$chunk" CS_COUNTERS_ONLY=1 "$TSX" "$CLUSTERSYNTH/src/cli.ts" scenario "$cfg" --out-dir "$OUTDIR/parts-$tag-$R/p$k" >>"$OUTDIR/gen.err" 2>&1 &
+    env CS_CONTROL_ARM=1 "${TRIAD_ENV[@]}" CS_COUNTERS="$COUNTERS" CS_SHARD_RANGE="$start:$chunk" CS_COUNTERS_ONLY=1 "$TSX" "$CLUSTERSYNTH/src/cli.ts" scenario "$cfg" --out-dir "$OUTDIR/parts-$tag-$R/p$k" >>"$OUTDIR/gen.err" 2>&1 &
   done
   wait
   for d in "$OUTDIR/parts-$tag-$R"/p*; do [ -f "$d/counters.ndjson" ] && cat "$d/counters.ndjson" >> "$bundle/counters.ndjson"; done

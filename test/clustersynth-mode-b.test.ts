@@ -11,7 +11,7 @@ import { loadScenarioBundle } from '../tools/clustersynth-scenario.js';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import {
-  loadControlPairs, scoreCounterModeB, fitContrast, applyContrast, renderModeB, monPairs,
+  loadControlPairs, scoreCounterModeB, fitContrast, applyContrast, renderModeB, monPairs, monTriples,
 } from '../tools/clustersynth-mode-b.js';
 import { gInc } from '../tools/mixture-evalue.js';
 
@@ -119,6 +119,64 @@ test('streaming byte-range pairing (monPairs) covers every treatment/control pai
     }
     assert.equal(seen.size, expected, `nW=${nW}: ${seen.size} distinct pairs, want ${expected}`);
     for (const [k, n] of seen) assert.equal(n, 1, `nW=${nW}: pair ${k} seen ${n}× (want 1 — no drop/dup across ranges)`);
+  }
+});
+
+test('streaming triad pairing (monTriples) covers every triple EXACTLY once and captures #ctrl2', () => {
+  // Mirror clustersynth's triad emit order: per gpu, per counter, treatment → #ctrl → #ctrl2.
+  const gpus = Array.from({ length: 11 }, (_, i) => `gpu-${i}`);
+  const counters = ['a', 'b', 'c'];
+  const lines: string[] = [];
+  for (const g of gpus) for (const c of counters) {
+    lines.push(JSON.stringify({ shard: g, counter: c, v: [1, 2, 3, 4] }));
+    lines.push(JSON.stringify({ shard: `${g}#ctrl`, counter: c, v: [1, 2, 3, 4] }));
+    lines.push(JSON.stringify({ shard: `${g}#ctrl2`, counter: c, v: [1, 2, 3, 4] }));
+  }
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cmb-triples-')), 'counters.ndjson');
+  fs.writeFileSync(file, lines.join('\n') + '\n');
+  const size = fs.statSync(file).size;
+  const expected = gpus.length * counters.length;
+  for (const nW of [1, 2, 3, 5, 7, 13, 64]) {
+    const seen = new Map<string, number>();
+    for (let i = 0; i < nW; i++) {
+      const bs = Math.floor((i * size) / nW), be = Math.floor(((i + 1) * size) / nW);
+      for (const [t, c, c2] of monTriples(file, bs, be)) {
+        assert.equal(c.shard, `${t.shard}#ctrl`, 'control must match its treatment');
+        assert.equal(c2?.shard, `${t.shard}#ctrl2`, 'second twin (#ctrl2) must be captured');
+        assert.equal(c2?.counter, t.counter, 'triple must share a counter');
+        const key = `${t.shard}\0${t.counter}`;
+        seen.set(key, (seen.get(key) ?? 0) + 1);
+      }
+    }
+    assert.equal(seen.size, expected, `nW=${nW}: ${seen.size} distinct triples, want ${expected}`);
+    for (const [k, n] of seen) assert.equal(n, 1, `nW=${nW}: triple ${k} seen ${n}× (want 1 — no drop/dup)`);
+  }
+});
+
+test('monTriples degrades to pairs (c2=null) for a NON-triad bundle, covering each pair once', () => {
+  // No #ctrl2 rows → every pair must still be yielded exactly once (parity with monPairs).
+  const gpus = Array.from({ length: 9 }, (_, i) => `gpu-${i}`);
+  const counters = ['a', 'b'];
+  const lines: string[] = [];
+  for (const g of gpus) for (const c of counters) {
+    lines.push(JSON.stringify({ shard: g, counter: c, v: [1, 2] }));
+    lines.push(JSON.stringify({ shard: `${g}#ctrl`, counter: c, v: [1, 2] }));
+  }
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cmb-triples-np-')), 'counters.ndjson');
+  fs.writeFileSync(file, lines.join('\n') + '\n');
+  const size = fs.statSync(file).size;
+  const expected = gpus.length * counters.length;
+  for (const nW of [1, 3, 5, 16]) {
+    const seen = new Set<string>();
+    for (let i = 0; i < nW; i++) {
+      const bs = Math.floor((i * size) / nW), be = Math.floor(((i + 1) * size) / nW);
+      for (const [t, c, c2] of monTriples(file, bs, be)) {
+        assert.equal(c2, null, 'no triad → c2 is null');
+        assert.equal(c.shard, `${t.shard}#ctrl`);
+        seen.add(`${t.shard}\0${t.counter}`);
+      }
+    }
+    assert.equal(seen.size, expected, `nW=${nW}: ${seen.size} pairs, want ${expected}`);
   }
 });
 
