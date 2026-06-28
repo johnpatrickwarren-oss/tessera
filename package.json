@@ -65,6 +65,8 @@
     "mode-b-loop": "node tools/mode-b-loop.js",
     "pretelemetry-source": "tsc -p tsconfig.test.json",
     "telemetry-source": "node tools/telemetry-source.js",
+    "preserial-calibration": "tsc -p tsconfig.test.json",
+    "serial-calibration": "node tools/serial-calibration.js",
     "preseasonal-probe": "tsc -p tsconfig.test.json",
     "seasonal-probe": "node tools/seasonal-probe.js",
     "preevalue": "tsc -p tsconfig.test.json",

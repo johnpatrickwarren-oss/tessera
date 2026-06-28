@@ -94,6 +94,16 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
   operational Assumption-3.1 diagnostic (residual conditional-whiteness); empirically, as common-mode
   removal degrades the diagnostic rises AND stopped-e-BH fleet-FDR crosses q. NECESSARY-condition gate,
   not a sufficiency proof. _Open — test on real GWDG (expected to FAIL; the diagnostic should say so)._
+  - **O5 calibration sub-result — anytime-valid SERIAL-dependence monitor. ✅ DONE (2026-06-27, ADR
+    0020).** The runtime calibration monitor (ADR 0019 #2) tests only the MARGINAL increment `g(r_t)`, so
+    it is provably blind to a unit-marginal AR(1) (catch ≈0% at every ρ); ADR 0019 #3 patched that with a
+    fixed-threshold lag-1 whiteness AND-gate (the crutch, ~76% on integrated drift). `tools/serial-
+    calibration.ts` makes it anytime-valid: bet `λ_t = c·r_{t-1}` in the canonical conditional e-value
+    `exp(λ_t·r_t − λ_t²/2)` (E[·|F_{t-1}]=1 for any past), mixed over `c∈±{.3,.6}`, AVERAGED with the
+    marginal martingale. Catches near-unit-root/integrated drift ~100% (beats 76%), iid null 0%≤α,
+    marginal breaks preserved. Honest tradeoffs: mild ρ low power by design, negative-ρ weaker, lag-1.
+    Subsumes whiteness for the breaks that matter → construction validity can drop the AND-gate (wiring is
+    a scoped follow-up needing mini+mac-mini re-validation; ADR 0020 § Follow-ups).
 
 - **Fleet SupFDR (FDR-at-all-times). 🔧 PROTOTYPED (2026-06-26).** `tools/supfdr.ts` (Tessera ADR
   0018): the √E−1 adjuster (Carefree, arXiv:2501.19360) makes a running-max e-process a valid all-times
