@@ -198,9 +198,13 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   GREYHOUND ATC'25 cohort-median >10%). UPGRADE to the contamination framing: DiD-under-interference
   (arXiv:2512.21176/2509.24259) proves a fault leaking into the control makes the contrast estimand
   TATT−ASC — *uninterpretable* (neither magnitude/direction/sign), not merely weakened. **Gap → ADR 0021
-  (Proposed):** a runtime control-twin validity detector (cancellation-quality + control-cohort-consistency;
-  the contrast's sign-blindness makes contamination a FALSE-POSITIVE source, not only a miss). GREYHOUND uses
-  contrast for localization, temporal for detection — Mode B is more aggressive.
+  (BUILT + NEGATIVE RESULT):** a twin-PAIR validity detector was implemented + validated and found
+  INSUFFICIENT — κ (cancellation ratio) catches decorrelation but does NOT restore FDR (the harm is a
+  sustained shift from low-κ pairs, not variance leak; sweep bottoms at FDP ~0.20 > q + over-excludes clean
+  pairs); contamination is undetectable by twin-pair stats (sign-blind contrast + the heterogeneous-loading
+  cohort wall, ADR 0012/0015). Real fix = a CONTROL TRIAD (two twins → matched control-vs-control null) =
+  **ADR 0022 candidate**. Artifacts kept: clustersynth CS_CONTAMINATE/CS_DECORRELATE modes + the κ machinery.
+  GREYHOUND uses contrast for localization, temporal for detection — Mode B is more aggressive.
 
 ---
 

@@ -38,6 +38,15 @@
 > **Remaining (lower):** the always-on loop accumulates the cohort over the full duration → could catch the
 > 1 Hz case there (un-validated, ADR 0020 § Follow-ups); lag-k serial extension.
 
+> **ADR 0021 (control-twin validity detector) — BUILT + VALIDATED + NOT SHIPPED (negative result,
+> 2026-06-28, commit `44a4f00`).** Implemented the twin-validity detector + clustersynth ground-truth fault
+> modes (CS_CONTAMINATE/CS_DECORRELATE, clustersynth `d2a5e0e`); a twin-PAIR detector cannot restore FDR, so
+> it is NOT wired into the Mode B gate (Mode B byte-identical; mini FDP still 0.000). κ catches decorrelation
+> but doesn't restore FDR (harm = sustained shift from LOW-κ pairs; FDP bottoms ~0.20 > q + over-excludes
+> clean pairs); contamination undetectable by twin-pair stats (sign-blind contrast + heterogeneous-loading
+> cohort wall). Real fix = a CONTROL TRIAD (two twins → matched control-vs-control null) = **ADR 0022
+> candidate**. Artifacts: `tools/contamination-detector.ts` (κ, unit-tested) + `tools/contrast.ts` refactor.
+> Suite 766 pass.
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the
 DeploySignal statistical-detector engine. Current work: moving from caveated artifact toward

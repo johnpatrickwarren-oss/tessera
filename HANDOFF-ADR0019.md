@@ -149,7 +149,25 @@ on nonstationary GPU telemetry (proven this session: time-varying drift defeats 
   never accumulates enough; the prefix length (not the feed cap) is the binding limit. **Whiteness RETAINED;
   serial-calibration kept as a research artifact.** Suite back to **758 pass**.
 
+## ADR 0021 — control-twin validity detector: BUILT + VALIDATED + NOT SHIPPED (negative result, 2026-06-28)
+- Implemented the twin-validity detector + clustersynth ground-truth fault modes and validated rigorously;
+  a twin-PAIR detector cannot restore the FDR guarantee, so it is NOT wired into the Mode B gate (Mode B
+  byte-identical; mini FDP still 0.000). Tessera commit `44a4f00`; clustersynth `d2a5e0e` (pushed).
+- **κ (cancellation ratio) catches decorrelation but does NOT restore FDR:** decorr FDP 0.25; a threshold
+  sweep bottoms at ~0.20 (> q) because the false positives come from LOW-κ pairs (the harm is a sustained
+  shift from un-cancelled non-stationary common-mode, not variance leak), and it over-excludes clean
+  weak-common-mode pairs. **Contamination is undetectable by twin-pair stats** (shared fault cancels →
+  recall 1.0→0.42; control-only fault → sign-blind contrast; cohort reference hits the heterogeneous-loading
+  wall ADR 0012/0015 — distributions overlap). Root cause: non-comparability re-introduces the temporal-null
+  wall; contamination needs a clean per-control reference a cohort can't give.
+- **Real fix = a CONTROL TRIAD** (two independent twins per treatment → matched control-vs-control null):
+  clean per-control reference for contamination + direct comparability check. **ADR 0022 candidate.**
+- Artifacts kept: `tools/contamination-detector.ts` (κ machinery, unit-tested), `tools/contrast.ts`
+  (fitContrast/applyContrast extraction, re-exported), clustersynth `CS_CONTAMINATE`/`CS_DECORRELATE_FRAC`.
+
 ## REMAINING — lower priority
+- (ADR 0022 candidate) **Control triad** — spec + validate two-twin matched control-vs-control null using the
+  clustersynth contamination/decorrelation modes already built; the construction that can close both modes.
 - (research, ADR 0020 § Follow-ups) The mac-mini finding is for the ONE-SHOT harness. The **always-on loop
   accumulates the control cohort over the full monitoring duration** (a feed as long as the detection
   horizon), so the serial monitor *might* catch the `gpu_temp_c`-style residual THERE — needs a multi-cycle
