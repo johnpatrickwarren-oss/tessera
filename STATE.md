@@ -1,6 +1,75 @@
 # Project state
 
-**Last updated:** 2026-06-24 · **by:** John Warren (with Claude)
+**Last updated:** 2026-06-27 · **by:** John Warren (with Claude)
+
+> **CURRENT FOCUS → see `HANDOFF.md`.** ADR 0019 (two-mode architecture: evidence/ranking default
+> vs FDR-guaranteed conditional) is decided + memorialized. The three code-side follow-ups are now DONE on
+> branch `three-walls-prototypes`: (1) `validity_class` code gate `tools/emitter-contract.ts` (`4733e62`);
+> (2) runtime calibration monitor `tools/calibration-monitor.ts` (`e162b83`); (3) Mode B concurrent-control
+> harness `tools/mode-b-control.ts` (`cffb7eb`) — spatial null FDP 0.099 ≤ q where temporal = 0.28. Suite
+> 719 pass. **Productionization also DONE:** clustersynth labeled control arm (`controlArm`/CS_CONTROL_ARM,
+> commit clustersynth `4e0797e`) + `tools/clustersynth-mode-b.ts` + ramp (Tessera `fddec22`, `5b6df18`).
+> **2-month scale validation on the mac mini (real gb200, 60d hourly baseline + 60d monitoring):** the
+> spatial-null contrast controls FDR with near-full recall up to 2304 shards — R=1/4/8/16 FDP 0.000 (recall
+> ≥0.99); R=8 × 5 seeds mean FDP 0.002. **1 Hz MIXED-CADENCE also DONE (commit `59b4da5`):** hourly 60d
+> baseline + 6h 1Hz monitoring → spatial-null **FDP 0.000** (5 seeds, to 2304 shards) where the naive
+> temporal null over-selects **FDP ≈0.97** (the documented 1Hz failure at scale); 4/5 counters get a clean
+> Mode-B guarantee at 1Hz, gpu_temp_c honestly abstains (near-unit-root idiosyncratic OU). Suite 725 pass.
+> **STREAMING/multi-core for multi-day 1Hz also DONE (commit `9a3e2f6`):** worker_threads byte-range
+> streaming (pairs treatment↔control rows) → constant memory; validated on the mini at 60d hourly baseline +
+> **72h 1Hz** monitoring, FDP 0.000 to 2304 shards on **1.3/5.2/10 GB** bundles (analysed in 3/16/31s). **ALWAYS-ON Mode B LOOP shipped (commit `f27239e`):** `tools/mode-b-loop.ts` wires FDR discoveries to
+> actions — per cycle it accumulates the per-shard calibration monitors, routes each emitter via the gate,
+> dispatches FDR-controlled discoveries and withdraws them on resolve/revoke (no action without a live
+> guarantee; revocation withdraws; debounced). 9 invariant tests; end-to-end clustersynth replay CLI. The
+> normalized-mixture e-value, the 2-month guard, and the scaled/resumable ramp were shipped earlier
+> (`d7bd0f5`). **DEPLOY ADAPTERS + README + SERIAL-CALIBRATION RESEARCH DONE (2026-06-27):** (a) the loop's
+> two production seams — `tools/telemetry-source.ts` (live `TelemetryFeed` + `runModeBLoopAsync` + reference
+> `bundleFeed` + CLI) and `tools/action-sinks.ts` (Jsonl audit / webhook rollout-gate+pager / command
+> remediation / fan-out; buffered I/O + drain), commit `4097f66`; (b) README two-mode claim language
+> (`6e9f853`); (c) **ADR 0020** anytime-valid serial-dependence calibration monitor `tools/serial-
+> calibration.ts` (`259af23`) — closes the marginal monitor's blind spot (bet λ_t=c·r_{t-1}, averaged with
+> the marginal martingale): synthetic near-unit-root/integrated drift ~100%, iid null 0%≤α. **(d) WIRING
+> ATTEMPTED + REVERTED — NEGATIVE RESULT (`25452f7` → `2bf76f2`).** Wiring the monitor into the gate
+> (retiring whiteness) passed hourly at scale (FDP 0.000 to 2304 shards) but REGRESSED 1 Hz on the mac mini:
+> `gpu_temp_c` (near-unit-root residual) stayed Mode B and over-fired (FDP 0.97, aggregate 0.87) where
+> whiteness correctly abstains it (FDP 0.000). The betting monitor needs accumulation the short healthy
+> prefix (≤1728 ticks) can't provide vs the 21 600-tick detection horizon; whiteness estimates ρ̂ directly.
+> **Whiteness RETAINED**; serial-calibration kept as a research artifact (ADR 0020). Suite 758 pass.
+> **Remaining (lower):** the always-on loop accumulates the cohort over the full duration → could catch the
+> 1 Hz case there (un-validated, ADR 0020 § Follow-ups); lag-k serial extension.
+
+> **ADR 0021 (control-twin validity detector) — BUILT + VALIDATED + NOT SHIPPED (negative result,
+> 2026-06-28, commit `44a4f00`).** Implemented the twin-validity detector + clustersynth ground-truth fault
+> modes (CS_CONTAMINATE/CS_DECORRELATE, clustersynth `d2a5e0e`); a twin-PAIR detector cannot restore FDR, so
+> it is NOT wired into the Mode B gate (Mode B byte-identical; mini FDP still 0.000). κ catches decorrelation
+> but doesn't restore FDR (harm = sustained shift from LOW-κ pairs; FDP bottoms ~0.20 > q + over-excludes
+> clean pairs); contamination undetectable by twin-pair stats (sign-blind contrast + heterogeneous-loading
+> cohort wall). Real fix = a CONTROL TRIAD (two twins → matched control-vs-control null) = **ADR 0022
+> candidate**. Artifacts: `tools/contamination-detector.ts` (κ, unit-tested) + `tools/contrast.ts` refactor.
+> Suite 766 pass.
+> **FULL-CLUSTER Mode B test (mac mini, 2026-06-28).** `clustersynth-mode-b-ramp.sh`, 60d hourly baseline +
+> 60d hourly monitoring, RACKS 8/16/32/64 → up to **9,216 observation units (4,608 treatment GPUs + 4,608
+> controls)**. Spatial-null FDR control is scale-invariant: **FDP 0.000 at every tier**, recall 0.987 → 0.995
+> (R=64: 730 discoveries, 0 false, 730/734 faults caught); all 5 counters Mode B. Whole ramp ~90 s (hourly is
+> cheap; in-memory analysis 5/10/20/39 s per tier). Confirms ADR 0019's guarantee holds at full cluster scale.
+> **1 Hz FULL-CLUSTER test (mac mini, 2026-06-28).** Same ramp, MON_DT=1 MON_HOURS=6 (60d hourly baseline +
+> 6h 1 Hz monitoring = 21,600 ticks), RACKS 8/16/32/64. Spatial-null FDR controlled to **9,216 units** via
+> the STREAMING path: FDP 0.000/0.000/0.007/0.003 (≤ q at every tier), recall ~0.79; 4/5 counters Mode B,
+> `gpu_temp_c` honestly abstains (Mode A, near-unit-root, whiteness 41%) at every tier; naive temporal
+> over-selects FDP ~0.97. R=64 = 7.0 GB monitoring bundle analyzed in 22 s with FLAT memory (no OOM on 64 GB)
+> — the O(window×workers) streaming architecture holds at full cluster scale. Extends the 1 Hz envelope from
+> 2,304 → 9,216 units.
+
+> **2-MONTH 1 Hz BASELINE test (mac mini, 2026-06-28).** Closed the gap that the mixed-cadence path fits φ
+> from a ~29-min mon prefix, not the 2-month baseline. Built a STREAMING same-cadence long-baseline fit
+> (`fitContrastFast` mean/SD, no sort; Phase-1 stream baseline→per-shard fits, Phase-2 stream mon→detect;
+> flat memory; commit `01bdab0`). Ran 60d **1 Hz** baseline (5.18 M ticks/series) + 6h 1 Hz monitoring,
+> gpu_temp_c+power_w, RACKS 1/2/4/8 (R=8 baseline ~83 GB, gen 610 s, analysis 191 s). FINDING: a genuine
+> 2-month 1 Hz baseline HELPS (gpu_temp_c whiteness 41%→65–75%, FDR clean at **FDP 0.000** vs the prefix-fit
+> run's 0.003–0.007) but does NOT rescue gpu_temp_c — it still abstains (Mode A) at every tier. Its 1 Hz
+> abstention is **INTRINSIC** (τ=120 s → near-unit-root φ≈0.992; can't out-baseline the physics), and correct
+> (temporal comparator FDP ~0.97 → it would over-fire in Mode B). power_w certifies Mode B, FDP 0.000,
+> recall 1.000 at every tier. Resolves the open question from the earlier prefix-fit 1 Hz run.
 
 ## What this is
 Tessera — statistically-rigorous per-shard behavioral observation for AI clusters, built on the

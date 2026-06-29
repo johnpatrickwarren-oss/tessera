@@ -1,0 +1,376 @@
+{
+  "T": 150,
+  "dt_s": 3600,
+  "triad": true,
+  "pairs": [
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-0-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-0-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-0-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-0-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-0-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-0-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-0-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-0-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-0-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-0-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-0-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-0-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-1-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-1-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-1-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-1-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-1-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-1-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-1-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-1-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-1-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-1-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-1-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-1-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-2-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-2-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-2-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-2-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-2-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-2-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-2-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-2-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-2-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-2-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-2-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-2-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-3-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-3-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-3-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-3-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-3-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-3-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-3-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-3-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-3-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-3-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-3-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-3-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-4-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-4-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-4-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-4-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-4-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-4-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-4-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-4-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-4-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-4-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-4-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-4-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-5-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-5-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-5-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-5-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-5-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-5-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-5-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-5-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-5-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-5-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-5-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-5-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-6-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-6-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-6-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-6-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-6-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-6-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-6-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-6-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-6-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-6-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-6-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-6-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-7-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-7-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-7-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-7-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-7-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-7-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-7-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-7-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-7-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-7-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-7-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-7-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-8-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-8-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-8-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-8-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-8-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-8-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-8-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-8-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-8-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-8-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-8-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-8-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-9-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-9-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-9-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-9-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-9-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-9-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-9-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-9-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-9-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-9-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-9-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-9-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-10-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-10-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-10-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-10-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-10-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-10-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-10-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-10-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-10-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-10-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-10-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-10-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-11-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-11-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-11-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-11-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-11-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-11-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-11-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-11-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-11-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-11-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-11-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-11-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-12-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-12-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-12-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-12-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-12-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-12-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-12-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-12-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-12-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-12-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-12-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-12-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-13-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-13-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-13-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-13-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-13-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-13-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-13-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-13-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-13-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-13-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-13-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-13-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-14-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-14-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-14-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-14-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-14-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-14-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-14-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-14-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-14-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-14-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-14-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-14-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-15-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-15-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-15-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-15-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-15-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-15-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-15-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-15-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-15-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-15-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-15-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-15-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-16-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-16-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-16-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-16-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-16-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-16-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-16-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-16-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-16-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-16-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-16-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-16-gpu-3#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-17-gpu-0",
+      "control": "cluster-0-pod-0-rack-0-tray-17-gpu-0#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-17-gpu-0#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-17-gpu-1",
+      "control": "cluster-0-pod-0-rack-0-tray-17-gpu-1#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-17-gpu-1#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-17-gpu-2",
+      "control": "cluster-0-pod-0-rack-0-tray-17-gpu-2#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-17-gpu-2#ctrl2"
+    },
+    {
+      "treatment": "cluster-0-pod-0-rack-0-tray-17-gpu-3",
+      "control": "cluster-0-pod-0-rack-0-tray-17-gpu-3#ctrl",
+      "control2": "cluster-0-pod-0-rack-0-tray-17-gpu-3#ctrl2"
+    }
+  ],
+  "contamination": {
+    "mode": "control",
+    "shards": [
+      "cluster-0-pod-0-rack-0-tray-13-gpu-0",
+      "cluster-0-pod-0-rack-0-tray-16-gpu-1",
+      "cluster-0-pod-0-rack-0-tray-8-gpu-2"
+    ]
+  },
+  "decorrelated": []
+}

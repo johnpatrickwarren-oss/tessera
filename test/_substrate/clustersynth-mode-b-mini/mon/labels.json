@@ -1,0 +1,116 @@
+{
+  "faults": [
+    {
+      "fault_id": "fault-0",
+      "level": "gpu",
+      "target": "cluster-0-pod-0-rack-0-tray-10-gpu-1",
+      "counter": null,
+      "type": "mean_shift",
+      "t_onset_s": 1700230434.637665,
+      "t_offset_s": 1700414659.323485,
+      "t_onset": 64,
+      "t_offset": 115,
+      "magnitude": 7.056888244114816,
+      "detach_factor": null,
+      "affected_shards": [
+        "cluster-0-pod-0-rack-0-tray-10-gpu-1"
+      ]
+    },
+    {
+      "fault_id": "fault-1",
+      "level": "gpu",
+      "target": "cluster-0-pod-0-rack-0-tray-1-gpu-2",
+      "counter": null,
+      "type": "mean_shift",
+      "t_onset_s": 1700168941.8182495,
+      "t_offset_s": 1700286342.9790816,
+      "t_onset": 47,
+      "t_offset": 80,
+      "magnitude": 6.770845171064138,
+      "detach_factor": null,
+      "affected_shards": [
+        "cluster-0-pod-0-rack-0-tray-1-gpu-2"
+      ]
+    },
+    {
+      "fault_id": "fault-2",
+      "level": "gpu",
+      "target": "cluster-0-pod-0-rack-0-tray-5-gpu-0",
+      "counter": "hbm_bw_gbps",
+      "type": "mean_shift",
+      "t_onset_s": 1700240804.2345715,
+      "t_offset_s": 1700369510.9940953,
+      "t_onset": 67,
+      "t_offset": 103,
+      "magnitude": 6.398643768392503,
+      "detach_factor": null,
+      "affected_shards": [
+        "cluster-0-pod-0-rack-0-tray-5-gpu-0"
+      ]
+    },
+    {
+      "fault_id": "fault-3",
+      "level": "gpu",
+      "target": "cluster-0-pod-0-rack-0-tray-4-gpu-3",
+      "counter": "gpu_temp_c",
+      "type": "mean_shift",
+      "t_onset_s": 1700246868.2739785,
+      "t_offset_s": 1700444532.3447134,
+      "t_onset": 69,
+      "t_offset": 123,
+      "magnitude": 5.497660353779793,
+      "detach_factor": null,
+      "affected_shards": [
+        "cluster-0-pod-0-rack-0-tray-4-gpu-3"
+      ]
+    },
+    {
+      "fault_id": "fault-4",
+      "level": "gpu",
+      "target": "cluster-0-pod-0-rack-0-tray-17-gpu-3",
+      "counter": null,
+      "type": "mean_shift",
+      "t_onset_s": 1700197814.4622586,
+      "t_offset_s": 1700377182.3118532,
+      "t_onset": 55,
+      "t_offset": 105,
+      "magnitude": 6.549016715027392,
+      "detach_factor": null,
+      "affected_shards": [
+        "cluster-0-pod-0-rack-0-tray-17-gpu-3"
+      ]
+    },
+    {
+      "fault_id": "fault-5",
+      "level": "gpu",
+      "target": "cluster-0-pod-0-rack-0-tray-1-gpu-3",
+      "counter": null,
+      "type": "mean_shift",
+      "t_onset_s": 1700184548.5920253,
+      "t_offset_s": 1700342033.0035653,
+      "t_onset": 51,
+      "t_offset": 95,
+      "magnitude": 6.991893264465034,
+      "detach_factor": null,
+      "affected_shards": [
+        "cluster-0-pod-0-rack-0-tray-1-gpu-3"
+      ]
+    },
+    {
+      "fault_id": "fault-6",
+      "level": "gpu",
+      "target": "cluster-0-pod-0-rack-0-tray-11-gpu-2",
+      "counter": "power_w",
+      "type": "mean_shift",
+      "t_onset_s": 1700121337.3172123,
+      "t_offset_s": 1700392248.4150777,
+      "t_onset": 34,
+      "t_offset": 109,
+      "magnitude": 6.248309091664851,
+      "detach_factor": null,
+      "affected_shards": [
+        "cluster-0-pod-0-rack-0-tray-11-gpu-2"
+      ]
+    }
+  ]
+}

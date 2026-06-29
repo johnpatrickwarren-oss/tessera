@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tessera — How Mode A and Mode B Function</title>
+<script src="./mermaid.min.js"></script>
+<style>
+  :root {
+    --ink: #1a2230;
+    --muted: #5b6675;
+    --line: #d4dae3;
+    --modeA: #2f6f4f;     /* green — evidence/ranking */
+    --modeA-bg: #e8f5ee;
+    --modeB: #b3471d;     /* burnt orange — FDR-guaranteed */
+    --modeB-bg: #fbece4;
+    --gate: #34495e;
+    --accent: #2b5c8a;
+    --callout-bg: #f3f6fa;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  .page {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 54px 54px;
+  }
+  .cover { page-break-after: always; padding-top: 90px; }
+  .cover h1 { font-size: 38px; margin: 0 0 6px; letter-spacing: -0.5px; }
+  .cover .sub { font-size: 18px; color: var(--muted); margin: 0 0 34px; font-weight: 500; }
+  .cover .lede {
+    font-size: 15.5px; line-height: 1.65; color: var(--ink);
+    border-left: 4px solid var(--accent); padding: 4px 0 4px 18px; max-width: 760px;
+  }
+  .cover .meta {
+    margin-top: 40px; font-size: 12.5px; color: var(--muted);
+    border-top: 1px solid var(--line); padding-top: 14px;
+  }
+  .cover .legend { margin-top: 30px; display: flex; gap: 26px; }
+  .cover .legend .chip { font-size: 13px; }
+  .swatch { display:inline-block; width:13px; height:13px; border-radius:3px; vertical-align:middle; margin-right:7px; }
+
+  section { page-break-before: always; }
+  section.nobreak { page-break-before: avoid; }
+  h2 {
+    font-size: 23px; margin: 6px 0 2px; letter-spacing: -0.3px;
+  }
+  h2 .num { color: var(--accent); font-weight: 800; margin-right: 10px; }
+  .tagline { color: var(--muted); font-size: 14.5px; margin: 0 0 20px; }
+  .figure {
+    border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 8px;
+    background: #fff; margin: 6px 0 14px; text-align: center;
+    box-shadow: 0 1px 3px rgba(20,30,50,.05);
+    page-break-inside: avoid;
+  }
+  .figure .mermaid { display: flex; justify-content: center; }
+  .figure svg { max-width: 100%; max-height: 540px; height: auto; }
+  .figure.tall svg { max-height: 600px; }
+  h2, .tagline { page-break-after: avoid; }
+  .callout { page-break-inside: avoid; }
+  .caption { font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
+  .callout {
+    background: var(--callout-bg); border-radius: 10px; padding: 13px 17px;
+    font-size: 13.5px; margin: 4px 0 8px;
+  }
+  .callout b { color: var(--accent); }
+  .callout.intuition::before {
+    content: "INTUITION"; display: block; font-size: 10.5px; letter-spacing: 1.3px;
+    color: var(--accent); font-weight: 700; margin-bottom: 4px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12.8px; margin: 8px 0 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; }
+  td code, p code, li code { background:#eef1f6; padding:1px 5px; border-radius:4px; font-size:12px; }
+  .pill { font-weight:700; padding:1px 8px; border-radius:20px; font-size:11.5px; }
+  .pill.A { background: var(--modeA-bg); color: var(--modeA); }
+  .pill.B { background: var(--modeB-bg); color: var(--modeB); }
+  p { margin: 8px 0; }
+  ul { margin: 6px 0 12px; padding-left: 20px; }
+  li { margin: 3px 0; }
+  .foot { color: var(--muted); font-size: 11px; text-align:center; margin-top: 30px; border-top:1px solid var(--line); padding-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────── COVER ───────────────────────── -->
+<div class="page cover">
+  <h1>Tessera — Mode&nbsp;A &amp; Mode&nbsp;B</h1>
+  <p class="sub">How the two-mode observation architecture functions today</p>
+  <p class="lede">
+    Tessera runs <b>one detector substrate in two modes</b>, chosen per&#8209;emitter by a
+    <code>validity_class</code> gate. <span class="pill A">Mode&nbsp;A</span> is the always&#8209;on
+    layer — it <i>ranks</i> shards by evidence and <i>abstains</i> when it cannot make a calibrated
+    claim, with no false&#8209;discovery&#8209;rate promise. <span class="pill B">Mode&nbsp;B</span> is a
+    narrow, revocable upgrade that earns an <b>FDR&nbsp;≤&nbsp;q</b> guarantee by building a valid
+    <i>spatial</i> null from a concurrent control twin (<code>d&nbsp;=&nbsp;treatment&nbsp;−&nbsp;control</code>),
+    which cancels the common&#8209;mode the temporal null cannot on nonstationary GPU telemetry.
+  </p>
+
+  <div class="legend">
+    <span class="chip"><span class="swatch" style="background:var(--modeA)"></span>Mode A — evidence / ranking + abstain (default)</span>
+    <span class="chip"><span class="swatch" style="background:var(--modeB)"></span>Mode B — FDR&#8209;guaranteed (conditional, narrow)</span>
+    <span class="chip"><span class="swatch" style="background:var(--gate)"></span>Gate / decision</span>
+  </div>
+
+  <div class="meta">
+    Source: <code>tools/emitter-contract.ts</code> · <code>tools/mode-b-loop.ts</code> ·
+    <code>tools/contrast.ts</code> · <code>tools/control-triad.ts</code> &nbsp;|&nbsp;
+    ADRs&nbsp;0019–0022 &nbsp;|&nbsp; branch <code>three-walls-prototypes</code> &nbsp;|&nbsp; 2026&#8209;06&#8209;28
+  </div>
+</div>
+
+<!-- ───────────────────────── 1. BIG PICTURE ───────────────────────── -->
+<section class="page">
+  <h2><span class="num">1</span>The big picture — one substrate, two modes, gated per&#8209;emitter</h2>
+  <p class="tagline">Every detector is an <b>emitter</b> (a whole contract). The gate alone decides its mode.</p>
+  <div class="figure">
+    <pre class="mermaid">
+flowchart TD
+  RAW["Raw shard telemetry<br/><span style='font-size:11px'>gpu_temp_c · power_w · sm_util · …</span>"]:::raw
+  RAW --> EM["ONE EMITTER per counter<br/><span style='font-size:10.5px'>contract = baseline · conditioning · residualizer ·<br/>increment · horizon · <b>validity_class</b></span>"]:::raw
+  EM --> GATE{"VALIDITY-CLASS GATE<br/><span style='font-size:11px'>isFdrBearing(c)?</span>"}:::gate
+  GATE -->|"theorem_valid OR<br/>construction_valid + live monitor ✓"| B["MODE B<br/>FDR-GUARANTEED<br/><span style='font-size:11px'>conditional · narrow</span>"]:::modeb
+  GATE -->|"empirically_audited ·<br/>heuristic · rca_only"| A["MODE A<br/>EVIDENCE / RANKING + ABSTAIN<br/><span style='font-size:11px'>DEFAULT substrate</span>"]:::modea
+  B --> BACT["Can DISPATCH actions<br/><span style='font-size:11px'>block · page · remediate &nbsp;|&nbsp; FDR ≤ q across the set</span>"]:::modeb2
+  A --> AACT["NEVER dispatches an FDR-keyed action<br/><span style='font-size:11px'>however large its e-value</span>"]:::modea2
+  classDef raw fill:#eef1f6,stroke:#b9c2cf,color:#1a2230;
+  classDef gate fill:#34495e,stroke:#22303d,color:#fff;
+  classDef modeb fill:#fbece4,stroke:#b3471d,color:#7a2f12,stroke-width:2px;
+  classDef modeb2 fill:#fff,stroke:#b3471d,color:#7a2f12;
+  classDef modea fill:#e8f5ee,stroke:#2f6f4f,color:#1d4731,stroke-width:2px;
+  classDef modea2 fill:#fff,stroke:#2f6f4f,color:#1d4731;
+    </pre>
+  </div>
+  <div class="callout intuition">
+    <b>Mode A is the default</b> — every emitter starts here. <b>Mode B is opt&#8209;in and revocable</b>:
+    an emitter has to <i>earn</i> its way in and gets kicked back the moment its null stops being trustworthy.
+    The gate (<code>assertFdrEligible</code>) <i>throws</i> rather than let an ineligible emitter silently
+    acquire a guarantee — the same hard&#8209;fail discipline as the ≥56&#8209;day baseline guard.
+  </div>
+</section>
+
+<!-- ───────────────────────── 2. MODE A ───────────────────────── -->
+<section class="page">
+  <h2><span class="num">2</span><span class="pill A">Mode A</span>&nbsp; the always&#8209;on substrate — no FDR claim</h2>
+  <p class="tagline">Rank by evidence, and <b>abstain</b> rather than bluff.</p>
+  <div class="figure">
+    <pre class="mermaid">
+flowchart LR
+  R["Residualized<br/>shard signal"]:::modea2 --> E["Per-shard e-value<br/><span style='font-size:11px'>how surprising is this<br/>shard right now?</span>"]:::modea2
+  E --> RANK["RANK shards by evidence<br/>+ ABSTAIN when uncertain"]:::modea
+  RANK --> OUT["Early warning · triage · RCA hints<br/><span style='font-size:11px'><b>NO</b> false-discovery-rate ≤ q promise</span>"]:::modea2
+  classDef modea fill:#e8f5ee,stroke:#2f6f4f,color:#1d4731,stroke-width:2px;
+  classDef modea2 fill:#fff,stroke:#2f6f4f,color:#1d4731;
+    </pre>
+  </div>
+  <table>
+    <tr><th>Shard / emitter</th><th>Evidence</th><th>Mode A behavior</th></tr>
+    <tr><td><code>shard-417</code></td><td>████████████ strong</td><td>surfaced top of the ranking</td></tr>
+    <tr><td><code>shard-031</code></td><td>███████ moderate</td><td>surfaced, lower</td></tr>
+    <tr><td><code>shard-902</code></td><td>██ weak</td><td>below the fold</td></tr>
+    <tr><td><code>gpu_temp_c</code> @ 1&nbsp;Hz</td><td>· · · · ·</td><td><b>ABSTAINS</b> — cannot certify a valid null → says nothing</td></tr>
+  </table>
+  <div class="callout intuition">
+    Mode&nbsp;A is <b>honest about uncertainty</b>: it surfaces and ranks, and when it cannot make a
+    calibrated claim it <i>abstains</i> instead of guessing. <code>gpu_temp_c</code> at 1&nbsp;Hz is the
+    canonical abstainer — near&#8209;unit&#8209;root physics (φ≈0.992) means there is no valid temporal
+    null, so it stays in Mode&nbsp;A permanently. That abstention is <i>intrinsic and correct</i>, not a
+    fixable artifact (confirmed against a genuine 2&#8209;month 1&nbsp;Hz baseline).
+  </div>
+</section>
+
+<!-- ───────────────────────── 3. MODE B ───────────────────────── -->
+<section class="page">
+  <h2><span class="num">3</span><span class="pill B">Mode B</span>&nbsp; FDR guarantee via a <i>spatial</i> null</h2>
+  <p class="tagline">A guarantee needs a valid null. On drifting telemetry, build it in <b>space</b>, not time.</p>
+  <div class="figure">
+    <pre class="mermaid">
+flowchart TD
+  CM["Shared common-mode<br/><span style='font-size:10.5px'>workload · ambient · power regime · CDU / pod events</span>"]:::cm
+  CM -.->|same instant| T["TREATMENT shard&nbsp; t"]:::modeb2
+  CM -.->|same instant| C["CONTROL twin&nbsp; c"]:::modeb2
+  T --> D["d = t − c<br/><span style='font-size:11px'>common-mode CANCELS (it is shared)</span>"]:::modeb
+  C --> D
+  D --> FIT["fitContrast( d_healthy )<br/><span style='font-size:10.5px'>1 center · 2 AR(1) φ whiten · 3 robust loc / scale</span>"]:::modeb2
+  FIT --> APP["applyContrast( d_mon ) → standardized residual<br/>normalizedMixtureEValue → 1 e-value / shard"]:::modeb2
+  APP --> EBH["GATED e-BH&nbsp; (q)<br/><span style='font-size:11px'>FDR ≤ q across the selected set</span>"]:::modeb
+  EBH --> DISC["FDR-controlled discoveries → actions"]:::modeb2
+  classDef cm fill:#eef1f6,stroke:#b9c2cf,color:#1a2230;
+  classDef modeb fill:#fbece4,stroke:#b3471d,color:#7a2f12,stroke-width:2px;
+  classDef modeb2 fill:#fff,stroke:#b3471d,color:#7a2f12;
+    </pre>
+  </div>
+  <div class="callout intuition">
+    The <b>contrast</b> <code>d&nbsp;=&nbsp;t&nbsp;−&nbsp;c</code> is the whole trick. Treatment and its twin
+    feel the <i>same</i> workload, ambient temperature and power regime at the <i>same</i> instant, so
+    subtracting them <b>cancels the common&#8209;mode exactly</b> — leaving a clean null the drifting
+    temporal baseline could never give. Fit on a healthy window (center → whiten → standardize), apply to
+    the monitoring window, turn each shard into one e&#8209;value, and run e&#8209;BH for FDR&nbsp;≤&nbsp;q.
+  </div>
+</section>
+
+<!-- ───────────────────────── 4. WHY SPATIAL (graph) ───────────────────────── -->
+<section class="page">
+  <h2><span class="num">4</span>Why spatial, not temporal — the data</h2>
+  <p class="tagline">Same detector, same q&nbsp;=&nbsp;0.1. Only the <b>null construction</b> changes.</p>
+  <div class="figure">
+    <pre class="mermaid">
+xychart-beta
+  title "False-discovery proportion by null construction  (lower is better; target q = 0.1)"
+  x-axis ["Temporal", "Single twin (bad ctrl)", "Spatial twin", "Control triad"]
+  y-axis "FDP" 0 --> 1
+  bar [0.97, 0.58, 0.003, 0.0]
+    </pre>
+  </div>
+  <p class="caption">FDP at 1&nbsp;Hz scale. Temporal over&#8209;selects catastrophically; a single twin fails when the
+    control itself is contaminated; the matched spatial twin and the control triad sit at or below target.</p>
+  <div class="callout">
+    <b>Temporal</b> compares a shard against its own past — drift contaminates it → FDP&nbsp;≈&nbsp;0.97.
+    <b>Spatial</b> compares a shard against its twin at the same instant — common&#8209;mode cancels → FDP&nbsp;≈&nbsp;0.
+    The <b>single twin</b> has one weakness (a contaminated <i>control</i> makes <code>t−c</code> false&#8209;fire,
+    FDP&nbsp;≈&nbsp;0.58); the <b>triad</b> (§7) closes it.
+  </div>
+</section>
+
+<!-- ───────────────────────── 5. THE GATE (decision tree) ───────────────────────── -->
+<section class="page">
+  <h2><span class="num">5</span>The gate as a decision tree — what makes an emitter Mode&nbsp;B <i>right now</i></h2>
+  <p class="tagline">Validity is a property of the live emitter, re&#8209;evaluated continuously.</p>
+  <div class="figure">
+    <pre class="mermaid">
+flowchart TD
+  Q{"validity_class = ?"}:::gate
+  Q -->|theorem_valid| B1["MODE B<br/><span style='font-size:11px'>always (proven e-process)</span>"]:::modeb
+  Q -->|construction_valid| M{"live calibration<br/>monitor passing?"}:::gate
+  Q -->|"empirically_audited /<br/>heuristic / rca_only"| A1["MODE A"]:::modea
+  M -->|yes| B2["MODE B<br/><span style='font-size:11px'>while ✓ (revocable)</span>"]:::modeb
+  M -->|"no / undefined<br/>(not-yet-monitored)"| A2["MODE A<br/><span style='font-size:11px'>demoted</span>"]:::modea
+  classDef gate fill:#34495e,stroke:#22303d,color:#fff;
+  classDef modeb fill:#fbece4,stroke:#b3471d,color:#7a2f12,stroke-width:2px;
+  classDef modea fill:#e8f5ee,stroke:#2f6f4f,color:#1d4731,stroke-width:2px;
+    </pre>
+  </div>
+  <div class="callout intuition">
+    Two load&#8209;bearing rules: (1) <code>construction_valid</code> is <b>not a static stamp</b> — it is
+    bound to a live monitor and requires <code>calibrationMonitorPassing&nbsp;===&nbsp;true</code> every cycle
+    (<code>undefined</code> counts as failing — "a class without a live monitor manufactures false
+    confidence"). (2) <b>The unit of validity is the emitter, not the counter</b> — the same counter can be
+    Mode&nbsp;B under one contract and Mode&nbsp;A under another.
+  </div>
+</section>
+
+<!-- ───────────────────────── 6. THE ALWAYS-ON LOOP ───────────────────────── -->
+<section class="page">
+  <h2><span class="num">6</span>The always&#8209;on loop — how B and A behave over time</h2>
+  <p class="tagline"><code>mode-b-loop.ts</code>: a promotion / demotion machine, run every cycle, per emitter.</p>
+  <div class="figure">
+    <pre class="mermaid">
+flowchart TD
+  S["control cohort residuals<br/><span style='font-size:11px'>(known-null)</span>"]:::raw
+  S --> UM["UPDATE per-shard calibration monitors<br/><span style='font-size:11px'>anytime-valid · ACCUMULATE across cycles</span>"]:::raw
+  UM --> CV{"constructionValid?<br/><span style='font-size:11px'>calibFrac ≥ 0.8 AND whitenessPass</span>"}:::gate
+  CV -->|yes| MB["MODE B<br/>gated e-BH on contrast e-values"]:::modeb
+  CV -->|no| MA["MODE A<br/>abstain (no discoveries)"]:::modea
+  MB --> REC["RECONCILE vs standing actions"]:::modeb2
+  MA --> REC
+  REC --> D1["new discovery →<br/><b>DISPATCH</b> (debounced)"]:::out
+  REC --> D2["gone, still B →<br/><b>WITHDRAW</b> 'resolved'"]:::out
+  REC --> D3["B → A transition →<br/><b>WITHDRAW ALL</b> 'revoked'"]:::out
+  classDef raw fill:#eef1f6,stroke:#b9c2cf,color:#1a2230;
+  classDef gate fill:#34495e,stroke:#22303d,color:#fff;
+  classDef modeb fill:#fbece4,stroke:#b3471d,color:#7a2f12,stroke-width:2px;
+  classDef modeb2 fill:#fff,stroke:#b3471d,color:#7a2f12;
+  classDef modea fill:#e8f5ee,stroke:#2f6f4f,color:#1d4731,stroke-width:2px;
+  classDef out fill:#fff,stroke:#34495e,color:#22303d;
+    </pre>
+  </div>
+  <table>
+    <tr><th>Invariant</th><th>Meaning</th></tr>
+    <tr><td>No action without a live guarantee</td><td>a Mode&#8209;A emitter never dispatches, however large its e&#8209;value</td></tr>
+    <tr><td>Revocation withdraws</td><td>guarantee breaks → all that emitter's standing actions are pulled</td></tr>
+    <tr><td>Debounce</td><td>a still&#8209;standing discovery fires once, not every cycle</td></tr>
+    <tr><td>Resolution withdraws</td><td>a discovery that disappears (while still Mode&nbsp;B) → <code>'resolved'</code></td></tr>
+  </table>
+  <div class="callout intuition">
+    An emitter <b>rides into Mode&nbsp;B</b> when its construction holds, dispatches FDR&#8209;controlled
+    actions, and <b>falls back to Mode&nbsp;A</b> — dropping <i>all</i> its actions — the instant the monitor
+    or whiteness check says its null is no longer trustworthy. An action keyed to a bounded error rate must
+    never outlive the guarantee it was keyed to.
+  </div>
+</section>
+
+<!-- ───────────────────────── 7. THE TRIAD ───────────────────────── -->
+<section class="page">
+  <h2><span class="num">7</span>The control triad (ADR&nbsp;0022) — hardening the spatial null</h2>
+  <p class="tagline">A second twin lets the construction self&#8209;check when a <i>control</i> goes bad.</p>
+  <div class="figure">
+    <pre class="mermaid">
+flowchart TD
+  T["treatment&nbsp; t"]:::modeb2
+  C1["control twin&nbsp; c1"]:::modeb2
+  C2["control twin&nbsp; c2"]:::modeb2
+  C1 --> S1{"STEP 1&nbsp; c1 − c2 fires?<br/><span style='font-size:11px'>control-vs-control null<br/>(matched siblings cancel)</span>"}:::gate
+  C2 --> S1
+  S1 -->|"yes — flag c1 bad"| USE2["STEP 2&nbsp; detect on&nbsp; t − c2<br/><span style='font-size:11px'>clean sibling → no false positive</span>"]:::modeb
+  S1 -->|no| USE1["detect on&nbsp; t − c1"]:::modeb
+  T -.-> USE1
+  T -.-> USE2
+  classDef gate fill:#34495e,stroke:#22303d,color:#fff;
+  classDef modeb fill:#fbece4,stroke:#b3471d,color:#7a2f12,stroke-width:2px;
+  classDef modeb2 fill:#fff,stroke:#b3471d,color:#7a2f12;
+    </pre>
+  </div>
+  <div class="callout intuition">
+    A single twin has one blind spot: if the <i>control</i> is contaminated, <code>t&nbsp;−&nbsp;c</code>
+    fires even though the treatment is healthy (a sign&#8209;blind false positive, FDP&nbsp;≈&nbsp;0.58). The
+    triad adds a second twin so <code>c1&nbsp;−&nbsp;c2</code> becomes a clean control&#8209;vs&#8209;control
+    reference that flags the bad control, and detection routes to the clean sibling
+    <code>t&nbsp;−&nbsp;c2</code> → FDP&nbsp;back to <b>0.000</b> at recall&nbsp;1.000.
+    <i>Note:</i> <code>applyTriadRouting</code> is in&#8209;memory only today; wiring it into the streaming /
+    1&nbsp;Hz&#8209;at&#8209;scale path is the top remaining item.
+  </div>
+</section>
+
+<!-- ───────────────────────── 8. SCALE VALIDATION ───────────────────────── -->
+<section class="page">
+  <h2><span class="num">8</span>It holds at full cluster scale</h2>
+  <p class="tagline">Hourly Mode&nbsp;B, validated to <b>9,216 observation units</b> (4,608 treatment + 4,608 control).</p>
+  <div class="figure">
+    <pre class="mermaid">
+xychart-beta
+  title "Hourly Mode B as the cluster scales — recall (bars) stays ~1, FDP (line) stays ~0"
+  x-axis ["1152 units", "2304 units", "4608 units", "9216 units"]
+  y-axis "rate" 0 --> 1
+  bar [0.995, 0.995, 0.995, 0.995]
+  line [0.0, 0.0, 0.0, 0.0]
+    </pre>
+  </div>
+  <p class="caption">Bars = recall (≈0.995). Line = FDP (≈0.000) across all four rack tiers. Cadence&#8209;dependent caveat:
+    at 1&nbsp;Hz, <code>power_w</code> certifies Mode&nbsp;B (FDP&nbsp;0.000, recall&nbsp;1.000) while
+    <code>gpu_temp_c</code> correctly abstains to Mode&nbsp;A.</p>
+  <table>
+    <tr><th>Setting</th><th>Scale</th><th>FDP</th><th>Recall</th><th>Notes</th></tr>
+    <tr><td>Hourly, full cluster</td><td>9,216 units</td><td>0.000</td><td>→0.995</td><td>every rack tier</td></tr>
+    <tr><td>1&nbsp;Hz, 2&#8209;month baseline, <code>power_w</code></td><td>9,216 units</td><td>0.000</td><td>1.000</td><td>certifies Mode&nbsp;B</td></tr>
+    <tr><td>1&nbsp;Hz, <code>gpu_temp_c</code></td><td>—</td><td>—</td><td>—</td><td><b>abstains</b> (Mode&nbsp;A) — intrinsic, correct</td></tr>
+    <tr><td>Triad under control contamination</td><td>1,728 shards</td><td>0.000</td><td>1.000</td><td>vs single&#8209;pair FDP&nbsp;≈&nbsp;0.58</td></tr>
+  </table>
+  <div class="callout intuition">
+    The two&#8209;mode guarantee is <b>scale&#8209;invariant where it applies</b> and <b>honestly silent
+    where it does not</b>. Growing the cluster 8× does not erode FDR control; switching to a near&#8209;unit&#8209;root
+    counter does not produce false confidence — it produces abstention.
+  </div>
+  <p class="foot">Tessera · two&#8209;mode observation architecture · ADRs&nbsp;0019–0022 · all results on synthetic clustersynth telemetry (real&#8209;cluster DCGM validation is the Phase&#8209;4 candidate)</p>
+</section>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    securityLevel: 'loose',
+    flowchart: { htmlLabels: true, curve: 'basis', nodeSpacing: 40, rankSpacing: 48, useMaxWidth: false },
+    themeVariables: {
+      fontFamily: '-apple-system, Helvetica Neue, Arial, sans-serif',
+      fontSize: '13px',
+      lineColor: '#7a8696',
+      primaryColor: '#eef1f6',
+      primaryTextColor: '#1a2230',
+      primaryBorderColor: '#b9c2cf',
+      xyChart: {
+        backgroundColor: '#ffffff',
+        plotColorPalette: '#c75b30, #2b5c8a',
+        titleColor: '#1a2230',
+        xAxisLabelColor: '#5b6675',
+        yAxisLabelColor: '#5b6675',
+        xAxisTitleColor: '#5b6675',
+        yAxisTitleColor: '#5b6675'
+      }
+    }
+  });
+  // Signal for the PDF renderer once all diagrams have drawn.
+  window.__renderDone = false;
+  (async () => {
+    try { await mermaid.run(); } catch (e) { console.error(e); }
+    window.__renderDone = true;
+    document.title = 'READY — Tessera Mode A & B';
+  })();
+</script>
+</body>
+</html>

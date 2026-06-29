@@ -23,7 +23,10 @@
 // Tessera-original; NOT vendored.
 
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
+import { StringDecoder } from 'node:string_decoder';
+import { Worker, isMainThread, workerData, parentPort } from 'node:worker_threads';
 import { instrumentedCommonModeResiduals } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/instrumented-common-mode';
 import { universalInferenceMeanShiftEValue } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/universal-inference-e-value';
 import { nuisanceRobustBFEValue, MIN_CALIBRATION_FOR_VALIDITY } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/nuisance-robust-bf-e-value';
@@ -31,6 +34,7 @@ import { distributionalSignature } from '@johnpatrickwarren-oss/deploysignal-eng
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 import { eBHConditionalCalibration } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh-conditional-calibration';
 import { gaussianLrEValue, gaussianLrNullSurvival } from './gaussian-lr-evalue.js';
+import { assertLongBaseline } from './baseline-guard.js';
 
 export type FaultType = 'mean_shift' | 'drift' | 'variance_collapse' | 'detachment';
 export type FaultLevel = 'gpu' | 'cdu' | 'pod';
@@ -44,6 +48,8 @@ interface FaultLabel {
 
 export interface ScenarioBundle {
   T: number;
+  /** Cadence (seconds per tick) — needed by the short-window guard to compute baseline days. */
+  dt_s: number;
   shardIds: string[];
   counters: CounterSpec[];
   factors: Record<string, FactorEntry>;
@@ -53,23 +59,65 @@ export interface ScenarioBundle {
   series: Map<string, number[]>;
 }
 
-/** Load a scenario bundle directory (factors.json + labels.json + counters.ndjson). */
-export function loadScenarioBundle(dir: string): ScenarioBundle {
+/** Yield complete lines from a file via chunked reads — never materialises the whole file
+ *  as one JS string, so it is immune to V8's ~512 MB max-string-length cap. This matters for
+ *  long-duration high-cadence (1 Hz) bundles whose counters.ndjson runs to multiple GB. */
+export function* ndjsonLines(filePath: string): Generator<string> {
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const CHUNK = 1 << 22; // 4 MB
+    const buf = Buffer.allocUnsafe(CHUNK);
+    const decoder = new StringDecoder('utf8');
+    let leftover = '';
+    let bytes: number;
+    while ((bytes = fs.readSync(fd, buf, 0, CHUNK, null)) > 0) {
+      leftover += decoder.write(buf.subarray(0, bytes));
+      let nl: number;
+      while ((nl = leftover.indexOf('\n')) >= 0) {
+        const line = leftover.slice(0, nl);
+        leftover = leftover.slice(nl + 1);
+        if (line.length) yield line;
+      }
+    }
+    leftover += decoder.end();
+    if (leftover.trim().length) yield leftover;
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+/** Load a scenario bundle directory (factors.json + labels.json + counters.ndjson).
+ *  `counterFilter`, when given, loads only those counter rows into memory (the rest are
+ *  parsed-and-dropped) — keeps RAM flat when a bundle holds counters you will not score. */
+export function loadScenarioBundle(dir: string, counterFilter?: ReadonlySet<string>): ScenarioBundle {
   const factorsDoc = JSON.parse(fs.readFileSync(path.join(dir, 'factors.json'), 'utf8'));
   const faults: FaultLabel[] = JSON.parse(fs.readFileSync(path.join(dir, 'labels.json'), 'utf8')).faults;
+  // Factor series: stream factors.ndjson (new format; factors.json is meta-only), else fall back
+  // to the legacy factors.json `.factors` field (old committed fixtures).
+  const factors: Record<string, FactorEntry> = {};
+  const ndFactors = path.join(dir, 'factors.ndjson');
+  if (fs.existsSync(ndFactors)) {
+    for (const line of ndjsonLines(ndFactors)) {
+      const row = JSON.parse(line) as { id: string; kind: string; v: number[] };
+      factors[row.id] = { kind: row.kind, series: row.v };
+    }
+  } else if (factorsDoc.factors) {
+    for (const id of Object.keys(factorsDoc.factors)) factors[id] = factorsDoc.factors[id];
+  }
   const series = new Map<string, number[]>();
   const shardSet = new Set<string>();
-  const ndjson = fs.readFileSync(path.join(dir, 'counters.ndjson'), 'utf8').trim().split('\n');
-  for (const line of ndjson) {
+  for (const line of ndjsonLines(path.join(dir, 'counters.ndjson'))) {
     const row = JSON.parse(line) as { shard: string; counter: string; v: number[] };
-    series.set(`${row.shard}\0${row.counter}`, row.v);
     shardSet.add(row.shard);
+    if (counterFilter && !counterFilter.has(row.counter)) continue;
+    series.set(`${row.shard}\0${row.counter}`, row.v);
   }
   return {
     T: factorsDoc.T,
+    dt_s: factorsDoc.dt_s ?? 1,
     shardIds: [...shardSet].sort(),
     counters: factorsDoc.counters,
-    factors: factorsDoc.factors,
+    factors,
     membership: factorsDoc.membership,
     faults,
     series,
@@ -183,6 +231,7 @@ function signatureHealthyFP(b: ScenarioBundle, counterName: string, calLen: numb
 
 /** Run the instrumented pipeline + the detectors on one counter and score by fault type. */
 export function scoreCounter(b: ScenarioBundle, counterName: string, calLen: number, q: number): CounterScore {
+  assertLongBaseline(calLen, b.dt_s, `scoreCounter(${counterName})`);
   const { X, factorSignals, membership } = counterMatrices(b, counterName);
   const R = instrumentedCommonModeResiduals(X, calLen, factorSignals, membership);
   const cal = { start: 0, len: calLen };
@@ -227,12 +276,14 @@ export function scoreBundle(dir: string, q = 0.05, calLen?: number): { bundle: S
   return { bundle, scores: bundle.counters.map((c) => scoreCounter(bundle, c.name, cl, q)) };
 }
 
-/** Render an honest per-counter + per-fault-type report. */
-export function renderScenario(dir: string, q = 0.05): string {
-  const { bundle, scores } = scoreBundle(dir, q);
+/** Header facts shared by the in-memory and streaming render paths. */
+interface ReportMeta { dir: string; nShards: number; T: number; nCounters: number; nFaults: number; }
+
+/** Render an honest per-counter + per-fault-type report from pre-computed scores. */
+export function renderReport(meta: ReportMeta, scores: CounterScore[], q = 0.05): string {
   const lines: string[] = [];
-  lines.push(`clustersynth SCENARIO bundle — adversarial, labeled telemetry. dir=${dir}`);
-  lines.push(`${bundle.shardIds.length} shards, T=${bundle.T}, ${bundle.counters.length} counters, ${bundle.faults.length} faults. FDR q=${q}.`);
+  lines.push(`clustersynth SCENARIO bundle — adversarial, labeled telemetry. dir=${meta.dir}`);
+  lines.push(`${meta.nShards} shards, T=${meta.T}, ${meta.nCounters} counters, ${meta.nFaults} faults. FDR q=${q}.`);
   lines.push('');
   const bfValid = scores.some((s) => s.bf.valid);
   lines.push('Valid-FDR path (mean-shift e-value → e-BH), scored vs gpu mean_shift faults.');
@@ -286,12 +337,267 @@ export function renderScenario(dir: string, q = 0.05): string {
   return lines.join('\n');
 }
 
+/** In-memory render path (loads the whole bundle; fine for small/committed fixtures). */
+export function renderScenario(dir: string, q = 0.05): string {
+  const { bundle, scores } = scoreBundle(dir, q);
+  return renderReport(
+    { dir, nShards: bundle.shardIds.length, T: bundle.T, nCounters: bundle.counters.length, nFaults: bundle.faults.length },
+    scores, q);
+}
+
 function fmt(x: number): string { return Number.isNaN(x) ? '  -  ' : x.toFixed(3); }
 
-if (require.main === module) { // CommonJS CLI guard (tsconfig compiles to CJS)
+// ─── STREAMING PATH (memory-lean, scales to many racks) ──────────────────────
+// The in-memory path above holds every shard's series PLUS a full residual copy
+// (~6 GB per NVL72 rack at a 2-month 1 Hz window). The streaming path instead keeps
+// only the shared measured factor series in RAM, then processes one shard at a time:
+// read its counter row, remove the instrumented common-mode against just that shard's
+// factors, compute the per-shard e-values/signature, keep the scalars, drop the series.
+// Peak RAM ≈ the factor sidecar (~0.4 GB per rack) + one shard's working set, so the
+// rack ceiling rises ~16× versus the in-memory path. Output is byte-identical.
+
+interface FactorsMeta { T: number; dt_s?: number; counters: CounterSpec[]; membership: Record<string, Record<string, string>>; }
+
+/** Load the measured factor series: stream factors.ndjson when present (no string cap),
+ *  else fall back to the legacy factors.json `.factors` field (old committed fixtures). */
+function loadFactorSeries(dir: string): Map<string, number[]> {
+  const map = new Map<string, number[]>();
+  const nd = path.join(dir, 'factors.ndjson');
+  if (fs.existsSync(nd)) {
+    for (const line of ndjsonLines(nd)) {
+      const row = JSON.parse(line) as { id: string; v: number[] };
+      map.set(row.id, row.v);
+    }
+  } else {
+    const doc = JSON.parse(fs.readFileSync(path.join(dir, 'factors.json'), 'utf8'));
+    for (const id of Object.keys(doc.factors ?? {})) map.set(id, doc.factors[id].series);
+  }
+  return map;
+}
+
+/** The four per-shard detector scalars (ui mean-shift e-value, signature flag, nuisance-robust
+ *  BF e-value, Gaussian-LR e-value) after removing the shard's instrumented common-mode. */
+interface ShardScalars { ui: number; sig: boolean; bf: number; glr: number; }
+
+/** Window spec. */
+interface Span { start: number; len: number; }
+
+/** Residualise one shard against its measured factors and compute the four detector scalars.
+ *  This is the per-shard unit of work — independent across shards, hence trivially parallel. */
+function shardScalars(
+  v: number[], kinds: string[], membership: Record<string, string>,
+  factorSeries: Map<string, number[]>, cl: number, cal: Span, test: Span, bfValid: boolean,
+): ShardScalars {
+  const sigs: number[][] = [];
+  for (const k of kinds) {
+    const inst = membership[k];
+    if (inst == null) continue;
+    const ser = factorSeries.get(inst);
+    if (ser) sigs.push(ser);
+  }
+  const r = instrumentedCommonModeResiduals([v], cl, sigs, [sigs.map((_, i) => i)])[0];
+  return {
+    ui: safeUi(r, cal, test),
+    sig: safeSig(r, cal, test),
+    bf: bfValid ? safeBf(r, cal, test) : 0,
+    glr: gaussianLrEValue(r, cal, test),
+  };
+}
+
+/** Per-counter accumulators of the per-shard scalars, indexed by shard. */
+interface Acc { ui: number[]; bf: number[]; glr: number[]; sig: boolean[]; }
+function emptyAcc(n: number): Acc {
+  return { ui: new Array<number>(n).fill(0), bf: new Array<number>(n).fill(0), glr: new Array<number>(n).fill(0), sig: new Array<boolean>(n).fill(false) };
+}
+
+/** Run e-BH + per-fault-type scoring from filled accumulators (the cheap fleet-level combine). */
+function scoreFromAcc(
+  dir: string, T: number, shardIds: string[], counters: CounterSpec[], faults: FaultLabel[],
+  cl: number, q: number, acc: Acc[], bfValid: boolean,
+): { meta: ReportMeta; scores: CounterScore[] } {
+  const b: ScenarioBundle = { T, dt_s: 1, shardIds, counters, factors: {}, membership: {}, faults, series: new Map() };
+  const survival = gaussianLrNullSurvival();
+  const scores: CounterScore[] = counters.map((c, ci) => {
+    const a = acc[ci];
+    const idx = meanShiftIdx(b, c.name, cl);
+    return {
+      counter: c.name,
+      meanShift: scoreSelection(idx, eBenjaminiHochberg(a.ui, q).selected),
+      bf: { ...scoreSelection(idx, eBenjaminiHochberg(a.bf, q).selected), valid: bfValid },
+      glr: {
+        plain: scoreSelection(idx, eBenjaminiHochberg(a.glr, q).selected),
+        boosted: scoreSelection(idx, eBHConditionalCalibration(a.glr, q, (_j, x) => survival(x)).selected),
+      },
+      byType: recallByType(b, c.name, cl, a.ui, a.sig),
+      sigHealthy: signatureHealthyFP(b, c.name, cl, a.sig),
+    };
+  });
+  return { meta: { dir, nShards: shardIds.length, T, nCounters: counters.length, nFaults: faults.length }, scores };
+}
+
+/** Score every counter in a bundle WITHOUT materialising all series at once (single core). */
+export function scoreBundleStreaming(dir: string, q = 0.05, calLen?: number): { meta: ReportMeta; scores: CounterScore[] } {
+  const fmeta = JSON.parse(fs.readFileSync(path.join(dir, 'factors.json'), 'utf8')) as FactorsMeta & { factors?: unknown };
+  const faults: FaultLabel[] = JSON.parse(fs.readFileSync(path.join(dir, 'labels.json'), 'utf8')).faults;
+  const factorSeries = loadFactorSeries(dir);
+  const shardIds = Object.keys(fmeta.membership).sort();
+  const shardIndex = new Map(shardIds.map((s, i) => [s, i] as const));
+  const T = fmeta.T;
+  const cl = calLen ?? Math.floor(0.1 * T);
+  assertLongBaseline(cl, fmeta.dt_s ?? 1, 'scoreBundleStreaming');
+  const cal = { start: 0, len: cl };
+  const test = { start: cl, len: T - cl };
+  const bfValid = cl >= MIN_CALIBRATION_FOR_VALIDITY;
+  const counters = fmeta.counters;
+  const counterIndex = new Map(counters.map((c, i) => [c.name, i] as const));
+  const kindsByCounter = counters.map((c) => Object.keys(c.load).filter((k) => c.load[k] !== 0));
+  const acc = counters.map(() => emptyAcc(shardIds.length));
+
+  for (const line of ndjsonLines(path.join(dir, 'counters.ndjson'))) {
+    const row = JSON.parse(line) as { shard: string; counter: string; v: number[] };
+    const ci = counterIndex.get(row.counter);
+    if (ci === undefined) continue;
+    const si = shardIndex.get(row.shard);
+    if (si === undefined) continue;
+    const sc = shardScalars(row.v, kindsByCounter[ci], fmeta.membership[row.shard] ?? {}, factorSeries, cl, cal, test, bfValid);
+    acc[ci].ui[si] = sc.ui; acc[ci].sig[si] = sc.sig; acc[ci].bf[si] = sc.bf; acc[ci].glr[si] = sc.glr;
+  }
+  return scoreFromAcc(dir, T, shardIds, counters, faults, cl, q, acc, bfValid);
+}
+
+/** Streaming render path (single core). */
+export function renderScenarioStreaming(dir: string, q = 0.05, calLen?: number): string {
+  const { meta, scores } = scoreBundleStreaming(dir, q, calLen);
+  return renderReport(meta, scores, q);
+}
+
+// ─── MULTI-CORE PATH ─────────────────────────────────────────────────────────
+// The per-shard work is independent, so we fan it out across worker_threads and reduce
+// the (tiny) scalar e-values centrally. counters.ndjson is split into byte RANGES; each
+// worker owns the lines whose start offset falls in its range (lines are written in shard
+// order, so this cleanly partitions shards). Speedup ≈ cores−1; results are identical.
+
+interface WorkerRecord { c: string; s: string; ui: number; sig: boolean; bf: number; glr: number; }
+interface WorkerInput { __cs_worker: true; dir: string; byteStart: number; byteEnd: number; cl: number; bfValid: boolean; }
+
+/** Yield lines whose START byte offset is in [byteStart, byteEnd). ASCII (offset == char). */
+export function* ndjsonRange(filePath: string, byteStart: number, byteEnd: number): Generator<string> {
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const CHUNK = 1 << 22;
+    const buf = Buffer.allocUnsafe(CHUNK);
+    let filePos = byteStart;        // next byte to read from disk
+    let lineStart = byteStart;      // file offset of the start of `pending`
+    let pending = Buffer.alloc(0);
+    let skipFirst = byteStart > 0;  // first partial line belongs to the previous range
+    let bytes: number;
+    while ((bytes = fs.readSync(fd, buf, 0, CHUNK, filePos)) > 0) {
+      filePos += bytes;
+      const chunk = pending.length ? Buffer.concat([pending, buf.subarray(0, bytes)]) : Buffer.from(buf.subarray(0, bytes));
+      let off = 0;
+      let nl: number;
+      while ((nl = chunk.indexOf(10, off)) >= 0) {
+        const lineLen = nl - off + 1;            // include newline
+        const thisStart = lineStart;
+        lineStart += lineLen;
+        const line = chunk.subarray(off, nl);
+        off = nl + 1;
+        if (skipFirst) { skipFirst = false; continue; }
+        if (thisStart >= byteEnd) return;        // past our range
+        if (line.length) yield line.toString('utf8');
+      }
+      pending = chunk.subarray(off);             // tail; lineStart already points at it
+    }
+    if (!skipFirst && pending.length && lineStart < byteEnd) yield pending.toString('utf8');
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+/** Worker body: process an assigned byte range and return the per-shard scalars it computed. */
+function runWorker(input: WorkerInput): WorkerRecord[] {
+  const { dir, byteStart, byteEnd, cl, bfValid } = input;
+  const fmeta = JSON.parse(fs.readFileSync(path.join(dir, 'factors.json'), 'utf8')) as FactorsMeta;
+  const factorSeries = loadFactorSeries(dir);
+  const cal = { start: 0, len: cl };
+  const test = { start: cl, len: fmeta.T - cl };
+  const kindsByCounter = new Map(fmeta.counters.map((c) => [c.name, Object.keys(c.load).filter((k) => c.load[k] !== 0)] as const));
+  const out: WorkerRecord[] = [];
+  for (const line of ndjsonRange(path.join(dir, 'counters.ndjson'), byteStart, byteEnd)) {
+    const row = JSON.parse(line) as { shard: string; counter: string; v: number[] };
+    const kinds = kindsByCounter.get(row.counter);
+    if (!kinds) continue;
+    const sc = shardScalars(row.v, kinds, fmeta.membership[row.shard] ?? {}, factorSeries, cl, cal, test, bfValid);
+    out.push({ c: row.counter, s: row.shard, ui: sc.ui, sig: sc.sig, bf: sc.bf, glr: sc.glr });
+  }
+  return out;
+}
+
+/** Score every counter using a pool of `nWorkers` worker threads. */
+export async function scoreBundleParallel(dir: string, q = 0.05, calLen: number | undefined, nWorkers: number): Promise<{ meta: ReportMeta; scores: CounterScore[] }> {
+  const fmeta = JSON.parse(fs.readFileSync(path.join(dir, 'factors.json'), 'utf8')) as FactorsMeta;
+  const faults: FaultLabel[] = JSON.parse(fs.readFileSync(path.join(dir, 'labels.json'), 'utf8')).faults;
+  const shardIds = Object.keys(fmeta.membership).sort();
+  const shardIndex = new Map(shardIds.map((s, i) => [s, i] as const));
+  const T = fmeta.T;
+  const cl = calLen ?? Math.floor(0.1 * T);
+  assertLongBaseline(cl, fmeta.dt_s ?? 1, 'scoreBundleParallel');
+  const bfValid = cl >= MIN_CALIBRATION_FOR_VALIDITY;
+  const counters = fmeta.counters;
+  const counterIndex = new Map(counters.map((c, i) => [c.name, i] as const));
+  const acc = counters.map(() => emptyAcc(shardIds.length));
+
+  const file = path.join(dir, 'counters.ndjson');
+  const size = fs.statSync(file).size;
+  const ranges: Array<[number, number]> = [];
+  for (let i = 0; i < nWorkers; i++) ranges.push([Math.floor((i * size) / nWorkers), Math.floor(((i + 1) * size) / nWorkers)]);
+
+  const results = await Promise.all(ranges.map(([byteStart, byteEnd]) => new Promise<WorkerRecord[]>((resolve, reject) => {
+    const w = new Worker(__filename, { workerData: { __cs_worker: true, dir, byteStart, byteEnd, cl, bfValid } as WorkerInput });
+    w.once('message', (m: WorkerRecord[]) => resolve(m));
+    w.once('error', reject);
+    w.once('exit', (code) => { if (code !== 0) reject(new Error(`worker exited ${code}`)); });
+  })));
+
+  for (const recs of results) for (const rec of recs) {
+    const ci = counterIndex.get(rec.c); const si = shardIndex.get(rec.s);
+    if (ci === undefined || si === undefined) continue;
+    acc[ci].ui[si] = rec.ui; acc[ci].sig[si] = rec.sig; acc[ci].bf[si] = rec.bf; acc[ci].glr[si] = rec.glr;
+  }
+  return scoreFromAcc(dir, T, shardIds, counters, faults, cl, q, acc, bfValid);
+}
+
+/** Default worker count: cores−1, capped, overridable via CS_WORKERS. */
+function defaultWorkers(): number {
+  if (process.env.CS_WORKERS) return Math.max(1, Number(process.env.CS_WORKERS) | 0);
+  const cores = (os.availableParallelism?.() ?? os.cpus().length);
+  return Math.max(1, cores - 1);
+}
+
+if (!isMainThread && (workerData as Partial<WorkerInput> | undefined)?.__cs_worker) {
+  // Running inside a worker thread: compute the assigned range and post results back.
+  try {
+    parentPort!.postMessage(runWorker(workerData as WorkerInput));
+  } catch (err) {
+    parentPort!.postMessage([]); // surface as an empty slice; main reports missing shards as 0
+    throw err;
+  }
+} else if (require.main === module) { // CommonJS CLI guard (tsconfig compiles to CJS)
   const dir = process.argv[2];
-  if (!dir) { process.stderr.write('usage: node tools/clustersynth-scenario.js <bundle-dir> [q]\n'); process.exit(2); }
+  if (!dir) { process.stderr.write('usage: node tools/clustersynth-scenario.js <bundle-dir> [q] [calLen]\n  env: CS_WORKERS=N (parallel, default cores-1; 1=single-core), CS_INMEMORY=1 (legacy)\n'); process.exit(2); }
   const q = process.argv[3] ? Number(process.argv[3]) : 0.05;
-  process.stdout.write(renderScenario(dir, q) + '\n');
-  process.exit(0);
+  const calLen = process.argv[4] ? Number(process.argv[4]) : undefined;
+  process.stderr.write(
+    '\nNOTE: this is the DIAGNOSTIC scorer (terminal mean-shift only — no e-detector, no Wall-A gate).\n' +
+    'For findings use the production pipeline: tools/baseline-monitor.ts (+ clustersynth-e2e for localization).\n\n');
+  (async () => {
+    if (process.env.CS_INMEMORY === '1') { process.stdout.write(renderScenario(dir, q) + '\n'); return; }
+    const nWorkers = defaultWorkers();
+    if (nWorkers > 1) {
+      const { meta, scores } = await scoreBundleParallel(dir, q, calLen, nWorkers);
+      process.stdout.write(renderReport(meta, scores, q) + `\n(${nWorkers} worker threads)\n`);
+    } else {
+      process.stdout.write(renderScenarioStreaming(dir, q, calLen) + '\n');
+    }
+  })().then(() => process.exit(0)).catch((e) => { process.stderr.write(String(e?.stack ?? e) + '\n'); process.exit(1); });
 }

@@ -25,7 +25,16 @@ Tessera detects deviations in AI cluster behavior at the per-shard level and acr
 - `TopologySource.fetchSnapshot(ctx?)` interface with sparse-data resilience
 - Per-shard residual semantics + topology-aware freeze-hook
 - Hierarchical e-value combination across shard/host/rack layers
-- e-BH FDR control over the per-shard verdict surface
+- e-BH FDR control over the per-shard verdict surface — **conditional**, see *Two operating modes* below
+
+**Two operating modes (ADR 0019).** FDR control is not unconditional on nonstationary fleet telemetry; the per-shard *temporal* null cannot be certified when drift is itself time-varying. Tessera therefore runs in two modes, gated per emitter by a `validity_class`:
+
+- **Mode A — evidence/ranking (DEFAULT).** Always-on continuous fleet observation: per-shard / per-region rankings + early warning, full audit trails, and **abstention** when validity cannot be established. **No FDR claim.**
+- **Mode B — FDR-guaranteed (CONDITIONAL, narrow).** e-BH-controlled discovery, admitted **only** for emitter contracts whose conditional null is `theorem_valid` or `construction_valid` over the horizon — in practice a **spatial null** (a concurrent control / canary, treatment − control), which cancels the common-mode the temporal null cannot. The guarantee is revocable: a live calibration monitor demotes an emitter B→A the moment its construction breaks.
+
+> Tessera provides FDR control only for detector emitters whose conditional null validity is established by construction over the monitoring horizon. For nonstationary telemetry where such validity cannot be established, Tessera operates in evidence-ranking mode with abstention and full audit trails.
+
+The always-on Mode B control loop ([`tools/mode-b-loop.ts`](./tools/mode-b-loop.ts)) wires FDR-controlled discoveries to the control plane via two deploy adapters: a live telemetry+control feed ([`tools/telemetry-source.ts`](./tools/telemetry-source.ts)) and pluggable [`ActionSink`s](./tools/action-sinks.ts) (rollout-gate / pager / remediation + durable audit). See [`decisions/0019-two-mode-architecture-evidence-vs-fdr.md`](./decisions/0019-two-mode-architecture-evidence-vs-fdr.md).
 
 **DeploySignal integration:**
 - HTTP API contract (TypeScript types + endpoint metadata) at `@johnpatrickwarren-oss/deploysignal-engine/ds-integration`
@@ -135,6 +144,36 @@ pnpm build:demos        # regenerates demos/scenarios/*.json + demos/demo.html
 ```
 
 Idempotent: re-running produces byte-identical files. The 8 scenario JSON files double as audit-inspectable evidence of what the dashboard shows. Source: [`tools/build-canned-demos.ts`](./tools/build-canned-demos.ts).
+
+## Scale-and-duration testing
+
+Running tessera detection against clustersynth scenario telemetry at scale (many racks)
+or over a long window follows a fixed methodology — **read it before any such test**:
+[`docs/METHODOLOGY-scale-and-duration-testing.md`](./docs/METHODOLOGY-scale-and-duration-testing.md).
+Two rules it exists to enforce, because both mistakes keep recurring:
+
+- **Window ≥ 2 months, never a snapshot.** Tessera needs a ~2-month baseline, and the
+  nonstationarity is wall-clock-keyed (diurnal/weekly/regime). A short window measures
+  an unrepresentative slice, not whether detection works.
+- **Ramp racks with a resource model** (cores/RAM/disk/time), not by guessing. The
+  scenario scorer is streaming + multi-core, so RAM is rarely the wall — single-core
+  CPU time usually is.
+
+The harness:
+
+```bash
+# ramp racks at the 2-month 1Hz temperature window (auto cores-1 workers); enforces the
+# 2-month minimum. RACKS="1 4 8 16" or MAX_RACKS=64; see the doc for all env knobs.
+tools/clustersynth-ramp.sh
+
+# or run one bundle directly:
+node tools/clustersynth-scenario.js <bundle-dir> [q]   # CS_WORKERS=N (default cores-1; 1=single-core)
+```
+
+`tools/clustersynth-scenario.ts` streams `counters.ndjson`/`factors.ndjson` (no
+~512 MB single-string cap), scores one shard at a time (flat RAM), and fans the
+per-shard work across `worker_threads` (the e-BH FDR combine is central and cheap).
+Generation restricts to a counter subset via `CS_COUNTERS` (clustersynth-side).
 
 ## Methodology
 
