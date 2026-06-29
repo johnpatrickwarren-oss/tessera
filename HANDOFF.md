@@ -38,6 +38,13 @@ construction validity and revoke (B→A) when it breaks.
   contamination) R=8 → `power_w` flags **0**, recall **1.000**, FDP 0.000 (no false-flag of healthy Mode-B
   controls). `gpu_temp_c` abstains (Mode A, ~41% whiteness) in both — its large flag count is the known
   near-unit-root artifact, computed but never acted on (Mode A never selects), consistent with in-memory.
+  **Then end-to-end on the SAME-CADENCE LONG-BASELINE path** (the heavy one — genuine 60d 1 Hz baseline =
+  5.18M ticks/series, `CS_LONG_BASELINE=1`, triad on, clean): `power_w` certifies Mode B at **FDP 0.000 /
+  recall 1.000 / flagged 0 every tier** R=1/2/4/8 (to 1,152 units), `gpu_temp_c` abstains every tier
+  (whiteness 67–75%, better than prefix-fit's 41% — the 2-month baseline helps but can't out-baseline the
+  physics; its sibling-null flags are the same artifact, unactioned). So the long-baseline Phase-1/Phase-2
+  triad code runs at full 2-month 1 Hz scale **without breaking or false-flagging the Mode-B counter** —
+  the canonical 1 Hz finding (`9b4e69e`) reproduced through the triad-wired code. Peak ~169 GB on T9, no reboot.
   **Also fixed a latent `linesFrom` bug** found en route: it unconditionally skipped the first line when
   `byteStart>0`, so a byte boundary landing exactly on a line start dropped that line from BOTH workers
   (benign at scale where row lengths vary — but `monPairs` had it too). Now skips only a genuinely mid-line
