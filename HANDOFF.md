@@ -1,9 +1,12 @@
 # Handoff — Tessera two-mode architecture (ADRs 0019–0022 + scale validation)
 
-**Date:** 2026-06-28 · **Branch:** `three-walls-prototypes` · **clustersynth
+> **SINGLE SOURCE OF TRUTH for current status** (date · suite · what's built · what's next). `STATE.md` is the
+> durable decision/arc trail (history); `README.md` defers here for the live count. Keep this header current.
+
+**Date:** 2026-06-28 · **Branch:** `three-walls-prototypes` (merged to `main` through PR #39) · **clustersynth
 HEAD:** `35c3afa` (branch `scenario-counter-subset-streamed-factors`, unchanged). Both repos clean + pushed.
-**Suite:** 775 pass / 0 fail / 7 skip (the lone intermittent "fail 1" is the pre-existing flaky q84
-worker-terminate timing test — passes in isolation; not ours).
+**Suite:** 790 tests · 783 pass / 0 fail / 7 skip (the lone intermittent "fail 1" is the pre-existing flaky
+q84 worker-terminate timing test — passes in isolation; not ours).
 
 **Read first:** `decisions/0019` (architecture) → `0020` (serial monitor) → `0021` (twin-validity, negative)
 → `0022` (control triad). Then `RESEARCH-INDEX.md` §1–4 and `docs/METHODOLOGY-scale-and-duration-testing.md`.

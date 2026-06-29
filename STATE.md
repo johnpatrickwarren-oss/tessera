@@ -1,8 +1,15 @@
 # Project state
 
-**Last updated:** 2026-06-27 · **by:** John Warren (with Claude)
+**Last updated:** 2026-06-28 · **by:** John Warren (with Claude)
 
-> **CURRENT FOCUS → see `HANDOFF.md`.** ADR 0019 (two-mode architecture: evidence/ranking default
+> **Current status — date · suite pass/skip · what's built · what's next — lives in `HANDOFF.md`, the SINGLE
+> SOURCE OF TRUTH.** This file is the **durable decision/arc trail**: point-in-time history. The per-entry
+> "Suite NNN pass" figures below are snapshots from when each entry was written — NOT the live count (which
+> is in HANDOFF.md). `README.md` also defers to HANDOFF.md for the live count.
+
+## Recent arc — two-mode architecture (ADRs 0019–0022) · history (live status in HANDOFF.md)
+
+> ADR 0019 (two-mode architecture: evidence/ranking default
 > vs FDR-guaranteed conditional) is decided + memorialized. The three code-side follow-ups are now DONE on
 > branch `three-walls-prototypes`: (1) `validity_class` code gate `tools/emitter-contract.ts` (`4733e62`);
 > (2) runtime calibration monitor `tools/calibration-monitor.ts` (`e162b83`); (3) Mode B concurrent-control
