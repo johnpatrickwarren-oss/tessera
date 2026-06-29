@@ -23,6 +23,24 @@ construction validity and revoke (B→A) when it breaks.
 
 ## This session — what shipped (newest first)
 
+- **REAL-CLUSTER Phase 4 first cut: GWDG κ measurement + realism-calibrated availability (this session).**
+  Anchored the (synthetic) peer-availability study to REAL telemetry. `tools/gwdg-comparability.ts` measures
+  within-node peer comparability on the real GWDG A100 DCGM dataset (Zenodo 10.5281/zenodo.19052367, 4 GPUs/
+  node, labeled detachment faults): median best-peer **κ 0.42 / 0.88 / 0.64** (temp/power/util), only **8–23 %**
+  of GPUs have a κ≤0.1 peer — real siblings run different **jobs**, so little workload common-mode cancels
+  (temp best via shared cooling, power worst). **Methodology guard-rail (important):** only the STRUCTURAL κ
+  is valid off GWDG — its files are ≤10-day incident windows, NOT a representative baseline, so detection/FDR
+  on it are INVALID (a thin baseline's fit fails to transfer → an A/A test false-fires from thinness, which I
+  initially mis-ran and **retracted**; `baseline-guard` exists for exactly this). Tiling/padding short data to
+  fake a 2-month baseline is also invalid (adds duration, zero info; games the guard). The valid move:
+  **calibrate the synthetic generator to the real κ** — added a per-job common-mode to `peer-availability.ts`
+  (bimodal κ like a real shared cluster), tuned the job count so the comparable fraction matches GWDG
+  (`node tools/peer-availability.js --gwdg`). Result: at the real operating point, the κ-gated min-agreement
+  triad controls **FDP ≤ q on the eligible subset** (0.03/0.00/0.07) where the pair detector is FP-dominated
+  (≈0.5). **Conclusion: real-cluster Mode B is AVAILABILITY-bound, not FDR-broken** — abstains on 77–92 % of
+  GPUs (no false guarantee), certifies the comparable minority; **job-aware peer selection is the coverage
+  lever**. A representative-baseline null/detection run still needs a long continuous feed (shadow-deploy; no
+  public dataset supplies one). 6 tests; suite 783 pass. ADR 0022 § Real-telemetry anchor + RESEARCH-INDEX §4.
 - **ADR 0022 COMPARABLE-PEER AVAILABILITY STUDY: DONE (this session).** The last ADR 0022 follow-up — the
   triad's binding real-world constraint. All prior validation used clustersynth's EXACT-COPY twins
   (`#ctrl`/`#ctrl2` share the treatment's loadings perfectly); real deployment uses REAL sibling shards with
@@ -134,7 +152,9 @@ construction validity and revoke (B→A) when it breaks.
   `monTriples` + per-worker `flagE`/`eC2`). `tools/contrast.ts` — `fitContrast`/`fitContrastFast`/`applyContrast`.
 - `tools/contamination-detector.ts` — κ machinery (ADR 0021 artifact, not gated); reused by `peer-availability.ts`.
 - `tools/peer-availability.ts` — ADR 0022 comparable-peer availability study (real κ-selected peers, `min`-agreement
-  rule); `node tools/peer-availability.js [seeds]`. The deployment-feasibility analysis, not a runtime path.
+  rule, job-structured model); `node tools/peer-availability.js [seeds]` or `--gwdg` (real-calibrated). Analysis, not a runtime path.
+- `tools/gwdg-comparability.ts` — real-A100 within-node peer κ measurement (`node tools/gwdg-comparability.js <gwdg-dir>`,
+  decompress `telemetry/*.bz2` first). STRUCTURAL κ only — GWDG detection/FDR are INVALID (short incident windows).
 - `tools/mode-b-loop.ts` — always-on loop; `tools/telemetry-source.ts` + `tools/action-sinks.ts` — deploy seams.
 - `tools/clustersynth-mode-b-ramp.sh` — the scale entry point. **GOTCHA: it reads `COUNTERS=` (env), NOT
   `CS_COUNTERS` — it overrides the latter.** Pass `COUNTERS=gpu_temp_c,power_w` to subset.
@@ -163,8 +183,13 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## The thread that's "live" if you want to continue
-ADR 0022 is now fully closed (streaming triad + comparable-peer availability study both done). The two-mode
-architecture (ADRs 0019–0022) is end-to-end built, scale-validated, and deployment-feasibility-checked on the
-synthetic harness. The natural frontier is finally moving off synthetic telemetry toward **real-cluster DCGM
-validation (Phase 4)** — the one axis nothing has touched. Smaller live threads: job-aware peer pre-selection
-(raises triad availability) and the ADR 0020 serial-monitor research. Nothing is mid-flight or broken.
+ADR 0022 is fully closed and now has a **real-telemetry anchor** (GWDG κ measurement → realism-calibrated
+availability). Phase 4 (real-cluster) has its first cut: the STRUCTURAL comparability question is answered on
+real A100s (availability-bound, job-factor binding). What remains for a full Phase 4 is a **representative-
+baseline null/detection run**, which needs a long continuous DCGM feed — the **shadow-deploy path** (wire
+`telemetry-source.ts` to a live feed, accumulate a real baseline over weeks, reconcile discoveries against the
+cluster incident log). No public dataset supplies a long-enough continuous concurrent-GPU baseline (GWDG =
+≤10-day incident windows; MIT = per-job fragments) — and faking one by tiling/padding is invalid (a recurring
+methodology trap: it adds duration with zero information and games `baseline-guard`). The concrete next code
+step toward wider coverage is **job-aware peer selection** (match peers by workload). The ADR 0020 serial-
+monitor research is the other smaller thread. Nothing is mid-flight or broken.

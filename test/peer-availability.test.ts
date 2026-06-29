@@ -7,11 +7,11 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { genGroup, bestPeers, studyPoint, type PeerOptions } from '../tools/peer-availability.js';
+import { genGroup, bestPeers, studyPoint, calibrateNJobs, type PeerOptions } from '../tools/peer-availability.js';
 
 const DEF: Required<PeerOptions> = {
   groups: 12, shardsPerGroup: 24, T: 300, phi: 0.6, loadMean: 6, loadHetero: 0,
-  idioSd: 0.6, faultMag: 4, faultFrac: 0.05, kappaThresh: 0.1, q: 0.1,
+  idioSd: 0.6, faultMag: 4, faultFrac: 0.05, kappaThresh: 0.1, q: 0.1, nJobs: 1, groupLoad: 0,
 };
 
 test('a matched (zero-heterogeneity) peer cancels the common-mode — tiny κ', () => {
@@ -41,6 +41,26 @@ test('D2: the min-agreement triad controls FDP where the pair detector (contamin
   assert.ok(r.triadFdp <= 0.12, `min-agreement triad controls FDP ≈ q (${r.triadFdp.toFixed(3)})`);
   assert.ok(r.triadFdp < r.pairFdp - 0.2, `triad cuts the pair detector's false positives (${r.triadFdp.toFixed(3)} ≪ ${r.pairFdp.toFixed(3)})`);
   assert.ok(r.triadRecall >= 0.7, `triad keeps usable recall on genuine faults (${r.triadRecall.toFixed(3)})`);
+});
+
+test('job structure reproduces real low availability (calibrateNJobs) with FDR controlled on the eligible subset', () => {
+  // The homogeneous pool always finds a comparable peer (availability ≈ 1); real shared clusters are LOW
+  // because most siblings run different jobs. The job-structured model + calibrateNJobs reproduces a real
+  // GWDG-style availability, and on the comparable (same-job) subset the κ-gated triad still controls FDP.
+  const seeds = 4, target = 0.234; // GWDG gpu_temp_c availability
+  const base: PeerOptions = { ...DEF, loadHetero: 0.2 };
+  const nJobs = calibrateNJobs(target, seeds, { ...base, shardsPerGroup: 72 });
+  assert.ok(nJobs > 10, `low real availability needs many small jobs (got ${nJobs.toFixed(0)})`);
+  const p = studyPoint(0.2, 72, seeds, { ...base, nJobs });
+  assert.ok(Math.abs(p.avail.fracAvailable - target) < 0.06, `model availability ${p.avail.fracAvailable.toFixed(3)} ≈ real ${target}`);
+  assert.ok(p.fdr.pairFdp > 0.3, `pair detector FP-dominated by contaminated peers (${p.fdr.pairFdp.toFixed(3)})`);
+  assert.ok(p.fdr.triadFdp <= 0.12, `triad controls FDP ≤ q on the eligible subset (${p.fdr.triadFdp.toFixed(3)})`);
+});
+
+test('nJobs=1 (single job) recovers the homogeneous fully-comparable pool', () => {
+  // Backward-compat: with one job, every shard shares the common-mode → availability ≈ 1 at low heterogeneity.
+  const a = studyPoint(0.1, 24, 4, { ...DEF, nJobs: 1 }).avail.fracAvailable;
+  assert.ok(a >= 0.97, `single-job pool is fully comparable (got ${a.toFixed(3)})`);
 });
 
 test('the κ gate makes non-comparability an AVAILABILITY cost, not an FDR risk', () => {

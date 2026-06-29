@@ -215,8 +215,19 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   pool, falls with heterogeneity); the deployable real-peer rule is `min(t−c1, t−c2)` agreement (no
   designated-clean sibling; min is a valid conservative e-value) → FDP ≤ q at EVERY heterogeneity (pair
   detector FP-dominated ≈0.5). The κ gate converts non-comparability from an FDR risk into an availability
-  cost (no comparable peer → no triad → abstain, Mode A). Open: job-aware peer pre-selection; fleet-wide
-  common-mode blind spot (unchanged). GREYHOUND uses contrast for localization, temporal for detection.
+  cost (no comparable peer → no triad → abstain, Mode A). **REAL-TELEMETRY ANCHOR (Phase 4 first cut,
+  `tools/gwdg-comparability.ts`):** measured within-node peer κ on real GWDG A100 DCGM (Zenodo
+  10.5281/zenodo.19052367) — median κ 0.42/0.88/0.64 (temp/power/util), only 8–23% of GPUs have a κ≤0.1
+  peer (real siblings run different JOBS → little workload common-mode cancels; temp best via shared cooling,
+  power worst). Only the STRUCTURAL κ is valid off GWDG — detection/FDR would NOT be (≤10-day incident
+  windows ≠ a representative baseline; baseline-guard forbids it; a thin baseline's fit fails to transfer →
+  A/A false-fires from thinness, not a real property — DO NOT report GWDG detection/FDR). Calibrated the
+  synthetic model to the real κ (added a per-job common-mode → bimodal κ; `--gwdg`): at real availability the
+  κ-gated min-triad controls FDP ≤ q on the eligible subset (0.03/0.00/0.07). Real-cluster Mode B is
+  AVAILABILITY-bound, not FDR-broken; **job-aware peer selection** is the coverage lever; a representative-
+  baseline null/detection run needs a long continuous feed (shadow-deploy — no public dataset supplies one).
+  NB: tiling/padding short data to fake a baseline is INVALID (adds duration, zero info; games the guard).
+  GREYHOUND uses contrast for localization, temporal for detection.
 
 ---
 

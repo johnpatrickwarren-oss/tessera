@@ -147,6 +147,37 @@ from an FDR risk into an abstention. Still open / not addressed: peers must also
 (a different-job sibling is non-comparable — the κ gate catches this empirically, but job-aware pre-selection
 would raise availability); and the fleet-wide common-mode blind spot (ADR 0019) is unchanged.
 
+### Real-telemetry anchor (GWDG A100, Phase 4 first cut)
+
+The synthetic sweep uses arbitrary heterogeneity; to anchor it we measured within-node peer comparability on
+the **real GWDG A100 DCGM telemetry** (Zenodo 10.5281/zenodo.19052367 — 4 GPUs/node, real labeled GPU-detachment
+incidents), `tools/gwdg-comparability.ts`. Only the **structural** κ is taken from GWDG (a variance ratio,
+baseline-independent); detection/FDR on GWDG would be invalid because its files are ≤10-day incident windows,
+NOT a representative baseline — `baseline-guard` forbids exactly that, and a thin baseline's fit fails to
+transfer (an A/A test on it false-fires from baseline-thinness, not from any real property). What κ shows:
+
+| counter | median within-node best-peer κ | comparable (κ≤0.1) = availability | common-mode that cancels |
+|---|---|---|---|
+| gpu_temp_c | 0.42 | **23 %** | shared cooling (~58 %) |
+| sm_util | 0.64 | **8 %** | partly shared (~36 %) |
+| power_w | 0.88 | **16 %** | almost none (~12 %) — per-GPU/workload |
+
+Real sibling GPUs on a shared HPC node are **largely non-comparable** — they run different jobs, so little
+workload common-mode cancels (power barely cancels; temperature cancels best via shared cooling). This is the
+**job-factor axis made real**, and it confirms the study's thesis on real hardware: comparability is binding.
+
+We then **calibrated the synthetic generator to these measurements** (not a faked/tiled baseline): the real
+κ distribution is bimodal (a same-job minority cancels, most don't), so we added a per-job common-mode to the
+model and tuned the job count so the comparable fraction matches the real availability per counter. At the
+real operating point (`node tools/peer-availability.js --gwdg`): model availability 0.234 / 0.081 / 0.155
+(matching GWDG), and **on the eligible (κ≤0.1) subset the κ-gated min-agreement triad controls FDP ≤ q**
+(0.027 / 0.000 / 0.065) where the bare pair detector does not (≈0.5–0.6). So real-cluster Mode B is
+**availability-bound, not FDR-broken**: it abstains (Mode A) on the 77–92 % of GPUs without a comparable peer
+— never a false guarantee — and certifies the comparable minority. **Job-aware peer selection** (match peers
+by workload → restore the shared common-mode → lower κ → more eligible GPUs) is the decisive lever to widen
+coverage, and is the concrete next step toward real-cluster Mode B. A representative-baseline null/detection
+validation still requires a long continuous feed (the shadow-deploy path; no public dataset supplies one).
+
 ## Decision
 
 Pursue the full build (steps 1–3) as the fix for ADR 0021's contamination + sign-blind-FP gaps. The
