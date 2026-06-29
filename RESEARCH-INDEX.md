@@ -208,8 +208,15 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   `t−c2`). Validated end-to-end on real topology, control-only contamination vs the corrected positive set:
   mini twin-pair FDP 0.579→triad 0.000 (recall 1.000), mac-mini R=8 (1728 shards) 0.588→0.000; non-regressive.
   COST (ADR 0022 §Cost): +50% data/compute, memory flat, hardware doubling ONLY for dedicated canaries;
-  binding constraint = comparable-peer availability. Remaining: streaming-path triad; non-comparability.
-  GREYHOUND uses contrast for localization, temporal for detection — Mode B is more aggressive.
+  binding constraint = comparable-peer availability. **Both follow-ups DONE:** streaming-path triad (commit
+  0a69e59, 1 Hz validated to R=8 incl. 2-month long-baseline); and the comparable-peer AVAILABILITY study
+  (`tools/peer-availability.ts`): real κ-selected sibling peers (not exact-copy twins) at clustersynth's
+  `LAMBDA_HETERO=0.4` → ~96% of shards have ≥2 comparable peers at rack-scale pools (availability rises with
+  pool, falls with heterogeneity); the deployable real-peer rule is `min(t−c1, t−c2)` agreement (no
+  designated-clean sibling; min is a valid conservative e-value) → FDP ≤ q at EVERY heterogeneity (pair
+  detector FP-dominated ≈0.5). The κ gate converts non-comparability from an FDR risk into an availability
+  cost (no comparable peer → no triad → abstain, Mode A). Open: job-aware peer pre-selection; fleet-wide
+  common-mode blind spot (unchanged). GREYHOUND uses contrast for localization, temporal for detection.
 
 ---
 
