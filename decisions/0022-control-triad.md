@@ -7,9 +7,10 @@
   `tools/clustersynth-mode-b.ts` (in-memory path); committed triad mini fixture + tests. **Validated:** mini
   (72 GPUs) and mac-mini R=8 (1728 shards) — control-only contamination drives the twin-pair detector to
   **FDP ≈0.58–0.59**, the triad to **FDP 0.000 at recall 1.000** (flags the bad control via `c1−c2`, detects
-  on the clean sibling). Non-regressive (clean triad + non-triad path unchanged, FDP 0.000). **Remaining
-  (lower):** the STREAMING/multi-core path (mixed-cadence 1 Hz) triad — currently `flaggedControls:0` there;
-  and a real-topology comparable-peer study (the binding constraint, § Cost).
+  on the clean sibling). Non-regressive (clean triad + non-triad path unchanged, FDP 0.000). **Both follow-ups
+  now DONE:** (a) the STREAMING/multi-core path triad — wired into the shared streaming reducer, 1 Hz validated
+  to R=8 incl. genuine 2-month long-baseline (commit `0a69e59`); (b) the comparable-peer availability study
+  (§ Comparable-peer availability, below; `tools/peer-availability.ts`).
 - **Builds on:** ADR 0019 (Mode B spatial null); ADR 0021 (twin-PAIR validity detector — built, validated,
   found insufficient: κ misses the sustained-shift harm; contamination is undetectable by a twin pair
   because the contrast is sign-blind and the cohort reference hits the heterogeneous-loading wall of
@@ -52,8 +53,11 @@ worth building.
    (no `control2` → unchanged pair behavior). Committed triad mini fixture + 3 tests.
 3. ✅ **Validated:** mini (72 GPUs) + mac-mini R=8 (1728 shards) — twin-pair FDP ≈0.58–0.59 → triad FDP 0.000
    / recall 1.000; clean triad + non-triad path non-regressive (FDP 0.000).
-4. ⬜ **Remaining (lower):** wire the triad into the STREAMING path (mixed-cadence 1 Hz); a real-topology
-   comparable-peer availability study (the binding constraint per § Cost).
+4. ✅ **Streaming-path triad (DONE, `0a69e59`):** `monTriples` + per-worker `flagE`/`eC2` + routing in the
+   shared `reduceCmbCounter` (both the mixed-cadence and long-baseline streaming paths). 1 Hz validated on
+   the mini to R=8 (incl. genuine 2-month long-baseline): `power_w` flags contaminated controls, FDP 0.000,
+   no false-flag of clean Mode-B controls. (Also fixed a latent `linesFrom` byte-boundary bug.)
+5. ✅ **Comparable-peer availability study (DONE):** `tools/peer-availability.ts` (+ tests). See below.
 
 ## Cost / tradeoff (honest)
 
@@ -93,7 +97,59 @@ as the non-comparability caveat below; it's what to validate against a real topo
 - Still inherits the majority-healthy assumption at the FLEET level (a fleet-wide common-mode event cancels
   by design — ADR 0019); the triad only fixes the PER-CONTROL reference, not fleet-wide blind spots.
 
+## Comparable-peer availability study (`tools/peer-availability.ts`, DONE)
+
+Every validation above used clustersynth's **exact-copy twins** (`#ctrl`/`#ctrl2` share the treatment's
+loadings perfectly — `loadingId = gpu`). That is an idealization. In a real per-shard SDC deployment the
+controls are **real sibling shards** with their OWN per-shard loadings (clustersynth's own model jitters each
+shard's λ by `LAMBDA_HETERO = 0.4`). The study replaces exact-copy twins with real in-group siblings selected
+by the κ cancellation ratio (the ADR 0021 statistic) and answers the two questions § Cost flagged as the
+binding constraint. 24 groups, OU common-mode + mid-window regime step, fault 4σ, κ ≤ 0.1, q = 0.1, 8 seeds.
+
+**D1 — Availability.** Fraction of shards with ≥2 comparable peers, vs loading heterogeneity × peer-pool size:
+
+| hetero | S=8 | S=24 | S=72 (rack) |
+|---|---|---|---|
+| 0.00 | 1.00 | 1.00 | 1.00 |
+| 0.20 | 0.94 | 0.99 | 1.00 |
+| **0.40** (clustersynth real) | 0.76 | 0.92 | **0.96** |
+| 0.80 | 0.42 | 0.74 | 0.83 |
+
+Availability falls as siblings grow unlike and rises with the pool. Real clusters give LARGE in-group pools —
+a rack is 72 GPUs sharing CDU + power-feed + fabric, a power-feed 576, a CDU 1,152 (per the topology model) —
+so at the realistic heterogeneity (0.4) **a rack-scale pool yields ~96% triad availability**. The binding
+constraint is real but favorable in a homogeneous training cluster; it bites only in small/heterogeneous ones.
+
+**D2 — FDR under real (imperfect) peers (S=72, a rack).** Real peers have NO designated-clean sibling (unlike
+`#ctrl2`), so "route to c2" is unavailable; the deployable rule is **`e = min(e_{t−c1}, e_{t−c2})` —
+require BOTH peers to agree.** A single contaminated peer fires only one contrast → the min stays small → not
+selected; `min` of e-values is a valid conservative e-value (`min ≤ e₁ ⇒ E[min|H0] ≤ 1`) so e-BH still
+controls FDR. Result, vs the bare `t−c1` pair, over heterogeneity (5% fault rate):
+
+| hetero | pair FDP/recall | **triad** FDP/recall |
+|---|---|---|
+| 0.00 | 0.60 / 0.96 | **0.05 / 0.93** |
+| 0.40 (real) | 0.52 / 0.94 | **0.06 / 0.87** |
+| 0.80 | 0.52 / 0.94 | **0.06 / 0.86** |
+
+The pair detector is FP-dominated by contaminated peers (FDP ≈ 0.5) at every heterogeneity; the min-agreement
+triad holds **FDP ≤ q at every heterogeneity** with a modest recall cost. Crucially there is **no FDR ceiling
+in range**: the κ gate EXCLUDES the peers that would leak un-cancelled common-mode, so non-comparability
+becomes an **availability** cost (a shard with no comparable peer gets no triad → abstains, Mode A), never a
+false guarantee. A fault-rate sweep (D1b) shows the min-triad holds FDP ≤ q until the contamination load
+(faulted PEERS) is extreme (~10–20%); real per-shard anomaly rates are far lower.
+
+**Conclusion.** The triad is deployable on real fleet peers, not just synthetic twins, with two amendments to
+the construction: (1) select peers by κ on the healthy baseline and offer a triad ONLY where two comparable
+peers exist (availability, not capacity, is the binding constraint — ~96% at rack scale); (2) use the
+min-agreement rule, since real peers lack a designated-clean sibling. Non-comparability is thereby converted
+from an FDR risk into an abstention. Still open / not addressed: peers must also match on the *job* factor
+(a different-job sibling is non-comparable — the κ gate catches this empirically, but job-aware pre-selection
+would raise availability); and the fleet-wide common-mode blind spot (ADR 0019) is unchanged.
+
 ## Decision
 
 Pursue the full build (steps 1–3) as the fix for ADR 0021's contamination + sign-blind-FP gaps. The
-prototype + its unit test are kept as the validating artifact.
+prototype + its unit test are kept as the validating artifact. **Update (study done):** real-peer deployment
+is viable under the two amendments above; availability (≥2 κ-comparable peers/shard) is the binding
+constraint, ~96% at rack scale and realistic heterogeneity.

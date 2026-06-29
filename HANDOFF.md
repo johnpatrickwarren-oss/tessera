@@ -23,6 +23,21 @@ construction validity and revoke (B→A) when it breaks.
 
 ## This session — what shipped (newest first)
 
+- **ADR 0022 COMPARABLE-PEER AVAILABILITY STUDY: DONE (this session).** The last ADR 0022 follow-up — the
+  triad's binding real-world constraint. All prior validation used clustersynth's EXACT-COPY twins
+  (`#ctrl`/`#ctrl2` share the treatment's loadings perfectly); real deployment uses REAL sibling shards with
+  their own loadings (clustersynth jitters λ by `LAMBDA_HETERO=0.4`). `tools/peer-availability.ts` (+ 4 tests)
+  selects real in-group peers by the κ cancellation ratio and answers two questions. **D1 Availability:** at
+  realistic heterogeneity (0.4), fraction of shards with ≥2 comparable peers = 0.76 / 0.92 / **0.96** for
+  pool sizes 8 / 24 / **72 (a rack)** — real clusters give large in-group pools (rack 72, power-feed 576, CDU
+  1,152), so availability is favorable; it bites only in small/heterogeneous clusters. **D2 FDR under real
+  peers:** real peers have NO designated-clean sibling, so the deployable rule is `min(e_{t−c1}, e_{t−c2})` —
+  require BOTH peers to agree (a single contaminated peer fires only one contrast → not selected; `min` is a
+  valid conservative e-value). Result: triad **FDP ≤ q at every heterogeneity** (pair detector FP-dominated
+  ≈0.5), recall ~0.87. **Key finding:** the κ gate converts non-comparability from an FDR risk into an
+  AVAILABILITY cost — a shard with no comparable peer gets no triad → abstains (Mode A), never a false
+  guarantee. Open: job-aware peer pre-selection; fleet-wide common-mode blind spot (unchanged). ADR 0022 +
+  RESEARCH-INDEX §4 updated. **This closes ALL ADR 0022 follow-ups.**
 - **ADR 0022 STREAMING-PATH TRIAD: WIRED + 1 Hz VALIDATED (this session).** Closed the top remaining ADR
   0022 item — the triad now routes in the STREAMING reducer, not just in-memory. New `monTriples` byte-range
   generator captures clustersynth's contiguous `treatment → #ctrl → #ctrl2` triple (degrades to `[t,c1,null]`
@@ -95,15 +110,14 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## REMAINING (lower priority)
-- ~~**(ADR 0022) Streaming-path triad**~~ — DONE this session (wired into `reduceCmbCounter` for both streaming
-  paths; 1 Hz validated on the mini). See "what shipped".
-- **(ADR 0022) Comparable-peer availability study** — the triad's binding real-world constraint (two matched
-  peers/shard); validate against a real topology (§ Cost). Hardware cost is ~free unless controls are
-  dedicated canaries (decomposed in ADR 0022 § Cost: controls 2× but data/compute +50%, memory flat).
+- ~~**(ADR 0022) Streaming-path triad**~~ — DONE (wired into `reduceCmbCounter`; 1 Hz validated). See "what shipped".
+- ~~**(ADR 0022) Comparable-peer availability study**~~ — DONE this session (`tools/peer-availability.ts`):
+  real κ-selected peers, ~96% availability at rack scale + realistic heterogeneity, `min`-agreement rule
+  controls FDP ≤ q; non-comparability → an availability cost, not an FDR risk. **All ADR 0022 items closed.**
+- **(job-aware peer selection)** — the availability study's one open thread: real peers must also match on the
+  *job* factor; the κ gate catches mismatches empirically, but job-aware pre-selection would raise availability.
 - **(ADR 0020 research) Strengthen the calibration monitor vs serial dependence** so the whiteness check can
   eventually retire — or accept whiteness is the better tool (the negative result suggests the latter).
-- **(non-comparability)** — still a separate open axis the triad doesn't address (treatment↔control loadings
-  diverging); ADR 0021 § Follow-ups.
 - **Real-cluster (DCGM) validation** — everything is on synthetic clustersynth telemetry; the Phase-4
   candidate. The two-mode guarantee, deploy seams, and triad are all validated only against the harness.
 
@@ -118,7 +132,9 @@ construction validity and revoke (B→A) when it breaks.
   **same-cadence long-baseline streaming** (`renderModeBLongBaseline`, ADR 0022 1 Hz) + the **triad** — now
   in BOTH the in-memory path (`applyTriadRouting`) AND the streaming reducer (`reduceCmbCounter`, fed by
   `monTriples` + per-worker `flagE`/`eC2`). `tools/contrast.ts` — `fitContrast`/`fitContrastFast`/`applyContrast`.
-- `tools/contamination-detector.ts` — κ machinery (ADR 0021 artifact, not gated).
+- `tools/contamination-detector.ts` — κ machinery (ADR 0021 artifact, not gated); reused by `peer-availability.ts`.
+- `tools/peer-availability.ts` — ADR 0022 comparable-peer availability study (real κ-selected peers, `min`-agreement
+  rule); `node tools/peer-availability.js [seeds]`. The deployment-feasibility analysis, not a runtime path.
 - `tools/mode-b-loop.ts` — always-on loop; `tools/telemetry-source.ts` + `tools/action-sinks.ts` — deploy seams.
 - `tools/clustersynth-mode-b-ramp.sh` — the scale entry point. **GOTCHA: it reads `COUNTERS=` (env), NOT
   `CS_COUNTERS` — it overrides the latter.** Pass `COUNTERS=gpu_temp_c,power_w` to subset.
@@ -147,7 +163,8 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## The thread that's "live" if you want to continue
-The streaming-path triad is now wired + 1 Hz-validated, leaving the **comparable-peer availability study** as
-the last ADR 0022 follow-up (can a real topology even supply two matched twins per shard?). After that, the
-natural frontier is finally moving off synthetic telemetry toward real-cluster DCGM validation (Phase 4).
-Nothing is mid-flight or broken.
+ADR 0022 is now fully closed (streaming triad + comparable-peer availability study both done). The two-mode
+architecture (ADRs 0019–0022) is end-to-end built, scale-validated, and deployment-feasibility-checked on the
+synthetic harness. The natural frontier is finally moving off synthetic telemetry toward **real-cluster DCGM
+validation (Phase 4)** — the one axis nothing has touched. Smaller live threads: job-aware peer pre-selection
+(raises triad availability) and the ADR 0020 serial-monitor research. Nothing is mid-flight or broken.
