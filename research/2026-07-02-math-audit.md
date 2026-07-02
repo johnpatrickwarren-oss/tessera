@@ -160,7 +160,7 @@ to Mode B); (4) hop-distance locality metric, unconditional, then re-baseline th
 (5) rank candidates post-detection by the κ-gated peer contrast; feed the real fitted common-mode to
 the Wall-A gate.
 
-## F12 — Claims vs measurement (✅ FIXED where doc-level; ⚠️ validation work standing)
+## F12 — Claims vs measurement (✅ FIXED doc-level; ✅ validation work DONE — W4, see addendum)
 
 - R72/R77 run on an iid-Gaussian ORACLE-baseline DGP (`updateBettingState(x, 0, 1, α)`); R77 "drift
   magnitude" is a ramp SLOPE reaching 10–75σ terminal at the quoted defaults, 5 trials/cell. README
@@ -189,6 +189,19 @@ the Wall-A gate.
    closed form, replaces the 6-point λ grid; or GRAPA-style predictable betting.
 6. **Sequential-UI increments** in the e-detector (numerator fit on strictly-past data) → genuine
    SRR e-detector with real ARL theorem (closes O3 by construction) and repairs the F6 proof hole.
+
+## Addendum — W4 follow-through (2026-07-02, same-day)
+
+**Validation honesty, all three standing items delivered:** (1) **20-seed committed artifact**
+(`runs/2026-07-02-modeb-20seed-and-magnitude/`): contaminated-control R=8 FDP 0.000 on every seed,
+pooled recall 0.969; clean 0.000 / 0.972 — zero false positives across all 46 W4 runs (0/2,921
+selections). (2) **Small-fault magnitude sweep** (new clustersynth `CS_FAULT_MAG` knob, PR #4):
+sustained 1–2σ faults → recall 0.804 at FDP 0.000; 2–3σ → 0.996 — the "recall was only measured on
+4–8σ" caveat is replaced by a measured power curve. (3) **R79 mismatched-DGP falsification boundary**
+(`coverage-matrices/R79-mismatched-dgp.*`, locked by test): the SAME oracle-parameter detector cell
+that is clean on the R72/R77 iid DGP (FPR 0.000) false-fires 0.905/0.940 under AR(1) ρ=0.9/0.95 nulls
+and 0.980 under a NULL regime step — the committed, quantified reason the oracle-DGP coverage numbers
+must not be quoted as robustness claims. README carries the R79 pointer.
 
 ## Addendum — W3 follow-through (2026-07-02, same-day)
 

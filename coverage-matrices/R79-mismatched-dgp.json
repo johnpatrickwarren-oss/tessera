@@ -1,0 +1,37 @@
+[
+  {
+    "name": "iid-gaussian",
+    "nullFireRate": 0,
+    "rampDetectRate": 1
+  },
+  {
+    "name": "ar1-rho0.5",
+    "nullFireRate": 0.165,
+    "rampDetectRate": 1
+  },
+  {
+    "name": "ar1-rho0.9",
+    "nullFireRate": 0.905,
+    "rampDetectRate": 1
+  },
+  {
+    "name": "ar1-rho0.95",
+    "nullFireRate": 0.94,
+    "rampDetectRate": 1
+  },
+  {
+    "name": "t3-tails",
+    "nullFireRate": 0.005,
+    "rampDetectRate": 1
+  },
+  {
+    "name": "regime-step",
+    "nullFireRate": 0.98,
+    "rampDetectRate": 1
+  },
+  {
+    "name": "diurnal",
+    "nullFireRate": 0,
+    "rampDetectRate": 1
+  }
+]

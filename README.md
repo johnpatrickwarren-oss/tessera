@@ -272,6 +272,15 @@ At default settings (α=0.005, window_count=200, Family A): ≈100% detection fo
 
 Operator tuning guidance: see `scripts/detector-tuning-recommendation.md`.
 
+### Mismatched-DGP falsification boundary (R79)
+
+`coverage-matrices/R79-mismatched-dgp.md` (regenerate: `node tools/mismatched-dgp-envelope.js`)
+measures the SAME oracle-parameter detector cell under nulls the R72/R77 matrices never test:
+the iid row is clean (FPR 0.000), while an AR(1) ρ=0.9 null fires 90%+ of the time and a NULL
+regime step reads as a fault 98% of the time — the committed, quantified reason the oracle-DGP
+numbers above must not be quoted as robustness claims (the production pipelines interpose
+baselining/whitening/common-mode removal + the Wall-A gate in front of this detector).
+
 ### Topology-walk tuning envelope (R78)
 
 Tessera R78 characterizes the tuning envelope of `attributeCommonMode` along two operator-visible dials — `max_hop_distance` and `min_member_count` — over 5 scenario classes × 30 cells × 5 trials. Generate the envelope matrix with:

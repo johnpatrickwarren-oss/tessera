@@ -67,7 +67,7 @@ gen_split(){
   # inline assignment-prefix — bash resolves prefixes before expansion). The triad twin (#ctrl2) must be in
   # BOTH bundles (the fit needs c2 in the baseline); contamination is deterministic per seed but injects no
   # fault in the faults-off baseline, so it only manifests in the monitoring bundle.
-  local TRIAD_ENV=(CS_TRIAD="${CS_TRIAD:-}" CS_CONTAMINATE="${CS_CONTAMINATE:-}" CS_CONTAMINATE_FRAC="${CS_CONTAMINATE_FRAC:-}" CS_DECORRELATE_FRAC="${CS_DECORRELATE_FRAC:-}")
+  local TRIAD_ENV=(CS_TRIAD="${CS_TRIAD:-}" CS_CONTAMINATE="${CS_CONTAMINATE:-}" CS_CONTAMINATE_FRAC="${CS_CONTAMINATE_FRAC:-}" CS_DECORRELATE_FRAC="${CS_DECORRELATE_FRAC:-}" CS_FAULT_MAG="${CS_FAULT_MAG:-}")
   env CS_CONTROL_ARM=1 "${TRIAD_ENV[@]}" CS_COUNTERS="$COUNTERS" CS_SHARD_RANGE="0:$chunk" "$TSX" "$CLUSTERSYNTH/src/cli.ts" scenario "$cfg" --out-dir "$bundle" >>"$OUTDIR/gen.err" 2>&1 &
   for (( k=1; k<K; k++ )); do
     start=$((k*chunk)); [ "$start" -ge "$nshards" ] && break
