@@ -6,6 +6,11 @@ Tessera detects deviations in AI cluster behavior at the per-shard level and acr
 
 ## Status
 
+> **Live status lives in [`HANDOFF.md`](HANDOFF.md)** (the single source of truth for date · suite ·
+> what's built · what's next). The table below is phase-close *history*, not the current state —
+> the Mode A/B two-mode architecture (ADRs 0019–0022) and the Phase-4 GWDG real-cluster first cut
+> post-date it.
+
 **Phase 3 closed; v1 publication candidate (2026-05-20); engine npm extract shipped (R90/R94).** 90+ rounds of iterative-spec-with-cold-eye-Reviewer development have shipped vendor coverage across the major AI compute substrates plus a bi-directional integration interface with DeploySignal. Current package version is `0.1.0-pre`; the v1 tag lands with the publication gate.
 
 | Phase | Scope | Status |
@@ -46,6 +51,7 @@ The always-on Mode B control loop ([`tools/mode-b-loop.ts`](./tools/mode-b-loop.
 
 - **Hardware diagnosis.** Tessera observes counter behavior; per-GPU fault attribution remains anti-scope (A10 carve-out preserved across all phases).
 - **Real-cluster DCGM validation** as of v1. Validated against synthetic fixtures derived from public Neuron SDK + JAX topology code + TPU v4/v5 papers. Real-cluster rental validation is a Phase 4 candidate (Path B selected at Phase 3 SLICE 1/2 gate per OQ-P3-9).
+- **Independent validation of the statistical guarantees.** The detection/FDR results (R72 saturation matrix, the at-scale FDR runs) are measured on [clustersynth](https://github.com/johnpatrickwarren-oss/clustersynth)-generated telemetry, and clustersynth's factor-model DGP shares its structural assumptions (linear common-mode factors + OU idiosyncratics) with the residualization Tessera applies. Those results demonstrate internal consistency at scale — they are not evidence about telemetry from outside that model family. The GWDG κ realism anchoring (Phase 4 first cut) is the first external tie-down; real-cluster validation remains the open item above.
 - **Customer telemetry consumption.** A8/A11 inherited from Phase 1; only operator-controlled rental environments or synthetic fixtures are in-scope.
 
 ## Tessera vs DeploySignal
