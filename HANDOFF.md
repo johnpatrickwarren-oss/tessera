@@ -26,6 +26,16 @@ construction validity and revoke (B→A) when it breaks.
 
 ## This session — what shipped (newest first)
 
+- **W4 VALIDATION HONESTY (2026-07-02) — the audit's last standing items.** 20-seed Mode B artifact
+  (`runs/2026-07-02-modeb-20seed-and-magnitude/`): R=8 hourly, FDP **0.000 on every one of 46 runs**
+  (0/2,921 selections); contaminated pooled recall 0.969, clean 0.972. Small-fault sweep via the new
+  clustersynth `CS_FAULT_MAG` knob (clustersynth PR #4, `b0f0530`): **1–2σ → recall 0.804, 2–3σ →
+  0.996, both at FDP 0.000** — the 4–8σ-only caveat replaced by a measured power curve. **R79
+  mismatched-DGP falsification boundary** (`coverage-matrices/R79-mismatched-dgp.*` +
+  `tools/mismatched-dgp-envelope.ts`, test-locked): the oracle-parameter cell clean on iid (FPR 0.000)
+  false-fires 0.905/0.940/0.980 under ρ=0.9/ρ=0.95/null-regime-step — the committed reason R72/R77
+  numbers are wiring validation, not robustness claims. README points at it.
+
 - **W3 LOCALITY PROGRAM (2026-07-02): engine v0.6.3-pre + tessera locality layer.** Engine (PR #37):
   calibrated group attribution (`group_e_value` mean-of-members, `binom_tail` size-calibrated
   co-firing score — raw ≥2-count false-candidates quadratically in rack size, measured — plus a
