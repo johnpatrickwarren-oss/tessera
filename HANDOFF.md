@@ -26,6 +26,18 @@ construction validity and revoke (B→A) when it breaks.
 
 ## This session — what shipped (newest first)
 
+- **60d @ 1 Hz LONG-BASELINE RE-VALIDATION on the mac mini M4 Pro (2026-07-02,
+  `runs/2026-07-02-1hz-longbaseline-revalidation/`).** The one production path still resting on
+  pre-audit validation, re-run under the shipped stack (min rule + W1 + corrected positives, engine
+  v0.6.3-pre): canonical finding reproduces EXACTLY (power_w Mode B FDP 0.000 / power 1.000 every tier
+  to R=8 = 1,728 units; gpu_temp_c abstains every tier; temporal comparator ≈0.96–0.99 FDP), and the
+  path's FIRST contaminated-control run holds FDP 0.000 every tier with contaminated controls flagged.
+  Cross-machine determinism confirmed (R=1 tier bit-identical M5 laptop vs M4 Pro mini). En route:
+  PR #49 (ramp parts deleted as appended — halves peak disk; the ~125 GB R=8 tier now fits a 151
+  GB-free volume) and a PROVENANCE CORRECTION — today's earlier run artifacts said "mac mini" but ran
+  on the M5 MacBook Pro; the two runs/ READMEs + ADR 0022 note now say so. Remote setup: tailscale
+  ssh, corepack-pnpm shim, rsynced trees.
+
 - **W4 VALIDATION HONESTY (2026-07-02) — the audit's last standing items.** 20-seed Mode B artifact
   (`runs/2026-07-02-modeb-20seed-and-magnitude/`): R=8 hourly, FDP **0.000 on every one of 46 runs**
   (0/2,921 selections); contaminated pooled recall 0.969, clean 0.972. Small-fault sweep via the new
