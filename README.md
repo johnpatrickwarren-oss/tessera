@@ -62,7 +62,7 @@ Tessera is **not** a fork or extension of DeploySignal — it's a separate produ
 
 ## Engine sourcing
 
-The statistical-detector engine is consumed as the npm package [`@johnpatrickwarren-oss/deploysignal-engine`](https://github.com/johnpatrickwarren-oss/deploysignal-engine), pinned in `package.json` to a tagged commit (`#v0.3.1-pre`). The package is the Tessera-evolved snapshot of the engine originally vendored from DeploySignal at SHA `5a72371` (per-file deltas were tracked in the pipeline's vendoring manifest); the extract shipped in rounds R90/R94, removing the former in-repo `engine/` tree.
+The statistical-detector engine is consumed as the npm package [`@johnpatrickwarren-oss/deploysignal-engine`](https://github.com/johnpatrickwarren-oss/deploysignal-engine), pinned in `package.json` to a tagged release (see `package.json` for the current tag — README copies of the pin have gone stale before). The package is the Tessera-evolved snapshot of the engine originally vendored from DeploySignal at SHA `5a72371` (per-file deltas were tracked in the pipeline's vendoring manifest); the extract shipped in rounds R90/R94, removing the former in-repo `engine/` tree.
 
 A small calibration subset remains vendored in-repo at `tools/calibrators/*` (each file carries a source-path + SHA header and a sync-policy note).
 
@@ -229,14 +229,16 @@ pnpm coverage
 
 See `coverage-matrices/R72-saturation-matrix.md` for the human-readable summary; `coverage-matrices/R72-saturation-matrix.json` is the machine-readable data. The matrix is deterministic — re-running produces byte-identical output.
 
-| Type | Detection floor | Attribution floor |
-|---|---|---|
-| sdc-drift | 16 / 20 | ≥ 95% |
-| common-mode-rack | 20 / 20 | ≥ 95% |
-| event-conditional | 20 / 20 | ≥ 95% |
-| fdr-multiple-testing | 16 / 20 | ≥ 95% |
-| hierarchical-evalue | 12 / 20 | ≥ 95% (and ≥ 80% fleet-fires-before-per-shard) |
-| topology-spanning-common-mode | 16 / 20 | ≥ 95% |
+The "floor" columns are the minimums asserted by `test/q72-coverage-saturation.test.ts` (the suite fails below them); "observed" is what the current deterministic matrix actually records (114 / 120 detected overall). The two are different numbers on purpose — floors leave headroom so seed-level jitter can't flake the suite.
+
+| Type | Detection floor (asserted) | Detection observed (R72) | Attribution floor |
+|---|---|---|---|
+| sdc-drift | ≥ 16 / 20 | 18 / 20 | ≥ 95% |
+| common-mode-rack | ≥ 20 / 20 | 20 / 20 | ≥ 95% |
+| event-conditional | ≥ 20 / 20 | 20 / 20 | ≥ 95% |
+| fdr-multiple-testing | ≥ 16 / 20 | 20 / 20 | ≥ 95% |
+| hierarchical-evalue | ≥ 12 / 20 | 20 / 20 | ≥ 95% (and ≥ 80% fleet-fires-before-per-shard) |
+| topology-spanning-common-mode | ≥ 16 / 20 | 16 / 20 | ≥ 95% |
 
 ### Detection envelope (R77)
 
