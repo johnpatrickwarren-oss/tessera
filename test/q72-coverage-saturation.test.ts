@@ -158,12 +158,20 @@ test('AC-R72-13: topology-spanning-common-mode detected_count >= 16', () => {
 
 // AC-R72-14: per-type attribution_accuracy >= 0.95 when detected_count > 0 (across all 6 types).
 test('AC-R72-14: per-type attribution_accuracy >= 0.95 when any detection occurred', () => {
+  // hierarchical-evalue has NO localization target (fleet-fires-before-per-shard demo): its
+  // attribution is unmeasured (null) as of the 2026-07-02 audit fix — assert exactly that, so the
+  // vacuous-100% definition can never silently return.
+
   const m = loadCommittedMatrix();
   for (const t of m.types) {
-    if (t.summary.detected_count > 0) {
-      assert.ok(t.summary.attribution_accuracy !== null && t.summary.attribution_accuracy >= 0.95,
-        `Type ${t.type_name}: attribution_accuracy = ${t.summary.attribution_accuracy}; expected >= 0.95 (detected_count=${t.summary.detected_count})`);
+    if (t.summary.detected_count === 0) continue;
+    if (t.type_name === 'hierarchical-evalue') {
+      assert.equal(t.summary.attribution_accuracy, null,
+        `Type ${t.type_name}: attribution is unmeasured by design — accuracy must be null, got ${t.summary.attribution_accuracy}`);
+      continue;
     }
+    assert.ok(t.summary.attribution_accuracy !== null && t.summary.attribution_accuracy >= 0.95,
+      `Type ${t.type_name}: attribution_accuracy = ${t.summary.attribution_accuracy}; expected >= 0.95 (detected_count=${t.summary.detected_count})`);
   }
 });
 

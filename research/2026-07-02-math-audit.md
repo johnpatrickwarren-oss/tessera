@@ -132,7 +132,7 @@ Under matched loadings κ = 2σ_n²/(λ²σ_f²+σ_n²), so the common-mode vari
 ≥95% shared (the gate is a high bar by construction). `gwdg-comparability.ts`,
 `peer-availability.ts` GWDG rows, and `contamination-detector.ts` docs corrected.
 
-## F11 — Localization/locality gaps (GAP; ⚠️ STANDING — the improvement program)
+## F11 — Localization/locality gaps (GAP; 🔧 PROGRAM LARGELY BUILT — W3 2026-07-02, see addendum)
 
 - `attributeCommonMode` (engine) is uncalibrated co-firing clustering: absolute member count ≥2, no
   null model, no temporal coincidence window. False-candidate probability ≈ C(g,2)α² grows with
@@ -189,6 +189,28 @@ the Wall-A gate.
    closed form, replaces the 6-point λ grid; or GRAPA-style predictable betting.
 6. **Sequential-UI increments** in the e-detector (numerator fit on strictly-past data) → genuine
    SRR e-detector with real ARL theorem (closes O3 by construction) and repairs the F6 proof hole.
+
+## Addendum — W3 follow-through (2026-07-02, same-day)
+
+**Engine v0.6.3-pre (ADR 0022-engine):** `attributeCommonMode` gains calibrated group evidence —
+`group_e_value` (mean of member e-values over ALL members; validity inherited), `binom_tail`
+(size-calibrated Binomial(g, α̂) tail — the raw ≥2-count rule false-candidates quadratically in group
+size: measured .01→.24→.88 at g=4/18/72 vs ≤.03 flat calibrated), and a temporal coincidence window;
+legacy calls byte-identical. `detectionOrientedResiduals` deflates 2–5-member domains against
+LEAVE-ONE-OUT factors applied exactly once post-sweeps (iterated LOO annihilates the pair contrast —
+measured; the ≤3-member sibling mirror is intrinsic, r_b + λ̂_b·r_a ∝ b, and documented: localize
+small domains at pair granularity). 237/237.
+
+**Tessera W3b:** hop-level `LocalityMetric` in the e2e pipeline (unconditional exact/rack/missed +
+precision splits — the metric F11 said was absent); `tools/locality-drilldown.ts` coarse-to-fine
+per-level e-BH on group-mean e-values reporting the FINEST identified level with abstention below
+(level 0 carries FDR ≤ q; deeper levels conditional-on-descent — the honest middle N6 permits;
+diffuse-weak group faults abstain by construction, ADR 0015 v2 remains the open detector for those);
+Wall-A/3.1 diagnostic now receives the FITTED common-mode prediction as its covariate (was a zero
+vector — marginal whiteness only) and the partial-past regression includes X_{n−1}; tolerance gets a
+2-Bartlett-SE noise floor; the vacuous hierarchical-evalue attribution is now reported UNMEASURED
+(matrix regenerated: 94 attribution-correct, was 114 with the 20 tautological rows; README + floor
+test updated so it cannot silently return).
 
 ## Addendum — W1/W2 follow-through (2026-07-02, same-day)
 

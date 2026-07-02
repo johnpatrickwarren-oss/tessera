@@ -62,15 +62,58 @@ export function runInstrumented(topo: ParsedTopology, tel: Telemetry, q: number)
   return { ...out, ms };
 }
 
+/** HOP-LEVEL LOCALITY (2026-07-02 audit F11/W3b — the metric the pipeline previously lacked).
+ *  Recall side, UNCONDITIONAL over ALL true faulted shards (misses counted — never conditional on
+ *  detection): `exact` = fraction whose OWN shard is in the e-BH selection; `rack` = fraction not
+ *  exact but with a selected shard in the SAME localization group; `missed` = the rest. Precision
+ *  side, over the selection: `precisionExact` = selected shards that are truly faulted;
+ *  `precisionRack` = not faulted but sharing a group with a true fault (right rack, wrong shard);
+ *  `precisionFalse` = the rest (wrong locality entirely). NaN when the respective denominator is 0. */
+export interface LocalityMetric {
+  exact: number; rack: number; missed: number;
+  precisionExact: number; precisionRack: number; precisionFalse: number;
+}
+
 export interface LocalizeResult {
   /** Mean perShardEValue over failed shards ÷ over healthy shards (victims enriched ≫ 1). */
   enrichment: number;
-  /** Precision of the top-nFail ranked shards (fraction truly failed). */
+  /** Precision of the top-nFail ranked shards (fraction truly failed). NB: needs the ORACLE fault
+   *  count nFail — a characterization metric, not an operational one (locality is the honest one). */
   topPrecision: number;
   /** For a clustered fault: fraction of e-BH selections that land in the true fault group (else NaN). */
   groupAttribution: number;
+  /** Hop-level locality of the e-BH selection vs the true fault set (see LocalityMetric). */
+  locality: LocalityMetric;
   K: number;
   ms: number;
+}
+
+/** Compute the hop-level locality of a selection against the true fault set. */
+export function localityMetric(selected: ReadonlyArray<number>, failed: ReadonlyArray<boolean>, groups: ReadonlyArray<number>): LocalityMetric {
+  const sel = new Set(selected);
+  const selGroups = new Set(selected.map((i) => groups[i]));
+  const faultIdx = failed.map((f, i) => (f ? i : -1)).filter((i) => i >= 0);
+  const faultGroups = new Set(faultIdx.map((i) => groups[i]));
+  let exact = 0, rack = 0;
+  for (const f of faultIdx) {
+    if (sel.has(f)) exact++;
+    else if (selGroups.has(groups[f])) rack++;
+  }
+  let pExact = 0, pRack = 0;
+  for (const a of sel) {
+    if (failed[a]) pExact++;
+    else if (faultGroups.has(groups[a])) pRack++;
+  }
+  const frac = (num: number, den: number): number => (den ? num / den : NaN);
+  const nF = faultIdx.length, nS = sel.size;
+  return {
+    exact: frac(exact, nF),
+    rack: frac(rack, nF),
+    missed: frac(nF - exact - rack, nF),
+    precisionExact: frac(pExact, nS),
+    precisionRack: frac(pRack, nS),
+    precisionFalse: frac(nS - pExact - pRack, nS),
+  };
 }
 
 /** Path 2 — topology-localised fault detection (ranking + grouped e-BH). */
@@ -104,6 +147,7 @@ export function runLocalize(topo: ParsedTopology, tel: Telemetry, q: number): Lo
     enrichment: evHealthy > 0 ? evFailed / evHealthy : Infinity,
     topPrecision: nFail > 0 ? topHits / nFail : 1,
     groupAttribution,
+    locality: localityMetric([...res.selected], tel.failed, topo.localizationGroups),
     K: res.selected.length,
     ms,
   };
@@ -136,8 +180,8 @@ export function renderE2E(q = 0.05): string {
   lines.push('clustersynth end-to-end pipeline — instrumented FDR + localisation on real topology.');
   lines.push(`FDR target q=${q}. Tiers run only when the fixture is present in test/_substrate/.`);
   lines.push('');
-  lines.push('  tier  shards  domains groups | inst.FDP power  ms | loc.enrich topPrec  ms');
-  lines.push('  ------------------------------+-------------------+---------------------------');
+  lines.push('  tier  shards  domains groups | inst.FDP power  ms | loc.enrich topPrec  ms | locality exact/rack/miss');
+  lines.push('  ------------------------------+-------------------+------------------------+--------------------------');
   for (const tier of TIERS) {
     if (!fs.existsSync(fixturePath(tier))) continue;
     const clustered = tier === 's2' || tier === 'c0'; // exercise clustered-fault localisation where groups>1
@@ -147,7 +191,8 @@ export function renderE2E(q = 0.05): string {
     lines.push(
       `  ${p(tier, 4)} ${p(r.nShards, 7)} ${p(r.nDomains, 7)} ${p(r.nGroups, 6)} | `
       + `${p(i.fdp.toFixed(3), 8)} ${p(i.power.toFixed(2), 5)} ${p(i.ms.toFixed(0), 4)} | `
-      + `${p(isFinite(l.enrichment) ? l.enrichment.toFixed(1) : '∞', 9)} ${p(l.topPrecision.toFixed(2), 7)} ${p(l.ms.toFixed(0), 4)}`);
+      + `${p(isFinite(l.enrichment) ? l.enrichment.toFixed(1) : '∞', 9)} ${p(l.topPrecision.toFixed(2), 7)} ${p(l.ms.toFixed(0), 4)} | `
+      + (Number.isNaN(l.locality.exact) ? '   -' : `${(100 * l.locality.exact).toFixed(0)}%/${(100 * l.locality.rack).toFixed(0)}%/${(100 * l.locality.missed).toFixed(0)}%`));
   }
   return lines.join('\n');
 }
