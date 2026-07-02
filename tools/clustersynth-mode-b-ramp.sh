@@ -74,7 +74,12 @@ gen_split(){
     env CS_CONTROL_ARM=1 "${TRIAD_ENV[@]}" CS_COUNTERS="$COUNTERS" CS_SHARD_RANGE="$start:$chunk" CS_COUNTERS_ONLY=1 "$TSX" "$CLUSTERSYNTH/src/cli.ts" scenario "$cfg" --out-dir "$OUTDIR/parts-$tag-$R/p$k" >>"$OUTDIR/gen.err" 2>&1 &
   done
   wait
-  for d in "$OUTDIR/parts-$tag-$R"/p*; do [ -f "$d/counters.ndjson" ] && cat "$d/counters.ndjson" >> "$bundle/counters.ndjson"; done
+  # Delete each part right after appending: peak disk ≈ bundle + ONE part instead of ~2× the bundle
+  # (at the 60d 1Hz R=8 triad tier the bundle is ~125 GB — the old all-parts-then-rm peak did not fit
+  # on a 151 GB-free volume).
+  for d in "$OUTDIR/parts-$tag-$R"/p*; do
+    [ -f "$d/counters.ndjson" ] && cat "$d/counters.ndjson" >> "$bundle/counters.ndjson" && rm -f "$d/counters.ndjson"
+  done
   rm -rf "$OUTDIR/parts-$tag-$R"
 }
 
