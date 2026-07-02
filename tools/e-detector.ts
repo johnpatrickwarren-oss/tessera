@@ -47,6 +47,51 @@
 // Tessera-original; NOT vendored.
 
 import { universalInferenceMeanShiftEValue } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/universal-inference-e-value';
+import { gInc } from './mixture-evalue.js';
+
+// ── VALID-INCREMENT SR E-DETECTOR (W2, 2026-07-02 — closes O3's construction gap conditionally) ────
+
+export interface SrEDetectorTrace {
+  /** First tick t with M_t ≥ threshold (= patience/α), else null. */
+  detectTime: number | null;
+  /** Running max of the SR statistic (diagnostics/ranking only — NOT an e-value; see mixture-evalue). */
+  peak: number;
+  threshold: number;
+}
+
+/** The SRR e-detector with GENUINE e-process increments, on a STANDARDIZED residual series.
+ *
+ *  M_n = (1 + M_{n−1})·g(r_n) is exactly the Shiryaev–Roberts sum Σ_{j≤n} Λ^(j)_n with per-onset
+ *  increments Λ^(j)_n = Π_{s=j..n} g(r_s), g = the FIXED-grid Gaussian-LR mixture (mixture-evalue.ts
+ *  gInc — predictable: the λ grid is set before data). Each Λ^(j) is a genuine e-PROCESS conditional
+ *  on the residual null (r_s | F_{s−1} ~ N(0,1) — the emitter-contract premise the Wall-A gate and
+ *  calibration monitor audit).
+ *
+ *  THRESHOLD SEMANTICS (important — E[M_n|H0] = n, so M crosses any FIXED level ~linearly often):
+ *  the threshold is c = patience/α, giving TWO conditional guarantees at once:
+ *    • P(any false alarm within `patience` ticks) ≤ α — Doob's maximal inequality on the nonneg
+ *      submartingale M (E[M_n] ≤ n): P(max_{n≤patience} M_n ≥ patience/α) ≤ patience/(patience/α) = α.
+ *    • ARL = E∞[N*] ≥ patience/α — Shin–Ramdas–Rinaldo Thm 2.4 (arXiv:2203.03532); equivalently
+ *      **EOP ≤ α at patience `patience`** (error-over-patience, arXiv:2501.04130) — the O1 metric
+ *      decision, now implemented. A bare 1/α threshold (the UI eDetector's convention above) carries
+ *      NO per-window false-alarm bound — under the null M reaches 1/α within ~2/α ticks routinely.
+ *  Both bounds are CONDITIONAL on the certified residual null; a Wall-A-flagged counter has neither.
+ *  Contrast the UI-increment `eDetector` above, whose moving train/eval splits are NOT e-processes
+ *  (disclosed there): for THIS variant no validity-promotion question remains — the open wall is
+ *  entirely the residual null itself, which the two-mode gates own. O(T), all onsets (no grid). */
+export function srEDetector(resid: ReadonlyArray<number>, alpha = 0.01, patience?: number): SrEDetectorTrace {
+  const p = patience ?? Math.max(1, resid.length);
+  const threshold = p / alpha;
+  let M = 0, peak = 0;
+  let detectTime: number | null = null;
+  for (let t = 0; t < resid.length; t++) {
+    M = (1 + M) * gInc(resid[t]);
+    if (!isFinite(M)) M = Number.MAX_VALUE;
+    if (M > peak) peak = M;
+    if (detectTime === null && M >= threshold) detectTime = t;
+  }
+  return { detectTime, peak, threshold };
+}
 
 /** UI windowing floor (engine universal-inference-e-value.ts): each window needs ≥ 6 points. */
 export const UI_MIN_WINDOW = 6;

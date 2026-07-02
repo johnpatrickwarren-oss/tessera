@@ -30,7 +30,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { Worker, isMainThread, workerData, parentPort } from 'node:worker_threads';
 import { autocorr, conditionalMarkovDiagnostic } from './conditional-markov.js';
-import { eDetector, terminalUiEValue, type EDetectorOptions } from './e-detector.js';
+import { eDetector, srEDetector, terminalUiEValue, type EDetectorOptions } from './e-detector.js';
 import { loadScenarioBundle, counterMatrices, ndjsonLines, ndjsonRange, type ScenarioBundle } from './clustersynth-scenario.js';
 import { assertLongBaseline } from './baseline-guard.js';
 import { normalizedMixtureEValue } from './mixture-evalue.js';
@@ -162,6 +162,9 @@ export function applyBaseline(mon: ScenarioBundle, counter: string, fits: ShardB
 export interface BaselineMonitorResult {
   counter: string;
   nFault: number; eHits: number; terminalHits: number;
+  /** faults fired by the VALID-increment SR e-detector at its OPERATIONAL threshold 1/α (no oracle
+   *  labels — the deployable operating point; ARL ≥ 1/α ⇒ EOP ≤ α conditional on the certified null). */
+  srHits: number;
   residMedianLag1: number; markovPlausibleFrac: number;
   /** aggregate FDP of the e-BH selection at the fleet level on this counter (false / selected). */
   aggregateFdp: number; selected: number; falsePos: number;
@@ -195,31 +198,40 @@ export function scoreCounterBaseline(mon: ScenarioBundle, counter: string, R: nu
 
   const eThr = quantile(healthyIdx.map((i) => eDetector(R[i], opts).peak), 0.95);
   const tThr = quantile(healthyIdx.map((i) => terminalUiEValue(R[i], calLen)), 0.95);
-  let eHits = 0, terminalHits = 0;
+  let eHits = 0, terminalHits = 0, srHits = 0;
   for (const i of faultIdx) {
     if (eDetector(R[i], opts).peak >= eThr) eHits++;
     if (terminalUiEValue(R[i], calLen) >= tThr) terminalHits++;
+    if (srEDetector(R[i]).detectTime !== null) srHits++; // operational threshold T/α (per-window FA ≤ α), no labels
   }
   // AGGREGATE FDR (ADR 0019): feed e-BH the NORMALIZED CONVEX-MIXTURE e-value (a valid e-value,
   // E≤1), NOT the raw Shiryaev–Roberts statistic (E≈T, not an e-value — the adjuster can't rescue
   // it). The e-detector peak above is kept only for the Mode-A transient-recall metric.
-  const sel = eBenjaminiHochberg(R.map(normalizedMixtureEValue), 0.1).selected;
+  const sel = eBenjaminiHochberg(R.map((r) => normalizedMixtureEValue(r)), 0.1).selected;
   let falsePos = 0;
   for (const i of sel) if (!faultIdx.has(i)) falsePos++;
   return {
-    counter, nFault: faultIdx.size, eHits, terminalHits,
+    counter, nFault: faultIdx.size, eHits, terminalHits, srHits,
     residMedianLag1: quantile(lag1, 0.5), markovPlausibleFrac: healthyIdx.length ? plaus / healthyIdx.length : NaN,
     aggregateFdp: sel.length ? falsePos / sel.length : 0, selected: sel.length, falsePos,
   };
 }
 
 /** Shared renderer from per-counter results (used by both the in-memory and parallel paths). */
-function renderResults(healthyShards: number, healthyT: number, monT: number, monFaults: number, cl: number, results: BaselineMonitorResult[]): string {
+function renderResults(healthyShards: number, healthyT: number, monT: number, monFaults: number, cl: number, results: BaselineMonitorResult[], sameCadence = true): string {
   const emitter = baselineMonitorEmitter();
   const mode = modeOf(emitter); // 'A' — empirically_audited is NOT FDR-bearing (ADR 0019 validity gate)
   const L: string[] = [];
   L.push('═══ BASELINE-MONITOR — long (≥2-month) anomaly-trimmed baseline, then monitor ═══');
   L.push(`baseline: ${healthyShards} shards × T=${healthyT} ticks (healthy)  |  monitoring: T=${monT}, ${monFaults} faults, e-detector calLen=${cl}`);
+  // ADR 0009 plug-in condition (2026-07-02 audit F8): baseline-estimation error inflates the null mean
+  // like E[e] ≈ 1/√(1 − n/m) (n = monitoring ticks, m = baseline ticks); validity margin needs
+  // n/m ≤ 0.4. Advisory only — this emitter is Mode A (measured, not guaranteed) — but a run in the
+  // n/m > 0.4 regime should not be quoted as if the plug-in error were negligible.
+  if (sameCadence && monT / healthyT > 0.4) {
+    L.push(`⚠️  PLUG-IN RATIO n/m = ${(monT / healthyT).toFixed(2)} > 0.4 (ADR 0009): baseline-estimation`);
+    L.push('    error is NON-negligible at this monitoring/baseline length ratio; treat measured FDP with care.');
+  }
   L.push(`emitter: ${emitter.id}  validity_class=${emitter.validityClass}  →  MODE ${mode}` +
     (mode === 'A' ? ` (evidence/ranking + abstain, NO FDR claim — ${ineligibilityReason(emitter)})` : ' (FDR-guaranteed)'));
   L.push('');
@@ -229,18 +241,26 @@ function renderResults(healthyShards: number, healthyT: number, monT: number, mo
   L.push('FDR guarantee (Mode B) only for theorem/construction-valid emitters; otherwise a RANKING whose');
   L.push('false-discovery proportion is MEASURED, not guaranteed (Mode A).');
   L.push('');
-  L.push('counter          nFault  e-detector  terminal | residual |ρ₁|  markovPlausible | gate');
-  let eT = 0, tT = 0, fT = 0, selOk = 0, fpOk = 0;
+  L.push('counter          nFault  e-detector  sr@T/α  terminal | residual |ρ₁|  markovPlausible | gate');
+  let eT = 0, tT = 0, sT = 0, fT = 0, selOk = 0, fpOk = 0;
   const flagged: string[] = [];
   for (const r of results) {
     if (r.nFault === 0) continue;
     const certified = r.markovPlausibleFrac >= 0.5;
-    eT += r.eHits; tT += r.terminalHits; fT += r.nFault;
+    eT += r.eHits; tT += r.terminalHits; sT += r.srHits; fT += r.nFault;
     if (certified) { selOk += r.selected; fpOk += r.falsePos; } else flagged.push(r.counter);
-    L.push(`  ${r.counter.padEnd(14)} ${String(r.nFault).padStart(5)}  ${String(r.eHits).padStart(8)}/${r.nFault}  ${String(r.terminalHits).padStart(6)}/${r.nFault} | ${r.residMedianLag1.toFixed(3).padStart(11)}  ${(r.markovPlausibleFrac * 100).toFixed(0).padStart(13)}% | ${certified ? 'CERTIFIED' : 'FLAGGED (abstain)'}`);
+    L.push(`  ${r.counter.padEnd(14)} ${String(r.nFault).padStart(5)}  ${String(r.eHits).padStart(8)}/${r.nFault}  ${String(r.srHits).padStart(4)}/${r.nFault}  ${String(r.terminalHits).padStart(6)}/${r.nFault} | ${r.residMedianLag1.toFixed(3).padStart(11)}  ${(r.markovPlausibleFrac * 100).toFixed(0).padStart(13)}% | ${certified ? 'CERTIFIED' : 'FLAGGED (abstain)'}`);
   }
   L.push('');
-  L.push(`TRANSIENT mean_shift recall (all counters): e-detector ${eT}/${fT}  vs  terminal ${tT}/${fT}`);
+  L.push(`TRANSIENT mean_shift recall (all counters): e-detector ${eT}/${fT}  vs  sr@T/α ${sT}/${fT}  vs  terminal ${tT}/${fT}`);
+  L.push('STREAMING ERROR METRIC (O1, W2 2026-07-02): the sr@T/α column is the VALID-increment SR');
+  L.push('e-detector at its OPERATIONAL threshold T/α (α=0.01, patience = the window) — its increments');
+  L.push('are genuine e-processes given the certified residual null, so BOTH hold as theorems conditional');
+  L.push('on that null: P(false alarm within the window) ≤ α (Doob on the SR submartingale, E[M_n]=n) and');
+  L.push('ARL ≥ T/α (Shin–Ramdas–Rinaldo Thm 2.4) ⇒ EOP ≤ α at window patience (arXiv:2501.04130) — the');
+  L.push('controllable streaming error metric worst-case FDR cannot be (finite ARL ⇒ FDR = 1). The bound');
+  L.push('is CONDITIONAL on Wall-A certification — a FLAGGED counter has no EOP claim. The e-detector');
+  L.push('column (UI increments, ROC-matched) remains the unstandardized-regime comparator.');
   const fdpLabel = mode === 'B'
     ? `AGGREGATE fleet FDP on the CERTIFIED set (e-BH q=0.1, FDR-GUARANTEED)`
     : `MEASURED fleet FDP on the CERTIFIED ranking (e-BH q=0.1, Mode A — NO guarantee)`;
@@ -273,7 +293,7 @@ export function renderBaselineMonitor(healthyDir: string, monDir: string, calLen
     if (fits.length !== mon.shardIds.length) continue; // topology mismatch
     results.push(scoreCounterBaseline(mon, counter, applyBaseline(mon, counter, fits), cl, opts));
   }
-  return renderResults(healthy.shardIds.length, healthy.T, mon.T, mon.faults.length, cl, results);
+  return renderResults(healthy.shardIds.length, healthy.T, mon.T, mon.faults.length, cl, results, healthy.dt_s === mon.dt_s);
 }
 
 // ─── STREAMING + MULTI-CORE PATH (default; scales to long 1Hz monitoring at fleet size) ──────
@@ -286,7 +306,7 @@ export function renderBaselineMonitor(healthyDir: string, monDir: string, calLen
 interface MonMeta { T: number; dt_s?: number; counters: CounterSpec[]; membership: Record<string, Record<string, string>>; }
 interface CounterSpec { name: string; load: Record<string, number>; }
 interface FaultLabel { level: string; counter: string | null; type: string; affected_shards: string[] }
-interface BmRecord { c: string; s: string; peak: number; mixE: number; terminal: number; lag1: number; markov: boolean }
+interface BmRecord { c: string; s: string; peak: number; mixE: number; terminal: number; srFired: boolean; lag1: number; markov: boolean }
 interface BmWorkerInput { __bm_worker: true; monDir: string; byteStart: number; byteEnd: number; cl: number; fits: Record<string, Record<string, ShardBaseline>> }
 
 /** Load mon factor series (factors.ndjson; fallback to legacy factors.json `.factors`). */
@@ -322,7 +342,7 @@ function runBmWorker(input: BmWorkerInput): BmRecord[] {
     const scale = robustScale(e, prefix) || fit.scale;
     const resid = e.map((ev) => ev / scale);
     const zero = resid.map(() => 0);
-    out.push({ c: row.counter, s: row.shard, peak: eDetector(resid, opts).peak, mixE: normalizedMixtureEValue(resid), terminal: terminalUiEValue(resid, cl), lag1: Math.abs(autocorr(resid, 1)), markov: conditionalMarkovDiagnostic(resid, zero).markovPlausible });
+    out.push({ c: row.counter, s: row.shard, peak: eDetector(resid, opts).peak, mixE: normalizedMixtureEValue(resid), terminal: terminalUiEValue(resid, cl), srFired: srEDetector(resid).detectTime !== null, lag1: Math.abs(autocorr(resid, 1)), markov: conditionalMarkovDiagnostic(resid, zero).markovPlausible });
   }
   return out;
 }
@@ -376,7 +396,7 @@ export async function renderBaselineMonitorParallel(healthyDir: string, monDir: 
     const m = byCounter.get(counter);
     if (m) results.push(reduceCounter(counter, m, monShardIds, faults));
   }
-  return renderResults(healthy.shardIds.length, healthy.T, meta.T, faults.length, cl, results);
+  return renderResults(healthy.shardIds.length, healthy.T, meta.T, faults.length, cl, results, healthy.dt_s === (meta.dt_s ?? healthy.dt_s));
 }
 
 function bmQuantile(xs: number[], qq: number): number {
@@ -393,15 +413,15 @@ function reduceCounter(counter: string, m: Map<string, BmRecord>, monShardIds: s
   const term = (s: string): number => m.get(s)?.terminal ?? 0;
   const eThr = bmQuantile(healthyIds.map(peak), 0.95);
   const tThr = bmQuantile(healthyIds.map(term), 0.95);
-  let eHits = 0, terminalHits = 0;
-  for (const i of faultIdx) { const s = monShardIds[i]; if (peak(s) >= eThr) eHits++; if (term(s) >= tThr) terminalHits++; }
+  let eHits = 0, terminalHits = 0, srHits = 0;
+  for (const i of faultIdx) { const s = monShardIds[i]; if (peak(s) >= eThr) eHits++; if (term(s) >= tThr) terminalHits++; if (m.get(s)?.srFired) srHits++; }
   const plaus = healthyIds.filter((s) => m.get(s)?.markov).length;
   // FDR e-BH on the NORMALIZED CONVEX-MIXTURE e-value (ADR 0019), already a valid adjusted e-value.
   const mixE = (s: string): number => m.get(s)?.mixE ?? 0;
   const sel = eBenjaminiHochberg(monShardIds.map(mixE), 0.1).selected;
   let falsePos = 0; for (const i of sel) if (!faultIdx.has(i)) falsePos++;
   return {
-    counter, nFault: faultIdx.size, eHits, terminalHits,
+    counter, nFault: faultIdx.size, eHits, terminalHits, srHits,
     residMedianLag1: bmQuantile(healthyIds.map((s) => m.get(s)?.lag1 ?? 0), 0.5),
     markovPlausibleFrac: healthyIds.length ? plaus / healthyIds.length : NaN,
     aggregateFdp: sel.length ? falsePos / sel.length : 0, selected: sel.length, falsePos,

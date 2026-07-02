@@ -58,15 +58,16 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
 
 ## 2. Open questions (genuinely unsettled — fair game for new work)
 
-- **O1 — error metric choice. ✅ DECIDED (2026-06-26 audit) — ⚠️ UNIMPLEMENTED (2026-07-02).**
+- **O1 — error metric choice. ✅ DECIDED (2026-06-26) — ✅ IMPLEMENTED (2026-07-02 W2).**
   Control **EOP (error over patience)** for the streaming detector: Dandapanthula–Ramdas
   (arXiv:2501.04130) PROVE that finite ARL ⇒ worst-case FDR/FWER/PFER = 1, so worst-case FDR is
   uncontrollable for a fast-detection live detector. EOP is controllable (`ARL ≥ 1/α`). Keep
   anytime-valid fleet-FDR (stopped e-BH) only as a CONDITIONAL guarantee (see O4). FWER = worse;
-  TDP = a post-hoc reporting layer, not a live target. **Implementation status: NOTHING computes,
-  bounds, or reports EOP anywhere in the tree** (the e-detector's 1/α threshold is the compatible
-  primitive, but the metric itself is aspirational) — so Mode A currently states no controllable
-  error metric in code; implementing EOP tracking is the open work item.
+  TDP = a post-hoc reporting layer, not a live target. **Implemented (W2): `srEDetector`
+  (tools/e-detector.ts) — SR over GENUINE e-process increments (fixed-grid Gaussian-LR mixture) at
+  threshold patience/α ⇒ P(false alarm within the window) ≤ α (Doob on the SR submartingale) AND
+  ARL ≥ patience/α ⇒ EOP ≤ α — both as theorems CONDITIONAL on the certified residual null (the
+  Wall-A gate owns the premise). Reported as the sr@T/α column + EOP statement in baseline-monitor.**
 - **O2 — principled robust / contaminated e-process** to replace the ad-hoc Tukey center
   (with breakdown guarantees). No off-the-shelf construction exists (ADR 0005 Thread C). _Still open._
 - **O3 — transient-fault early detection. ✅ RESOLVED IN PRINCIPLE + 🔧 PROTOTYPED (2026-06-26).**
@@ -97,6 +98,12 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
   operational Assumption-3.1 diagnostic (residual conditional-whiteness); empirically, as common-mode
   removal degrades the diagnostic rises AND stopped-e-BH fleet-FDR crosses q. NECESSARY-condition gate,
   not a sufficiency proof. _Open — test on real GWDG (expected to FAIL; the diagnostic should say so)._
+  **O3 construction-gap update (2026-07-02 W2): CLOSED CONDITIONALLY — `srEDetector` uses per-onset
+  increments Λ^(j) = Π g(r_s) with the FIXED-grid Gaussian-LR mixture, which ARE genuine e-processes
+  given the standardized residual null, so the SRR ARL theorem holds conditional on the emitter
+  contract (no promotion question remains for that variant; the UI-increment e-detector stays the
+  disclosed-empirical comparator for unstandardized regimes). The remaining open item is the residual
+  null itself — the same wall the two-mode gates own.**
   - **O5 calibration sub-result — anytime-valid SERIAL-dependence monitor. ✅ DONE (2026-06-27, ADR
     0020).** The runtime calibration monitor (ADR 0019 #2) tests only the MARGINAL increment `g(r_t)`, so
     it is provably blind to a unit-marginal AR(1) (catch ≈0% at every ρ); ADR 0019 #3 patched that with a
