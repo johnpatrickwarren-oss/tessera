@@ -48,7 +48,11 @@ test('the harness aggregate scores the CORRECTED positive set (control-contamina
     assert.ok(dropped.size >= 1, 'the triad fixture carries control-mode contamination');
     const out = renderModeB(BASE, MON, 0.1);
     assert.match(out, /AGGREGATE spatial-null \(Mode B\) FDP: 0\.000/);
-    assert.match(out, /recall: 1\.000/, 'full recall on the corrected positive set (min rule)');
+    // ≥0.85 (not 1.000) on this SHORT plumbing fixture: the distribution-robust linear bounded-bet
+    // increment (W1, 2026-07-02) caps per-tick growth at log(1+λ), so a late-onset fault in a tiny
+    // window can miss — the scale ramps (runs/…-modeb-*) measure the real recall (≈0.99 at 60d).
+    const recall = Number((/recall: (\d\.\d+)/.exec(out) ?? [])[1]);
+    assert.ok(recall >= 0.85, `recall ${recall} on the corrected positive set (min rule + bounded bets)`);
   } finally {
     delete process.env.CS_ALLOW_SHORT;
   }

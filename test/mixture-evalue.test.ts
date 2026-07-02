@@ -72,3 +72,45 @@ test('geometricMixtureEValue: detects a sustained shift (clearly larger than its
 test('geometricMixtureEValue: empty series → 0', () => {
   assert.equal(geometricMixtureEValue([]), 0);
 });
+
+// ── 'bounded' (linear bounded-bet) increments — the distribution-robust Mode B family (W1) ──
+
+test('bounded: E[·|H0] holds under HEAVY TAILS (t3) and a 15% scale UNDER-estimate — where gaussian breaks', () => {
+  // t3 via ratio of gaussians; scale error via r = 1.15·z. The gaussian mixture's null mean explodes
+  // under both; the linear bounded bet is exactly valid (E[g|F]=1 for any mean-zero clipped residual).
+  const t3 = (rng: () => number): number => {
+    const n = gauss(rng);
+    const c1 = gauss(rng) ** 2 + gauss(rng) ** 2 + gauss(rng) ** 2;
+    return n / Math.sqrt(c1 / 3);
+  };
+  let sumT = 0, sumS = 0;
+  const REPS = 300, T = 240;
+  for (let rep = 0; rep < REPS; rep++) {
+    const rng = mulberry(9000 + rep);
+    sumT += normalizedMixtureEValue(Array.from({ length: T }, () => t3(rng)), 'bounded');
+    const rng2 = mulberry(19000 + rep);
+    sumS += normalizedMixtureEValue(Array.from({ length: T }, () => 1.15 * gauss(rng2)), 'bounded');
+  }
+  assert.ok(sumT / REPS <= 1, `t3 null mean ${(sumT / REPS).toFixed(3)} must be ≤ 1`);
+  assert.ok(sumS / REPS <= 1, `scale-error null mean ${(sumS / REPS).toFixed(3)} must be ≤ 1`);
+});
+
+test('bounded: detects a sustained 4σ shift AND a small 0.3σ shift over a long window', () => {
+  const rng = mulberry(77);
+  const big = Array.from({ length: 400 }, (_, t) => gauss(rng) + (t >= 100 ? 4 : 0));
+  assert.ok(normalizedMixtureEValue(big, 'bounded') > 10, 'big fault detected');
+  const rng2 = mulberry(78);
+  const small = Array.from({ length: 1440 }, (_, t) => gauss(rng2) + (t >= 200 ? 0.3 : 0));
+  assert.ok(normalizedMixtureEValue(small, 'bounded') > 3, 'small sustained shift accumulates');
+});
+
+test('geometricMixtureEValue bounded: prefix-monotone (the loop property holds for the bounded family too)', () => {
+  const rng = mulberry(11);
+  const r = Array.from({ length: 600 }, (_, t) => gauss(rng) + (t >= 300 ? 2.5 : 0));
+  let prev = 0;
+  for (const cut of [100, 300, 400, 600]) {
+    const v = geometricMixtureEValue(r.slice(0, cut), 'bounded');
+    assert.ok(v >= prev - 1e-12, `prefix ${cut}: ${v} < ${prev}`);
+    prev = v;
+  }
+});

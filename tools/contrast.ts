@@ -30,6 +30,17 @@ export function applyContrast(d: number[], fit: ContrastFit): number[] {
   return dc.map((x, t) => (whiten(x, t > 0 ? dc[t - 1] : null, fit.phi) - fit.loc) / fit.scale);
 }
 
+/** Compose a fit from two sources (2026-07-02 audit F8 fix, ADR 0022 mixed-cadence path): the CENTER
+ *  from a long (possibly coarse-cadence) baseline fit of the SAME contrast — a mean offset is
+ *  cadence-independent, so the ≥2-month baseline supplies it validly across cadences — and the
+ *  DYNAMICS (φ, loc, scale — all cadence-dependent) from a monitoring-cadence KNOWN-NULL fit (the
+ *  triad's full-window c1−c2 sibling contrast, which is fault-free under gpu-level treatment faults).
+ *  This eliminates the mon pre-fault-prefix fit and with it the baked-in "onsets ≥ 0.1·T" DGP
+ *  assumption (a production fault in the first ticks can no longer corrupt its own null). */
+export function composeFit(centerFrom: ContrastFit, dynamicsFrom: ContrastFit): ContrastFit {
+  return { center: centerFrom.center, phi: dynamicsFrom.phi, loc: dynamicsFrom.loc, scale: dynamicsFrom.scale };
+}
+
 const mean = (xs: number[]): number => xs.reduce((a, b) => a + b, 0) / xs.length;
 const sd = (xs: number[]): number => { const m = mean(xs); return Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / xs.length); };
 

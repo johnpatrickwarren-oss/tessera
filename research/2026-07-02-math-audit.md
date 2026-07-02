@@ -95,7 +95,7 @@ slack) — P1 stands empirically; "by construction" overstates. Engine-side fix:
 numerator (fit on strictly past data), which would also make the e-detector increments genuine
 e-processes (closing O3 by construction).
 
-## F7 — Plug-in nuisance sensitivity of the guarantee-bearing increment (GAP; ⚠️ STANDING)
+## F7 — Plug-in nuisance sensitivity of the guarantee-bearing increment (GAP; 🔧 PARTIALLY HARDENED — W1 2026-07-02, see addendum below)
 
 Quantified: 10% under-estimate of σ̂ drives E[mixture output|H0] from 0.52 to **7.6**. In both
 canonical paths, center/scale/φ/loadings are plug-in; safe-t and the UI e-value are wired into
@@ -105,7 +105,7 @@ NEITHER (zero imports). What holds the Mode B claim up is a set of uncalibrated 
 predictive increments (safe-t logic) for σ; φ-grid mixture over φ̂ ± 2SE; Bartlett-scaled gate
 thresholds; aggregated cohort e-process for the demotion decision.
 
-## F8 — Mixed-cadence guard loophole (GAP; ⚠️ STANDING)
+## F8 — Mixed-cadence guard loophole (GAP; ✅ FIXED for triad bundles — W1 2026-07-02, see addendum)
 
 On the mixed-cadence streaming path the ≥56d guard checks a baseline whose SERIES the fit never
 reads — the actual fit comes from the first ~8% of the monitoring window, assuming clustersynth's
@@ -114,7 +114,7 @@ contaminates its own null). Also ADR 0009's quantitative validity condition (n/m
 is never checked — 60d baseline + 60d monitoring passes at n/m = 1. Fixes: assert on the fit feed;
 add the n/m check + an effective-sample-size floor; fit the mon-cadence null from the control cohort.
 
-## F9 — Spatial-null distributional assumptions unaudited on real data (GAP; ⚠️ STANDING)
+## F9 — Spatial-null distributional assumptions unaudited on real data (GAP; 🔧 PARTIALLY ADDRESSED — W1 built + MEASURED the trade-off, see addendum)
 
 The Gaussian-LR increment needs the standardized contrast residual conditionally 1-sub-Gaussian;
 never audited on real contrast residuals (raw-telemetry kurtosis up to 1540, ADR 0011; the cap does
@@ -189,6 +189,33 @@ the Wall-A gate.
    closed form, replaces the 6-point λ grid; or GRAPA-style predictable betting.
 6. **Sequential-UI increments** in the e-detector (numerator fit on strictly-past data) → genuine
    SRR e-detector with real ARL theorem (closes O3 by construction) and repairs the F6 proof hole.
+
+## Addendum — W1/W2 follow-through (2026-07-02, same-day)
+
+**W1 (Mode B hardening).** (a) F8 FIXED for triad bundles: mixed-cadence fits now take the CENTER from
+the ≥2-month baseline contrast (cadence-independent — the guard finally guards a feed that is used) and
+the DYNAMICS from the FULL-window mon-cadence c1−c2 sibling (fault-free known null; 12×+ the old 8%
+prefix; the "onsets ≥ 0.1·T" DGP assumption is gone), with the calibration monitor run over the FULL
+detection-length sibling feed (in-sample standardization ⇒ the CALIB_FEED_CAP rationale does not apply
+— this is ADR 0020's named "deeper fix", and it is load-bearing: without it the better sibling φ̂ let
+gpu_temp_c pass lag-1 whiteness at 1 Hz and FDP hit 0.779 in a probe run; with it the counter REVOKES
+and FDP returns to 0.000 at unchanged recall 0.794). (b) Whiteness gates now carry an explicit
+noise floor (max(0.1, 2/√n)) documenting the effect-size-vs-significance regime. (c) F9: a
+distribution-robust linear bounded-bet increment family ('bounded', mixture-evalue.ts) was BUILT and
+MEASURED — exactly valid under any conditionally mean-zero clipped residual, but VARIANCE-BLIND
+(E[1+λc]=1 under any symmetric law), and a scale probe showed that blindness halves recall on
+detachment/variance-signal faults (clean R=8 0.987→0.539). The Gaussian increment's scale-error
+fragility and its variance-fault power are the same sensitivity; Mode B therefore stays Gaussian with
+the fragility managed by (a) + the ∏g monitor, and 'bounded' ships as the option for
+mean-shift-only monitoring under distribution doubt. (d) baseline-monitor prints the ADR 0009
+n/m > 0.4 plug-in advisory.
+
+**W2 (O1/O3).** `srEDetector` (tools/e-detector.ts): SR over genuine e-process increments (fixed-grid
+Gaussian-LR mixture) at threshold patience/α ⇒ per-window false-alarm ≤ α (Doob on the SR
+submartingale, E[M_n]=n) AND ARL ≥ patience/α ⇒ **EOP ≤ α** — both conditional on the certified
+residual null. O1 implemented; O3's construction gap closed conditionally (no promotion question for
+this variant; the UI-increment e-detector remains the disclosed-empirical comparator). Reported as the
+sr@T/α column + EOP statement in baseline-monitor.
 
 ## Version nit
 
