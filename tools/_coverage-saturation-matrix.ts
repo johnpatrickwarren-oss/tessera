@@ -25,6 +25,9 @@ import {
 function summarizeType(type_name: FailureTypeName, rows: VariationRow[]): TypeSummary {
   const detected_rows = rows.filter(r => r.observation.detected);
   const correct_rows = detected_rows.filter(r => r.observation.attribution_correct === true);
+  // Rows that MEASURE attribution at all (2026-07-02: a type whose scenario has no localization
+  // target reports null for every row — its accuracy must be null/'n/a', not a vacuous 100%).
+  const measured_rows = detected_rows.filter(r => r.observation.attribution_correct !== null);
   const fp_values = detected_rows
     .map(r => r.observation.false_positive_count)
     .filter((x): x is number => x !== null);
@@ -37,7 +40,7 @@ function summarizeType(type_name: FailureTypeName, rows: VariationRow[]): TypeSu
   return {
     detection_rate: detected_rows.length / 20,
     detected_count: detected_rows.length,
-    attribution_accuracy: detected_rows.length > 0 ? correct_rows.length / detected_rows.length : null,
+    attribution_accuracy: measured_rows.length > 0 ? correct_rows.length / measured_rows.length : null,
     correct_count: correct_rows.length,
     max_false_positive_count: max_fp,
     pedagogical_property_rate: pedagogical_rate,

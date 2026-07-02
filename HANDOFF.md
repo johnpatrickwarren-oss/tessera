@@ -26,6 +26,18 @@ construction validity and revoke (B→A) when it breaks.
 
 ## This session — what shipped (newest first)
 
+- **W3 LOCALITY PROGRAM (2026-07-02): engine v0.6.3-pre + tessera locality layer.** Engine (PR #37):
+  calibrated group attribution (`group_e_value` mean-of-members, `binom_tail` size-calibrated
+  co-firing score — raw ≥2-count false-candidates quadratically in rack size, measured — plus a
+  temporal coincidence window) and LEAVE-ONE-OUT factors for 2–5-member domains (once-only,
+  post-sweeps; the ≤3-member mirror is intrinsic and documented). Tessera: hop-level
+  `LocalityMetric` (unconditional exact/rack/missed + precision splits) in clustersynth-e2e;
+  `tools/locality-drilldown.ts` (coarse-to-fine per-level e-BH, finest-identified-level with
+  abstention — no hierarchical guarantee claimed, N6); Wall-A diagnostic conditions on the FITTED
+  common-mode prediction (was a zero covariate) + X_{n−1} in the partial-past test + noise-floor
+  tolerance; hierarchical-evalue attribution honestly UNMEASURED (matrix regenerated 94
+  attribution-correct, was 114 vacuous; README + floor test updated). Engine pin → v0.6.3-pre.
+
 - **MIN-RULE SCALE RE-VALIDATION + ENGINE v0.6.2-pre PIN (2026-07-02, after the audit fixes below).**
   (1) Engine PR #36 merged + tagged **v0.6.2-pre**: `nuisanceRobustBFEValue` @deprecated with the
   corrected envelope (`validUnderEstimatedBaseline: false` — the FDR gate no longer auto-admits it;

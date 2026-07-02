@@ -123,7 +123,9 @@ export function conditionalMarkovDiagnostic(
   const n = Y.length;
   if (n < 8) throw new RangeError(`conditionalMarkovDiagnostic: need ≥ 8 points; got ${n}`);
   const lags = opts.ljungBoxLags ?? 5;
-  const condTol = opts.condLag1Tol ?? 0.15;
+  // Default tolerance carries a NOISE FLOOR of 2 Bartlett SEs (2026-07-02 W3b): at small n the fixed
+  // 0.15 was a sub-2σ test; at large n it is deliberately an EFFECT-SIZE gate (see the field doc).
+  const condTol = opts.condLag1Tol ?? Math.max(0.15, 2 / Math.sqrt(Math.max(1, n)));
   const pastTol = opts.partialPastTol ?? 2.0;
 
   const rawLag1 = autocorr(Y, 1);
@@ -140,41 +142,65 @@ export function conditionalMarkovDiagnostic(
   return { rawLag1, condLag1, partialPastT, ljungBoxQ: Q, ljungBoxDof: dof, markovPlausible };
 }
 
-/** t-statistic of the Y_{n−1} coefficient in Y_n ~ 1 + X_n + Y_{n−1} (n ≥ 2). Multiple regression
- *  via the 3×3 normal equations; returns 0 if the design is degenerate. */
+/** t-statistic of the Y_{n−1} coefficient in Y_n ~ 1 + X_n + X_{n−1} + Y_{n−1} (n ≥ 2).
+ *  2026-07-02 (audit F11/W3b): Assumption 3.1 conditions out the PAST covariate too
+ *  (Y_n ⊥ (X_{<n}, Y_{<n}) | X_n), so the direct-leakage regression must include X_{n−1} — omitting
+ *  it can misattribute leakage carried by the lagged covariate to Y_{n−1} (or mask it). Multiple
+ *  regression via 4×4 normal equations (Gauss–Jordan); returns 0 if the design is degenerate
+ *  (e.g. the zero covariate — then X columns are constant/collinear and the solver drops to the
+ *  pseudo-degenerate fallback below). */
 function partialPastTStat(Y: ReadonlyArray<number>, X: ReadonlyArray<number>): number {
-  const rows: Array<[number, number, number]> = []; // [1, X_n, Y_{n-1}]
+  const rows: number[][] = []; // [1, X_n, X_{n-1}, Y_{n-1}]
   const ys: number[] = [];
-  for (let i = 1; i < Y.length; i++) { rows.push([1, X[i], Y[i - 1]]); ys.push(Y[i]); }
-  const p = 3, m = rows.length;
-  if (m <= p) return 0;
-  // Normal equations A = RᵀR (3×3), b = RᵀY.
-  const A = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-  const b = [0, 0, 0];
+  for (let i = 1; i < Y.length; i++) { rows.push([1, X[i], X[i - 1], Y[i - 1]]); ys.push(Y[i]); }
+  if (rows.length <= 4) return 0;
+  const t4 = lastCoefT(rows, ys);
+  if (t4 !== null) return t4;
+  // A DEGENERATE X (constant, e.g. the no-covariate zero vector) makes columns 1/2 collinear with the
+  // intercept: fall back to the 2-column design [1, Y_{n-1}] so the test still runs (as before).
+  return lastCoefT(rows.map((r) => [r[0], r[3]]), ys) ?? 0;
+}
+
+/** OLS t-statistic of the LAST column's coefficient; null if the design is (near-)singular. */
+function lastCoefT(rows: ReadonlyArray<ReadonlyArray<number>>, ys: ReadonlyArray<number>): number | null {
+  const p = rows[0].length, m = rows.length;
+  const A = Array.from({ length: p }, () => new Array<number>(p).fill(0));
+  const b = new Array<number>(p).fill(0);
   for (let r = 0; r < m; r++) {
     for (let j = 0; j < p; j++) { b[j] += rows[r][j] * ys[r]; for (let k = 0; k < p; k++) A[j][k] += rows[r][j] * rows[r][k]; }
   }
-  const inv = invert3(A);
-  if (!inv) return 0;
-  const coef = [0, 0, 0];
+  const inv = invertSym(A);
+  if (!inv) return null;
+  const coef = new Array<number>(p).fill(0);
   for (let j = 0; j < p; j++) for (let k = 0; k < p; k++) coef[j] += inv[j][k] * b[k];
-  // Residual variance → standard error of coef[2] (the Y_{n-1} slope).
   let rss = 0;
-  for (let r = 0; r < m; r++) { const pred = coef[0] * rows[r][0] + coef[1] * rows[r][1] + coef[2] * rows[r][2]; const e = ys[r] - pred; rss += e * e; }
+  for (let r = 0; r < m; r++) {
+    let pred = 0; for (let j = 0; j < p; j++) pred += coef[j] * rows[r][j];
+    const e = ys[r] - pred; rss += e * e;
+  }
   const sigma2 = rss / (m - p);
-  const se = Math.sqrt(Math.max(sigma2 * inv[2][2], 1e-300));
-  return se > 0 ? coef[2] / se : 0;
+  const last = p - 1;
+  const se = Math.sqrt(Math.max(sigma2 * inv[last][last], 1e-300));
+  return se > 0 ? coef[last] / se : 0;
 }
 
-/** Invert a 3×3 matrix; null if singular. */
-function invert3(A: number[][]): number[][] | null {
-  const [a, b, c] = A[0], [d, e, f] = A[1], [g, h, i] = A[2];
-  const det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
-  if (Math.abs(det) < 1e-12) return null;
-  const id = 1 / det;
-  return [
-    [(e * i - f * h) * id, (c * h - b * i) * id, (b * f - c * e) * id],
-    [(f * g - d * i) * id, (a * i - c * g) * id, (c * d - a * f) * id],
-    [(d * h - e * g) * id, (b * g - a * h) * id, (a * e - b * d) * id],
-  ];
+/** Invert a small symmetric positive-definite-ish matrix by Gauss–Jordan with partial pivoting;
+ *  null if (near-)singular. */
+function invertSym(A0: ReadonlyArray<ReadonlyArray<number>>): number[][] | null {
+  const n = A0.length;
+  const M = A0.map((row, i) => [...row, ...Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))]);
+  for (let c = 0; c < n; c++) {
+    let piv = c;
+    for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[piv][c])) piv = r;
+    if (Math.abs(M[piv][c]) < 1e-10) return null;
+    [M[c], M[piv]] = [M[piv], M[c]];
+    const d = M[c][c];
+    for (let k = 0; k < 2 * n; k++) M[c][k] /= d;
+    for (let r = 0; r < n; r++) {
+      if (r === c) continue;
+      const f = M[r][c];
+      for (let k = 0; k < 2 * n; k++) M[r][k] -= f * M[c][k];
+    }
+  }
+  return M.map((row) => row.slice(n));
 }

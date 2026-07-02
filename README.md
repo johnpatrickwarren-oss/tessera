@@ -243,9 +243,11 @@ The "floor" columns are the minimums asserted by `test/q72-coverage-saturation.t
 > detector wiring and relative tuning, not robustness: the repo's own measurements show AR(1) ρ=0.95
 > inflates per-shard type-I error ~180× (ADR 0001) and real telemetry fires far off these numbers
 > (ADR 0007). "Attribution" is computed **conditional on detection** and per-type definitions vary
-> in strictness (the hierarchical-evalue row's definition is satisfied by construction whenever
-> detection succeeds — treat that row's attribution column as vacuous); no hop-level locality metric
-> (right shard vs right rack vs right zone) is measured anywhere in these matrices.
+> in strictness (the hierarchical-evalue row has no localization target, so its attribution is
+> reported as unmeasured — the pre-2026-07-02 matrix scored it tautologically 100%). Hop-level
+> locality (right shard vs right rack) is now measured by the e2e pipeline's locality columns
+> (`tools/clustersynth-e2e.ts` LocalityMetric) and the coarse-to-fine drill-down
+> (`tools/locality-drilldown.ts`), not by these matrices.
 
 | Type | Detection floor (asserted) | Detection observed (R72) | Attribution floor |
 |---|---|---|---|
@@ -253,7 +255,7 @@ The "floor" columns are the minimums asserted by `test/q72-coverage-saturation.t
 | common-mode-rack | ≥ 20 / 20 | 20 / 20 | ≥ 95% |
 | event-conditional | ≥ 20 / 20 | 20 / 20 | ≥ 95% |
 | fdr-multiple-testing | ≥ 16 / 20 | 20 / 20 | ≥ 95% |
-| hierarchical-evalue | ≥ 12 / 20 | 20 / 20 | ≥ 95% (and ≥ 80% fleet-fires-before-per-shard) |
+| hierarchical-evalue | ≥ 12 / 20 | 20 / 20 | n/a — no localization target (≥ 80% fleet-fires-before-per-shard) |
 | topology-spanning-common-mode | ≥ 16 / 20 | 16 / 20 | ≥ 95% |
 
 ### Detection envelope (R77)

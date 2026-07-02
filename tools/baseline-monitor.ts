@@ -148,15 +148,28 @@ function robustScale(xs: number[], len: number): number {
  *  This lets a coarse (hourly) 2-month baseline calibrate a fine (1Hz) monitoring window: the
  *  loadings are cadence-independent, but the residual scale is NOT, so it must be re-estimated. */
 export function applyBaseline(mon: ScenarioBundle, counter: string, fits: ShardBaseline[]): number[][] {
+  return applyBaselineWithCovariate(mon, counter, fits).R;
+}
+
+/** As applyBaseline, but ALSO returns each shard's fitted common-mode PREDICTION series
+ *  X[i][t] = intercept + Σ λ̂ⱼ·Fⱼ[t] — the CONDITIONING COVARIATE the Wall-A / Assumption-3.1
+ *  diagnostic must receive (2026-07-02 audit F11/W3b: the diagnostic was previously invoked with a
+ *  ZERO covariate, degenerating "conditionally white GIVEN the common-mode" to plain marginal
+ *  whiteness — it never conditioned on the actual estimate, which is the whole point of O5). */
+export function applyBaselineWithCovariate(mon: ScenarioBundle, counter: string, fits: ShardBaseline[]): { R: number[][]; X: number[][] } {
   const { X, factorSignals, membership } = counterMatrices(mon, counter);
   const prefix = Math.max(1, Math.floor(0.1 * mon.T)); // healthy, pre-onset
-  return X.map((y, i) => {
+  const R: number[][] = [], C: number[][] = [];
+  X.forEach((y, i) => {
     const cols = shardCols(factorSignals, membership, i);
     const f = fits[i];
-    const e = y.map((v, t) => v - f.intercept - cols.reduce((s, c, j) => s + (f.loadings[j] ?? 0) * c[t], 0));
+    const pred = y.map((_, t) => f.intercept + cols.reduce((s, c, j) => s + (f.loadings[j] ?? 0) * c[t], 0));
+    const e = y.map((v, t) => v - pred[t]);
     const scale = robustScale(e, prefix) || f.scale; // monitoring-cadence scale; fall back to baseline
-    return e.map((ev) => ev / scale);
+    R.push(e.map((ev) => ev / scale));
+    C.push(pred);
   });
+  return { R, X: C };
 }
 
 export interface BaselineMonitorResult {
@@ -188,13 +201,16 @@ function faultedShardSet(mon: ScenarioBundle, counter: string): Set<string> {
 
 /** Score one counter end-to-end: e-detector vs terminal recall on transient mean_shifts, the AGGREGATE
  *  e-BH false-discovery proportion across the fleet, and the Wall-A residual diagnostic. */
-export function scoreCounterBaseline(mon: ScenarioBundle, counter: string, R: number[][], calLen: number, opts: EDetectorOptions): BaselineMonitorResult {
+export function scoreCounterBaseline(mon: ScenarioBundle, counter: string, R: number[][], calLen: number, opts: EDetectorOptions, Xcov?: number[][]): BaselineMonitorResult {
   const faulted = faultedShardSet(mon, counter);
   const faultIdx = new Set([...faulted].map((s) => mon.shardIds.indexOf(s)).filter((i) => i >= 0));
   const healthyIdx = mon.shardIds.map((_, i) => i).filter((i) => !faultIdx.has(i)).filter((_, k) => k % 12 === 0).slice(0, 50);
+  // Wall-A covariate (W3b): the diagnostic conditions on the FITTED common-mode prediction — the
+  // actual Assumption-3.1 covariate — not a zero vector (which degenerates it to marginal whiteness).
   const zero = R[0].map(() => 0);
+  const covOf = (i: number): ReadonlyArray<number> => Xcov?.[i] ?? zero;
   const lag1 = healthyIdx.map((i) => Math.abs(autocorr(R[i], 1)));
-  const plaus = healthyIdx.filter((i) => conditionalMarkovDiagnostic(R[i], zero).markovPlausible).length;
+  const plaus = healthyIdx.filter((i) => conditionalMarkovDiagnostic(R[i], covOf(i)).markovPlausible).length;
 
   const eThr = quantile(healthyIdx.map((i) => eDetector(R[i], opts).peak), 0.95);
   const tThr = quantile(healthyIdx.map((i) => terminalUiEValue(R[i], calLen)), 0.95);
@@ -291,7 +307,8 @@ export function renderBaselineMonitor(healthyDir: string, monDir: string, calLen
   for (const counter of mon.counters.map((c) => c.name)) {
     const fits = fitBaseline(healthy, counter);
     if (fits.length !== mon.shardIds.length) continue; // topology mismatch
-    results.push(scoreCounterBaseline(mon, counter, applyBaseline(mon, counter, fits), cl, opts));
+    const { R, X } = applyBaselineWithCovariate(mon, counter, fits);
+    results.push(scoreCounterBaseline(mon, counter, R, cl, opts, X));
   }
   return renderResults(healthy.shardIds.length, healthy.T, mon.T, mon.faults.length, cl, results, healthy.dt_s === mon.dt_s);
 }
@@ -338,11 +355,12 @@ function runBmWorker(input: BmWorkerInput): BmRecord[] {
     if (!kinds || !fit) continue;
     const cols: number[][] = [];
     for (const k of kinds) { const inst = meta.membership[row.shard]?.[k]; if (inst == null) continue; const ser = factors.get(inst); if (ser) cols.push(ser); }
-    const e = row.v.map((val, t) => val - fit.intercept - cols.reduce((s, c, j) => s + (fit.loadings[j] ?? 0) * c[t], 0));
+    const pred = row.v.map((_, t) => fit.intercept + cols.reduce((s, c, j) => s + (fit.loadings[j] ?? 0) * c[t], 0));
+    const e = row.v.map((val, t) => val - pred[t]);
     const scale = robustScale(e, prefix) || fit.scale;
     const resid = e.map((ev) => ev / scale);
-    const zero = resid.map(() => 0);
-    out.push({ c: row.counter, s: row.shard, peak: eDetector(resid, opts).peak, mixE: normalizedMixtureEValue(resid), terminal: terminalUiEValue(resid, cl), srFired: srEDetector(resid).detectTime !== null, lag1: Math.abs(autocorr(resid, 1)), markov: conditionalMarkovDiagnostic(resid, zero).markovPlausible });
+    // Wall-A covariate (W3b): condition the 3.1 diagnostic on the fitted common-mode prediction.
+    out.push({ c: row.counter, s: row.shard, peak: eDetector(resid, opts).peak, mixE: normalizedMixtureEValue(resid), terminal: terminalUiEValue(resid, cl), srFired: srEDetector(resid).detectTime !== null, lag1: Math.abs(autocorr(resid, 1)), markov: conditionalMarkovDiagnostic(resid, pred).markovPlausible });
   }
   return out;
 }

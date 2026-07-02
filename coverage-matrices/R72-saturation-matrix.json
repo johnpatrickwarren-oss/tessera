@@ -2138,7 +2138,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 22,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2165,7 +2165,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 23,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2192,7 +2192,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 20,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2219,7 +2219,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 17,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2246,7 +2246,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 15,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2273,7 +2273,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 23,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2303,7 +2303,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 22,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2333,7 +2333,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 18,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2363,7 +2363,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 14,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2393,7 +2393,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 17,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2423,7 +2423,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 24,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2455,7 +2455,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 22,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2487,7 +2487,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 18,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2519,7 +2519,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 15,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2551,7 +2551,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 15,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2583,7 +2583,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 24,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2620,7 +2620,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 22,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2657,7 +2657,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 20,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2694,7 +2694,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 15,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2731,7 +2731,7 @@
           },
           "observation": {
             "detected": true,
-            "attribution_correct": true,
+            "attribution_correct": null,
             "detection_window_index": 14,
             "false_positive_count": null,
             "pedagogical_property_met": true,
@@ -2763,8 +2763,8 @@
       "summary": {
         "detection_rate": 1,
         "detected_count": 20,
-        "attribution_accuracy": 1,
-        "correct_count": 20,
+        "attribution_accuracy": null,
+        "correct_count": 0,
         "max_false_positive_count": null,
         "pedagogical_property_rate": 1
       }
@@ -3269,6 +3269,6 @@
   "totals": {
     "total_variations": 120,
     "total_detected": 114,
-    "total_attribution_correct": 114
+    "total_attribution_correct": 94
   }
 }

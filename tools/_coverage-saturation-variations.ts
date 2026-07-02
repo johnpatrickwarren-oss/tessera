@@ -263,7 +263,11 @@ export function runType5Variation(idx: number): VariationRow {
     updateFleetEProcessState(fleetState, combineResult.log_fleet_e, LOG_FLEET_THRESHOLD);
   }
   const detected = fleetState.fired === true;
-  const attribution_correct = detected ? true : null;
+  // 2026-07-02 audit F11 fix: this scenario has NO localization target (it demonstrates
+  // fleet-fires-before-per-shard), so attribution is NOT MEASURED — always null. The old
+  // `detected ? true : null` made the type's attribution accuracy TAUTOLOGICALLY 100%
+  // (the README floor for this row was an identity, not a measurement).
+  const attribution_correct = null;
   const earliest_per_shard_tick = perShardFirstFireTick
     .filter((t): t is number => t !== null)
     .reduce((m, t) => Math.min(m, t), Number.POSITIVE_INFINITY);
