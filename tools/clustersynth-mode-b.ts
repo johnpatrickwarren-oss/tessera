@@ -176,20 +176,28 @@ export function contrastEValuesFor(healthy: ScenarioBundle, mon: ScenarioBundle,
   });
 }
 
-/** ADR 0022 control triad. If every pair has a present second twin, flag contaminated controls via the
- *  c1−c2 sibling null (e-BH) and overwrite the detection e-value of a flagged shard with the clean-sibling
- *  contrast t−c2 (so a control-only fault is not a sign-blind false positive on the treatment). Mutates `e`
- *  in place; returns the flagged-control count (0 when there is no triad). */
+/** ADR 0022 control triad — MIN RULE (2026-07-02 audit correction; see ADR 0022 § Correction).
+ *  The previous routing (flag contaminated controls via the c1−c2 sibling e-BH, then OVERWRITE a flagged
+ *  shard's detection e-value with the clean-sibling contrast t−c2) was a DATA-DEPENDENT selection with no
+ *  covering theorem: the flag statistic (c1−c2) and the substituted statistic (t−c2) share c2's
+ *  idiosyncratic noise (corr ≈ ½ under matched twins), so conditioning on {flagged} — including FALSE
+ *  flags, which the flag e-BH produces at rate ~q by construction — up-tilts the substituted e-value;
+ *  E[e_routed|H0] ≤ 1 was never established (the measured FDP 0.000 was empirics, not a theorem).
+ *  The deployable rule validated in tools/peer-availability.ts IS theorem-valid and is used instead:
+ *  e = min(e_{t−c1}, e_{t−c2}) UNCONDITIONALLY (E[min|H0] ≤ min E[e_i] ≤ 1, valid whenever ≥1 sibling
+ *  contrast is a clean null; a single contaminated control fires only one contrast → not selected).
+ *  Known cost: recall in the corner where a fault and same-sign control contamination partially cancel
+ *  inside t−c1 (peer-availability measured recall ~0.87 there); FDR validity takes priority.
+ *  The c1−c2 sibling null is RETAINED for REPORTING only (flaggedControls — operators still learn which
+ *  controls look contaminated); it no longer influences which e-value enters e-BH. Mutates `e` in place;
+ *  returns the flagged-control count (0 when there is no triad). */
 function applyTriadRouting(healthy: ScenarioBundle, mon: ScenarioBundle, usable: ControlPair[], counter: string, q: number, e: number[]): number {
   const hasTriad = usable.every((p) => p.control2 && ser(healthy, p.control2, counter) && ser(mon, p.control2, counter));
   if (!hasTriad) return 0;
+  const eC2 = contrastEValuesFor(healthy, mon, usable, counter, (p) => p.treatment, (p) => p.control2!);
+  for (let i = 0; i < e.length; i++) e[i] = Math.min(e[i], eC2[i]);
   const flagE = contrastEValuesFor(healthy, mon, usable, counter, (p) => p.control, (p) => p.control2!);
-  const badControl = new Set(eBenjaminiHochberg(flagE, q).selected);
-  if (badControl.size) {
-    const eC2 = contrastEValuesFor(healthy, mon, usable, counter, (p) => p.treatment, (p) => p.control2!);
-    for (const i of badControl) e[i] = eC2[i];
-  }
-  return badControl.size;
+  return eBenjaminiHochberg(flagE, q).selected.length; // reporting only — never routes the detection e-value
 }
 
 /** Score one counter end-to-end: spatial-null contrast (gated) vs the temporal per-shard null. */
@@ -209,7 +217,7 @@ export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, 
 
   // Detection: the spatial-null e-value per pair on the monitoring contrast; #1 gates e-BH on Mode B.
   const e = usable.map((p, i) => normalizedMixtureEValue(applyContrast(sub(ser(mon, p.treatment, counter)!, ser(mon, p.control, counter)!), fits[i])));
-  // ADR 0022 control triad: flag contaminated controls + re-route their detection to the clean sibling.
+  // ADR 0022 control triad (min rule): e = min(t−c1, t−c2) — both siblings must agree; c1−c2 flags report only.
   const flaggedControls = applyTriadRouting(healthy, mon, usable, counter, q, e);
 
   const sel = mode === 'B' ? fdrBenjaminiHochberg(e, q, emitter, 'clustersynth-mode-b').selected : [];
@@ -283,9 +291,10 @@ export function renderModeB(healthyDir: string, monDir: string, q = 0.1): string
 interface Row { shard: string; counter: string; v: number[] }
 interface CmbWorkerInput { __cmb_worker: true; monDir: string; byteStart: number; byteEnd: number }
 /** Per-pair streaming scalar record. `flagE`/`eC2` are present ONLY when a triad twin (#ctrl2) exists for
- *  the pair (ADR 0022): flagE = the c1−c2 sibling-null e-value (flags a contaminated control), eC2 = the
- *  t−c2 clean-sibling detection e-value (the routed-to value when c1 is flagged). reduceCmbCounter does the
- *  fleet routing. Absent ⇒ no triad ⇒ the reducer scores the bare t−c1 contrast as before. */
+ *  the pair (ADR 0022): flagE = the c1−c2 sibling-null e-value (REPORTING only — flags a contaminated
+ *  control), eC2 = the t−c2 second-sibling detection e-value. reduceCmbCounter applies the MIN RULE
+ *  e = min(e_{t−c1}, e_{t−c2}) (2026-07-02 audit correction — see applyTriadRouting's header for why the
+ *  old flag-then-substitute routing was invalid). Absent ⇒ no triad ⇒ the bare t−c1 contrast as before. */
 interface CmbRecord { c: string; s: string; e: number; tE: number; calibPass: boolean; white: boolean; flagE?: number; eC2?: number }
 
 /** Yield [line, startOffset] for complete lines from byteStart to EOF (skipping a partial leading line that
@@ -420,17 +429,18 @@ function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyAr
   const emitter = clustersynthModeBEmitter(monitorPassing);
   const mode = modeOf(emitter);
 
-  // ADR 0022 control triad: when every pair carries a second twin (#ctrl2), flag contaminated controls via
-  // the c1−c2 sibling null (fleet e-BH over flagE) and route a flagged shard's detection to the clean-sibling
-  // t−c2 e-value. Mirrors the in-memory applyTriadRouting, here over the streamed scalars (so it works
-  // identically on the mixed-cadence AND the long-baseline streaming paths, which both reduce through here).
+  // ADR 0022 control triad — MIN RULE (2026-07-02 audit correction; see applyTriadRouting's header):
+  // when every pair carries a second twin (#ctrl2), the detection e-value is min(e_{t−c1}, e_{t−c2}) —
+  // unconditionally a valid conservative e-value (both siblings must agree; a single contaminated control
+  // fires only one contrast → not selected). The c1−c2 sibling e-BH is REPORTING only. Mirrors the
+  // in-memory applyTriadRouting, here over the streamed scalars (so the mixed-cadence AND long-baseline
+  // streaming paths, which both reduce through here, get the identical rule).
   const e = recs.map((r) => r.e);
   const hasTriad = recs.every((r) => r.flagE !== undefined && r.eC2 !== undefined);
   let flaggedControls = 0;
   if (hasTriad) {
-    const badControl = new Set(eBenjaminiHochberg(recs.map((r) => r.flagE!), q).selected);
-    for (const i of badControl) e[i] = recs[i].eC2!;
-    flaggedControls = badControl.size;
+    for (let i = 0; i < e.length; i++) e[i] = Math.min(e[i], recs[i].eC2!);
+    flaggedControls = eBenjaminiHochberg(recs.map((r) => r.flagE!), q).selected.length;
   }
 
   const sel = mode === 'B' ? fdrBenjaminiHochberg(e, q, emitter, 'clustersynth-mode-b').selected : [];

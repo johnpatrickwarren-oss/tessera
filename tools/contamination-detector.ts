@@ -34,7 +34,9 @@ const mean = (xs: number[]): number => xs.reduce((s, x) => s + x, 0) / xs.length
 const variance = (xs: number[]): number => { const m = mean(xs); return xs.reduce((s, x) => s + (x - m) ** 2, 0) / xs.length; };
 
 /** The cancellation ratio κ of a treatment↔control pair on a healthy feed: contrast variance relative to
- *  the members' average variance. ≈0 for a matched twin (common-mode cancels); large when loadings diverge. */
+ *  the members' average variance. ≈0 for a matched twin (common-mode cancels); large when loadings diverge.
+ *  NB (2026-07-02): under matched loadings κ = 2σ_n²/(λ²σ_f²+σ_n²), so κ ranges to 2 at zero common-mode
+ *  and the common-mode VARIANCE FRACTION is 1 − κ/2 — not 1 − κ. κ≤0.1 ⇔ ≥95% shared variance. */
 export function cancellationRatio(treatment: number[], control: number[]): number {
   const d = treatment.map((x, i) => x - control[i]);
   const denom = (variance(treatment) + variance(control)) / 2;

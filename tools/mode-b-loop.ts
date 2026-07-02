@@ -53,7 +53,10 @@ export interface EmitterCycle {
   contract: EmitterContract;
   /** The unit ids aligned with eValues (treatment shards). */
   shards: string[];
-  /** Per-shard contrast e-value over the data SO FAR (anytime-valid running value). */
+  /** Per-shard contrast e-value over the data SO FAR. MUST be the running value of ONE e-process
+   *  with horizon-independent weights (e.g. geometricMixtureEValue) — supplying a per-cycle
+   *  re-normalized value (e.g. normalizedMixtureEValue over a growing prefix) makes each cycle a
+   *  different mixture, and the cross-cycle first-crossing dispatch loses its theorem (2026-07-02). */
   eValues: number[];
   /** This cycle's NEW known-null residuals, one stream per concurrent-control unit. Fed PER SHARD into
    *  separate accumulating martingales (pooling over-powers — ADR 0019 productionization finding). */
@@ -171,7 +174,7 @@ export async function runModeBLoopAsync(
 
 import { loadScenarioBundle, type ScenarioBundle } from './clustersynth-scenario.js';
 import { loadControlPairs, fitContrast, applyContrast, clustersynthModeBEmitter } from './clustersynth-mode-b.js';
-import { normalizedMixtureEValue } from './mixture-evalue.js';
+import { geometricMixtureEValue } from './mixture-evalue.js';
 import { autocorr } from './conditional-markov.js';
 
 interface CounterReplay { c: string; shards: string[]; monStd: number[][]; calStd: number[][]; whitenessPass: boolean }
@@ -206,7 +209,12 @@ export function replayClustersynthCycles(healthyDir: string, monDir: string, nCy
     const emitters = cols.map((col) => ({
       contract: { ...clustersynthModeBEmitter(true), id: `clustersynth-mode-b/${col.c}` },
       shards: col.shards,
-      eValues: col.monStd.map((s) => normalizedMixtureEValue(s.slice(0, monEnd))),
+      // GEOMETRIC onset prior (2026-07-02 audit fix): its weights are horizon-independent, so the
+      // per-cycle values are prefixes of ONE e-process and dispatch-at-first-crossing is theorem-
+      // covered (SupFDR ≤ q). The uniform normalizedMixtureEValue re-normalizes by the prefix length
+      // each cycle — a DIFFERENT mixture per look, breaking the cross-cycle guarantee (and its
+      // renormalization shrinkage could spuriously 'resolve' a standing real-fault action as T grew).
+      eValues: col.monStd.map((s) => geometricMixtureEValue(s.slice(0, monEnd))),
       calibrationSamples: col.calStd.map((s) => s.slice(calLo, calHi)),
       whitenessPass: col.whitenessPass,
     }));
@@ -238,7 +246,10 @@ if (require.main === module) {
   const modeA = reports.at(-1)!.emitters.filter((e) => e.mode === 'A').map((e) => e.emitter.replace('clustersynth-mode-b/', ''));
   L.push(`TOTAL: ${sink.dispatched.length} actions dispatched, ${sink.withdrawn.length} withdrawn (${sink.withdrawn.filter((w) => w.reason === 'revoked').length} on revoke).`);
   if (modeA.length) L.push(`ABSTAINING (Mode A, no FDR guarantee → no actions): ${modeA.join(', ')}`);
-  L.push('Each dispatched action is an FDR-controlled discovery (false-discovery rate ≤ q across the standing set); a Mode-A emitter contributes ranking/evidence elsewhere but never an FDR-keyed action.');
+  L.push('Each dispatched action is an FDR-controlled discovery: the e-values are prefixes of one horizon-');
+  L.push('independent e-process (geometric onset prior), so e-BH on the adjusted running max controls SupFDR ≤ q');
+  L.push('at every look including the data-dependent first-crossing dispatch (Carefree, arXiv:2501.19360). A');
+  L.push('Mode-A emitter contributes ranking/evidence elsewhere but never an FDR-keyed action.');
   process.stdout.write(L.join('\n') + '\n');
   process.exit(0);
 }

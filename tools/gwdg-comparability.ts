@@ -101,7 +101,10 @@ export function runGwdgComparability(dir: string): GwdgComparabilityResult {
     return {
       counter: as, nUnits: a.kappas.length, medianKappa: mk,
       fracComparable: a.kappas.length ? a.kappas.filter((k) => k <= 0.1).length / a.kappas.length : 0,
-      commonModeFrac: Number.isNaN(mk) ? NaN : Math.max(0, 1 - mk),
+      // κ = Var(t−p)/mean(Var t, Var p) = 2σ_n²/(λ²σ_f²+σ_n²) under matched loadings, so the
+      // common-mode VARIANCE FRACTION is 1 − κ/2 (κ→2 at zero common-mode) — NOT 1 − κ, which
+      // understated it (2026-07-02 audit fix; e.g. power_w κ=0.88 ⇒ ~56% shared, not ~12%).
+      commonModeFrac: Number.isNaN(mk) ? NaN : Math.max(0, 1 - mk / 2),
       residAutocorr: a.ac.length ? median(a.ac) : NaN,
     };
   });
@@ -112,16 +115,17 @@ export function runGwdgComparability(dir: string): GwdgComparabilityResult {
   L.push(`${csvs.length} node-incident files, ${nodes.size} nodes, real DCGM @ 10-min. STRUCTURAL measurement (κ is a variance ratio — baseline-INDEPENDENT).`);
   L.push('NOTE: only κ/comparability is reported. Detection/FDR on GWDG would be INVALID (≤10-day incident windows ≠ a representative baseline).');
   L.push('');
-  L.push('  counter       median κ   comparable(κ≤0.1)   common-mode frac (1−κ)   resid autocorr   gpu-units');
+  L.push('  counter       median κ   comparable(κ≤0.1)   common-mode frac (1−κ/2)   resid autocorr   gpu-units');
   for (const s of stats) {
     L.push(`  ${s.counter.padEnd(12)}  ${f3(s.medianKappa)}      ${f3(s.fracComparable)}              ${f3(s.commonModeFrac)}                ${f3(s.residAutocorr)}        ${s.nUnits}`);
   }
   L.push('');
   const tempK = stats.find((s) => s.counter === 'gpu_temp_c')?.medianKappa ?? NaN;
   const powK = stats.find((s) => s.counter === 'power_w')?.medianKappa ?? NaN;
-  L.push('READING: median κ ≫ 0.1 ⇒ real sibling GPUs on a shared HPC node are LARGELY NON-COMPARABLE — they run different');
-  L.push(`jobs, so the shared workload common-mode is weak. TEMPERATURE cancels best (κ≈${f3(tempK)}, shared cooling) while POWER`);
-  L.push(`cancels worst (κ≈${f3(powK)}, almost entirely per-GPU/workload-driven). This is the REAL operating point for the peer-`);
+  L.push('READING: median κ ≫ 0.1 ⇒ real sibling GPUs on a shared HPC node are LARGELY NON-COMPARABLE for the triad gate —');
+  L.push('κ≤0.1 needs ≥95% shared variance (comparability is a HIGH bar, not "any common-mode"). They run different jobs, so');
+  L.push(`the workload common-mode falls short of it. TEMPERATURE cancels best (κ≈${f3(tempK)} ⇒ ~${(100 * (1 - tempK / 2)).toFixed(0)}% shared, cooling) while POWER`);
+  L.push(`cancels worst (κ≈${f3(powK)} ⇒ ~${(100 * (1 - powK / 2)).toFixed(0)}% shared — still material, but far from the gate). This is the REAL operating point for the peer-`);
   L.push('availability study — the job-factor axis is binding on real telemetry. Feed these κ into the peer-availability');
   L.push('calibration to place real clusters on the availability/FDR curve. Resid autocorr is small ⇒ 10-min cadence is');
   L.push('white-friendly (no near-unit-root); the residual structure that remains is un-cancelled common-mode, not autocorrelation.');

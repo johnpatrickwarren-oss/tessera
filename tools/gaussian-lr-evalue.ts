@@ -5,16 +5,28 @@
 // for any of its e-values, and the Markov bound 1/x gives no boost — the power comes
 // only from the EXACT null tail. This module supplies an e-value whose null IS known.
 //
-// Construction: standardise the test-vs-cal mean shift to z (≈ N(0,1) under H0 on the
-// ~iid common-mode-removed residual), then the mixture e-value under a N(0, g) prior on
-// the standardised effect:
+// Construction: standardise the test-vs-cal mean shift to z, then the mixture e-value
+// under a N(0, g) prior on the standardised effect:
 //     e(z) = (1+g)^(-1/2) · exp( g·z² / (2(1+g)) )
-// E[e|Z~N(0,1)] = 1 (a valid e-value). e is monotone in |z|, so the null survival is exact:
+// E[e|Z~N(0,1)] = 1 EXACTLY — but ONLY for oracle z ~ N(0,1). e is monotone in |z|, so the
+// ORACLE null survival is:
 //     S(x) = P(e(Z) ≥ x) = P(|Z| ≥ z*(x)) = 2·(1 − Φ(z*(x))),  z*(x) = sqrt( 2(1+g)/g · ln(x·√(1+g)) )
 // (and S(x)=1 for x below the floor e(0)=(1+g)^(-1/2)).
 //
-// EXPERIMENTAL — Tessera-local. If boosting pays off, the durable home for a survival is
-// the engine alongside the e-value (engine owns the math; Tessera stays a thin harness).
+// ⚠️ VALIDITY CAVEAT (2026-07-02 audit). shiftZ standardises by the CALIBRATION-WINDOW SAMPLE
+// SD — a plug-in. Under H0 with estimated s the true z has t-like tails, and E[exp(c·z²)]
+// with c = g/(2(1+g)) ≈ 0.48 DIVERGES for any finite cal length (measured: cal=30 →
+// E[e|H0] ≈ 1.6e5; even cal=300 has a divergent tail). So E[e|H0] = 1 does NOT hold as
+// implemented, and the "exact" survival UNDERSTATES the plug-in t-tail — feeding it to the
+// conditional-calibration boost makes the boost ANTI-conservative (this partially confounds
+// the PR #33 / registry-N4 "boosting amplifies TP+FP" reading). This is the ADR 0007 plug-in
+// invalidity replayed. Long baselines (assertLongBaseline forces cal ≥ 1344 in the scenario
+// harness) shrink but do not eliminate the gap. Treat both functions as ORACLE-null objects
+// for diagnostics only; a valid replacement needs the variance integrated out (the engine's
+// safe-t, ADR 0005) with its exact t-based survival.
+//
+// EXPERIMENTAL — Tessera-local, diagnostic harness use only (clustersynth-scenario.ts, which
+// is itself designated diagnostic-only). NOT for any FDR-bearing path.
 //
 // Tessera-original; NOT vendored.
 
@@ -48,13 +60,15 @@ export function shiftZ(values: ReadonlyArray<number>, cal: Window, test: Window)
   return (muTest - muCal) / se;
 }
 
-/** Gaussian-LR mean-shift e-value over a cal/test split. Valid: E[e|H0] = 1. */
+/** Gaussian-LR mean-shift e-value over a cal/test split. E[e|H0] = 1 ONLY for oracle z ~ N(0,1);
+ *  with shiftZ's plug-in cal SD the null mean diverges — see the header caveat. Diagnostics only. */
 export function gaussianLrEValue(values: ReadonlyArray<number>, cal: Window, test: Window, g = DEFAULT_EFFECT_PRIOR_VAR): number {
   const z = shiftZ(values, cal, test);
   return Math.pow(1 + g, -0.5) * Math.exp((g * z * z) / (2 * (1 + g)));
 }
 
-/** The EXACT null survival S(x) = P(e ≥ x | H0) of the Gaussian-LR e-value, for boosting. */
+/** The ORACLE null survival S(x) = P(e ≥ x | z~N(0,1)). With the plug-in z it UNDERSTATES the true
+ *  tail (anti-conservative as a boosting input) — see the header caveat. Diagnostics only. */
 export function gaussianLrNullSurvival(g = DEFAULT_EFFECT_PRIOR_VAR): (x: number) => number {
   const floor = Math.pow(1 + g, -0.5); // e(0)
   return (x: number): number => {
