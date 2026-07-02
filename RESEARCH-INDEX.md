@@ -32,8 +32,8 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
 
 | # | Result | Source |
 |---|---|---|
-| P1 | **UI mean-shift e-value** — `E[e\|H0] ≤ 1` by construction for ANY φ incl. unit root (split-LR / universal inference). The validity answer; underpowered above φ≈0.8. | ADR 0010 |
-| P2 | **safe-t e-value** (right-Haar / GROW) — variance nuisance integrated out, σ-exact at every cal length. | ADR 0005 |
+| P1 | **UI mean-shift e-value** — `E[e\|H0] ≤ 1` for ANY φ incl. unit root (split-LR / universal inference). ⚠️ 2026-07-02 audit: the "by construction" PROOF has a hole in the engine variant (cal-eval temporally precedes test-train, so the split-LRT independence premise fails for φ≠0); holds **empirically** with ~6× slack (MC E≈0.15 at φ up to 0.999). Underpowered above φ≈0.8. | ADR 0010 + 2026-07-02 audit F5 |
+| P2 | **safe-t e-value** (right-Haar / GROW) — variance nuisance integrated out, σ-exact at every cal length. Audit-confirmed exact. ⚠️ NB: the ADR 0013 nuisance-robust **BF** is NOT valid as implemented (E[BF\|H0]≈1.155 at every cal length — recentering breaks the proper-prior property; see ADR 0013 correction note); safe-t is the theorem-valid substitute. | ADR 0005; ADR 0013 correction |
 | P3 | **e-BH controls FDR under ARBITRARY dependence** given valid per-input e-values. | Wang–Ramdas 2022 (foundational) |
 | P4 | **Auto factor-rank selection** (sequential common-deflation-path null) — the *legitimate* route N3 failed to find: correct rank → homogeneous residual inflation → cancels in e-BH → protects fleet FDR. | ADR 0014 |
 | P5 | **Common-mode ESTIMATION is the real detection/localization lever.** Oracle common-mode → 99–100% detection at 0% FPR even for small faults; full-series loading ABSORBS single-shard faults → 0%; cal-only loading → ~16% / 8% FPR. | ADR 0016 (FAIR test) |
@@ -58,12 +58,15 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
 
 ## 2. Open questions (genuinely unsettled — fair game for new work)
 
-- **O1 — error metric choice. ✅ RESOLVED (2026-06-26 audit).** Control **EOP (error over
-  patience)** for the streaming detector: Dandapanthula–Ramdas (arXiv:2501.04130) PROVE
-  that finite ARL ⇒ worst-case FDR/FWER/PFER = 1, so worst-case FDR is uncontrollable for a
-  fast-detection live detector. EOP is controllable (`ARL ≥ 1/α`). Keep anytime-valid
-  fleet-FDR (stopped e-BH) only as a CONDITIONAL guarantee (see O4). FWER = worse; TDP = a
-  post-hoc reporting layer, not a live target.
+- **O1 — error metric choice. ✅ DECIDED (2026-06-26 audit) — ⚠️ UNIMPLEMENTED (2026-07-02).**
+  Control **EOP (error over patience)** for the streaming detector: Dandapanthula–Ramdas
+  (arXiv:2501.04130) PROVE that finite ARL ⇒ worst-case FDR/FWER/PFER = 1, so worst-case FDR is
+  uncontrollable for a fast-detection live detector. EOP is controllable (`ARL ≥ 1/α`). Keep
+  anytime-valid fleet-FDR (stopped e-BH) only as a CONDITIONAL guarantee (see O4). FWER = worse;
+  TDP = a post-hoc reporting layer, not a live target. **Implementation status: NOTHING computes,
+  bounds, or reports EOP anywhere in the tree** (the e-detector's 1/α threshold is the compatible
+  primitive, but the metric itself is aspirational) — so Mode A currently states no controllable
+  error metric in code; implementing EOP tracking is the open work item.
 - **O2 — principled robust / contaminated e-process** to replace the ad-hoc Tukey center
   (with breakdown guarantees). No off-the-shelf construction exists (ADR 0005 Thread C). _Still open._
 - **O3 — transient-fault early detection. ✅ RESOLVED IN PRINCIPLE + 🔧 PROTOTYPED (2026-06-26).**
@@ -228,6 +231,21 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   baseline null/detection run needs a long continuous feed (shadow-deploy — no public dataset supplies one).
   NB: tiling/padding short data to fake a baseline is INVALID (adds duration, zero info; games the guard).
   GREYHOUND uses contrast for localization, temporal for detection.
+- **2026-07-02 — full math audit of Tessera + engine vs the cited papers** (5 parallel audit passes:
+  e-value constructions, e-BH/FDR layer, Mode B spatial null, localization, baseline/whitening+claims).
+  **Report:** [research/2026-07-02-math-audit.md](research/2026-07-02-math-audit.md). CONFIRMED exact:
+  engine e-BH, √E−1 SupFDR adjuster, normalized onset mixture, safe-t, serial-calibration composition,
+  fixed-time stopping discipline. **Corrected in the same-day fix PR:** metric-router fed the SR
+  running-max peak (not an e-value) to e-BH; triad flag-then-substitute routing → **min rule** (ADR 0022
+  correction); mode-b-loop per-cycle re-normalization → **geometric onset prior** (one e-process across
+  cycles ⇒ SupFDR ≤ q covers first-crossing dispatch); gaussian-lr plug-in caveat; κ common-mode fraction
+  = 1−κ/2; groupAttribution empty-selection bug; R72/R77 oracle-DGP + ramp-slope caveats. **Standing
+  (not yet fixed):** engine BF invalidity (E≈1.155 — ADR 0013 correction; substitute safe-t, engine-side);
+  UI "by construction" proof hole (P1 note; empirically fine); plug-in σ̂/φ̂ sensitivity of the mixture
+  increment (10% σ̂ error ⇒ null mean 0.52→7.6) held only by uncalibrated gates; mixed-cadence prefix-fit
+  guard loophole; no locality (hop-distance) metric; localization improvement program (calibrated group
+  e-values, coarse-to-fine drill-down, leave-one-out factors, contrast-based ranking). See the report's
+  prioritized recommendation list.
 
 ---
 

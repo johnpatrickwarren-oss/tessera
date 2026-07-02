@@ -1,6 +1,20 @@
 # ADR 0013 — a nuisance-baseline-robust e-value fixes the plug-in invalidity (ADR 0008 solved)
 
-- **Status:** Accepted (the constructive fix for ADR 0008 — the arc's first remedy)
+- **Status:** Accepted (the constructive fix for ADR 0008 — the arc's first remedy).
+  **⚠️ CORRECTED IN PART (2026-07-02 math audit — see `research/2026-07-02-math-audit.md` F1).**
+  The "E[BF|H0] ≤ 1 by construction" claim below is **FALSE as implemented**: the engine's
+  `nuisance-robust-bf-e-value` recenters both samples by the ESTIMATED calibration mean before
+  evaluating the proper-prior marginal likelihood — and a proper prior centered at 0 is not
+  shift-invariant, so the recentering re-introduces the plug-in through the back door. Exact
+  ideal-case null mean: E[BF|H0] = (1+2x)/√((1+x)(1+3x)) → 2/√3 ≈ **1.155** as the prior widens —
+  at EVERY calibration length (MC-verified against the shipped function). The original validation
+  missed it because the statistic is heavily sub-Ville in the tails (the mean excess lives in a
+  tail K=600 Monte-Carlo cannot sample). Impact is bounded (e-BH FDR ≤ 1.155·q), and the
+  location-INVARIANCE property below still holds — but the object is `empirically_audited`, not
+  construction-valid. The theorem-valid replacement already exists in the engine: **safe-t**
+  (right-Haar/GROW, ADR 0005), which integrates the location out by invariance rather than
+  recentering. Substitution is engine-side work; until then do not cite this ADR as a validity
+  theorem.
 - **Date:** 2026-06-23
 
 ## Context

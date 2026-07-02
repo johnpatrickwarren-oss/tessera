@@ -94,8 +94,10 @@ export function runLocalize(topo: ParsedTopology, tel: Telemetry, q: number): Lo
   const evHealthy = mean(res.perShardEValue.filter((_, i) => !failedIdx.has(i)));
   const ranked = res.perShardEValue.map((v, i) => [v, i] as const).sort((a, b) => b[0] - a[0]);
   const topHits = ranked.slice(0, nFail).filter(([, i]) => failedIdx.has(i)).length;
+  // Empty e-BH selection → NaN, NOT 1 (2026-07-02 audit fix: scoring an empty selection as perfect
+  // attribution inflated the clustered-fault metric exactly in the low-power regime where it matters).
   const groupAttribution = tel.faultGroup >= 0
-    ? (res.selected.length ? res.selected.filter((i) => topo.localizationGroups[i] === tel.faultGroup).length / res.selected.length : 1)
+    ? (res.selected.length ? res.selected.filter((i) => topo.localizationGroups[i] === tel.faultGroup).length / res.selected.length : NaN)
     : NaN;
 
   return {

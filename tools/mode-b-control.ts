@@ -19,7 +19,9 @@
 //
 // WIRES #1 AND #2 LIVE. The contrast emitter is `construction_valid` — BUT only while a runtime
 // calibration monitor (tools/calibration-monitor.ts, follow-up #2) confirms the cancellation actually
-// holds on the live control cohort. We feed the monitor the KNOWN-NULL control-vs-control contrasts; if
+// holds on the live control cohort. We feed the monitor the KNOWN-NULL contrasts of the HEALTHY cohort
+// (treatment−control of ground-truth-healthy shards — see constructionNullFeed; knowable only in a
+// harness, where the labels exist. In production the analogous feed is the control arm itself); if
 // the construction is sound it passes and the emitter stays Mode B; if the control does NOT in fact share
 // the factors (a broken construction) the monitor REVOKES and the validity-class gate
 // (tools/emitter-contract.ts, follow-up #1) demotes the emitter B→A and we ABSTAIN from the FDR claim.
@@ -294,8 +296,10 @@ function render(r: ModeBReport): string {
   L.push(`random walk that single-φ whitening cannot remove → the null is genuinely invalid):`);
   L.push(`  ungated e-BH FDP (if we ignored the monitor): ${r.broken_construction.ungated_mean_fdp.toFixed(3)}  ≫ q  ← the wrong guarantee`);
   L.push(`  calibration monitor revoked: ${(100 * r.broken_construction.monitor_revoked_frac).toFixed(0)}% of trials  →  demoted to Mode A: ${(100 * r.broken_construction.demoted_to_mode_a_frac).toFixed(0)}%  →  gated FDR emissions: ${r.broken_construction.gated_mean_fdp.toFixed(3)} (abstained)`);
-  L.push('  — #2 (runtime monitor) catches the broken construction and #1 (gate) demotes it B→A, so a bad');
-  L.push('    control can never silently emit an FDR claim. Validity is opt-in AND revocable.');
+  L.push('  — #2 (runtime monitor) catches the broken construction and #1 (gate) demotes it B→A. The catch');
+  L.push('    rate is the MEASURED fraction above, not 100% (ADR 0019 follow-up: ~24–28% of broken');
+  L.push('    constructions slip a marginal monitor — whiteness AND-gating narrows, does not close, this).');
+  L.push('    Validity is opt-in AND revocable, with monitor power as the residual exposure.');
   return L.join('\n');
 }
 

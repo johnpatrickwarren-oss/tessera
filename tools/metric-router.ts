@@ -30,6 +30,7 @@
 
 import { autocorr, conditionalMarkovDiagnostic } from './conditional-markov.js';
 import { eDetector, type EDetectorOptions } from './e-detector.js';
+import { normalizedMixtureEValue } from './mixture-evalue.js';
 import { rwChangepointEValue } from './rw-changepoint.js';
 import { fitBaseline, applyBaseline, type ShardBaseline } from './baseline-monitor.js';
 import { loadScenarioBundle, type ScenarioBundle } from './clustersynth-scenario.js';
@@ -111,10 +112,17 @@ export function routeCounter(mon: ScenarioBundle, counter: string, fits: ShardBa
   // "data-density" lever — enough points per window to average out the removal-induced heavy tails).
   const cpWindow = useMeanShift ? 0 : pickChangepointWindow(R, healthyIdx, calLen);
   const detector = useMeanShift ? 'mean-shift e-detector' : `rw changepoint w=${cpWindow}`;
-  const score = (i: number) => useMeanShift
+  // TWO scores per shard (2026-07-02 audit fix). The e-detector's SR running-max peak is NOT an
+  // e-value (E[M^SR|H0] ≈ #onsets, not ≤ 1 — the pre-ADR-0019 mistake), so it must never feed
+  // e-BH; it is kept ONLY for the ROC-matched recall metric. e-BH gets the NORMALIZED CONVEX-
+  // MIXTURE e-value (mixture-evalue.ts), the same valid object baseline-monitor.ts feeds it.
+  const recallScore = (i: number) => useMeanShift
     ? eDetector(R[i], opts).peak
     : safeChangepoint(R[i], calLen, cpWindow);
-  const fleet = scoreFleet(R, score, faulted, healthyIdx);
+  const ebhScore = (i: number) => useMeanShift
+    ? normalizedMixtureEValue(R[i])
+    : safeChangepoint(R[i], calLen, cpWindow);
+  const fleet = scoreFleet(R, recallScore, ebhScore, faulted, healthyIdx);
 
   // Gate EACH path on ITS detector's own null. Stationary → the conditional-Markov (mean-whiteness)
   // diagnostic. Integrated → the changepoint e-value's empirical null mean over HEALTHY shards (≤ ~1): the
@@ -133,12 +141,16 @@ export function routeCounter(mon: ScenarioBundle, counter: string, fits: ShardBa
   };
 }
 
-/** ROC-matched recall (faulted vs healthy 95th-pct threshold) + e-BH aggregate FDP over the fleet. */
-function scoreFleet(R: number[][], score: (i: number) => number, faulted: Set<number>, healthyIdx: number[]): { recall: number; aggregateFdp: number; selected: number; healthyScores: number[] } {
-  const healthyScores = healthyIdx.map(score);
-  const thr = quantile(healthyScores, 0.95);
-  let hits = 0; for (const i of faulted) if (score(i) >= thr) hits++;
-  const sel = eBenjaminiHochberg(R.map((_, i) => score(i)), 0.1).selected;
+/** ROC-matched recall (faulted vs healthy 95th-pct threshold on `recallScore`) + e-BH aggregate FDP
+ *  over the fleet on `ebhScore`. The two are SEPARATE on purpose: recall may use any monotone
+ *  statistic (empirical, threshold-matched), but e-BH's FDR theorem requires a genuine e-value
+ *  (E[·|H0] ≤ 1) — see mixture-evalue.ts / ADR 0019. `healthyScores` returns the healthy-shard
+ *  ebhScore sample (the integrated path's null-mean gate audits E[e|H0] on exactly what e-BH sees). */
+function scoreFleet(R: number[][], recallScore: (i: number) => number, ebhScore: (i: number) => number, faulted: Set<number>, healthyIdx: number[]): { recall: number; aggregateFdp: number; selected: number; healthyScores: number[] } {
+  const healthyScores = healthyIdx.map(ebhScore);
+  const thr = quantile(healthyIdx.map(recallScore), 0.95);
+  let hits = 0; for (const i of faulted) if (recallScore(i) >= thr) hits++;
+  const sel = eBenjaminiHochberg(R.map((_, i) => ebhScore(i)), 0.1).selected;
   let falsePos = 0; for (const i of sel) if (!faulted.has(i)) falsePos++;
   return {
     recall: faulted.size ? hits / faulted.size : NaN,
@@ -205,7 +217,8 @@ export function renderMetricRouter(healthyDir: string, monDir: string, calLen?: 
   const tempLine = tempSummary(rows.get('gpu_temp_c'));
   L.push('READING: the router classifies each metric by integration order (cross-window common-mode residual on');
   L.push('HEALTHY shards — an in-sample fit spuriously whitens a random walk, so it must be cross-window) and routes');
-  L.push('it: STATIONARY (white residual) → mean-shift e-detector (UI e-value, theorem-backed); INTEGRATED (near-');
+  L.push('it: STATIONARY (white residual) → mean-shift e-detector for RECALL, with e-BH fed the normalized convex-');
+  L.push('mixture e-value (mixture-evalue.ts — the SR peak is NOT an e-value and never touches e-BH); INTEGRATED (near-');
   L.push('unit-root level, white Δ) → the random-walk CHANGEPOINT detector on the LEVEL (tools/rw-changepoint.ts): a');
   L.push('windowed local level-contrast (post-window mean − adjacent pre-window mean), mixed over onsets, CLIPPED →');
   L.push('bounded. Each path is gated on ITS detector\'s OWN null (mean-whiteness for stationary; the changepoint');

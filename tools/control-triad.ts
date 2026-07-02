@@ -129,11 +129,12 @@ export function runTriadExperiments(seed = 1, q = 0.1, opts: TriadOptions = {}):
   // pair detector (Mode B today): t − c1. Fires on real treatment faults AND on contaminated-control shards (FP).
   const pairE = contrastEValues(b2.healthy, b2.mon, (s) => s.t, (s) => s.c1);
   const pairSel = selected(pairE, q);
-  // triad-protected: flag bad controls via c1−c2; for flagged shards use t − c2 (clean sibling), else t − c1.
-  const flagE = contrastEValues(b2.healthy, b2.mon, (s) => s.c1, (s) => s.c2);
-  const badControl = selected(flagE, q);
+  // triad-protected — MIN RULE (2026-07-02 audit correction): e = min(t−c1, t−c2) unconditionally. The
+  // original flag-then-substitute routing (use t−c2 only for shards whose c1−c2 sibling null fires) was a
+  // data-dependent selection with no covering theorem (flag and substitute share c2's noise); the min of two
+  // e-values IS one (E[min|H0] ≤ 1 whenever ≥1 sibling is clean). See clustersynth-mode-b.ts applyTriadRouting.
   const tE_c1 = pairE, tE_c2 = contrastEValues(b2.healthy, b2.mon, (s) => s.t, (s) => s.c2);
-  const protectedE = idxs.map((i) => (badControl.has(i) ? tE_c2[i] : tE_c1[i]));
+  const protectedE = idxs.map((i) => Math.min(tE_c1[i], tE_c2[i]));
   const protSel = selected(protectedE, q);
   const exp2 = { pairFdp: fdp(pairSel, tFaults), pairRecall: recall(pairSel, tFaults), triadFdp: fdp(protSel, tFaults), triadRecall: recall(protSel, tFaults) };
 
@@ -149,7 +150,7 @@ export function runTriadExperiments(seed = 1, q = 0.1, opts: TriadOptions = {}):
   L.push('');
   L.push('EXPERIMENT 2 — control-only contamination → sign-blind FALSE POSITIVE (treatment faults 15% + separate control contam 15%):');
   L.push(`  pair  (t − c1, Mode B today)      : FDP ${f(exp2.pairFdp)}  recall ${f(exp2.pairRecall)}  (FP from contaminated controls)`);
-  L.push(`  triad (flag c1 via c1−c2 → use c2): FDP ${f(exp2.triadFdp)}  recall ${f(exp2.triadRecall)}  (clean sibling avoids the FP)`);
+  L.push(`  triad (min(t−c1, t−c2), both agree): FDP ${f(exp2.triadFdp)}  recall ${f(exp2.triadRecall)}  (a lone contaminated sibling can't select)`);
   L.push('');
   const worth = exp1.triadFdp <= q + 1e-9 && exp1.triadRecall > 0.8 && exp2.triadFdp < exp2.pairFdp - 0.05;
   L.push(worth

@@ -1,7 +1,9 @@
-// test/clustersynth-mode-b-triad.test.ts — the ADR 0022 control triad wired into Mode B. A second matched
-// control twin (c1−c2 sibling null) flags a contaminated control and routes detection to the clean sibling,
-// eliminating the sign-blind false positive the twin-PAIR detector suffers (ADR 0021). Uses a committed
-// triad mini fixture (1 rack, hourly) generated with CS_TRIAD=1 CS_CONTAMINATE=control.
+// test/clustersynth-mode-b-triad.test.ts — the ADR 0022 control triad wired into Mode B. Detection uses the
+// MIN RULE min(e_{t−c1}, e_{t−c2}) — both sibling contrasts must agree, so a control-only contamination
+// (which fires just one contrast) cannot select, eliminating the sign-blind false positive the twin-PAIR
+// detector suffers (ADR 0021). The c1−c2 sibling null flags contaminated controls for REPORTING only
+// (2026-07-02 audit correction — the old flag-then-substitute routing was data-dependent selection with no
+// covering theorem). Uses a committed triad mini fixture (1 rack, hourly), CS_TRIAD=1 CS_CONTAMINATE=control.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -80,9 +82,8 @@ test('the triad eliminates the sign-blind false positive (vs the twin-pair detec
     acc.pos += genuine.filter(Boolean).length;
     const eC1 = contrastEValuesFor(healthy, mon, usable, counter, (p) => p.treatment, (p) => p.control);
     const eC2 = contrastEValuesFor(healthy, mon, usable, counter, (p) => p.treatment, (p) => p.control2!);
-    const flag = contrastEValuesFor(healthy, mon, usable, counter, (p) => p.control, (p) => p.control2!);
-    const bad = new Set(eBenjaminiHochberg(flag, q).selected);
-    const triadE = eC1.map((v, i) => (bad.has(i) ? eC2[i] : v));
+    // the shipped MIN RULE: min of two e-values is a valid conservative e-value; no data-dependent routing.
+    const triadE = eC1.map((v, i) => Math.min(v, eC2[i]));
     const pr = tally(eBenjaminiHochberg(eC1, q).selected, genuine);
     const tr = tally(eBenjaminiHochberg(triadE, q).selected, genuine);
     acc.pairFp += pr.fp; acc.pairTp += pr.tp; acc.pairSel += pr.sel;

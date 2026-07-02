@@ -237,6 +237,16 @@ See `coverage-matrices/R72-saturation-matrix.md` for the human-readable summary;
 
 The "floor" columns are the minimums asserted by `test/q72-coverage-saturation.test.ts` (the suite fails below them); "observed" is what the current deterministic matrix actually records (114 / 120 detected overall). The two are different numbers on purpose — floors leave headroom so seed-level jitter can't flake the suite.
 
+> **Scope caveat (2026-07-02 audit).** The R72/R77 matrices run on an **iid-Gaussian DGP with an
+> oracle baseline** (the true mean 0 and variance 1 are passed to the detector as known constants —
+> no baseline estimation, autocorrelation, heavy tails, seasonality, or common-mode). They validate
+> detector wiring and relative tuning, not robustness: the repo's own measurements show AR(1) ρ=0.95
+> inflates per-shard type-I error ~180× (ADR 0001) and real telemetry fires far off these numbers
+> (ADR 0007). "Attribution" is computed **conditional on detection** and per-type definitions vary
+> in strictness (the hierarchical-evalue row's definition is satisfied by construction whenever
+> detection succeeds — treat that row's attribution column as vacuous); no hop-level locality metric
+> (right shard vs right rack vs right zone) is measured anywhere in these matrices.
+
 | Type | Detection floor (asserted) | Detection observed (R72) | Attribution floor |
 |---|---|---|---|
 | sdc-drift | ≥ 16 / 20 | 18 / 20 | ≥ 95% |
@@ -256,7 +266,7 @@ pnpm detector-envelope
 
 See `coverage-matrices/R77-detection-envelope.md` for the human-readable summary with detection curves; `coverage-matrices/R77-detection-envelope-matrix.json` is the machine-readable data (504 cells, 2520 trials).
 
-At default settings (α=0.005, window_count=200, Family A): **≈100% detection for all drift magnitudes from 0.050 to 0.375**. The transitional detection band is at window_count=30 with magnitude < 0.10. Family A outperforms Family C in the short-window/low-magnitude regime (the boundary cells where tuning choices matter most).
+At default settings (α=0.005, window_count=200, Family A): ≈100% detection for all ramp slopes from 0.050 to 0.375. **Read the units carefully:** "magnitude" here is a per-window **ramp slope**, so at window_count=200 a 0.050 slope reaches a terminal offset of **10σ** (0.375 → 75σ) — near-certain detection of an eventually-10σ signal is expected, not evidence of small-drift sensitivity. Cells are 5 trials each (a 5/5 cell's 95% CI is roughly [0.48, 1.0]) under the same oracle-baseline iid DGP as R72 (caveat above). The envelope's value is *relative* tuning guidance: the transitional band is at window_count=30 with slope < 0.10, and Family A outperforms Family C in the short-window/low-slope regime (the boundary cells where tuning choices matter most).
 
 Operator tuning guidance: see `scripts/detector-tuning-recommendation.md`.
 

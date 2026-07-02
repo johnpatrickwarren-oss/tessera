@@ -39,8 +39,11 @@ export interface ShardEvals { rawPeak: number; mixPeakAdj: number; termE: number
 
 /** Per-shard SR recursion → candidate e-statistics + the PREFIX self-audit value.
  *  `prefixLen` is the healthy (pre-fault) window used to test this shard's null validity:
- *  prefixPeakNorm = max_{t<prefixLen} M_t / prefixLen, a valid e-value over the prefix
- *  (E≤1 under a valid null). A drifting shard's SR explodes on its own healthy prefix. */
+ *  prefixPeakNorm = max_{t<prefixLen} M_t / prefixLen — a VILLE-TAIL-BOUNDED statistic, NOT an
+ *  e-value (2026-07-02 audit fix: it is dominated by the sup of the uniform onset-mixture
+ *  e-process, so P(≥x|valid null) ≤ 1/x — the tail property the ≥10 abstention rule actually
+ *  uses — but the MEAN of a sup is not ≤ 1, so never feed it to e-BH or call it an e-value).
+ *  A drifting shard's SR explodes on its own healthy prefix. */
 export function shardEvals(r: number[], prefixLen: number): ShardEvals {
   const T = r.length;
   let M = 0, rawPeak = 0, mixPeak = 0, prefixPeak = 0;

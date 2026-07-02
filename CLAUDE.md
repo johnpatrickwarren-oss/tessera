@@ -82,9 +82,10 @@
 #     CS_ALLOW_SHORT=1 (plumbing smokes only; prints an INVALID-FOR-FINDINGS banner). Do
 #     NOT set it to make a real run pass. test/baseline-guard.test.ts locks this in.
 # (2) RIGHT HARNESS — the CANONICAL pipeline is tools/baseline-monitor.ts (robust long
-#     baseline → e-detector → Wall-A gate → e-BH; routes I(1) counters to a trend detector),
-#     plus tools/clustersynth-e2e.ts for localization. tools/clustersynth-scenario.ts is a
-#     DIAGNOSTIC scorer only (terminal mean-shift, no e-detector/gate) — underpowered; do
-#     not report findings from it.
+#     baseline → e-detector → Wall-A gate → e-BH; ABSTAINS on I(1)/flagged counters — the
+#     trend-detector routing lives in the SEPARATE tools/metric-router.ts CLI, which the
+#     ramp does not invoke), plus tools/clustersynth-e2e.ts for localization.
+#     tools/clustersynth-scenario.ts is a DIAGNOSTIC scorer only (terminal mean-shift, no
+#     e-detector/gate) — underpowered; do not report findings from it.
 # (3) Ramp racks with a resource model (cores/RAM/disk/time): tools/clustersynth-ramp.sh.
 #     Counter subset + parallel generation: CS_COUNTERS / CS_SHARD_RANGE (clustersynth-side).

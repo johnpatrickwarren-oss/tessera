@@ -262,10 +262,11 @@ export function calibrateNJobs(targetAvail: number, seeds: number, base: PeerOpt
 
 /** Per-counter within-node comparability measured on real GWDG A100 telemetry (gwdg-comparability.ts, healthy
  *  window): median best-peer κ and the comparable fraction (κ≤0.1) = the real availability. */
+// common-mode fractions use 1 − κ/2 (matched-loading identity; 2026-07-02 audit fix — 1 − κ understated them).
 export const GWDG_KAPPA: ReadonlyArray<{ counter: string; kappa: number; avail: number; commonMode: string }> = [
-  { counter: 'gpu_temp_c', kappa: 0.42, avail: 0.234, commonMode: 'shared cooling (~58% cancels)' },
-  { counter: 'sm_util', kappa: 0.64, avail: 0.081, commonMode: 'partly shared (~36%)' },
-  { counter: 'power_w', kappa: 0.88, avail: 0.156, commonMode: 'almost none (~12%) — per-GPU/workload' },
+  { counter: 'gpu_temp_c', kappa: 0.42, avail: 0.234, commonMode: 'shared cooling (~79% shared variance)' },
+  { counter: 'sm_util', kappa: 0.64, avail: 0.081, commonMode: 'partly shared (~68%)' },
+  { counter: 'power_w', kappa: 0.88, avail: 0.156, commonMode: 'weakest (~56%) — per-GPU/workload-dominated' },
 ];
 
 export function runGwdgCalibrated(seeds = 6, base: PeerOptions = {}): { lines: string[] } {

@@ -52,9 +52,11 @@ only the terminal mean-shift e-value, with no e-detector and no Wall-A gate, so 
 underpowered on transients and runs mean-shift e-BH even on I(1) counters it should
 abstain on. **The production-faithful pipeline is `tools/baseline-monitor.ts`**: robust
 anomaly-trimmed long baseline → e-detector (transient power) → conditional-Markov gate
-(certify vs abstain; routes I(1)/drift counters to a trend detector) → e-BH. For the
-localization/enrichment view, add `tools/clustersynth-e2e.ts` (`localizeFaults`). Report
-findings from those, not from the bare scenario scorer.
+(certify vs **abstain** — flagged/I(1) counters get NO detection in this pipeline) → e-BH.
+The I(1)→trend-detector routing lives in the **separate** `tools/metric-router.ts` CLI
+(not invoked by `clustersynth-ramp.sh`); run it explicitly if a routed I(1) result is
+wanted. For the localization/enrichment view, add `tools/clustersynth-e2e.ts`
+(`localizeFaults`). Report findings from those, not from the bare scenario scorer.
 
 **Cadence vs duration.** The DCGM band is 1–30 s; 1 Hz is supported. A coarse run is
 statistically ≈ a downsampled fine run (clustersynth `REALISM-PLAN.md`), so a long
