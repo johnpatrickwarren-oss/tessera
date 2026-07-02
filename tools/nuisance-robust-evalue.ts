@@ -3,6 +3,13 @@
 // prefix; the estimation error makes E[e|H0] ≫ 1 (invalid) — it fires on the gap between μ̂ and the
 // true mean, badly so when calibration is under-powered (ADR 0007/0008).
 //
+// ⚠️ CORRECTED (2026-07-02 audit; ADR 0013 correction note + engine v0.6.2-pre): the "E[BF|H0] ≤ 1 by
+// construction" claim below is FALSE — the engine BF's recentering by the estimated cal mean makes
+// E[BF|H0] ≈ 1.155 at every cal length (bounded; the K=600 MC below missed it — the mean excess lives
+// in an unsampleable tail). The engine function is now @deprecated; the theorem-valid substitute is
+// safeTwoSampleTEValue (right-Haar safe-t, ADR 0005). This harness is kept as the historical ADR 0013
+// validation record; do not cite it as a validity theorem.
+//
 // Construction: a TWO-SAMPLE sequential Bayes-factor e-value on WHITENED residuals. Whiten by the
 // AR(1) φ (no centering — the mean stays unknown), then test "test-window mean = calibration mean"
 // with BOTH means integrated out under a proper N(0,τ²) prior (a Bayes factor: separate-means vs
