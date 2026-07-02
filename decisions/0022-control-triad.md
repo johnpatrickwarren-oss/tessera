@@ -1,6 +1,21 @@
 # ADR 0022 — control triad: two control twins per treatment (PROPOSED — prototype-validated)
 
 - **Date:** 2026-06-28
+- **⚠️ CORRECTION (2026-07-02 math audit — see `research/2026-07-02-math-audit.md`):** the original
+  **flag-then-substitute routing** (flag contaminated controls via the c1−c2 sibling e-BH, then
+  overwrite a flagged shard's detection e-value with the clean-sibling contrast t−c2) was a
+  **data-dependent selection with no covering theorem**: the flag statistic (c1−c2) and the
+  substituted statistic (t−c2) share c2's idiosyncratic noise (corr ≈ ½ under matched twins), so
+  conditioning on {flagged} — including false flags, produced at rate ~q by the flag e-BH by
+  construction — up-tilts the substituted e-value; E[e_routed|H0] ≤ 1 was never established. The
+  FDP 0.000 results below are real empirics but were not theorem-backed. **The shipped rule is now
+  the MIN RULE** `e = min(e_{t−c1}, e_{t−c2})` unconditionally — already validated as "the deployable
+  real-peer rule" in § Comparable-peer availability: E[min|H0] ≤ 1 whenever ≥1 sibling contrast is a
+  clean null, with no selection step. The c1−c2 sibling null is retained for REPORTING only
+  (`flaggedControls`). Known cost: recall in the corner where a fault and same-sign control
+  contamination partially cancel inside t−c1 (the availability study measured recall ~0.87 for
+  min-agreement). The routing-based scale numbers below stand as historical measurements of the
+  superseded rule.
 - **Status:** **BUILT + VALIDATED (in-memory path).** The synthetic prototype recovered both Mode B failure
   modes; the construction is now built end-to-end and validated on real clustersynth topology, at scale.
   Done: clustersynth second twin (`CS_TRIAD`, clustersynth `35c3afa`); the triad detector wired into

@@ -3,10 +3,10 @@
 > **SINGLE SOURCE OF TRUTH for current status** (date · suite · what's built · what's next). `STATE.md` is the
 > durable decision/arc trail (history); `README.md` defers here for the live count. Keep this header current.
 
-**Date:** 2026-06-28 · **Branch:** `three-walls-prototypes` (merged to `main` through PR #39) · **clustersynth
-HEAD:** `35c3afa` (branch `scenario-counter-subset-streamed-factors`, unchanged). Both repos clean + pushed.
-**Suite:** 790 tests · 783 pass / 0 fail / 7 skip (the lone intermittent "fail 1" is the pre-existing flaky
-q84 worker-terminate timing test — passes in isolation; not ours).
+**Date:** 2026-07-02 · **Branch:** `audit/math-correctness-fixes` (PR pending → `main`) · **clustersynth
+HEAD:** `35c3afa` (branch `scenario-counter-subset-streamed-factors`, unchanged).
+**Suite:** 794 tests · 787 pass / 0 fail / 7 skip (4 new mixture-e-value tests this session; the lone
+intermittent "fail 1" is the pre-existing flaky q84 worker-terminate timing test — passes in isolation; not ours).
 
 **Read first:** `decisions/0019` (architecture) → `0020` (serial monitor) → `0021` (twin-validity, negative)
 → `0022` (control triad). Then `RESEARCH-INDEX.md` §1–4 and `docs/METHODOLOGY-scale-and-duration-testing.md`.
@@ -26,6 +26,24 @@ construction validity and revoke (B→A) when it breaks.
 
 ## This session — what shipped (newest first)
 
+- **2026-07-02 MATH AUDIT + CORRECTNESS FIXES (`research/2026-07-02-math-audit.md`; RESEARCH-INDEX §4).**
+  Five parallel audit passes verified the code against the cited papers. CONFIRMED exact: engine e-BH,
+  √E−1 adjuster, normalized onset mixture, safe-t, serial-calibration. FIXED in this branch: (1)
+  metric-router fed the SR running-max peak (NOT an e-value) to e-BH → now the normalized mixture;
+  (2) triad flag-then-substitute routing (no covering theorem — flag and substitute share c2's noise)
+  → the **min rule** `min(e_{t−c1}, e_{t−c2})` everywhere, sibling null reporting-only (ADR 0022
+  correction note); (3) mode-b-loop's per-cycle re-normalized mixture (cross-cycle optional stopping,
+  no theorem on dispatched actions) → **`geometricMixtureEValue`** (Shiryaev onset prior,
+  horizon-independent weights ⇒ one e-process ⇒ SupFDR ≤ q covers first-crossing dispatch); (4)
+  gaussian-lr plug-in caveat (E[e|H0] diverges with estimated cal SD — diagnostics only); κ
+  common-mode fraction corrected to **1 − κ/2** (power_w ~56% shared, not ~12%); groupAttribution
+  empty-selection=1 bug → NaN; emitter-prototype prefix stat relabeled Ville-tail-bounded; R72/R77
+  oracle-DGP + ramp-slope caveats in README; METHODOLOGY/CLAUDE.md no longer claim baseline-monitor
+  routes I(1) (it abstains; metric-router is a separate CLI). STANDING (not fixed here): engine BF
+  invalidity E[BF|H0]≈1.155 (ADR 0013 correction note; substitute safe-t — ENGINE-side); UI "by
+  construction" proof hole (empirically fine — P1 note); plug-in σ̂/φ̂ sensitivity held by uncalibrated
+  gates; mixed-cadence guard loophole; no locality (hop-distance) metric + the localization program;
+  EOP decided-but-unimplemented. Full prioritized list in the audit report.
 - **REAL-CLUSTER Phase 4 first cut: GWDG κ measurement + realism-calibrated availability (this session).**
   Anchored the (synthetic) peer-availability study to REAL telemetry. `tools/gwdg-comparability.ts` measures
   within-node peer comparability on the real GWDG A100 DCGM dataset (Zenodo 10.5281/zenodo.19052367, 4 GPUs/
