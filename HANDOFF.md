@@ -26,6 +26,22 @@ construction validity and revoke (B→A) when it breaks.
 
 ## This session — what shipped (newest first)
 
+- **MIN-RULE SCALE RE-VALIDATION + ENGINE v0.6.2-pre PIN (2026-07-02, after the audit fixes below).**
+  (1) Engine PR #36 merged + tagged **v0.6.2-pre**: `nuisanceRobustBFEValue` @deprecated with the
+  corrected envelope (`validUnderEstimatedBaseline: false` — the FDR gate no longer auto-admits it;
+  safe-t named as the substitute; new regression test demonstrates E[BF|H0] > 1 at x=1 ≈ theory
+  1.0607), UI "by construction" → empirically-audited (interleaved-split proof gap), ADR 0004/0010
+  correction notes; suite 226/226. Tessera pin bumped (PR #44, main `864c029`), suite 794/787.
+  (2) **Mac-mini ramp re-run under the MIN RULE** (`runs/2026-07-02-modeb-min-rule-ramp/`): the ADR
+  0022 headline reproduced with a theorem behind it — contaminated-control hourly ramp **FDP 0.000
+  every tier/seed, R=8 × 5 seeds pooled recall 0.990** (corrected positive set); clean triad
+  non-regression FDP 0.000 recall 1.000/1.000/0.987 (R=1/4/8); 1 Hz mixed-cadence streaming R=8
+  FDP 0.000 recall 0.794 (= pre-min-rule prefix-fit level, no streaming regression). En route,
+  fixed a harness metric bug: the aggregate scorer now drops control-contaminated (treatment-
+  healthy) shards from the positive set per the clustersynth `control.json` contract
+  (`loadContaminatedHealthyTreatments`) — previously recall was diluted by design-undetectable
+  shards and a contaminated shard that fired would have counted as a TRUE positive (understating
+  FDP). Locked by a new fixture test.
 - **2026-07-02 MATH AUDIT + CORRECTNESS FIXES (`research/2026-07-02-math-audit.md`; RESEARCH-INDEX §4).**
   Five parallel audit passes verified the code against the cited papers. CONFIRMED exact: engine e-BH,
   √E−1 adjuster, normalized onset mixture, safe-t, serial-calibration. FIXED in this branch: (1)

@@ -42,6 +42,20 @@ export function loadControlPairs(dir: string): ControlPair[] {
   return JSON.parse(fs.readFileSync(p, 'utf8')).pairs as ControlPair[];
 }
 
+/** Shards whose TREATMENT must be scored as HEALTHY because clustersynth's 'control' contamination
+ *  mode MOVED their fault into the control twin (control.json `.contamination`; the generator's
+ *  contract says "the scorer must drop these from the positive set"). Without this the aggregate
+ *  under-counts recall (labels still list the shard as faulted, but the treatment carries no fault)
+ *  and — worse — a contaminated shard that fired would be scored a TRUE positive, understating FDP
+ *  (2026-07-02 fix; the triad test always applied this correction, the harness aggregate did not).
+ *  'both' mode duplicates the fault (treatment genuinely faulted) → NOT dropped. */
+export function loadContaminatedHealthyTreatments(dir: string): Set<string> {
+  const p = path.join(dir, 'control.json');
+  if (!fs.existsSync(p)) return new Set();
+  const doc = JSON.parse(fs.readFileSync(p, 'utf8')) as { contamination?: { mode?: string | null; shards?: string[] } };
+  return doc.contamination?.mode === 'control' ? new Set(doc.contamination.shards ?? []) : new Set();
+}
+
 const sub = (a: number[], b: number[]): number[] => a.map((x, t) => x - b[t]);
 const ser = (b: ScenarioBundle, shard: string, counter: string): number[] | undefined => b.series.get(`${shard}\0${counter}`);
 
@@ -71,11 +85,13 @@ export function clustersynthModeBEmitter(calibrationMonitorPassing: boolean): Em
  *  counter=null = all counters). A pure variance_collapse (no mean change) may evade the mean-shift
  *  e-value → it only lowers recall, never inflating FDP. */
 interface CounterLoad { name: string; load?: Record<string, number> }
-function faultedSet(mon: ScenarioBundle, counter: string): Set<string> {
-  return faultedSetFrom(mon.faults, mon.counters as unknown as CounterLoad[], counter);
+function faultedSet(mon: ScenarioBundle, counter: string, drop?: ReadonlySet<string>): Set<string> {
+  return faultedSetFrom(mon.faults, mon.counters as unknown as CounterLoad[], counter, drop);
 }
-/** As faultedSet, from raw labels + counter specs (so the streaming path can reuse it without a bundle). */
-function faultedSetFrom(faults: ReadonlyArray<unknown>, counterSpecs: CounterLoad[], counter: string): Set<string> {
+/** As faultedSet, from raw labels + counter specs (so the streaming path can reuse it without a bundle).
+ *  `drop` = control-contaminated shards whose treatment is healthy (loadContaminatedHealthyTreatments)
+ *  — excluded from the positive set per the clustersynth 'control'-mode scoring contract. */
+function faultedSetFrom(faults: ReadonlyArray<unknown>, counterSpecs: CounterLoad[], counter: string, drop?: ReadonlySet<string>): Set<string> {
   const load = counterSpecs.find((c) => c.name === counter)?.load ?? {};
   const out = new Set<string>();
   for (const f of faults) {
@@ -92,6 +108,7 @@ function faultedSetFrom(faults: ReadonlyArray<unknown>, counterSpecs: CounterLoa
     }
     if (hits) for (const s of ff.affected_shards ?? []) out.add(s);
   }
+  if (drop) for (const s of drop) out.delete(s);
   return out;
 }
 
@@ -201,10 +218,10 @@ function applyTriadRouting(healthy: ScenarioBundle, mon: ScenarioBundle, usable:
 }
 
 /** Score one counter end-to-end: spatial-null contrast (gated) vs the temporal per-shard null. */
-export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, pairs: ControlPair[], counter: string, q: number): ModeBCounterResult | null {
+export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, pairs: ControlPair[], counter: string, q: number, dropContaminated?: ReadonlySet<string>): ModeBCounterResult | null {
   const usable = pairs.filter((p) => ser(healthy, p.treatment, counter) && ser(healthy, p.control, counter) && ser(mon, p.treatment, counter) && ser(mon, p.control, counter));
   if (!usable.length) return null;
-  const faulted = faultedSet(mon, counter);
+  const faulted = faultedSet(mon, counter, dropContaminated);
   const isFault = usable.map((p) => faulted.has(p.treatment));
   const nFault = isFault.filter(Boolean).length;
 
@@ -272,7 +289,8 @@ export function renderModeB(healthyDir: string, monDir: string, q = 0.1): string
   assertLongBaseline(healthy.T, healthy.dt_s, 'clustersynth-mode-b (healthy baseline)');
   const mon = loadScenarioBundle(monDir);
   const pairs = loadControlPairs(monDir);
-  const results = mon.counters.map((c) => scoreCounterModeB(healthy, mon, pairs, c.name, q)).filter((r): r is ModeBCounterResult => r != null);
+  const dropContaminated = loadContaminatedHealthyTreatments(monDir);
+  const results = mon.counters.map((c) => scoreCounterModeB(healthy, mon, pairs, c.name, q, dropContaminated)).filter((r): r is ModeBCounterResult => r != null);
   const h: ModeBHeader = { healthyShards: healthy.shardIds.length, healthyT: healthy.T, healthyDt: healthy.dt_s, monT: mon.T, monDt: mon.dt_s, faults: mon.faults.length, pairs: pairs.length };
   return renderModeBReport(h, results, q);
 }
@@ -419,9 +437,9 @@ function runCmbWorker(input: CmbWorkerInput): CmbRecord[] {
 }
 
 /** Reduce one counter's per-pair records → a ModeBCounterResult (gate → e-BH → FDP/recall vs temporal). */
-function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyArray<unknown>, specs: CounterLoad[], q: number): ModeBCounterResult | null {
+function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyArray<unknown>, specs: CounterLoad[], q: number, dropContaminated?: ReadonlySet<string>): ModeBCounterResult | null {
   if (!recs.length) return null;
-  const faulted = faultedSetFrom(faults, specs, counter);
+  const faulted = faultedSetFrom(faults, specs, counter, dropContaminated);
   const isFault = recs.map((r) => faulted.has(r.s));
   const nFault = isFault.filter(Boolean).length;
   const whiteFrac = recs.filter((r) => r.white).length / recs.length;
@@ -476,7 +494,8 @@ export async function renderModeBStreaming(healthyDir: string, monDir: string, q
 
   const byCounter = new Map<string, CmbRecord[]>();
   for (const r of recs) { let a = byCounter.get(r.c); if (!a) { a = []; byCounter.set(r.c, a); } a.push(r); }
-  const results = meta.counters.map((c) => reduceCmbCounter(c.name, byCounter.get(c.name) ?? [], faults, meta.counters, q)).filter((r): r is ModeBCounterResult => r != null);
+  const dropContaminated = loadContaminatedHealthyTreatments(monDir);
+  const results = meta.counters.map((c) => reduceCmbCounter(c.name, byCounter.get(c.name) ?? [], faults, meta.counters, q, dropContaminated)).filter((r): r is ModeBCounterResult => r != null);
   const h: ModeBHeader = { healthyShards: Object.keys(hMeta.membership ?? {}).length, healthyT: hMeta.T, healthyDt: hMeta.dt_s ?? 1, monT: meta.T, monDt: meta.dt_s ?? 1, faults: faults.length, pairs: pairs.length };
   return renderModeBReport(h, results, q);
 }
@@ -584,7 +603,8 @@ export async function renderModeBLongBaseline(baseDir: string, monDir: string, q
     let a = byCounter.get(r.c); if (!a) { a = []; byCounter.set(r.c, a); }
     a.push({ c: r.c, s: r.s, e: r.e, tE: r.tE, calibPass: g.calibPass, white: g.white, flagE: r.flagE, eC2: r.eC2 });
   }
-  const results = meta.counters.map((c) => reduceCmbCounter(c.name, byCounter.get(c.name) ?? [], faults, meta.counters, q)).filter((r): r is ModeBCounterResult => r != null);
+  const dropContaminated = loadContaminatedHealthyTreatments(monDir);
+  const results = meta.counters.map((c) => reduceCmbCounter(c.name, byCounter.get(c.name) ?? [], faults, meta.counters, q, dropContaminated)).filter((r): r is ModeBCounterResult => r != null);
   const h: ModeBHeader = { healthyShards: Object.keys(hMeta.membership ?? {}).length, healthyT: hMeta.T, healthyDt: hMeta.dt_s ?? 1, monT: meta.T, monDt: meta.dt_s ?? 1, faults: faults.length, pairs: pairs.length };
   return renderModeBReport(h, results, q);
 }

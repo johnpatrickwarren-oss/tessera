@@ -10,7 +10,10 @@ import assert from 'node:assert/strict';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { loadScenarioBundle } from '../tools/clustersynth-scenario.js';
-import { loadControlPairs, scoreCounterModeB, contrastEValuesFor, renderModeBLongBaseline } from '../tools/clustersynth-mode-b.js';
+import {
+  loadControlPairs, scoreCounterModeB, contrastEValuesFor, renderModeB, renderModeBLongBaseline,
+  loadContaminatedHealthyTreatments,
+} from '../tools/clustersynth-mode-b.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
 const FIX = path.join(__dirname, '_substrate', 'clustersynth-mode-b-triad-mini');
@@ -33,6 +36,22 @@ test('the triad fixture pairs carry a second twin (control2 = #ctrl2)', () => {
   const pairs = loadControlPairs(MON);
   assert.equal(pairs.length, 72);
   assert.ok(pairs.every((p) => p.control2?.endsWith('#ctrl2')), 'every pair has a second matched twin');
+});
+
+test('the harness aggregate scores the CORRECTED positive set (control-contaminated treatments are healthy)', () => {
+  // clustersynth 'control' mode MOVES a fault into the control twin — the treatment is healthy, and the
+  // generator contract says the scorer must drop those shards from the positive set (control.json
+  // `.contamination`). Under the min rule + corrected positive set the fixture scores FDP 0 at full recall.
+  process.env.CS_ALLOW_SHORT = '1';
+  try {
+    const dropped = loadContaminatedHealthyTreatments(MON);
+    assert.ok(dropped.size >= 1, 'the triad fixture carries control-mode contamination');
+    const out = renderModeB(BASE, MON, 0.1);
+    assert.match(out, /AGGREGATE spatial-null \(Mode B\) FDP: 0\.000/);
+    assert.match(out, /recall: 1\.000/, 'full recall on the corrected positive set (min rule)');
+  } finally {
+    delete process.env.CS_ALLOW_SHORT;
+  }
 });
 
 test('scoreCounterModeB flags contaminated controls via the c1−c2 sibling null', () => {

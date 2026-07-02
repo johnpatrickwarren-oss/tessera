@@ -16,6 +16,14 @@
   contamination partially cancel inside t−c1 (the availability study measured recall ~0.87 for
   min-agreement). The routing-based scale numbers below stand as historical measurements of the
   superseded rule.
+  **RE-VALIDATED AT SCALE UNDER THE MIN RULE (2026-07-02, mac mini — `runs/2026-07-02-modeb-min-rule-ramp/`):**
+  contaminated-control (CS_CONTAMINATE=control) hourly ramp, corrected positive set (control-moved
+  faults scored healthy per the clustersynth contract — scorer fix in the same PR): **FDP 0.000 at
+  every tier and seed; R=8 × 5 seeds pooled recall 0.990** (203/205; R=1/4/8 seed 1 all recall 1.000).
+  Clean triad non-regression: FDP 0.000, recall 1.000/1.000/0.987 at R=1/4/8. 1 Hz mixed-cadence
+  STREAMING path (hourly 2-month baseline + 6 h 1 Hz mon, R=8): FDP 0.000, recall 0.794 — matching
+  the pre-min-rule prefix-fit 1 Hz recall (~0.79), no streaming regression. The min rule reproduces
+  the routing-era headline with a theorem behind it.
 - **Status:** **BUILT + VALIDATED (in-memory path).** The synthetic prototype recovered both Mode B failure
   modes; the construction is now built end-to-end and validated on real clustersynth topology, at scale.
   Done: clustersynth second twin (`CS_TRIAD`, clustersynth `35c3afa`); the triad detector wired into
