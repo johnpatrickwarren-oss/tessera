@@ -24,10 +24,12 @@
 // the loop cadence. Failures therefore surface through the FEEDBACK channel ('error'/'confirmed'
 // outcomes), never by drain() throwing; idle() awaits all in-flight ladders (shutdown / tests).
 //
-// EXIT-CODE CONVENTION: diag exit 0 = pass, nonzero = fault found. If your dcgmi build reports
-// failures only in its JSON output, point `diag` at a wrapper script that translates. The cordon/
-// uncordon/diag commands are DEPLOYMENT CONFIG ({shard} → hostname mapping included) — this file
-// provides the tested orchestration, not the cluster specifics. Tessera-original.
+// EXIT-CODE CONVENTION (diag): 0 = pass, 1 = fault found, ANYTHING ELSE = orchestration error —
+// reported as an 'error' outcome, never 'confirmed': an unreachable host is not a diagnosis. The
+// bundled wrapper (tools/dcgmi-diag.ts) implements this contract, including the shard→host mapping
+// and the dcgmi JSON translation; its `exec` subcommand reuses the mapping for cordon/uncordon.
+// The cordon/uncordon/diag commands are DEPLOYMENT CONFIG — this file provides the tested
+// orchestration, not the cluster specifics. Tessera-original.
 
 import type { FleetAction, WithdrawReason, ProbeOutcome, ProbeStep, FeedbackSource } from './mode-b-loop.js';
 import { actionKey, defaultExec, type DrainableSink, type ExecLike } from './action-sinks.js';
@@ -40,7 +42,9 @@ export interface DiagProbeOptions {
   cordon: CommandSpec;
   /** Restore the shard after a clean/cancelled probe (e.g. ['uncordon', '{shard}']). */
   uncordon: CommandSpec;
-  /** One diag level (e.g. { command: 'dcgmi', args: ['diag', '-r', '{level}', '--host', '{shard}'] }). */
+  /** One diag level. Exit contract: 0 pass · 1 fault found · else orchestration error. Wire it to the
+   *  bundled wrapper: { command: 'node', args: ['tools/dcgmi-diag.js', 'diag', '--shard', '{shard}',
+   *  '--level', '{level}', '--hostmap', 'hosts.json'] }. */
   diag: CommandSpec;
   /** The escalation ladder, shallow→deep; runs until a level fails or all pass. Default [1, 3]. */
   levels?: number[];
@@ -175,14 +179,17 @@ export class DiagProbeSink implements DrainableSink, FeedbackSource {
     await this.finish(a, key, steps, failedLevel, error);
   }
 
-  /** The escalating ladder: shallow→deep until a level fails (mechanism confirmed), all pass, or cancel. */
+  /** The escalating ladder: shallow→deep until a level fails (mechanism confirmed), all pass, or cancel.
+   *  Only exit 1 confirms; any other nonzero exit is an ORCHESTRATION error (host unreachable, dcgmi
+   *  missing, unparseable output) and must not masquerade as a hardware diagnosis. */
   private async climb(key: string, shard: string, steps: ProbeStep[]): Promise<{ failedLevel?: number; error?: string }> {
     for (const level of this.levels) {
       if (this.cancelRequested.has(key)) return {};
       const r = await this.tryExec(this.opts.diag, shard, level);
       if (r.error) return { error: `diag r${level}: ${r.error}` };
       steps.push({ level, code: r.code, stderr: r.stderr });
-      if (r.code !== 0) return { failedLevel: level };
+      if (r.code === 1) return { failedLevel: level };
+      if (r.code !== 0) return { error: DiagProbeSink.describe(`diag r${level}`, r) };
     }
     return {};
   }

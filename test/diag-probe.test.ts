@@ -129,6 +129,24 @@ test('CANCEL-AT-STEP-BOUNDARY: withdraw mid-ladder stops before the next level a
   assert.equal(o.cordoned, false);
 });
 
+test('EXIT-CODE CONTRACT: a diag orchestration exit (≠0/1) is an error, never confirmed — and the shard is restored', async () => {
+  const calls: string[][] = [];
+  const execImpl: ExecLike = async (cmd, args) => {
+    calls.push([cmd, ...args]);
+    return cmd === 'dcgmi' ? { code: 2, stderr: 'unable to establish a connection' } : { code: 0, stderr: '' };
+  };
+  const sink = new DiagProbeSink(opts(execImpl));
+  sink.dispatch(act('s0'));
+  await sink.drain();
+  await sink.idle();
+  assert.deepEqual(calls.at(-1), ['kubectl', 'uncordon', 's0'], 'an orchestration failure still restores the shard');
+  const [o] = sink.takeOutcomes();
+  assert.equal(o.verdict, 'error', 'an unreachable host is not a diagnosis');
+  assert.equal(o.failedLevel, undefined);
+  assert.equal(o.cordoned, false);
+  assert.match(o.detail!, /diag r1 exit 2/);
+});
+
 test('cordon failure aborts the probe as an error — no diag on a shard still carrying load', async () => {
   const calls: string[][] = [];
   const sink = new DiagProbeSink(opts(fakeExec(calls, (_cmd, args) => args[0] === 'cordon')));
