@@ -34,17 +34,49 @@ export type WithdrawReason = 'resolved' | 'revoked';
  *  page / remediate); the loop guarantees it is only ever emitted for a Mode-B (guaranteed) emitter. */
 export interface FleetAction { emitter: string; shard: string; cycle: number; eValue: number; q: number }
 
+/** One step of an active mechanism probe (one diag level run against the shard). */
+export interface ProbeStep { level: number; code: number; stderr: string }
+
+/** The RESULT-FEEDBACK record: what an active mechanism probe (tools/diag-probe.ts) found for a
+ *  dispatched action. The loop pulls these each step (ModeBLoopOptions.feedback) and ANNOTATES —
+ *  reports them in the CycleReport and forwards them to sinks implementing annotate(). It never
+ *  changes the standing set on feedback: a 'clean' probe does not withdraw (a passing hardware diag
+ *  does not refute behavioral evidence — the SDC class passes diags by definition), and 'confirmed'
+ *  does not pin an action past its guarantee. `key` matches actionKey(dispatch) for correlation. */
+export interface ProbeOutcome {
+  key: string;
+  emitter: string; shard: string; cycle: number;
+  /** 'delegated' = not probed because the shard's topology group already has its probe quota in flight
+   *  (a common-mode discovery fans out per shard; probing a sample answers for the group without
+   *  evacuating it wholesale) — `detail` names the shards probing on the group's behalf. */
+  verdict: 'confirmed' | 'clean' | 'cancelled' | 'error' | 'delegated';
+  steps: ProbeStep[];
+  /** The ladder level that failed (verdict 'confirmed'). */
+  failedLevel?: number;
+  /** The cordon state the probe left the shard in. */
+  cordoned: boolean;
+  detail?: string;
+}
+
+/** Where the loop pulls probe results from each step (DiagProbeSink implements this). */
+export interface FeedbackSource { takeOutcomes(): ProbeOutcome[] }
+
 export interface ActionSink {
   dispatch(action: FleetAction): void;
   withdraw(action: FleetAction, reason: WithdrawReason): void;
+  /** Optional: receive a probe result for a previously dispatched action. `standing` says whether the
+   *  action still stands when the result lands (a late result for a withdrawn action is still audited). */
+  annotate?(outcome: ProbeOutcome, standing: boolean): void;
 }
 
 /** An in-memory sink that records every dispatch/withdraw — for tests and the CLI summary. */
 export class RecordingSink implements ActionSink {
   readonly dispatched: FleetAction[] = [];
   readonly withdrawn: Array<{ action: FleetAction; reason: WithdrawReason }> = [];
+  readonly annotated: Array<{ outcome: ProbeOutcome; standing: boolean }> = [];
   dispatch(a: FleetAction): void { this.dispatched.push(a); }
   withdraw(a: FleetAction, reason: WithdrawReason): void { this.withdrawn.push({ action: a, reason }); }
+  annotate(o: ProbeOutcome, standing: boolean): void { this.annotated.push({ outcome: o, standing }); }
 }
 
 /** One emitter's input for one cycle. */
@@ -70,15 +102,27 @@ export interface EmitterReport {
   calibFrac: number; whitenessPass: boolean;
   selected: number; dispatched: number; withdrawn: number; standing: number;
 }
-export interface CycleReport { cycle: number; emitters: EmitterReport[] }
+export interface CycleReport {
+  cycle: number;
+  emitters: EmitterReport[];
+  /** Probe results that arrived since the last step (result-feedback path; empty without a feedback source). */
+  feedback: Array<{ outcome: ProbeOutcome; standing: boolean }>;
+}
 
-export interface ModeBLoopOptions { q?: number; alpha?: number; calibFracThreshold?: number; sink: ActionSink }
+export interface ModeBLoopOptions {
+  q?: number; alpha?: number; calibFracThreshold?: number; sink: ActionSink;
+  /** Optional result-feedback source (e.g. the DiagProbeSink itself); polled at the START of each step,
+   *  so an outcome's `standing` reflects the set the probe was dispatched against, before this cycle's
+   *  reconcile can resolve it. */
+  feedback?: FeedbackSource;
+}
 
 export class ModeBLoop {
   private readonly q: number;
   private readonly alpha: number;
   private readonly calibThresh: number;
   private readonly sink: ActionSink;
+  private readonly feedback?: FeedbackSource;
   private readonly monitors = new Map<string, CalibrationMonitorState[]>(); // emitter → per-shard monitors
   private readonly standing = new Map<string, Map<string, FleetAction>>();   // emitter → shard → action
   private readonly lastMode = new Map<string, Mode>();
@@ -88,6 +132,7 @@ export class ModeBLoop {
     this.alpha = opts.alpha ?? 0.01;
     this.calibThresh = opts.calibFracThreshold ?? 0.8;
     this.sink = opts.sink;
+    this.feedback = opts.feedback;
   }
 
   /** Re-establish a revoked emitter's construction (e.g. after a re-baseline): drop its accumulated
@@ -96,7 +141,19 @@ export class ModeBLoop {
   rearm(emitterId: string): void { this.monitors.delete(emitterId); }
 
   step(cycle: number, emitters: EmitterCycle[]): CycleReport {
-    return { cycle, emitters: emitters.map((e) => this.stepEmitter(cycle, e)) };
+    const feedback = this.takeFeedback();
+    return { cycle, emitters: emitters.map((e) => this.stepEmitter(cycle, e)), feedback };
+  }
+
+  /** Pull probe results in and route them: into the report AND to sinks that annotate. Annotation-only
+   *  by design — feedback never dispatches or withdraws (see the ProbeOutcome doc for why). */
+  private takeFeedback(): Array<{ outcome: ProbeOutcome; standing: boolean }> {
+    const outcomes = this.feedback?.takeOutcomes() ?? [];
+    return outcomes.map((o) => {
+      const standing = this.standing.get(o.emitter)?.has(o.shard) ?? false;
+      this.sink.annotate?.(o, standing);
+      return { outcome: o, standing };
+    });
   }
 
   /** Update the per-shard accumulating calibration monitors; return the fraction still passing. */
