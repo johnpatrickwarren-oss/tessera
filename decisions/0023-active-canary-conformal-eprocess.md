@@ -105,6 +105,18 @@ Known EMP-CAL degradations inside the design (stated, not hidden):
   ≈ 60 days of budget; gpu@1% undetectable by sentinels at EVERY tested β — single-GPU
   small-degradation discovery does not pay at nominal capacity cost.
 
+## Follow-ups (flagged)
+
+- **Decompose `runCanarySim`** (carries `anchor:allow no-god-functions no-complex-functions`): the
+  window loop is one 600-line stateful sweep; split into top-level stage functions around an
+  explicit SimState when the harness next changes materially. Behavior is locked by the 10 tests +
+  seeded `scoreChecksum` fingerprints, so the decomposition can be verified bit-identical.
+- **Real-probe pilot** on the mac mini once its 56-day baseline clears (~2026-08-29): probe-runner
+  mechanics, versioned anchored envelope on real drift, per-core relative ranks (E/P-core blocks) —
+  power numbers must be re-measured on hardware (report § 10).
+- **Probe-mix optimization**: leaf/host shares (15%/20%) are token coverage at sentinel budgets;
+  the mix was not optimized.
+
 ## Consequences
 
 - Mode B's coverage constraint (comparable peers) becomes a **design variable**: canaries
