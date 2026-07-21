@@ -1,6 +1,26 @@
 # ADR 0023 — active synthetic canaries: randomized conformal ranks → e-processes → per-family stopped e-BH (PROPOSED — simulation-validated)
 
 - **Date:** 2026-07-21
+- **⚠️ CORRECTION (2026-07-21, same-day — clustersynth cross-check):** the originally-shipped
+  per-unit/group accumulator was the **plain product e-process**, which suffers fixed-split
+  dilution: E[log f(U)] < 0 under the null, so a fault onsetting after H healthy increments faces
+  ~0.65·H nats of accumulated decay before any evidence counts (measured on the clustersynth
+  cross-check: 13 d extra delay for a 4σ fault after 30 d of health; scales with history, so an
+  always-on deployment would get arbitrarily slow). **Replaced with
+  ½·(plain product) + ½·(geometric-onset-prior mixture)** `M_t = Σ_j (1−γ)γ^(j−1) Π_(s=j..t)
+  f(p_s)`, γ=0.99 (`onsetUpdate`/`onsetValue`/`combinedEValue` in canary-sim.ts) — the mixture is
+  the repo's established increment object (ADR 0019 normalized-mixture default; the 2026-07-02
+  audit's mode-b-loop geometric-prior correction), and the product is its j=1 component, so the
+  average is itself a nonnegative supermartingale with E=1 ⇒ Ville paging and stopped e-BH stay
+  exact. The combination is within log 2 ≈ 0.7 nats of whichever wins: the product for short
+  healthy histories (E5 measured the mixture-only prior cost at ~1–2 d on early-onset marginal
+  faults), the mixture for long ones (delay onset-independent forever). All evidence numbers below
+  are from the corrected accumulator. Cross-check artifacts:
+  `tools/canary-crosscheck.ts` + `runs/2026-07-21-canary-sim/xcheck/`; findings in the program
+  report § 8b — headline: ladder calibration transfers exactly to clustersynth telemetry; a
+  4-idio-σ fault is only **0.13 own-σ** in passive counters (~30× SNR loss), so probe scores MUST
+  come from the controlled workload itself, and estimated per-unit references reproduce the N1/ADR
+  0013 pathologies (masking at sparse coverage; plug-in σ̂ compounding at dense coverage).
 - **Status:** PROPOSED. Design + full simulation program built and run (`tools/canary-sim.ts`,
   `tools/canary-experiments.ts`, `test/canary-sim.test.ts` — 10 tests; results in
   `runs/2026-07-21-canary-sim/`). No production probe runner exists; this ADR fixes the
