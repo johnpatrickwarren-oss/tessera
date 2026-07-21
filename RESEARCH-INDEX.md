@@ -238,6 +238,25 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   baseline null/detection run needs a long continuous feed (shadow-deploy — no public dataset supplies one).
   NB: tiling/padding short data to fake a baseline is INVALID (adds duration, zero info; games the guard).
   GREYHOUND uses contrast for localization, temporal for detection.
+- **2026-07-21 — active synthetic-canary guarantee program (simulation-validated; ADR 0023).**
+  **Report:** [research/2026-07-21-canary-guarantee-program.md](research/2026-07-21-canary-guarantee-program.md);
+  SPEC `docs/SPEC-canary-guarantee-program.md`; harness `tools/canary-sim.ts`/`canary-experiments.ts`;
+  results `runs/2026-07-21-canary-sim/`. Headline: **randomized contemporaneous canary ranks give the
+  design-based version of Mode B's spatial null** — controlled versioned workload manufactures the
+  comparability that caps passive Mode B at 8–23% (ADR 0022 GWDG), and randomized placement yields
+  EXACT finite-sample conformal p → anytime e-process (global filtration ⇒ stopped e-BH sound, O4
+  satisfied by construction) → per-family FDR. Calibration exactly nominal in all 14 healthy-drift
+  scenarios at 10k+100k GPUs where historical baselines collapse (0.54–0.67); contamination ≤20% is
+  conservative-only; adaptive escalation valid with RANDOM peer drafts (suspect drafts mask).
+  NEGATIVE results (§ 3.1 of report): naive qualification group-handicap mints pseudo-faults from
+  estimation noise; pooled-execs permutation under-covers under within-group correlated noise; raw
+  cross-group ranks compound serially on persistent benign offsets → the surviving group construction
+  (studentized-change cross-group conformal, lag+burn-in) is EMP-CAL, per-family only (N6 stands).
+  ECONOMICS: coverage, not severity, is the wall — sentinel β=0.05% detects rack@2–5% in ~5–7 d
+  (≈1 rack event/month breaks even) and anchored catches 3% common-mode in ~6 h (1 day earlier ≈ 60
+  days of budget); single-GPU @1% is sentinel-undetectable at every β ≤ 1% — do NOT justify a canary
+  program on small single-GPU discovery. Verdict: adopt scoped (guarantee = relative contemporaneous
+  surface only; anchored = triage, N1).
 - **2026-07-02 — full math audit of Tessera + engine vs the cited papers** (5 parallel audit passes:
   e-value constructions, e-BH/FDR layer, Mode B spatial null, localization, baseline/whitening+claims).
   **Report:** [research/2026-07-02-math-audit.md](research/2026-07-02-math-audit.md). CONFIRMED exact:
