@@ -256,7 +256,15 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   (≈1 rack event/month breaks even) and anchored catches 3% common-mode in ~6 h (1 day earlier ≈ 60
   days of budget); single-GPU @1% is sentinel-undetectable at every β ≤ 1% — do NOT justify a canary
   program on small single-GPU discovery. Verdict: adopt scoped (guarantee = relative contemporaneous
-  surface only; anchored = triage, N1).
+  surface only; anchored = triage, N1). **SAME-DAY CROSS-CHECK on clustersynth
+  (`tools/canary-crosscheck.ts`, report § 8b): (a) caught + fixed fixed-split dilution — plain
+  product e-processes replaced by the geometric-onset-prior mixture (ADR 0023 correction; delay now
+  onset-independent); (b) ladder calibration transfers exactly to the calibrated generative model
+  (A/A 0.0096–0.0102); (c) a 4-idio-σ fault ≈ 0.13 own-σ in passive counters (~30× SNR loss) ⇒
+  probe scores MUST come from the controlled workload itself — passive sampling + estimated
+  per-unit references reproduce the N1/ADR-0013 pathologies (masking at sparse coverage, plug-in σ̂
+  compounding at dense); with probe-like SNR, recall 0.96–1.00 and cdu shared faults detect in
+  0–8 d.**
 - **2026-07-02 — full math audit of Tessera + engine vs the cited papers** (5 parallel audit passes:
   e-value constructions, e-BH/FDR layer, Mode B spatial null, localization, baseline/whitening+claims).
   **Report:** [research/2026-07-02-math-audit.md](research/2026-07-02-math-audit.md). CONFIRMED exact:

@@ -158,7 +158,7 @@ Full table with Wilson 95% CIs: `runs/2026-07-21-canary-sim/e1-calibration.json`
   selections ≈ 0–1 per 20 runs. With the **√E−1 SupFDR adjuster** the repeated-stop leakage
   disappears entirely (0 selection-stops in most scenarios — `e1-calibration-supfdr.json`) at a
   power cost; use it wherever automation consumes the standing discovery set.
-- **Paging:** ~0.5–1.25 false pages/run vs a Ville budget of N·α = 10.4 — an order of magnitude
+- **Paging:** ~0.2–0.8 false pages/run vs a Ville budget of N·α = 10.4 — an order of magnitude
   inside the guarantee, in every scenario.
 - **Runtime monitor:** 0 revocations across all 280 healthy runs (no false demotions B→A).
 - **Scale invariance (103,680 GPUs, 5 seeds × H1/H3/H13):** conformal 0.0100 (Q4 0.00994–0.01013);
@@ -174,16 +174,17 @@ discovery covering the fault scope; delay in days from onset (`e2-faults.json`).
 
 | fault | eBH det | median delay | correct level | stop-FDP |
 |---|---|---|---|---|
-| rack @1% | 4/8 | 10.9 d | 4/8 | 0.049 |
-| rack @2% | 7/8 | 5.9 d | 7/8 | 0.007 |
-| rack @5% | 8/8 | 4.9 d | 8/8 | 0.006 |
-| power domain @1% | 8/8 | 10.9 d | 8/8 | 0.000 |
+| rack @1% | 4/8 | 13.9 d | 4/8 | 0.032 |
+| rack @2% | 7/8 | 6.9 d | 7/8 | 0.002 |
+| rack @5% | 8/8 | 4.9 d (5/8 also page) | 8/8 | 0.002 |
+| power domain @1% | 7/8 | 10.9 d | 7/8 | 0.000 |
+| power domain @5% | 8/8 | 11.9 d | 8/8 | 0.000 |
 | gpu ×1, any severity ≤30% | 0/8 | — | — | — |
-| gpu ×5 @5% | 0/8 (1/8 page) | — | — | — |
+| gpu ×5 @5% | 0/8 | — | — | — |
 | host @1–5% (NVLink probe) | 0/8 | — | — | — |
 | leaf switch @1–5% (xrack probe) | 0/8 | — | — | — |
 | intermittent gpu (20% duty) | 0/8 | — | — | — |
-| class-conditional rack @5% | 2/8 | 8.9 d | 2/8 | 0.071 |
+| class-conditional rack @5% | 2/8 | 8.9 d | 2/8 | 0.045 |
 | correctness gpu (5%/probe) | 0/8 | — | — | — |
 | fleet common-mode @3% | 0/8 (by design) | anchored: ~6 h | — | — |
 
@@ -218,10 +219,10 @@ turning probe validation failures into hard evidence at high manifestation rates
 
 | contamination | healthy p≤.01 | new-fault detection | delay | stop-FDP | false revocations |
 |---|---|---|---|---|---|
-| 0% | 0.0098 | 7/8 | 4.9 d | 0.027 | 0 |
+| 0% | 0.0098 | 7/8 | 4.9 d | 0.020 | 0 |
 | 0.5% | 0.0095 | 5/8 | 4.9 d | 0.000 | 0 |
 | 2% | 0.0094 | 5/8 | 4.9 d | 0.000 | 0 |
-| 5% | 0.0084 | 5/8 | 4.9 d | 0.037 | 0 |
+| 5% | 0.0084 | 5/8 | 4.9 d | 0.038 | 0 |
 | 10% | 0.0074 | 6/8 | 4.9 d | 0.000 | 0 |
 | 20% | 0.0060 | 6/8 | 5.9 d | 0.000 | 0 |
 
@@ -235,24 +236,24 @@ ADR 0015 had to armor (robust location/trimming are already implicit in the rank
 **E4 — adaptive sampling** (β=0.2% average; 3 GPUs @5%, onset day 15; escalate at e≥4, 30% budget
 reserve; 12 seeds; `e4-adaptive.json`):
 
-| variant | detection | median delay | healthy p≤.01 | gpu-family FDP | GPU-h/run |
-|---|---|---|---|---|---|
-| fixed-rate | 12/12 | 19.9 d | 0.0099 | 0.038 | 29,168 |
-| **adaptive, random peer drafts** | 12/12 | **7.9 d** | 0.0082¹ | 0.052 | **21,429** |
-| adaptive, SUSPECT-enriched drafts | 12/12 | 8.9 d | 0.0083¹ | 0.045 | 21,477 |
+| variant | detection | median delay | healthy p≤.01 | gpu-family FDP | false pages | GPU-h/run |
+|---|---|---|---|---|---|---|
+| fixed-rate | 12/12 | 21.9 d | 0.0099 | 0.028 | 72 | 29,168 |
+| **adaptive, random peer drafts** | 12/12 | **5.9 d** | 0.0082¹ | 0.033 | 82 | **21,222** |
+| adaptive, SUSPECT-enriched drafts | 12/12 | 8.9 d | 0.0082¹ | **0.144** | **109** | 21,281 |
 
 ¹ conservative shift: escalation floods the faulty units' blocks with their own extreme execs,
 pushing healthy peers' ranks away from the tail — under-coverage, not inflation.
 
-- **Escalation is the answer to the coverage wall**: 2.5× faster detection at 27% lower realized
+- **Escalation is the answer to the coverage wall**: 3.7× faster detection at 27% lower realized
   cost, with calibration intact and FDP ≈ q. Sentinels buy the trigger; escalation buys the delay.
-- **Suspect-enriched peer drafts degrade detection, not FPR** — for a one-sided "worse than peers"
-  test, comparing suspects against suspects makes them mask each other (evidence dilution; the
-  co-located limit, e.g. drafting same-rack peers for a rack fault, masks completely — the group
-  family's cross-rack comparisons cover exactly that case). The FP direction would arise from
-  drafting systematically-healthy peers. Production rule stands: **escalation peer drafts must be
-  freshly randomized from the eligibility block**; validity under adaptivity then follows from the
-  conditional (per-round) validity of the increments — confirmed by the calibration columns.
+- **Suspect-enriched peer drafts break the design on BOTH axes**: detection slows (8.9 vs 5.9 d —
+  suspects mask each other in a one-sided "worse than peers" test), and with the combined
+  accumulator the FDP inflates to ~3× q (0.144) with ~33% more false pages — escalated healthy
+  units compared against enriched-suspect pools accumulate spurious relative evidence. This is the
+  measured adaptive-selection-bias failure. Production rule is absolute: **escalation peer drafts
+  must be freshly randomized from the eligibility block**; validity under adaptivity then follows
+  from the conditional (per-round) validity of the increments — confirmed by the random-draft row.
 - **Optional-stopping calibration** (E1's `stopsOptional`): first-crossing FDP matches fixed-grid
   FDP across scenarios — consistent with the global-filtration argument for stopped e-BH (§ 2.3).
 
@@ -271,11 +272,11 @@ GPU-h over the same period.
 |---|---|---|---|---|---|
 | 0.01% | 319 h | 0/6 | 0/6 | 0/6 | 0 |
 | 0.02% | 242 h | 0/6 | 0/6 | 0/6 | 0 |
-| 0.05% | 132 h | 0/6 | 1/6 · 17.9 d | 6/6 · 6.9 d | **0.62** |
-| 0.10% | 72 h | 4/6 · 30 d | 4/6 · 8.9 d | 6/6 · 6.9 d | 0.31 |
-| 0.20% | 39 h | 6/6 · 35.9 d | 6/6 · 10.9 d | 6/6 · 6.9 d | 0.15 |
+| 0.05% | 132 h | 0/6 | 1/6 · 18.9 d | 5/6 · 6.9 d | **0.62** |
+| 0.10% | 72 h | 4/6 · 32.9 d | 3/6 · 30.3 d | 6/6 · 6.9 d | 0.31 |
+| 0.20% | 39 h | 6/6 · 35.9 d | 6/6 · 14.9 d | 6/6 · 6.9 d | 0.15 |
 | 0.50% | 15 h | 6/6 · 11.9 d | 6/6 · 8.9 d | 6/6 · 4.9 d | 0.06 |
-| 1.00% | 9 h | 6/6 · 5.9 d | 6/6 · 6.9 d | 6/6 · 4.9 d | 0.03 |
+| 1.00% | 9 h | 6/6 · 3.9 d | 6/6 · 6.9 d | 6/6 · 2.9 d | 0.03 |
 
 Readings (all in GPU-hours; $/GPU-h is a configurable multiplier):
 
@@ -319,7 +320,11 @@ GPU-equivalents detected Δt hours earlier saves `Σ nAff·s·Δt` GPU-h. Break-
    probe, E2E inference probe; all with output validation (the correctness channel is nearly-free
    evidence and catches SDC-class faults the perf channel misses). Versioned: code, kernel, inputs,
    batch/sequence, image, timeout, telemetry schema, resource envelope. A version change = a new
-   statistical class; no pooling across versions (block key enforces).
+   statistical class; no pooling across versions (block key enforces). **Scores come from the
+   probe's own controlled execution (runtime/throughput/validation of the versioned kernel) —
+   never from concurrent passive counters, and never via estimated per-unit baselines** (§ 8b:
+   passive samples carry ~30× the spread; estimated references reproduce the N1/ADR-0013
+   pathologies). Per-unit expected-score variation is handled by block keys (SKU/firmware bins).
 2. **Budget:** 0.05–0.1% of fleet GPU-time; 3 h comparison windows at ≥10k-GPU scale; block =
    probe × version × gen × firmware. Small fleets need proportionally higher β (K floor).
 3. **Statistics:** randomized placement (scheduler must LOG the randomization — it is the validity
@@ -337,6 +342,66 @@ GPU-equivalents detected Δt hours earlier saves `Σ nAff·s·Δt` GPU-h. Break-
 6. **Division of labor with DCGM/passive:** canaries carry the guarantee; DCGM/passive telemetry
    (Mode A) does within-scope attribution, ranking, and covers dcgm-only fault classes; the
    canary discovery set gates actions (the mode-b-loop pattern).
+
+## 8b. Clustersynth cross-check (2026-07-21, follow-up run — `tools/canary-crosscheck.ts`)
+
+To ground the power claims in the calibrated generative model rather than canary-sim's hand-rolled
+score distributions, the same ladder (conformal ranks → mixture-calibrator increments → onset-mixture
+e-process → gated e-BH; identical primitives, identical emitter contract) was run over clustersynth
+bundles (gb200, 4 pods × 8 racks = 2,304 shards, 60 d hourly, thermal+diurnal+weekly+regime
+nonstationarity, `power_w`+`sm_util`), with probe executions emulated as randomized contemporaneous
+samples of shard telemetry. Bundles: A/A ×3 seeds; gpu mean_shift at CS_FAULT_MAG 1/2/4/60/120 (noise-σ
+units); cdu shared faults ×3 seeds. Results in `runs/2026-07-21-canary-sim/xcheck/`.
+
+**Finding 1 — the fixed-split dilution bug (fixed in both tools).** The cross-check immediately
+exposed a real construction flaw in the ladder as originally shipped: the plain product e-process
+pays for its healthy past (E[log f(U)] < 0), so a fault onsetting at day 30 faced ~48 nats of
+accumulated decay — 13 d extra delay for a 4σ fault needing ~4 probes of evidence. Fixed by
+switching the per-unit and group accumulators to **½·(plain product) + ½·(geometric-onset-prior
+mixture)** `M_t = Σ_j (1−γ)γ^(j−1) Π_(s=j..t) f(p_s)` (γ=0.99) — the mixture is the repo's own
+established increment object (ADR 0019 default; the 2026-07-02 audit's mode-b-loop correction),
+the product is its j=1 component, and the average is itself a genuine supermartingale (E=1), so
+Ville paging and stopped e-BH remain exact. The average is within log 2 ≈ 0.7 nats of whichever
+component wins — the product on short healthy histories (the mixture-only variant cost ~1–2 d on
+early-onset marginal faults in E5), the mixture on long ones (delay onset-independent forever).
+All § 4–7 tables are from the corrected accumulator.
+
+**Finding 2 — calibration transfers exactly.** On A/A bundles, raw contemporaneous ranks: healthy
+p≤.01 rate 0.0096/0.0100/0.0100 across seeds (Q4 0.0094–0.0099), monitor never revokes. The
+conformal layer is distribution-free in practice, not just in theorem. Two substrate-driven leaks
+are visible and honestly attributable: (i) raw passive scores compound on persistent OUTLIER
+shards under every accumulator tried (6–10 distinct false shards/run — the substrate's
+exchangeability violation, removed entirely by the unit-reference emulation: 0–1); (ii) on
+clustersynth's real rack-persistent structure the group family shows ~2 false racks/run —
+reaffirming, on the calibrated substrate, that group families are EMP-CAL, not exact (§ 3.1).
+
+**Finding 3 — the controlled workload is load-bearing, now with a number.** On passive counters, a
+"4σ" idiosyncratic fault (4× idio-noise σ) achieves **median 0.13 own-temporal-σ** — resident-job
+and factor dynamics are ~30× the idiosyncratic scale, so cross-sectional ranks of raw samples have
+zero power at any tested magnitude (recall 0.000) while a few persistent outlier shards compound
+into false discoveries (2–5/run). This is the GWDG comparability wall (ADR 0022) measured from a
+different direction, and it quantifies WHY a real canary must derive scores from the controlled
+workload itself (versioned kernel runtime/throughput), never from concurrent passive counters:
+the controlled workload physically removes the ~30× spread.
+
+**Finding 4 — the ladder's power mechanism verifies once SNR is probe-like.** Emulating the
+controlled-workload property via per-shard lagged studentized references: at achieved shift ≈ 5–8
+own-σ and 2 probes/shard/day, unit recall = 0.96–1.00 and the cdu shared faults (1,152 shards)
+detect in 0–8.3 d. But the estimated reference reintroduces known pathologies, both measured:
+(i) at sparse coverage (0.5 probes/shard/day) the lagged reference ABSORBS the fault before the
+e-process can cross (~12-d masking vs ~13-d accumulation — detection 0); (ii) at dense coverage,
+per-shard σ̂ estimation error compounds (~75/2,304 shards, stop-FDP ~0.5) — the ADR 0013 plug-in
+pathology reproduced at the rank layer. **A real probe pays neither cost** (its reference is
+physical, not estimated); the emulation's failure modes are precisely the reasons the passive
+temporal-reference program (N1, ADR 0007) failed. Production requirement hardened: probe scores
+come from the probe's own controlled execution; per-unit expected-score variation is handled by
+block keys (SKU/firmware), never by estimated per-unit baselines.
+
+**Complementarity note:** the canonical passive pipeline (baseline-monitor) detects these same
+idiosyncratic faults from CONTINUOUS telemetry with full factor residualization and a ≥56-d
+baseline — sparse passive sampling does not. The canary and the passive stack are not substitutes
+at either end: canaries carry the guarantee with no baseline and tiny data volume; the passive
+stack covers dcgm-only faults and within-scope attribution given its full stream.
 
 ## 9. Verdict
 

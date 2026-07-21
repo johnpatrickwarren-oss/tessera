@@ -336,6 +336,32 @@ function execScore(cfg: SimConfig, st: FleetState, g: number, pt: ProbeType, tHo
 
 // ── 6. Statistical primitives ───────────────────────────────────────────────────────────────
 
+// ── onset-mixture e-process (fixes fixed-split dilution) ────────────────────────────────────
+// A plain product e-process pays for its healthy past: E[log f(U)] < 0, so by a late fault onset
+// the process sits at e.g. 1e-17 and detection delay grows with healthy history (measured on the
+// clustersynth cross-check: 13 d for a 4σ fault that needs ~4 probes of evidence). The repo's
+// established fix (ADR 0019 default increment; mode-b-loop geometric-onset-prior correction,
+// 2026-07-02 audit) is the onset mixture M_t = Σ_j w_j Π_{s=j..t} f(p_s) with FIXED geometric
+// weights w_j = (1−γ)γ^(j−1): a countable convex combination of e-processes each conditionally
+// valid from its own onset ⇒ M is a genuine nonnegative supermartingale with E[M_0]=1 ⇒ Ville
+// paging and stopped e-BH remain exact, while detection delay becomes onset-independent.
+// Recursion: G_t = f_t·(G_{t−1} + w_t), M_t = G_t + γ^t (untriggered-onset tail).
+export const ONSET_GAMMA = 0.99;
+export function onsetUpdate(g: number, k: number, f: number): number {
+  return f * (g + (1 - ONSET_GAMMA) * Math.pow(ONSET_GAMMA, k));
+}
+export function onsetValue(g: number, k: number): number {
+  return g + Math.pow(ONSET_GAMMA, k);
+}
+/** Reported e-value: ½·(plain product) + ½·(onset mixture). Both are valid supermartingales
+ *  (the product is the mixture's j=1 component), so the average is one too — and it is within
+ *  log 2 ≈ 0.7 nats of whichever wins: the product for short healthy histories (no prior
+ *  penalty), the mixture for long ones (no dilution). E5 measured the mixture-only prior cost
+ *  at ~1–2 d on early-onset marginal faults; this recovers it. */
+export function combinedEValue(prod: number, g: number, k: number): number {
+  return 0.5 * prod + 0.5 * onsetValue(g, k);
+}
+
 const KAPPAS = [0.05, 0.1, 0.2, 0.4, 0.6, 0.8];
 /** mixture p→e calibrator: mean_κ κ p^{κ-1}; ∫₀¹ f = 1 exactly, f decreasing ⇒ E[f(P)] ≤ 1 for super-uniform P. */
 export function calibrator(p: number): number {
@@ -452,7 +478,7 @@ export interface FaultOutcome {
   localizedCorrectLevel: boolean;   // discovery family == fault level (gpu-count faults → 'gpu')
 }
 
-interface GroupState { e: Float64Array; max: Float64Array; }
+interface GroupState { prod: Float64Array; g: Float64Array; k: Float64Array; e: Float64Array; max: Float64Array; }
 
 // standardized rank u in (0,1) for each exec within its block (used for group stats)
 function standardizedRanks(scores: number[], rng: Rng): number[] {
@@ -488,14 +514,20 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
   const escFrac = cfg.adaptive?.enabled ? cfg.adaptive.escalationBudgetFrac : 0;
 
   // per-unit / per-group e-processes
+  // e-process state per unit/group: prod (plain product), g/k (onset mixture);
+  // reported e-value = combinedEValue(prod, g, k). e/max hold the CURRENT value + running max.
+  const prodGpu = new Float64Array(topo.n).fill(1);
+  const gGpu = new Float64Array(topo.n);
+  const kGpu = new Float64Array(topo.n);
   const eGpu = new Float64Array(topo.n).fill(1);
   const eGpuMax = new Float64Array(topo.n).fill(1);
+  const mkGroup = (n2: number): GroupState => ({
+    prod: new Float64Array(n2).fill(1), g: new Float64Array(n2), k: new Float64Array(n2),
+    e: new Float64Array(n2).fill(1), max: new Float64Array(n2).fill(1),
+  });
   const groups: Record<string, GroupState> = {
-    host: { e: new Float64Array(topo.nHosts).fill(1), max: new Float64Array(topo.nHosts).fill(1) },
-    rack: { e: new Float64Array(topo.nRacks).fill(1), max: new Float64Array(topo.nRacks).fill(1) },
-    leaf: { e: new Float64Array(topo.nLeaves).fill(1), max: new Float64Array(topo.nLeaves).fill(1) },
-    power: { e: new Float64Array(topo.nPowers).fill(1), max: new Float64Array(topo.nPowers).fill(1) },
-    region: { e: new Float64Array(topo.nRegions).fill(1), max: new Float64Array(topo.nRegions).fill(1) },
+    host: mkGroup(topo.nHosts), rack: mkGroup(topo.nRacks), leaf: mkGroup(topo.nLeaves),
+    power: mkGroup(topo.nPowers), region: mkGroup(topo.nRegions),
   };
   const E_CAP = 1e30;
 
@@ -786,8 +818,21 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
         const a = hostInc.get(execs[i].unit) ?? { s: 0, n: 0 }; a.s += f; a.n++; hostInc.set(execs[i].unit, a);
       }
     }
-    for (const [g, a] of gpuInc) eGpu[g] = Math.min(E_CAP, eGpu[g] * (a.s / a.n));
-    for (const [h, a] of hostInc) groups.host.e[h] = Math.min(E_CAP, groups.host.e[h] * (a.s / a.n));
+    for (const [g, a] of gpuInc) {
+      const f = a.s / a.n;
+      prodGpu[g] = Math.min(E_CAP, prodGpu[g] * f);
+      gGpu[g] = Math.min(E_CAP, onsetUpdate(gGpu[g], kGpu[g], f));
+      kGpu[g]++;
+      eGpu[g] = combinedEValue(prodGpu[g], gGpu[g], kGpu[g]);
+    }
+    for (const [h, a] of hostInc) {
+      const st2 = groups.host;
+      const f = a.s / a.n;
+      st2.prod[h] = Math.min(E_CAP, st2.prod[h] * f);
+      st2.g[h] = Math.min(E_CAP, onsetUpdate(st2.g[h], st2.k[h], f));
+      st2.k[h]++;
+      st2.e[h] = combinedEValue(st2.prod[h], st2.g[h], st2.k[h]);
+    }
 
     // group-level accumulation: member standardized ranks buffer across windows; the cross-group
     // conformal test runs once per GROUP_EVAL_HOURS (daily) so each group has enough executions
@@ -858,7 +903,11 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
         for (const g2 of stats) {
           const peersZ = stats.filter(s2 => s2.gi !== g2.gi).map(s2 => s2.z);
           const pG = conformalP(g2.z, peersZ, rng.next());
-          st2.e[g2.gi] = Math.min(E_CAP, st2.e[g2.gi] * calibrator(pG));
+          const fG = calibrator(pG);
+          st2.prod[g2.gi] = Math.min(E_CAP, st2.prod[g2.gi] * fG);
+          st2.g[g2.gi] = Math.min(E_CAP, onsetUpdate(st2.g[g2.gi], st2.k[g2.gi], fG));
+          st2.k[g2.gi]++;
+          st2.e[g2.gi] = combinedEValue(st2.prod[g2.gi], st2.g[g2.gi], st2.k[g2.gi]);
         }
       }
     }
