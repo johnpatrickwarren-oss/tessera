@@ -121,6 +121,16 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
     **Whiteness RETAINED.** Open: the always-on loop accumulates the cohort over the full duration → could
     catch it there (un-validated); or feed a calibration reference at the detection length. ADR 0020.
 
+- **O6 — learned-forecaster residualization (DSIPTS et al.). ⛔ DEFERRED, ENTRY-GATED (2026-07-22,
+  ADR 0024).** Evaluated and NOT proceeding now: the cheap in-engine covariate-augmented
+  statistical residualizer must be built and benchmarked FIRST (it is the mandatory comparator and
+  likely winner per the DLinear-line evidence); Architecture D (baseline-lifecycle scoring) needs a
+  MEASURED lifecycle failure rate before any build; DSIPTS-native anomaly scoring rejected
+  outright. Gates G1–G4 in `decisions/0024-*` apply to any Tessera testing/changes once the mac
+  mini 1 Hz baseline clears (~2026-08-29) — incl. the three-arm race (statistical / forecast /
+  spatial-null), the σ̂-perturbation probe, long-window-only null gates (GWDG cannot serve them),
+  and the strictly-exogenous covariate allowlist. Upside if gates open: forecast-as-X_n for O5
+  (conditional fleet-FDR via Assumption 3.1).
 - **Fleet SupFDR (FDR-at-all-times). 🔧 PROTOTYPED (2026-06-26).** `tools/supfdr.ts` (Tessera ADR
   0018): the √E−1 adjuster (Carefree, arXiv:2501.19360) makes a running-max e-process a valid all-times
   e-value (`∫_1^∞ A(e)/e² de = 1`), so e-BH controls **SupFDR ≤ q** under arbitrary dependence where
