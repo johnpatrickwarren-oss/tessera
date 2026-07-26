@@ -1,0 +1,2 @@
+# lake build tree — contains the whole compiled Mathlib (gigabytes). Never commit.
+.lake/

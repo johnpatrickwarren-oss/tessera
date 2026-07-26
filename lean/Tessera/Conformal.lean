@@ -1,7 +1,11 @@
 /-
   Tessera/Conformal.lean — randomised conformal ranks, and Proposition A2 (the drift identity).
 
-  ⚠️ BUILD STATUS: NOT MACHINE-CHECKED (no Lean toolchain in the authoring environment).
+  BUILD STATUS: elaborates on Lean 4.32.1 + Mathlib v4.32.1; every proof here is still `sorry`.
+  This file is the A2 line, and it is the part that is NOT proved — the drift identity, the
+  accumulation bound, and rank uniformity remain prose plus simulation. The e-BH guarantee in
+  `EBH.lean` says FDR is controlled GIVEN valid e-values; whether Tessera's e-values are valid is
+  exactly the question this file poses and does not answer.
 
   Two blocks:
     § 1  exchangeability ⇒ the randomised rank is EXACTLY uniform            (link L2 of ADR 0023)
@@ -14,9 +18,17 @@
   `drift_identity` and `accumulator_mean` were validated by Monte-Carlo against the shipped rank
   construction in `test/exchangeability-drift.test.ts`.
 -/
+-- Import Mathlib wholesale rather than naming submodules. Mathlib reorganises constantly
+-- (`Mathlib.MeasureTheory.Integral.Bochner` became a DIRECTORY between v4.14 and v4.32, so the
+-- original narrow imports 404), and with `lake exe cache get` the cost is import time, not build
+-- time. Not worth the maintenance for a development this size.
+import Mathlib
 import Tessera.EValue
-import Mathlib.Probability.Notation
-import Mathlib.GroupTheory.Perm.Basic
+
+-- autoImplicit turns an unknown identifier into a silently-bound implicit variable: `IsEValue P`
+-- elaborated as an opaque metavariable instead of erroring. That is exactly the failure mode this
+-- file is meant to avoid, so it is off. Mathlib itself disables it for the same reason.
+set_option autoImplicit false
 
 open MeasureTheory Finset
 

@@ -1,10 +1,19 @@
 /-
   Tessera/EValue.lean — e-values and their closure properties.
 
-  ⚠️ BUILD STATUS: NOT MACHINE-CHECKED. Written in an environment with no Lean toolchain
-  (`leanprover.github.io` is outside the network allowlist). Definitions and STATEMENTS are the
-  deliverable; every `sorry` carries the paper proof in a comment. Do not read an absent `sorry`
-  as "checked" — read it as "the author believed the tactic block, and nothing verified it".
+  BUILD STATUS (Lean 4.32.1 + Mathlib v4.32.1):
+    PROVED:  `min_isEValue`      → discharges CERT.MIN_RULE    (ADR 0022; repairs audit F4)
+             `convexMean_isEValue` → discharges CERT.CONVEX_MEAN
+    SORRY:   `tsum_convexMean_isEValue`, `calibrate_isEValue`
+
+  Both proofs hold for an ARBITRARY measure — `IsProbabilityMeasure` is `omit`ted, which the unused-
+  variable linter surfaced and which is slightly stronger than the statements as first written.
+
+  RULE FOR THIS FILE: no Mathlib API name may appear in a TACTIC BLOCK unless it has been read from
+  mathlib4 source at the pinned tag (raw.githubusercontent.com/leanprover-community/mathlib4/<tag>/…)
+  and its signature recorded. Recalled names are how `Integrable.min` — which does not exist — ended
+  up here. Statements may use names not yet validated, since a wrong statement fails loudly at build;
+  a wrong tactic silently looks like progress.
 
   What IS verified: the statements themselves, numerically, against the shipped implementations.
   See `research/2026-07-26-lean-formalisation.md` § 2 for the checks and their results.
@@ -14,8 +23,15 @@
     CERT.CONVEX_MEAN     ↔ `EValue.convexMean_isEValue`
     CERT.SUP_ADJUSTED    ↔ `EValue.supAdjuster_integral` (in EBH.lean)
 -/
-import Mathlib.MeasureTheory.Integral.Bochner
-import Mathlib.MeasureTheory.Function.L1Space
+-- Import Mathlib wholesale rather than naming submodules. Mathlib reorganises constantly
+-- (`Mathlib.MeasureTheory.Integral.Bochner` became a DIRECTORY between v4.14 and v4.32, so the
+-- original narrow imports 404), and with `lake exe cache get` the cost is import time, not build
+-- time. Not worth the maintenance for a development this size.
+import Mathlib
+-- autoImplicit turns an unknown identifier into a silently-bound implicit variable: `IsEValue P`
+-- elaborated as an opaque metavariable instead of erroring. That is exactly the failure mode this
+-- file is meant to avoid, so it is off. Mathlib itself disables it for the same reason.
+set_option autoImplicit false
 
 open MeasureTheory
 
@@ -35,21 +51,39 @@ structure IsEValue (X : Ω → ℝ) : Prop where
 
 namespace EValue
 
+-- `omit ... in` must precede the DOCSTRING, not sit between it and the theorem.
+-- The linter was right that `IsProbabilityMeasure P` is unused: the min rule and the convex-mean
+-- rule both hold for ANY measure. Recording that rather than silencing the warning.
+omit [IsProbabilityMeasure P] in
 /-- **The min rule** (ADR 0022; repairs audit finding F4, where flag-then-substitute triad routing
     had no covering theorem). Unconditional — no independence, no assumption on the joint law.
 
     Proof: `min X Y ≤ X` pointwise, so `∫ min X Y ≤ ∫ X ≤ 1` by monotonicity of the integral.
-    Nonnegativity and integrability are immediate from those of `X`. -/
+    Nonnegativity and integrability are immediate from those of `X`.
+
+    ── API, VALIDATED BY THE COMPILER (`exact?` at v4.32.1), not recalled ──
+      `min = ⊓`              closes by `rfl` — pointwise `min` IS the lattice inf, definitionally.
+                             So the "bridge lemma" I hunted for in source (`inf_eq_min`,
+                             `Pi.inf_apply`) was never needed; grepping source found the absence of
+                             `Integrable.min` but could not tell me what to use instead. `exact?`
+                             searches BY TYPE and answers that question directly.
+      `Integrable.inf`       `(hf) (hg) : Integrable (f ⊓ g) μ`
+      `Std.min_le_left`      note the `Std` namespace, and implicit arguments
+      `integral_mono`        `(hf) (hg) (h : f ≤ g)` — confirmed from source, Bochner/Basic.lean:635
+
+    Record of the error this replaced: `Integrable.min` was written here from recall. It does not
+    exist. -/
 theorem min_isEValue {X Y : Ω → ℝ} (hX : IsEValue P X) (hY : IsEValue P Y) :
     IsEValue P (fun ω => min (X ω) (Y ω)) := by
-  refine ⟨fun ω => le_min (hX.nonneg ω) (hY.nonneg ω), ?_, ?_⟩
-  · exact hX.integrable.min hY.integrable
-  · calc ∫ ω, min (X ω) (Y ω) ∂P
-        ≤ ∫ ω, X ω ∂P := by
-          apply integral_mono (hX.integrable.min hY.integrable) hX.integrable
-          intro ω; exact min_le_left _ _
-      _ ≤ 1 := hX.mean_le_one
+  have hmin : (fun ω => min (X ω) (Y ω)) = X ⊓ Y := rfl
+  have hint : Integrable (fun ω => min (X ω) (Y ω)) P := by
+    rw [hmin]; exact hX.integrable.inf hY.integrable
+  refine ⟨fun ω => le_min (hX.nonneg ω) (hY.nonneg ω), hint, ?_⟩
+  calc ∫ ω, min (X ω) (Y ω) ∂P
+      ≤ ∫ ω, X ω ∂P := integral_mono hint hX.integrable (fun _ => Std.min_le_left)
+    _ ≤ 1 := hX.mean_le_one
 
+omit [IsProbabilityMeasure P] in
 /-- **Sub-convex combination.** Weights nonnegative summing to at most one. The `≤ 1` rather than
     `= 1` matters: a sub-convex combination is still an e-value and is the conservative choice, and
     `tools/e-value.ts` enforces exactly this (weights summing above one are the N3 rescaling error,
@@ -57,8 +91,22 @@ theorem min_isEValue {X Y : Ω → ℝ} (hX : IsEValue P X) (hY : IsEValue P Y) 
 theorem convexMean_isEValue {ι : Type*} [Fintype ι] {X : ι → Ω → ℝ} {w : ι → ℝ}
     (hX : ∀ i, IsEValue P (X i)) (hw : ∀ i, 0 ≤ w i) (hsum : ∑ i, w i ≤ 1) :
     IsEValue P (fun ω => ∑ i, w i * X i ω) := by
-  -- ∫ Σ wᵢ Xᵢ = Σ wᵢ ∫ Xᵢ ≤ Σ wᵢ · 1 = Σ wᵢ ≤ 1, by linearity of the integral and monotonicity.
-  sorry
+  -- ∫ Σ wᵢ Xᵢ = Σ wᵢ ∫ Xᵢ ≤ Σ wᵢ · 1 = Σ wᵢ ≤ 1. Every Mathlib term below came from `exact?`:
+  -- `Integrable.const_mul`, `integrable_finsetSum`, `integral_finsetSum`, `integral_const_mul`.
+  have hi : ∀ i, Integrable (fun ω => w i * X i ω) P :=
+    fun i => (hX i).integrable.const_mul (w i)
+  have hint : Integrable (fun ω => ∑ i, w i * X i ω) P :=
+    integrable_finsetSum Finset.univ (fun i _ => hi i)
+  refine ⟨fun ω => Finset.sum_nonneg (fun i _ => mul_nonneg (hw i) ((hX i).nonneg ω)), hint, ?_⟩
+  rw [integral_finsetSum Finset.univ (fun i _ => hi i)]
+  have hpull : ∀ i, ∫ ω, w i * X i ω ∂P = w i * ∫ ω, X i ω ∂P :=
+    fun i => integral_const_mul (w i) (X i)
+  simp only [hpull]
+  calc ∑ i, w i * ∫ ω, X i ω ∂P
+      ≤ ∑ i, w i * 1 :=
+        Finset.sum_le_sum (fun i _ => mul_le_mul_of_nonneg_left (hX i).mean_le_one (hw i))
+    _ = ∑ i, w i := by simp
+    _ ≤ 1 := hsum
 
 /-- **Countable convex combination** — the form the onset mixture actually needs, since the
     geometric prior `w_j = (1−γ)γ^(j−1)` ranges over all onsets. Needs monotone convergence rather

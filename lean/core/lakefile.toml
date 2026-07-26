@@ -1,0 +1,8 @@
+# Zero-dependency Lean package: no Mathlib, no Batteries, no cache, no dylibs.
+# Builds in seconds on any toolchain, which is the point -- it sidesteps the macOS 15.4
+# SG_READ_ONLY dyld bug entirely (that bug is in Mathlib's precompiled `cache` binary).
+name = "tesseraCore"
+defaultTargets = ["TesseraCore"]
+
+[[lean_lib]]
+name = "TesseraCore"

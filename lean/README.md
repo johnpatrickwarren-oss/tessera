@@ -1,15 +1,98 @@
 # Tessera — Lean 4 formalisation
 
-**Build status: NEVER COMPILED.** These files were authored in an environment with no Lean toolchain
-(`leanprover.github.io` sits outside the network allowlist), so nothing here has been machine-checked.
-Every proof is `sorry` with the paper argument in a comment. Treat this as a *specification of what
-to prove*, with a head start on the definitions — not as a verified development.
+**Build status, split by package:**
 
-To build:
+- **`core/` — BUILDS CLEAN, NO `sorry`.** `Tessera.EBH.fdp_pointwise`, the deterministic threshold
+  lemma that carries e-BH, is fully machine-checked (Lean 4.32.1, zero dependencies). This is the
+  first proven link in the ADR 0023 chain — L5, the one audit findings F1–F5 violated.
+- **`Tessera/` (the Mathlib layer) — BUILDS on Lean 4.32.1 + Mathlib v4.32.1.** Proved:
+  `min_isEValue` (→ CERT.MIN_RULE, ADR 0022 / audit F4), `convexMean_isEValue`
+  (→ CERT.CONVEX_MEAN), `fdr_le_of_pointwise` (the expectation step of e-BH's FDR guarantee), and
+  `fdr_le` itself — which has no `sorry` of its own, being a two-line derivation.
+
+  All four hold for an ARBITRARY measure: `IsProbabilityMeasure` is `omit`ted throughout, surfaced
+  by the unused-variable linter each time. Worth knowing — the e-BH bound is not leaning on
+  normalisation anywhere.
+
+  Also proved: `fdp_le_sum` (FDP bounded by the sum over nulls). **The FDR chain is now complete
+  except for two threshold facts** — `card_reject` and `fdp_pointwise` — both of which are
+  machine-checked in `core/` over `Nat`/`List`, against definitions verified selection-for-selection
+  against the shipped engine. That remainder is transport between representations, not mathematics.
+
+  **Still `sorry`:** those two, plus `supAdjuster_integral` (one definite integral),
+  `calibrate_isEValue`, `tsum_convexMean_isEValue`, `rank_uniform`, and the whole A2 drift identity.
+
+  **Read this precisely.** The measure-theoretic content of the FDR guarantee is proved. The A2
+  line — the drift identity, the first-passage rate, everything that changed the product claim —
+  is untouched, and "Lean-verified" must not be read as covering it.
+
+## Build
+
+**Start here — zero dependencies, seconds, no Mathlib:**
 
 ```
-cd lean && lake update && lake build
+cd lean/core && lake build
 ```
+
+`core/` is a self-contained package holding the deterministic heart of e-BH (`fdp_pointwise`) over
+`Nat` and `List` from Lean core only. No Mathlib, no Batteries, no `cache`, no dylibs — which also
+means it sidesteps the macOS 15.4 `__DATA_CONST`/`SG_READ_ONLY` dyld failure
+([leanprover/lean4#7917](https://github.com/leanprover/lean4/issues/7917)) that makes
+`lake exe cache get` fail on Sequoia with older toolchains.
+
+**It pins `lean-toolchain` to v4.32.1, the same as the Mathlib layer.** It originally pinned
+nothing, on the reasoning that a zero-dependency file should build under whatever elan default is
+installed. That was wrong, and it broke: when the default moved 4.14 → 4.32, `List.mem_cons_self`
+lost its explicit arguments and `core/` stopped compiling — while still being described as proved.
+**Zero *dependencies* is not zero *API surface*.** Lean core moves too, so the toolchain is pinned
+and both packages move together.
+
+The `#eval`s at the bottom of `TesseraCore.lean` execute the
+definitions and check the lemma on concrete data, so the statement is testable before any proof
+lands.
+
+**The Mathlib-dependent layer** (measure theory: `fdr_le`, the supermartingale chain, conformal
+uniformity) is the outer package:
+
+```
+cd lean && lake update && lake exe cache get && lake build
+```
+
+`cache get` is not optional — without it Mathlib builds from source (~1 hr). If it fails with the
+dyld error above, adopt Mathlib's own toolchain
+(`cp .lake/packages/mathlib/lean-toolchain lean-toolchain`, then `lake update` again) or just work
+in `core/`, which needs none of it.
+
+## Rule: validate API names against source, never from recall
+
+Every Mathlib name used in a **tactic block** must be read from mathlib4 source at the pinned tag
+before it is written:
+
+```
+curl -s https://raw.githubusercontent.com/leanprover-community/mathlib4/v4.32.1/Mathlib/<path> | grep -n "<name>"
+```
+
+(`raw.githubusercontent.com` is reachable; the Mathlib doc site and `lakecache` are not.)
+
+This is not procedural fussiness — it caught a real error. `Integrable.min` was written into
+`min_isEValue` from recall. **It does not exist.** The lattice lemma is `Integrable.inf`
+(`Mathlib/MeasureTheory/Function/L1Space/Integrable.lean:556`) and its conclusion is
+`Integrable (f ⊓ g) μ` — the *pointwise* inf, not `fun ω => min (f ω) (g ω)`, so it needs a bridge
+that plain `.min` would have hidden. `integral_mono` by contrast checked out exactly
+(`Integral/Bochner/Basic.lean:635`, argument order `(hf) (hg) (h : f ≤ g)`).
+
+**Better still, once Mathlib builds: ask the compiler.** `exact?` searches the library BY TYPE, so
+it answers "what should I use here?" — which grepping source cannot. It found `Std.min_le_left`
+(namespaced), `integrable_finsetSum`, `integral_finsetSum`, `integral_const_mul`,
+`Integrable.const_mul`, and settled the `⊓`/`min` question outright: they are DEFINITIONALLY equal,
+so the bridge lemma I hunted for in source never needed to exist. Source-reading is the fallback for
+when there is no compiler.
+
+`exact?` only closes goals a SINGLE lemma matches, so decompose the goal to one step per probe.
+Compound goals return nothing and look like a missing API when the goal was simply too big.
+
+**Statements** are held to a weaker bar than tactics: a wrong statement fails loudly at build time,
+whereas a wrong tactic can look like work.
 
 ## Why this exists
 
@@ -24,19 +107,24 @@ actually builds.
 
 | file | content |
 |---|---|
-| `Tessera/EValue.lean` | `IsEValue`, closure under `min` / convex mean / countable mixture, calibrator → e-value |
-| `Tessera/EBH.lean` | e-BH in sorting-free self-consistent form; the deterministic FDP lemma; FDR under arbitrary dependence; the √e−1 adjuster identity |
+| `core/TesseraCore.lean` | **PROVED.** e-BH in sorting-free form; `fdp_pointwise`; supporting `List.foldl max` characterisation (absent from core) |
+| `Tessera/EValue.lean` | `IsEValue`; **PROVED** `min_isEValue`, `convexMean_isEValue`; `sorry` for countable mixture + calibrator |
+| `Tessera/EBH.lean` | e-BH sorting-free; **PROVED** `fdr_le_of_pointwise` + `fdr_le`; `sorry` for the three combinatorial lemmas (mirrored in `core/`) and the √e−1 integral |
 | `Tessera/Conformal.lean` | randomised rank exactly uniform under exchangeability; Proposition A2 (drift identity) |
 
 ## Priority order
 
-1. **`EBH.fdp_pointwise`** — the whole of e-BH rests on it, it is deterministic and finite (no
-   measure theory, no order statistics, no independence), and it is the hypothesis F1–F5 violated.
-   The sorting-free `admissible`/`kStar` presentation exists specifically to make this reachable:
-   the proof is `card_reject` (self-consistency, by maximality) followed by rearrangement.
-2. **`EBH.fdr_le`** — linearity of expectation on top of (1).
-3. **`EValue.min_isEValue`, `convexMean_isEValue`** — short, and they are the combinators the
-   production code actually composes.
+1. ~~**`EBH.fdp_pointwise`**~~ — **DONE**, in `core/`. Proving it surfaced a missing side condition
+   (`WF`: `d.E.length = d.n`), without which `card_reject` is false. No amount of numerical testing
+   could have found it, because the constructor always happens to establish it.
+2. ~~**`EBH.fdr_le`**~~ — **DONE.** Split into `fdp_le_sum` (combinatorial, open) and
+   `fdr_le_of_pointwise` (the expectation step, PROVED); `fdr_le` is then a two-line derivation with
+   no `sorry` of its own. Integrability of the FDP is carried as an explicit hypothesis rather than
+   proved — it is a bounded function of finitely many e-values, so it holds whenever they are
+   measurable.
+3. ~~**`EValue.min_isEValue`, `convexMean_isEValue`**~~ — **DONE.** Both discharge their
+   certificates, and both turned out to hold for an ARBITRARY measure (`IsProbabilityMeasure`
+   omitted) — surfaced by the unused-variable linter, not by me.
 4. **`Conformal.rank_uniform`** — a counting argument over `S_{K+1}`; no measure theory beyond the
    pushforward.
 5. **`EValue.calibrate_isEValue`** — layer-cake / stochastic-dominance argument.
