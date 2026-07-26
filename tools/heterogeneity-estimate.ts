@@ -69,6 +69,7 @@ export function healthyPanel(k: Knobs, seed: number, nUnits = 1440, nRounds = 40
   const rackStatic = Array.from({ length: nRacks }, () => norm(r) * k.rackStaticSd);
   const rackNoiseMult = Array.from({ length: nRacks }, () => Math.exp(norm(r) * k.heteroRackSd));
   const agingSlope = Array.from({ length: nUnits }, () => Math.abs(norm(r)) * k.agingSdPerDay);
+  const unitOffset = Array.from({ length: nUnits }, () => (k.unitOffsetSd > 0 ? norm(r) * k.unitOffsetSd : 0));
   const hidden = Array.from({ length: nUnits }, () => (r() < k.hiddenStratumFrac ? 1 : 0));
   // rack OU state (H2), mean-reverting with time constant rackOuTauH
   const ou = new Float64Array(nRacks);
@@ -94,6 +95,7 @@ export function healthyPanel(k: Knobs, seed: number, nUnits = 1440, nRounds = 40
       rel += k.diurnalAmp * Math.sin((2 * Math.PI * (tExec % 24)) / 24) * (0.5 + (g % 7) / 7);
       rel += rackStatic[rk] + ou[rk];
       rel += agingSlope[g] * day;
+      rel += unitOffset[g];
       if (hidden[g]) rel += k.hiddenStratumOffset;
       const sigma = GEN_SIGMA * rackNoiseMult[rk];
       rel += sigma * norm(r) + MEAS_SIGMA * norm(r);
@@ -204,7 +206,7 @@ export function nullFloorTheta(seed = 20260725, nUnits = 1440, nRounds = 40, see
   const zeroed: Knobs = {
     ...HEALTHY_SCENARIOS.H1, name: 'null-floor',
     rackStaticSd: 0, rackOuSd: 0, heteroRackSd: 0, diurnalAmp: 0,
-    hiddenStratumFrac: 0, hiddenStratumOffset: 0, agingSdPerDay: 0,
+    hiddenStratumFrac: 0, hiddenStratumOffset: 0, agingSdPerDay: 0, unitOffsetSd: 0,
   };
   // MAX over seeds, not mean: the clamp at 0 makes a single draw come out exactly 0 about half the
   // time, which would set an unusably optimistic floor.

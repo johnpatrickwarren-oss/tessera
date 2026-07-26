@@ -32,8 +32,9 @@
 // COMPILE ERROR. See test/e-value.test.ts, where that is asserted with `@ts-expect-error`.
 //
 // SCOPE / HONESTY. A certificate is a citation, not a proof. `evidence: 'theorem'` means "a proof
-// exists in the literature or in the engine and is cited"; `lean` names a machine-checked theorem
-// and is `undefined` everywhere today. The point of the type is not that it proves anything — it is
+// exists in the literature or in the engine and is cited"; `lean` names a MACHINE-CHECKED theorem,
+// and is populated only where one actually builds — today that is MIN_RULE and CONVEX_MEAN
+// (Lean 4.32.1 + Mathlib, both for an arbitrary measure). Everywhere else it stays `undefined`. The point of the type is not that it proves anything — it is
 // that it forces every e-value entering e-BH to NAME the argument it relies on, and makes the
 // weakest link in a derivation propagate to the result (see `weakest`). Discharging certificates
 // into Lean theorems is the follow-on programme
@@ -146,12 +147,14 @@ export const CERT = {
     claim: 'E[min(e₁,…,e_k)|H0] ≤ min_i E[e_i|H0] ≤ 1 — the minimum of e-values is an e-value, unconditionally.',
     evidence: 'theorem',
     source: 'ADR 0022 correction (audit F4); elementary (min ≤ each argument pointwise)',
+    lean: 'Tessera.EValue.min_isEValue',
   },
   CONVEX_MEAN: {
     id: 'convex-mean',
     claim: 'E[Σ w_i e_i|H0] = Σ w_i E[e_i|H0] ≤ 1 for weights w_i ≥ 0 with Σ w_i ≤ 1 — a convex combination of e-values is an e-value.',
     evidence: 'theorem',
     source: 'elementary (linearity of expectation); ADR 0019 mixture default; Wang–Ramdas 2022',
+    lean: 'Tessera.EValue.convexMean_isEValue',
   },
   SUP_ADJUSTED: {
     id: 'sup-adjusted-running-max',
@@ -186,10 +189,10 @@ export const CERT = {
 export const LEAN_QUEUE: ReadonlyArray<{
   cert: string; theorem: string; status: 'sorry' | 'proved'; validated: string;
 }> = [
-  { cert: 'min-rule', theorem: 'Tessera.EValue.min_isEValue', status: 'sorry',
-    validated: 'MC on correlated inputs (test/e-value.test.ts)' },
-  { cert: 'convex-mean', theorem: 'Tessera.EValue.convexMean_isEValue', status: 'sorry',
-    validated: 'MC + weight-sum guard tests' },
+  { cert: 'min-rule', theorem: 'Tessera.EValue.min_isEValue', status: 'proved',
+    validated: 'MACHINE-CHECKED (Lean 4.32.1 + Mathlib). Holds for an ARBITRARY measure — IsProbabilityMeasure is omitted, stronger than first stated. Also MC-checked on correlated inputs.' },
+  { cert: 'convex-mean', theorem: 'Tessera.EValue.convexMean_isEValue', status: 'proved',
+    validated: 'MACHINE-CHECKED (Lean 4.32.1 + Mathlib), likewise for an arbitrary measure. Also MC + weight-sum guard tests.' },
   { cert: 'sup-adjusted-running-max', theorem: 'Tessera.EBH.supAdjuster_integral', status: 'sorry',
     validated: 'MC: adjusted running max of a null e-process has mean ≤ 1 (test/supfdr.ts, test/e-value.test.ts)' },
   { cert: 'conformal-rank-calibrated', theorem: 'Tessera.Conformal.rank_uniform', status: 'sorry',
@@ -198,8 +201,8 @@ export const LEAN_QUEUE: ReadonlyArray<{
     validated: '∫f=1 by substitution quadrature; antitone over 2e5 points (test/e-value.test.ts)' },
   { cert: 'half-half-accumulator', theorem: 'Tessera.Conformal.accumulator_mean', status: 'sorry',
     validated: 'MC vs shipped rank construction (test/exchangeability-drift.test.ts)' },
-  { cert: '(e-BH itself — not an EValue certificate)', theorem: 'Tessera.EBH.fdp_pointwise', status: 'sorry',
-    validated: '995,245 selections vs the SHIPPED engine e-BH across 5 adversarial families: 0 violations, worst slack 0.0' },
+  { cert: '(e-BH itself — not an EValue certificate)', theorem: 'Tessera.EBH.fdp_pointwise', status: 'proved',
+    validated: 'MACHINE-CHECKED in lean/core (zero-dependency, no sorry). Definitions additionally verified to match the SHIPPED engine selection-for-selection over 60,000 instances / 100,542 selections, 0 mismatches; and the inequality itself over 995,245 engine selections, 0 violations, worst slack 0.0.' },
   { cert: '(e-BH itself)', theorem: 'Tessera.EBH.fdr_le', status: 'sorry',
     validated: 'follows from fdp_pointwise + linearity; the pointwise lemma is the checked part' },
 ];
@@ -301,6 +304,42 @@ export function eConformalRank(p: number): EValue {
  *  is NOT an e-value (E[BF|H0] ≈ 1.155 at every calibration length). */
 export function eFromEngineSafeT(engineValue: number): EValue {
   return mk(engineValue, CERT.SAFE_T);
+}
+
+// ── Adapters for values computed by the existing numeric paths ───────────────────────────────
+//
+// HONESTY ABOUT WHAT THESE DO. Unlike the constructors above, an adapter cannot verify that the
+// number it is handed came from the construction it names — it TRUSTS the caller, exactly as
+// `eFromEngineSafeT` trusts the engine. They exist so long-standing harnesses can be routed through
+// the certified gate WITHOUT restructuring numerics whose outputs are already published (moving a
+// committed figure to satisfy a type would be the wrong trade).
+//
+// They are still strictly stronger than passing a bare `number[]`: the value acquires a certificate,
+// the evidence-class check against the emitter's `validityClass` applies, the derivation appears in
+// the audit record, and — the point — a quantity with NO construction at all (an SR running max, a
+// p-value) still cannot reach e-BH, because there is no adapter that would name it.
+//
+// New code should prefer the real constructors (`eNormalizedMixture`, `eGeometricMixture`,
+// `eConformalRank`) or `EProcess`, which compute the value and the certificate together.
+
+/** A value produced by the ½·product + ½·onset-mixture accumulator (canary-sim's `combinedEValue`,
+ *  or `EProcess.current()` / `.runningMax()`). */
+export function eFromOnsetAccumulator(value: number): EValue {
+  return mk(value, CERT.HALF_HALF_ACCUMULATOR);
+}
+
+/** A value produced by `normalizedMixtureEValue` on a fixed-horizon terminal analysis — including
+ *  one already passed through the ADR 0022 triad min rule upstream, which preserves both validity
+ *  and evidence class (`min` of two construction-class e-values is construction-class). */
+export function eFromNormalizedMixture(value: number): EValue {
+  return mk(value, CERT.NORMALIZED_MIXTURE);
+}
+
+/** A value produced by `geometricMixtureEValue` — the horizon-INDEPENDENT onset prior. This is the
+ *  object the always-on loop requires: per-cycle re-normalisation of a uniform mixture makes each
+ *  cycle a different convex combination rather than one e-process, which is audit finding F5. */
+export function eFromGeometricMixture(value: number): EValue {
+  return mk(value, CERT.GEOMETRIC_MIXTURE);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

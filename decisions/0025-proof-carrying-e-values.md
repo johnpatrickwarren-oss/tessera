@@ -55,6 +55,32 @@ past it unchecked.
 **F3 is now a compile error**, as are p-values, plug-in LR values, and forged objects with the right
 shape — asserted with `@ts-expect-error`, which fails the build if the error does *not* occur.
 
+## Migration (2026-07-26) and the gate that keeps it
+
+All FDR-bearing call sites now route through `certifiedFdrBenjaminiHochberg`, each with the
+certificate matching its real provenance:
+
+| call site | provenance | certificate |
+|---|---|---|
+| `canary-sim` (6 topology families) | ½/½ accumulator, or √E−1 on its running max | `HALF_HALF_ACCUMULATOR`, derived through `SUP_ADJUSTED` when `supFdrAdjust` |
+| `canary-crosscheck` (shard + rack) | `combinedEValue` | `HALF_HALF_ACCUMULATOR` |
+| `clustersynth-mode-b` (in-memory) | `normalizedMixtureEValue`, triad min applied upstream | `NORMALIZED_MIXTURE` |
+| `clustersynth-mode-b` (streaming) | as above, min rule now via the `eMin` combinator | `MIN_RULE ← NORMALIZED_MIXTURE` |
+| `mode-b-control` | `normalizedMixtureEValue` | `NORMALIZED_MIXTURE` |
+| `mode-b-loop` | `geometricMixtureEValue` — the horizon-independent object F5 requires | `GEOMETRIC_MIXTURE` |
+
+A hand survey found two of these. The remaining three were found by the gate, which is the argument
+for the gate: **`certified-fdr-path`** (`invariants.json`, `forbid_path` over `tools/`, ratchet)
+blocks any new caller of the raw number-array form. `emitter-contract.ts` defines both and carries an
+`anchor:allow certified-fdr-path` suppression; the raw function is marked `@deprecated`.
+
+**Numerically transparent, and tested as such.** These call sites carry published figures (E1–E5,
+mode-b FDP/recall), so moving a number to satisfy a type would have been the wrong trade. The only
+arithmetic introduced is provably identity — `supAdjuster(v) = v>1 ? √v−1 : 0` is bit-equal to the
+previous `max(√v−1, 0)` for `v ≥ 0`, and `eMin` is `Math.min`. Asserted with `Object.is` over
+1.2M comparisons plus the clamp boundaries at `v = 1`. Full suite: 923 tests, 0 failures; gate clean
+(`certified-fdr-path: 0`, baseline 6).
+
 ## What this does NOT do
 
 A certificate is a **citation, not a proof**. The type forces every e-value entering e-BH to name the

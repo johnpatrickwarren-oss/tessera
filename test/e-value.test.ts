@@ -16,7 +16,7 @@ import {
   type EValue, CERT, calibrate, eConformalRank, eMin, eConvexMean, eSupAdjusted,
   eNormalizedMixture, eGeometricMixture, eFromEngineSafeT, EProcess,
   weaker, weakest, meetsEvidence, certificateChain, openPremises, unsafeEValue,
-  CALIBRATOR_KAPPAS,
+  CALIBRATOR_KAPPAS, eFromOnsetAccumulator, eFromNormalizedMixture,
 } from '../tools/e-value.js';
 import { certifiedFdrBenjaminiHochberg, REQUIRED_EVIDENCE, type EmitterContract } from '../tools/emitter-contract.js';
 
@@ -329,6 +329,41 @@ test('unsafeEValue is permanently empirical-class and taints downstream derivati
   } finally {
     if (prev === undefined) delete process.env.CS_ALLOW_UNVALIDATED; else process.env.CS_ALLOW_UNVALIDATED = prev;
   }
+});
+
+test('MIGRATION SAFETY: the adapters are numerically transparent (ADR 0025)', () => {
+  // The three call sites migrated to certifiedFdrBenjaminiHochberg carry PUBLISHED figures
+  // (canary-sim E1–E5, clustersynth mode-b FDP/recall). Routing them through the certified gate is
+  // only legitimate if it cannot move a single number, so assert bit-exactness (Object.is, not ≈)
+  // against the arithmetic each call site used before.
+  const r = rng(20260726);
+  for (let i = 0; i < 200_000; i++) {
+    const v = Math.exp(24 * (r() - 0.5)); // 1e-5 … 1e5
+    // canary-sim: `max(√v − 1, 0)` on the running max  ≡  eSupAdjusted ∘ eFromOnsetAccumulator
+    assert.ok(Object.is(Math.max(Math.sqrt(v) - 1, 0), eSupAdjusted(eFromOnsetAccumulator(v)).value));
+    // canary-sim unadjusted branch: the accumulator value passes through untouched
+    assert.ok(Object.is(v, eFromOnsetAccumulator(v).value));
+    // clustersynth-mode-b streaming: the ADR 0022 min rule  ≡  eMin
+    const a = Math.exp(20 * (r() - 0.5)), b = Math.exp(20 * (r() - 0.5));
+    assert.ok(Object.is(Math.min(a, b), eMin(eFromNormalizedMixture(a), eFromNormalizedMixture(b)).value));
+  }
+  // boundary cases a random sweep will not reach: the adjuster's clamp at 1 is where a rewrite
+  // would most plausibly have drifted
+  for (const v of [0, 1, 1 - 1e-16, 1 + 1e-16, Number.MIN_VALUE, 1e308]) {
+    assert.ok(Object.is(Math.max(Math.sqrt(v) - 1, 0), eSupAdjusted(eFromOnsetAccumulator(v)).value),
+      `adjuster differs at v=${v}`);
+  }
+});
+
+test('adapters carry the certificate their name claims', () => {
+  assert.equal(eFromOnsetAccumulator(2).cert.id, 'half-half-accumulator');
+  assert.equal(eFromNormalizedMixture(2).cert.id, 'normalized-onset-mixture');
+  // and the class both migrated emitters declare (construction_valid) accepts them
+  assert.ok(meetsEvidence(eFromOnsetAccumulator(2).cert.evidence, 'construction'));
+  assert.ok(meetsEvidence(eFromNormalizedMixture(2).cert.evidence, 'construction'));
+  // min of two construction-class values stays construction-class — the claim made at
+  // clustersynth-mode-b's in-place triad routing site
+  assert.equal(eMin(eFromNormalizedMixture(1), eFromNormalizedMixture(2)).cert.evidence, 'construction');
 });
 
 test('negative or non-finite values are refused at construction', () => {

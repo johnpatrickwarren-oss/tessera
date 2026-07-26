@@ -25,7 +25,7 @@
 // act" / "stand down". The per-shard contrast e-values + calibration samples are computed by the caller
 // (e.g. tools/clustersynth-mode-b.ts); the loop orchestrates. Tessera-original.
 
-import { fdrBenjaminiHochberg, modeOf, type EmitterContract, type Mode } from './emitter-contract.js';
+import { certifiedFdrBenjaminiHochberg, modeOf, type EmitterContract, type Mode } from './emitter-contract.js';
 import { freshCalibrationMonitor, updateCalibrationBatch, type CalibrationMonitorState } from './calibration-monitor.js';
 
 export type WithdrawReason = 'resolved' | 'revoked';
@@ -175,7 +175,7 @@ export class ModeBLoop {
 
     // Mode B → the GATED e-BH discovery set; Mode A → no FDR-keyed discoveries (abstain).
     const discovered = new Map<string, number>();
-    if (mode === 'B') for (const i of fdrBenjaminiHochberg(ec.eValues, this.q, contract, `mode-b-loop:${id}`).selected) discovered.set(ec.shards[i], ec.eValues[i]);
+    if (mode === 'B') for (const i of certifiedFdrBenjaminiHochberg(ec.eValues.map(eFromGeometricMixture), this.q, contract, `mode-b-loop:${id}`).selected) discovered.set(ec.shards[i], ec.eValues[i]);
 
     const { dispatched, withdrawn, standing } = this.reconcile(id, cycle, discovered, prev === 'B' && mode === 'A');
     return { emitter: id, mode, modeChanged: mode !== prev, constructionValid, calibFrac, whitenessPass: ec.whitenessPass, selected: discovered.size, dispatched, withdrawn, standing };
@@ -232,6 +232,7 @@ export async function runModeBLoopAsync(
 import { loadScenarioBundle, type ScenarioBundle } from './clustersynth-scenario.js';
 import { loadControlPairs, fitContrast, applyContrast, clustersynthModeBEmitter } from './clustersynth-mode-b.js';
 import { geometricMixtureEValue } from './mixture-evalue.js';
+import { eFromGeometricMixture } from './e-value.js';
 import { autocorr } from './conditional-markov.js';
 
 interface CounterReplay { c: string; shards: string[]; monStd: number[][]; calStd: number[][]; whitenessPass: boolean }

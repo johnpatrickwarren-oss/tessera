@@ -37,8 +37,9 @@
 
 import { mulberry32, gaussian, scramble } from './calibration-envelope.js';
 import { normalizedMixtureEValue } from './mixture-evalue.js';
+import { eFromNormalizedMixture } from './e-value.js';
 import { applyCalibrationMonitor } from './calibration-monitor.js';
-import { fdrBenjaminiHochberg, modeOf, type EmitterContract } from './emitter-contract.js';
+import { certifiedFdrBenjaminiHochberg, modeOf, type EmitterContract } from './emitter-contract.js';
 import { estimateAr1, whiten } from './per-shard-whitening.js';
 import { autocorr } from './conditional-markov.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
@@ -224,7 +225,7 @@ export function modeBTrial(seed: number, p: ModeBParams, sharedControl = true): 
   const contrastE = fleet.treat.map((tI, i) => contrastEValue(tI, fleet.ctrl[i], prefix));
   const ungatedRej = [...eBenjaminiHochberg(contrastE, p.q).selected];
   const modeBRej: ReadonlyArray<number> = mode === 'B'
-    ? fdrBenjaminiHochberg(contrastE, p.q, contract, 'mode-b-control').selected
+    ? certifiedFdrBenjaminiHochberg(contrastE.map(eFromNormalizedMixture), p.q, contract, 'mode-b-control').selected
     : []; // demoted → abstain from the FDR claim
   const mb = score(modeBRej, fleet.failed);
 

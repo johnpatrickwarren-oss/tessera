@@ -24,7 +24,8 @@
 import * as fs from 'node:fs';
 import { loadScenarioBundle, ScenarioBundle } from './clustersynth-scenario';
 import { Rng, calibrator, conformalP, canaryEmitter, onsetUpdate, combinedEValue } from './canary-sim';
-import { fdrBenjaminiHochberg } from './emitter-contract';
+import { eFromOnsetAccumulator } from './e-value.js';
+import { certifiedFdrBenjaminiHochberg } from './emitter-contract';
 
 /** series map key separator used by loadScenarioBundle (NUL) */
 const SEP = String.fromCharCode(0);
@@ -334,7 +335,7 @@ function stopEval(
 ): void {
   if (res.monitorRevokedDay !== null) return; // Mode A: abstain — no FDR-bearing discoveries
   const contract = canaryEmitter(true);
-  const { selected } = fdrBenjaminiHochberg(Array.from(e), cfg.q, contract, 'canary-crosscheck/shard');
+  const { selected } = certifiedFdrBenjaminiHochberg(Array.from(e, eFromOnsetAccumulator), cfg.q, contract, 'canary-crosscheck/shard');
   if (selected.length > 0) {
     let nTrue = 0;
     for (const i of selected) {
@@ -347,7 +348,7 @@ function stopEval(
   }
   const rackIds = [...rack.e.keys()];
   if (rackIds.length === 0) return;
-  const { selected: selR } = fdrBenjaminiHochberg(rackIds.map(r => rack.e.get(r)!), cfg.q, contract, 'canary-crosscheck/rack');
+  const { selected: selR } = certifiedFdrBenjaminiHochberg(rackIds.map((r) => eFromOnsetAccumulator(rack.e.get(r)!)), cfg.q, contract, 'canary-crosscheck/rack');
   if (selR.length === 0) return;
   let nTrueR = 0;
   for (const ri of selR) {

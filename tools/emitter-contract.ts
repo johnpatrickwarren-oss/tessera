@@ -127,9 +127,14 @@ export function assertFdrEligible(c: EmitterContract, where: string): void {
     `FDR claim), or set CS_ALLOW_UNVALIDATED=1 ONLY for a plumbing smoke (selection branded invalid).`);
 }
 
-/** Gated e-BH: assert the emitter is FDR-eligible, THEN run the engine's e-BH. Use this — never the raw
- *  engine eBenjaminiHochberg — wherever a selection is meant to carry the FDR guarantee (Mode B).
- *  Returns the engine's {selected, K}. */
+/** @deprecated ADR 0025 — use {@link certifiedFdrBenjaminiHochberg}, which takes proof-carrying
+ *  `EValue`s instead of bare numbers. Retained only so existing tests can exercise the eligibility
+ *  gate in isolation; the `certified-fdr-path` invariant blocks any NEW caller under tools/.
+ *  anchor:allow certified-fdr-path
+ *
+ *  Gated e-BH: assert the emitter is FDR-eligible, THEN run the engine's e-BH. Returns {selected, K}.
+ *  It cannot see whether its inputs are e-values at all — which is exactly how audit findings F1–F5
+ *  reached production. */
 export function fdrBenjaminiHochberg(
   perShardEValues: ReadonlyArray<number>, qLevel: number, c: EmitterContract, where: string,
 ): ReturnType<typeof eBenjaminiHochberg> {

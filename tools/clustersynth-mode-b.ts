@@ -40,7 +40,8 @@ import { normalizedMixtureEValue } from './mixture-evalue.js';
 const MODE_B_INCREMENT: import('./mixture-evalue.js').IncrementKind = 'gaussian';
 const normalizedMixtureEValue_H = (r: number[]): number => normalizedMixtureEValue(r, MODE_B_INCREMENT);
 import { freshCalibrationMonitor, updateCalibrationBatch } from './calibration-monitor.js';
-import { fdrBenjaminiHochberg, modeOf, ineligibilityReason, type EmitterContract } from './emitter-contract.js';
+import { certifiedFdrBenjaminiHochberg, modeOf, ineligibilityReason, type EmitterContract } from './emitter-contract.js';
+import { eFromNormalizedMixture, eMin, type EValue } from './e-value.js';
 import { fitContrast, fitContrastFast, applyContrast, composeFit, type ContrastFit } from './contrast.js';
 import { autocorr } from './conditional-markov.js';
 // re-export so existing importers (mode-b-loop, telemetry-source) keep their import site.
@@ -301,7 +302,11 @@ export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, 
   // ADR 0022 control triad (min rule): e = min(t−c1, t−c2) — both siblings must agree; c1−c2 flags report only.
   const flaggedControls = applyTriadRouting(healthy, mon, usable, counter, q, e);
 
-  const sel = mode === 'B' ? fdrBenjaminiHochberg(e, q, emitter, 'clustersynth-mode-b').selected : [];
+  // ADR 0025. `applyTriadRouting` has already applied the ADR 0022 min rule in place; `min` of two
+  // construction-class e-values is construction-class, so the certificate below is the right one.
+  const sel = mode === 'B'
+    ? certifiedFdrBenjaminiHochberg(e.map(eFromNormalizedMixture), q, emitter, 'clustersynth-mode-b').selected
+    : [];
   const fp = sel.filter((i) => !isFault[i]).length;
   const tp = sel.filter((i) => isFault[i]).length;
   const t = temporalComparator(healthy, mon, usable, counter, q, isFault);
@@ -547,12 +552,16 @@ function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyAr
   const e = recs.map((r) => r.e);
   const hasTriad = recs.every((r) => r.flagE !== undefined && r.eC2 !== undefined);
   let flaggedControls = 0;
+  // ADR 0025: the ADR 0022 min rule is now expressed with the certified combinator, so the audit
+  // record carries the derivation (min-rule ← normalized-onset-mixture) instead of a bare number.
+  // `eMin` is `Math.min` on the values, so the selection is byte-identical to the previous code.
+  let eVals: EValue[] = e.map(eFromNormalizedMixture);
   if (hasTriad) {
-    for (let i = 0; i < e.length; i++) e[i] = Math.min(e[i], recs[i].eC2!);
+    eVals = e.map((v, i) => eMin(eFromNormalizedMixture(v), eFromNormalizedMixture(recs[i].eC2!)));
     flaggedControls = eBenjaminiHochberg(recs.map((r) => r.flagE!), q).selected.length;
   }
 
-  const sel = mode === 'B' ? fdrBenjaminiHochberg(e, q, emitter, 'clustersynth-mode-b').selected : [];
+  const sel = mode === 'B' ? certifiedFdrBenjaminiHochberg(eVals, q, emitter, 'clustersynth-mode-b').selected : [];
   const fp = sel.filter((i) => !isFault[i]).length, tp = sel.filter((i) => isFault[i]).length;
   const tSel = [...eBenjaminiHochberg(recs.map((r) => r.tE), q).selected];
   const tFp = tSel.filter((i) => !isFault[i]).length, tTp = tSel.filter((i) => isFault[i]).length;

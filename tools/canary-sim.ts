@@ -15,10 +15,11 @@
  * certification — the anchored envelope is empirically calibrated, never theorem-valid),
  * N3 (no cross-sectional recalibration before e-BH), N6 (per-family FDR only),
  * ADR 0019 (validity is an EmitterContract, revocable at runtime — the canary emitter here
- * routes through the gated fdrBenjaminiHochberg).
+ * routes through the certified, proof-carrying e-BH gate — ADR 0025).
  */
 
-import { fdrBenjaminiHochberg, EmitterContract } from './emitter-contract';
+import { certifiedFdrBenjaminiHochberg, EmitterContract } from './emitter-contract';
+import { eFromOnsetAccumulator, eSupAdjusted, type EValue } from './e-value.js';
 
 // ── 1. RNG (seeded; no Math.random / Date anywhere) ─────────────────────────────────────────
 
@@ -120,6 +121,14 @@ export interface ScenarioKnobs {
   commonModeStepDay: number;    // H13 fleet-wide slowdown (-1 = off) — benign-null variants use 0 size
   commonModeStepSize: number;
   agingSdPerDay: number;        // H14 per-unit aging slope sd
+  /** H15-H17 (2026-07-26): CONTINUOUS per-unit PERSISTENT offset, sd as a fraction of score.
+   *  The gap the theta/tau measurement found: the original 14 scenarios vary drift, steps and
+   *  common-mode -- all round- or fleet-common, which a within-round rank cancels BY CONSTRUCTION --
+   *  so ten of them contain no unit-level persistence at all and the accumulation effect had nothing
+   *  to act on. Persistent unit offsets are what actually drive an e-process across rounds
+   *  (research/2026-07-25-theta-tau-measurement.md). Default 0: every pre-existing scenario is
+   *  byte-identical, and no rng is drawn unless the knob is set. */
+  unitOffsetSd: number;
 }
 
 const BASE: ScenarioKnobs = {
@@ -127,7 +136,7 @@ const BASE: ScenarioKnobs = {
   globalDriftPerDay: 0, driftOnsetDay: 6, diurnalAmp: 0, regimeStepDay: -1, regimeStepSize: 0,
   workloadMixChangeDay: -1, schedulerChangeDay: -1, heteroRackSd: 0, missingRate: 0.01,
   placementBias: 0, interferenceCoef: 0.002, hiddenStratumFrac: 0, hiddenStratumOffset: 0,
-  commonModeStepDay: -1, commonModeStepSize: 0, agingSdPerDay: 0,
+  commonModeStepDay: -1, commonModeStepSize: 0, agingSdPerDay: 0, unitOffsetSd: 0,
 };
 
 export const HEALTHY_SCENARIOS: Record<string, ScenarioKnobs> = {
@@ -145,6 +154,14 @@ export const HEALTHY_SCENARIOS: Record<string, ScenarioKnobs> = {
   H12: { ...BASE, name: 'H12-partial-exch-violation', hiddenStratumFrac: 0.05, hiddenStratumOffset: 0.006 },
   H13: { ...BASE, name: 'H13-common-mode-slowdown', commonModeStepDay: 30, commonModeStepSize: 0.03 },
   H14: { ...BASE, name: 'H14-aging', agingSdPerDay: 0.00004, rackStaticSd: 0.002 },
+  // ── unit-level persistent heterogeneity (2026-07-26) ──────────────────────────────────────
+  // sigma_exec = sqrt(0.010^2 + 0.005^2) = 0.011180, so unitOffsetSd = theta * sigma_exec.
+  // H15 sits at the corrected design target (ICC ~ 9.5%, P7); H16 just inside it; H17 well past,
+  // where the anytime paging rate is expected to breach its Ville budget within a few hundred
+  // rounds. These are the scenarios the E1 family was missing.
+  H15: { ...BASE, name: 'H15-unit-persistent-at-target', unitOffsetSd: 0.003578 },   // theta 0.32, ICC 9.3%
+  H16: { ...BASE, name: 'H16-unit-persistent-mild', unitOffsetSd: 0.001118 },        // theta 0.10, ICC 1.0%
+  H17: { ...BASE, name: 'H17-unit-persistent-severe', unitOffsetSd: 0.006708 },      // theta 0.60, ICC 26.5%
 };
 
 // ── 4. Probes & faults ──────────────────────────────────────────────────────────────────────
@@ -244,6 +261,7 @@ export interface Exec {
 interface FleetState {
   topo: Topology;
   agingSlope: Float64Array;   // per-gpu per-day
+  unitOffset: Float64Array;   // per-gpu PERSISTENT offset (H15-H17)
   rackStatic: Float64Array;
   rackOu: Float64Array;
   rackNoiseMult: Float64Array;
@@ -256,6 +274,11 @@ function initFleet(cfg: SimConfig, rng: Rng): FleetState {
   const topo = buildTopology(cfg.nGpus, rng, cfg.scenario.hiddenStratumFrac);
   const agingSlope = new Float64Array(topo.n);
   for (let g = 0; g < topo.n; g++) agingSlope[g] = Math.abs(rng.norm()) * cfg.scenario.agingSdPerDay;
+  const unitOffset = new Float64Array(topo.n);
+  // guarded: drawing unconditionally would shift the rng stream and move every published figure
+  if (cfg.scenario.unitOffsetSd > 0) {
+    for (let g = 0; g < topo.n; g++) unitOffset[g] = rng.norm() * cfg.scenario.unitOffsetSd;
+  }
   const rackStatic = new Float64Array(topo.nRacks);
   const rackOu = new Float64Array(topo.nRacks);
   const rackNoiseMult = new Float64Array(topo.nRacks).fill(1);
@@ -263,7 +286,7 @@ function initFleet(cfg: SimConfig, rng: Rng): FleetState {
     rackStatic[r] = rng.norm() * cfg.scenario.rackStaticSd;
     rackNoiseMult[r] = Math.exp(rng.norm() * cfg.scenario.heteroRackSd);
   }
-  return { topo, agingSlope, rackStatic, rackOu, rackNoiseMult, genSigma: [0.008, 0.010, 0.013], genBase: [1.0, 0.92, 1.1], fwBase: [1.0, 1.005] };
+  return { topo, agingSlope, unitOffset, rackStatic, rackOu, rackNoiseMult, genSigma: [0.008, 0.010, 0.013], genBase: [1.0, 0.92, 1.1], fwBase: [1.0, 1.005] };
 }
 
 /** host load in [0,1] at window w (drives interference + placement bias) */
@@ -325,6 +348,7 @@ function execScore(cfg: SimConfig, st: FleetState, g: number, pt: ProbeType, tHo
   rel += s.diurnalAmp * Math.sin(2 * Math.PI * (tHours % 24) / 24) * (0.5 + t.hiddenOfGpu[g] * 0.0 + (g % 7) / 7);
   rel += st.rackStatic[rack] + st.rackOu[rack];
   rel += st.agingSlope[g] * day;
+  rel += st.unitOffset[g];
   if (t.hiddenOfGpu[g]) rel += s.hiddenStratumOffset;
   rel += s.interferenceCoef * hostLoad(st, cfg, t.hostOf[g], tHours, rng);
   rel += faultEffect(cfg, st, g, pt, tHours, rng);
@@ -1047,9 +1071,15 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
     if (atStop && day >= 1) {
       const monitorPassing = monitorRevokedDay === null;
       const contract = canaryEmitter(monitorPassing);
-      const adj = (e: Float64Array, m: Float64Array): number[] =>
-        cfg.supFdrAdjust ? Array.from(m, v => Math.max(Math.sqrt(v) - 1, 0)) : Array.from(e);
-      const families: Array<{ name: Level | 'gpu'; e: number[]; degraded: (i: number) => boolean }> = [
+      // ADR 0025: e-BH inputs are proof-carrying. The adjusted branch records its real derivation —
+      // √E−1 applied to the running max of the ½/½ accumulator — rather than an anonymous number.
+      // `supAdjuster(v) = v > 1 ? √v − 1 : 0` is identical to the previous `max(√v − 1, 0)` for
+      // v ≥ 0, so no published figure moves.
+      const adj = (e: Float64Array, m: Float64Array): EValue[] =>
+        cfg.supFdrAdjust
+          ? Array.from(m, (v) => eSupAdjusted(eFromOnsetAccumulator(v)))
+          : Array.from(e, (v) => eFromOnsetAccumulator(v));
+      const families: Array<{ name: Level | 'gpu'; e: EValue[]; degraded: (i: number) => boolean }> = [
         { name: 'gpu', e: adj(eGpu, eGpuMax), degraded: i => gpuDegraded(i, day) },
         { name: 'host', e: adj(groups.host.e, groups.host.max), degraded: i => groupDegraded('host', i, day) },
         { name: 'rack', e: adj(groups.rack.e, groups.rack.max), degraded: i => groupDegraded('rack', i, day) },
@@ -1060,7 +1090,7 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
       for (const fam of families) {
         if (!monitorPassing) break; // Mode A: abstain — no FDR-bearing discoveries
         const arr = fam.e;
-        const { selected } = fdrBenjaminiHochberg(arr, cfg.q, contract, `canary-sim/${fam.name}`);
+        const { selected } = certifiedFdrBenjaminiHochberg(arr, cfg.q, contract, `canary-sim/${fam.name}`);
         if (selected.length === 0) continue;
         let nTrue = 0, nFalse = 0;
         for (const i of selected) {
