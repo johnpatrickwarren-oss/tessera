@@ -29,6 +29,9 @@
 // live calibration monitor".
 
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
+import {
+  type EValue, type EvidenceClass, weakest, meetsEvidence, certificateChain, openPremises,
+} from './e-value.js';
 
 /** The validity class of an emitter contract, ordered most→least trustworthy. Only the top two enter
  *  the FDR-bearing e-BH path (Mode B); the rest are Mode A (ranking/RCA) only. */
@@ -132,6 +135,64 @@ export function fdrBenjaminiHochberg(
 ): ReturnType<typeof eBenjaminiHochberg> {
   assertFdrEligible(c, where);
   return eBenjaminiHochberg(perShardEValues, qLevel);
+}
+
+/** The evidence class a validity class DEMANDS of the numbers it feeds to e-BH. This is the join
+ *  between ADR 0019's emitter-level lattice and the per-number certificates in tools/e-value.ts:
+ *  a `theorem_valid` emitter feeding `construction`-class numbers is a category error, and before
+ *  the branded type it was the normal state of affairs (audit F1–F5). */
+export const REQUIRED_EVIDENCE: Readonly<Record<'theorem_valid' | 'construction_valid', EvidenceClass>> = {
+  theorem_valid: 'theorem',
+  construction_valid: 'construction',
+};
+
+/** The audit record a Mode-B selection produces. `openPremises` is the honest risk surface: the
+ *  type system guarantees PROVENANCE, never that these premises hold. */
+export interface CertifiedSelection {
+  readonly selected: readonly number[];
+  readonly K: number;
+  readonly evidence: EvidenceClass;
+  readonly certificateIds: readonly string[];
+  readonly openPremises: readonly string[];
+}
+
+/**
+ * PROOF-CARRYING e-BH — the Mode-B entry point. Prefer this over `fdrBenjaminiHochberg`.
+ *
+ * Takes `readonly EValue[]`, not `readonly number[]`, so a quantity with no registered
+ * construction — an SR running max, a p-value, a plug-in BF — cannot reach the FDR path at all.
+ * Audit F3 (`eDetector(...).peak` fed to e-BH and reported CERTIFIED) becomes a COMPILE error; see
+ * test/e-value.test.ts, which asserts that with `@ts-expect-error`.
+ *
+ * Two checks the untyped version cannot make:
+ *   1. the emitter is FDR-eligible (as before — ADR 0019);
+ *   2. every input's evidence class is at least as strong as the emitter's `validityClass` claims.
+ */
+export function certifiedFdrBenjaminiHochberg(
+  perShardEValues: ReadonlyArray<EValue>, qLevel: number, c: EmitterContract, where: string,
+): CertifiedSelection {
+  assertFdrEligible(c, where);
+
+  const need = REQUIRED_EVIDENCE[c.validityClass as 'theorem_valid' | 'construction_valid'] ?? 'construction';
+  const got = weakest(perShardEValues);
+  if (!meetsEvidence(got, need)) {
+    const offenders = [...new Set(
+      perShardEValues.filter((e) => !meetsEvidence(e.cert.evidence, need)).map((e) => `${e.cert.id} (${e.cert.evidence})`),
+    )];
+    const msg =
+      `${where}: emitter "${c.id}" declares validity_class=${c.validityClass}, which demands ` +
+      `${need}-class e-values, but the weakest input is ${got}-class — ${offenders.join(', ')}. ` +
+      `Either weaken the emitter's validity_class to match its evidence, or replace the offending ` +
+      `construction (audit F1/F2: the engine nuisance-robust BF and gaussianLrEValue are NOT ` +
+      `e-values; safe-t is the theorem-valid substitute).`;
+    if (unvalidatedOverride()) process.stderr.write(`\n⚠️  EVIDENCE-CLASS OVERRIDE (CS_ALLOW_UNVALIDATED=1) — ${msg}\n\n`);
+    else throw new Error(msg);
+  }
+
+  const { selected, K } = eBenjaminiHochberg(perShardEValues.map((e) => e.value), qLevel);
+  const certificateIds = [...new Set(perShardEValues.flatMap((e) => certificateChain(e).map((x) => x.id)))];
+  const premises = [...new Set(perShardEValues.flatMap(openPremises))];
+  return { selected: [...selected], K, evidence: got, certificateIds, openPremises: premises };
 }
 
 /** Partition a set of emitters by mode (the "exclude" path for continuous fleet observation): the
