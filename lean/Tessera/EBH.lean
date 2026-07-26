@@ -2,24 +2,38 @@
   Tessera/EBH.lean — the e-BH procedure and its FDR guarantee (Wang–Ramdas 2022, arXiv:2009.02824).
 
   BUILD STATUS (Lean 4.32.1 + Mathlib v4.32.1):
-    PROVED:  `fdp_le_sum`           — FDP ≤ Σ over the nulls; both branches of the k*=0 split
-             `fdr_le_of_pointwise`  — the expectation step; e-BH's independence-freeness lives here
-             `fdr_le`               — no `sorry` of its own; a 2-line derivation from those two
-    SORRY:   `card_reject`, `fdp_pointwise` — the two THRESHOLD facts, and the ONLY remaining gap in
-             the FDR chain. Both are MACHINE-CHECKED in `lean/core` over `Nat`/`List`, against
-             definitions verified selection-for-selection (0 mismatches / 100,542) against the
-             shipped engine. What is left is transport to `Finset`/`ℝ`, not new mathematics.
-             `supAdjuster_integral` — a separate calculus gap: ∫₁^∞ (√e−1)/e² de = 1.
+    THE FDR CHAIN IS CLOSED. `fdr_le` — e-BH controls FDR under arbitrary dependence — has NO
+    `sorry` anywhere beneath it. Proved here, bottom to top:
 
-    So `fdr_le` holds MODULO exactly two finite, already-verified-elsewhere combinatorial facts.
+      count_antitone        lowering the threshold can only admit more coordinates
+      kStar_mem / le_kStar  `k*` is admissible, and dominates every admissible `k`
+      card_reject           |R| = k*                     (≥ admissibility; ≤ maximality)
+      fdp_pointwise         THE THRESHOLD LEMMA: 1/|R| ≤ q·e_j/N for every rejected j
+      fdp_le_sum            FDP ≤ Σ over the nulls       (both branches of the k*=0 split)
+      fdr_le_of_pointwise   the expectation step; e-BH's independence-freeness lives here
+      fdr_le                a 2-line derivation from the last two
 
-    `fdp_le_sum` needed a hypothesis it did not have: `0 ≤ e j`. Without it the empty-rejection
-    branch has FDP = 0 on the left and a possibly-NEGATIVE sum on the right, so the lemma is FALSE
-    as first stated. Every e-value is nonnegative, so nothing is lost — but it was an unstated
-    assumption, the same species of gap as `WF` in `lean/core`.
+    READ THE SCOPE PRECISELY. `fdr_le` still CARRIES HYPOTHESES — stated, not hidden: each null
+    coordinate is an e-value, all coordinates are nonnegative, and the FDP is integrable (`hFint`,
+    a regularity condition). What it does NOT assume is anything about their JOINT law. That is the
+    property the whole Mode-B architecture rests on, and it is now machine-checked.
 
-  Everything MEASURE-THEORETIC in the FDR guarantee is therefore proved. What is open is finite
-  combinatorics that has already been checked in another representation, plus one integral.
+    It says nothing about whether TESSERA's quantities satisfy the hypothesis. That is the A2
+    question, and `Conformal.lean` is entirely `sorry`.
+
+    SORRY REMAINING IN THIS FILE: `supAdjuster_integral` only — ∫₁^∞ (√e−1)/e² de = 1. That is the
+    √E−1 adjuster's calibration, a separate calculus fact about SupFDR; it is NOT part of the e-BH
+    FDR guarantee and nothing above depends on it.
+
+    TWO MISSING SIDE CONDITIONS SURFACED BY PROVING, both invisible to testing because every
+    constructor happens to establish them:
+      `fdp_le_sum` needs `0 ≤ e j`. Without it the empty-rejection branch has FDP = 0 on the left
+      and a possibly-NEGATIVE sum on the right — the lemma is FALSE as first stated.
+      `WF` (`d.E.length = d.n`) in `lean/core`, without which `card_reject` is false.
+
+    `kStar` uses `WithBot.unbotD`, not `Option.getD` — see the definition. The `getD` spelling
+    reaches through the `WithBot = Option` synonym, so the `unbotD_bot`/`unbotD_coe` simp lemmas
+    never fire and every step about `k*` degenerates into a defeq argument.
 
   WHY THIS FILE IS THE PRIORITY. The load-bearing content of e-BH is not measure-theoretic — it is a
   DETERMINISTIC, finite, combinatorial lemma about the threshold (`fdp_pointwise` below). Everything
@@ -64,21 +78,95 @@ noncomputable def count (e : Fin N → ℝ) (t : ℝ) : ℕ := (univ.filter fun 
 noncomputable def admissible (q : ℝ) (e : Fin N → ℝ) : Finset ℕ :=
   (Icc 1 N).filter fun k => (k : ℝ) ≤ (count e ((N : ℝ) / (q * k)) : ℝ)
 
-/-- `k* = max` of the admissible set, `0` when it is empty (reject nothing). -/
-noncomputable def kStar (q : ℝ) (e : Fin N → ℝ) : ℕ := (admissible q e).max.getD 0
+/-- `k* = max` of the admissible set, `0` when it is empty (reject nothing).
+
+    `WithBot.unbotD`, not `Option.getD`. Same function — Mathlib documents `unbotD` as
+    "specialization of `Option.getD` to values in `WithBot α` that respects API boundaries" — but
+    `getD` reaches through the `WithBot = Option` synonym, so the simp set (`unbotD_bot`,
+    `unbotD_coe`) does not fire on it and every step about `k*` turns into a defeq argument.
+    Switching to the idiomatic spelling is what made `kStar_mem` and `le_kStar` short. -/
+noncomputable def kStar (q : ℝ) (e : Fin N → ℝ) : ℕ := (admissible q e).max.unbotD 0
 
 /-- The rejection set. -/
 noncomputable def reject (q : ℝ) (e : Fin N → ℝ) : Finset (Fin N) :=
   if kStar q e = 0 then ∅ else univ.filter fun i => (N : ℝ) / (q * kStar q e) ≤ e i
 
+/-- **`count` is antitone in the threshold.** Lowering the bar can only admit more coordinates.
+    This is the only monotonicity fact the whole development needs.
+
+    API validated against the pinned checkout (`.lake/packages/mathlib`, rev `520045ab14`):
+    `Finset.monotone_filter_right (s) ⦃p q⦄ [DecidablePred p] [DecidablePred q]
+      (h : ∀ a ∈ s, p a → q a) : s.filter p ⊆ s.filter q`  — note the hypothesis is a pointwise
+    implication ON THE SET, not `p ≤ q`; and `Finset.card_le_card : s ⊆ t → #s ≤ #t`. -/
+theorem count_antitone (e : Fin N → ℝ) {t t' : ℝ} (h : t' ≤ t) : count e t ≤ count e t' :=
+  Finset.card_le_card (Finset.monotone_filter_right _ fun _ _ hi => le_trans h hi)
+
+/-- `k*` is itself admissible whenever it is nonzero — the fold is a member, not the seed. -/
+theorem kStar_mem (hk : kStar q e ≠ 0) : kStar q e ∈ admissible q e := by
+  by_cases hs : admissible q e = ∅
+  · rw [kStar, hs, Finset.max_empty, WithBot.unbotD_bot] at hk
+    exact absurd rfl hk
+  · obtain ⟨a, ha⟩ := Finset.max_of_nonempty (Finset.nonempty_iff_ne_empty.mpr hs)
+    have hka : kStar q e = a := by rw [kStar, ha, WithBot.unbotD_coe]
+    rw [hka]
+    exact Finset.mem_of_max ha
+
+/-- `k*` dominates every admissible `k`: it is the maximum. -/
+theorem le_kStar {k : ℕ} (hmem : k ∈ admissible q e) : k ≤ kStar q e := by
+  obtain ⟨a, ha⟩ := Finset.max_of_nonempty ⟨k, hmem⟩
+  -- Rewrite FORWARD, into the hypothesis. `rw [← ha]` on the goal asks Lean to find `↑a`, and the
+  -- coercion it elaborates there is not syntactically the one in `ha`; rewriting into `hka`
+  -- matches `(admissible q e).max` literally instead.
+  have hka := Finset.le_max hmem
+  rw [ha] at hka
+  have hks : kStar q e = a := by rw [kStar, ha, WithBot.unbotD_coe]
+  rw [hks]
+  exact WithBot.coe_le_coe.mp hka
+
 /-- **Self-consistency: `|R| = k*`.**
 
     `≥` is admissibility of `k*` unfolded. `≤` is maximality: if `|R| > k*` then `k' := |R|` gives
-    `N/(q k') < N/(q k*)`, so `count (N/(q k')) ≥ count (N/(q k*)) = |R| = k'`, making `k'`
-    admissible and strictly larger than the maximum — contradiction. -/
+    `N/(q k') ≤ N/(q k*)`, so `count (N/(q k')) ≥ count (N/(q k*)) = |R| = k'`, making `k'`
+    admissible and strictly larger than the maximum — contradiction.
+
+    Note the `≤` direction needs only `≤` on the levels, not `<`: `count_antitone` is enough, so
+    no strictness argument about the division is required. -/
 theorem card_reject (hq : 0 < q) (hk : kStar q e ≠ 0) :
     (reject q e).card = kStar q e := by
-  sorry
+  have hmem := kStar_mem hk
+  simp only [admissible, Finset.mem_filter, Finset.mem_Icc] at hmem
+  obtain ⟨⟨hk1, _hkN⟩, hadm⟩ := hmem
+  -- `|R|` is literally the count at `k*`'s own level.
+  have hcount : (reject q e).card = count e ((N : ℝ) / (q * kStar q e)) := by
+    simp only [reject, if_neg hk, count]
+  have hkR : (0 : ℝ) < kStar q e := by exact_mod_cast Nat.pos_of_ne_zero hk
+  have hNR : (0 : ℝ) ≤ N := Nat.cast_nonneg N
+  -- (≥) admissibility of k*.
+  have hge : kStar q e ≤ (reject q e).card := by rw [hcount]; exact_mod_cast hadm
+  -- (≤) maximality.
+  have hle : (reject q e).card ≤ kStar q e := by
+    by_contra hcon
+    -- `omega` reads the negated `≤` directly; `push_neg` is deprecated at this toolchain.
+    have hlt : kStar q e < (reject q e).card := by omega
+    have hk'N : (reject q e).card ≤ N := by
+      simp only [reject, if_neg hk]
+      calc (univ.filter fun i => (N : ℝ) / (q * kStar q e) ≤ e i).card
+          ≤ (univ : Finset (Fin N)).card := Finset.card_filter_le _ _
+        _ = N := Finset.card_fin N
+    have hk'R : (kStar q e : ℝ) ≤ ((reject q e).card : ℝ) := by exact_mod_cast le_of_lt hlt
+    -- a bigger candidate set means a LOWER bar, so the count can only rise
+    have hlevel : (N : ℝ) / (q * (reject q e).card) ≤ (N : ℝ) / (q * kStar q e) :=
+      div_le_div_of_nonneg_left hNR (mul_pos hq hkR)
+        (mul_le_mul_of_nonneg_left hk'R (le_of_lt hq))
+    have hk'adm : (reject q e).card ∈ admissible q e := by
+      simp only [admissible, Finset.mem_filter, Finset.mem_Icc]
+      refine ⟨⟨by omega, hk'N⟩, ?_⟩
+      calc (((reject q e).card : ℕ) : ℝ)
+          = (count e ((N : ℝ) / (q * kStar q e)) : ℝ) := by rw [hcount]
+        _ ≤ (count e ((N : ℝ) / (q * (reject q e).card)) : ℝ) := by
+            exact_mod_cast count_antitone e hlevel
+    exact absurd (le_kStar hk'adm) (by omega)
+  omega
 
 /-- **THE LEMMA.** For every rejected coordinate, `1/|R| ≤ q·e_j/N`.
 
@@ -90,7 +178,26 @@ theorem card_reject (hq : 0 < q) (hk : kStar q e ≠ 0) :
     `EValue` type in `tools/e-value.ts` exists to make its hypothesis unrepresentable-if-false. -/
 theorem fdp_pointwise (hq : 0 < q) (hN : 0 < N) {j : Fin N} (hj : j ∈ reject q e) :
     1 / ((reject q e).card : ℝ) ≤ q / N * e j := by
-  sorry
+  -- something was rejected, so the threshold is real
+  have hk : kStar q e ≠ 0 := by
+    intro h
+    simp only [reject, if_pos h] at hj
+    exact Finset.notMem_empty j hj
+  have hlevel : (N : ℝ) / (q * kStar q e) ≤ e j := by
+    simp only [reject, if_neg hk, Finset.mem_filter] at hj
+    exact hj.2
+  have hNR : (0 : ℝ) < N := by exact_mod_cast hN
+  have hkR : (0 : ℝ) < kStar q e := by exact_mod_cast Nat.pos_of_ne_zero hk
+  have hq0 : q ≠ 0 := ne_of_gt hq
+  have hN0 : (N : ℝ) ≠ 0 := ne_of_gt hNR
+  have hk0 : (kStar q e : ℝ) ≠ 0 := ne_of_gt hkR
+  -- scale the threshold inequality by q/N > 0; the left side collapses to 1/k*
+  have hmul : q / N * ((N : ℝ) / (q * kStar q e)) ≤ q / N * e j :=
+    mul_le_mul_of_nonneg_left hlevel (le_of_lt (div_pos hq hNR))
+  have hsimp : q / N * ((N : ℝ) / (q * kStar q e)) = 1 / (kStar q e : ℝ) := by
+    field_simp
+  rw [card_reject hq hk, ← hsimp]
+  exact hmul
 
 /-- False discovery proportion of a rejection set against a null index set `H₀`. -/
 noncomputable def fdp (H₀ : Finset (Fin N)) (R : Finset (Fin N)) : ℝ :=
@@ -101,9 +208,9 @@ variable {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω) [IsProbabilityMeasur
 /-- **The pointwise step**, isolated: FDP is bounded by the sum of the per-null e-value bounds.
 
     Purely combinatorial — `fdp_pointwise` for the rejected nulls, and `0` for the rest. NO measure
-    theory. The `Nat`/`List` analogue of `fdp_pointwise` is already MACHINE-CHECKED in `lean/core`
-    (`Tessera.EBH.fdp_pointwise`, zero dependencies), over definitions verified selection-for-
-    selection against the shipped engine. What remains here is transporting it to `Finset`/`ℝ`. -/
+    theory. Independently machine-checked in `lean/core` over `Nat`/`List` (zero dependencies), over
+    definitions verified selection-for-selection against the shipped engine; the two developments
+    now agree, which is a real cross-check rather than a restatement. -/
 theorem fdp_le_sum (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (he : ∀ j, 0 ≤ e j) :
     fdp H₀ (reject q e) ≤ ∑ j ∈ H₀, q / N * e j := by
   have hqN : (0:ℝ) < N := by exact_mod_cast hN
@@ -178,9 +285,11 @@ omit [IsProbabilityMeasure P] in
     Only the NULL coordinates need to be e-values, and nothing whatever is assumed about the joint
     law — that is the property the whole Mode-B architecture is built on.
 
-    NO `sorry` OF ITS OWN — this is now a two-line derivation from `fdp_le_sum` (combinatorial,
-    still open here but MACHINE-CHECKED in `lean/core` over `Nat`/`List`) and `fdr_le_of_pointwise`
-    (the expectation step, PROVED below). `hFint` is a regularity hypothesis: the FDP is a bounded
+    NO `sorry` ANYWHERE BENEATH IT — a two-line derivation from `fdp_le_sum` (combinatorial, proved
+    above) and `fdr_le_of_pointwise` (the expectation step, proved below). This is the theorem the
+    Mode-B architecture cites; it is now machine-checked end to end, hypotheses and all.
+
+    `hFint` is a regularity hypothesis: the FDP is a bounded
     function of finitely many e-values, so it is integrable whenever they are measurable; carrying
     it explicitly is cheaper than proving measurability of the rejection set here. -/
 theorem fdr_le (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (E : Fin N → Ω → ℝ)

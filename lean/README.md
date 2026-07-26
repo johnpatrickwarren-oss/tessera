@@ -5,26 +5,28 @@
 - **`core/` — BUILDS CLEAN, NO `sorry`.** `Tessera.EBH.fdp_pointwise`, the deterministic threshold
   lemma that carries e-BH, is fully machine-checked (Lean 4.32.1, zero dependencies). This is the
   first proven link in the ADR 0023 chain — L5, the one audit findings F1–F5 violated.
-- **`Tessera/` (the Mathlib layer) — BUILDS on Lean 4.32.1 + Mathlib v4.32.1.** Proved:
-  `min_isEValue` (→ CERT.MIN_RULE, ADR 0022 / audit F4), `convexMean_isEValue`
-  (→ CERT.CONVEX_MEAN), `fdr_le_of_pointwise` (the expectation step of e-BH's FDR guarantee), and
-  `fdr_le` itself — which has no `sorry` of its own, being a two-line derivation.
+- **`Tessera/` (the Mathlib layer) — BUILDS on Lean 4.32.1 + Mathlib v4.32.1.**
 
-  All four hold for an ARBITRARY measure: `IsProbabilityMeasure` is `omit`ted throughout, surfaced
-  by the unused-variable linter each time. Worth knowing — the e-BH bound is not leaning on
-  normalisation anywhere.
+  **`fdr_le` — e-BH controls FDR under arbitrary dependence — is PROVED, with no `sorry` anywhere
+  beneath it.** The full chain: `count_antitone` → `kStar_mem`/`le_kStar` → `card_reject` →
+  `fdp_pointwise` (the threshold lemma) → `fdp_le_sum` → `fdr_le_of_pointwise` → `fdr_le`.
 
-  Also proved: `fdp_le_sum` (FDP bounded by the sum over nulls). **The FDR chain is now complete
-  except for two threshold facts** — `card_reject` and `fdp_pointwise` — both of which are
-  machine-checked in `core/` over `Nat`/`List`, against definitions verified selection-for-selection
-  against the shipped engine. That remainder is transport between representations, not mathematics.
+  Also proved: `min_isEValue` (→ CERT.MIN_RULE, ADR 0022 / audit F4) and `convexMean_isEValue`
+  (→ CERT.CONVEX_MEAN). Both hold for an ARBITRARY measure — `IsProbabilityMeasure` is `omit`ted,
+  surfaced by the unused-variable linter each time. The e-BH bound never leans on normalisation.
 
-  **Still `sorry`:** those two, plus `supAdjuster_integral` (one definite integral),
-  `calibrate_isEValue`, `tsum_convexMean_isEValue`, `rank_uniform`, and the whole A2 drift identity.
+  **What `fdr_le` assumes, stated not hidden:** each null coordinate is an e-value, all coordinates
+  are nonnegative, and the FDP is integrable. What it does *not* assume is anything about the joint
+  law — which is the property the Mode-B architecture is built on.
 
-  **Read this precisely.** The measure-theoretic content of the FDR guarantee is proved. The A2
-  line — the drift identity, the first-passage rate, everything that changed the product claim —
-  is untouched, and "Lean-verified" must not be read as covering it.
+  **Still `sorry`:** `supAdjuster_integral` (one definite integral, the √E−1 adjuster's calibration
+  — separate from the FDR chain and nothing depends on it), `calibrate_isEValue`,
+  `tsum_convexMean_isEValue`, `rank_uniform`, and the whole A2 drift identity.
+
+  **Read this precisely.** e-BH's FDR guarantee is machine-checked. Whether *Tessera's* quantities
+  satisfy its hypothesis is the A2 question — the drift identity, the first-passage rate,
+  everything that changed the product claim — and `Conformal.lean` is entirely `sorry`.
+  "Lean-verified" must not be read as covering it.
 
 ## Build
 
@@ -109,19 +111,19 @@ actually builds.
 |---|---|
 | `core/TesseraCore.lean` | **PROVED.** e-BH in sorting-free form; `fdp_pointwise`; supporting `List.foldl max` characterisation (absent from core) |
 | `Tessera/EValue.lean` | `IsEValue`; **PROVED** `min_isEValue`, `convexMean_isEValue`; `sorry` for countable mixture + calibrator |
-| `Tessera/EBH.lean` | e-BH sorting-free; **PROVED** `fdr_le_of_pointwise` + `fdr_le`; `sorry` for the three combinatorial lemmas (mirrored in `core/`) and the √e−1 integral |
+| `Tessera/EBH.lean` | e-BH sorting-free; **PROVED end to end: `card_reject`, `fdp_pointwise`, `fdp_le_sum`, `fdr_le_of_pointwise`, `fdr_le`**; only the √e−1 integral is `sorry` |
 | `Tessera/Conformal.lean` | randomised rank exactly uniform under exchangeability; Proposition A2 (drift identity) |
 
 ## Priority order
 
-1. ~~**`EBH.fdp_pointwise`**~~ — **DONE**, in `core/`. Proving it surfaced a missing side condition
-   (`WF`: `d.E.length = d.n`), without which `card_reject` is false. No amount of numerical testing
-   could have found it, because the constructor always happens to establish it.
-2. ~~**`EBH.fdr_le`**~~ — **DONE.** Split into `fdp_le_sum` (combinatorial, open) and
-   `fdr_le_of_pointwise` (the expectation step, PROVED); `fdr_le` is then a two-line derivation with
-   no `sorry` of its own. Integrability of the FDP is carried as an explicit hypothesis rather than
-   proved — it is a bounded function of finitely many e-values, so it holds whenever they are
-   measurable.
+1. ~~**`EBH.fdp_pointwise`**~~ — **DONE** in BOTH representations: `core/` over `Nat`/`List`, and
+   `Tessera/` over `Finset`/`ℝ`. Proving it surfaced a missing side condition (`WF`:
+   `d.E.length = d.n`), without which `card_reject` is false. No amount of numerical testing could
+   have found it, because the constructor always happens to establish it.
+2. ~~**`EBH.fdr_le`**~~ — **DONE, chain closed.** `fdp_le_sum` and `fdr_le_of_pointwise` are both
+   proved, so `fdr_le` has no `sorry` beneath it. Integrability of the FDP is carried as an explicit
+   hypothesis rather than proved — it is a bounded function of finitely many e-values, so it holds
+   whenever they are measurable.
 3. ~~**`EValue.min_isEValue`, `convexMean_isEValue`**~~ — **DONE.** Both discharge their
    certificates, and both turned out to hold for an ARBITRARY measure (`IsProbabilityMeasure`
    omitted) — surfaced by the unused-variable linter, not by me.
