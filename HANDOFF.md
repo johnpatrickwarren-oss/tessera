@@ -1,15 +1,15 @@
-# Handoff — Tessera two-mode architecture (ADRs 0019–0022 + scale validation)
+# Handoff — Tessera two-mode architecture (ADRs 0019–0025 + scale validation)
 
 > **SINGLE SOURCE OF TRUTH for current status** (date · suite · what's built · what's next). `STATE.md` is the
 > durable decision/arc trail (history); `README.md` defers here for the live count. Keep this header current.
 
-**Date:** 2026-07-02 · **Branch:** `audit/math-correctness-fixes` (PR pending → `main`) · **clustersynth
-HEAD:** `35c3afa` (branch `scenario-counter-subset-streamed-factors`, unchanged).
-**Suite:** 794 tests · 787 pass / 0 fail / 7 skip (4 new mixture-e-value tests this session; the lone
-intermittent "fail 1" is the pre-existing flaky q84 worker-terminate timing test — passes in isolation; not ours).
+**Date:** 2026-07-26 · **Branch:** `main` (in sync with origin, `e831578`) · **clustersynth
+HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
+**Suite:** 921 tests · 914 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
-**Read first:** `decisions/0019` (architecture) → `0020` (serial monitor) → `0021` (twin-validity, negative)
-→ `0022` (control triad). Then `RESEARCH-INDEX.md` §1–4 and `docs/METHODOLOGY-scale-and-duration-testing.md`.
+**Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
+program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
+§1–4 and `docs/METHODOLOGY-scale-and-duration-testing.md`.
 Memory carries the condensed version (`project_adr0019_two_mode_architecture` + the feedback notes).
 
 ---
@@ -24,7 +24,49 @@ construction validity and revoke (B→A) when it breaks.
 
 ---
 
-## This session — what shipped (newest first)
+## What shipped (newest first)
+
+- **PROOF-CARRYING E-VALUES (2026-07-26 — ADR 0025, `89dfeca`).** Five of the six CRITICAL findings
+  in the 2026-07-02 math audit are the SAME bug: a non-e-value entering the FDR-bearing e-BH path.
+  `tools/e-value.ts` makes `EValue` an OPAQUE branded type constructible only via certified
+  constructors/combinators, each carrying a `Certificate` (claim as an inequality, evidence class
+  theorem/construction/empirical, unchecked premises; derivations inherit the weakest input's class;
+  no free-standing product — accumulation only via the stateful `EProcess`).
+  `certifiedFdrBenjaminiHochberg` (`tools/emitter-contract.ts`) takes `readonly EValue[]` and
+  cross-checks evidence class against the emitter's `validity_class`, returning the certificate
+  chain + open premises with every Mode-B selection. Audit F3 (SR running max fed to e-BH, reported
+  "CERTIFIED") is now a COMPILE error, `@ts-expect-error`-locked (18 tests). `lean/` is the
+  discharge queue and has NEVER BEEN COMPILED — every proof is `sorry`; the STATEMENTS were
+  validated numerically first (e-BH FDP lemma: 995,245 engine selections across five adversarial
+  families, 0 violations, worst slack exactly 0.0; rank uniformity exhaustive over `S_{K+1}`,
+  K=2–4). See `lean/README.md` + `LEAN_QUEUE`.
+
+- **THE A2 LINE — persistent unit heterogeneity vs the canary guarantee (2026-07-25/26,
+  `37897e6`+`e831578`; six reports `research/2026-07-25-*`, four harnesses + 41 tests;
+  RESEARCH-INDEX N7/N8/P6–P8; ADR 0023 CORRECTION 2).** Per-round conformal validity is EXACT and
+  does NOT survive accumulation: `E[M_T] = E_δ[g(δ)^T] > 1` for T ≥ 2 whenever persistent unit
+  heterogeneity exists (P6). The Λ bound is TRUE and OPERATIONALLY VACUOUS — the operational form is
+  a drift/first-passage condition; design target **ICC ≲ 9.5%** @ α=1e-3, superseding 0.25% (P7).
+  Mean reversion measured CLOSED-negative — τ̂ ≥ 20× every horizon (N8). **Paging fails BEFORE
+  FDR** (P8): A/A to T=320 on the shipped primitives, H2 (ICC 11%) breaches its Ville budget 3.3×
+  while per-family e-BH false selections stayed **0.00 in every cell**; the pooled-marginal
+  uniformity monitor is PROVABLY BLIND to this class (β = 1; gated guarantee is
+  `sup FDR ≤ max(q, β)` — Gap B). End state is IDENTIFIABILITY, not a defect (N7): δ₀ = the
+  calibrator's Kelly break-even shift = the detection floor ≈ **1.02% degradation** (independently
+  matches E2's rack floor). Narrows ADR 0023's claims; does NOT invalidate the design. Actionable:
+  enrich block keys until residual persistent heterogeneity is below the fault size you care about.
+
+- **Catch-up 2026-07-04 → 07-22 (merged to main while this file was stale):**
+  **Diag-probe** (PRs #51/#52): cordon → escalating `dcgmi diag` → uncordon `ActionSink` +
+  annotate-only result feedback (confirmed stays cordoned; clean never withdraws) + per-group probe
+  quota + `tools/dcgmi-diag.ts` (shard→host mapping, JSON→exit contract 0/1/2).
+  **Canary guarantee program** (ADR 0023, PRs #54/#55): active randomized canaries = design-based
+  spatial null; conformal ranks → ½·product+½·onset-mixture e-process → per-family e-BH; coverage
+  (not severity) is the wall; adopt scoped; the clustersynth cross-check quantified the controlled
+  workload as load-bearing (~30× SNR loss in passive counters) and fixed fixed-split dilution
+  (CORRECTION 1). **ADR 0024** (PR #56): DSIPTS/learned-forecaster residualization DEFERRED,
+  entry-gated (O6). **Mini 1 Hz real-telemetry baseline** running since 07-04; the 56-day
+  baseline-guard gate clears ~2026-08-29.
 
 - **60d @ 1 Hz LONG-BASELINE RE-VALIDATION on the mac mini M4 Pro (2026-07-02,
   `runs/2026-07-02-1hz-longbaseline-revalidation/`).** The one production path still resting on
@@ -213,8 +255,15 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## Key file map
-- `decisions/0019–0022-*.md` — the architecture + the three follow-on ADRs.
-- `tools/emitter-contract.ts` — validity_class gate (ADR 0019 #1).
+- `decisions/0019–0025-*.md` — the architecture + follow-on ADRs (0023 canary program w/ corrections;
+  0024 DSIPTS deferred; 0025 proof-carrying e-values).
+- `tools/e-value.ts` — opaque `EValue` + certified constructors/combinators + `EProcess` + `LEAN_QUEUE`
+  (ADR 0025); `lean/` — Lean discharge queue, NEVER compiled (all `sorry`).
+- `tools/emitter-contract.ts` — validity_class gate (ADR 0019 #1) + `certifiedFdrBenjaminiHochberg`
+  (the proof-carrying Mode-B e-BH entry point — prefer over `fdrBenjaminiHochberg`).
+- `tools/canary-sim.ts` + `tools/canary-experiments.ts` + `tools/canary-crosscheck.ts` — ADR 0023 program;
+  `tools/{exchangeability-drift,heterogeneity-estimate,horizon-experiment,tail-probability}.ts` — the A2
+  harnesses (analysis, not runtime paths).
 - `tools/calibration-monitor.ts` — marginal runtime monitor (#2); `tools/serial-calibration.ts` — the serial
   monitor (ADR 0020, not in the gate).
 - `tools/clustersynth-mode-b.ts` — the Mode B pipeline: in-memory + mixed-cadence streaming (prefix fit) +
@@ -264,3 +313,10 @@ cluster incident log). No public dataset supplies a long-enough continuous concu
 methodology trap: it adds duration with zero information and games `baseline-guard`). The concrete next code
 step toward wider coverage is **job-aware peer selection** (match peers by workload). The ADR 0020 serial-
 monitor research is the other smaller thread. Nothing is mid-flight or broken.
+
+Newer threads (2026-07-26): the **mini real-probe pilot** once the 56-day baseline gate clears (~08-29);
+**block-key enrichment** for the canary design (the one lever ADR 0023 CORRECTION 2 leaves — drive residual
+persistent heterogeneity below the target fault size; measure achievable ICC on real telemetry); the
+**Lean discharge queue** (`lean/` — set up a toolchain, replace `sorry`s, flip `Certificate.lean` fields);
+per-call-site **migration to `certifiedFdrBenjaminiHochberg`**; and a **validity-class rung** for
+"exact per round, drift-limited across rounds" (Correction 2 item 1).
