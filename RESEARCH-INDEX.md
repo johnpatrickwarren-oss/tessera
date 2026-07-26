@@ -27,6 +27,8 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
 | N4 | **Lee–Ren conditional-calibration boosting** as an FDR fix | **It's a POWER lever, NOT an FDR fix.** Deterministic superset (`K_boosted ≥ K_plain`) at the *stated* FDR; when the base null is violated by nonstationarity it amplifies TP+FP together. Verified in Tessera PR #33. | ADR 0006 + Tessera PR #33 |
 | N5 | **Blier-Wong–Wang threshold sharpening** for the e-BH procedure | **DROPPED.** `B^AD = 1` — no threshold improvement is possible under arbitrary dependence (the regime fleet e-BH relies on). Gains need PRDS / log-concave survival only. | ADR 0006 |
 | N6 | **Two-level hierarchical-FDR guarantee** (shard→rack→fleet) | **Ambitious version DEAD** (3 ways). Survivor: flat e-BH + topology used only to define a tighter common-mode contrast + a separate group-fault detector — **per-group FDP, no global guarantee.** | ADR 0015 |
+| N7 | **A statistical fix for false pages caused by persistent unit heterogeneity** (canary unit family) | **DEAD — IDENTIFIABILITY, not a defect.** δ₀ (the persistent offset above which a healthy unit eventually pages) IS the calibrator's Kelly break-even shift, i.e. the *minimum persistent fault the detector has power against*. Same number because it is the same event: the rank sees only the shift. δ₀ ≈ 0.913·σ_exec ≈ **1.02% degradation**, which independently matches E2's measured rack detection floor (rack@1% 4/8, rack@2% 7/8). No calibrator, accumulator or threshold separates them. Only three responses exist: shrink θ via block-key enrichment; raise δ₀ via `κ_min` (costing exactly the power you blind yourself to); or reclassify persistent offsets as findings. | `research/2026-07-25-a2-delta0-derivation.md` |
+| N8 | **Mean reversion rescuing the accumulation horizon** (hope that persistent offsets revert on timescale τ, replacing the exponent T by min(T,τ)) | **CLOSED NEGATIVE — measured.** τ̂ = 4802 / ∞ / ∞ / 83 rounds in the four canary-sim scenarios that carry unit-level persistence, everywhere ≥ 20× the corresponding horizon. `rackStatic`, the hidden stratum and the aging slope are set once at init and never revert. The exponent is T. | `research/2026-07-25-theta-tau-measurement.md` § 4 |
 
 ### Established POSITIVE results (use these)
 
@@ -37,6 +39,9 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
 | P3 | **e-BH controls FDR under ARBITRARY dependence** given valid per-input e-values. | Wang–Ramdas 2022 (foundational) |
 | P4 | **Auto factor-rank selection** (sequential common-deflation-path null) — the *legitimate* route N3 failed to find: correct rank → homogeneous residual inflation → cancels in e-BH → protects fleet FDR. | ADR 0014 |
 | P5 | **Common-mode ESTIMATION is the real detection/localization lever.** Oracle common-mode → 99–100% detection at 0% FPR even for small faults; full-series loading ABSORBS single-shard faults → 0%; cal-only loading → ~16% / 8% FPR. | ADR 0016 (FAIR test) |
+| P6 | **The A2 drift identity.** With `g(δ) = E[f(p)|δ]` the conditional increment mean given a unit's persistent offset: `E_δ[g] = 1` (per-round conformal validity is EXACT — confirmed empirically to T=320) but `E[M_T] = E_δ[g(δ)^T] =: Λ(T)`, so per-round validity does **not** survive accumulation. `FDR ≤ q·Λ(T)` by e-BH scale-invariance (N3). ⚠️ Λ is TRUE and OPERATIONALLY VACUOUS — dominated by tail mass below 1/N; it saturates at N while measured degradation was 3.3×. Use P7, not Λ. | `research/2026-07-25-conjecture-a2-resolution.md` |
+| P7 | **The operational form: a DRIFT condition, not a horizon.** `log M_t` is a random walk with drift `μ(δ) = E[log f(p)|δ]` (the Kelly log-growth rate); paging is first passage. Per-unit anytime page probability `≈ α^{κ(δ)}` where `κ(δ)` solves `E[f^κ|δ]=1` — **bounded by 1**, unlike `α·Λ`. Fleet rate `≈ N·P(δ ≥ δ₀)`, `δ₀(θ) = √(a₀² + (1+a₀²)θ²)`, `a₀ = 0.9128`. Design target **ICC ≲ 9.5%** at α=1e-3 (supersedes the 0.25% derived from the loose bound). Order-of-magnitude only: the rate is a Gaussian tail, so a 20% error in δ₀/θ moves it ~3×; design against δ₀, not the rate. | `research/2026-07-25-a2-tail-probability.md` |
+| P8 | **Paging fails before FDR.** Measured on an A/A fleet: at ICC 15% the anytime paging rate breaches its Ville budget from T≈100 rounds and reaches 3.3× at T=320, while per-family e-BH false selections stayed at **0.00 in every cell**. e-BH's single-rejection threshold `N/q` protects it; the per-unit rule `e ≥ 1/α` has no such protection, and the gap widens with fleet size. Put the horizon/identifiability qualifier on the PAGING claim, not the FDR claim. | `research/2026-07-25-a2-e1b-horizon-experiment.md` § 3 |
 
 > The single most important framing (THESIS-VERDICT-2026-06-25): detection + ranking is
 > **ALIVE**; the per-alert guarantee is **DEAD**; fleet-FDR is **EMPIRICAL not a theorem**;
@@ -290,6 +295,41 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
   guard loophole; no locality (hop-distance) metric; localization improvement program (calibrated group
   e-values, coarse-to-fine drill-down, leave-one-out factors, contrast-based ranking). See the report's
   prioritized recommendation list.
+
+- **2026-07-25/26 — the A2 line: adaptivity, monitor gating, and persistent heterogeneity.** Six
+  reports, in dependency order. Each one CHANGED the conclusion of the previous, so read them in
+  sequence or read only the last two.
+  1. [formal-statements-adaptivity-and-gating](research/2026-07-25-formal-statements-adaptivity-and-gating.md)
+     — the ADR 0023 guarantee is a five-link chain; links L1/L4 rest on one prose sentence
+     (*"each round's randomization is fresh"*). States **Gap A** (design ignorability; suspect-enriched
+     drafting breaks conditional exchangeability, and only via persistent components) and **Gap B**
+     (the guarantee runs behind a revocable monitor ⇒ `sup FDR ≤ max(q, β)`, β = the monitor's miss
+     rate, never measured). Localises the E4 failure: per-test rate went CONSERVATIVE (0.0082) while
+     FDP tripled, so the break is in accumulation/stopping, **not** in rank super-uniformity.
+  2. [conjecture-a2-resolution](research/2026-07-25-conjecture-a2-resolution.md) — P6 above. Carries
+     a same-day correction note; its ICC ≲ 0.25% target is SUPERSEDED by P7.
+  3. [theta-tau-measurement](research/2026-07-25-theta-tau-measurement.md) — **ten of fourteen E1
+     healthy scenarios contain no unit-level persistent heterogeneity at all** (the family varies
+     round- and fleet-common effects, which a within-round rank cancels by construction). Where it
+     exists it is large: H2 ICC 11.1%, H14 8.1%, H8 4.0%, H12 1.4%. τ closes negative (N8). E1's
+     whole 60-day horizon is **T ≈ 5 rounds per unit** at β=0.05%.
+  4. [a2-e1b-horizon-experiment](research/2026-07-25-a2-e1b-horizon-experiment.md) — P8 above.
+     A/A sweep to T=320 on the SHIPPED primitives: per-test FPR nominal everywhere; iid control pages
+     zero at every horizon; H2 breaches the Ville budget. Refutes the Λ magnitude.
+  5. [a2-tail-probability](research/2026-07-25-a2-tail-probability.md) — P7 above.
+  6. [a2-delta0-derivation](research/2026-07-25-a2-delta0-derivation.md) — N7 above. The one to read
+     if you read only one.
+  Harnesses: `tools/exchangeability-drift.ts`, `tools/heterogeneity-estimate.ts`,
+  `tools/horizon-experiment.ts`, `tools/tail-probability.ts` (+ tests, 41 total).
+- **2026-07-26 — proof-carrying e-values + Lean scaffold.** `tools/e-value.ts` makes the e-value an
+  OPAQUE type constructible only by certified constructors/combinators, each carrying the argument it
+  relies on; `certifiedFdrBenjaminiHochberg` takes `readonly EValue[]`, so audit findings F1–F5 (all
+  the same bug: a non-e-value entering the FDR path) become COMPILE errors — asserted with
+  `@ts-expect-error` in `test/e-value.test.ts`. `lean/` holds the discharge queue (**never compiled**
+  — no toolchain; all `sorry`). Statements validated against the shipped code first: the e-BH FDP
+  lemma over **995,245 engine selections across five adversarial families, 0 violations, worst slack
+  exactly 0.0**; rank uniformity EXHAUSTIVELY over `S_{K+1}` for K=2,3,4. See `lean/README.md` and
+  `LEAN_QUEUE` in `tools/e-value.ts`. ADR 0025.
 
 ---
 

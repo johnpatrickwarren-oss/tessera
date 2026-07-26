@@ -21,6 +21,35 @@
   4-idio-σ fault is only **0.13 own-σ** in passive counters (~30× SNR loss), so probe scores MUST
   come from the controlled workload itself, and estimated per-unit references reproduce the N1/ADR
   0013 pathologies (masking at sparse coverage; plug-in σ̂ compounding at dense coverage).
+- **⚠️ CORRECTION 2 (2026-07-25/26 — the A2 line; six reports, see RESEARCH-INDEX § 4).** Three
+  claims below need qualification. None of this invalidates the design; it narrows what may be
+  claimed for it.
+  1. **"EXACT-FS" for the unit family is exact PER ROUND only.** With `g(δ) = E[f(p)|δ]`,
+     `E_δ[g] = 1` exactly (confirmed empirically to T=320 — per-test FPR stayed nominal in every
+     scenario at every horizon), but `E[M_T] = E_δ[g(δ)^T] > 1` strictly for T ≥ 2 whenever
+     persistent unit heterogeneity exists. Per-round validity does not survive accumulation. The
+     validity-class lattice has no rung for "exact per round, drift-limited across rounds" and needs
+     one. (P6)
+  2. **The runtime uniformity monitor is PROVABLY BLIND to this failure mode**, not weakly powered.
+     It tests the pooled *marginal* conformal-p distribution, which is exactly uniform at every θ by
+     the same identity that gives `Λ(1) = 1`. So its miss rate against persistent-heterogeneity drift
+     is **β = 1**, and § 5's "catches broad design breaks" cannot be relied on here. The gated
+     guarantee is `sup FDR ≤ max(q, β)` and β has never been measured for any violation class.
+  3. **The E1 calibration table is weaker evidence than it reads.** Ten of the fourteen healthy
+     scenarios contain no unit-level persistent heterogeneity at all — the family varies drift, steps
+     and common-mode, which a within-round rank cancels *by construction* — and at β=0.05% a unit
+     accumulates only **T ≈ 5 rounds** over the whole 60-day horizon. E1 could not have detected the
+     accumulation effect; it is not evidence against it.
+  **What this is, in the end (N7):** an IDENTIFIABILITY result, not a defect. δ₀ — the persistent
+  offset above which a healthy unit eventually pages — is the calibrator's Kelly break-even shift,
+  i.e. the minimum persistent fault the detector has power against. δ₀ ≈ 1.02% degradation, which
+  independently matches E2's measured rack detection floor. The system cannot page on 1% faults and
+  ignore 1% benign persistent offsets. § 3's "hidden strata … a semantic boundary, not a bug" was
+  right; the boundary now has a number.
+  **Operationally:** paging degrades before FDR (P8 — per-family e-BH selections stayed at 0.00 in
+  every measured cell), so the qualifier belongs on the paging claim. Design target: **ICC ≲ 9.5%**
+  after block-keying at α=1e-3. Actionable single sentence: *enrich block keys until residual
+  persistent heterogeneity is below the fault size you care about detecting.*
 - **Status:** PROPOSED. Design + full simulation program built and run (`tools/canary-sim.ts`,
   `tools/canary-experiments.ts`, `test/canary-sim.test.ts` — 10 tests; results in
   `runs/2026-07-21-canary-sim/`). No production probe runner exists; this ADR fixes the
