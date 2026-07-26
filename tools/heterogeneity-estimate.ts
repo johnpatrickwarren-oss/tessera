@@ -18,90 +18,57 @@
 //   • τ from the lag-k autocorrelation of unit residuals: r_k = ICC·ρ(k), so ρ(k) = r_k/ICC, fitted
 //     to exp(−k/τ).
 //
-// The healthy score model below MIRRORS `canary-sim.ts execScore` with the fault terms dropped, and
-// is restricted to a single block key (probe × version × gen × firmware) — within a block, gen and
-// firmware are fixed by construction, so genBase/fwBase/genSigma are constants and the multiplicative
-// base cancels in any rank. Knobs are imported from canary-sim so the two cannot drift apart.
+// THE SCORE MODEL IS NOT REIMPLEMENTED HERE. `healthyPanel` delegates to
+// `canary-sim.healthyScorePanel`, which calls the REAL `execScore`, restricted to a single block key
+// (probe × version × gen × firmware).
 //
-// ONE CHANNEL IS NOT MODELLED: `interferenceCoef · hostLoad(...)`. canary-sim's host-load process is
-// not exported and is not reproducible here without duplicating it. Host load has a persistent
-// per-host component, so every θ below is a LOWER BOUND, and it is a lower bound specifically for
-// the interference-driven scenarios H6/H7/H10/H11 — which are exactly the four that report θ = 0.
-// Do not read "θ = 0" for those as "no persistent heterogeneity"; read it as "none from the channels
-// modelled here". Closing this needs canary-sim to export its host-load state.
+// IT USED TO BE A MIRROR, AND THE MIRROR WAS WRONG (closes A2-host, 2026-07-26). The old comment
+// here read "Knobs are imported from canary-sim so the two cannot drift apart" — but importing
+// CONSTANTS does not couple two implementations, only calling the same CODE does, and the models had
+// drifted: the mirror omitted `interferenceCoef · hostLoad(...)` entirely, because `hostLoad` was not
+// exported and could not be reproduced without duplicating it. Host load carries a persistent
+// per-host component, so every θ̂ this tool produced was a LOWER bound — specifically for
+// H6/H7/H10/H11, the four interference-driven scenarios, which were exactly the four reporting θ = 0.
+// "θ = 0" there meant "none from the channels modelled here", and the figures it fed (including the
+// published ICC design target) inherited that bias in the UNSAFE direction.
+//
+// Two deliberate choices from the old mirror were kept, and are now inside `healthyScorePanel`
+// because dropping either would re-introduce a known bug: execution-time jitter within the revisit
+// interval (without it a 24 h-multiple spacing pins the diurnal phase and θ(H4) collapses to 0), and
+// advancing the rack OU state per round (execScore does not do it; the main sim loop does).
 //
 // Run: `pnpm build && node tools/heterogeneity-estimate.js [--json out.json]`
 
-import { HEALTHY_SCENARIOS } from './canary-sim.js';
+import { HEALTHY_SCENARIOS, healthyScorePanel, GEN_SIGMA_BY_GEN, MEAS_SIGMA } from './canary-sim.js';
 import { gCurve, validityHorizon, lambda, iccOf } from './exchangeability-drift.js';
 
 type Knobs = (typeof HEALTHY_SCENARIOS)[string];
 
-/** canary-sim's per-generation noise scale and measurement noise (canary-sim.ts:266, :331). */
-export const GEN_SIGMA = 0.010;
-export const MEAS_SIGMA = 0.005;
-export const RACK_SIZE = 72;
-
-function rng(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a |= 0; a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-const norm = (r: () => number): number => {
-  const u = Math.max(r(), 1e-12), v = r();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-};
+/**
+ * Per-execution noise of the block this tool measures, IMPORTED from canary-sim rather than copied.
+ *
+ * A SECOND MIRROR ERROR, found the same day as the interference one: this file used to declare
+ * `GEN_SIGMA = 0.010` locally. That is generation ONE's noise scale. The panel selects a gen-ZERO
+ * block, whose SD is 0.008 — so the old model overstated within-unit noise by 25%, inflating the
+ * denominator of the ICC and DEFLATING every θ̂ it reported. Same species of bug as the missing
+ * interference channel, same direction (unsafe), and it survived for the same reason: a constant was
+ * copied instead of imported.
+ */
+export const GEN_SIGMA = GEN_SIGMA_BY_GEN[0];
+export { MEAS_SIGMA };
 
 export interface Panel { /** scores[unit][round] */ scores: number[][]; hours: number[] }
 
 /**
- * Generate a healthy score panel for one block key: `nUnits` units, `nRounds` executions each,
- * spaced `hoursBetween` apart. Mirrors canary-sim `execScore` minus faults.
+ * Healthy score panel for one block key: `nUnits` units, `nRounds` executions each, spaced
+ * `hoursBetween` apart.
+ *
+ * DELEGATES TO `canary-sim.healthyScorePanel`, which calls the REAL `execScore`. It used to be a
+ * hand-written mirror of `execScore` here, and the mirror was wrong: it omitted
+ * `interferenceCoef · hostLoad(...)` entirely. See the note at the top of this file.
  */
 export function healthyPanel(k: Knobs, seed: number, nUnits = 1440, nRounds = 40, hoursBetween = 132): Panel {
-  const r = rng(seed);
-  const nRacks = Math.ceil(nUnits / RACK_SIZE);
-  const rackOf = Array.from({ length: nUnits }, (_, g) => Math.floor(g / RACK_SIZE));
-  const rackStatic = Array.from({ length: nRacks }, () => norm(r) * k.rackStaticSd);
-  const rackNoiseMult = Array.from({ length: nRacks }, () => Math.exp(norm(r) * k.heteroRackSd));
-  const agingSlope = Array.from({ length: nUnits }, () => Math.abs(norm(r)) * k.agingSdPerDay);
-  const unitOffset = Array.from({ length: nUnits }, () => (k.unitOffsetSd > 0 ? norm(r) * k.unitOffsetSd : 0));
-  const hidden = Array.from({ length: nUnits }, () => (r() < k.hiddenStratumFrac ? 1 : 0));
-  // rack OU state (H2), mean-reverting with time constant rackOuTauH
-  const ou = new Float64Array(nRacks);
-  const phi = Math.exp(-hoursBetween / Math.max(k.rackOuTauH, 1e-9));
-  const scores: number[][] = Array.from({ length: nUnits }, () => []);
-  const hours: number[] = [];
-
-  for (let t = 0; t < nRounds; t++) {
-    const tHours = t * hoursBetween, day = tHours / 24;
-    hours.push(tHours);
-    for (let i = 0; i < nRacks; i++) ou[i] = phi * ou[i] + Math.sqrt(1 - phi * phi) * norm(r) * k.rackOuSd;
-    for (let g = 0; g < nUnits; g++) {
-      const rk = rackOf[g];
-      let rel = 0;
-      // round-common terms (drift / steps) are omitted: they cancel in a within-round rank and are
-      // removed again by the demeaning below. Including them would change nothing but the noise.
-      //
-      // Execution time carries a uniform jitter within the revisit interval, because placement is
-      // randomised in time as well as in space. Without it, a spacing that is a multiple of 24 h
-      // pins every execution to the same phase and the H4 diurnal term vanishes identically —
-      // which silently reported θ(H4) = 0 on the first run of this tool.
-      const tExec = tHours + r() * hoursBetween;
-      rel += k.diurnalAmp * Math.sin((2 * Math.PI * (tExec % 24)) / 24) * (0.5 + (g % 7) / 7);
-      rel += rackStatic[rk] + ou[rk];
-      rel += agingSlope[g] * day;
-      rel += unitOffset[g];
-      if (hidden[g]) rel += k.hiddenStratumOffset;
-      const sigma = GEN_SIGMA * rackNoiseMult[rk];
-      rel += sigma * norm(r) + MEAS_SIGMA * norm(r);
-      scores[g].push(rel);
-    }
-  }
+  const { scores, hours } = healthyScorePanel(k, { nUnits, nRounds, hoursBetween, seed });
   return { scores, hours };
 }
 

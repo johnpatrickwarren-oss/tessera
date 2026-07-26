@@ -74,10 +74,14 @@ test('lag-0 normalisation and monotone decay for a mean-reverting process', () =
   for (let i = 1; i < ac.length; i++) assert.ok(ac[i] <= ac[i - 1] + 0.02, `autocorr should decay: ${ac.join(',')}`);
 });
 
-test('the panel generator mirrors canary-sim knob semantics', () => {
+test('the panel IS canary-sim (no mirror): noise scale and knob monotonicity bind to execScore', () => {
   // per-execution noise is genSigma ⊕ measurement noise …
   const flat = { ...HEALTHY_SCENARIOS.H1, rackStaticSd: 0, rackOuSd: 0, heteroRackSd: 0, diurnalAmp: 0, hiddenStratumFrac: 0, agingSdPerDay: 0 };
   const { sigmaExec } = estimateIcc(roundDemean(healthyPanel(flat, 3, 1200, 30)));
+  // GEN_SIGMA is now imported from canary-sim (gen 0 = 0.008), not declared here. When this file
+  // declared its own GEN_SIGMA = 0.010 — generation ONE's scale — this assertion PASSED against the
+  // mirror and would have failed against the real score function. It is now the other way round,
+  // which is the point: the check binds to the shipped model.
   const expected = Math.sqrt(GEN_SIGMA ** 2 + MEAS_SIGMA ** 2);
   assert.ok(Math.abs(sigmaExec - expected) / expected < 0.05, `σ_exec ${sigmaExec} vs expected ${expected}`);
 
@@ -98,35 +102,47 @@ test('null floor is small and H1 sits at it — the iid scenario has no persiste
   assert.equal(h1.aboveFloor, false, 'H1 must not register measurable persistent heterogeneity');
 });
 
-test('H15–H17 hit their designed ICC targets (the scenarios E1 was missing)', () => {
-  // sigma_exec = sqrt(0.010^2 + 0.005^2); unitOffsetSd = theta * sigma_exec.
-  const want: Record<string, number> = { H15: 0.093, H16: 0.010, H17: 0.265 };
+test('H15–H17 ICC, MEASURED ON THE CORRECTED SCALE (the labels were the thing that was wrong)', () => {
+  // These scenarios were TUNED against the old biased estimator, so their names ("at-target",
+  // "mild", "severe") encode ICC figures that were never real. The DGP has not changed and the
+  // PAGING results measured on them are untouched — the simulation always included interference.
+  // What was wrong is the ICC axis they were plotted against. On the corrected scale:
+  //   H16 "mild"      designed 1.0%  → actually 1.49%
+  //   H15 "at-target" designed 9.3%  → actually 12.40%
+  //   H17 "severe"    designed 26.5% → actually 32.97%
+  const want: Record<string, number> = { H15: 0.124, H16: 0.0149, H17: 0.330 };
   for (const [key, target] of Object.entries(want)) {
     const { icc } = estimateIcc(roundDemean(healthyPanel(HEALTHY_SCENARIOS[key], 20260725, 1440, 40)));
-    assert.ok(Math.abs(icc - target) / target < 0.12, `${key}: ICC ${icc} vs target ${target}`);
+    assert.ok(Math.abs(icc - target) / target < 0.12, `${key}: ICC ${icc} vs corrected ${target}`);
   }
-  // H15 sits at the corrected design target (P7: ICC <= 9.5% at alpha=1e-3), H17 well past it.
+  // The ORDERING and the separation are what the scenarios are for, and both survive.
   const icc15 = estimateIcc(roundDemean(healthyPanel(HEALTHY_SCENARIOS.H15, 1, 1440, 40))).icc;
   const icc17 = estimateIcc(roundDemean(healthyPanel(HEALTHY_SCENARIOS.H17, 1, 1440, 40))).icc;
-  assert.ok(icc15 < 0.11 && icc17 > 0.2, `H15 ${icc15}, H17 ${icc17}`);
+  assert.ok(icc15 > 0.10 && icc15 < 0.14, `H15 ${icc15}`);
+  assert.ok(icc17 > 0.28, `H17 ${icc17}`);
+  assert.ok(icc17 > icc15, 'severe must exceed at-target');
 });
 
-test('H16 reads as "no measurable heterogeneity" from ESTIMATOR POWER, not from the DGP', () => {
-  // At the report's default panel (1440 units x 40 rounds) the lag-autocorrelation noise floor is
-  // 3/sqrt(1440*39) ~ 0.0126, while H16's ICC ~ 0.0103 puts r_1 just below it — so tau returns the
-  // "no persistence" sentinel even though the offset is static by construction. Widen the panel and
-  // the persistence is unmistakable. Documented so nobody reads the report's H16 row as a DGP fact.
+test('H16 is now MEASURABLE — the corrected estimator recovers what the biased one could not', () => {
+  // This test used to assert the opposite: that H16 read as "no measurable heterogeneity" at the
+  // default panel and only revealed itself when widened, because r_1 fell under the autocorrelation
+  // noise floor. That was a POWER story told about a BIAS. With the interference channel restored
+  // and the gen-0 noise scale corrected, H16's ICC is ~1.49% and it clears the floor outright.
+  const { icc, theta } = estimateIcc(roundDemean(healthyPanel(HEALTHY_SCENARIOS.H16, 20260725, 1440, 40)));
+  assert.ok(icc > 0.012 && icc < 0.018, `H16 ICC on the corrected scale, got ${icc}`);
+  assert.ok(theta > nullFloorTheta(20260725, 1440, 40), 'H16 must now clear the estimator noise floor');
+  // and with a wider panel the persistence is still unmistakable
   const wide = roundDemean(healthyPanel(HEALTHY_SCENARIOS.H16, 7, 6000, 60));
-  const { icc } = estimateIcc(wide);
-  assert.ok(icc > 0.008 && icc < 0.013, `H16 ICC should still be ~1%, got ${icc}`);
-  assert.ok(estimateTau(wide, icc) > 20, 'with enough data H16 must read as long-persistence');
+  assert.ok(estimateTau(wide, estimateIcc(wide).icc) > 20, 'H16 must read as long-persistence');
 });
 
-test('adding the unitOffsetSd knob left every pre-existing scenario byte-identical', () => {
-  // The knob draws no rng at 0, so H1-H14 must reproduce the committed theta/tau table exactly.
-  // If this fails, every figure in research/2026-07-25-theta-tau-measurement.md moved.
+test('the unitOffsetSd knob still draws no rng at 0 — pre-existing scenarios keep their DGP', () => {
+  // Committed theta table, RE-BASELINED 2026-07-26 when the estimator stopped mirroring execScore
+  // and started calling it (A2-host). The DGP did not move; the MEASUREMENT of it did. H1 and H4 now
+  // read exactly 0 rather than ~0.027 — both are iid in the persistent channel, so 0 is the correct
+  // answer and the old nonzero values were estimator noise on an inflated scale.
   const published: Record<string, number> = {
-    H1: 0.0277, H2: 0.3538, H4: 0.0270, H8: 0.2032, H12: 0.1197, H14: 0.2965,
+    H1: 0.0000, H2: 0.3481, H4: 0.0000, H8: 0.2025, H12: 0.1422, H14: 0.3224,
   };
   for (const [key, theta] of Object.entries(published)) {
     const got = estimateIcc(roundDemean(healthyPanel(HEALTHY_SCENARIOS[key], 20260725, 1440, 40))).theta;
@@ -137,28 +153,47 @@ test('adding the unitOffsetSd knob left every pre-existing scenario byte-identic
   }
 });
 
-test('MAIN FINDING: of the ORIGINAL 14, only 4 carry unit-level persistent heterogeneity', () => {
+test('MAIN FINDING, REVISED: 6 of the ORIGINAL 14 carry unit-level persistent heterogeneity', () => {
   const rows = scenarioTable();
-  // H15-H17 were added in 2026-07-26 precisely because the original family lacked this; exclude
-  // them so the finding about the ORIGINAL family stays testable.
+  // H15-H17 were added in 2026-07-26 precisely because the original family lacked enough of this;
+  // exclude them so the finding about the ORIGINAL family stays testable.
   const orig = rows.filter((r) => !/^H1[567] /.test(r.name));
   const hot = orig.filter((r) => r.aboveFloor).map((r) => r.name.split(' ')[0]).sort();
-  assert.deepEqual(hot, ['H12', 'H14', 'H2', 'H8'].sort(),
-    `expected exactly H2/H8/H12/H14 above the floor, got ${hot.join(',')}`);
+  // WAS four (H2/H8/H12/H14). H10 and H11 joined when the estimator stopped mirroring execScore and
+  // picked up `interferenceCoef · hostLoad(...)` — and they are precisely the two scenarios with the
+  // largest interferenceCoef (0.008, 0.010). The old file predicted this in a comment and could not
+  // act on it. H6/H7 (coef 0.006) remain below the floor, but on τ, not on θ.
+  assert.deepEqual(hot, ['H2', 'H8', 'H10', 'H11', 'H12', 'H14'].sort(),
+    `expected H2/H8/H10/H11/H12/H14 above the floor, got ${hot.join(',')}`);
   assert.equal(orig.length, 14, 'the original family is 14 scenarios');
   assert.ok(rows.some((r) => /^H15 /.test(r.name) && r.aboveFloor), 'H15 must register as persistent');
-  // and where it exists it is NOT small
+  // The horizon claim survives: wherever persistence exists, T* is short.
   for (const r of orig.filter((x) => x.aboveFloor)) {
-    assert.ok(r.theta > 0.1, `${r.name}: θ=${r.theta}`);
     assert.ok(r.tStarK30 <= 12, `${r.name}: T*=${r.tStarK30} rounds — the horizon is short`);
+  }
+  // But the "and it is never small" half does NOT survive: the two newcomers are small-θ.
+  const newcomers = orig.filter((r) => /^H1[01] /.test(r.name));
+  assert.equal(newcomers.length, 2);
+  for (const r of newcomers) {
+    assert.ok(r.theta > 0.05 && r.theta < 0.15,
+      `${r.name}: θ=${r.theta} — interference-driven persistence is REAL but modest`);
   }
 });
 
-test('τ ≫ T* wherever θ > 0 — mean reversion does NOT rescue the horizon', () => {
+test('τ > T* wherever θ > 0 — mean reversion still does not rescue the horizon, by a NARROWER margin', () => {
   for (const r of scenarioTable().filter((x) => x.aboveFloor)) {
-    assert.ok(r.tauRounds > 10 * r.tStarK30,
-      `${r.name}: τ=${r.tauRounds} must dwarf T*=${r.tStarK30} for the mitigation to be absent`);
+    assert.ok(r.tauRounds > 3 * r.tStarK30,
+      `${r.name}: τ=${r.tauRounds} must exceed T*=${r.tStarK30} for the mitigation to be absent`);
   }
+  // MARGIN NARROWED, and it is worth knowing why. The assertion used to demand τ > 10·T*. H8 now
+  // reads τ=37 against T*=6 — a 6× margin, not 10× — because host load contributes a FAST-reverting
+  // component (diurnal + per-call noise) that pulls the fitted τ of a mixed-channel scenario down.
+  // N8's conclusion holds (τ still comfortably exceeds T*, so reversion does not rescue anything),
+  // but the headroom is smaller than the pre-correction table implied. Do not re-tighten this to 10×
+  // without re-deriving it.
+  const h8 = scenarioTable().find((r) => /^H8 /.test(r.name))!;
+  assert.ok(h8.tauRounds / h8.tStarK30 > 3 && h8.tauRounds / h8.tStarK30 < 10,
+    `H8 margin is the binding one: τ/T* = ${h8.tauRounds / h8.tStarK30}`);
 });
 
 test('E1 ran just inside the horizon; production does not', () => {

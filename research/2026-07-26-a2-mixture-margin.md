@@ -84,10 +84,11 @@ postponing the crossing.
    where it did not. This reinforces rather than displaces the identifiability result: above δ₀ a
    benign persistent offset and a genuine fault are the same event.
 2. **But the loop path has materially more headroom than the accumulator path below δ₀**, and the
-   ICC budget should probably be set per-path rather than globally. The H15 finding (ICC 9.2% → 10
+   ICC budget should probably be set per-path rather than globally. The H15 finding (ICC 12.4% → 10
    pages/run against a Ville budget of 2.016) was measured on the accumulator path; whether the loop
    path tolerates more ICC at the same δ is now a well-posed and cheap question. **This does not
-   license raising the published target** — the verified-safe figure stays ICC ≲ 1% until measured.
+   license raising the published target** — the verified-safe figure stays ICC ≲ 1.5% (N11-corrected
+   axis) until measured.
 3. **The √E−1 adjuster is doing double duty.** It was adopted for SupFDR validity under optional
    stopping (Carefree, arXiv:2501.19360). Squaring the sub-δ₀ false-page probability is a second,
    unclaimed benefit, and it is the larger of the two barrier effects.

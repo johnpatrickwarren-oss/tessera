@@ -74,7 +74,7 @@ still crosses with probability `α^{κ(δ)} > 0`, and at fleet scale that bulk t
 *over*-predicted 3×. The rate is a Gaussian tail composed with a first-passage probability; § 4's
 warning that it is order-of-magnitude only was, if anything, understated.)
 
-**Withdraw ICC ≲ 9.5%.** What is measured: **ICC ≲ 1% is safe** to T=320, 9% is not. The true
+**Withdraw ICC ≲ 9.5%.** What is measured, ON THE AXIS CORRECTED BY N11 (2026-07-26 — the θ̂ estimator was biased down twice over; these figures were originally stated as 1% and 9%): **ICC ≲ 1.5% is safe** to T=320, 12.4% is not. The true
 boundary lies between and needs a sweep — added as A2-icc below. Design against **δ₀** (§ 2), which
 is stable and was not affected by this correction.
 

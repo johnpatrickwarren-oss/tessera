@@ -47,8 +47,46 @@
   ignore 1% benign persistent offsets. § 3's "hidden strata … a semantic boundary, not a bug" was
   right; the boundary now has a number.
   **Operationally:** paging degrades before FDR (P8 — per-family e-BH selections stayed at 0.00 in
-  every measured cell), so the qualifier belongs on the paging claim. Design target: **ICC ≲ 9.5%**
-  after block-keying at α=1e-3. Actionable single sentence: *enrich block keys until residual
+  every measured cell), so the qualifier belongs on the paging claim.
+
+  ⚠️ **DESIGN TARGET — REVISED THREE TIMES (all on 2026-07-26). USE ONLY THE LAST ROW.**
+  Every earlier figure is superseded. Two were wrong; the third was right but on a compressed axis:
+
+  | figure | where it came from | why it is dead |
+  |---|---|---|
+  | ICC ≲ 0.25% | the loose `Λ` bound | `Λ` is true but operationally vacuous — it saturates at N while realised degradation was 3.3× (P7) |
+  | ICC ≲ 9.5% | the steady-state first-passage rate | **falsified by measurement.** H15 sits AT it and runs **10.00 pages/run against a Ville budget of 2.016** — 5× over — and produces the first false e-BH selections seen in any cell. The steady-state form drops the sub-threshold `α^κ(δ)` bulk term |
+  | ICC ≲ 1% | H16 measured clean to T=320 | **not wrong, but stated on a compressed axis.** The θ̂ estimator mirrored `execScore` instead of calling it and was biased DOWN twice over (A2-host). H16's true ICC is 1.49%, so the safe boundary is higher than this figure claimed |
+  | **ICC ≲ 1.5%** | H16 on the corrected axis | **← live figure** |
+
+  **Verified-safe target is ICC ≲ 1.5%** (H16 is clean to T=320, and its true ICC is 1.49%). The
+  true boundary lies somewhere in **1.5–12.4%** and **has not been swept** (open item A2-icc) —
+  treat anything above 1.5% as unbudgeted, not as "probably fine".
+
+  **THE ICC AXIS WAS RESCALED 2026-07-26 (A2-host closed).** The estimator behind every earlier ICC
+  figure mirrored `canary-sim.execScore` rather than calling it, and the mirror was wrong twice, both
+  times biasing θ̂ down: it omitted the interference channel, and it used generation 1's noise scale
+  for a generation 0 block. On the corrected scale H16 reads 1.49% (labelled 1.0%), H15 reads 12.40%
+  (labelled 9.2%), H17 reads 32.97% (labelled 26.5%).
+
+  **No paging result changed** — the simulation always included interference; only the axis was
+  compressed, by ~1.3–1.5×. So the figures were internally consistent and the ≲1% advice was, by
+  luck, conservative rather than dangerous. The real exposure was external: an ICC measured on real
+  telemetry with a correct estimator would have been compared against these numbers and misread by
+  ~1.4×, which is precisely the collision A2-θ-real was heading for.
+
+  **One caveat remains on the number:**
+  1. **It is a single global number covering two paths with different exposure.** The 12.4% breakage
+     was measured on the ACCUMULATOR path. The loop path (`geometricMixtureEValue`) carries a much
+     higher barrier and attenuates false pages ~39× at δ=0.3 — but ~1× at δ₀, so the margin is real
+     below δ₀ and absent at it (N9). Per-path budgeting is well-posed but unmeasured; until it is,
+     the single ≲1% target governs both.
+
+  **Design against δ₀, not against a rate.** δ₀(θ) = √(a₀² + (1+a₀²)θ²) with a₀ = 0.9128 moves only
+  ~10% over θ ∈ [0, 0.5], whereas the rates above have already been wrong twice. Treat any paging
+  rate as order-of-magnitude.
+
+  Actionable single sentence, unchanged and still the point: *enrich block keys until residual
   persistent heterogeneity is below the fault size you care about detecting.*
 - **Status:** PROPOSED. Design + full simulation program built and run (`tools/canary-sim.ts`,
   `tools/canary-experiments.ts`, `test/canary-sim.test.ts` — 10 tests; results in

@@ -46,7 +46,14 @@ construction validity and revoke (B→A) when it breaks.
   RESEARCH-INDEX N7/N8/P6–P8; ADR 0023 CORRECTION 2).** Per-round conformal validity is EXACT and
   does NOT survive accumulation: `E[M_T] = E_δ[g(δ)^T] > 1` for T ≥ 2 whenever persistent unit
   heterogeneity exists (P6). The Λ bound is TRUE and OPERATIONALLY VACUOUS — the operational form is
-  a drift/first-passage condition; design target **ICC ≲ 9.5%** @ α=1e-3, superseding 0.25% (P7).
+  a drift/first-passage condition. ⚠️ **DESIGN TARGET REVISED THREE TIMES — use only ICC ≲ 1.5%.**
+  0.25% and 9.5% were wrong; 1% was right but on a compressed axis. The θ̂ estimator MIRRORED
+  `canary-sim.execScore` instead of calling it and was biased down twice over — it dropped the
+  interference channel and used gen-1's noise scale for a gen-0 block (**A2-host, CLOSED
+  2026-07-26**: the mirror is gone, `healthyPanel` now calls the real `execScore`). On the corrected
+  axis H16 = 1.49%, H15 = 12.40%, H17 = 32.97%; **no paging result moved**, only the axis. The
+  1.5–12.4% boundary is UNSWEPT (A2-icc). Design against δ₀, stable to ~10% over θ ∈ [0,0.5]; treat
+  any rate as order-of-magnitude (P7).
   Mean reversion measured CLOSED-negative — τ̂ ≥ 20× every horizon (N8). **Paging fails BEFORE
   FDR** (P8): A/A to T=320 on the shipped primitives, H2 (ICC 11%) breaches its Ville budget 3.3×
   while per-family e-BH false selections stayed **0.00 in every cell**; the pooled-marginal
