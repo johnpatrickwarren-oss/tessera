@@ -55,6 +55,33 @@ how long crossing takes, not whether it eventually happens. So:
 That is the guarantee statement the product should carry. It is interpretable, it is a property of
 the *design* rather than of a horizon, and it replaces a quantity (Λ) that cannot be measured.
 
+## ⚠️ CORRECTION (2026-07-26) — the ICC target in § 3 is measurably too permissive
+
+§ 3 derives **ICC ≲ 9.5%** from the steady-state condition `N·P(δ ≥ δ₀) ≤ N·α`. Direct measurement
+on the newly-added unit-persistence scenarios (H15–H17, `canary-sim.ts`; A/A, N=2016, K=30,
+α=10⁻³, Ville budget 2.016 pages/run) says otherwise:
+
+| scenario | ICC | pages/run at T=320 | vs budget | false e-BH selections |
+|---|---|---|---|---|
+| H16 | 1.0% | **0.00** | safe at every T ≤ 320 | 0.00 |
+| **H15** | **9.2%** | **10.00** | **5× over** (breaches ≈ T=60) | **3.00** |
+| H17 | 26.5% | 90.75 | 45× over | 63.75 |
+
+H15 sits *at* the derived target and runs 5× over budget. The steady-state form under-counts because
+it keeps only the `δ ≥ δ₀` population and drops the sub-threshold contribution — every unit below δ₀
+still crosses with probability `α^{κ(δ)} > 0`, and at fleet scale that bulk term is not negligible.
+(Note this misses in the opposite direction from § 4's H2 comparison, where the diffusion form
+*over*-predicted 3×. The rate is a Gaussian tail composed with a first-passage probability; § 4's
+warning that it is order-of-magnitude only was, if anything, understated.)
+
+**Withdraw ICC ≲ 9.5%.** What is measured: **ICC ≲ 1% is safe** to T=320, 9% is not. The true
+boundary lies between and needs a sweep — added as A2-icc below. Design against **δ₀** (§ 2), which
+is stable and was not affected by this correction.
+
+**Second finding:** H15 is the first cell in which **false e-BH selections appear at all** (3.00 at
+T=320; H17 reaches 63.75). This refines P8 — per-family FDR is markedly more robust than paging, but
+it is not immune; it breaks later and at higher heterogeneity, not never.
+
 ## 3. The design target was 36× too strict
 
 The fleet rate `N·P(δ ≥ δ₀)` with `δ ~ N(0,θ²)` and `δ₀ ≈ 1` stays inside the Ville budget `N·α`
