@@ -35,8 +35,9 @@
      the same identity that gives `Λ(1) = 1`. So its miss rate against persistent-heterogeneity drift
      is **β = 1**, and § 5's "catches broad design breaks" cannot be relied on here. The gated
      guarantee is `sup FDR ≤ max(q, β)` and β has never been measured for any violation class.
-  3. **The E1 calibration table is weaker evidence than it reads.** Ten of the fourteen healthy
-     scenarios contain no unit-level persistent heterogeneity at all — the family varies drift, steps
+  3. **The E1 calibration table is weaker evidence than it reads.** EIGHT of the fourteen healthy
+     scenarios contain no unit-level persistent heterogeneity at all (this read "ten" until N11
+     corrected the estimator; H10 and H11 do carry it, at ~1%) — the family varies drift, steps
      and common-mode, which a within-round rank cancels *by construction* — and at β=0.05% a unit
      accumulates only **T ≈ 5 rounds** over the whole 60-day horizon. E1 could not have detected the
      accumulation effect; it is not evidence against it.

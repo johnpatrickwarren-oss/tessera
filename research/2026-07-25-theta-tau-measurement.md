@@ -79,15 +79,19 @@ with the same channel at larger `interferenceCoef`, do persist.
 > the banner at the top). They are the two scenarios with the largest `interferenceCoef`, i.e. exactly
 > the ones § 7's threat-to-validity predicted. The rest of this section's reasoning stands.
 
-H1, H3, H4, H5, H6, H7, H9, H10, H11, H13 are at the floor with τ̂ ≈ 0. Looking at the knobs, that is
-by construction rather than by accident: the E1 family varies `globalDriftPerDay`, `regimeStepDay`,
-`commonModeStepDay`, `missingRate`, `placementBias`, `schedulerChangeDay` — every one of which is a
-**round-common or fleet-common** effect, and a within-round rank cancels those exactly. Only four
-scenarios put a persistent term on an individual unit: `rackStaticSd` (H2, H8, H14),
-`hiddenStratumOffset` (H12), `agingSdPerDay` (H14).
+**H1, H3, H4, H5, H6, H7, H9, H13** are at the floor (H6/H7 clear the θ floor but fail on τ̂ = 1.0 —
+fast-reverting host load, no persistence). Looking at the knobs, that is by construction rather than
+by accident: the E1 family varies `globalDriftPerDay`, `regimeStepDay`, `commonModeStepDay`,
+`missingRate`, `placementBias`, `schedulerChangeDay` — every one of which is a **round-common or
+fleet-common** effect, and a within-round rank cancels those exactly.
+
+Six scenarios put a persistent term on an individual unit: `rackStaticSd` (H2, H8, H14),
+`hiddenStratumOffset` (H12), `agingSdPerDay` (H14), and — via `interferenceCoef · hostLoad`, which
+carries a persistent per-HOST component the original analysis overlooked — **H10 and H11**.
 
 So E1's headline — *exact calibration in every scenario, every quarter* — is doing less work than it
-appears. For ten of the fourteen there is nothing for the accumulator to compound, and the per-round
+appears. For eight of the fourteen (ten as first measured — see the § 2 banner) there is nothing for
+the accumulator to compound, and the per-round
 result (Λ(1) = 1 exactly) is guaranteed by the A2 identity regardless of θ. **The scenario family was
 designed to stress drift and common-mode, which the design defeats by construction. It was not
 designed to stress unit-level persistence, which is the thing that breaks the accumulator.**

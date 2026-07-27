@@ -96,7 +96,8 @@ the previous report implied.
 - The identity (★) and Proposition A2 — unaffected; P1 is a direct confirmation of its first clause.
 - `T* ≈ 0.592/θ` as the horizon at which the **bound** doubles — correct as stated, but it is a bound
   horizon, not an operational one. The operational horizon measured here is ~30× longer.
-- The θ/τ measurement — unaffected. Ten of fourteen E1 scenarios still carry no unit-level persistent
+- The θ/τ measurement — ⚠️ RESCALED by N11 (2026-07-26), see that report's banner. EIGHT of fourteen
+  (not ten) E1 scenarios carry no unit-level persistent
   heterogeneity, and τ ≫ T* still holds.
 - The claim that E1 could not have detected this — **strengthened**. E1's T ≈ 5 is 20× below where
   the effect becomes visible even in the worst scenario.
