@@ -3,9 +3,9 @@
 > **SINGLE SOURCE OF TRUTH for current status** (date · suite · what's built · what's next). `STATE.md` is the
 > durable decision/arc trail (history); `README.md` defers here for the live count. Keep this header current.
 
-**Date:** 2026-07-27 · **Branch:** `main` (in sync with origin, `04d5385`) · **clustersynth
+**Date:** 2026-07-27 · **Branch:** `main` (in sync with origin, `270ac0d`) · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 962 tests · 955 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 976 tests · 969 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -25,6 +25,24 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## What shipped (newest first)
+
+- **A2-DISP-EBH CLOSED + THE PAIR GATE ENFORCED (2026-07-27, `fcc5d6f`/`791cdfc`/`304aa51`;
+  `research/2026-07-27-a2-disp-ebh-boundary.md`; RESEARCH-INDEX N12 + P8/P9 amendments; ADR 0023
+  CORR 3 update).** ς-sweep on the shipped primitives: paging breach onset narrows to
+  **ς̂ ∈ (0.244, 0.305)**; e-BH onset **ς̂ ≈ 0.31 (rare, seed-dependent) / robust from 0.43** —
+  the ς ≲ 0.15 gate keeps ~2× margin. ⚠️ **N12: the fleet-size protection REVERSES under
+  dispersion** — λ is rack-shared, so the fleet max is extreme-value in the number of RACKS, and
+  one extreme rack cascades through e-BH's step-up (N/(q·k)): false selections grow SUPERLINEARLY
+  with N (0 / 3 / 26.5 per run at N = 1008/2016/4032, ς̂ = 0.61; per-unit rate grows; first
+  selection earlier). Scale is exposure, not protection; never argue "N/q is far away."
+  **Enforcement:** `tools/dispersion-monitor.ts` (believed-healthy panel → ς̂ + ICC vs the pair
+  targets, undecided-below-20-rounds ⇒ not passing, sticky demotion) →
+  `EmitterContract.heterogeneityGatePassing`, required by `isFdrBearing` for
+  `constructionFamily='conformal_rank'` in EITHER FDR-bearing class (a Lean-proved per-round rank
+  e-value still accumulates drift) — the runtime form of CORR 2's missing validity rung; the
+  pooled-marginal monitors are provably blind here (β = 1). Contrast family untouched. 14 tests.
+  Open: A2-disp-ebh-scale (e-BH onset vs N at ≥ 10k units — extreme-rack statistics can only pull
+  it down); A2-disp-real now waits on the ~09-21 gate (mini outage).
 
 - **PROOF-CARRYING E-VALUES (2026-07-26 — ADR 0025, `89dfeca`).** Five of the six CRITICAL findings
   in the 2026-07-02 math audit are the SAME bug: a non-e-value entering the FDR-bearing e-BH path.
