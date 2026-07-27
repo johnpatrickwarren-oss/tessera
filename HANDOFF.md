@@ -3,7 +3,7 @@
 > **SINGLE SOURCE OF TRUTH for current status** (date · suite · what's built · what's next). `STATE.md` is the
 > durable decision/arc trail (history); `README.md` defers here for the live count. Keep this header current.
 
-**Date:** 2026-07-26 · **Branch:** `main` (in sync with origin, `563ecc2`) · **clustersynth
+**Date:** 2026-07-26 · **Branch:** `main` (in sync with origin, `fe5d61d`) · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
 **Suite:** 940 tests · 933 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
