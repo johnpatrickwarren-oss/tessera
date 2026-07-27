@@ -1,7 +1,12 @@
-# SPEC (DRAFT) — Probe candidates for the Apple Silicon real-probe pilot
+# SPEC — Probes for the Apple Silicon real-probe pilot
 
-- **Date:** 2026-07-27
-- **Status:** **DRAFT — candidates for decision, nothing here is committed.** This is the one
+- **Date:** 2026-07-27 (drafted and DECIDED same day)
+- **Status:** **DECIDED — § 4's asks are resolved; § 0 is the committed design.** Decisions
+  (2026-07-27): build the minimal trio P1-int + P4-mem + P5-gpu (P3-amx deferred until the trio
+  lands); cadence 2 h ± U(0, 2 h); energy channel deferred to phase 2; P6-thermal stays cut.
+  Implementation: `tools/probe/probes.swift` (one compiled binary — a compiled probe avoids the
+  JIT warm-up that would contaminate the duration channel) + `tools/probe-runner.ts` (scheduler,
+  lanes, ledger, scores) + `test/probe-runner.test.ts`. This was the one
   piece of pilot preparation that is NOT gated on the mac mini's 56-day baseline window
   (~2026-08-29): what the controlled probe workload actually *is* on Apple Silicon. The canary
   program's probes are abstract (`canary-sim.execScore`); `dcgmi`-style GPU diagnostics do not
@@ -13,7 +18,7 @@
   `tools/heterogeneity-estimate.ts`; both floors (δ₀ location, λ₀ dispersion) computable from
   `tools/tail-probability.ts` / `tools/dispersion-drift.ts`.
 
-## 0. Recommendation (decide against this)
+## 0. Design (as decided)
 
 Build the **minimal orthogonal trio** — P1-int (CPU/ALU, correctness-first), P4-mem (memory
 subsystem, duration-first), P5-gpu (Metal compute, both channels) — at a **2 h ± U(0, 2 h)**
@@ -84,7 +89,7 @@ a second phase so the pilot's scoring path stays identical to the validated two-
   execution window goes to an exclusion ledger (`probe-windows.ndjson`) so passive-baseline
   consumers can excise probe intervals; nothing runs before the 56-day gate clears.
 
-## 4. Decision asks
+## 4. Decision asks — RESOLVED 2026-07-27 (per recommendation)
 
 1. Which candidates to build (recommendation: P1-int, P4-mem, P5-gpu; P3-amx fourth).
 2. Cadence (recommendation: 2 h ± U(0, 2 h)).

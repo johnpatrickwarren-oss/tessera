@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Template — edit the three paths, keep notBefore in the config (the daemon refuses to start
+     before it; the mini's passive-baseline gate is 2026-08-29). SEPARATE from the powermetrics
+     collector daemon by design (SPEC-probe-pilot-apple-silicon.md § 3). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.tessera.probe-runner</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>/opt/tessera/probe-runner.js</string>
+    <string>--daemon</string>
+    <string>--config</string>
+    <string>/opt/tessera/probe-config.json</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/var/log/tessera-probe-runner.log</string>
+  <key>StandardErrorPath</key><string>/var/log/tessera-probe-runner.err</string>
+</dict>
+</plist>

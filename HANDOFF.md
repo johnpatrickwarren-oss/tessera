@@ -5,7 +5,7 @@
 
 **Date:** 2026-07-26 · **Branch:** `main` (in sync with origin, `d3dfa55`) · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 950 tests · 943 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 957 tests · 950 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -358,10 +358,13 @@ step toward wider coverage is **job-aware peer selection** (match peers by workl
 monitor research is the other smaller thread. Nothing is mid-flight or broken.
 
 Newer threads (2026-07-26): the **mini real-probe pilot** once the 56-day baseline gate clears (~08-29) —
-probe-workload candidates DRAFTED (`docs/SPEC-probe-pilot-apple-silicon-DRAFT.md`, 2026-07-27: minimal trio
-P1-int/P4-mem/P5-gpu, 2h±jitter cadence, duration+error channels, exclusion ledger; NB no core pinning on
-arm64 macOS ⇒ worker-slot panel is an A/A null by construction — instrument qualification, not fleet ς̂/θ̂;
-awaiting decision on the § 4 asks);
+probe spec DECIDED + BUILT (2026-07-27, `docs/SPEC-probe-pilot-apple-silicon.md`): trio P1-int/P4-mem/P5-gpu
+in one compiled Swift binary (`tools/probe/`, goldens baked, P5 = CPU-vs-GPU cross-check every run) +
+`tools/probe-runner.ts` (2h±U(0,2h) jitter, P/E lanes via taskpolicy -b — verified 3.5× duration separation —
+GPU lane, block-key epochs on OS/binary change, scores + exclusion ledger ndjson, `notBefore` daemon gate for
+the mini, plist template + README). Verified end-to-end on the MBP (--once: 5 executions SDC-clean). Deploy to
+the mini ONLY after the gate (~08-29). NB no core pinning on arm64 macOS ⇒ worker-slot panel is an A/A null
+by construction — instrument qualification, not fleet ς̂/θ̂;
 **block-key enrichment** for the canary design (the one lever ADR 0023 CORRECTIONS 2+3 leave — drive residual
 persistent heterogeneity below the target fault size; measure achievable ICC **and ς** on real telemetry —
 the gate is now the pair ICC ≲ 4% AND ς ≲ 0.15, and `estimateDispersion` is the second instrument); the

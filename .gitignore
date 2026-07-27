@@ -33,3 +33,5 @@ bench/results/
 # (~141 KB, 72 shards) is committed so the e2e pipeline test runs in CI.
 test/_substrate/clustersynth-*.json
 !test/_substrate/clustersynth-gb200-s0.json
+probe-data/
+tools/probe/build/
