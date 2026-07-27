@@ -1,9 +1,16 @@
 # ADR 0025 — proof-carrying e-values: make the F1–F5 bug class unrepresentable
 
 - **Date:** 2026-07-26
-- **Status:** ACCEPTED (type + gate shipped, tests green); Lean discharge queue OPEN.
+- **Status:** ACCEPTED (type + gate shipped, tests green). Lean discharge (updated 2026-07-26,
+  same day, later session): **EValue.lean + EBH.lean SORRY-FREE and Conformal.lean § 1 proved —
+  the validity chain (exchangeability → exact rank → calibrator → e-value → e-BH → FDR ≤ q) is
+  machine-checked end to end**; only Conformal § 2 (the A2 accumulation identity) remains open.
+  Proving found four statement-level bugs the numerics had passed — see
+  `research/2026-07-26-lean-formalisation.md` § 3.
 - **Artifacts:** `tools/e-value.ts`, `certifiedFdrBenjaminiHochberg` in `tools/emitter-contract.ts`,
-  `test/e-value.test.ts` (18), `lean/` (never compiled — see `lean/README.md`).
+  `test/e-value.test.ts` (18), `lean/` (builds on Lean 4.32.1 + Mathlib v4.32.1 — see
+  `lean/README.md`; "never compiled" was true when this ADR was first written, that day's earlier
+  session).
 
 ## Problem
 

@@ -19,14 +19,33 @@
   are nonnegative, and the FDP is integrable. What it does *not* assume is anything about the joint
   law — which is the property the Mode-B architecture is built on.
 
-  **Still `sorry`:** `supAdjuster_integral` (one definite integral, the √E−1 adjuster's calibration
-  — separate from the FDR chain and nothing depends on it), `calibrate_isEValue`,
-  `tsum_convexMean_isEValue`, `rank_uniform`, and the whole A2 drift identity.
+  **THE VALIDITY CHAIN IS CLOSED (2026-07-26).** `EValue.lean` and `EBH.lean` are now SORRY-FREE:
+  `tsum_convexMean_isEValue`, `calibrate_isEValue`, and `supAdjuster_integral` are proved. So is
+  `Conformal.lean` § 1: `rank_uniform` (the randomised rank is EXACTLY Unif[0,1] under
+  exchangeability + independent jitter — ties and all, no continuity assumption),
+  `rank_superUniform`, and the composition `calibrated_rank_isEValue`. Chained with `fdr_le`:
 
-  **Read this precisely.** e-BH's FDR guarantee is machine-checked. Whether *Tessera's* quantities
-  satisfy its hypothesis is the A2 question — the drift identity, the first-passage rate,
-  everything that changed the product claim — and `Conformal.lean` is entirely `sorry`.
-  "Lean-verified" must not be read as covering it.
+      exchangeable block + independent Unif[0,1] jitter
+        → conformal rank exactly uniform → calibrator → e-value → e-BH → FDR ≤ q
+          under arbitrary dependence — machine-checked end to end, no informal step.
+
+  **Proving § 1 found FOUR statement-level bugs that simulation had validated as fine** (the
+  numerical checks below instantiate the intended objects and cannot see over-general quantifiers):
+  `tsum_convexMean_isEValue` was FALSE as stated (junk-value `∑'` made `hsum` vacuous for
+  non-summable weights; `Summable w` added); `calibrate_isEValue` lacked the measurability needed
+  for integrability (`Measurable p` added); `SuperUniform` was UNSATISFIABLE (quantified over
+  negative α; toReal ≥ 0); `rank_superUniform` had NO independence hypothesis and was FALSE
+  (adversarial jitter coupling, `P(p ≤ 1/4) = 1/2` at K = 1). Details in each file's header.
+
+  **Still `sorry`:** `Conformal.lean` § 2 only — the A2 drift identity and accumulation bound
+  (`marginal_validity`, `accumulator_mean`, `accumulator_ge_one`). The negative result (per-round
+  validity does not survive accumulation) remains prose + simulation.
+
+  **Read this precisely.** The guarantee holds GIVEN the design hypotheses: exchangeability of the
+  block scores (H-EX — a claim about the probe scheduler, deliberately not formalised, see
+  omissions) and an independent uniform jitter. What is discharged is everything from those
+  hypotheses to FDR control; what is not is whether the scheduler delivers them, and the A2
+  accumulation question for the serial product.
 
 ## Build
 
@@ -110,9 +129,9 @@ actually builds.
 | file | content |
 |---|---|
 | `core/TesseraCore.lean` | **PROVED.** e-BH in sorting-free form; `fdp_pointwise`; supporting `List.foldl max` characterisation (absent from core) |
-| `Tessera/EValue.lean` | `IsEValue`; **PROVED** `min_isEValue`, `convexMean_isEValue`; `sorry` for countable mixture + calibrator |
-| `Tessera/EBH.lean` | e-BH sorting-free; **PROVED end to end: `card_reject`, `fdp_pointwise`, `fdp_le_sum`, `fdr_le_of_pointwise`, `fdr_le`**; only the √e−1 integral is `sorry` |
-| `Tessera/Conformal.lean` | randomised rank exactly uniform under exchangeability; Proposition A2 (drift identity) |
+| `Tessera/EValue.lean` | **SORRY-FREE.** `IsEValue`; `min_isEValue`, `convexMean_isEValue`, `tsum_convexMean_isEValue`, `calibrate_isEValue` |
+| `Tessera/EBH.lean` | **SORRY-FREE.** e-BH sorting-free; `card_reject`, `fdp_pointwise`, `fdp_le_sum`, `fdr_le_of_pointwise`, `fdr_le`; `supAdjuster_integral` |
+| `Tessera/Conformal.lean` | **§ 1 PROVED**: `rank_uniform` (exact), `rank_superUniform`, `calibrated_rank_isEValue`; § 2 (Proposition A2 drift identity) still `sorry` |
 
 ## Priority order
 
@@ -127,11 +146,18 @@ actually builds.
 3. ~~**`EValue.min_isEValue`, `convexMean_isEValue`**~~ — **DONE.** Both discharge their
    certificates, and both turned out to hold for an ARBITRARY measure (`IsProbabilityMeasure`
    omitted) — surfaced by the unused-variable linter, not by me.
-4. **`Conformal.rank_uniform`** — a counting argument over `S_{K+1}`; no measure theory beyond the
-   pushforward.
-5. **`EValue.calibrate_isEValue`** — layer-cake / stochastic-dominance argument.
+4. ~~**`Conformal.rank_uniform`**~~ — **DONE (2026-07-26), exact uniformity, not merely
+   super-uniformity.** The deterministic core is the jitter-sum identity: for EVERY fixed score
+   vector, tie-class blocks `[E_v, E_v+C_v)` tile `[0, K+1)` and unit clamps telescope. Statement
+   repaired en route (the `hindep : True` placeholder became a real product-law hypothesis;
+   the independence-free `rank_superUniform` was refutable).
+5. ~~**`EValue.calibrate_isEValue`**~~ — **DONE (2026-07-26)**, layer-cake on both sides;
+   `Measurable p` added to the statement; integrability of `f` is FORCED by `∫₀¹ f = 1` via the
+   junk-value convention rather than assumed. Composition shipped as
+   `Conformal.calibrated_rank_isEValue`.
 6. **`Conformal.accumulator_mean`** — needs conditional expectation and disintegration; the first
-   genuinely measure-theoretic item, and the one that changed the product claim.
+   genuinely measure-theoretic item, and the one that changed the product claim. NOW THE ONLY
+   OPEN ITEM (with its two § 2 neighbours).
 
 ## Statement validation (the part that IS checked)
 

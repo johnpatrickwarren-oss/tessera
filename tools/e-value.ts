@@ -118,6 +118,7 @@ export const CERT = {
     claim: 'E[f(p)|F_{t−½}] ≤ 1 where p is a randomised conformal rank and f = mean_κ κp^{κ−1} (∫₀¹f = 1, f non-increasing).',
     evidence: 'theorem',
     source: 'ADR 0023; Prop A1 in research/2026-07-25-formal-statements-adaptivity-and-gating.md',
+    lean: 'Tessera.Conformal.calibrated_rank_isEValue',
     premises: [
       '(H-EX) conditional on F_{t−½} and on the realised block, the healthy members\' scores are exchangeable — VIOLATED by suspect-enriched peer drafting (measured: E4 FDP 0.144 ≈ 3q)',
       '(H-MON) faulty peers are stochastically no better than healthy ones (one-sided test)',
@@ -161,6 +162,7 @@ export const CERT = {
     claim: '√S − 1 applied to the running max S of a genuine e-process is a valid ALL-TIMES e-value: ∫₁^∞ (√e−1)/e² de = 1 exactly.',
     evidence: 'theorem',
     source: 'Carefree, arXiv:2501.19360 Thm 1; audit 2026-07-02 (confirmed exact; naive running-max e-BH leaks ≈1.08α)',
+    lean: 'Tessera.EBH.supAdjuster_integral',
     premises: ['the input running max is of a GENUINE e-process — applying this to an SR sum is exactly bug F3, which the type prevents'],
   },
   HALF_HALF_ACCUMULATOR: {
@@ -178,13 +180,16 @@ export const CERT = {
 /**
  * The Lean discharge queue: certificate id → the theorem in `lean/` that would discharge it.
  *
- * Deliberately NOT written into each certificate's `lean` field. That field means "names a
- * machine-checked theorem"; the Lean development has never been compiled (no toolchain in the
- * authoring environment — see lean/README.md), so filling it in would be false by its own
- * definition. When a theorem builds, move its name into the certificate and delete the row here.
+ * A certificate's `lean` field means "names a MACHINE-CHECKED theorem" — it is filled in only
+ * once the theorem actually builds (Lean 4.32.1 + Mathlib v4.32.1, `cd lean && lake build`).
+ * Rows stay here as the audit trail of HOW each statement was validated.
  *
- * `validated` records how the STATEMENT was checked in the absence of a proof — which is the part
- * that actually protects against formalising the wrong thing.
+ * `validated` records how the STATEMENT was checked independent of the proof — which is the part
+ * that actually protects against formalising the wrong thing. The 2026-07-26 proof pass showed
+ * why both are needed: FOUR statements simulation had passed were formally wrong (over-general
+ * quantifiers: junk-value ∑' weights, a missing measurability, SuperUniform over negative α, a
+ * missing independence hypothesis). Simulation instantiates the intended objects; only proving
+ * sees the whole quantifier.
  */
 export const LEAN_QUEUE: ReadonlyArray<{
   cert: string; theorem: string; status: 'sorry' | 'proved'; validated: string;
@@ -193,18 +198,20 @@ export const LEAN_QUEUE: ReadonlyArray<{
     validated: 'MACHINE-CHECKED (Lean 4.32.1 + Mathlib). Holds for an ARBITRARY measure — IsProbabilityMeasure is omitted, stronger than first stated. Also MC-checked on correlated inputs.' },
   { cert: 'convex-mean', theorem: 'Tessera.EValue.convexMean_isEValue', status: 'proved',
     validated: 'MACHINE-CHECKED (Lean 4.32.1 + Mathlib), likewise for an arbitrary measure. Also MC + weight-sum guard tests.' },
-  { cert: 'sup-adjusted-running-max', theorem: 'Tessera.EBH.supAdjuster_integral', status: 'sorry',
-    validated: 'MC: adjusted running max of a null e-process has mean ≤ 1 (test/supfdr.ts, test/e-value.test.ts)' },
-  { cert: 'conformal-rank-calibrated', theorem: 'Tessera.Conformal.rank_uniform', status: 'sorry',
-    validated: 'EXHAUSTIVE over S_{K+1} for K=2,3,4 vs shipped conformalP: E[p]=0.500000, E[p²]=0.333333' },
-  { cert: 'conformal-rank-calibrated', theorem: 'Tessera.EValue.calibrate_isEValue', status: 'sorry',
-    validated: '∫f=1 by substitution quadrature; antitone over 2e5 points (test/e-value.test.ts)' },
+  { cert: 'sup-adjusted-running-max', theorem: 'Tessera.EBH.supAdjuster_integral', status: 'proved',
+    validated: 'MACHINE-CHECKED 2026-07-26 (rpow computation; EBH.lean now sorry-free). Also MC: adjusted running max of a null e-process has mean ≤ 1 (test/supfdr.ts, test/e-value.test.ts)' },
+  { cert: 'conformal-rank-calibrated', theorem: 'Tessera.Conformal.rank_uniform', status: 'proved',
+    validated: 'MACHINE-CHECKED 2026-07-26, EXACT uniformity (ties and all, no continuity assumption). Statement REPAIRED en route: hindep:True placeholder → product-form joint law; the independence-free super-uniformity claim was FALSE (adversarial jitter coupling). Also exhaustive over S_{K+1} for K=2,3,4 vs shipped conformalP: E[p]=0.500000, E[p²]=0.333333' },
+  { cert: 'conformal-rank-calibrated', theorem: 'Tessera.EValue.calibrate_isEValue', status: 'proved',
+    validated: 'MACHINE-CHECKED 2026-07-26 (layer-cake both sides; Measurable p ADDED — required for integrability). Composed end to end as Tessera.Conformal.calibrated_rank_isEValue. Also ∫f=1 by substitution quadrature; antitone over 2e5 points (test/e-value.test.ts)' },
+  { cert: 'geometric-onset-mixture', theorem: 'Tessera.EValue.tsum_convexMean_isEValue', status: 'proved',
+    validated: 'MACHINE-CHECKED 2026-07-26. Summable w ADDED: the statement as first written was FALSE (junk-value ∑\' made the weight bound vacuous for non-summable w; constant weights + summable constants gave mean 2). Geometric weights are summable, so the shipped instance was never at risk — but the STATEMENT was.' },
   { cert: 'half-half-accumulator', theorem: 'Tessera.Conformal.accumulator_mean', status: 'sorry',
     validated: 'MC vs shipped rank construction (test/exchangeability-drift.test.ts)' },
   { cert: '(e-BH itself — not an EValue certificate)', theorem: 'Tessera.EBH.fdp_pointwise', status: 'proved',
     validated: 'MACHINE-CHECKED in lean/core (zero-dependency, no sorry). Definitions additionally verified to match the SHIPPED engine selection-for-selection over 60,000 instances / 100,542 selections, 0 mismatches; and the inequality itself over 995,245 engine selections, 0 violations, worst slack 0.0.' },
-  { cert: '(e-BH itself)', theorem: 'Tessera.EBH.fdr_le', status: 'sorry',
-    validated: 'follows from fdp_pointwise + linearity; the pointwise lemma is the checked part' },
+  { cert: '(e-BH itself)', theorem: 'Tessera.EBH.fdr_le', status: 'proved',
+    validated: 'MACHINE-CHECKED (no sorry beneath it): count_antitone → kStar_mem/le_kStar → card_reject → fdp_pointwise → fdp_le_sum → fdr_le_of_pointwise → fdr_le. Scope: GIVEN valid e-values — which conformal-rank-calibrated now also discharges formally for the canary construction.' },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

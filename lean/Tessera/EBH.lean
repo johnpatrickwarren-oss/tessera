@@ -19,11 +19,14 @@
     property the whole Mode-B architecture rests on, and it is now machine-checked.
 
     It says nothing about whether TESSERA's quantities satisfy the hypothesis. That is the A2
-    question, and `Conformal.lean` is entirely `sorry`.
+    question. As of 2026-07-26, `Conformal.lean` § 1 DISCHARGES it for the canary construction:
+    `Conformal.calibrated_rank_isEValue` (exchangeable block + independent Unif[0,1] jitter ⇒ the
+    calibrated conformal rank is an e-value) composes with `fdr_le` into a machine-checked chain
+    with no informal step. § 2 of that file (the A2 accumulation identity) remains `sorry`.
 
-    SORRY REMAINING IN THIS FILE: `supAdjuster_integral` only — ∫₁^∞ (√e−1)/e² de = 1. That is the
-    √E−1 adjuster's calibration, a separate calculus fact about SupFDR; it is NOT part of the e-BH
-    FDR guarantee and nothing above depends on it.
+    THIS FILE IS SORRY-FREE (since 2026-07-26): `supAdjuster_integral` — ∫₁^∞ (√e−1)/e² de = 1,
+    the √E−1 adjuster's calibration — is now proved as well (an rpow computation; it is separate
+    from, and nothing in, the e-BH FDR chain).
 
     TWO MISSING SIDE CONDITIONS SURFACED BY PROVING, both invisible to testing because every
     constructor happens to establish them:
@@ -313,7 +316,25 @@ noncomputable def supAdjuster (x : ℝ) : ℝ := if x ≤ 1 then 0 else Real.sqr
     `eSupAdjusted` takes an `EValue`, so F3 no longer type-checks. -/
 theorem supAdjuster_integral :
     ∫ x in Set.Ioi (1:ℝ), supAdjuster x / x ^ 2 = 1 := by
-  sorry
+  have hcong : ∀ x ∈ Set.Ioi (1:ℝ),
+      supAdjuster x / x ^ 2 = x ^ (-(3:ℝ)/2) - x ^ (-2:ℝ) := by
+    intro x hx
+    have hx1 : (1:ℝ) < x := hx
+    have hx0 : (0:ℝ) < x := lt_trans zero_lt_one hx1
+    calc supAdjuster x / x ^ 2
+        = (x ^ ((1:ℝ)/2) - 1) / x ^ ((2:ℝ)) := by
+          rw [supAdjuster, if_neg (not_le.2 hx1), Real.sqrt_eq_rpow, ← Real.rpow_natCast x 2]
+          norm_num
+      _ = x ^ ((1:ℝ)/2) / x ^ ((2:ℝ)) - 1 / x ^ ((2:ℝ)) := sub_div _ _ _
+      _ = x ^ ((1:ℝ)/2 - 2) - x ^ (-(2:ℝ)) := by
+          rw [← Real.rpow_sub hx0, one_div (x ^ ((2:ℝ))), ← Real.rpow_neg hx0.le]
+      _ = x ^ (-(3:ℝ)/2) - x ^ (-2:ℝ) := by norm_num
+  rw [setIntegral_congr_fun measurableSet_Ioi fun x hx => hcong x hx]
+  rw [integral_sub (integrableOn_Ioi_rpow_of_lt (by norm_num) zero_lt_one)
+    (integrableOn_Ioi_rpow_of_lt (by norm_num) zero_lt_one)]
+  rw [integral_Ioi_rpow_of_lt (by norm_num) zero_lt_one,
+    integral_Ioi_rpow_of_lt (by norm_num) zero_lt_one]
+  norm_num [Real.one_rpow]
 
 end EBH
 end Tessera

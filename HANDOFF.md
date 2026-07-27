@@ -39,10 +39,19 @@ construction validity and revoke (B→A) when it breaks.
   discharge queue and **NOW BUILDS (Lean 4.32.1 + Mathlib): `fdr_le` — e-BH controls FDR under
   arbitrary dependence — is PROVED with no `sorry` beneath it**, via `card_reject` → `fdp_pointwise`
   → `fdp_le_sum` → `fdr_le_of_pointwise`. `fdp_pointwise` is proved in BOTH representations
-  (`lean/core` over Nat/List, zero deps; `Tessera/` over Finset/ℝ) and they agree. Only
-  `supAdjuster_integral` is still `sorry` in that file, and it is a SupFDR fact outside the FDR
-  chain. ⚠️ Scope: this proves FDR is controlled GIVEN valid e-values; whether Tessera's are valid
-  is the A2 question and `Conformal.lean` is entirely `sorry`. The STATEMENTS were
+  (`lean/core` over Nat/List, zero deps; `Tessera/` over Finset/ℝ) and they agree.
+  **VALIDITY CHAIN CLOSED (2026-07-26 second pass): `EValue.lean` and `EBH.lean` are now
+  SORRY-FREE, and `Conformal.lean` § 1 is proved** — `rank_uniform` (the randomised conformal rank
+  is EXACTLY Unif[0,1] under exchangeability + independent jitter, ties and all),
+  `rank_superUniform`, `calibrate_isEValue`, `tsum_convexMean_isEValue`, `supAdjuster_integral`,
+  and the composition `Conformal.calibrated_rank_isEValue`. Chained with `fdr_le`: exchangeable
+  block + independent Unif[0,1] jitter → exact rank → calibrator → e-value → e-BH → FDR ≤ q, with
+  no informal step. Remaining scope: H-EX itself (a scheduler contract, deliberately unformalised)
+  and `Conformal.lean` § 2 (the A2 accumulation identity — still `sorry`, the one open Lean item).
+  **Proving § 1 found FOUR statement-level bugs simulation had passed** (junk-value `∑'` weights
+  made `tsum_convexMean` FALSE; `calibrate` lacked measurability; `SuperUniform` was UNSATISFIABLE
+  over negative α; `rank_superUniform` had NO independence hypothesis and was FALSE) — see
+  `research/2026-07-26-lean-formalisation.md` § 3. The STATEMENTS were
   validated numerically first (e-BH FDP lemma: 995,245 engine selections across five adversarial
   families, 0 violations, worst slack exactly 0.0; rank uniformity exhaustive over `S_{K+1}`,
   K=2–4). See `lean/README.md` + `LEAN_QUEUE`.
@@ -273,7 +282,8 @@ construction validity and revoke (B→A) when it breaks.
 - `decisions/0019–0025-*.md` — the architecture + follow-on ADRs (0023 canary program w/ corrections;
   0024 DSIPTS deferred; 0025 proof-carrying e-values).
 - `tools/e-value.ts` — opaque `EValue` + certified constructors/combinators + `EProcess` + `LEAN_QUEUE`
-  (ADR 0025); `lean/` — Lean discharge queue, NEVER compiled (all `sorry`).
+  (ADR 0025); `lean/` — Lean development, BUILDS (4.32.1 + Mathlib): EValue/EBH sorry-free,
+  Conformal § 1 proved, § 2 (A2) the only remaining `sorry`.
 - `tools/emitter-contract.ts` — validity_class gate (ADR 0019 #1) + `certifiedFdrBenjaminiHochberg`
   (the proof-carrying Mode-B e-BH entry point — prefer over `fdrBenjaminiHochberg`).
 - `tools/canary-sim.ts` + `tools/canary-experiments.ts` + `tools/canary-crosscheck.ts` — ADR 0023 program;
@@ -332,6 +342,7 @@ monitor research is the other smaller thread. Nothing is mid-flight or broken.
 Newer threads (2026-07-26): the **mini real-probe pilot** once the 56-day baseline gate clears (~08-29);
 **block-key enrichment** for the canary design (the one lever ADR 0023 CORRECTION 2 leaves — drive residual
 persistent heterogeneity below the target fault size; measure achievable ICC on real telemetry); the
-**Lean discharge queue** (`lean/` — set up a toolchain, replace `sorry`s, flip `Certificate.lean` fields);
+**Lean discharge queue** (`lean/` — only `Conformal.lean` § 2, the A2 accumulation identity, remains
+`sorry`; needs condExp/disintegration. `Certificate.lean` fields for the proved chain are flipped);
 per-call-site **migration to `certifiedFdrBenjaminiHochberg`**; and a **validity-class rung** for
 "exact per round, drift-limited across rounds" (Correction 2 item 1).
