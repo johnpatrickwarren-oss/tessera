@@ -234,6 +234,13 @@ export function scoreCounterBaseline(mon: ScenarioBundle, counter: string, R: nu
 }
 
 /** Shared renderer from per-counter results (used by both the in-memory and parallel paths). */
+/** One table row: recall columns supplied by the caller (dashes for A/A), gate columns shared. */
+function gateRow(r: BaselineMonitorResult, certified: boolean, recallCols: string): string {
+  return `  ${r.counter.padEnd(14)} ${String(r.nFault).padStart(5)}  ${recallCols} | ` +
+    `${r.residMedianLag1.toFixed(3).padStart(11)}  ${(r.markovPlausibleFrac * 100).toFixed(0).padStart(13)}% | ` +
+    (certified ? 'CERTIFIED' : 'FLAGGED (abstain)');
+}
+
 function renderResults(healthyShards: number, healthyT: number, monT: number, monFaults: number, cl: number, results: BaselineMonitorResult[], sameCadence = true): string {
   const emitter = baselineMonitorEmitter();
   const mode = modeOf(emitter); // 'A' — empirically_audited is NOT FDR-bearing (ADR 0019 validity gate)
@@ -261,11 +268,20 @@ function renderResults(healthyShards: number, healthyT: number, monT: number, mo
   let eT = 0, tT = 0, sT = 0, fT = 0, selOk = 0, fpOk = 0;
   const flagged: string[] = [];
   for (const r of results) {
-    if (r.nFault === 0) continue;
     const certified = r.markovPlausibleFrac >= 0.5;
+    if (!certified) flagged.push(r.counter);
+    if (r.nFault === 0) {
+      // A/A counter: no recall to report, but the Wall-A GATE status is the point — the mini
+      // pilot's first (qualification) runs are all-healthy, and an empty table hid exactly the
+      // certification/abstention picture they exist to produce. Found by the pre-gap plumbing
+      // smoke on real mini telemetry, 2026-07-27.
+      L.push(gateRow(r, certified, `${'—'.padStart(10)}  ${'—'.padStart(6)}  ${'—'.padStart(8)}`));
+      continue;
+    }
     eT += r.eHits; tT += r.terminalHits; sT += r.srHits; fT += r.nFault;
-    if (certified) { selOk += r.selected; fpOk += r.falsePos; } else flagged.push(r.counter);
-    L.push(`  ${r.counter.padEnd(14)} ${String(r.nFault).padStart(5)}  ${String(r.eHits).padStart(8)}/${r.nFault}  ${String(r.srHits).padStart(4)}/${r.nFault}  ${String(r.terminalHits).padStart(6)}/${r.nFault} | ${r.residMedianLag1.toFixed(3).padStart(11)}  ${(r.markovPlausibleFrac * 100).toFixed(0).padStart(13)}% | ${certified ? 'CERTIFIED' : 'FLAGGED (abstain)'}`);
+    if (certified) { selOk += r.selected; fpOk += r.falsePos; }
+    L.push(gateRow(r, certified,
+      `${String(r.eHits).padStart(8)}/${r.nFault}  ${String(r.srHits).padStart(4)}/${r.nFault}  ${String(r.terminalHits).padStart(6)}/${r.nFault}`));
   }
   L.push('');
   L.push(`TRANSIENT mean_shift recall (all counters): e-detector ${eT}/${fT}  vs  sr@T/α ${sT}/${fT}  vs  terminal ${tT}/${fT}`);

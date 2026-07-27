@@ -5,7 +5,7 @@
 
 **Date:** 2026-07-27 · **Branch:** `main` (in sync with origin, `63a4983`) · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 957 tests · 950 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 962 tests · 955 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -357,7 +357,23 @@ methodology trap: it adds duration with zero information and games `baseline-gua
 step toward wider coverage is **job-aware peer selection** (match peers by workload). The ADR 0020 serial-
 monitor research is the other smaller thread. Nothing is mid-flight or broken.
 
-Newer threads (2026-07-26): the **mini real-probe pilot** once the 56-day baseline gate clears (~08-29) —
+⚠️ **MINI INCIDENT (found 2026-07-27 by the first health audit): the mini was POWERED OFF from
+2026-07-13 ~05:00 PT to 2026-07-27 10:43 PT** (14.2-day hole after only 8.7 days of baseline;
+`autorestart` was 0, so a power blip stays down silently — recommend `sudo pmset -a autorestart 1`
++ a heartbeat check). Collector auto-resumed on boot. **THE 56-DAY GATE CLOCK RESTARTED 2026-07-27
+⇒ gate ≈ 2026-09-21** (was ~08-29); a 14-day hole cannot be stitched. Pre-gap 8.7d segment pulled
+to the MBP (runs/mini-data, gitignored) and used for: the PLUMBING SMOKE (mini-bundle → cluster
+inference clean (E/P0/P1), zero in-segment gaps → baseline-monitor under CS_ALLOW_SHORT=1 runs end
+to end; A/A rows now printed with Wall-A gate status — they were hidden by the fault-recall table)
+and DESCRIPTIVE TRIAGE (at idle HALF the per-core fleet is parked: P0 cluster 99.3% zero, GPU/ANE
+parked, thermal_level constant 0 — the probe workloads are what will make cores measurable).
+Probe deploy STAGED on the mini (~/tessera-probes, binary sha 50efff6b…, notBefore=2026-09-21,
+daemon NOT loaded; P4 golden verified EXACTLY on the M4 Pro — cross-chip determinism confirmed;
+node is at /opt/homebrew/bin/node → edit plist at install). `tools/probe-excise.ts` (exclusion-
+ledger excision, 5 tests) built. `docs/SPEC-mini-intervention-campaign-DRAFT.md` drafted — § 5
+owner sign-off pending. Remote sessions journaled to ~/concord/telemetry/access-log.ndjson.
+
+Newer threads (2026-07-26): the **mini real-probe pilot** once the 56-day baseline gate clears (**~2026-09-21 after the incident above**, was ~08-29) —
 probe spec DECIDED + BUILT (2026-07-27, `docs/SPEC-probe-pilot-apple-silicon.md`): trio P1-int/P4-mem/P5-gpu
 in one compiled Swift binary (`tools/probe/`, goldens baked, P5 = CPU-vs-GPU cross-check every run) +
 `tools/probe-runner.ts` (2h±U(0,2h) jitter, P/E lanes via taskpolicy -b — verified 3.5× duration separation —
