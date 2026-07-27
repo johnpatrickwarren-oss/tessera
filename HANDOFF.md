@@ -26,6 +26,18 @@ construction validity and revoke (B→A) when it breaks.
 
 ## What shipped (newest first)
 
+- **RECORD CORRECTION on `e564c94` (2026-07-27).** That commit's message attributes the stale
+  Lean-discharge sentence in `tools/e-value.ts` to "a stale-base edit in a parallel session".
+  The forensics say otherwise: the sentence was added in `6c27ad2` and touched by NO commit until
+  the fix (`git log -S`), the parallel session's `791cdfc` changed only the Gap-A2 caveat hunk
+  (`git show 791cdfc -- tools/e-value.ts`), and `988c050` — the validity-chain commit — updated
+  the LEAN_QUEUE table to `proved` but never edited the header prose 60 lines above. **Update
+  omission, not a clobber; no stale base existed.** The fix itself and its principle stand: the
+  TABLE is the authority, prose headers are derived text that drifts — when a fact changes, grep
+  for its prose restatements (or don't restate it in prose). Concurrency discipline (pathspec
+  commits while another session is active; `git diff HEAD -- <file>` on shared files) is in
+  shared memory: `feedback_concurrent_sessions_git.md`.
+
 - **A2-DISP-EBH CLOSED + THE PAIR GATE ENFORCED (2026-07-27, `fcc5d6f`/`791cdfc`/`304aa51`;
   `research/2026-07-27-a2-disp-ebh-boundary.md`; RESEARCH-INDEX N12 + P8/P9 amendments; ADR 0023
   CORR 3 update).** ς-sweep on the shipped primitives: paging breach onset narrows to
