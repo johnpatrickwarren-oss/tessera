@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- MBP-side watchdog for the mini collector (see tools/mini-heartbeat.sh). Every 6 h + at load. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.tessera.mini-heartbeat</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>/Users/johnwarren/concord/tessera/tools/mini-heartbeat.sh</string>
+  </array>
+  <key>StartInterval</key><integer>21600</integer>
+  <key>RunAtLoad</key><true/>
+</dict>
+</plist>
