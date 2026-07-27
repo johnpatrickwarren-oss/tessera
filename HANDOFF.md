@@ -3,9 +3,9 @@
 > **SINGLE SOURCE OF TRUTH for current status** (date · suite · what's built · what's next). `STATE.md` is the
 > durable decision/arc trail (history); `README.md` defers here for the live count. Keep this header current.
 
-**Date:** 2026-07-26 · **Branch:** `main` (in sync with origin, `e831578`) · **clustersynth
+**Date:** 2026-07-26 · **Branch:** `main` (in sync with origin, `563ecc2`) · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 921 tests · 914 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 940 tests · 933 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -36,7 +36,13 @@ construction validity and revoke (B→A) when it breaks.
   cross-checks evidence class against the emitter's `validity_class`, returning the certificate
   chain + open premises with every Mode-B selection. Audit F3 (SR running max fed to e-BH, reported
   "CERTIFIED") is now a COMPILE error, `@ts-expect-error`-locked (18 tests). `lean/` is the
-  discharge queue and has NEVER BEEN COMPILED — every proof is `sorry`; the STATEMENTS were
+  discharge queue and **NOW BUILDS (Lean 4.32.1 + Mathlib): `fdr_le` — e-BH controls FDR under
+  arbitrary dependence — is PROVED with no `sorry` beneath it**, via `card_reject` → `fdp_pointwise`
+  → `fdp_le_sum` → `fdr_le_of_pointwise`. `fdp_pointwise` is proved in BOTH representations
+  (`lean/core` over Nat/List, zero deps; `Tessera/` over Finset/ℝ) and they agree. Only
+  `supAdjuster_integral` is still `sorry` in that file, and it is a SupFDR fact outside the FDR
+  chain. ⚠️ Scope: this proves FDR is controlled GIVEN valid e-values; whether Tessera's are valid
+  is the A2 question and `Conformal.lean` is entirely `sorry`. The STATEMENTS were
   validated numerically first (e-BH FDP lemma: 995,245 engine selections across five adversarial
   families, 0 violations, worst slack exactly 0.0; rank uniformity exhaustive over `S_{K+1}`,
   K=2–4). See `lean/README.md` + `LEAN_QUEUE`.
@@ -46,7 +52,7 @@ construction validity and revoke (B→A) when it breaks.
   RESEARCH-INDEX N7/N8/P6–P8; ADR 0023 CORRECTION 2).** Per-round conformal validity is EXACT and
   does NOT survive accumulation: `E[M_T] = E_δ[g(δ)^T] > 1` for T ≥ 2 whenever persistent unit
   heterogeneity exists (P6). The Λ bound is TRUE and OPERATIONALLY VACUOUS — the operational form is
-  a drift/first-passage condition. ⚠️ **DESIGN TARGET REVISED THREE TIMES — use only ICC ≲ 1.5%.**
+  a drift/first-passage condition. ⚠️ **DESIGN TARGET: ICC ≲ 4% — four earlier figures superseded, see below.**
   0.25% and 9.5% were wrong; 1% was right but on a compressed axis. The θ̂ estimator MIRRORED
   `canary-sim.execScore` instead of calling it and was biased down twice over — it dropped the
   interference channel and used gen-1's noise scale for a gen-0 block (**A2-host, CLOSED
@@ -56,7 +62,7 @@ construction validity and revoke (B→A) when it breaks.
   since ≲1.5% had extrapolated from a single clean point. Per-path budgeting closed NEGATIVE (both
   pipelines breach in the same cell; N9 predicted it). `research/2026-07-26-icc-sweep.md`. Design against δ₀, stable to ~10% over θ ∈ [0,0.5]; treat
   any rate as order-of-magnitude (P7).
-  Mean reversion measured CLOSED-negative — τ̂ ≥ 20× every horizon (N8). **Paging fails BEFORE
+  Mean reversion measured CLOSED-negative — τ̂ > 3× every horizon, binding case H8 at **6×** (N8; the pre-N11 table said ≥20×, do not quote that headroom). **Paging fails BEFORE
   FDR** (P8): A/A to T=320 on the shipped primitives, H2 (ICC 11%) breaches its Ville budget 3.3×
   while per-family e-BH false selections stayed **0.00 in every cell**; the pooled-marginal
   uniformity monitor is PROVABLY BLIND to this class (β = 1; gated guarantee is
