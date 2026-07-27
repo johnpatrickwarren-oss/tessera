@@ -5,7 +5,7 @@
 
 **Date:** 2026-07-26 · **Branch:** `main` (in sync with origin, `5856c93`) · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 940 tests · 933 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 950 tests · 943 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -84,6 +84,19 @@ construction validity and revoke (B→A) when it breaks.
   calibrator's Kelly break-even shift = the detection floor ≈ **1.02% degradation** (independently
   matches E2's rack floor). Narrows ADR 0023's claims; does NOT invalidate the design. Actionable:
   enrich block keys until residual persistent heterogeneity is below the fault size you care about.
+  **A2-disp CLOSED (2026-07-26 — P9, ADR 0023 CORRECTION 3; `research/2026-07-26-a2-dispersion.md`;
+  `tools/dispersion-drift.ts` + `estimateDispersion`, 10 tests).** The machinery re-derived for the
+  noise-SCALE channel (H8's actual mechanism): ∞-block tilt B = 9.63 ≈ 4.8×A but the finite block
+  caps it 6.6× (K=30 tilt 1.47); floor is a RATIO λ₀ = 4.14× noise at K=30, **K=10 immune**,
+  falling with K (power/validity trade sharper than location); **κ_min points the OPPOSITE way**
+  (raising it lowers λ₀). ς is estimable (χ²-corrected log-variance spread; the ICC gate is blind
+  to it); H8: ς̂ = 0.31, τ_disp = ∞, corrected T\* ≈ 3 (was 6). A/A validation: dispersion-only
+  fleet (θ̂ at floor — location model predicts NOTHING) breaches Ville budget 6× by T=320, FPR
+  nominal + variant-independent throughout. **Design gate is now a PAIR: ICC ≲ 4% AND ς ≲ 0.15**
+  (breach bracket ς̂ 0.15–0.31). ⚠️ **P8 SCOPE NARROWED: e-BH FAILS under dispersion** — 14.8
+  false selections/run at ς̂ = 0.61 (first nonzero at 0.31) from healthy units; a noisy unit
+  concentrates inflation and crosses N/q individually. Steady-state P(λ≥λ₀) misses the breach
+  (finite-T Lundberg bulk dominates); orderings exact, rates order-of-magnitude.
 
 - **Catch-up 2026-07-04 → 07-22 (merged to main while this file was stale):**
   **Diag-probe** (PRs #51/#52): cordon → escalating `dcgmi diag` → uncordon `ActionSink` +
@@ -345,8 +358,9 @@ step toward wider coverage is **job-aware peer selection** (match peers by workl
 monitor research is the other smaller thread. Nothing is mid-flight or broken.
 
 Newer threads (2026-07-26): the **mini real-probe pilot** once the 56-day baseline gate clears (~08-29);
-**block-key enrichment** for the canary design (the one lever ADR 0023 CORRECTION 2 leaves — drive residual
-persistent heterogeneity below the target fault size; measure achievable ICC on real telemetry); the
+**block-key enrichment** for the canary design (the one lever ADR 0023 CORRECTIONS 2+3 leave — drive residual
+persistent heterogeneity below the target fault size; measure achievable ICC **and ς** on real telemetry —
+the gate is now the pair ICC ≲ 4% AND ς ≲ 0.15, and `estimateDispersion` is the second instrument); the
 **Lean discharge queue: EMPTY** (`lean/` is sorry-free; `Certificate.lean` fields flipped; remaining
 candidates only if a consumer needs them — A2(3) strictness, the first-passage form);
 per-call-site **migration to `certifiedFdrBenjaminiHochberg`**; and a **validity-class rung** for

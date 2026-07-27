@@ -42,7 +42,7 @@ const WG = (() => { const w = new Float64Array(NW); for (let i = 0; i < NW; i++)
 
 /** Per-rank-cell moments of `log f`, integrating out the tie/jitter draw U analytically-in-spirit
  *  (fine quadrature; the cell is bounded so this is easy). */
-function logCellMoments(K: number, kappaMin: number): { m1: Float64Array; m2: Float64Array; mk: (k: number) => Float64Array } {
+export function logCellMoments(K: number, kappaMin: number): { m1: Float64Array; m2: Float64Array; mk: (k: number) => Float64Array } {
   const c = 1 / (K + 1), f = calibratorWith(kappaMin), NU = 400;
   const m1 = new Float64Array(K + 1), m2 = new Float64Array(K + 1);
   for (let r = 0; r <= K; r++) {
@@ -67,7 +67,7 @@ function logCellMoments(K: number, kappaMin: number): { m1: Float64Array; m2: Fl
 }
 
 /** Binomial mixing weights: E over R ~ Bin(K, π) of a per-cell quantity. */
-function mixBinom(K: number, pi: number, cell: Float64Array): number {
+export function mixBinom(K: number, pi: number, cell: Float64Array): number {
   if (pi <= 0) return cell[0];
   if (pi >= 1) return cell[K];
   let term = Math.pow(1 - pi, K), acc = term * cell[0];

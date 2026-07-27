@@ -21,6 +21,23 @@
   4-idio-σ fault is only **0.13 own-σ** in passive counters (~30× SNR loss), so probe scores MUST
   come from the controlled workload itself, and estimated per-unit references reproduce the N1/ADR
   0013 pathologies (masking at sparse coverage; plug-in σ̂ compounding at dense coverage).
+- **⚠️ CORRECTION 3 (2026-07-26 — A2-disp, P9; `research/2026-07-26-a2-dispersion.md`).** The A2
+  line below is derived for persistent LOCATION offsets. Extending it to persistent DISPERSION
+  (noise-scale multipliers — H8's actual mechanism) adds two things this ADR must carry:
+  1. **The design gate is a PAIR: ICC ≲ 4% AND ς ≲ 0.15** (ς = between-unit spread of log
+     within-unit SD, measured by `estimateDispersion` — the ICC gate is blind to it by
+     construction). Measured Ville breach bracket ς̂ ∈ (0.15, 0.31) at T = 320, K = 30.
+  2. **The § 5 residual-risk list must name the dispersion e-BH failure.** P8's "paging fails
+     before FDR; e-BH selections 0.00 everywhere" is LOCATION-specific: a persistently noisy unit
+     CONCENTRATES its inflation and crosses e-BH's N/q threshold individually — 14.8 false
+     selections/run measured at ς̂ = 0.61, first nonzero at ς̂ = 0.31, from all-HEALTHY fleets.
+     This is the first mechanism measured anywhere in the program that defeats Mode-B FDR from
+     healthy units at scale.
+  Also: the dispersion paging/detection floor is a ratio λ₀ (4.14× noise at K = 30; K = 10 blocks
+  are immune; N7's duality applies — it is also the noisy-fault detection floor), H8's corrected
+  horizon is T\* ≈ 3 (not 6), and the κ_min lever POINTS THE OPPOSITE WAY for this channel
+  (raising it lowers λ₀), so retuning either κ_min or block size must quote both floors.
+
 - **⚠️ CORRECTION 2 (2026-07-25/26 — the A2 line; six reports, see RESEARCH-INDEX § 4).** Three
   claims below need qualification. None of this invalidates the design; it narrows what may be
   claimed for it.

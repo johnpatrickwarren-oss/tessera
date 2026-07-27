@@ -182,6 +182,11 @@ level that would give a month of horizon.
   occupies rank extremes more often by a different mechanism (the program report names this at group
   level, § 3.1 item 3). H8's θ̂ = 0.203 captures only its `rackStaticSd = 0.003` component, so H8 is
   understated by an unknown amount.
+  → **CONFIRMED AND CLOSED 2026-07-26 (A2-disp, P9 — `research/2026-07-26-a2-dispersion.md`).**
+  The amount is no longer unknown: H8's dispersion component is ς̂ = 0.31 with τ_disp = ∞, its
+  corrected horizon is **T\* ≈ 3, not 6**, and the pure-dispersion variant breaches the Ville
+  budget 6× by T = 320 while its location θ̂ sits at the estimator floor. The threat also
+  under-called the consequence: under this channel e-BH fails too (P8 scope narrowed).
 - **Execution timing.** Round spacing is the measured β=0.05% median revisit (132 h) with uniform
   jitter. A first version used 24 h spacing, which pins every execution to the same diurnal phase and
   silently reported θ(H4) = 0; the jitter is now load-bearing and tested.
@@ -194,5 +199,5 @@ level that would give a month of horizon.
 | A2-θ-real | ICC of real probe scores after block-keying — needs the probe pilot; nothing here substitutes | **high** |
 | A2-E1b | re-run E1 at T ≫ T\* (extend horizon or raise β) and check the predicted Λ inflation appears | **high — the decisive experiment, and it is cheap** |
 | ~~A2-host~~ | ~~export canary-sim's host-load state so the interference channel enters θ̂~~ — **CLOSED 2026-07-26.** Resolved by deleting the mirror rather than exporting the state: `healthyPanel` now calls the real `execScore` via `canary-sim.healthyScorePanel`. Found a second, independent downward bias in the process (gen-1 noise scale used for a gen-0 block). See the banner at the top of this report. | ~~high~~ done |
-| A2-disp | extend the A2 model to persistent *dispersion* heterogeneity (H8's real mechanism) | medium |
+| ~~A2-disp~~ | ~~extend the A2 model to persistent *dispersion* heterogeneity (H8's real mechanism)~~ — **CLOSED 2026-07-26**, `research/2026-07-26-a2-dispersion.md` (P9): tilt B, floor λ₀, estimator ς̂, pair design gate ς ≲ 0.15 + ICC ≲ 4%, and the e-BH failure P8 missed | ~~medium~~ done |
 | A2-scen | add unit-level-persistence scenarios to the E1 family (it currently has four, all incidental) | medium |

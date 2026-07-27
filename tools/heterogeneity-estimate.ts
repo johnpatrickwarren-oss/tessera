@@ -162,6 +162,79 @@ export function roundsPerUnit(betaPct: number, days: number): number {
   return (betaPct / 0.05) * 0.09 * days;
 }
 
+/** Trigamma ψ₁(x) by recurrence + asymptotic series — the exact sampling variance of `log v̂` for
+ *  a χ² variance estimate: `Var(log(σ̂²)) = ψ₁((n−1)/2)` under Gaussian noise. */
+export function trigamma(x: number): number {
+  let s = 0, z = x;
+  while (z < 8) { s += 1 / (z * z); z += 1; }
+  const iz = 1 / z;
+  return s + iz + (iz * iz) / 2 + Math.pow(iz, 3) / 6 - Math.pow(iz, 5) / 30 + Math.pow(iz, 7) / 42;
+}
+
+export interface DispersionResult {
+  /** Between-unit SD of log within-unit VARIANCE, χ²-corrected. */
+  vsLogVar: number;
+  /** ς — between-unit SD of log within-unit SD (= vsLogVar/2): the lognormal scale-multiplier
+   *  spread the A2-disp drift analysis consumes (`tools/dispersion-drift.ts`). */
+  varsigma: number;
+  /** Persistence timescale of the dispersion channel, in rounds (∞ = static multiplier). */
+  tauDisp: number;
+}
+
+/**
+ * Persistent DISPERSION heterogeneity — the channel the location ICC is blind to (a scale
+ * multiplier moves no unit mean, so `estimateIcc` reports 0 on a pure-dispersion panel).
+ *
+ * Estimator: per-unit within variance v̂_u across rounds (unit-demeaned first, so location offsets
+ * do not leak in), then `ς̂_v² = Var_u(log v̂_u) − ψ₁((n−1)/2)` — the trigamma term is the EXACT χ²
+ * sampling variance of log v̂ under Gaussian noise, and it is not small: at n = 40 rounds it is
+ * 0.0526, the same order as H2's raw spread. Subtracting a mis-modelled floor is the same bug
+ * class as N11's GEN_SIGMA constant, so the Gaussian assumption is backstopped by the measured
+ * `nullFloorDispersion`. τ_disp comes from the lag autocorrelation of centred SQUARED residuals —
+ * the same machinery as `estimateTau`, on the second-moment panel.
+ */
+export function estimateDispersion(resid: number[][]): DispersionResult {
+  const m = resid.length, n = resid[0].length;
+  const logv: number[] = [];
+  const sq: number[][] = [];
+  for (let u = 0; u < m; u++) {
+    const mu = resid[u].reduce((a, b) => a + b, 0) / n;
+    let v = 0;
+    const row: number[] = [];
+    for (let t = 0; t < n; t++) { const e2 = (resid[u][t] - mu) ** 2; v += e2; row.push(e2); }
+    v /= n - 1;
+    logv.push(Math.log(Math.max(v, 1e-300)));
+    // The squared-residual panel is NOT unit-centred: `estimateTau`'s r_k = ICC·ρ(k) reading needs
+    // the between-unit (persistent) component present in the panel. Centring each unit's e² by its
+    // own v̂ deletes exactly the signal being timed (this bit: τ_disp read 0 on a static-multiplier
+    // scenario until the centring was removed).
+    sq.push(row);
+  }
+  const gm = logv.reduce((a, b) => a + b, 0) / m;
+  let vv = 0;
+  for (const lv of logv) vv += (lv - gm) ** 2;
+  vv /= m - 1;
+  const vs2 = Math.max(0, vv - trigamma((n - 1) / 2));
+  const iccSq = estimateIcc(sq).icc;
+  return { vsLogVar: Math.sqrt(vs2), varsigma: Math.sqrt(vs2) / 2, tauDisp: estimateTau(sq, iccSq) };
+}
+
+/** Measured null floor of ς̂ — same convention as `nullFloorTheta` (max over seeds; the estimator
+ *  clamps at 0). Doubles as the check on the trigamma correction's Gaussian assumption: if
+ *  canary-sim's healthy noise were heavy-tailed, this floor would come out large, not ≈ 0. */
+export function nullFloorDispersion(seed = 20260726, nUnits = 1440, nRounds = 40, seeds = 8): number {
+  const zeroed: Knobs = {
+    ...HEALTHY_SCENARIOS.H1, name: 'null-floor-disp',
+    rackStaticSd: 0, rackOuSd: 0, heteroRackSd: 0, diurnalAmp: 0,
+    hiddenStratumFrac: 0, hiddenStratumOffset: 0, agingSdPerDay: 0, unitOffsetSd: 0,
+  };
+  let mx = 0;
+  for (let i = 0; i < seeds; i++) {
+    mx = Math.max(mx, estimateDispersion(roundDemean(healthyPanel(zeroed, seed + 7919 * (i + 1), nUnits, nRounds))).varsigma);
+  }
+  return mx;
+}
+
 /**
  * The estimator's own noise floor: θ̂ measured on a panel with EVERY persistent knob zeroed. The
  * one-way ICC estimator is clamped at 0, so under the null it is biased upward and reports a small
