@@ -64,7 +64,7 @@ export interface HorizonResult {
 }
 
 /** Per-unit accumulator state (canary-sim's ½·product + ½·onset-mixture) plus the paged flags. */
-interface FleetState {
+export interface FleetState {
   prod: Float64Array; g: Float64Array; k: Int32Array; cur: Float64Array; paged: Uint8Array;
 }
 
@@ -73,7 +73,7 @@ interface RoundAcc { fprNum: number; fprDen: number; lam: number; pages: number;
 /** One round of the design: assign every unit to a fresh random block of K+1, score each member by
  *  its randomised conformal rank within the block, and advance the per-unit accumulators. `a` is
  *  the per-test-FPR tally for this round's horizon, when this round is a measured horizon. */
-function scoreRound(
+export function scoreRound(
   r: () => number, scores: ReadonlyArray<ReadonlyArray<number>>, t: number, K: number,
   st: FleetState, alphaPage: number, a: RoundAcc | undefined,
 ): void {

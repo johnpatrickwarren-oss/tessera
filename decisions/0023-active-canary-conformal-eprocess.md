@@ -49,19 +49,28 @@
   **Operationally:** paging degrades before FDR (P8 — per-family e-BH selections stayed at 0.00 in
   every measured cell), so the qualifier belongs on the paging claim.
 
-  ⚠️ **DESIGN TARGET — REVISED THREE TIMES (all on 2026-07-26). USE ONLY THE LAST ROW.**
-  Every earlier figure is superseded. Two were wrong; the third was right but on a compressed axis:
+  ⚠️ **DESIGN TARGET — FOUR SUPERSEDED FIGURES. USE ONLY THE LAST ROW.**
+  Two were wrong, one was on a compressed axis, one extrapolated a boundary from a single point.
+  The live figure is the first one that was MEASURED across the band rather than inferred:
 
   | figure | where it came from | why it is dead |
   |---|---|---|
   | ICC ≲ 0.25% | the loose `Λ` bound | `Λ` is true but operationally vacuous — it saturates at N while realised degradation was 3.3× (P7) |
   | ICC ≲ 9.5% | the steady-state first-passage rate | **falsified by measurement.** H15 sits AT it and runs **10.00 pages/run against a Ville budget of 2.016** — 5× over — and produces the first false e-BH selections seen in any cell. The steady-state form drops the sub-threshold `α^κ(δ)` bulk term |
   | ICC ≲ 1% | H16 measured clean to T=320 | **not wrong, but stated on a compressed axis.** The θ̂ estimator mirrored `execScore` instead of calling it and was biased DOWN twice over (A2-host). H16's true ICC is 1.49%, so the safe boundary is higher than this figure claimed |
-  | **ICC ≲ 1.5%** | H16 on the corrected axis | **← live figure** |
+  | ICC ≲ 1.5% | H16 on the corrected axis | superseded — H16 was the only clean point measured, so this extrapolated a boundary from one observation |
+  | **ICC ≲ 4%** | the A2-icc sweep: bracketed, not extrapolated | **← live figure** |
 
-  **Verified-safe target is ICC ≲ 1.5%** (H16 is clean to T=320, and its true ICC is 1.49%). The
-  true boundary lies somewhere in **1.5–12.4%** and **has not been swept** (open item A2-icc) —
-  treat anything above 1.5% as unbudgeted, not as "probably fine".
+  **Design target is ICC ≲ 4%** — MEASURED, not extrapolated (A2-icc, 2026-07-26). The sweep puts
+  the Ville-budget breach between **6.32% and 8.36%** on both pipelines: 4.28% runs at 12% of budget,
+  6.32% at 74%, 8.36% at 198%. 4% is the recommendation because 6.32% is the edge of what was
+  measured and its margin is inside Poisson noise on the paged-unit count; it is not a claim that
+  6% is unsafe.
+
+  **This RELAXES the previous ≲1.5% by ~3×, and that is the operationally important part.** The
+  design instruction is "enrich block keys until residual heterogeneity is below the fault size you
+  care about", and enrichment cost rises steeply as the target falls. ≲1.5% came from H16 being the
+  only clean scenario anyone had measured — a boundary extrapolated from a single point.
 
   **THE ICC AXIS WAS RESCALED 2026-07-26 (A2-host closed).** The estimator behind every earlier ICC
   figure mirrored `canary-sim.execScore` rather than calling it, and the mirror was wrong twice, both
@@ -75,8 +84,13 @@
   telemetry with a correct estimator would have been compared against these numbers and misread by
   ~1.4×, which is precisely the collision A2-θ-real was heading for.
 
-  **One caveat remains on the number:**
-  1. **It is a single global number covering two paths with different exposure.** The 12.4% breakage
+  **The per-path caveat is now RESOLVED, negatively — a single global budget is correct.** The
+  sweep ran every cell through both pipelines: the loop path pages less below the boundary (0.75 vs
+  1.50 at 6.32%) but **breaches in the same cell**, and by 12.83% is marginally worse. N9 predicted
+  this — the geometric mixture buys barrier height, which collapses as δ → δ₀, and the units that
+  page are the tail with δ ≳ δ₀. It protects the units that were never going to page. Superseded
+  caveat, retained for the record:
+  1. ~~It is a single global number covering two paths with different exposure.~~ The 12.4% breakage
      was measured on the ACCUMULATOR path. The loop path (`geometricMixtureEValue`) carries a much
      higher barrier and attenuates false pages ~39× at δ=0.3 — but ~1× at δ₀, so the margin is real
      below δ₀ and absent at it (N9). Per-path budgeting is well-posed but unmeasured; until it is,

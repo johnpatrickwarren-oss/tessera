@@ -51,8 +51,10 @@ construction validity and revoke (B→A) when it breaks.
   `canary-sim.execScore` instead of calling it and was biased down twice over — it dropped the
   interference channel and used gen-1's noise scale for a gen-0 block (**A2-host, CLOSED
   2026-07-26**: the mirror is gone, `healthyPanel` now calls the real `execScore`). On the corrected
-  axis H16 = 1.49%, H15 = 12.40%, H17 = 32.97%; **no paging result moved**, only the axis. The
-  1.5–12.4% boundary is UNSWEPT (A2-icc). Design against δ₀, stable to ~10% over θ ∈ [0,0.5]; treat
+  axis H16 = 1.49%, H15 = 12.40%, H17 = 32.97%; **no paging result moved**, only the axis. **A2-icc is now CLOSED**: the band was swept and the breach falls between
+  **6.32% and 8.36%** on both pipelines, so the design target is **ICC ≲ 4%** — a ~3× RELAXATION,
+  since ≲1.5% had extrapolated from a single clean point. Per-path budgeting closed NEGATIVE (both
+  pipelines breach in the same cell; N9 predicted it). `research/2026-07-26-icc-sweep.md`. Design against δ₀, stable to ~10% over θ ∈ [0,0.5]; treat
   any rate as order-of-magnitude (P7).
   Mean reversion measured CLOSED-negative — τ̂ ≥ 20× every horizon (N8). **Paging fails BEFORE
   FDR** (P8): A/A to T=320 on the shipped primitives, H2 (ICC 11%) breaches its Ville budget 3.3×

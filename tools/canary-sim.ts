@@ -162,13 +162,16 @@ export const HEALTHY_SCENARIOS: Record<string, ScenarioKnobs> = {
   H13: { ...BASE, name: 'H13-common-mode-slowdown', commonModeStepDay: 30, commonModeStepSize: 0.03 },
   H14: { ...BASE, name: 'H14-aging', agingSdPerDay: 0.00004, rackStaticSd: 0.002 },
   // ── unit-level persistent heterogeneity (2026-07-26) ──────────────────────────────────────
-  // sigma_exec = sqrt(0.010^2 + 0.005^2) = 0.011180, so unitOffsetSd = theta * sigma_exec.
-  // H15 sits at the corrected design target (ICC ~ 9.5%, P7); H16 just inside it; H17 well past,
-  // where the anytime paging rate is expected to breach its Ville budget within a few hundred
-  // rounds. These are the scenarios the E1 family was missing.
-  H15: { ...BASE, name: 'H15-unit-persistent-at-target', unitOffsetSd: 0.003578 },   // theta 0.32, ICC 9.3%
-  H16: { ...BASE, name: 'H16-unit-persistent-mild', unitOffsetSd: 0.001118 },        // theta 0.10, ICC 1.0%
-  H17: { ...BASE, name: 'H17-unit-persistent-severe', unitOffsetSd: 0.006708 },      // theta 0.60, ICC 26.5%
+  // `unitOffsetSd = theta * sigma_exec`, and for the gen-0 block these are drawn against
+  // sigma_exec = sqrt(0.008^2 + 0.005^2) = 0.009434 — NOT the 0.011180 (gen 1) originally used here.
+  // ⚠️ THE NAMES AND THE ORIGINAL ICC COMMENTS ARE STALE, AND THE KNOB VALUES ARE NOT.
+  // These three were tuned against the pre-N11 estimator, which was biased down twice over, so the
+  // ICCs they were named for were never their real ICCs. The knobs are deliberately UNCHANGED (every
+  // published paging result was measured on them); only the labels were wrong. Measured on the
+  // corrected axis: H16 = 1.49%, H15 = 12.40%, H17 = 32.97%. See RESEARCH-INDEX N11.
+  H15: { ...BASE, name: 'H15-unit-persistent-at-target', unitOffsetSd: 0.003578 },   // ICC 12.40% (labelled 9.3%)
+  H16: { ...BASE, name: 'H16-unit-persistent-mild', unitOffsetSd: 0.001118 },        // ICC  1.49% (labelled 1.0%)
+  H17: { ...BASE, name: 'H17-unit-persistent-severe', unitOffsetSd: 0.006708 },      // ICC 32.97% (labelled 26.5%)
 };
 
 // ── 4. Probes & faults ──────────────────────────────────────────────────────────────────────
