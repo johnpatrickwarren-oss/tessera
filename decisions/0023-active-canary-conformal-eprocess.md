@@ -37,6 +37,19 @@
   are immune; N7's duality applies — it is also the noisy-fault detection floor), H8's corrected
   horizon is T\* ≈ 3 (not 6), and the κ_min lever POINTS THE OPPOSITE WAY for this channel
   (raising it lowers λ₀), so retuning either κ_min or block size must quote both floors.
+  **BOUNDARY + ENFORCEMENT UPDATE (2026-07-27 — A2-disp-ebh closed;
+  `research/2026-07-27-a2-disp-ebh-boundary.md`).** (a) Brackets refined: paging breach onset
+  ς̂ ∈ (0.244, 0.305); e-BH onset ς̂ ≈ 0.31 (rare, seed-dependent), robust failure from ς̂ ≈ 0.43 —
+  the ς ≲ 0.15 gate keeps a ~2× margin. (b) ⚠️ **The fleet-size protection REVERSES for this
+  channel (N12):** λ is rack-shared, so more units mean more rack draws, and one extreme rack
+  cascades through e-BH's step-up (`N/(q·k)`) — false selections grow SUPERLINEARLY with N
+  (0 / 3 / 26.5 per run at N = 1008/2016/4032, ς̂ = 0.61). Never argue "N/q is far away at our
+  scale"; onset-vs-N at ≥ 10k units is open (A2-disp-ebh-scale). (c) **The pair gate is now
+  ENFORCED IN CODE:** `tools/dispersion-monitor.ts` measures ς̂ + ICC on the believed-healthy
+  panel (≥ 20 rounds, sticky demotion) and sets `EmitterContract.heterogeneityGatePassing`,
+  which `isFdrBearing` requires for `constructionFamily = 'conformal_rank'` in EITHER
+  FDR-bearing class — the runtime semantics of Correction 2's missing validity rung. The
+  pooled-marginal monitors cannot do this job (β = 1, Correction 2 item 2).
 
 - **⚠️ CORRECTION 2 (2026-07-25/26 — the A2 line; six reports, see RESEARCH-INDEX § 4).** Three
   claims below need qualification. None of this invalidates the design; it narrows what may be
