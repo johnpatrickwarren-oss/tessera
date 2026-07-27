@@ -125,7 +125,7 @@ export const CERT = {
       'block composition is fixed at the DESIGN stage, before any round-t score is revealed',
     ],
     caveats: [
-      'Gap A2: (H-EX) requires no persistent idiosyncratic heterogeneity beyond the block key. Known false in fleets; measured to bite at GROUP level (~4 false racks/run, program report § 3.1) and asserted benign at UNIT level. Unbounded.',
+      'Gap A2 — now MEASURED AND GATED (ADR 0023 CORR 2+3): per-round validity is exact but does not survive accumulation under persistent unit heterogeneity, in EITHER channel. Pair gate ICC ≲ 4% AND ς ≲ 0.15, enforced at runtime by tools/dispersion-monitor.ts → EmitterContract.heterogeneityGatePassing (the pooled-marginal monitors are provably blind to this premise, β = 1). Above the gate the failure reaches e-BH itself: false selections from ς̂ ≈ 0.31, cascading via rack-shared scale + the step-up threshold, WORSENING with fleet size (dispersion-ebh-boundary).',
     ],
   },
   SAFE_T: {

@@ -74,6 +74,22 @@ export interface EmitterContract {
    *  NOT passing (a class without a live monitor manufactures false confidence). Ignored for
    *  `theorem_valid` (proven, no runtime monitor needed). */
   calibrationMonitorPassing?: boolean;
+  /** The null-construction family. `conformal_rank` (the ADR 0023 canary family) carries an
+   *  ACCUMULATION premise its per-round proof does not cover: no persistent unit heterogeneity
+   *  beyond the block key, in either channel (ICC ≲ 4% AND ς ≲ 0.15 — Corrections 2 + 3). That
+   *  premise is PROVABLY invisible to the pooled-marginal calibration/uniformity monitors (β = 1),
+   *  so declaring this family additionally requires the heterogeneity gate below — for BOTH
+   *  FDR-bearing classes: a Lean-proved per-round rank e-value (theorem_valid) still accumulates
+   *  drift when the premise fails. Absent ⇒ `contrast` (the ADR 0019/0022 twin-contrast family;
+   *  unchanged semantics). */
+  constructionFamily?: 'contrast' | 'conformal_rank';
+  /** Live heterogeneity design-gate verdict (tools/dispersion-monitor.ts — the ς̂ + ICC panel
+   *  estimator pair against the design targets). REQUIRED true for a `conformal_rank` emitter to
+   *  be FDR-bearing; undefined ⇒ unmeasured ⇒ NOT passing, the same rule as the calibration
+   *  monitor. This is the runtime semantics of Correction 2's missing validity-class rung
+   *  ("exact per round, drift-limited across rounds"): admitted while the measured drift
+   *  preconditions hold. Ignored for the `contrast` family. */
+  heterogeneityGatePassing?: boolean;
 }
 
 /** Brand a run as plumbing-only when the unvalidated-emitter override is set (mirrors CS_ALLOW_SHORT). */
@@ -81,10 +97,20 @@ export function unvalidatedOverride(): boolean {
   return process.env.CS_ALLOW_UNVALIDATED === '1';
 }
 
+/** True iff this contract's construction family imposes no unmet family-specific gate. The
+ *  `conformal_rank` family requires a currently-passing heterogeneity design gate (ADR 0023
+ *  Corrections 2 + 3) regardless of validity class — the drift premise is outside what any
+ *  per-round proof or pooled-marginal monitor covers. */
+function familyGateOk(c: EmitterContract): boolean {
+  return c.constructionFamily !== 'conformal_rank' || c.heterogeneityGatePassing === true;
+}
+
 /** True iff this emitter is currently admitted to the FDR-bearing e-BH path (Mode B). A
  *  `construction_valid` emitter is FDR-bearing ONLY while its live calibration monitor passes; a
- *  `theorem_valid` emitter always is; everything else never is. */
+ *  `theorem_valid` emitter needs no calibration monitor; a `conformal_rank`-family emitter of
+ *  EITHER class additionally requires a passing heterogeneity gate; everything else never is. */
 export function isFdrBearing(c: EmitterContract): boolean {
+  if (!familyGateOk(c)) return false;
   if (c.validityClass === 'theorem_valid') return true;
   if (c.validityClass === 'construction_valid') return c.calibrationMonitorPassing === true;
   return false;
@@ -98,6 +124,11 @@ export function modeOf(c: EmitterContract): Mode {
 /** Human-readable reason an emitter is NOT FDR-bearing (for the gate message / Mode-A audit trail). */
 export function ineligibilityReason(c: EmitterContract): string | null {
   if (isFdrBearing(c)) return null;
+  if (!familyGateOk(c)) {
+    return c.heterogeneityGatePassing === undefined
+      ? `constructionFamily=conformal_rank but no heterogeneity design gate (heterogeneityGatePassing undefined) — the accumulation premise (ICC ≲ 4% AND ς ≲ 0.15, ADR 0023 CORR 2+3) is invisible to pooled-marginal monitors and MUST be measured (tools/dispersion-monitor.ts)`
+      : `constructionFamily=conformal_rank and its heterogeneity design gate is FAILING (persistent unit heterogeneity above the pair gate — demoted Mode B→A; ADR 0023 CORR 2+3)`;
+  }
   if (c.validityClass === 'construction_valid') {
     return c.calibrationMonitorPassing === undefined
       ? `validity_class=construction_valid but no live calibration monitor (calibrationMonitorPassing undefined) — not-yet-monitored emitters are not FDR-bearing`
