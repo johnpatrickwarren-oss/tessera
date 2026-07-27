@@ -357,7 +357,11 @@ methodology trap: it adds duration with zero information and games `baseline-gua
 step toward wider coverage is **job-aware peer selection** (match peers by workload). The ADR 0020 serial-
 monitor research is the other smaller thread. Nothing is mid-flight or broken.
 
-Newer threads (2026-07-26): the **mini real-probe pilot** once the 56-day baseline gate clears (~08-29);
+Newer threads (2026-07-26): the **mini real-probe pilot** once the 56-day baseline gate clears (~08-29) —
+probe-workload candidates DRAFTED (`docs/SPEC-probe-pilot-apple-silicon-DRAFT.md`, 2026-07-27: minimal trio
+P1-int/P4-mem/P5-gpu, 2h±jitter cadence, duration+error channels, exclusion ledger; NB no core pinning on
+arm64 macOS ⇒ worker-slot panel is an A/A null by construction — instrument qualification, not fleet ς̂/θ̂;
+awaiting decision on the § 4 asks);
 **block-key enrichment** for the canary design (the one lever ADR 0023 CORRECTIONS 2+3 leave — drive residual
 persistent heterogeneity below the target fault size; measure achievable ICC **and ς** on real telemetry —
 the gate is now the pair ICC ≲ 4% AND ς ≲ 0.15, and `estimateDispersion` is the second instrument); the
