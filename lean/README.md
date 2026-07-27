@@ -37,15 +37,23 @@
   negative α; toReal ≥ 0); `rank_superUniform` had NO independence hypothesis and was FALSE
   (adversarial jitter coupling, `P(p ≤ 1/4) = 1/2` at K = 1). Details in each file's header.
 
-  **Still `sorry`:** `Conformal.lean` § 2 only — the A2 drift identity and accumulation bound
-  (`marginal_validity`, `accumulator_mean`, `accumulator_ge_one`). The negative result (per-round
-  validity does not survive accumulation) remains prose + simulation.
+  **NOTHING IS `sorry` ANY MORE.** `Conformal.lean` § 2 — the A2 accumulation results — is proved
+  too (same day, third pass), on the honest conditional-i.i.d. model (persistent state `d` ~ mixing
+  law `ρ`; per-round p-value law a Markov kernel `κ d`): `marginal_validity` (the state-average
+  increment mean IS the mixture-round mean — validity per round is a property of the mixture, not
+  of any unit), `accumulator_mean` (`E[M_T] = E[g(Δ)^T]`, an EQUALITY, via a `lintegral` Tonelli
+  over the `T`-fold product proved here by `piFinSuccAbove` induction), and `accumulator_ge_one`
+  (Jensen by Hölder in `ℝ≥0∞`, side-condition-free: if `E[g(Δ)] = 1` then `E[g(Δ)^T] ≥ 1` — the
+  machine-checked form of "per-round validity does NOT survive accumulation"). The § 2 statements
+  as first written sat on a placeholder `g` CONSTANT in the state and were contentless — a fifth
+  statement-level repair. Strictness of A2(3) under heterogeneity (the drift rates, P6–P8) stays
+  numerical by design.
 
   **Read this precisely.** The guarantee holds GIVEN the design hypotheses: exchangeability of the
   block scores (H-EX — a claim about the probe scheduler, deliberately not formalised, see
   omissions) and an independent uniform jitter. What is discharged is everything from those
-  hypotheses to FDR control; what is not is whether the scheduler delivers them, and the A2
-  accumulation question for the serial product.
+  hypotheses to FDR control, plus the accumulation NEGATIVE result; what is not is whether the
+  scheduler delivers the hypotheses, and the quantitative drift rates.
 
 ## Build
 
@@ -131,7 +139,7 @@ actually builds.
 | `core/TesseraCore.lean` | **PROVED.** e-BH in sorting-free form; `fdp_pointwise`; supporting `List.foldl max` characterisation (absent from core) |
 | `Tessera/EValue.lean` | **SORRY-FREE.** `IsEValue`; `min_isEValue`, `convexMean_isEValue`, `tsum_convexMean_isEValue`, `calibrate_isEValue` |
 | `Tessera/EBH.lean` | **SORRY-FREE.** e-BH sorting-free; `card_reject`, `fdp_pointwise`, `fdp_le_sum`, `fdr_le_of_pointwise`, `fdr_le`; `supAdjuster_integral` |
-| `Tessera/Conformal.lean` | **§ 1 PROVED**: `rank_uniform` (exact), `rank_superUniform`, `calibrated_rank_isEValue`; § 2 (Proposition A2 drift identity) still `sorry` |
+| `Tessera/Conformal.lean` | **SORRY-FREE.** § 1: `rank_uniform` (exact), `rank_superUniform`, `calibrated_rank_isEValue`; § 2: `marginal_validity`, `accumulator_mean`, `accumulator_ge_one` on the conditional-i.i.d. kernel model |
 
 ## Priority order
 
@@ -155,9 +163,12 @@ actually builds.
    `Measurable p` added to the statement; integrability of `f` is FORCED by `∫₀¹ f = 1` via the
    junk-value convention rather than assumed. Composition shipped as
    `Conformal.calibrated_rank_isEValue`.
-6. **`Conformal.accumulator_mean`** — needs conditional expectation and disintegration; the first
-   genuinely measure-theoretic item, and the one that changed the product claim. NOW THE ONLY
-   OPEN ITEM (with its two § 2 neighbours).
+6. ~~**`Conformal.accumulator_mean`**~~ — **DONE (2026-07-26, third pass), and it did NOT need
+   disintegration:** modelling the conditional-i.i.d. structure directly (mixing law + Markov
+   kernel + `T`-fold product kernel) turns the accumulation identity into Tonelli over
+   `ρ ⊗ₘ η` plus an induction over `Measure.pi`, all in `ℝ≥0∞` with no integrability side
+   conditions. The placeholder-`g` statements it replaced were contentless (constant in the
+   state). THE QUEUE IS EMPTY — every planned theorem is proved.
 
 ## Statement validation (the part that IS checked)
 

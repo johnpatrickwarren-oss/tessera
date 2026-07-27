@@ -22,7 +22,9 @@
     question. As of 2026-07-26, `Conformal.lean` § 1 DISCHARGES it for the canary construction:
     `Conformal.calibrated_rank_isEValue` (exchangeable block + independent Unif[0,1] jitter ⇒ the
     calibrated conformal rank is an e-value) composes with `fdr_le` into a machine-checked chain
-    with no informal step. § 2 of that file (the A2 accumulation identity) remains `sorry`.
+    with no informal step. § 2 of that file (the A2 accumulation results, incl. the NEGATIVE
+    result that per-round validity does not survive serial products) is proved as well — the
+    whole `lean/` tree is sorry-free.
 
     THIS FILE IS SORRY-FREE (since 2026-07-26): `supAdjuster_integral` — ∫₁^∞ (√e−1)/e² de = 1,
     the √E−1 adjuster's calibration — is now proved as well (an rpow computation; it is separate

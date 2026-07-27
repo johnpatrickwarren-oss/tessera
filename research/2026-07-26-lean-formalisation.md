@@ -5,9 +5,10 @@ proved and how the proof is shaped, (§ 2) how each STATEMENT was validated nume
 shipped implementations before being proved — the part Lean does not protect against, (§ 3) the
 statement-level bugs that proving found and simulation had passed, and (§ 4) what remains open.
 
-Build state as of this report: **`lean/core` sorry-free** (unchanged), **`Tessera/EValue.lean`
-sorry-free**, **`Tessera/EBH.lean` sorry-free**, **`Tessera/Conformal.lean` § 1 sorry-free, § 2
-(Proposition A2) still `sorry`**. Toolchain Lean 4.32.1 + Mathlib v4.32.1, `cd lean && lake build`.
+Build state as of this report: **the whole `lean/` tree is SORRY-FREE** — `lean/core`,
+`Tessera/EValue.lean`, `Tessera/EBH.lean`, and `Tessera/Conformal.lean` §§ 1–2 (Proposition A2
+included, proved the same day in a third pass on the honest kernel model; see § 1b below).
+Toolchain Lean 4.32.1 + Mathlib v4.32.1, `cd lean && lake build`.
 
 ## § 1 — What is proved
 
@@ -68,6 +69,29 @@ returning to `ℝ` once finiteness is established — the same junk-value-safe p
 `∫₁^∞ (√e−1)/e² de = 1` — an `rpow` computation (`x^(−3/2) − x^(−2)` integrated by
 `integral_Ioi_rpow_of_lt`). With it, `EBH.lean` is sorry-free; it was never part of the FDR chain.
 
+### § 1b — Proposition A2 (Conformal § 2): the accumulation results, including the negative one
+
+The original § 2 carried a placeholder `g` that was CONSTANT in the persistent state (marked as
+such in the source), which made its three statements contentless — the fifth statement-level
+repair of the day. The honest model: persistent unit state `d` in a measurable type `δ` with
+mixing law `ρ`; conditional on the state, per-round p-values i.i.d. with law `κ d` (a Markov
+kernel); `gE κ f d := ∫⁻ f(p) d(κ d)` the conditional increment mean. Everything in `ℝ≥0∞`, which
+eliminates every integrability side condition (under the alternative the accumulator's mean is
+genuinely infinite, so this is also the honest register).
+
+- **`marginal_validity` (A2(1)):** `∫ gE dρ` IS the increment mean under the mixture round-law
+  `ρ.bind κ` — the law § 1 calibrates. Per-round validity is a property of the mixture, not of
+  any unit: `gE d ≤ 1` may hold for no state at all.
+- **`accumulator_mean` (A2(2)):** `E[M_T] = E[g(Δ)^T]` — an EQUALITY, via Tonelli over
+  `ρ ⊗ₘ η` where `η d` is the `T`-fold product of `κ d`, plus a `lintegral` product identity
+  over `Measure.pi` proved by `piFinSuccAbove` induction (Mathlib ships only the
+  integrability-gated Bochner version).
+- **`accumulator_ge_one` (A2(3)):** if `E[g(Δ)] = 1` — all § 1 gives — then `E[g(Δ)^T] ≥ 1`:
+  **per-round validity does not survive accumulation**, machine-checked. Proved by Hölder with
+  exponents `(T, T/(T−1))` rather than Bochner-Jensen: in `ℝ≥0∞` this needs no side conditions.
+  Strictness under heterogeneity (the drift RATES, `T* ≈ 0.592/θ`, P6–P8) deliberately stays
+  numerical; the bound's direction is what kills the product claim.
+
 ## § 2 — Statement validation (numerical, against the SHIPPED implementations)
 
 Formalising the wrong statement is the failure mode Lean does not protect against, so each
@@ -85,10 +109,10 @@ headers and `LEAN_QUEUE` in `tools/e-value.ts` cite; reproduce via `test/e-value
 
 ## § 3 — What proving found that simulation had passed
 
-Four statement-level bugs, all the same species: **simulation instantiates the intended objects;
-only proving reads the whole quantifier.** Every numerical check above ran against summable
-weights, measurable ranks, and α ∈ [0,1] — and so could not see that the formal statements
-quantified over more.
+Five statement-level bugs, all the same species: **simulation instantiates the intended objects;
+only proving reads the whole quantifier (or notices there isn't one).** Every numerical check
+above ran against summable weights, measurable ranks, and α ∈ [0,1] — and so could not see that
+the formal statements quantified over more (or, in the fifth case, over nothing).
 
 1. **`tsum_convexMean_isEValue` was FALSE as stated.** `∑' j, w j ≤ 1` is vacuous for
    non-summable `w` (Mathlib's junk-value `∑' = 0`), and `w ≡ 1` with `X j := const 2⁻ʲ` gives a
@@ -105,6 +129,11 @@ quantified over more.
    couple the jitter to the scores — uniform marginal, but squeezed into the low half of its rank
    cell — and `P(p ≤ 1/4) = 1/2` at K = 1. Both theorems now take the product-form joint law
    `hjoint`, which IS "Unif[0,1] jitter independent of the scores".
+5. **The § 2 statements were CONTENTLESS**: the conditional mean `g` they quantified over was a
+   placeholder constant in the state (so `accumulator_mean` reduced to `E[∏] = (E[f(p)])^T`,
+   which is false for the intended model and trivial for the placeholder one, and `hiid : True`
+   carried the entire conditional-i.i.d. assumption). Rebuilt on the mixing-law + Markov-kernel
+   model, where the assumption is structure, not a `True`-typed comment.
 
 This quadruples the evidence for the ADR 0025 thesis: the opaque-`EValue`-type layer stops unnamed
 QUANTITIES from reaching e-BH, and the Lean layer is what checks the named ARGUMENTS — including
@@ -112,10 +141,11 @@ the arguments' fine print, which is exactly where all four bugs lived.
 
 ## § 4 — Open
 
-- **`Conformal.lean` § 2** — the A2 line (`marginal_validity`, `accumulator_mean`,
-  `accumulator_ge_one`): needs conditional expectation/disintegration (the `g` in the file is an
-  explicit placeholder). This is the machine-checked form of the NEGATIVE result (accumulation
-  breaks under persistent heterogeneity) and the top-ranked Lean item now.
+- ~~`Conformal.lean` § 2~~ — DONE (see § 1b): no disintegration needed once the conditional-i.i.d.
+  structure is modelled directly as a kernel. The Lean queue is EMPTY.
 - **A2-disp** (not Lean): the drift identity and δ₀ are derived for persistent LOCATION shifts;
   H8's mechanism is persistent dispersion. Statement-level hole, same species as A2-host was.
+  With the queue empty this is now the top open item on the whole A2 line.
+- **Strictness of A2(3)** (`E[g^T] > 1` unless `g` a.s. constant) and the drift RATES — numerical
+  by design; formalise only if a consumer needs the strict inequality as a statement.
 - **H-EX as a scheduler contract** — deliberately not formalised until the contract is written.

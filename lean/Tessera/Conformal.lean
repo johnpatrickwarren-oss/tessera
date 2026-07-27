@@ -1,13 +1,20 @@
 /-
   Tessera/Conformal.lean — randomised conformal ranks, and Proposition A2 (the drift identity).
 
-  BUILD STATUS (Lean 4.32.1 + Mathlib v4.32.1):
-    § 1 PROVED, sorry-free (2026-07-26): `rank_uniform` (the randomised rank is EXACTLY Unif[0,1]),
+  BUILD STATUS (Lean 4.32.1 + Mathlib v4.32.1): SORRY-FREE (since 2026-07-26, second pass).
+    § 1 PROVED: `rank_uniform` (the randomised rank is EXACTLY Unif[0,1]),
         `rank_superUniform`, and the end-to-end corollary `calibrated_rank_isEValue` — which,
         composed with `EBH.fdr_le`, closes the validity chain:
           exchangeable block + independent jitter → exact conformal rank → calibrator → e-value
           → e-BH → FDR ≤ q under arbitrary dependence.
-    § 2 still `sorry`: the A2 drift identity and accumulation bound remain prose plus simulation.
+    § 2 PROVED: the A2 accumulation results, on the honest conditional-i.i.d. kernel model —
+        `marginal_validity` (the state-average increment mean IS the mixture-round mean),
+        `accumulator_mean` (E[M_T] = E[g(Δ)^T], an equality), and `accumulator_ge_one`
+        (Jensen-by-Hölder: per-round validity does NOT survive accumulation). The § 2
+        statements this file used to carry were built on a placeholder `g` that was CONSTANT
+        in the state (flagged as such) and were contentless; the kernel model replaces them.
+        Strictness of A2(3) under heterogeneity — the quantitative drift analysis (P6–P8) —
+        is deliberately not formalised; the bound direction is what kills the product claim.
 
   STATEMENT REPAIRS made while proving § 1 (the statements as first written were wrong):
     * `rank_uniform`'s `hindep : True` placeholder and separate `hU` marginal are replaced by one
@@ -614,42 +621,111 @@ theorem calibrated_rank_isEValue {S : Fin (K + 1) → Ω → ℝ} {U : Ω → �
   The statement that changed the product claim. Posed originally as "approximate exchangeability ⇒
   bounded drift", which was the wrong question: under the canary design the per-round rank is
   EXACTLY uniform (§ 1), so nothing is approximate per round. The failure is purely serial.
+
+  MODEL (this replaces the placeholder `g` this file used to carry, which was CONSTANT in the
+  state and made the original § 2 statements contentless). The persistent unit state lives in a
+  measurable type `δ` with mixing law `ρ`; conditional on the state `d`, the unit's per-round
+  p-values are i.i.d. with law `κ d`, a Markov kernel — the honest conditional-i.i.d. structure
+  the A2 narrative always intended. Everything is stated in `ℝ≥0∞`: increments are nonnegative,
+  under the alternative the accumulator's mean is genuinely infinite, and the register keeps the
+  statements hypothesis-light — no integrability side conditions anywhere in § 2.
 -/
 
 variable {δ : Type*} [MeasurableSpace δ]
 
-/-- `g(d) = E[f(p) | Δ = d]`, the conditional increment mean given a unit's persistent state. -/
-noncomputable def g (P : Measure Ω) (f : ℝ → ℝ) (p : Ω → ℝ) (Δ : Ω → δ) (d : δ) : ℝ :=
-  ∫ ω, f (p ω) ∂(P) -- placeholder: the conditional law given Δ = d; `condExp`/disintegration in the real development
+open ProbabilityTheory
 
-/-- **A2(1) — per-round validity.** `E[g(Δ)] = 1` whenever the unconditional score law is
-    exchangeable. This is exactly § 1 composed with the calibrator identity, and it is what the
-    A2-E1b experiment confirmed empirically: per-test FPR stayed at nominal 0.01 at every horizon
-    out to T = 320, in every scenario. -/
-theorem marginal_validity {f : ℝ → ℝ} {p : Ω → ℝ} {Δ : Ω → δ}
-    (hf : EValue.IsCalibrator f) (hp : EValue.SuperUniform P p) :
-    ∫ d, g P f p Δ d ∂(Measure.map Δ P) ≤ 1 := by
-  sorry
+/-- `gE κ f d = E[f(p) | Δ = d]` — the conditional per-round increment mean given the persistent
+    state `d`, for a unit whose conditional per-round p-value law is `κ d`. -/
+noncomputable def gE (κ : Kernel δ ℝ) (f : ℝ → ℝ) (d : δ) : ℝ≥0∞ :=
+  ∫⁻ x, ENNReal.ofReal (f x) ∂(κ d)
 
-/-- **A2(2) — the accumulation identity.** Conditional on `Δ`, the increments are i.i.d., so
-    `E[M_T] = E_Δ[g(Δ)^T]`.
+/-- **A2(1) — per-round (marginal) validity.** The state-average of the conditional increment
+    mean is EXACTLY the increment mean under the mixture round-law `ρ.bind κ` — which is the law
+    § 1's exchangeability argument calibrates. So `E[g(Δ)] ≤ 1` whenever the marginal round is
+    calibrated, even though `g(d) ≤ 1` may hold for NO individual state: per-round validity is a
+    property of the mixture, not of any unit. This is what the A2-E1b experiment confirmed
+    empirically — per-test FPR at nominal 0.01 at every horizon out to T = 320. -/
+theorem marginal_validity (ρ : Measure δ) (κ : Kernel δ ℝ) {f : ℝ → ℝ} (hfm : Measurable f)
+    (hmix : ∫⁻ x, ENNReal.ofReal (f x) ∂(ρ.bind fun d => κ d) ≤ 1) :
+    ∫⁻ d, gE κ f d ∂ρ ≤ 1 := by
+  refine le_trans (le_of_eq ?_) hmix
+  simp only [gE]
+  exact (Measure.lintegral_bind κ.measurable.aemeasurable
+    hfm.ennreal_ofReal.aemeasurable).symm
 
-    This is the whole content of the A2 line. Note it is an EQUALITY, not a bound: `Λ(T)` is the
-    exact null mean of the accumulator. -/
-theorem accumulator_mean {f : ℝ → ℝ} {p : ℕ → Ω → ℝ} {Δ : Ω → δ} (T : ℕ)
-    (hiid : True /- conditionally i.i.d. given Δ -/) :
-    ∫ ω, (∏ t ∈ range T, f (p t ω)) ∂P = ∫ d, (g P f (p 0) Δ d) ^ T ∂(Measure.map Δ P) := by
-  sorry
+/-- Tonelli over a finite power of one law: the `n`-fold product integral of identical per-round
+    factors is the `n`-th power of one round. Mathlib ships the Bochner version
+    (`integral_fintype_prod_eq_pow`, integrability-gated); this is the `lintegral` version, by the
+    same `piFinSuccAbove` induction, side-condition-free. -/
+private lemma lintegral_pi_pow {E : Type*} {mE : MeasurableSpace E} (μ : Measure E)
+    [SigmaFinite μ] {g : E → ℝ≥0∞} (hg : Measurable g) (n : ℕ) :
+    ∫⁻ y, ∏ t, g (y t) ∂(Measure.pi fun _ : Fin n => μ) = (∫⁻ x, g x ∂μ) ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      have hmp := measurePreserving_piFinSuccAbove (fun _ : Fin (n + 1) => μ) 0
+      rw [MeasurePreserving.lintegral_map_equiv (fun y => ∏ t, g (y t))
+        (MeasurableEquiv.piFinSuccAbove (fun _ : Fin (n + 1) => E) 0).symm
+        (MeasurePreserving.symm _ hmp)]
+      simp only [MeasurableEquiv.piFinSuccAbove_symm_apply, Fin.insertNthEquiv,
+        Equiv.coe_fn_mk, Fin.prod_univ_succ, Fin.insertNth_zero, Fin.zero_succAbove,
+        Fin.cons_zero, Fin.cons_succ, cast_eq]
+      have h2 : Measurable fun w : Fin n → E => ∏ t, g (w t) :=
+        Finset.measurable_prod _ fun t _ => hg.comp (measurable_pi_apply t)
+      rw [lintegral_prod_mul hg.aemeasurable h2.aemeasurable]
+      rw [ih, pow_succ, mul_comm]
 
-/-- **A2(3) — Jensen.** `Λ(T) ≥ 1`, strictly for `T ≥ 2` unless `g` is a.s. constant (⇔ no
-    persistent heterogeneity). Per-round validity does NOT survive accumulation.
+/-- **A2(2) — the accumulation identity.** Conditional on the state, the rounds are i.i.d., so
+    the null mean of the `T`-round product accumulator is `E[g(Δ)^T]` — an EQUALITY, not a bound:
+    `Λ(T)` is the exact null mean of the accumulator.
 
-    Elementary once A2(2) is available: `x ↦ x^T` is strictly convex on `[0,∞)` for `T ≥ 2`, and
-    `E[g] ≤ 1`. -/
-theorem accumulator_ge_one {f : ℝ → ℝ} {p : ℕ → Ω → ℝ} {Δ : Ω → δ} (T : ℕ) (hT : 2 ≤ T)
-    (hmean : ∫ d, g P f (p 0) Δ d ∂(Measure.map Δ P) = 1) :
-    1 ≤ ∫ d, (g P f (p 0) Δ d) ^ T ∂(Measure.map Δ P) := by
-  sorry
+    The conditional-i.i.d. structure enters through `η`: the `T`-round law given state `d` is the
+    `T`-fold product of `κ d`. (`η` is carried as a hypothesis rather than constructed here, so no
+    parameterised-product-measurability machinery is needed; a consumer holds it concretely.) -/
+theorem accumulator_mean (ρ : Measure δ) [SFinite ρ] (κ : Kernel δ ℝ) [IsMarkovKernel κ]
+    {f : ℝ → ℝ} (hfm : Measurable f) (T : ℕ) (η : Kernel δ (Fin T → ℝ)) [IsSFiniteKernel η]
+    (hη : ∀ d, η d = Measure.pi fun _ : Fin T => κ d) :
+    ∫⁻ z, ∏ t, ENNReal.ofReal (f (z.2 t)) ∂(ρ ⊗ₘ η) = ∫⁻ d, gE κ f d ^ T ∂ρ := by
+  have hmeas : Measurable fun z : δ × (Fin T → ℝ) => ∏ t, ENNReal.ofReal (f (z.2 t)) :=
+    Finset.measurable_prod _ fun t _ =>
+      hfm.ennreal_ofReal.comp ((measurable_pi_apply t).comp measurable_snd)
+  rw [Measure.lintegral_compProd hmeas]
+  refine lintegral_congr fun d => ?_
+  rw [hη d]
+  exact lintegral_pi_pow (κ d) hfm.ennreal_ofReal T
+
+/-- **A2(3) — Jensen.** If the state-average of `g` is exactly one — per-round validity on
+    average, which is all § 1 gives — then the `T`-round accumulator mean is AT LEAST one:
+    per-round validity does NOT survive accumulation. Strictness under heterogeneity (`g` not
+    a.s. constant) is the quantitative content of the drift analysis (P6–P8, `T* ≈ 0.592/θ`) and
+    is deliberately not formalised — the bound direction is what kills the product claim.
+
+    Proved via Hölder with exponents `(T, T/(T−1))` rather than a Bochner-Jensen library lemma:
+    in `ℝ≥0∞` this needs no integrability side conditions at all. -/
+theorem accumulator_ge_one (ρ : Measure δ) [IsProbabilityMeasure ρ] (κ : Kernel δ ℝ)
+    [IsSFiniteKernel κ] {f : ℝ → ℝ} (hfm : Measurable f) (T : ℕ) (hT : 2 ≤ T)
+    (hmean : ∫⁻ d, gE κ f d ∂ρ = 1) :
+    1 ≤ ∫⁻ d, gE κ f d ^ T ∂ρ := by
+  have hT1 : (1:ℝ) < (T:ℝ) := by exact_mod_cast lt_of_lt_of_le one_lt_two hT
+  have hT0 : (T:ℝ) ≠ 0 := by linarith
+  have hTm1 : (T:ℝ) - 1 ≠ 0 := by linarith
+  have hpq : (T:ℝ).HolderConjugate ((T:ℝ) / ((T:ℝ) - 1)) := by
+    refine ⟨?_, by linarith, by positivity⟩
+    rw [inv_one]
+    field_simp
+    ring
+  have hgE : Measurable (gE κ f) :=
+    Measurable.lintegral_kernel_prod_right' (hfm.ennreal_ofReal.comp measurable_snd)
+  have hH := ENNReal.lintegral_mul_le_Lp_mul_Lq ρ hpq hgE.aemeasurable
+    (aemeasurable_const (b := (1 : ℝ≥0∞)))
+  simp only [Pi.mul_apply, mul_one, ENNReal.one_rpow, lintegral_one, measure_univ] at hH
+  rw [hmean] at hH
+  -- hH : 1 ≤ (∫⁻ d, gE κ f d ^ (T:ℝ) ∂ρ) ^ (1/(T:ℝ)); raise both sides to the T
+  have h2 := ENNReal.rpow_le_rpow hH (le_of_lt (by positivity : (0:ℝ) < (T:ℝ)))
+  rw [ENNReal.one_rpow, ← ENNReal.rpow_mul, one_div, inv_mul_cancel₀ hT0,
+    ENNReal.rpow_one] at h2
+  simpa [ENNReal.rpow_natCast] using h2
 
 /-- **A2 corollary — the FDR consequence.** Feeding `M_T` to e-BH controls `FDR ≤ q·Λ(T)`, by e-BH's
     scale invariance (`e-BH(e/μ, q) ≡ e-BH(e, q/μ)`, the N3 observation).
@@ -657,9 +733,9 @@ theorem accumulator_ge_one {f : ℝ → ℝ} {p : ℕ → Ω → ℝ} {Δ : Ω �
     ⚠️ SCOPE, from the A2-E1b experiment: this bound is TRUE and OPERATIONALLY VACUOUS. `Λ(T)` is
     dominated by tail mass at probabilities far below `1/N`, so it saturates at `N` while the
     realised degradation was 3.3×. The quantity the product should carry is the first-passage rate
-    of `research/2026-07-25-a2-tail-probability.md`, not this. Formalise it for completeness, do not
-    quote it as a guarantee. -/
-theorem fdr_inflated {q lam : ℝ} (hq : 0 < q) : True := trivial
+    of `research/2026-07-25-a2-tail-probability.md`, not this. Deliberately left as a documented
+    non-theorem: formalising it would invite quoting it as a guarantee. -/
+theorem fdr_inflated : True := trivial
 
 end Conformal
 end Tessera

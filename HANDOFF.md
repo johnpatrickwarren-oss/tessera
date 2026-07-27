@@ -40,17 +40,22 @@ construction validity and revoke (B→A) when it breaks.
   arbitrary dependence — is PROVED with no `sorry` beneath it**, via `card_reject` → `fdp_pointwise`
   → `fdp_le_sum` → `fdr_le_of_pointwise`. `fdp_pointwise` is proved in BOTH representations
   (`lean/core` over Nat/List, zero deps; `Tessera/` over Finset/ℝ) and they agree.
-  **VALIDITY CHAIN CLOSED (2026-07-26 second pass): `EValue.lean` and `EBH.lean` are now
-  SORRY-FREE, and `Conformal.lean` § 1 is proved** — `rank_uniform` (the randomised conformal rank
-  is EXACTLY Unif[0,1] under exchangeability + independent jitter, ties and all),
-  `rank_superUniform`, `calibrate_isEValue`, `tsum_convexMean_isEValue`, `supAdjuster_integral`,
-  and the composition `Conformal.calibrated_rank_isEValue`. Chained with `fdr_le`: exchangeable
-  block + independent Unif[0,1] jitter → exact rank → calibrator → e-value → e-BH → FDR ≤ q, with
-  no informal step. Remaining scope: H-EX itself (a scheduler contract, deliberately unformalised)
-  and `Conformal.lean` § 2 (the A2 accumulation identity — still `sorry`, the one open Lean item).
-  **Proving § 1 found FOUR statement-level bugs simulation had passed** (junk-value `∑'` weights
+  **THE WHOLE `lean/` TREE IS SORRY-FREE (2026-07-26, second + third pass).** § 1 (validity
+  chain): `rank_uniform` (the randomised conformal rank is EXACTLY Unif[0,1] under
+  exchangeability + independent jitter, ties and all), `rank_superUniform`, `calibrate_isEValue`,
+  `tsum_convexMean_isEValue`, `supAdjuster_integral`, composed as
+  `Conformal.calibrated_rank_isEValue`; chained with `fdr_le`: exchangeable block + independent
+  Unif[0,1] jitter → exact rank → calibrator → e-value → e-BH → FDR ≤ q, no informal step.
+  § 2 (Proposition A2, on the honest mixing-law + Markov-kernel conditional-i.i.d. model, all in
+  ℝ≥0∞ with zero integrability side conditions): `marginal_validity`, `accumulator_mean`
+  (E[M_T] = E[g(Δ)^T], an equality), and `accumulator_ge_one` — the machine-checked NEGATIVE
+  result that per-round validity does not survive accumulation. Remaining informal scope: H-EX
+  itself (a scheduler contract, deliberately unformalised) and the quantitative drift RATES
+  (strictness of A2(3); numerical by design).
+  **Proving found FIVE statement-level bugs simulation had passed** (junk-value `∑'` weights
   made `tsum_convexMean` FALSE; `calibrate` lacked measurability; `SuperUniform` was UNSATISFIABLE
-  over negative α; `rank_superUniform` had NO independence hypothesis and was FALSE) — see
+  over negative α; `rank_superUniform` had NO independence hypothesis and was FALSE; the § 2
+  placeholder-`g` statements were CONTENTLESS) — see
   `research/2026-07-26-lean-formalisation.md` § 3. The STATEMENTS were
   validated numerically first (e-BH FDP lemma: 995,245 engine selections across five adversarial
   families, 0 violations, worst slack exactly 0.0; rank uniformity exhaustive over `S_{K+1}`,
@@ -282,8 +287,8 @@ construction validity and revoke (B→A) when it breaks.
 - `decisions/0019–0025-*.md` — the architecture + follow-on ADRs (0023 canary program w/ corrections;
   0024 DSIPTS deferred; 0025 proof-carrying e-values).
 - `tools/e-value.ts` — opaque `EValue` + certified constructors/combinators + `EProcess` + `LEAN_QUEUE`
-  (ADR 0025); `lean/` — Lean development, BUILDS (4.32.1 + Mathlib): EValue/EBH sorry-free,
-  Conformal § 1 proved, § 2 (A2) the only remaining `sorry`.
+  (ADR 0025); `lean/` — Lean development, BUILDS (4.32.1 + Mathlib), ENTIRELY SORRY-FREE:
+  validity chain + A2 accumulation results both machine-checked.
 - `tools/emitter-contract.ts` — validity_class gate (ADR 0019 #1) + `certifiedFdrBenjaminiHochberg`
   (the proof-carrying Mode-B e-BH entry point — prefer over `fdrBenjaminiHochberg`).
 - `tools/canary-sim.ts` + `tools/canary-experiments.ts` + `tools/canary-crosscheck.ts` — ADR 0023 program;
@@ -342,7 +347,7 @@ monitor research is the other smaller thread. Nothing is mid-flight or broken.
 Newer threads (2026-07-26): the **mini real-probe pilot** once the 56-day baseline gate clears (~08-29);
 **block-key enrichment** for the canary design (the one lever ADR 0023 CORRECTION 2 leaves — drive residual
 persistent heterogeneity below the target fault size; measure achievable ICC on real telemetry); the
-**Lean discharge queue** (`lean/` — only `Conformal.lean` § 2, the A2 accumulation identity, remains
-`sorry`; needs condExp/disintegration. `Certificate.lean` fields for the proved chain are flipped);
+**Lean discharge queue: EMPTY** (`lean/` is sorry-free; `Certificate.lean` fields flipped; remaining
+candidates only if a consumer needs them — A2(3) strictness, the first-passage form);
 per-call-site **migration to `certifiedFdrBenjaminiHochberg`**; and a **validity-class rung** for
 "exact per round, drift-limited across rounds" (Correction 2 item 1).
