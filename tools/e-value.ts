@@ -33,8 +33,10 @@
 //
 // SCOPE / HONESTY. A certificate is a citation, not a proof. `evidence: 'theorem'` means "a proof
 // exists in the literature or in the engine and is cited"; `lean` names a MACHINE-CHECKED theorem,
-// and is populated only where one actually builds — today that is MIN_RULE and CONVEX_MEAN
-// (Lean 4.32.1 + Mathlib, both for an arbitrary measure). Everywhere else it stays `undefined`. The point of the type is not that it proves anything — it is
+// and is populated only where one actually builds — since 2026-07-26 that is the whole validity
+// chain (MIN_RULE, CONVEX_MEAN, CALIBRATOR via `calibrated_rank_isEValue`, SUP_ADJUSTED, and the
+// e-BH chain itself; `lean/` is sorry-free — see LEAN_QUEUE below, which is the authority this
+// sentence once contradicted after a stale-base edit). Elsewhere it stays `undefined`. The point of the type is not that it proves anything — it is
 // that it forces every e-value entering e-BH to NAME the argument it relies on, and makes the
 // weakest link in a derivation propagate to the result (see `weakest`). Discharging certificates
 // into Lean theorems is the follow-on programme
