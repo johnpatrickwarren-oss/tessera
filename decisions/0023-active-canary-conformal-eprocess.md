@@ -51,6 +51,22 @@
   FDR-bearing class — the runtime semantics of Correction 2's missing validity rung. The
   pooled-marginal monitors cannot do this job (β = 1, Correction 2 item 2).
 
+- **⚠️ CORRECTION 4 (2026-07-28 — A2-disp-ebh-scale, N13;
+  `research/2026-07-28-a2-disp-ebh-scale.md`).** Correction 3's "the ς ≲ 0.15 gate keeps a ~2×
+  margin" was an N = 2016 statement and DOES NOT SURVIVE fleet scale. Measured onset (last-clean,
+  onset) vs N: (0.31, 0.43) @ 2016 → (0.153, 0.183] @ 4k–10k → (0.123, 0.153] @ 20k — **the gate
+  point itself fails 3/16 seeds** — → ≤ 0.065 @ 40k (~3× the instrument floor; knob-0 controls
+  clean). No fixed ς̂ threshold protects `conformal_rank` e-BH accumulation at ≥ 20k units; the
+  paging onset falls the same way. Pending the gate decision
+  (**A2-disp-ebh-gate-decision** — scale-indexed thresholds / bounded selection domains /
+  rack-local blocks), treat any `conformal_rank` emitter serving ≥ 20k units as
+  heterogeneity-gate-FAILING regardless of measured ς̂. The measured positive alternative is the
+  **rack-local conformal construction** (`research/2026-07-28-rack-local-conformal.md`): blocks
+  within racks cancel the shared λ (premise = within-rack exchangeability, N-free) — A/A clean at
+  ς̂ = 0.607 at N = 20160 where fleet-random makes 141.75 false selections/run, and MORE powerful
+  under dispersion (recall 0.50 vs 0.07 at δ = 0.01) — at the disclosed cost that rack-level
+  faults need their own (gated) channel. PROTOTYPE; adoption is an ADR decision.
+
 - **⚠️ CORRECTION 2 (2026-07-25/26 — the A2 line; six reports, see RESEARCH-INDEX § 4).** Three
   claims below need qualification. None of this invalidates the design; it narrows what may be
   claimed for it.
