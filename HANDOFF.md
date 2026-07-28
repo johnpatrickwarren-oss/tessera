@@ -3,9 +3,9 @@
 > **SINGLE SOURCE OF TRUTH for current status** (date · suite · what's built · what's next). `STATE.md` is the
 > durable decision/arc trail (history); `README.md` defers here for the live count. Keep this header current.
 
-**Date:** 2026-07-27 · **Branch:** `main` (in sync with origin, `270ac0d`) · **clustersynth
+**Date:** 2026-07-28 · **Branch:** `main` · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 976 tests · 969 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 979 tests · 972 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -25,6 +25,23 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## What shipped (newest first)
+
+- **A2-disp-ebh-scale CLOSED + rack-local construction prototyped (2026-07-28; N13, ADR 0023
+  CORR 4).** The e-BH onset ς̂ COLLAPSES with fleet size: (0.31, 0.43) @ N=2016 → (0.153, 0.183]
+  @ 4k–10k → (0.123, 0.153] @ 20k (**the ς ≲ 0.15 gate point itself fails 3/16 seeds**) →
+  ≤0.065 @ 40k (~3× instrument floor; knob-0 controls clean). No fixed ς̂ threshold protects
+  fleet-scale `conformal_rank` e-BH — pending **A2-disp-ebh-gate-decision** (scale-indexed gate /
+  bounded selection domains / rack-local adoption), treat ≥20k-unit conformal_rank emitters as
+  gate-failing regardless of ς̂. The measured POSITIVE alternative:
+  **`tools/rack-local-conformal.ts`** — blocks within racks cancel the shared λ (premise =
+  within-rack exchangeability, N-free); A/A clean at ς̂=0.607 at N=2016 AND 20160 (fleet-random:
+  141.75 false sel/run), A/B recall 0.50 vs 0.07 at δ=0.01 under dispersion, zero false
+  selections. `research/2026-07-28-a2-disp-ebh-scale.md` + `research/2026-07-28-rack-local-conformal.md`;
+  `tools/dispersion-ebh-scale.ts`; runs in `runs/2026-07-28-a2-disp-ebh-scale/`. **Engine side
+  (branch `feat/covariate-residualizer`, engine ADR 0023):** the ADR 0024 G2 cheap arm —
+  covariate-augmented statistical residualizer (AR(p) + strictly-exogenous covariate OLS,
+  frozen-fit one-step innovations, exogeneity lint with no override) + 6 property tests (engine
+  suite 249 green). Product-side benchmark harness still to build.
 
 - **RECORD CORRECTION on `e564c94` (2026-07-27).** That commit's message attributes the stale
   Lean-discharge sentence in `tools/e-value.ts` to "a stale-base edit in a parallel session".
