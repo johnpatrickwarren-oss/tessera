@@ -190,6 +190,60 @@ export function abPower(
   };
 }
 
+// ── within-rack channel horizon (grounds the rack-scope gate thresholds) ─────
+//
+// Rack-local blocks cancel RACK-shared λ; per-unit λ spread WITHIN racks is the construction's
+// remaining dispersion premise, and it accumulates with T exactly like the fleet channel did.
+// The shipped substrate has no within-rack ς knob (rackNoiseMult is per-rack), so this panel is
+// HAND-BUILT — iid unit multipliers λ_u = exp(ς·g_u) on Gaussian scores — while every scoring
+// primitive (conformalP → calibrator → ½/½ accumulator → eBhSelect via scoreRoundRackLocal) is
+// the shipped code. Departure from the healthyScorePanel convention: flagged here and in the
+// research note; the estimand is the accumulator's first-passage response, which depends on the
+// rank distribution the λ spread induces, not on the substrate's other channels (they are
+// rack-level or round-common and cancel within-rack).
+
+export interface WithinRackHorizonRow {
+  varsigmaWithin: number;
+  /** per-seed first round (1-based) with ≥1 false e-BH selection; Infinity = never within maxT. */
+  firstSelRounds: number[];
+  falsePagesAtMaxT: number;
+  villeBudget: number;
+}
+
+export function withinRackHorizon(
+  varsigmaWithin: number,
+  opts: { seeds?: number; nUnits?: number; Krack?: number; maxT?: number } = {},
+): WithinRackHorizonRow {
+  const seeds = opts.seeds ?? 6, nUnits = opts.nUnits ?? 2016, Krack = opts.Krack ?? 71;
+  const maxT = opts.maxT ?? 2560;
+  const alphaPage = 0.001, q = 0.05;
+  const nRacks = Math.ceil(nUnits / 72);
+  const rackOf = new Int32Array(nUnits);
+  for (let u = 0; u < nUnits; u++) rackOf[u] = Math.floor(u / 72);
+  const firstSelRounds: number[] = [];
+  let pages = 0;
+  for (let s = 0; s < seeds; s++) {
+    const r = rng(70601 + s * 613);
+    const norm = (): number => {
+      const u1 = Math.max(r(), 1e-12), u2 = r();
+      return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    };
+    const lambda = Array.from({ length: nUnits }, () => Math.exp(varsigmaWithin * norm()));
+    const scores: number[][] = Array.from({ length: nUnits }, (_, u) =>
+      Array.from({ length: maxT }, () => lambda[u] * norm()));
+    const st = freshState(nUnits);
+    const rs = rng(880301 + s * 9377);
+    let first = Infinity;
+    for (let t = 0; t < maxT; t++) {
+      scoreRoundRackLocal(rs, scores, t, Krack, rackOf, nRacks, st, alphaPage);
+      if (!Number.isFinite(first) && eBhSelect(Array.from(st.cur), q).length > 0) first = t + 1;
+    }
+    firstSelRounds.push(first);
+    for (let u = 0; u < nUnits; u++) pages += st.paged[u];
+  }
+  return { varsigmaWithin, firstSelRounds, falsePagesAtMaxT: pages / seeds, villeBudget: nUnits * alphaPage };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 const f2 = (x: number): string => x.toFixed(2);
