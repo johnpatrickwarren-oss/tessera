@@ -66,6 +66,30 @@ shipped path's failure is catastrophic, rack-local stays clean:
 | 0.5 | 0.305 | 2.75 | 107.8 | 0.00 | 1.5 |
 | 1.0 | 0.607 | 141.75 | 579.8 | 0.00 | 1.8 |
 
+## 3c. Full-sim integration (C-sim, same day — `blocking: 'rack-local'` in `runCanarySim`)
+
+Rack-cohort sentinel drafting (minPeers+1 units of one random rack per draft — randomization
+moves to rack-uniform × within-rack-uniform) + rack block keys for gpu execs + rack-mate
+escalation drafts + the per-λ recall split. Validation at 20 160 GPUs, 60 days, 0.5 % budget,
+heteroRackSd = 1.0 (`runs/2026-07-28-a2-disp-ebh-scale/csim-validation-hibudget.json`; the
+0.05 % sentinel-budget run is uninformative — T ≈ 5 rounds/unit masks the failure in BOTH arms,
+`csim-validation.json`):
+
+| | coarse | rack-local |
+|---|---|---|
+| A/A false pages (Ville budget 20.2) | 448 | 3 |
+| A/A false gpu e-BH selections (cumulative / distinct units) | 5449 / 246 | 0 / 0 |
+| healthy per-exec calibration @ .01 (n ≈ 1.4 M) | 0.0100 | 0.0101 |
+| unit fault (20 × 3 %, onset d5): first e-BH detection day | 25.9 | 27.9 |
+| true-selected of 20 degraded | 8 | 13 |
+| falsely-selected healthy units (fault arm) | 254 | 0 |
+| runtime uniformity monitor | never revokes | never revokes |
+
+The full path reproduces both halves of the story: the fleet construction fails at scale with
+EVERY per-round check green (calibration exact, monitor silent — the β = 1 blindness, in vivo),
+and rack-local is clean with MORE true detections. The λ split shows the disclosed cost
+precisely: rack-local recall 9/9 in low-λ racks vs 4/11 in high-λ racks.
+
 ## 4. Costs, stated plainly
 
 1. **Rack-level faults leave this channel.** A whole rack degrading together cancels out of every

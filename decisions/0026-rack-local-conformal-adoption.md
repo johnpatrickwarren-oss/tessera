@@ -59,8 +59,8 @@ For `conformal_rank` emitters, the block-formation scope becomes a declared cont
 
 | item | what |
 |---|---|
-| C-sim | wire `blockScope: 'rack'` drafts into `runCanarySim`'s scheduler (current prototype path is the harness `scoreRoundRackLocal`); per-rack recall reporting |
-| C-rack-channel | the rack-vs-fleet channel for rack-level faults (group e-values / W3 machinery at rack granularity) + its gate; check N13 at rack count |
+| ~~C-sim~~ | **DONE same day**: `blocking: 'rack-local'` in `runCanarySim` — rack-cohort sentinel drafting, rack block keys (gpu execs), rack-mate escalation drafts, per-λ recall split (`RunResult.lambdaSplit`). Validated at 20 160 GPUs / 60 d / 0.5 % budget / heteroRackSd 1.0: coarse = 448 false pages + 5449 false selections with calibration exact AND the monitor silent (β = 1 blindness in vivo); rack-local = 3 pages, 0 false selections, MORE true detections (13 vs 8 of 20). λ split: recall 9/9 low-λ vs 4/11 high-λ racks — the disclosed cost, measured. At the 0.05 % sentinel budget BOTH arms look clean (T ≈ 5 rounds/unit — sparse coverage masks the failure); the construction matters exactly where coverage/rounds grow. Research note § 3c. |
+| C-rack-channel | rack-level faults are the GROUP families' channel (studentized-change cross-group conformal — its lagged-sd studentization already removes persistent group dispersion; EMP-CAL class, disclosed). Remaining: verify the group families' behavior under strong dispersion at scale (the validation runs show 1–6 false HOST groups — small but nonzero) + check N13 at rack count for the group-level comparison |
 | A2-disp-real | within-rack pair on real probe scores at the mini gate (~09-21) — the premise measurement |
 | C-rng-transfer | tessera-rng: onset-vs-N sweep on their fabric decides whether their ADR-0051 fixed gate has the same disease (their per-leaf dispersion may be iid — the collapse may not reproduce); queued for that repo's session |
 

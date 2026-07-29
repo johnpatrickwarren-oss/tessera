@@ -5,7 +5,7 @@
 
 **Date:** 2026-07-28 · **Branch:** `main` · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 987 tests · 980 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 991 tests · 984 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -34,10 +34,17 @@ construction validity and revoke (B→A) when it breaks.
   log-SD spread (rack-demeaning alone does NOT cancel a scale multiplier; the rank's block
   invariance does — the estimator now matches the construction's invariance), scope-mismatch
   wiring THROWS. Whole-rack blocks (K=71) measured best at every power cell. Scope disclosure:
-  rack-scoped Mode-B claims cover UNIT-level faults only until the rack-vs-fleet channel
-  (C-rack-channel) exists. Follow-ups: C-sim (runCanarySim draft integration), C-rack-channel,
-  A2-disp-real within-rack pair (~09-21), C-rng-transfer (tessera-rng onset-vs-N decides
-  transfer). +4 monitor tests.
+  rack-scoped Mode-B claims cover UNIT-level faults only (rack-level = the group families,
+  EMP-CAL). **C-sim DONE same day: `blocking: 'rack-local'` in `runCanarySim`** (rack-cohort
+  sentinel drafting, rack block keys, rack-mate escalation drafts, `lambdaSplit` recall
+  reporting; +4 sim tests). Full-sim validation @ 20 160 GPUs / 60 d / 0.5 % budget /
+  heteroRackSd 1.0: **coarse = 448 false pages + 5449 false e-BH selections with per-exec
+  calibration exact (0.0100, n=1.4 M) and the runtime monitor NEVER revoking (β=1 blindness in
+  vivo); rack-local = 3 pages / 0 false selections / 13-vs-8 true detections**; λ split 9/9
+  low-λ vs 4/11 high-λ racks (the disclosed cost, measured). At 0.05 % sentinel budget both
+  arms look clean (T≈5 rounds/unit masks it) — the construction matters where coverage grows.
+  Remaining: C-rack-channel verification (group families under dispersion — 1–6 false HOST
+  groups seen), A2-disp-real within-rack pair (~09-21), C-rng-transfer.
 
 - **A2-disp-ebh-scale CLOSED + rack-local construction prototyped (2026-07-28; N13, ADR 0023
   CORR 4).** The e-BH onset ς̂ COLLAPSES with fleet size: (0.31, 0.43) @ N=2016 → (0.153, 0.183]

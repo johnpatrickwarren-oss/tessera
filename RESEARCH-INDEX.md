@@ -360,8 +360,11 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
      same day (ADR 0026, option C):** `blockScope` contract property + scope-matched gate
      (pooled within-rack ς̂ — rack-demeaning alone does NOT cancel a scale multiplier, the
      rank's invariance does) + whole-rack blocks K=71 (measured best) + N13 cap in code
-     (`selectionDomainUnits ≥ 20160` at fleet scope ⇒ not FDR-bearing). Follow-ups: C-sim
-     (runCanarySim drafts), C-rack-channel, A2-disp-real within-rack pair.
+     (`selectionDomainUnits ≥ 20160` at fleet scope ⇒ not FDR-bearing). **C-sim DONE:
+     `blocking: 'rack-local'` in the full sim — @20 160 GPUs/60 d/0.5 % budget the coarse arm
+     makes 5449 false selections with calibration exact AND the uniformity monitor silent (the
+     β=1 blindness in vivo) while rack-local makes 0 with more true detections (note § 3c).**
+     Remaining: C-rack-channel verification, A2-disp-real within-rack pair.
   Harnesses: `tools/exchangeability-drift.ts`, `tools/heterogeneity-estimate.ts`,
   `tools/horizon-experiment.ts`, `tools/tail-probability.ts`, `tools/dispersion-drift.ts`,
   `tools/dispersion-ebh-boundary.ts`, `tools/dispersion-ebh-scale.ts`,
