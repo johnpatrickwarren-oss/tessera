@@ -239,7 +239,11 @@ export interface SimConfig {
   q: number;                  // e-BH level
   alphaPage: number;          // per-unit anytime paging threshold e ≥ 1/alphaPage
   stopEveryHours: number;     // e-BH stopping grid
-  blocking: 'coarse' | 'mondrian';  // C vs D block keys
+  /** Block keys: 'coarse' = pt|ver|gen; 'mondrian' adds fw|region; 'rack-local' (ADR 0026) keys
+   *  gpu-unit execs by pt|ver|RACK and drafts sentinels in RACK COHORTS so blocks fill — the
+   *  rack-shared λ cancels by within-rack rank invariance (N13's fix). Host/path execs keep
+   *  coarse keys (rack-level faults are the group families' channel, not this one). */
+  blocking: 'coarse' | 'mondrian' | 'rack-local';
   adaptive?: AdaptiveConfig;
   historyDays: number;        // method B history window (must be ≥ 14; SPEC uses 14 within a ≥56d horizon)
   refreshHistory: boolean;    // method B variant
@@ -577,6 +581,11 @@ export interface RunResult {
   scoreChecksum: number;                   // reproducibility fingerprint (sum of exec scores)
   // union-over-horizon discovery quality (gpu family)
   gpuEverDegraded: number; gpuEverSelectedTrue: number; gpuEverSelectedFalse: number;
+  /** ADR 0026 per-rack-λ power split (fleet-mean recall hides it): ever-degraded and
+   *  true-selected gpu counts split by whether the unit's rack noise multiplier sits above the
+   *  fleet median. Meaningful only when the scenario has heteroRackSd > 0 (else the split is an
+   *  arbitrary halving). */
+  lambdaSplit: { degHigh: number; selTrueHigh: number; degLow: number; selTrueLow: number };
   falseGroupsDistinct: Record<string, number>;   // distinct falsely-selected groups per family
 }
 
@@ -714,6 +723,7 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
     historicalDetectDay: new Map(), passiveDetectDay: new Map(), eprocDetectDay: new Map(), pageDetectDay: new Map(),
     blocksSkippedSmallK: 0, scoreChecksum: 0,
     gpuEverDegraded: 0, gpuEverSelectedTrue: 0, gpuEverSelectedFalse: 0,
+    lambdaSplit: { degHigh: 0, selTrueHigh: 0, degLow: 0, selTrueLow: 0 },
     falseGroupsDistinct: {},
   };
   const everSelTrue = new Uint8Array(topo.n), everSelFalse = new Uint8Array(topo.n), everDeg = new Uint8Array(topo.n);
@@ -792,6 +802,28 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
           gpuSecondsThisWindow += spec.gpus * spec.secs;
           continue;
         }
+        // rack-cohort drafting (ADR 0026): under rack-local blocking, gpu-unit sentinels are
+        // drafted minPeers+1 at a time from ONE random rack — randomized placement moves to
+        // (rack uniform) × (units uniform-without-replacement within rack), which is exactly the
+        // within-rack exchangeability the rack-local block key needs, and it makes rack blocks
+        // reach the minPeers floor at sparse coverage. Cohort members consume this loop's
+        // remaining exec budget. nvlink stays per-draw (host-unit — not this channel).
+        if (cfg.blocking === 'rack-local' && pt !== 'nvlink') {
+          const cohortSize = Math.min(cfg.minPeers + 1, nExec - i, GPUS_PER_RACK);
+          const r0 = rng.int(topo.nRacks);
+          const drafted = new Set<number>();
+          while (drafted.size < cohortSize) drafted.add(r0 * GPUS_PER_RACK + rng.int(GPUS_PER_RACK));
+          for (const g of drafted) {
+            if (rng.next() < s.missingRate) continue;
+            const sc = execScore(cfg, st, g, pt, tHours, rng);
+            execs.push({ unit: g, unitKind: 'gpu', pt, y: sc.y, err: sc.err, targeted: false, gpuSeconds: spec.gpus * spec.secs });
+            gpuSecondsThisWindow += spec.gpus * spec.secs;
+            if (lastProbed[g] >= 0) revisitSamples.push(tHours - lastProbed[g]);
+            lastProbed[g] = tHours;
+          }
+          i += cohortSize - 1;
+          continue;
+        }
         // unit draw (placement bias: sentinel placement ∝ exp(-bias·hostLoad))
         let g = rng.int(topo.n);
         if (s.placementBias > 0) {
@@ -829,6 +861,11 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
           let peer: number;
           if (cfg.adaptive.peerDraft === 'suspects' && escalated.size > 3 && rng.next() < 0.7) {
             const arr = [...escalated]; peer = arr[rng.int(arr.length)];
+          } else if (cfg.blocking === 'rack-local') {
+            // freshly-randomized draft WITHIN the escalated unit's rack — the rack-local
+            // comparison set (still health-independent; suspects mode above stays the
+            // deliberately-invalid E4 design)
+            peer = topo.rackOf[g] * GPUS_PER_RACK + rng.int(GPUS_PER_RACK);
           } else {
             peer = rng.int(topo.n);
           }
@@ -852,9 +889,11 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
       const g = ex.unitKind === 'host' ? ex.unit * GPUS_PER_HOST : ex.unit; // representative gpu for context
       const rack = topo.rackOf[Math.min(g, topo.n - 1)];
       const gen = topo.genOfRack[rack], fw = topo.fwOfRack[rack], region = topo.regionOf[Math.min(g, topo.n - 1)];
-      const key = cfg.blocking === 'mondrian'
-        ? `${ex.pt}|${ver}|${gen}|${fw}|${region}`
-        : `${ex.pt}|${ver}|${gen}`;
+      const key = cfg.blocking === 'rack-local' && ex.unitKind === 'gpu'
+        ? `${ex.pt}|${ver}|r${rack}` // rack determines gen|fw; the shared rack λ cancels in-rank (ADR 0026)
+        : cfg.blocking === 'mondrian'
+          ? `${ex.pt}|${ver}|${gen}|${fw}|${region}`
+          : `${ex.pt}|${ver}|${gen}`;
       let arr = blocks.get(key); if (!arr) { arr = []; blocks.set(key, arr); }
       arr.push(i);
     }
@@ -1222,10 +1261,14 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
       if (inScope) everDeg[g] = 1;
     }
   }
+  const lambdaMedian = [...st.rackNoiseMult].sort((a, b) => a - b)[Math.floor(topo.nRacks / 2)];
   for (let g = 0; g < topo.n; g++) {
     res.gpuEverDegraded += everDeg[g];
     res.gpuEverSelectedTrue += everSelTrue[g];
     res.gpuEverSelectedFalse += everSelFalse[g];
+    const high = st.rackNoiseMult[topo.rackOf[g]] > lambdaMedian;
+    if (everDeg[g]) { if (high) res.lambdaSplit.degHigh++; else res.lambdaSplit.degLow++; }
+    if (everSelTrue[g]) { if (high) res.lambdaSplit.selTrueHigh++; else res.lambdaSplit.selTrueLow++; }
   }
   res.monitorRevokedDay = monitorRevokedDay;
   for (const [famName, set] of falseGroupSel) res.falseGroupsDistinct[famName] = set.size;
