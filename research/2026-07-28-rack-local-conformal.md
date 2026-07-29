@@ -3,9 +3,10 @@
 - **Artifacts:** `tools/rack-local-conformal.ts` (both-arms harness: A/A validity + A/B power on
   identical panels). Run artifacts: `runs/2026-07-28-a2-disp-ebh-scale/rack-local-proto.json`.
   Reproduce: `pnpm build && node tools/rack-local-conformal.js --seeds 4`.
-- **Status: PROTOTYPE — not adopted.** Changing block formation is a change to the shipped scoring
-  path and to the guarantee's scope (rack-level faults leave this channel); adoption is an
-  ADR-level decision. This note records the measurement that makes the case.
+- **Status: ADOPTED same day — ADR 0026 (operator decision, option C of the scale note § 4).**
+  Contract + gate wiring landed (`blockScope`, scope-matched monitor, N13 cap); sim-side draft
+  integration and the rack-level channel are ADR 0026's named follow-ups. This note records the
+  measurement the decision rests on.
 - **Context:** the pair gate (ADR 0023 CORR 3, a2-disp-ebh) currently answers dispersion by
   ABSTAINING — ς̂ > 0.15 demotes the emitter. This is the first measured positive alternative: a
   construction whose validity premise the dispersion channel cannot violate.

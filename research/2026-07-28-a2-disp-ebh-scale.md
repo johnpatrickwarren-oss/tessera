@@ -89,7 +89,7 @@ extends it to the measured-but-unprotectable case pending the ADR.
 
 | id | item | priority |
 |---|---|---|
-| A2-disp-ebh-gate-decision | pick (a)/(b)/(c) above and wire the gate/ADR 0023 accordingly | high — blocks honest Mode-B claims at fleet scale |
+| ~~A2-disp-ebh-gate-decision~~ | **DECIDED same day: (c), with (b) surviving as the in-code cap for fleet-scoped emitters — ADR 0026** | closed |
 | A2-disp-rack-local-adoption | the companion note's § 5 checklist (rack-level channel story, contract wiring, K sensitivity) | high if (c) |
 | A2-disp-real | unchanged — real ς̂ from the probe pilot (~09-21), now ALSO wants within-rack ς̂ for the rack-local premise | high, gated |
 | A2-disp-ebh-horizon | onset vs T at fixed N (T = 320 is one slice; the always-on loop runs longer) | medium |

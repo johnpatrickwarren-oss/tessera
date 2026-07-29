@@ -5,7 +5,7 @@
 
 **Date:** 2026-07-28 · **Branch:** `main` · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 979 tests · 972 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 987 tests · 980 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -25,6 +25,19 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## What shipped (newest first)
+
+- **RACK-LOCAL ADOPTED (2026-07-28, operator decision — ADR 0026, option C).** The
+  A2-disp-ebh-gate-decision is CLOSED: `EmitterContract.blockScope` ('fleet' | 'rack') +
+  `selectionDomainUnits` with the in-code **N13 cap** (fleet-scoped conformal_rank at ≥20 160
+  units ⇒ not FDR-bearing regardless of gate verdict); `dispersion-monitor` gains
+  `scope: 'rack'` — ICC on the rack×round-demeaned panel, ς̂ as the **pooled within-rack**
+  log-SD spread (rack-demeaning alone does NOT cancel a scale multiplier; the rank's block
+  invariance does — the estimator now matches the construction's invariance), scope-mismatch
+  wiring THROWS. Whole-rack blocks (K=71) measured best at every power cell. Scope disclosure:
+  rack-scoped Mode-B claims cover UNIT-level faults only until the rack-vs-fleet channel
+  (C-rack-channel) exists. Follow-ups: C-sim (runCanarySim draft integration), C-rack-channel,
+  A2-disp-real within-rack pair (~09-21), C-rng-transfer (tessera-rng onset-vs-N decides
+  transfer). +4 monitor tests.
 
 - **A2-disp-ebh-scale CLOSED + rack-local construction prototyped (2026-07-28; N13, ADR 0023
   CORR 4).** The e-BH onset ς̂ COLLAPSES with fleet size: (0.31, 0.43) @ N=2016 → (0.153, 0.183]

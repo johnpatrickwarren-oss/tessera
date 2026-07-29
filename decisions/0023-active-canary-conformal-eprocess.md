@@ -65,7 +65,9 @@
   within racks cancel the shared λ (premise = within-rack exchangeability, N-free) — A/A clean at
   ς̂ = 0.607 at N = 20160 where fleet-random makes 141.75 false selections/run, and MORE powerful
   under dispersion (recall 0.50 vs 0.07 at δ = 0.01) — at the disclosed cost that rack-level
-  faults need their own (gated) channel. PROTOTYPE; adoption is an ADR decision.
+  faults need their own (gated) channel. **DECIDED 2026-07-28: option (c) ADOPTED — ADR 0026**
+  (`blockScope` contract property, scope-matched gate with pooled within-rack ς̂, whole-rack
+  blocks K = 71, N13 cap enforced in code for fleet scope via `selectionDomainUnits`).
 
 - **⚠️ CORRECTION 2 (2026-07-25/26 — the A2 line; six reports, see RESEARCH-INDEX § 4).** Three
   claims below need qualification. None of this invalidates the design; it narrows what may be
