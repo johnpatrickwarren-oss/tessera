@@ -618,6 +618,10 @@ function standardizedRanks(scores: number[], rng: Rng): number[] {
 // test/canary-sim.test.ts (10) + the seeded scoreChecksum fingerprint.
 export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god-functions anchor:allow no-complex-functions
   const rng = new Rng(cfg.seed);
+  // Dedicated stream for the group-rank second pass (rack-local): its tie-break draws must not
+  // perturb the unit channel's stream (coarse runs consume nothing from it, so coarse streams
+  // are byte-identical to pre-ADR-0026 runs).
+  const rngGroup = new Rng(cfg.seed ^ 0x51ed2701);
   const st = initFleet(cfg, rng);
   const topo = st.topo;
   const s = cfg.scenario;
@@ -910,6 +914,15 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
     const pOfExec = new Float64Array(execs.length).fill(NaN);
     const pErrOfExec = new Float64Array(execs.length).fill(NaN);
     const uOfExec = new Float64Array(execs.length).fill(NaN);
+    // Group-family ranks (ADR 0026): under rack-local blocking the block ranks are WITHIN-rack,
+    // which makes every rank's rack-mean 0.5 by construction — a rack-level fault would be
+    // invisible to the rack/power/region group families too (measured: a 5% rack fault detected
+    // d11.9 under coarse is undetected by ANY family under rack-local). So the group buffers are
+    // fed from a SECOND, coarse-keyed ranking pass over the same gpu execs: the unit channel
+    // stays rack-local (dispersion-immune), the group channel keeps its cross-rack contrast —
+    // and, honestly, its group-level dispersion exposure, which its studentized-change lagged-sd
+    // handicap owns (verified clean at 280 racks under heteroRackSd 1.0).
+    const uGroupOfExec = new Float64Array(execs.length).fill(NaN);
     const monPs: number[] = [];
 
     for (const [key, idxs] of blocks) {
@@ -929,7 +942,7 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
             ? rng.next() * (1 + errPeers) / K1
             : (errPeers + rng.next() * (K1 - errPeers)) / K1;
         }
-        pOfExec[i] = p; uOfExec[i] = us[j];
+        pOfExec[i] = p; uOfExec[i] = us[j]; uGroupOfExec[i] = us[j];
         monPs.push(p);
         // calibration tally (healthy = unit not degraded now)
         const gRep = execs[i].unitKind === 'host' ? execs[i].unit * GPUS_PER_HOST : execs[i].unit;
@@ -962,6 +975,24 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
             }
           }
         }
+      }
+    }
+
+    // ── group-rank second pass (rack-local only): coarse-keyed ranks for the group families ──
+    if (cfg.blocking === 'rack-local') {
+      const coarseBlocks = new Map<string, number[]>();
+      for (let i = 0; i < execs.length; i++) {
+        if (execs[i].unitKind !== 'gpu') continue;
+        const g = execs[i].unit;
+        const gen = topo.genOfRack[topo.rackOf[g]];
+        const key = `${execs[i].pt}|${ver}|${gen}`;
+        let arr = coarseBlocks.get(key); if (!arr) { arr = []; coarseBlocks.set(key, arr); }
+        arr.push(i);
+      }
+      for (const idxs of coarseBlocks.values()) {
+        if (idxs.length < cfg.minPeers) continue;
+        const us = standardizedRanks(idxs.map(i => execs[i].y), rngGroup);
+        for (let j = 0; j < idxs.length; j++) uGroupOfExec[idxs[j]] = us[j];
       }
     }
 
@@ -1008,10 +1039,10 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
       const of = level === 'rack' ? topo.rackOf : level === 'power' ? topo.powerOf : topo.regionOf;
       const buf = groupBuf[level];
       for (let i = 0; i < execs.length; i++) {
-        if (Number.isNaN(uOfExec[i]) || execs[i].unitKind !== 'gpu') continue;
+        if (Number.isNaN(uGroupOfExec[i]) || execs[i].unitKind !== 'gpu') continue;
         const gi = of[execs[i].unit];
         let arr = buf.get(gi); if (!arr) { arr = []; buf.set(gi, arr); }
-        arr.push(uOfExec[i]);
+        arr.push(uGroupOfExec[i]); // coarse-keyed rank under rack-local — cross-rack contrast preserved
       }
     };
     groupAccumulate('rack'); groupAccumulate('power'); groupAccumulate('region');

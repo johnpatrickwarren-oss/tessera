@@ -101,6 +101,19 @@ for a 4-GPU host, not the construction. Group families (rack/leaf/power/region) 
 false groups in every arm — the studentized-change lagged-sd handicap removes persistent group
 dispersion by design; verified here at 280 racks, larger rack counts unswept.
 
+**Second integration gap, found and closed: the group families were DEAD under rack-local
+blocking.** Group buffers were fed from the block ranks — within-rack ranks have rack-mean 0.5
+by construction, so a whole-rack fault was invisible to EVERY family (measured: 5 % rack fault
+detected d11.9 under coarse via the gpu family; undetected by anything under rack-local — no
+family stop, no page). Fix: the group buffers now come from a SECOND, coarse-keyed ranking pass
+over the same execs (dedicated rng stream, so the unit channel's draws are untouched and coarse
+runs stay byte-identical). After (`csim-groupchannel.json`, 280 racks, heteroRackSd 1.0,
+rack-local): A/A 2 pages / 0 false selections / 0 false groups; 5 % rack fault detects d23.9 via
+the rack family; 20 × 3 % unit faults detect d23.9 with 12 true / 0 false selections. Unit
+channel = rack-local ranks (dispersion-immune); group channel = coarse ranks (cross-rack
+contrast, EMP-CAL, its own studentized-change dispersion defenses). Both live at once,
+test-locked.
+
 ## 4. Costs, stated plainly
 
 1. **Rack-level faults leave this channel.** A whole rack degrading together cancels out of every

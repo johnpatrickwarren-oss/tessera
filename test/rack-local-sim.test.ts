@@ -64,3 +64,18 @@ test('rack-local blocking is deterministic in the seed and populates the per-λ 
   assert.equal(ls.degHigh + ls.degLow, a.gpuEverDegraded, 'λ split partitions the degraded set');
   assert.ok(ls.selTrueHigh + ls.selTrueLow === a.gpuEverSelectedTrue, 'λ split partitions the true-selected set');
 });
+
+test('rack-level fault stays detectable under rack-local blocking — the group channel keeps cross-rack ranks', () => {
+  // Without the coarse-keyed second ranking pass, within-rack ranks make EVERY family blind to a
+  // whole-rack fault (measured: 5% rack fault, detected d11.9 coarse, undetected rack-local).
+  const cfg = defaultConfig({
+    seed: 11, nGpus: 16 * GPUS_PER_RACK, days: 45, budgetFrac: 0.005, blocking: 'rack-local',
+    scenario: HEALTHY_SCENARIOS.H1,
+    faults: [{ id: 'r1', level: 'rack', target: 7, onsetDay: 20, severity: 0.05, kind: 'perf' }],
+  });
+  const r = runCanarySim(cfg);
+  assert.ok(r.eprocDetectDay.has('r1'),
+    'rack fault must be detected via the group families under rack-local blocking');
+  const rackStops = r.stops.filter(s => s.family === 'rack');
+  assert.ok(rackStops.length > 0, 'detection must come from the rack group family');
+});
