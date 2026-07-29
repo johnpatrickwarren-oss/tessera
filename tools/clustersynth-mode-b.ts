@@ -167,7 +167,8 @@ const CALIB_FEED_CAP = 500;
  *  negligible σ̂ error accumulates into a spurious crossing. See fullCalibrationPass for the
  *  in-sample case where the cap must NOT apply. */
 function prefixCalibrationPass(standardized: number[], alpha = 0.01): boolean {
-  const m = freshCalibrationMonitor({ alpha });
+  // ADR 0027 family coherence: this pipeline's emitters accumulate MODE_B_INCREMENT ('gaussian').
+  const m = freshCalibrationMonitor({ alpha, incrementKind: MODE_B_INCREMENT });
   updateCalibrationBatch(m, standardized.length > CALIB_FEED_CAP ? standardized.slice(0, CALIB_FEED_CAP) : standardized);
   return m.passing;
 }
@@ -180,7 +181,7 @@ function prefixCalibrationPass(standardized: number[], alpha = 0.01): boolean {
  *  the lag-1 whiteness gate — accumulates here and revokes. Without this, the full-window sibling fit
  *  ACCIDENTALLY WEAKENED the gate (measured: gpu_temp_c at 1 Hz went Mode B → FDP 0.779). */
 function fullCalibrationPass(standardized: number[], alpha = 0.01): boolean {
-  const m = freshCalibrationMonitor({ alpha });
+  const m = freshCalibrationMonitor({ alpha, incrementKind: MODE_B_INCREMENT });
   updateCalibrationBatch(m, standardized);
   return m.passing;
 }

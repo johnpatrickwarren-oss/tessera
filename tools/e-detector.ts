@@ -47,7 +47,7 @@
 // Tessera-original; NOT vendored.
 
 import { universalInferenceMeanShiftEValue } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/universal-inference-e-value';
-import { gInc } from './mixture-evalue.js';
+import { gInc, gBounded, BOUND_LAMBDAS, type IncrementKind } from './mixture-evalue.js';
 
 // ── VALID-INCREMENT SR E-DETECTOR (W2, 2026-07-02 — closes O3's construction gap conditionally) ────
 
@@ -78,12 +78,36 @@ export interface SrEDetectorTrace {
  *  Both bounds are CONDITIONAL on the certified residual null; a Wall-A-flagged counter has neither.
  *  Contrast the UI-increment `eDetector` above, whose moving train/eval splits are NOT e-processes
  *  (disclosed there): for THIS variant no validity-promotion question remains — the open wall is
- *  entirely the residual null itself, which the two-mode gates own. O(T), all onsets (no grid). */
-export function srEDetector(resid: ReadonlyArray<number>, alpha = 0.01, patience?: number): SrEDetectorTrace {
+ *  entirely the residual null itself, which the two-mode gates own. O(T), all onsets (no grid).
+ *
+ *  INCREMENT FAMILY (ADR 0027): 'gaussian' (default — max power on a certified standardized null;
+ *  the premise is audited by Wall-A + the calibration monitor) or 'bounded' (the audit's clipped
+ *  linear bets — exact per-onset validity under any tail / σ̂ error, for distribution-doubt
+ *  regimes). Linear bets cannot mix per-tick, so the bounded kind runs one SR recursion per λ and
+ *  averages the sums — each M_λ is an SR sum of genuine e-processes (E[g_λ|H0] = 1 exactly), and a
+ *  convex combination preserves both threshold guarantees. */
+export function srEDetector(
+  resid: ReadonlyArray<number>, alpha = 0.01, patience?: number, kind: IncrementKind = 'gaussian',
+): SrEDetectorTrace {
   const p = patience ?? Math.max(1, resid.length);
   const threshold = p / alpha;
-  let M = 0, peak = 0;
+  let peak = 0;
   let detectTime: number | null = null;
+  if (kind === 'bounded') {
+    const Ms = BOUND_LAMBDAS.map(() => 0);
+    for (let t = 0; t < resid.length; t++) {
+      let mean = 0;
+      for (let k = 0; k < BOUND_LAMBDAS.length; k++) {
+        Ms[k] = (1 + Ms[k]) * gBounded(resid[t], BOUND_LAMBDAS[k]);
+        mean += Ms[k];
+      }
+      mean /= BOUND_LAMBDAS.length;
+      if (mean > peak) peak = mean;
+      if (detectTime === null && mean >= threshold) detectTime = t;
+    }
+    return { detectTime, peak, threshold };
+  }
+  let M = 0;
   for (let t = 0; t < resid.length; t++) {
     M = (1 + M) * gInc(resid[t]);
     if (!isFinite(M)) M = Number.MAX_VALUE;

@@ -71,14 +71,31 @@ export interface ConditionalMonitorOptions {
   alpha?: number;
   /** Serial-bet mixture coefficients (default DEFAULT_SERIAL_COEFFS). */
   coeffs?: ReadonlyArray<number>;
+  /** Increment family (ADR 0027). 'gaussian' (default — the documented construction above, premised
+   *  on a conditionally sub-Gaussian residual) or 'bounded' — clipped linear bets, exact conditional
+   *  validity under ANY tail: marginal g = 1 + λ·clip(r)/B per λ, serial g = 1 + b·clip(r)/B with
+   *  b = c·clip(r_prev)/B (|c| ≤ 0.9 ⇒ wealth stays positive). Linear bets mix at the CAPITAL level
+   *  (per-λ / per-c capitals, averaged), same composition rule as the marginal/serial average. */
+  kind?: 'gaussian' | 'bounded';
 }
+
+/** Clip bound for the bounded kind (mirrors mixture-evalue's BOUND_CLIP). */
+const B_CLIP = 3;
+const clip3 = (x: number): number => (x > B_CLIP ? B_CLIP : x < -B_CLIP ? -B_CLIP : x);
+/** Marginal bounded-bet λ grid (mirrors mixture-evalue's BOUND_LAMBDAS). */
+const BOUND_MARG_LAMBDAS: ReadonlyArray<number> = [0.1, 0.3, 0.6, 0.9, -0.1, -0.3, -0.6, -0.9];
 
 /** The strengthened monitor: a marginal martingale + a serial martingale, combined by averaging. */
 export interface ConditionalMonitorState {
-  /** log of the marginal-calibration martingale (∏ g(r_t)). */
+  /** log of the marginal-calibration martingale (∏ g(r_t)). Bounded kind: log of the mean of the
+   *  per-λ capitals. */
   logWmarg: number;
-  /** log of the serial-dependence martingale (∏ g_serial(r_{t-1}, r_t)). */
+  /** log of the serial-dependence martingale (∏ g_serial(r_{t-1}, r_t)). Bounded kind: log of the
+   *  mean of the per-c capitals. */
   logWserial: number;
+  /** bounded kind only: per-λ marginal log-capitals / per-c serial log-capitals. */
+  margByLambda: number[] | null;
+  serialByCoeff: number[] | null;
   /** running max of log((W_marg + W_serial)/2) — the combined evidence-so-far (the revocation statistic). */
   peakLogAvg: number;
   /** previous residual (the serial predictor); null before the first tick / after a stream boundary. */
@@ -93,9 +110,17 @@ export interface ConditionalMonitorState {
 export function freshConditionalMonitor(opts: ConditionalMonitorOptions = {}): ConditionalMonitorState {
   const alpha = opts.alpha ?? 0.01;
   if (!(alpha > 0 && alpha <= 1)) throw new Error(`serial-calibration: alpha must be in (0,1], got ${alpha}`);
+  const bounded = opts.kind === 'bounded';
+  const coeffs = opts.coeffs ?? DEFAULT_SERIAL_COEFFS;
+  if (bounded && coeffs.some((c) => Math.abs(c) >= 1)) {
+    throw new Error('serial-calibration: bounded kind needs |c| < 1 (wealth must stay positive)');
+  }
   return {
-    logWmarg: 0, logWserial: 0, peakLogAvg: 0, prev: null, ticks: 0, passing: true,
-    threshold: Math.log(1 / alpha), coeffs: opts.coeffs ?? DEFAULT_SERIAL_COEFFS,
+    logWmarg: 0, logWserial: 0,
+    margByLambda: bounded ? BOUND_MARG_LAMBDAS.map(() => 0) : null,
+    serialByCoeff: bounded ? coeffs.map(() => 0) : null,
+    peakLogAvg: 0, prev: null, ticks: 0, passing: true,
+    threshold: Math.log(1 / alpha), coeffs,
   };
 }
 
@@ -105,8 +130,24 @@ const LOG2 = Math.log(2);
  *  (once a predecessor exists), then revoke (sticky) if their AVERAGE has ever crossed 1/alpha. Mutates and
  *  returns the state. */
 export function updateConditional(state: ConditionalMonitorState, r: number): ConditionalMonitorState {
-  state.logWmarg += Math.min(LOG_G_CAP, logSumExp(MARGINAL_LAMBDAS.map((l) => betLog(l, r))) - Math.log(MARGINAL_LAMBDAS.length));
-  if (state.prev !== null) state.logWserial += serialLogIncrement(state.prev, r, state.coeffs);
+  if (state.margByLambda && state.serialByCoeff) {
+    const c = clip3(r);
+    for (let i = 0; i < BOUND_MARG_LAMBDAS.length; i++) {
+      state.margByLambda[i] += Math.log(1 + (BOUND_MARG_LAMBDAS[i] * c) / B_CLIP);
+    }
+    state.logWmarg = logSumExp(state.margByLambda) - Math.log(BOUND_MARG_LAMBDAS.length);
+    if (state.prev !== null) {
+      const cp = clip3(state.prev);
+      for (let i = 0; i < state.coeffs.length; i++) {
+        const b = (state.coeffs[i] * cp) / B_CLIP; // |b| < 1
+        state.serialByCoeff[i] += Math.log(1 + (b * c) / B_CLIP);
+      }
+      state.logWserial = logSumExp(state.serialByCoeff) - Math.log(state.coeffs.length);
+    }
+  } else {
+    state.logWmarg += Math.min(LOG_G_CAP, logSumExp(MARGINAL_LAMBDAS.map((l) => betLog(l, r))) - Math.log(MARGINAL_LAMBDAS.length));
+    if (state.prev !== null) state.logWserial += serialLogIncrement(state.prev, r, state.coeffs);
+  }
   state.prev = r;
   const logAvg = logSumExp([state.logWmarg, state.logWserial]) - LOG2;
   if (logAvg > state.peakLogAvg) state.peakLogAvg = logAvg;

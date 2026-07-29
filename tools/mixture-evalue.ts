@@ -35,7 +35,7 @@ export function gInc(r: number): number {
 export const BOUND_CLIP = 3;
 /** Linear-bet grid: |λ| < 1 keeps every wealth factor strictly positive. Small λ for small sustained
  *  (or heavily-whitened near-unit-root) shifts; large λ for fast growth on big faults. */
-const BOUND_LAMBDAS = [0.1, 0.3, 0.6, 0.9, -0.1, -0.3, -0.6, -0.9];
+export const BOUND_LAMBDAS = [0.1, 0.3, 0.6, 0.9, -0.1, -0.3, -0.6, -0.9];
 
 /** DISTRIBUTION-ROBUST linear (Kelly) bounded-bet wealth factor (2026-07-02 audit fix, F7/F9).
  *
@@ -55,7 +55,7 @@ const BOUND_LAMBDAS = [0.1, 0.3, 0.6, 0.9, -0.1, -0.3, -0.6, -0.9];
  *  CAPITAL processes, one product per λ, combined at the onset-mixture level). The mixture functions
  *  below maintain one SR recursion per λ and average the resulting e-processes — a convex
  *  combination of e-processes, still an e-process. */
-function gBounded(r: number, lam: number): number {
+export function gBounded(r: number, lam: number): number {
   const c = r > BOUND_CLIP ? BOUND_CLIP : r < -BOUND_CLIP ? -BOUND_CLIP : r;
   return 1 + (lam * c) / BOUND_CLIP;
 }

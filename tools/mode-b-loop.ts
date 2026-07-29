@@ -159,7 +159,9 @@ export class ModeBLoop {
   /** Update the per-shard accumulating calibration monitors; return the fraction still passing. */
   private updateMonitors(id: string, samples: number[][]): number {
     let mons = this.monitors.get(id);
-    if (!mons || mons.length !== samples.length) { mons = samples.map(() => freshCalibrationMonitor({ alpha: this.alpha })); this.monitors.set(id, mons); }
+    // ADR 0027 family coherence: the loop's e-values are geometricMixtureEValue with the
+    // 'gaussian' default — the monitors must test that family.
+    if (!mons || mons.length !== samples.length) { mons = samples.map(() => freshCalibrationMonitor({ alpha: this.alpha, incrementKind: 'gaussian' })); this.monitors.set(id, mons); }
     samples.forEach((s, i) => updateCalibrationBatch(mons![i], s));
     return mons.length ? mons.filter((m) => m.passing).length / mons.length : 1;
   }

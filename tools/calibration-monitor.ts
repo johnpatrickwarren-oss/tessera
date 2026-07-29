@@ -27,26 +27,45 @@
 // is exactly what lets it run forever at a controlled false-revocation rate. Revoke-on-break is sound
 // even though certify-the-future is not.
 //
-// SCOPE (named honestly). g is the symmetric Gaussian-LR mixture (λ = ±{.5,1,2}), so W tests MARGINAL
-// calibration of the increment — it catches the binding ADR 0019 failure mode (residual mean/scale wrong
-// → E[g] > 1). Pure serial dependence with a perfect marginal N(0,1) is a subtler failure this marginal
-// test is weak against; conditional/serial calibration testing is the harder O5 frontier. We test the
-// failure that actually broke FDR, and name the boundary. Tessera-original.
+// SCOPE (named honestly). W tests MARGINAL calibration of the increment — it catches the binding
+// ADR 0019 failure mode (residual mean/scale wrong → E[g] > 1). Pure serial dependence with a
+// perfect marginal N(0,1) is a subtler failure this marginal test is weak against;
+// conditional/serial calibration testing is the harder O5 frontier. We test the failure that
+// actually broke FDR, and name the boundary. Tessera-original.
+//
+// INCREMENT-FAMILY COHERENCE (ADR 0027, 2026-07-28). The monitor must test the SAME increment
+// family the emitter accumulates: a bounded-family emitter (the FDR-bearing default since the
+// 2026-07-02 audit — exact validity under any tail and any standardizing-scale error) monitored
+// with the Gaussian-LR gInc gets FALSELY demoted by heavy tails / σ̂ error its own increment
+// absorbs, while a gaussian-family emitter NEEDS the strict gInc test (a 10 % σ̂ under-estimate
+// drives ITS null mean 0.52 → 7.6 — audit F7 — and the monitor must catch exactly that). The
+// default `incrementKind` is therefore 'bounded', matching `e-value.ts`'s certified-constructor
+// default; gaussian-family emitters pass 'gaussian' explicitly. Linear bets cannot be mixed
+// per-tick (mean_λ(1+λc) ≡ 1), so the bounded kind maintains one capital per λ and Ville runs on
+// their average — a convex combination of martingales.
 
-import { gInc } from './mixture-evalue.js';
+import { gInc, gBounded, BOUND_LAMBDAS } from './mixture-evalue.js';
 import type { EmitterContract } from './emitter-contract.js';
+import type { IncrementKind } from './mixture-evalue.js';
 
 export interface CalibrationMonitorOptions {
   /** Anytime-valid level: revoke when the calibration test martingale W ≥ 1/alpha. Default 0.01 (so the
    *  false-revocation probability over ALL time is ≤ 1%). */
   alpha?: number;
-  /** The emitter increment under test (E[g|H0] ≤ 1). Default: the production normalized-mixture g. */
+  /** Which increment family to test (ADR 0027: match the emitter). Default 'bounded' — the
+   *  FDR-bearing default family. Ignored when a custom `increment` is supplied. */
+  incrementKind?: IncrementKind;
+  /** A custom emitter increment under test (E[g|H0] ≤ 1) — single-product path, overrides
+   *  `incrementKind`. */
   increment?: (r: number) => number;
 }
 
 export interface CalibrationMonitorState {
-  /** log of the calibration test martingale W (log-space for numerical stability under long streams). */
+  /** log of the calibration test martingale W (log-space for numerical stability under long streams).
+   *  For the bounded kind this is the log of the AVERAGE of the per-λ capitals. */
   logW: number;
+  /** per-λ log-capitals (bounded kind only; null for gaussian/custom). */
+  logWByLambda: number[] | null;
   /** running max of logW (the e-value evidence-so-far is exp(peakLogW)). */
   peakLogW: number;
   /** number of believed-null residuals ingested. */
@@ -55,7 +74,7 @@ export interface CalibrationMonitorState {
   passing: boolean;
   /** the revocation threshold in log space, log(1/alpha). */
   threshold: number;
-  /** the increment under test. */
+  /** the increment under test (single-product path; identity placeholder for bounded). */
   increment: (r: number) => number;
 }
 
@@ -63,20 +82,40 @@ export interface CalibrationMonitorState {
 export function freshCalibrationMonitor(opts: CalibrationMonitorOptions = {}): CalibrationMonitorState {
   const alpha = opts.alpha ?? 0.01;
   if (!(alpha > 0 && alpha <= 1)) throw new Error(`calibration-monitor: alpha must be in (0,1], got ${alpha}`);
+  const kind: IncrementKind = opts.incrementKind ?? 'bounded';
+  const bounded = !opts.increment && kind === 'bounded';
   return {
-    logW: 0, peakLogW: 0, ticks: 0, passing: true,
+    logW: 0, logWByLambda: bounded ? BOUND_LAMBDAS.map(() => 0) : null,
+    peakLogW: 0, ticks: 0, passing: true,
     threshold: Math.log(1 / alpha), increment: opts.increment ?? gInc,
   };
+}
+
+/** log of the mean of exp(xs) (stable). */
+function logMeanExp(xs: ReadonlyArray<number>): number {
+  let m = -Infinity;
+  for (const x of xs) if (x > m) m = x;
+  if (!Number.isFinite(m)) return m;
+  let s = 0;
+  for (const x of xs) s += Math.exp(x - m);
+  return m + Math.log(s / xs.length);
 }
 
 /** Ingest ONE believed-null residual: multiply it into the calibration test martingale and revoke
  *  (sticky) if W has ever crossed 1/alpha. Mutates and returns the state. */
 export function updateCalibration(state: CalibrationMonitorState, r: number): CalibrationMonitorState {
-  const g = state.increment(r);
-  // log-space update; g ≥ 0. A zero increment would send logW → −∞; clamp to a tiny floor so a single
-  // unlucky tick cannot permanently sink the martingale (it only ever makes revocation HARDER, which is
-  // conservative for the false-revocation guarantee).
-  state.logW += Math.log(Math.max(g, 1e-300));
+  if (state.logWByLambda) {
+    for (let i = 0; i < BOUND_LAMBDAS.length; i++) {
+      state.logWByLambda[i] += Math.log(gBounded(r, BOUND_LAMBDAS[i]));
+    }
+    state.logW = logMeanExp(state.logWByLambda);
+  } else {
+    const g = state.increment(r);
+    // log-space update; g ≥ 0. A zero increment would send logW → −∞; clamp to a tiny floor so a single
+    // unlucky tick cannot permanently sink the martingale (it only ever makes revocation HARDER, which is
+    // conservative for the false-revocation guarantee).
+    state.logW += Math.log(Math.max(g, 1e-300));
+  }
   if (state.logW > state.peakLogW) state.peakLogW = state.logW;
   state.ticks++;
   if (state.peakLogW >= state.threshold) state.passing = false;

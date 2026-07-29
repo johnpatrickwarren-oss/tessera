@@ -215,7 +215,9 @@ export function modeBTrial(seed: number, p: ModeBParams, sharedControl = true): 
   //       (an integrated drift survives single-φ whitening as a near-mean-zero autocorrelated residual
   //       that the SR detector compounds into spurious selections). Mode B requires BOTH.
   const nullFeed = constructionNullFeed(fleet, prefix);
-  const { monitor } = applyCalibrationMonitor(controlContrastEmitter(true), nullFeed);
+  // ADR 0027 family coherence: this emitter accumulates GAUSSIAN-family increments
+  // (normalizedMixtureEValue default), so the monitor must test that family.
+  const { monitor } = applyCalibrationMonitor(controlContrastEmitter(true), nullFeed, { incrementKind: 'gaussian' });
   const white = controlResidualWhite(nullFeed);
   const contract = controlContrastEmitter(monitor.passing && white);
   const mode = modeOf(contract);

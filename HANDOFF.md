@@ -5,7 +5,7 @@
 
 **Date:** 2026-07-28 · **Branch:** `main` · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 1001 tests · 994 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 1007 tests · 1000 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -25,6 +25,20 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## What shipped (newest first)
+
+- **ADR 0027 — INCREMENT-FAMILY COHERENCE (2026-07-28, the "Catoni swap" resolved).** The
+  monitor must test the family its emitter accumulates: `calibration-monitor` gains
+  `incrementKind` (default 'bounded', matching e-value.ts's certified default; per-λ capitals,
+  Ville on their average); all existing gaussian-family call sites (mode-b-control,
+  clustersynth-mode-b, mode-b-loop) PINNED 'gaussian' — published behavior unchanged, family
+  now declared per site. `srEDetector` + the serial monitor gain kind knobs (defaults
+  unchanged). **Catoni assessed and NOT adopted** — the audit's bounded family dominates it on
+  σ̂-error validity (no variance premise), small-shift power, and intermittent-fault
+  sensitivity (three-way table in the o2-fit note); robust Catoni stays in
+  `tools/o2-robust-eprocess.ts` as contaminated-validity insurance (3√ε·σ floor). **Discovery:
+  ADR 0020's β=1 marginal blindness is GAUSSIAN-family-specific** — the bounded monitor
+  genuinely detects unit-marginal AR(1) (~0.41 @ ρ=0.6), coherently (the bounded emitter is
+  equally invalid there); test-locked both ways. +6 tests.
 
 - **HORIZON + RACK-COUNT SWEEPS + GROUP-CHANNEL RESTORATION (2026-07-28, session continuation).**
   (1) ⚠️ **Group families were DEAD under rack-local blocking** — within-rack ranks have

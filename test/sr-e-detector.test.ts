@@ -52,3 +52,24 @@ test('srEDetector: threshold is patience/α and empty input never fires', () => 
   assert.equal(srEDetector([], 0.05, 100).threshold, 2000);
   assert.equal(srEDetector([], 0.05).detectTime, null);
 });
+
+test('ADR 0027: bounded-kind SR — per-λ recursions detect a sustained shift and hold the null under heavy tails', () => {
+  // t3-ish heavy-tailed null: the bounded increments have E = 1 exactly (clipped, conditionally
+  // mean-zero), so the false-alarm bound holds where the gaussian gInc's premise is broken.
+  const t3 = (rng: () => number): number => {
+    const z = gauss(rng); const c = gauss(rng) ** 2 + gauss(rng) ** 2 + gauss(rng) ** 2;
+    return (z / Math.sqrt(c / 3)) / Math.sqrt(3);
+  };
+  let falses = 0; const reps = 60, T = 400;
+  for (let rep = 0; rep < reps; rep++) {
+    const rng = mulberry(9200 + rep);
+    const r = Array.from({ length: T }, () => t3(rng));
+    if (srEDetector(r, 0.05, T, 'bounded').detectTime !== null) falses++;
+  }
+  assert.ok(falses / reps <= 0.05 + 0.05, `bounded SR false-alarm rate ${(falses / reps).toFixed(2)} should be ≤ α(+slack) under heavy tails`);
+  const rng = mulberry(77);
+  const onset = 150;
+  const shifted = Array.from({ length: 600 }, (_, t) => gauss(rng) + (t >= onset ? 2 : 0));
+  const d = srEDetector(shifted, 0.05, 600, 'bounded');
+  assert.ok(d.detectTime !== null && d.detectTime >= onset, `bounded SR should detect the shift (got ${d.detectTime})`);
+});

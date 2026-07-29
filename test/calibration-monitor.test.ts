@@ -86,3 +86,35 @@ test('rejects an invalid alpha', () => {
   assert.throws(() => freshCalibrationMonitor({ alpha: 0 }), /alpha must be/);
   assert.throws(() => freshCalibrationMonitor({ alpha: 1.5 }), /alpha must be/);
 });
+
+// ── ADR 0027: increment-family coherence ─────────────────────────────────────
+
+function scaledStream(seed: number, n: number, scale: number): number[] {
+  const rng = mulberry32(seed);
+  return Array.from({ length: n }, () => scale * gaussian(rng));
+}
+
+test('ADR 0027 coherence: a 1.5× scale error revokes the GAUSSIAN-kind monitor but not the BOUNDED default', () => {
+  // The bounded emitter's increment is exactly valid under any symmetric scale error (clipped,
+  // conditionally mean-zero) — the monitor testing ITS family must not falsely demote it. The
+  // gaussian family's validity genuinely depends on the scale (audit F7) — its monitor must fire.
+  const s = scaledStream(11, 4000, 1.5);
+  const g = freshCalibrationMonitor({ alpha: 0.01, incrementKind: 'gaussian' });
+  const b = freshCalibrationMonitor({ alpha: 0.01 }); // default = bounded
+  updateCalibrationBatch(g, s);
+  updateCalibrationBatch(b, s);
+  assert.equal(g.passing, false, 'gaussian monitor must catch the scale error its family cannot absorb');
+  assert.equal(b.passing, true, `bounded monitor must NOT falsely demote (peak ${b.peakLogW.toFixed(2)})`);
+});
+
+test('ADR 0027: the bounded monitor still catches a center shift — the one nuisance the linear bet keeps', () => {
+  const m = freshCalibrationMonitor({ alpha: 0.01 });
+  updateCalibrationBatch(m, driftStream(13, 4000, 0.5));
+  assert.equal(m.passing, false, 'bounded monitor must revoke on a broken center');
+});
+
+test('ADR 0027: bounded default stays passing on a clean null (Ville respected)', () => {
+  const m = freshCalibrationMonitor({ alpha: 0.01 });
+  updateCalibrationBatch(m, nullStream(17, 6000));
+  assert.equal(m.passing, true);
+});
