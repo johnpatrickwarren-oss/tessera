@@ -90,6 +90,17 @@ EVERY per-round check green (calibration exact, monitor silent — the β = 1 bl
 and rack-local is clean with MORE true detections. The λ split shows the disclosed cost
 precisely: rack-local recall 9/9 in low-λ racks vs 4/11 in high-λ racks.
 
+**Host-family leak, found and closed (same day).** The first integration left nvlink (per-host
+family) on coarse keys — and it leaked exactly as the mechanism predicts one level up: 1–6 false
+HOST selections/run in the otherwise-clean rack-local arm. Fix: nvlink drafts HOST cohorts
+within a rack (18 hosts/rack ≥ minPeers+1) and host execs take the rack key. After
+(`csim-hostfamily.json`): rack-local false groups = {} in both arms; a host-level fault (5 %,
+onset d5) still detects — day 42.9 with ZERO false selections, vs coarse day 16.9 amid ~5.5k
+false selections (speed without validity). The remaining delay is sentinel-coverage economics
+for a 4-GPU host, not the construction. Group families (rack/leaf/power/region) showed zero
+false groups in every arm — the studentized-change lagged-sd handicap removes persistent group
+dispersion by design; verified here at 280 racks, larger rack counts unswept.
+
 ## 4. Costs, stated plainly
 
 1. **Rack-level faults leave this channel.** A whole rack degrading together cancels out of every

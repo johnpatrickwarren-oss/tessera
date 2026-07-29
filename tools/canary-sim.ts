@@ -802,24 +802,33 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
           gpuSecondsThisWindow += spec.gpus * spec.secs;
           continue;
         }
-        // rack-cohort drafting (ADR 0026): under rack-local blocking, gpu-unit sentinels are
-        // drafted minPeers+1 at a time from ONE random rack — randomized placement moves to
+        // rack-cohort drafting (ADR 0026): under rack-local blocking, sentinels are drafted
+        // minPeers+1 at a time from ONE random rack — randomized placement moves to
         // (rack uniform) × (units uniform-without-replacement within rack), which is exactly the
         // within-rack exchangeability the rack-local block key needs, and it makes rack blocks
         // reach the minPeers floor at sparse coverage. Cohort members consume this loop's
-        // remaining exec budget. nvlink stays per-draw (host-unit — not this channel).
-        if (cfg.blocking === 'rack-local' && pt !== 'nvlink') {
-          const cohortSize = Math.min(cfg.minPeers + 1, nExec - i, GPUS_PER_RACK);
+        // remaining exec budget. nvlink drafts HOST cohorts (18 hosts/rack ≥ minPeers+1) — the
+        // per-host family otherwise keeps the coarse key and carries the same dispersion disease
+        // one level up (measured: 1–6 false hosts/run leaked while gpu-family read 0).
+        if (cfg.blocking === 'rack-local') {
           const r0 = rng.int(topo.nRacks);
+          const perRack = pt === 'nvlink' ? HOSTS_PER_RACK : GPUS_PER_RACK;
+          const cohortSize = Math.min(cfg.minPeers + 1, nExec - i, perRack);
           const drafted = new Set<number>();
-          while (drafted.size < cohortSize) drafted.add(r0 * GPUS_PER_RACK + rng.int(GPUS_PER_RACK));
-          for (const g of drafted) {
+          while (drafted.size < cohortSize) drafted.add(rng.int(perRack));
+          for (const member of drafted) {
             if (rng.next() < s.missingRate) continue;
+            const g = pt === 'nvlink'
+              ? (r0 * HOSTS_PER_RACK + member) * GPUS_PER_HOST + rng.int(GPUS_PER_HOST)
+              : r0 * GPUS_PER_RACK + member;
             const sc = execScore(cfg, st, g, pt, tHours, rng);
-            execs.push({ unit: g, unitKind: 'gpu', pt, y: sc.y, err: sc.err, targeted: false, gpuSeconds: spec.gpus * spec.secs });
+            const unit = pt === 'nvlink' ? topo.hostOf[g] : g;
+            execs.push({ unit, unitKind: pt === 'nvlink' ? 'host' : 'gpu', pt, y: sc.y, err: sc.err, targeted: false, gpuSeconds: spec.gpus * spec.secs });
             gpuSecondsThisWindow += spec.gpus * spec.secs;
-            if (lastProbed[g] >= 0) revisitSamples.push(tHours - lastProbed[g]);
-            lastProbed[g] = tHours;
+            if (pt !== 'nvlink') {
+              if (lastProbed[g] >= 0) revisitSamples.push(tHours - lastProbed[g]);
+              lastProbed[g] = tHours;
+            }
           }
           i += cohortSize - 1;
           continue;
@@ -889,7 +898,7 @@ export function runCanarySim(cfg: SimConfig): RunResult { // anchor:allow no-god
       const g = ex.unitKind === 'host' ? ex.unit * GPUS_PER_HOST : ex.unit; // representative gpu for context
       const rack = topo.rackOf[Math.min(g, topo.n - 1)];
       const gen = topo.genOfRack[rack], fw = topo.fwOfRack[rack], region = topo.regionOf[Math.min(g, topo.n - 1)];
-      const key = cfg.blocking === 'rack-local' && ex.unitKind === 'gpu'
+      const key = cfg.blocking === 'rack-local' && ex.unitKind !== 'path'
         ? `${ex.pt}|${ver}|r${rack}` // rack determines gen|fw; the shared rack λ cancels in-rank (ADR 0026)
         : cfg.blocking === 'mondrian'
           ? `${ex.pt}|${ver}|${gen}|${fw}|${region}`
