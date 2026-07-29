@@ -175,3 +175,72 @@ test('cohort discipline: a round with a different unit count throws instead of s
   assert.throws(() => updateHeterogeneity(st, makeRound(r, offsets.slice(0, 100), scales.slice(0, 100))), /stable cohort/);
   assert.throws(() => updateHeterogeneity(st, [...makeRound(r, offsets, scales).slice(0, N_UNITS - 1), NaN]), /non-finite/);
 });
+
+// ── ADR 0026: rack scope ──────────────────────────────────────────────────────
+
+/** 400 units in 50 racks of 8; rack-shared scale multipliers exp(ςᵣ·gᵣ), optional within-rack
+ *  per-unit spread exp(ςᵤ·gᵤ). */
+function rackFleet(r: () => number, rackSigma: number, unitSigma: number): {
+  rackOf: number[]; offsets: number[]; scales: number[];
+} {
+  const perRack = 8, nRacks = N_UNITS / perRack;
+  const rackMult = Array.from({ length: nRacks }, () => Math.exp(rackSigma * gauss(r)));
+  const rackOf: number[] = [], scales: number[] = [];
+  for (let u = 0; u < N_UNITS; u++) {
+    const rk = Math.floor(u / perRack);
+    rackOf.push(rk);
+    scales.push(rackMult[rk] * Math.exp(unitSigma * gauss(r)));
+  }
+  return { rackOf, offsets: new Array<number>(N_UNITS).fill(0), scales };
+}
+
+test('rack scope: rack-shared dispersion fails the fleet gate but PASSES the rack gate (the construction cancels it)', () => {
+  const r = rng(2601);
+  const { rackOf, offsets, scales } = rackFleet(r, 0.5, 0);
+  const fleet = freshHeterogeneityMonitor({ minRounds: 20 });
+  const rack = freshHeterogeneityMonitor({ minRounds: 20, scope: 'rack', rackOf });
+  for (let t = 0; t < 30; t++) {
+    const round = makeRound(r, offsets, scales);
+    updateHeterogeneity(fleet, round);
+    updateHeterogeneity(rack, round);
+  }
+  const vf = heterogeneityVerdict(fleet), vr = heterogeneityVerdict(rack);
+  assert.equal(vf.passing, false, `fleet gate must fail on rack-shared ς (ς̂=${vf.varsigmaHat?.toFixed(3)})`);
+  assert.equal(vr.passing, true, `rack gate must pass — the within-rack residual is homogeneous (ς̂=${vr.varsigmaHat?.toFixed(3)})`);
+});
+
+test('rack scope: WITHIN-rack per-unit dispersion still fails the rack gate — the premise moved inside, not away', () => {
+  const r = rng(2602);
+  const { rackOf, offsets, scales } = rackFleet(r, 0, 0.5);
+  const rack = freshHeterogeneityMonitor({ minRounds: 20, scope: 'rack', rackOf });
+  for (let t = 0; t < 30; t++) updateHeterogeneity(rack, makeRound(r, offsets, scales));
+  const v = heterogeneityVerdict(rack);
+  assert.equal(v.passing, false, `within-rack ς must breach the rack-scoped gate (ς̂=${v.varsigmaHat?.toFixed(3)})`);
+});
+
+test('scope mismatch: wiring a fleet monitor verdict into a rack-scoped emitter throws (and vice versa)', () => {
+  const r = rng(2603);
+  const { rackOf, offsets, scales } = rackFleet(r, 0, 0);
+  const fleet = freshHeterogeneityMonitor({ minRounds: 20 });
+  const rack = freshHeterogeneityMonitor({ minRounds: 20, scope: 'rack', rackOf });
+  for (let t = 0; t < 25; t++) {
+    const round = makeRound(r, offsets, scales);
+    updateHeterogeneity(fleet, round);
+    updateHeterogeneity(rack, round);
+  }
+  assert.throws(() => applyHeterogeneityGate(rankContract({ blockScope: 'rack' }), fleet), /blockScope=rack but the monitor is scope=fleet/);
+  assert.throws(() => applyHeterogeneityGate(rankContract(), rack), /blockScope=fleet but the monitor is scope=rack/);
+  const ok = applyHeterogeneityGate(rankContract({ blockScope: 'rack' }), rack);
+  assert.equal(ok.contract.heterogeneityGatePassing, true);
+});
+
+test('N13 cap: a fleet-scoped conformal_rank emitter at ≥20160 units is not FDR-bearing even with a passing gate; rack scope is exempt', () => {
+  const capped = rankContract({ heterogeneityGatePassing: true, selectionDomainUnits: 20160 });
+  assert.equal(isFdrBearing(capped), false);
+  assert.match(ineligibilityReason(capped) ?? '', /N13/);
+  const below = rankContract({ heterogeneityGatePassing: true, selectionDomainUnits: 10080 });
+  assert.equal(isFdrBearing(below), true);
+  const rackScoped = rankContract({ blockScope: 'rack', heterogeneityGatePassing: true, selectionDomainUnits: 40320 });
+  assert.equal(isFdrBearing(rackScoped), true, 'rack scope premise is N-free');
+  assert.equal(modeOf(rackScoped), 'B');
+});

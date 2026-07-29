@@ -84,25 +84,58 @@ export interface EmitterContract {
    *  unchanged semantics). */
   constructionFamily?: 'contrast' | 'conformal_rank';
   /** Live heterogeneity design-gate verdict (tools/dispersion-monitor.ts — the ς̂ + ICC panel
-   *  estimator pair against the design targets). REQUIRED true for a `conformal_rank` emitter to
-   *  be FDR-bearing; undefined ⇒ unmeasured ⇒ NOT passing, the same rule as the calibration
-   *  monitor. This is the runtime semantics of Correction 2's missing validity-class rung
-   *  ("exact per round, drift-limited across rounds"): admitted while the measured drift
-   *  preconditions hold. Ignored for the `contrast` family. */
+   *  estimator pair against the design targets, estimated AT THE EMITTER'S BLOCK SCOPE). REQUIRED
+   *  true for a `conformal_rank` emitter to be FDR-bearing; undefined ⇒ unmeasured ⇒ NOT passing,
+   *  the same rule as the calibration monitor. This is the runtime semantics of Correction 2's
+   *  missing validity-class rung ("exact per round, drift-limited across rounds"): admitted while
+   *  the measured drift preconditions hold. Ignored for the `contrast` family. */
   heterogeneityGatePassing?: boolean;
+  /** Where a `conformal_rank` emitter draws its blocks (ADR 0026). `fleet` (default): fleet-wide
+   *  random blocks — the premise is fleet-level exchangeability, the full pair gate binds, and
+   *  N13 applies (see `selectionDomainUnits`). `rack`: blocks drawn within racks — rack-level
+   *  effects (incl. the shared-λ dispersion channel that kills the fleet construction, N13)
+   *  cancel BY CONSTRUCTION; the premise moves inside the rack, so the gate verdict must come
+   *  from a scope='rack' monitor (within-rack pair). ⚠️ SCOPE DISCLOSURE: a rack-scoped emitter
+   *  is structurally blind to rack-level faults — they need a separate rack-vs-fleet channel,
+   *  which itself needs a gate at rack granularity. Ignored for the `contrast` family. */
+  blockScope?: 'fleet' | 'rack';
+  /** Number of units the e-BH selection runs over (deployment config, not a monitor verdict).
+   *  For a FLEET-scoped `conformal_rank` emitter at ≥ N13_FLEET_CAP units, NO measured-safe ς̂
+   *  threshold exists (the onset collapses toward the instrument floor — N13, ADR 0023 CORR 4),
+   *  so the emitter is not FDR-bearing REGARDLESS of its gate verdict. Absent ⇒ the cap is not
+   *  checked here (the CORR 4 prose rule still binds the operator). Rack scope is exempt — its
+   *  premise is N-free (measured clean at ς̂ 0.607, N 20160). */
+  selectionDomainUnits?: number;
 }
+
+/** The fleet size at/above which N13 makes fleet-scoped conformal_rank e-BH unprotectable by any
+ *  fixed ς̂ gate: the measured onset at 20 160 units sits AT the design-gate point (3/16 seeds),
+ *  and at 40 320 events occur ~3× above the instrument floor. 10 080 cleared only 6 seeds —
+ *  treat the cap as the measured-breach size, not a safety certificate below it. */
+export const N13_FLEET_CAP = 20160;
 
 /** Brand a run as plumbing-only when the unvalidated-emitter override is set (mirrors CS_ALLOW_SHORT). */
 export function unvalidatedOverride(): boolean {
   return process.env.CS_ALLOW_UNVALIDATED === '1';
 }
 
+/** True iff a fleet-scoped conformal_rank emitter's declared selection domain crosses the N13
+ *  cap (rack scope is exempt — its premise is N-free). */
+function n13Capped(c: EmitterContract): boolean {
+  return c.constructionFamily === 'conformal_rank'
+    && (c.blockScope ?? 'fleet') === 'fleet'
+    && c.selectionDomainUnits !== undefined
+    && c.selectionDomainUnits >= N13_FLEET_CAP;
+}
+
 /** True iff this contract's construction family imposes no unmet family-specific gate. The
  *  `conformal_rank` family requires a currently-passing heterogeneity design gate (ADR 0023
- *  Corrections 2 + 3) regardless of validity class — the drift premise is outside what any
- *  per-round proof or pooled-marginal monitor covers. */
+ *  Corrections 2 + 3, at the emitter's block scope — ADR 0026) regardless of validity class —
+ *  the drift premise is outside what any per-round proof or pooled-marginal monitor covers —
+ *  and, at fleet scope, a selection domain below the N13 cap (CORR 4). */
 function familyGateOk(c: EmitterContract): boolean {
-  return c.constructionFamily !== 'conformal_rank' || c.heterogeneityGatePassing === true;
+  if (c.constructionFamily !== 'conformal_rank') return true;
+  return c.heterogeneityGatePassing === true && !n13Capped(c);
 }
 
 /** True iff this emitter is currently admitted to the FDR-bearing e-BH path (Mode B). A
@@ -125,9 +158,12 @@ export function modeOf(c: EmitterContract): Mode {
 export function ineligibilityReason(c: EmitterContract): string | null {
   if (isFdrBearing(c)) return null;
   if (!familyGateOk(c)) {
+    if (n13Capped(c)) {
+      return `constructionFamily=conformal_rank at blockScope=fleet with selectionDomainUnits=${c.selectionDomainUnits} ≥ ${N13_FLEET_CAP} — NO fixed ς̂ gate protects e-BH accumulation at this scale (N13, ADR 0023 CORR 4); partition the selection domain or move to blockScope=rack (ADR 0026)`;
+    }
     return c.heterogeneityGatePassing === undefined
-      ? `constructionFamily=conformal_rank but no heterogeneity design gate (heterogeneityGatePassing undefined) — the accumulation premise (ICC ≲ 4% AND ς ≲ 0.15, ADR 0023 CORR 2+3) is invisible to pooled-marginal monitors and MUST be measured (tools/dispersion-monitor.ts)`
-      : `constructionFamily=conformal_rank and its heterogeneity design gate is FAILING (persistent unit heterogeneity above the pair gate — demoted Mode B→A; ADR 0023 CORR 2+3)`;
+      ? `constructionFamily=conformal_rank but no heterogeneity design gate (heterogeneityGatePassing undefined) — the accumulation premise (ICC ≲ 4% AND ς ≲ 0.15 at the emitter's block scope, ADR 0023 CORR 2+3 / ADR 0026) is invisible to pooled-marginal monitors and MUST be measured (tools/dispersion-monitor.ts)`
+      : `constructionFamily=conformal_rank and its heterogeneity design gate is FAILING (persistent unit heterogeneity above the pair gate at the emitter's block scope — demoted Mode B→A; ADR 0023 CORR 2+3 / ADR 0026)`;
   }
   if (c.validityClass === 'construction_valid') {
     return c.calibrationMonitorPassing === undefined

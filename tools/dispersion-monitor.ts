@@ -41,6 +41,17 @@ export interface HeterogeneityGateOptions {
   varsigmaMax?: number;
   /** Location gate: demote when ICC exceeds this. Default 0.04 (icc-sweep). */
   iccMax?: number;
+  /** The construction's block scope (ADR 0026). `fleet` (default): blocks drawn fleet-wide —
+   *  residual = round-demeaned, the premise is FLEET-level exchangeability, and N13 applies (no
+   *  fixed ς̂ threshold protects e-BH at ≥ 20k units — the contract enforces the cap). `rack`:
+   *  blocks drawn within racks — rack-level effects cancel by construction, so the premise moves
+   *  INSIDE the rack and the monitor estimates the SAME pair on the rack×round-demeaned residual
+   *  (within-rack ICC and within-rack ς). Requires `rackOf`. Thresholds default to the fleet
+   *  targets as a first cut — relations to re-measure, not constants of nature. */
+  scope?: 'fleet' | 'rack';
+  /** Unit → rack assignment (stable, same indexing as the round vectors). Required when
+   *  scope = 'rack'. */
+  rackOf?: ReadonlyArray<number>;
   /** Rounds of panel required before the gate can PASS. Below this the verdict is undecided and
    *  the emitter is NOT FDR-bearing — unmeasured preconditions are failed preconditions, the same
    *  rule as `calibrationMonitorPassing === undefined`. Default 20. */
@@ -59,6 +70,8 @@ export interface HeterogeneityMonitorState {
   iccMax: number;
   minRounds: number;
   windowRounds: number;
+  scope: 'fleet' | 'rack';
+  rackOf: ReadonlyArray<number> | null;
   /** total rounds ever ingested (the rolling window may hold fewer). */
   ticks: number;
   /** sticky — once the gate has failed it stays failed until the caller rearms (fresh monitor). */
@@ -70,10 +83,16 @@ export function freshHeterogeneityMonitor(opts: HeterogeneityGateOptions = {}): 
   const iccMax = opts.iccMax ?? 0.04;
   const minRounds = opts.minRounds ?? 20;
   const windowRounds = opts.windowRounds ?? 160;
+  const scope = opts.scope ?? 'fleet';
   if (!(varsigmaMax > 0) || !(iccMax > 0)) throw new Error('dispersion-monitor: thresholds must be positive');
   if (minRounds < 8) throw new Error(`dispersion-monitor: minRounds ${minRounds} too small for the χ²-corrected estimator (need ≥ 8)`);
   if (windowRounds < minRounds) throw new Error('dispersion-monitor: windowRounds must be ≥ minRounds');
-  return { rounds: [], nUnits: 0, varsigmaMax, iccMax, minRounds, windowRounds, ticks: 0, revoked: false };
+  if (scope === 'rack' && !opts.rackOf) throw new Error('dispersion-monitor: scope=rack requires rackOf (unit → rack assignment)');
+  return {
+    rounds: [], nUnits: 0, varsigmaMax, iccMax, minRounds, windowRounds,
+    scope, rackOf: scope === 'rack' ? [...opts.rackOf!] : null,
+    ticks: 0, revoked: false,
+  };
 }
 
 export interface HeterogeneityVerdict {
@@ -90,10 +109,24 @@ export interface HeterogeneityVerdict {
   reason: string | null;
 }
 
-/** Round-demean the round-major panel and return it unit-major (what both estimators consume). */
+/** Demean the round-major panel at the monitor's scope and return it unit-major (what both
+ *  estimators consume). Fleet scope removes the round mean (the comparison a fleet-wide conformal
+ *  rank makes); rack scope removes each rack's per-round mean (the comparison a rack-local block
+ *  makes — rack-level location AND the estimand's rack-level component cancel, leaving exactly
+ *  the within-rack residual the construction's premise is about). */
 function demeanedUnitMajor(state: HeterogeneityMonitorState): number[][] {
   const nR = state.rounds.length, nU = state.nUnits;
   const out: number[][] = Array.from({ length: nU }, () => new Array<number>(nR));
+  if (state.scope === 'rack') {
+    const rackOf = state.rackOf!;
+    const nRacks = Math.max(...rackOf) + 1;
+    for (let t = 0; t < nR; t++) {
+      const sum = new Array<number>(nRacks).fill(0), cnt = new Array<number>(nRacks).fill(0);
+      for (let u = 0; u < nU; u++) { sum[rackOf[u]] += state.rounds[t][u]; cnt[rackOf[u]]++; }
+      for (let u = 0; u < nU; u++) out[u][t] = state.rounds[t][u] - sum[rackOf[u]] / cnt[rackOf[u]];
+    }
+    return out;
+  }
   for (let t = 0; t < nR; t++) {
     let m = 0;
     for (let u = 0; u < nU; u++) m += state.rounds[t][u];
@@ -116,7 +149,23 @@ export function heterogeneityVerdict(state: HeterogeneityMonitorState): Heteroge
     };
   }
   const resid = demeanedUnitMajor(state);
-  const varsigmaHat = estimateDispersion(resid).varsigma;
+  // ς at rack scope must be the pooled WITHIN-rack spread: rack-demeaning cancels location but a
+  // rack-shared scale multiplier survives it (the residual is still λ_r·(g_u − ḡ_r)) — yet the
+  // rank construction IS invariant to it (a shared λ cannot reorder a within-rack block). Each
+  // rack's own dispersion estimate is invariant to its λ_r (a shared multiplier shifts every
+  // log-SD equally), so pool ς̂²_r equally across racks. ICC is fine on the rack-demeaned panel.
+  let varsigmaHat: number;
+  if (state.scope === 'rack') {
+    const rackOf = state.rackOf!;
+    const nRacks = Math.max(...rackOf) + 1;
+    const byRack: number[][][] = Array.from({ length: nRacks }, () => []);
+    for (let u = 0; u < state.nUnits; u++) byRack[rackOf[u]].push(resid[u]);
+    const perRack = byRack.filter((rows) => rows.length >= 2)
+      .map((rows) => Math.max(estimateDispersion(rows).varsigma, 0) ** 2);
+    varsigmaHat = perRack.length ? Math.sqrt(perRack.reduce((a, b) => a + b, 0) / perRack.length) : 0;
+  } else {
+    varsigmaHat = estimateDispersion(resid).varsigma;
+  }
   const iccHat = estimateIcc(resid).icc;
   const breaches: string[] = [];
   if (varsigmaHat > state.varsigmaMax) breaches.push(`ς̂ ${varsigmaHat.toFixed(3)} > ${state.varsigmaMax} (dispersion channel — invisible to the ICC gate AND to every pooled-marginal monitor)`);
@@ -156,6 +205,13 @@ export function updateHeterogeneity(state: HeterogeneityMonitorState, roundScore
 export function applyHeterogeneityGate(
   contract: EmitterContract, state: HeterogeneityMonitorState,
 ): { contract: EmitterContract; verdict: HeterogeneityVerdict } {
+  const emitterScope = contract.blockScope ?? 'fleet';
+  if (contract.constructionFamily === 'conformal_rank' && emitterScope !== state.scope) {
+    throw new Error(
+      `dispersion-monitor: emitter "${contract.id}" has blockScope=${emitterScope} but the monitor is ` +
+      `scope=${state.scope} — the gate verdict must be estimated at the construction's own scope ` +
+      `(a fleet-scoped pair says nothing about the within-rack premise, and vice versa; ADR 0026)`);
+  }
   const verdict = heterogeneityVerdict(state);
   return { contract: { ...contract, heterogeneityGatePassing: verdict.passing }, verdict };
 }
