@@ -5,7 +5,7 @@
 
 **Date:** 2026-07-28 · **Branch:** `main` · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 992 tests · 985 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 998 tests · 991 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`

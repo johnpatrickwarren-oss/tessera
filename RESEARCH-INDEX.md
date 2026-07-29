@@ -82,7 +82,14 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
   ARL ≥ patience/α ⇒ EOP ≤ α — both as theorems CONDITIONAL on the certified residual null (the
   Wall-A gate owns the premise). Reported as the sr@T/α column + EOP statement in baseline-monitor.**
 - **O2 — principled robust / contaminated e-process** to replace the ad-hoc Tukey center
-  (with breakdown guarantees). No off-the-shelf construction exists (ADR 0005 Thread C). _Still open._
+  (with breakdown guarantees). ⚠️ **"No off-the-shelf construction exists" is OUTDATED
+  (2026-07-28 lit pass):** Huber-robust confidence sequences (Wang–Ramdas, arXiv:2301.09573 —
+  robust exponential supermartingales under ε-contamination + heavy tails, queryable as
+  e-processes) and Huber-robust LR e-tests (arXiv:2408.14015) are exactly this construction
+  family. _Open item is now FIT, not existence:_ composition with the baselining/whitening
+  stack, power at the δ₀ ≈ 1 % floor, and the tail-laundering trap (robust-only centers hide
+  the extreme units we hunt — the tessera-rng ADR-0051 lesson) vs the median-center comparator.
+  `research/2026-07-28-donation-ebh-and-o2-disposition.md` § 2.
 - **O3 — transient-fault early detection. ✅ RESOLVED IN PRINCIPLE + 🔧 PROTOTYPED (2026-06-26).**
   The named construction is the **e-detector** (Shin–Ramdas–Rinaldo, **arXiv:2203.03532**):
   Shiryaev–Roberts `M^SR_n = Σ_{j≤n} Λ^(j)_n` (recommended) or CUSUM `max_{j≤n} Λ^(j)_n`,
@@ -154,7 +161,13 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
   0018): the √E−1 adjuster (Carefree, arXiv:2501.19360) makes a running-max e-process a valid all-times
   e-value (`∫_1^∞ A(e)/e² de = 1`), so e-BH controls **SupFDR ≤ q** under arbitrary dependence where
   naive running-max e-BH leaks (≈1.08α). Accept-to-reject monotone; real (√-shrinkage) power penalty.
-  _Open: donation-e-LOND (arXiv:2603.24792) as the tighter alternative SupFDR route._
+  _donation-e-LOND ASSESSED (2026-07-28, paper read + prototype): its SupFDR machinery is for
+  hypothesis STREAMS and does not map to the fixed-family sup-over-time problem — the √E−1
+  adjuster stays the SupFDR route. Offline donation e-BH (Thm 16) IS a free never-worse
+  drop-in at fixed times (`tools/donation-ebh.ts`) but measures ZERO gain on this substrate
+  (decayed null e-values leave no donable mass; burst-dominated first passage leaves no
+  near-threshold band). Keep `eBhSelect`.
+  `research/2026-07-28-donation-ebh-and-o2-disposition.md` § 1._
 
 ---
 
