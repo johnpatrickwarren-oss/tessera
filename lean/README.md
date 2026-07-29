@@ -29,6 +29,14 @@
         → conformal rank exactly uniform → calibrator → e-value → e-BH → FDR ≤ q
           under arbitrary dependence — machine-checked end to end, no informal step.
 
+  **§ 1c (2026-07-28) — the ADR 0026 rack-local premise:** `exchangeable_comp` and
+  `exchangeable_shared_affine` prove that block-shared transforms — including a RANDOM shared
+  affine pair `(Λ, C)`, the rack noise multiplier and offset — preserve exchangeability, given
+  joint exchangeability with the shared pair (the joint form is necessary: a `Λ := G 0` coupling
+  at K = 1 breaks the marginal-only version; counterexample in the section header). Composed with
+  the chain above, rack-shared scale/location are cancelled by a theorem rather than a gate;
+  within-block heterogeneity remains the gate's job (`accumulator_ge_one` + scope='rack' monitor).
+
   **Proving § 1 found FOUR statement-level bugs that simulation had validated as fine** (the
   numerical checks below instantiate the intended objects and cannot see over-general quantifiers):
   `tsum_convexMean_isEValue` was FALSE as stated (junk-value `∑'` made `hsum` vacuous for

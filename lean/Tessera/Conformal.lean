@@ -7,6 +7,11 @@
         composed with `EBH.fdr_le`, closes the validity chain:
           exchangeable block + independent jitter → exact conformal rank → calibrator → e-value
           → e-BH → FDR ≤ q under arbitrary dependence.
+    § 1c PROVED (2026-07-28): `exchangeable_comp` + `exchangeable_shared_affine` — block-shared
+        (deterministic or random) affine transforms preserve exchangeability, given joint
+        exchangeability with the shared pair. The ADR 0026 rack-local cancellation as a theorem:
+        rack-shared scale/location cannot break the within-rack premise; only WITHIN-block
+        heterogeneity can (which `accumulator_ge_one` covers and the rack-scope gate polices).
     § 2 PROVED: the A2 accumulation results, on the honest conditional-i.i.d. kernel model —
         `marginal_validity` (the state-average increment mean IS the mixture-round mean),
         `accumulator_mean` (E[M_T] = E[g(Δ)^T], an equality), and `accumulator_ge_one`
@@ -736,6 +741,91 @@ theorem accumulator_ge_one (ρ : Measure δ) [IsProbabilityMeasure ρ] (κ : Ker
     of `research/2026-07-25-a2-tail-probability.md`, not this. Deliberately left as a documented
     non-theorem: formalising it would invite quoting it as a guarantee. -/
 theorem fdr_inflated : True := trivial
+
+/-! ### § 1c — shared-transform invariance (ADR 0026: the rack-local premise)
+
+  The rack-local construction (ADR 0026) draws every conformal block WITHIN one rack, and its
+  validity claim is that RACK-LEVEL effects — a shared noise-scale multiplier λ (the N13
+  channel), a shared offset — cannot break the block's exchangeability, so `rank_uniform`
+  applies with the premise weakened from fleet-level to within-rack exchangeability. These two
+  theorems are that claim, machine-checked:
+
+    * `exchangeable_comp`: one deterministic measurable transform applied to every member
+      preserves exchangeability.
+    * `exchangeable_shared_affine`: a RANDOM shared affine pair `(Λ, C)` — drawn once per
+      block, as the rack λ is — preserves exchangeability, PROVIDED the block is exchangeable
+      JOINTLY with the shared pair (`hjoint`). Marginal exchangeability of `G` alone is NOT
+      enough: at K = 1 take `G` an exchangeable pair with `G 1 = 1 − G 0`, `G 0` fair on
+      {0,1}, and couple `Λ := G 0`; then `(Λ·G 0, Λ·G 1) = (G 0, 0)` while the permuted
+      block is `(0, G 0)` — different laws. `hjoint` is the honest hypothesis, and it is what
+      the substrate satisfies (unit noise i.i.d. given the rack effects).
+
+  Composed with the existing chain: `hjoint` → `exchangeable_shared_affine` → `rank_uniform`
+  → `calibrated_rank_isEValue` → `EBH.fdr_le` — rack-shared scale/location are cancelled by a
+  THEOREM rather than by a gate. What § 1c deliberately does NOT cover is WITHIN-block
+  (per-unit) heterogeneity: `accumulator_ge_one` machine-checks that failure, and policing it
+  is the rack-scope pair gate's job (`tools/dispersion-monitor.ts`, scope='rack'). -/
+
+omit [IsProbabilityMeasure P] in
+/-- Coordinatewise application of one measurable function to an exchangeable block preserves
+    exchangeability: the transform is shared, so it commutes with every permutation. -/
+theorem exchangeable_comp {S : Fin (K + 1) → Ω → ℝ} (f : ℝ → ℝ) (hf : Measurable f)
+    (hSm : ∀ i, Measurable (S i)) (hex : Exchangeable P S) :
+    Exchangeable P (fun i ω => f (S i ω)) := by
+  intro σ
+  have hSvec : Measurable fun ω (i : Fin (K + 1)) => S i ω :=
+    measurable_pi_lambda _ fun i => hSm i
+  have hSvecσ : Measurable fun ω (i : Fin (K + 1)) => S (σ i) ω :=
+    measurable_pi_lambda _ fun i => hSm (σ i)
+  have hF : Measurable fun v : Fin (K + 1) → ℝ => fun i => f (v i) :=
+    measurable_pi_lambda _ fun i => hf.comp (measurable_pi_apply i)
+  calc Measure.map (fun ω i => f (S (σ i) ω)) P
+      = Measure.map ((fun v : Fin (K + 1) → ℝ => fun i => f (v i))
+          ∘ fun ω i => S (σ i) ω) P := rfl
+    _ = Measure.map (fun v : Fin (K + 1) → ℝ => fun i => f (v i))
+          (Measure.map (fun ω i => S (σ i) ω) P) := (Measure.map_map hF hSvecσ).symm
+    _ = Measure.map (fun v : Fin (K + 1) → ℝ => fun i => f (v i))
+          (Measure.map (fun ω i => S i ω) P) := by rw [hex σ]
+    _ = Measure.map (fun ω i => f (S i ω)) P := Measure.map_map hF hSvec
+
+omit [IsProbabilityMeasure P] in
+/-- **Shared-affine invariance — the rack-local cancellation theorem (ADR 0026).** A block-shared
+    random affine transform `S i = Λ · G i + C` preserves exchangeability, given joint
+    exchangeability of the block with the shared pair (see the section header for why the joint
+    form is necessary). `Λ` is the rack noise multiplier N13 is about; `C` covers rack-static
+    offsets. No independence between `Λ`, `C`, and `G` is assumed — only `hjoint`. -/
+theorem exchangeable_shared_affine {G : Fin (K + 1) → Ω → ℝ} (Λ C : Ω → ℝ)
+    (hGm : ∀ i, Measurable (G i)) (hΛ : Measurable Λ) (hC : Measurable C)
+    (hjoint : ∀ σ : Equiv.Perm (Fin (K + 1)),
+      Measure.map (fun ω => (Λ ω, C ω, fun i => G (σ i) ω)) P
+        = Measure.map (fun ω => (Λ ω, C ω, fun i => G i ω)) P) :
+    Exchangeable P (fun i ω => Λ ω * G i ω + C ω) := by
+  intro σ
+  have hGvec : Measurable fun ω (i : Fin (K + 1)) => G i ω :=
+    measurable_pi_lambda _ fun i => hGm i
+  have hGvecσ : Measurable fun ω (i : Fin (K + 1)) => G (σ i) ω :=
+    measurable_pi_lambda _ fun i => hGm (σ i)
+  have hTrip : Measurable fun ω => (Λ ω, C ω, fun i => G i ω) :=
+    hΛ.prodMk (hC.prodMk hGvec)
+  have hTripσ : Measurable fun ω => (Λ ω, C ω, fun i => G (σ i) ω) :=
+    hΛ.prodMk (hC.prodMk hGvecσ)
+  have hH : Measurable fun z : ℝ × ℝ × (Fin (K + 1) → ℝ) => fun i => z.1 * z.2.2 i + z.2.1 := by
+    refine measurable_pi_lambda _ fun i => ?_
+    have h1 : Measurable fun z : ℝ × ℝ × (Fin (K + 1) → ℝ) => z.1 := measurable_fst
+    have h2 : Measurable fun z : ℝ × ℝ × (Fin (K + 1) → ℝ) => z.2.2 i :=
+      (measurable_pi_apply i).comp (measurable_snd.comp measurable_snd)
+    have h3 : Measurable fun z : ℝ × ℝ × (Fin (K + 1) → ℝ) => z.2.1 :=
+      measurable_fst.comp measurable_snd
+    exact (h1.mul h2).add h3
+  calc Measure.map (fun ω i => Λ ω * G (σ i) ω + C ω) P
+      = Measure.map ((fun z : ℝ × ℝ × (Fin (K + 1) → ℝ) => fun i => z.1 * z.2.2 i + z.2.1)
+          ∘ fun ω => (Λ ω, C ω, fun i => G (σ i) ω)) P := rfl
+    _ = Measure.map (fun z : ℝ × ℝ × (Fin (K + 1) → ℝ) => fun i => z.1 * z.2.2 i + z.2.1)
+          (Measure.map (fun ω => (Λ ω, C ω, fun i => G (σ i) ω)) P) :=
+        (Measure.map_map hH hTripσ).symm
+    _ = Measure.map (fun z : ℝ × ℝ × (Fin (K + 1) → ℝ) => fun i => z.1 * z.2.2 i + z.2.1)
+          (Measure.map (fun ω => (Λ ω, C ω, fun i => G i ω)) P) := by rw [hjoint σ]
+    _ = Measure.map (fun ω i => Λ ω * G i ω + C ω) P := Measure.map_map hH hTrip
 
 end Conformal
 end Tessera
