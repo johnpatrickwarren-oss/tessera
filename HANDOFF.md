@@ -26,6 +26,19 @@ construction validity and revoke (B→A) when it breaks.
 
 ## What shipped (newest first)
 
+- **AUDIT STRAGGLERS CLOSED (2026-07-29, `research/2026-07-29-audit-stragglers-closed.md`).**
+  The 2026-07-02 audit's STILL-OPEN list is now empty. (1) **Sequential-UI BUILT (engine ADR
+  0025, PR #41 → engine main 94fa65e)**: predictable-numerator UI e-process — E[E_τ] ≤ 1 at
+  every stopping time for ANY φ by a GAPLESS proof (F6's named fix); self-standardizing within
+  class (F7's σ̂ sensitivity profiled out); measured parity with the fixed-split at 2.5σ, and
+  the small-shift regime honestly stays fixed-split's (learning regret + an absorbing free-φ
+  null — oracle ceiling logE ≈ 7 at 1.5σ). Engine pin NOT yet bumped (nothing consumes it).
+  (2) **ADR-0015-v2 SUPERSEDED by measurement**: diffuse-weak group faults ARE detected by the
+  canary group families — the same 1 % whole-rack fault undetected at 0.5 % probe budget
+  detects at 2 % budget (d21.9, 0 false groups) — the gap is COVERAGE ECONOMICS (ADR 0023's
+  wall), not a missing detector; masking-horizon caveat stands. (3) **Shadow-replay
+  byte-identical** under the current tree — canonical NAB numbers rest on current code.
+
 - **ADR 0027 — INCREMENT-FAMILY COHERENCE (2026-07-28, the "Catoni swap" resolved).** The
   monitor must test the family its emitter accumulates: `calibration-monitor` gains
   `incrementKind` (default 'bounded', matching e-value.ts's certified default; per-λ capitals,
