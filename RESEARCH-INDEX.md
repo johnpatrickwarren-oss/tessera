@@ -86,10 +86,17 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
   (2026-07-28 lit pass):** Huber-robust confidence sequences (Wang–Ramdas, arXiv:2301.09573 —
   robust exponential supermartingales under ε-contamination + heavy tails, queryable as
   e-processes) and Huber-robust LR e-tests (arXiv:2408.14015) are exactly this construction
-  family. _Open item is now FIT, not existence:_ composition with the baselining/whitening
-  stack, power at the δ₀ ≈ 1 % floor, and the tail-laundering trap (robust-only centers hide
-  the extreme units we hunt — the tessera-rng ADR-0051 lesson) vs the median-center comparator.
-  `research/2026-07-28-donation-ebh-and-o2-disposition.md` § 2.
+  family. **FIT MEASURED same day (`research/2026-07-28-o2-fit-robust-catoni.md`):** the robust
+  Catoni's ε-tax (log(1+1.5ε)/tick) gives a **detection floor δ ≳ 3√ε·σ — priced out of the δ₀
+  band at any ε ≥ 1 %** (measured on the boundary: ε=.01 misses 0.25σ, catches 0.5σ); validity
+  impeccable where ε is correctly assumed; mis-specification cliff measured (99 % firing at
+  ε_true 5× assumed; test-locked as E[e] > 1); **the laundering trap is STRUCTURAL** — robust
+  arms fire on NEITHER benign symmetric bursts nor one-sided intermittent faults (same TV-ball
+  object); discrimination needs sign/asymmetry structure or the correctness channel, not
+  robustness. **The free win: PLAIN Catoni (ε = 0, bounded influence)** — heavy-tail-valid
+  (0.3 % vs the Gaussian bet's 5.3 % leak) at near-zero power cost; candidate default increment
+  wherever a raw Gaussian bet would ship. `tools/o2-robust-eprocess.ts`;
+  disposition context `research/2026-07-28-donation-ebh-and-o2-disposition.md` § 2.
 - **O3 — transient-fault early detection. ✅ RESOLVED IN PRINCIPLE + 🔧 PROTOTYPED (2026-06-26).**
   The named construction is the **e-detector** (Shin–Ramdas–Rinaldo, **arXiv:2203.03532**):
   Shiryaev–Roberts `M^SR_n = Σ_{j≤n} Λ^(j)_n` (recommended) or CUSUM `max_{j≤n} Λ^(j)_n`,
