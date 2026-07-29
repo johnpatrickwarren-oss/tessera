@@ -365,6 +365,16 @@ true/false discoveries, Blanchard–Neuvial–Roquain — in the source message;
      makes 5449 false selections with calibration exact AND the uniformity monitor silent (the
      β=1 blindness in vivo) while rack-local makes 0 with more true detections (note § 3c).**
      Remaining: C-rack-channel verification, A2-disp-real within-rack pair.
+  11. [a2-disp-ebh-horizon](research/2026-07-28-a2-disp-ebh-horizon.md) — closes the horizon +
+     rack-count questions. **Dispersion first-passage risk is FRONT-LOADED in T** (the γ=0.99
+     onset prior discounts late onsets): fleet onset brackets T-STABLE to 2560 @ N=2016 and
+     1280 @ N=20160 — **N13's fleet-size collapse is the ONLY eroding direction** (caveat: a
+     property of THIS accumulator; restarts/flatter priors re-expose late risk). **Within-rack
+     walls (rack scope, K=71): ς_within ∈ (0.15, 0.2]** — the scope='rack' default ς ≤ 0.15
+     validated as the first cut (thin paging margin 1.8/2.0); K is the relief lever
+     (K=23 ≈ +tolerance, −0.05 recall). **No N13 at rack count**: group channel clean to 2240
+     racks (2/12 runs show one false rack; no cascade — rack draws are iid across racks here;
+     leaf/pod-shared knobs unexercised).
   Harnesses: `tools/exchangeability-drift.ts`, `tools/heterogeneity-estimate.ts`,
   `tools/horizon-experiment.ts`, `tools/tail-probability.ts`, `tools/dispersion-drift.ts`,
   `tools/dispersion-ebh-boundary.ts`, `tools/dispersion-ebh-scale.ts`,

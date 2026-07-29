@@ -33,7 +33,11 @@ For `conformal_rank` emitters, the block-formation scope becomes a declared cont
    invariant to its λ_r, which is exactly the invariance the construction has. A fleet-scoped
    pair says nothing about the within-rack premise; `applyHeterogeneityGate` THROWS on a scope
    mismatch. Within-rack per-unit dispersion still demotes (the premise moved inside the rack,
-   not away — test-locked).
+   not away — test-locked). **Thresholds GROUNDED same day (horizon note § 2): the within-rack
+   walls sit in ς_within (0.15, 0.2] at K = 71, T-stable to 2560 — the default ς ≤ 0.15 is the
+   right first cut, with a thin paging margin; if A2-disp-real measures within-rack ς̂ ≳ 0.15,
+   drop Krack (block size is the dispersion-tolerance lever, at ~0.05 recall cost per the
+   K-sensitivity table).**
 4. **Fleet scope keeps the pair gate AND gains the N13 cap:** a fleet-scoped `conformal_rank`
    emitter declaring `selectionDomainUnits ≥ N13_FLEET_CAP` (20 160 — the measured breach size,
    not a safety certificate below it) is not FDR-bearing regardless of its gate verdict.

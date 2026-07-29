@@ -5,7 +5,7 @@
 
 **Date:** 2026-07-28 · **Branch:** `main` · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
-**Suite:** 991 tests · 984 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
+**Suite:** 992 tests · 985 pass / 0 fail / 7 skip (skips = local clustersynth s2/c0 fixtures).
 
 **Read first:** `decisions/0019` (architecture) → `0022` (control triad) → `0023` (canary guarantee
 program — including CORRECTION 1 + 2) → `0025` (proof-carrying e-values). Then `RESEARCH-INDEX.md`
@@ -25,6 +25,19 @@ construction validity and revoke (B→A) when it breaks.
 ---
 
 ## What shipped (newest first)
+
+- **HORIZON + RACK-COUNT SWEEPS + GROUP-CHANNEL RESTORATION (2026-07-28, session continuation).**
+  (1) ⚠️ **Group families were DEAD under rack-local blocking** — within-rack ranks have
+  rack-mean 0.5, so a 5 % rack fault (detected d11.9 coarse) was invisible to EVERY family;
+  fixed by a coarse-keyed SECOND ranking pass feeding the group buffers (dedicated rng; coarse
+  streams byte-identical). End state @280 racks/heteroRackSd 1.0: A/A clean, rack fault d23.9
+  via rack family, unit faults 12 true/0 false — both channels live at once, test-locked.
+  (2) **A2-disp-ebh-horizon closed**: dispersion first-passage risk is FRONT-LOADED in T
+  (γ=0.99 onset prior) — fleet brackets T-stable to 2560@2016 / 1280@20160; N13's N-collapse is
+  the only eroding direction (accumulator-specific caveat named). (3) **Within-rack gate
+  grounded**: walls at ς_within ∈ (0.15, 0.2] @ K=71 — default ς ≤ 0.15 validated, thin margin;
+  Krack is the relief lever, added to A2-disp-real's list. (4) **No N13 at rack count**: group
+  channel clean to 2240 racks. `research/2026-07-28-a2-disp-ebh-horizon.md`.
 
 - **RACK-LOCAL ADOPTED (2026-07-28, operator decision — ADR 0026, option C).** The
   A2-disp-ebh-gate-decision is CLOSED: `EmitterContract.blockScope` ('fleet' | 'rack') +
