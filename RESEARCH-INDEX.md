@@ -110,7 +110,13 @@ Each item: the idea, the verdict, and the authoritative source. "Source" paths a
   `tools/conditional-markov.ts` + the `tools/walls-validation.ts` sweep (Tessera ADR 0018)** — an
   operational Assumption-3.1 diagnostic (residual conditional-whiteness); empirically, as common-mode
   removal degrades the diagnostic rises AND stopped-e-BH fleet-FDR crosses q. NECESSARY-condition gate,
-  not a sufficiency proof. _Open — test on real GWDG (expected to FAIL; the diagnostic should say so)._
+  not a sufficiency proof. **GWDG test DONE (2026-07-28): FAILED AS PREDICTED, and the diagnostic
+  says so — 0/384 cells markov-plausible** (LOO common-mode covariate; conditioning halves serial
+  dependence on workload counters — POWER 0.90→0.51 — and barely dents thermal/clock; medians
+  0.46–0.85, not borderline). No conditional fleet-FDR theorem earned on this substrate with this
+  covariate; the fleet claim stays empirical (consistent with N1/ADR 0019). The condLag1 medians
+  are the quantified baseline any forecast-as-X_n (ADR 0024 upside) must beat.
+  `research/2026-07-28-gwdg-o5-diagnostic.md`; `tools/gwdg-o5-diagnostic.ts`.
   **O3 construction-gap update (2026-07-02 W2): CLOSED CONDITIONALLY — `srEDetector` uses per-onset
   increments Λ^(j) = Π g(r_s) with the FIXED-grid Gaussian-LR mixture, which ARE genuine e-processes
   given the standardized residual null, so the SRR ARL theorem holds conditional on the emitter
