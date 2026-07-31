@@ -121,6 +121,7 @@ export interface Outcome { fdp: number; power: number; K: number; }
 /** e-BH selection scored against the true fault mask: FDP = false / max(1,K); power =
  *  true / nFail (1 when there are no faults and none selected). */
 export function score(eValues: ReadonlyArray<number>, failed: ReadonlyArray<boolean>, q: number): Outcome {
+  // anchor:allow certified-fdr-path: measurement harness — `score` exists to compute FDP/power against the `failed` ground-truth mask of a synthetic fleet; it never returns a selection to act on.
   const { selected, K } = eBenjaminiHochberg(eValues, q);
   let falseSel = 0, trueSel = 0;
   for (const i of selected) (failed[i] ? trueSel++ : falseSel++);

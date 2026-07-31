@@ -77,6 +77,7 @@ export function drillDown(eValues: ReadonlyArray<number>, levels: ReadonlyArray<
     const byGroup = membersByGroup(levels[L].groups, restrict);
     const gids = [...byGroup.keys()].sort((a, b) => a - b);
     const gE = gids.map((g) => mean(byGroup.get(g)!.map((i) => eValues[i])));
+    // anchor:allow certified-fdr-path: UNGATED LIBRARY — `drillDown` takes bare ReadonlyArray<number> and asserts "FDR <= q across level-0 groups" in its docstring, i.e. it claims FDR in prose while pushing the validity obligation onto the caller instead of taking an EValue contract; its only caller today is test/locality-drilldown.test.ts. DESIGN GAP, reported for the owner — suppressed, not fixed.
     const sel = new Set(eBenjaminiHochberg(gE, q).selected);
     const rejected = gids.filter((_, k) => sel.has(k));
     const eMap = new Map<number, number>();

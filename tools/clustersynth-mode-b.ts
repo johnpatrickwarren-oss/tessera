@@ -241,6 +241,7 @@ function temporalComparator(healthy: ScenarioBundle, mon: ScenarioBundle, usable
   const prefixN = Math.max(50, Math.floor(0.08 * mon.T));
   const tFits = usable.map((p) => fitContrast(mixed ? ser(mon, p.treatment, counter)!.slice(0, prefixN) : ser(healthy, p.treatment, counter)!));
   const tE = usable.map((p, i) => normalizedMixtureEValue_H(applyContrast(ser(mon, p.treatment, counter)!, tFits[i])));
+  // anchor:allow certified-fdr-path: none of this file's raw e-BH calls is guarantee-bearing — the temporal comparator (here and in the streaming reducer) is the deliberate FAILING negative baseline scored against `isFault`, and the flagged-control counts are reporting-only by ADR 0022; the FDR-bearing selection goes through certifiedFdrBenjaminiHochberg.
   const tSel = [...eBenjaminiHochberg(tE, q).selected];
   return { K: tSel.length, fp: tSel.filter((i) => !isFault[i]).length, tp: tSel.filter((i) => isFault[i]).length };
 }

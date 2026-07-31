@@ -216,6 +216,7 @@ export function runType4Variation(idx: number): VariationRow {
     }
   }
   const terminalEValues = states.map(st => st.M);
+  // anchor:allow certified-fdr-path: coverage-matrix FIXTURE builder on labelled synthetic drift — the inputs are betting-e-process wealth (theorem-valid) and the selection is a recorded coverage row, never an operational decision.
   const fdrResult = eBenjaminiHochberg(terminalEValues, qLevel);
   const selected_indices = [...fdrResult.selected].sort((a, b) => a - b);
   const detected = fdrResult.K >= 1;

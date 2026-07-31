@@ -150,6 +150,7 @@ function scoreFleet(R: number[][], recallScore: (i: number) => number, ebhScore:
   const healthyScores = healthyIdx.map(ebhScore);
   const thr = quantile(healthyIdx.map(recallScore), 0.95);
   let hits = 0; for (const i of faulted) if (recallScore(i) >= thr) hits++;
+  // anchor:allow certified-fdr-path: measurement harness — `scoreFleet` computes an OBSERVED aggregate FDP against the labelled `faulted` set; the router CLI reports numbers, it does not gate.
   const sel = eBenjaminiHochberg(R.map((_, i) => ebhScore(i)), 0.1).selected;
   let falsePos = 0; for (const i of sel) if (!faulted.has(i)) falsePos++;
   return {

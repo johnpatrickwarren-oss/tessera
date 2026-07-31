@@ -70,6 +70,7 @@ export function runningMaxSelect(
   });
   // e-BH requires strictly positive-length input and a positive q; all-zero adjusted inputs select
   // nothing (e-BH returns K=0), which is correct (no evidence yet).
+  // anchor:allow certified-fdr-path: UNGATED LIBRARY — `runningMaxSelect` takes bare number[][] and its `mode:'naive'` branch is explicitly documented as leaking; it has NO caller anywhere in tools/ or test/, so nothing operational reads it. DESIGN GAP, reported for the owner. (The other raw call in this file, inside `supFdp`, is a measurement harness: it scores observed sup-FDP against the `isNonNull` label vector.)
   return eBenjaminiHochberg(evals, q);
 }
 

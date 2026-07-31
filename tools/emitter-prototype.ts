@@ -93,6 +93,7 @@ function run(baseDir: string, monDir: string, q = 0.1): void {
     const n = mon.shardIds.length;
 
     // No-audit baseline (normalized mixture over all shards).
+    // anchor:allow certified-fdr-path: measurement harness — both e-BH calls in this loop are immediately scored (`scoreSel`) against the labelled `faultIdx`; the no-audit call is the deliberate negative comparator the per-shard audit is measured against, and neither selection leaves the prototype.
     const noAudit = scoreSel(faultIdx, eBenjaminiHochberg(ev.map((e) => e.mixPeakAdj), q).selected, faultIdx.size);
 
     // Per-shard validity audit: certify shards whose prefix e-value < A_AUDIT.

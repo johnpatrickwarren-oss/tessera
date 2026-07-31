@@ -168,8 +168,17 @@ export interface CounterScore {
   counter: string;
   /** e-BH on the plug-in UI mean-shift e-value, vs mean_shift gpu faults. */
   meanShift: FdrPathScore;
-  /** e-BH on the NUISANCE-ROBUST BF e-value (baseline mean integrated out; E[BF|H0]≤1 by
-   *  construction). NaN/zeroed when cal < the validity floor (cal must be ≥ MIN_CALIBRATION). */
+  /** e-BH on the NUISANCE-ROBUST BF statistic. ⚠️ RETRACTED — NOT an e-value. The former claim
+   *  "E[BF|H0] ≤ 1 by construction" was withdrawn in engine v0.6.2-pre (2026-07-02 math audit,
+   *  finding F1): recentering by the ESTIMATED calibration mean breaks the proper-prior property,
+   *  and the exact ideal-case null expectation is E[BF|H0] = (1+2x)/√((1+x)(1+3x)) ≈ 1.155 — at
+   *  EVERY calibration length, so `MIN_CALIBRATION_FOR_VALIDITY` never bought validity and the
+   *  `valid` flag below means only "cal ≥ the floor", never "null-valid". The excess is bounded,
+   *  so any FDR read through this path is inflated to ≤ 1.155·q rather than voided.
+   *  `nuisanceRobustBFEValue` is `@deprecated` upstream and its envelope reads
+   *  `validUnderEstimatedBaseline: false`. The theorem-valid substitutes are safe-t
+   *  (`safeTwoSampleTEValue`, engine ADR 0005) and the UI e-value (engine ADR 0010).
+   *  Kept here only as a DIAGNOSTIC comparator column — never as an FDR-bearing input. */
   bf: FdrPathScore & { valid: boolean };
   /** Gaussian-LR mean-shift e-value: plain e-BH vs Lee–Ren conditional-calibration BOOSTING
    *  (engine ADR 0006). Boosting is a deterministic superset at the same FDR target — the
@@ -238,13 +247,16 @@ export function scoreCounter(b: ScenarioBundle, counterName: string, calLen: num
   const test = { start: calLen, len: b.T - calLen };
   const uiE = R.map((r) => safeUi(r, cal, test));
   const sig = R.map((r) => safeSig(r, cal, test));
-  // Nuisance-robust BF e-value (baseline mean integrated out) — only valid for cal ≥ the floor.
+  // Nuisance-robust BF statistic — RETRACTED as an e-value (engine v0.6.2-pre; E[BF|H0] ≈ 1.155 at
+  // every calibration length). `bfValid` gates on the calibration floor ONLY; it is not a validity
+  // claim. Diagnostic column only — safe-t (ADR 0005) / UI (ADR 0010) are the valid substitutes.
   const bfValid = calLen >= MIN_CALIBRATION_FOR_VALIDITY;
   const bfE = bfValid ? R.map((r) => safeBf(r, cal, test)) : R.map(() => 0);
   // Gaussian-LR e-value (known null survival) — plain e-BH vs conditional-calibration boosting.
   const glrE = R.map((r) => gaussianLrEValue(r, cal, test));
   const survival = gaussianLrNullSurvival();
   const idx = meanShiftIdx(b, counterName, calLen);
+  // anchor:allow certified-fdr-path: DIAGNOSTIC scorer only (CLAUDE.md forbids reporting findings from it) — every e-BH call here, on both the in-memory and streaming paths, is immediately scored (`scoreSelection`) for power/FDP against labels.json ground truth, including the RETRACTED nuisance-robust BF comparator column.
   return {
     counter: counterName,
     meanShift: scoreSelection(idx, eBenjaminiHochberg(uiE, q).selected),
@@ -286,8 +298,8 @@ export function renderReport(meta: ReportMeta, scores: CounterScore[], q = 0.05)
   lines.push(`${meta.nShards} shards, T=${meta.T}, ${meta.nCounters} counters, ${meta.nFaults} faults. FDR q=${q}.`);
   lines.push('');
   const bfValid = scores.some((s) => s.bf.valid);
-  lines.push('Valid-FDR path (mean-shift e-value → e-BH), scored vs gpu mean_shift faults.');
-  lines.push(`  ui = plug-in UI e-value;  bf = NUISANCE-ROBUST BF e-value (baseline integrated out, cal≥${MIN_CALIBRATION_FOR_VALIDITY})${bfValid ? '' : ' — SKIPPED: cal below validity floor'}`);
+  lines.push('FDR path (mean-shift e-value → e-BH), scored vs gpu mean_shift faults. Only the ui column is e-value-valid.');
+  lines.push(`  ui = plug-in UI e-value;  bf = nuisance-robust BF — RETRACTED, NOT an e-value (E[BF|H0]≈1.155 at every cal length; engine v0.6.2-pre, audit F1). Diagnostic column only; cal≥${MIN_CALIBRATION_FOR_VALIDITY} is a floor, not validity${bfValid ? '' : ' — SKIPPED: cal below the floor'}`);
   lines.push('  counter           nFault  ui:K power  FDP   bf:K power  FDP');
   for (const s of scores) {
     const m = s.meanShift, bf = s.bf;

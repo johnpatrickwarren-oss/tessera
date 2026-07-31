@@ -161,6 +161,7 @@ function stoppedEbhFalseDiscovery(resid: number[][], calLen: number, q: number):
     if (avg >= thresh) { tau = t; break; }
   }
   const stopped = eProc.map((e) => e[tau]);
+  // anchor:allow certified-fdr-path: measurement harness — the fleet here is ALL-HEALTHY by construction, so this call exists to MEASURE the empirical stopped-e-BH false-discovery rate as common-mode quality degrades (Wall A).
   return eBenjaminiHochberg(stopped, q).K > 0 ? 1 : 0;
 }
 

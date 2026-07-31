@@ -169,6 +169,7 @@ export function runFdrMultipleTestingRecording(): ScenarioJson {
   }
 
   const terminalEValues = states.map(st => st.M);
+  // anchor:allow certified-fdr-path: canned-demo FIXTURE builder on labelled synthetic drift — the inputs are betting-e-process wealth (theorem-valid) and the selection is baked into a demo JSON, never an operational decision.
   const fdrResult = eBenjaminiHochberg(terminalEValues, FDR_QLEVEL);
 
   const firingShards = shardIds.filter((_, s) => states[s].M >= DEMO_THRESHOLD).sort();

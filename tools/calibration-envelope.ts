@@ -231,6 +231,7 @@ function runFdrCell(label: string, gen: Generator, mode: 'raw' | 'whiten', q: nu
   for (let t = 0; t < E2_TRIALS; t++) {
     const eValues: number[] = [];
     for (let s = 0; s < E2_N; s++) eValues.push(shardTerminalEValue(gen, mode, fit, s < E2_K, seed++));
+    // anchor:allow certified-fdr-path: simulation cell measuring OBSERVED FDP/power over synthetic null+alt shards (first E2_K are the planted alternatives) — a measured statistic, not a guarantee-bearing selection.
     const { selected } = eBenjaminiHochberg(eValues, q);
     const { trueSel, fdp } = classifyFleetSelection(selected, E2_K);
     fdpSum += fdp; fdpSq += fdp * fdp; powerSum += trueSel / E2_K;

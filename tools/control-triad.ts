@@ -103,6 +103,7 @@ function cohortContamEValues(healthy: TriadBundle, mon: TriadBundle): number[] {
   });
 }
 
+// anchor:allow certified-fdr-path: measurement harness — `selected` exists only to feed the observed-FDP/recall scoring of the control-triad comparators against labelled synthetic faults.
 const selected = (e: number[], q: number): Set<number> => new Set(eBenjaminiHochberg(e, q).selected);
 const fdp = (sel: Set<number>, pos: Set<number>): number => sel.size ? [...sel].filter((i) => !pos.has(i)).length / sel.size : 0;
 const recall = (sel: Set<number>, pos: Set<number>): number => pos.size ? [...sel].filter((i) => pos.has(i)).length / pos.size : NaN;

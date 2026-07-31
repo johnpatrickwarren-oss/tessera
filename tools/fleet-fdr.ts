@@ -100,6 +100,7 @@ export function eValueValidity(K: number = 400): ValidityRow[] {
  *  on N=0; preserved here for the harness's lenient contract). */
 export function eBH(evalues: ReadonlyArray<number>, q: number): number[] {
   if (evalues.length === 0) return [];
+  // anchor:allow certified-fdr-path: research-harness operator on bare number[] — every caller (fleet-fdr's own sweeps, fleet-relative-capstone, contamination-robust-fleet) scores the selection against labelled synthetic faults, and none of them publishes an FDR guarantee. DESIGN GAP, reported for the owner: this local alias also hides those call sites from this invariant, which matches on the engine name.
   return [...eBenjaminiHochberg(evalues, q).selected];
 }
 

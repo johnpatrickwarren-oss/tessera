@@ -144,21 +144,23 @@ function pct(x: number): string { return (x * 100).toFixed(1) + '%'; }
 
 function renderMd(r: EValueReport): string {
   const L: string[] = [];
-  L.push('# Tessera — nuisance-baseline-robust e-value (the ADR 0008 fix)');
+  L.push('# Tessera — nuisance-baseline-robust e-value (ADR 0013 validation record — RETRACTED)');
   L.push('');
-  L.push(`The plug-in betting e-process freezes a point baseline μ̂; the estimation error makes E[e|H0] ≫ 1 (invalid). This e-value instead integrates the unknown baseline OUT: a two-sample sequential Bayes factor (separate vs common mean) on whitened residuals — valid by construction (E[BF|H0] ≤ 1), never freezing a point baseline. τ² = ${r.params.tau_mult}× innovation var; α=${r.params.alpha}.`);
+  L.push('> ⚠️ **RETRACTED — engine v0.6.2-pre (2026-07-02 math audit, finding F1).** The nuisance-robust BF is NOT a valid e-value: recentering by the ESTIMATED calibration mean breaks the proper-prior property, so E[BF|H0] = (1+2x)/√((1+x)(1+3x)) ≈ 1.155 at EVERY calibration length — it does not decay with more data. Bounded, so FDR ≤ 1.155·q rather than ≤ q. The K=600 MC below missed it (the excess mass lives in a tail 600 samples cannot reach). `nuisanceRobustBFEValue` is `@deprecated`, envelope `validUnderEstimatedBaseline: false`; safe-t (`safeTwoSampleTEValue`, engine ADR 0005) and the UI e-value (engine ADR 0010) are the theorem-valid substitutes. Read every "valid" below as the WITHDRAWN claim — historical record only.');
   L.push('');
-  L.push('## Validity at MULTIPLE scales (a valid e-value needs P(e≥k) ≤ 1/k at every k) + detection');
+  L.push(`The plug-in betting e-process freezes a point baseline μ̂; the estimation error makes E[e|H0] ≫ 1 (invalid). This e-value instead integrates the unknown baseline OUT: a two-sample sequential Bayes factor (separate vs common mean) on whitened residuals — which was claimed valid by construction (E[BF|H0] ≤ 1), a claim withdrawn above. τ² = ${r.params.tau_mult}× innovation var; α=${r.params.alpha}.`);
   L.push('');
-  L.push('| regime | BF E[e] | BF P(≥10)≤.1 | BF P(≥100)≤.01 | BF P(≥1000)≤.001 | BF valid? | BF detect | plug-in E[e] | plug-in P(≥100) | plug-in valid? |');
+  L.push('## MC null check at MULTIPLE scales (a valid e-value needs P(e≥k) ≤ 1/k at every k) + detection — NOT a validity proof');
+  L.push('');
+  L.push('| regime | BF E[e] | BF P(≥10)≤.1 | BF P(≥100)≤.01 | BF P(≥1000)≤.001 | BF MC-clean? (NOT valid) | BF detect | plug-in E[e] | plug-in P(≥100) | plug-in valid? |');
   L.push('|---|---|---|---|---|---|---|---|---|---|');
   for (const v of r.validity) L.push(`| ${v.regime} | ${v.bf_mean_e} | ${pct(v.bf_p_ge_10)} | ${pct(v.bf_p_ge_100)} | ${pct(v.bf_p_ge_1000)} | ${v.bf_valid_all_scales ? '✅' : '❌'} | ${pct(v.bf_detect)} | ${v.plugin_mean_e.toExponential(1)} | ${pct(v.plugin_p_ge_100)} | ${v.plugin_valid ? '✅' : '❌'} |`);
   L.push('');
-  L.push('**The BF e-value is valid at ALL tested scales in BOTH regimes — including the under-powered one where the plug-in blows up (E[e]≫1) — while retaining 100% shift detection.** That breaches the ADR 0008 wall: a valid e-value robust to plug-in baseline error + autocorrelation IS achievable. (Validity at every scale, not just α, is the exact property an earlier PR conflated — checked here.)');
+  L.push('**As MEASURED at K=600 the BF shows no violation at any tested scale in either regime — including the under-powered one where the plug-in blows up (E[e]≫1) — while retaining 100% shift detection.** The validity reading is WITHDRAWN (engine v0.6.2-pre): the exact null expectation is ≈1.155, and MC at this K cannot see it. What survives is the comparison against the plug-in, not a claim that the ADR 0008 wall was breached. (Validity at every scale, not just α, is the property an earlier PR conflated — checked here, and still not sufficient.)');
   L.push('');
   L.push('### Scope limit — same-variance assumption (H2)');
   L.push('');
-  L.push(`The BF tests a MEAN shift assuming equal innovation variance in calibration and test. A test-window VARIANCE change (no mean shift) inflates P(fire): ${r.variance_sensitivity.map((x) => `${x.std_mult}×std→${pct(x.bf_p_fire)}`).join(', ')}. So validity is for the mean-shift null with stable variance; a variance-robust e-value (NIG/t mixture) is the extension. (Large variance jumps are rare for GPU counters over short windows.)`);
+  L.push(`The BF tests a MEAN shift assuming equal innovation variance in calibration and test. A test-window VARIANCE change (no mean shift) inflates P(fire): ${r.variance_sensitivity.map((x) => `${x.std_mult}×std→${pct(x.bf_p_fire)}`).join(', ')}. This was scoped as "validity for the mean-shift null with stable variance"; since the mean-shift null itself is not valid either (E[BF|H0]≈1.155, engine v0.6.2-pre), read it as an added sensitivity, not a boundary of a guarantee. A variance-robust construction (NIG/t mixture) was the proposed extension. (Large variance jumps are rare for GPU counters over short windows.)`);
   L.push('');
   if (r.real_gwdg) {
     L.push('## Real telemetry — GWDG structural streams (fair side-by-side, both terminal e-values)');
@@ -172,13 +174,13 @@ function renderMd(r: EValueReport): string {
   }
   L.push('## Verdict');
   L.push('');
-  L.push('**The nuisance-baseline-robust e-value solves the ADR 0008 e-value-INVALIDITY** — decisively and rigorously where estimation error is the problem: valid (E[e]≤1, P(fire)≤α) even under-powered, where the plug-in is catastrophically invalid (E[e]≈440), while still detecting shifts (power 1.0). E[BF|H0]≤1 is a Bayes-factor property, so the validity is structural, not tuned.');
+  L.push('**WITHDRAWN — the BF does NOT solve the ADR 0008 e-value-INVALIDITY.** It is far less invalid than the plug-in (E[e]≈440 under-powered) and it still detects shifts (power 1.0), but it is not valid: E[BF|H0]≈1.155 at EVERY calibration length (engine v0.6.2-pre, audit F1), bounding FDR at 1.155·q. "E[BF|H0]≤1 is a Bayes-factor property" was the error — recentering by the ESTIMATED calibration mean is what breaks the proper prior, so the construction never had the property.');
   L.push('');
-  L.push('**But it is not a silver bullet on real data.** On the real GWDG structural streams the BF ≈ the terminal plug-in (both ~25–44%), because there the firing is dominated by REAL benign mean changes, not estimation error — so fixing the e-value moves the real-data fire rate only a few pp. The e-value blocker is genuinely removed; the *dominant* real-data problem (benign change vs fault) is the lifecycle/fleet\'s, not the e-value\'s.');
+  L.push('**But it is not a silver bullet on real data.** On the real GWDG structural streams the BF ≈ the terminal plug-in (both ~25–44%), because there the firing is dominated by REAL benign mean changes, not estimation error — so fixing the e-value moves the real-data fire rate only a few pp. The e-value blocker is NOT removed by this construction (see the verdict above); the *dominant* real-data problem (benign change vs fault) is separately the lifecycle/fleet\'s, not the e-value\'s.');
   L.push('');
-  L.push('**Where it pays off (composition):** the lifecycle (ADR 0011) re-records on drift → SHORT fresh calibration epochs → exactly the under-powered regime where the plug-in is invalid but the BF is valid. So BF + lifecycle is the real pairing: fresh short calibration (which the plug-in cannot safely use) made valid by the BF. Fleet-relative (ADR 0012) then needs the same valid e-value for fleet-FDR (still pending a contamination-robust common-mode).');
+  L.push('**Where the composition argument pointed — now routed elsewhere:** the lifecycle (ADR 0011) re-records on drift → SHORT fresh calibration epochs → exactly the under-powered regime where the plug-in is invalid. The BF is NOT the answer there (≈1.155 at every calibration length; engine v0.6.2-pre) — safe-t (ADR 0005) and the UI e-value (ADR 0010) are. Fleet-relative (ADR 0012) needs a genuinely valid e-value for fleet-FDR (still pending a contamination-robust common-mode).');
   L.push('');
-  L.push('> **Scope:** synthetic validity is rigorous (E[BF|H0]≤1 is a Bayes-factor property); real-data is a single metric/dataset. φ is plug-in (whitening); the BF handles the mean nuisance, not a misspecified φ — a second-order effect.');
+  L.push('> **Scope:** "synthetic validity is rigorous" is WITHDRAWN — E[BF|H0]≈1.155, not ≤1 (engine v0.6.2-pre), so the synthetic result is an MC non-detection, not a theorem. Real-data is a single metric/dataset. φ is plug-in (whitening); the BF handles the mean nuisance, not a misspecified φ — a second-order effect.');
   L.push('');
   return L.join('\n');
 }

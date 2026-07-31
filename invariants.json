@@ -50,8 +50,8 @@
   },
   {
     "id": "certified-fdr-path",
-    "intent": "ADR 0025: no module under tools/ may call the RAW number-array fdrBenjaminiHochberg. The FDR-bearing path takes proof-carrying EValues (certifiedFdrBenjaminiHochberg), which is what makes the 2026-07-02 audit's F1-F5 class (a non-e-value reaching e-BH; F3 fed the SR running max and reported CERTIFIED) a COMPILE error rather than a review question. emitter-contract.ts defines both and carries an anchor:allow suppression. Ratchet, so the count can only fall.",
-    "check": { "kind": "forbid_path", "dirs": ["tools"], "path": "\\bfdrBenjaminiHochberg\\s*\\(" },
+    "intent": "ADR 0025: no module under tools/ may call e-BH on a RAW number array — neither the deprecated local wrapper fdrBenjaminiHochberg nor the engine's eBenjaminiHochberg directly. The FDR-bearing path takes proof-carrying EValues (certifiedFdrBenjaminiHochberg), which is what makes the 2026-07-02 audit's F1-F5 class (a non-e-value reaching e-BH; F3 fed the SR running max and reported CERTIFIED) a COMPILE error rather than a review question. Widened 2026-07-31: the old pattern matched only the local wrapper, so a new file could import the engine function and stay green. Every remaining raw call site carries an anchor:allow suppression naming why it is not guarantee-bearing (measurement harnesses scoring observed FDP against labels, deliberate negative comparators, fixture builders, and two ungated libraries). Ratchet, so the count can only fall.",
+    "check": { "kind": "forbid_path", "dirs": ["tools"], "path": "\\b(?:e|fdr)BenjaminiHochberg\\s*\\(" },
     "max": 0,
     "mode": "ratchet",
     "severity": "block"

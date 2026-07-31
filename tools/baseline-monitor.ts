@@ -223,6 +223,7 @@ export function scoreCounterBaseline(mon: ScenarioBundle, counter: string, R: nu
   // AGGREGATE FDR (ADR 0019): feed e-BH the NORMALIZED CONVEX-MIXTURE e-value (a valid e-value,
   // E≤1), NOT the raw Shiryaev–Roberts statistic (E≈T, not an e-value — the adjuster can't rescue
   // it). The e-detector peak above is kept only for the Mode-A transient-recall metric.
+  // anchor:allow certified-fdr-path: measurement harness — the selection is scored into an OBSERVED aggregate FDP against labelled synthetic faults; nothing downstream carries an FDR guarantee.
   const sel = eBenjaminiHochberg(R.map((r) => normalizedMixtureEValue(r)), 0.1).selected;
   let falsePos = 0;
   for (const i of sel) if (!faultIdx.has(i)) falsePos++;
@@ -452,6 +453,7 @@ function reduceCounter(counter: string, m: Map<string, BmRecord>, monShardIds: s
   const plaus = healthyIds.filter((s) => m.get(s)?.markov).length;
   // FDR e-BH on the NORMALIZED CONVEX-MIXTURE e-value (ADR 0019), already a valid adjusted e-value.
   const mixE = (s: string): number => m.get(s)?.mixE ?? 0;
+  // anchor:allow certified-fdr-path: measurement harness — same as above on the monitored window; the selection is scored into an OBSERVED FDP against labelled faults, not acted on.
   const sel = eBenjaminiHochberg(monShardIds.map(mixE), 0.1).selected;
   let falsePos = 0; for (const i of sel) if (!faultIdx.has(i)) falsePos++;
   return {

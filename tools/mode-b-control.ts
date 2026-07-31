@@ -225,6 +225,7 @@ export function modeBTrial(seed: number, p: ModeBParams, sharedControl = true): 
   // #1 LIVE: only a Mode-B (passing) emitter may carry the FDR guarantee. The UNGATED selection (e-BH on
   // the contrast regardless of the monitor) shows what the gate is protecting against on a broken control.
   const contrastE = fleet.treat.map((tI, i) => contrastEValue(tI, fleet.ctrl[i], prefix));
+  // anchor:allow certified-fdr-path: deliberate NEGATIVE comparators — this ungated selection is what the Mode-B gate is being measured against, and the temporal no-control baseline below is the honestly-Mode-A comparator; the guarantee-bearing selection goes through certifiedFdrBenjaminiHochberg on the next line.
   const ungatedRej = [...eBenjaminiHochberg(contrastE, p.q).selected];
   const modeBRej: ReadonlyArray<number> = mode === 'B'
     ? certifiedFdrBenjaminiHochberg(contrastE.map(eFromNormalizedMixture), p.q, contract, 'mode-b-control').selected

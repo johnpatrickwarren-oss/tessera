@@ -128,8 +128,20 @@ when there is no compiler.
 `exact?` only closes goals a SINGLE lemma matches, so decompose the goal to one step per probe.
 Compound goals return nothing and look like a missing API when the goal was simply too big.
 
-**Statements** are held to a weaker bar than tactics: a wrong statement fails loudly at build time,
-whereas a wrong tactic can look like work.
+**Statements are held to a HIGHER bar than tactics, not a weaker one.** This paragraph said the
+opposite until 2026-07-31 — "a wrong statement fails loudly at build time" — and the § 1 work
+disproved it: all five statement-level bugs listed above type-checked cleanly. There are three
+guardians, and only one of them reads what you wrote.
+
+| guardian | what it checks | why it missed all five |
+|---|---|---|
+| simulation | the objects you intended | runs the shipped implementation, which instantiates summable weights, measurable ranks, α ∈ [0,1], a genuinely independent RNG |
+| the type checker | that the statement is **well-formed** | well-formed is neither true nor satisfiable — `SuperUniform` was UNSATISFIABLE and type-checked fine |
+| the proof obligation | the statement you actually **wrote** | — |
+
+A wrong tactic can look like work; a wrong statement looks like a theorem. "It compiles" and "it is
+proved" are different claims about a formal development, and all five bugs lived in the gap between
+them. See `research/2026-07-26-lean-formalisation.md` § 3.
 
 ## Why this exists
 

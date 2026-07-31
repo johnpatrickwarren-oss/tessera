@@ -131,6 +131,7 @@ export function assignTriads(groups: Group[], faulted: Set<number>, o: Required<
   return out;
 }
 
+// anchor:allow certified-fdr-path: measurement harness — `selected` exists only to feed the observed-FDP/recall scoring of peer-choice variants against labelled synthetic faults.
 const selected = (e: number[], q: number): Set<number> => new Set(eBenjaminiHochberg(e, q).selected);
 const fdp = (sel: Set<number>, pos: boolean[]): number => sel.size ? [...sel].filter((i) => !pos[i]).length / sel.size : 0;
 const recall = (sel: Set<number>, pos: boolean[]): number => {
