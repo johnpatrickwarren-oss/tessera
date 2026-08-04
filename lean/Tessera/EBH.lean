@@ -11,24 +11,25 @@
       fdp_pointwise         THE THRESHOLD LEMMA: 1/|R| ≤ q·e_j/N for every rejected j
       fdp_le_sum            FDP ≤ Σ over the nulls       (both branches of the k*=0 split)
       fdr_le_of_pointwise   the expectation step; e-BH's independence-freeness lives here
-      fdr_le_nonneg         the honest hypothesis set — the theorem to cite
-      fdr_le                the stronger-hypothesis form, kept for callers
+      fdr_le_nulls_only     the honest hypothesis set — the theorem to cite
+      fdr_le_nonneg         + a redundant nonneg hypothesis, kept for callers
+      fdr_le                + IsEValue of every coordinate, kept for callers
 
-    READ THE SCOPE PRECISELY. **`fdr_le_nonneg` is the theorem to cite**, and it carries these
-    hypotheses — stated, not hidden: each NULL coordinate is an e-value, non-null coordinates are
-    nonnegative, and the FDP is integrable (`hFint`, a regularity condition). What it does NOT
-    assume is anything about their JOINT law. That is the property the whole Mode-B architecture
+    READ THE SCOPE PRECISELY. **`fdr_le_nulls_only` is the theorem to cite**, and it carries these
+    hypotheses — stated, not hidden: each NULL coordinate is an e-value, and the FDP is integrable
+    (`hFint`, a regularity condition). **NOTHING WHATEVER is assumed about the non-null
+    coordinates** — not an e-value, not integrability, not nonnegativity. Nor anything about their
+    JOINT law. That is the property the whole Mode-B architecture
     rests on, and it is machine-checked.
 
     `fdr_le` additionally demands `IsEValue` of EVERY coordinate, which is false exactly when a
     detector is working — an alternative has `E[e] > 1`. It is retained so existing callers compile
     and is now derived from `fdr_le_nonneg`. Prefer the latter.
 
-    KNOWN, NOT YET APPLIED (2026-08-03): `hpos` is redundant too. `fdp_le_sum` declares
-    `he : ∀ j, 0 ≤ e j` but consumes it only at `j ∈ H₀`, where nonnegativity already arrives via
-    `hnull.nonneg`. So the bound assumes NOTHING about the non-null coordinates — not an e-value, not
-    integrability, not nonnegativity. Verified by compiling `fdp_le_sum'` and `fdr_le_nulls_only`
-    out-of-tree; the same defect as the one above, one level down.
+    APPLIED 2026-08-03. `fdp_le_sum` previously declared `he : ∀ j, 0 ≤ e j` while consuming it only
+    at `j ∈ H₀`, where nonnegativity already arrives via `hnull.nonneg`; it now asks only for what it
+    uses. Both weaker forms are kept so existing callers compile, and both are now one-line
+    derivations rather than separate proofs.
 
     It says nothing about whether TESSERA's quantities satisfy the hypothesis. That is the A2
     question. As of 2026-07-26, `Conformal.lean` § 1 DISCHARGES it for the canary construction:
@@ -228,7 +229,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω) [IsProbabilityMeasur
     theory. Independently machine-checked in `lean/core` over `Nat`/`List` (zero dependencies), over
     definitions verified selection-for-selection against the shipped engine; the two developments
     now agree, which is a real cross-check rather than a restatement. -/
-theorem fdp_le_sum (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (he : ∀ j, 0 ≤ e j) :
+theorem fdp_le_sum (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (he : ∀ j ∈ H₀, 0 ≤ e j) :
     fdp H₀ (reject q e) ≤ ∑ j ∈ H₀, q / N * e j := by
   have hqN : (0:ℝ) < N := by exact_mod_cast hN
   have hqn : (0:ℝ) ≤ q / N := le_of_lt (div_pos hq hqN)
@@ -237,7 +238,7 @@ theorem fdp_le_sum (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (he : ∀ j
     have hR : reject q e = ∅ := by simp [reject, hk]
     have : fdp H₀ (reject q e) = 0 := by simp [fdp, hR]
     rw [this]
-    exact Finset.sum_nonneg fun j _ => mul_nonneg hqn (he j)
+    exact Finset.sum_nonneg fun j hj => mul_nonneg hqn (he j hj)
   · -- |R| = k* ≠ 0, so the max in `fdp` is |R| and each rejected null pays `1/|R| ≤ (q/N)·e_j`.
     have hcard : (reject q e).card = kStar q e := card_reject hq hk
     have hRpos : 0 < (reject q e).card := by omega
@@ -252,7 +253,7 @@ theorem fdp_le_sum (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (he : ∀ j
           Finset.sum_le_sum fun j hj => fdp_pointwise hq hN (Finset.mem_inter.mp hj).2
       _ ≤ ∑ j ∈ H₀, q / N * e j :=
           Finset.sum_le_sum_of_subset_of_nonneg Finset.inter_subset_left
-            fun j _ _ => mul_nonneg hqn (he j)
+            fun j hj _ => mul_nonneg hqn (he j hj)
 
 omit [IsProbabilityMeasure P] in
 /-- **THE EXPECTATION STEP** — the part of `fdr_le` that is genuinely about integration, stated so it
@@ -310,12 +311,24 @@ omit [IsProbabilityMeasure P] in
     `hFint` is a regularity hypothesis: the FDP is a bounded function of finitely many e-values, so
     it is integrable whenever they are measurable; carrying it explicitly is cheaper than proving
     measurability of the rejection set here. -/
-theorem fdr_le_nonneg (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (E : Fin N → Ω → ℝ)
+theorem fdr_le_nulls_only (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (E : Fin N → Ω → ℝ)
     (hnull : ∀ j ∈ H₀, IsEValue P (E j))
-    (hpos : ∀ j, ∀ ω, 0 ≤ E j ω)
     (hFint : Integrable (fun ω => fdp H₀ (reject q fun i => E i ω)) P) :
     ∫ ω, fdp H₀ (reject q fun i => E i ω) ∂P ≤ q :=
-  fdr_le_of_pointwise (P := P) hq hN H₀ E hnull _ hFint (fun ω => fdp_le_sum hq hN H₀ (fun j => hpos j ω))
+  fdr_le_of_pointwise (P := P) hq hN H₀ E hnull _ hFint
+    (fun ω => fdp_le_sum hq hN H₀ (fun j hj => (hnull j hj).nonneg ω))
+
+omit [IsProbabilityMeasure P] in
+/-- `fdr_le_nulls_only` with a redundant nonnegativity hypothesis on every coordinate.
+
+    Retained so callers written against the 2026-08-03 signature still compile. `hpos` is not used:
+    `fdp_le_sum` consumes nonnegativity only at `j ∈ H₀`, where it arrives via `hnull.nonneg`. -/
+theorem fdr_le_nonneg (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (E : Fin N → Ω → ℝ)
+    (hnull : ∀ j ∈ H₀, IsEValue P (E j))
+    (_hpos : ∀ j, ∀ ω, 0 ≤ E j ω)
+    (hFint : Integrable (fun ω => fdp H₀ (reject q fun i => E i ω)) P) :
+    ∫ ω, fdp H₀ (reject q fun i => E i ω) ∂P ≤ q :=
+  fdr_le_nulls_only (P := P) hq hN H₀ E hnull hFint
 
 omit [IsProbabilityMeasure P] in
 /-- `fdr_le_nonneg` specialised to the historical hypothesis set: every coordinate an e-value.
