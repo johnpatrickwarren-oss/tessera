@@ -11,12 +11,24 @@
       fdp_pointwise         THE THRESHOLD LEMMA: 1/|R| ≤ q·e_j/N for every rejected j
       fdp_le_sum            FDP ≤ Σ over the nulls       (both branches of the k*=0 split)
       fdr_le_of_pointwise   the expectation step; e-BH's independence-freeness lives here
-      fdr_le                a 2-line derivation from the last two
+      fdr_le_nonneg         the honest hypothesis set — the theorem to cite
+      fdr_le                the stronger-hypothesis form, kept for callers
 
-    READ THE SCOPE PRECISELY. `fdr_le` still CARRIES HYPOTHESES — stated, not hidden: each null
-    coordinate is an e-value, all coordinates are nonnegative, and the FDP is integrable (`hFint`,
-    a regularity condition). What it does NOT assume is anything about their JOINT law. That is the
-    property the whole Mode-B architecture rests on, and it is now machine-checked.
+    READ THE SCOPE PRECISELY. **`fdr_le_nonneg` is the theorem to cite**, and it carries these
+    hypotheses — stated, not hidden: each NULL coordinate is an e-value, non-null coordinates are
+    nonnegative, and the FDP is integrable (`hFint`, a regularity condition). What it does NOT
+    assume is anything about their JOINT law. That is the property the whole Mode-B architecture
+    rests on, and it is machine-checked.
+
+    `fdr_le` additionally demands `IsEValue` of EVERY coordinate, which is false exactly when a
+    detector is working — an alternative has `E[e] > 1`. It is retained so existing callers compile
+    and is now derived from `fdr_le_nonneg`. Prefer the latter.
+
+    KNOWN, NOT YET APPLIED (2026-08-03): `hpos` is redundant too. `fdp_le_sum` declares
+    `he : ∀ j, 0 ≤ e j` but consumes it only at `j ∈ H₀`, where nonnegativity already arrives via
+    `hnull.nonneg`. So the bound assumes NOTHING about the non-null coordinates — not an e-value, not
+    integrability, not nonnegativity. Verified by compiling `fdp_le_sum'` and `fdr_le_nulls_only`
+    out-of-tree; the same defect as the one above, one level down.
 
     It says nothing about whether TESSERA's quantities satisfy the hypothesis. That is the A2
     question. As of 2026-07-26, `Conformal.lean` § 1 DISCHARGES it for the canary construction:

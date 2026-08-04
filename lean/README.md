@@ -15,7 +15,7 @@
   (→ CERT.CONVEX_MEAN). Both hold for an ARBITRARY measure — `IsProbabilityMeasure` is `omit`ted,
   surfaced by the unused-variable linter each time. The e-BH bound never leans on normalisation.
 
-  **What `fdr_le` assumes, stated not hidden:** each null coordinate is an e-value, all coordinates
+  **What `fdr_le_nonneg` assumes, stated not hidden** — and it, not `fdr_le`, is the theorem to cite: each null coordinate is an e-value, non-null coordinates
   are nonnegative, and the FDP is integrable. What it does *not* assume is anything about the joint
   law — which is the property the Mode-B architecture is built on.
 
