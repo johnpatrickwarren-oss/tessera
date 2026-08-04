@@ -285,24 +285,41 @@ theorem fdr_le_of_pointwise (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (E
           _ = q := by field_simp
 
 omit [IsProbabilityMeasure P] in
-/-- **e-BH controls FDR under arbitrary dependence** (P3 in RESEARCH-INDEX; Wang–Ramdas 2022).
+/-- **e-BH controls FDR under arbitrary dependence** — honest hypothesis set (Wang–Ramdas 2022).
 
-    Only the NULL coordinates need to be e-values, and nothing whatever is assumed about the joint
-    law — that is the property the whole Mode-B architecture is built on.
+    NULL coordinates are e-values; non-null coordinates need only be NONNEGATIVE. Nothing whatever
+    is assumed about the joint law — that is the property the whole Mode-B architecture is built on.
+    A detector behaving correctly under the alternative has `E[e] > 1` and still satisfies this
+    statement, which `fdr_le` below (requiring `IsEValue` of every coordinate) does not permit.
 
     NO `sorry` ANYWHERE BENEATH IT — a two-line derivation from `fdp_le_sum` (combinatorial, proved
-    above) and `fdr_le_of_pointwise` (the expectation step, proved below). This is the theorem the
-    Mode-B architecture cites; it is now machine-checked end to end, hypotheses and all.
+    above) and `fdr_le_of_pointwise` (the expectation step, proved below).
 
-    `hFint` is a regularity hypothesis: the FDP is a bounded
-    function of finitely many e-values, so it is integrable whenever they are measurable; carrying
-    it explicitly is cheaper than proving measurability of the rejection set here. -/
+    `hFint` is a regularity hypothesis: the FDP is a bounded function of finitely many e-values, so
+    it is integrable whenever they are measurable; carrying it explicitly is cheaper than proving
+    measurability of the rejection set here. -/
+theorem fdr_le_nonneg (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (E : Fin N → Ω → ℝ)
+    (hnull : ∀ j ∈ H₀, IsEValue P (E j))
+    (hpos : ∀ j, ∀ ω, 0 ≤ E j ω)
+    (hFint : Integrable (fun ω => fdp H₀ (reject q fun i => E i ω)) P) :
+    ∫ ω, fdp H₀ (reject q fun i => E i ω) ∂P ≤ q :=
+  fdr_le_of_pointwise (P := P) hq hN H₀ E hnull _ hFint (fun ω => fdp_le_sum hq hN H₀ (fun j => hpos j ω))
+
+omit [IsProbabilityMeasure P] in
+/-- `fdr_le_nonneg` specialised to the historical hypothesis set: every coordinate an e-value.
+
+    CORRECTED 2026-08-03: this theorem's docstring previously said "Only the NULL coordinates need
+    to be e-values" — the statement below has always required `hnullAll : ∀ j, IsEValue P (E j)`,
+    i.e. null mean ≤ 1 for ALTERNATIVES too, and used it only through `.nonneg`. The 2026-07-31
+    concept-layer audit recorded this as the development's sixth statement-level defect: three wiki
+    pages inherited the docstring rather than the signature. The honest statement is
+    `fdr_le_nonneg` above; this form is kept for callers and for the historical record. -/
 theorem fdr_le (hq : 0 < q) (hN : 0 < N) (H₀ : Finset (Fin N)) (E : Fin N → Ω → ℝ)
     (hnull : ∀ j ∈ H₀, IsEValue P (E j))
     (hnullAll : ∀ j, IsEValue P (E j))
     (hFint : Integrable (fun ω => fdp H₀ (reject q fun i => E i ω)) P) :
     ∫ ω, fdp H₀ (reject q fun i => E i ω) ∂P ≤ q :=
-  fdr_le_of_pointwise (P := P) hq hN H₀ E hnull _ hFint (fun ω => fdp_le_sum hq hN H₀ (fun j => (hnullAll j).nonneg ω))
+  fdr_le_nonneg (P := P) hq hN H₀ E hnull (fun j ω => (hnullAll j).nonneg ω) hFint
 
 
 /-- The `√e − 1` SupFDR adjuster (Carefree, arXiv:2501.19360 Thm 1), `tools/supfdr.ts`. -/
