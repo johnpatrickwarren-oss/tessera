@@ -112,3 +112,6 @@ canonical for both. `WRITING-STYLE.md` exists only there.
 **Communication with John** follows `~/concord/knowledge/design/pages/session-communication.md`:
 verify first; cite code, not prose; lead with corrections; decisions get 3+ numbered options with a
 recommendation; state what you did not do; a reply is as long as the finding.
+
+**Default test harness:** clustersynth for fleet/topology-shaped work (operator ruling 2026-08-05).
+Substrate routing: `~/concord/knowledge/methodology/pages/test-substrates.md`.
