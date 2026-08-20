@@ -6,7 +6,10 @@
   probes run CONCURRENTLY through 2b; NO physical interventions; execution via a paced driver
   script + journal with daily review. Timeline note: the 56-day gate moved to ~2026-09-21 after
   the 07-13→07-27 outage (see HANDOFF), so Phase 2a starts then; all "post-gate" language below
-  tracks that date. Fills the standing
+  tracks that date. **Gate update 2026-08-19:** a second outage cost 32.7 h of ticks
+  (2026-08-18T17:54:13Z → 2026-08-20T02:37:50Z; ruling = excise-and-continue, see HANDOFF),
+  so the tick-count gate now clears **~2026-09-22/23**; the seam must be bundled as two
+  windows (`mini-bundle` throws on gaps > 60 s and `--allow-gaps` forward-fills, not excises). Fills the standing
   "Phase-2 intervention campaign AFTER ~Aug 29 (spec + pacing)" item. Nothing here runs before
   the 56-day gate; `mini-interventions.ts` itself warns against baseline-window use.
 - **Machinery that already exists:** `tools/mini-interventions.ts` (cpu-load / lowpower /

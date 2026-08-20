@@ -9,8 +9,13 @@
 #   1. mini reachable over tailscale (ping);
 #   2. collector-status.json readable over ssh (BatchMode — needs the existing key);
 #   3. lastSample fresh (< 30 min old).
-# Failure → macOS notification + a FAIL line in ~/Library/Logs/tessera-mini-heartbeat.log.
-# Success → an OK line only (silent).
+# Failure → macOS notification + a MODAL DIALOG (persists up to 1 h) + a FAIL line in
+# ~/Library/Logs/tessera-mini-heartbeat.log. Success → an OK line only (silent).
+#
+# WHY the dialog (2026-08-19). During the 08-17→08-19 unreachability the script FAILed six
+# times and `display notification` surfaced none of them — banners are transient and drop
+# silently under Focus / locked screen / missing Notification-Center grant for osascript.
+# A dialog stays on screen until dismissed (or 1 h), so a FAIL survives until it is seen.
 #
 # Install (user LaunchAgent, every 6 h + at load — no sudo needed):
 #   cp tools/com.tessera.mini-heartbeat.plist ~/Library/LaunchAgents/
@@ -27,6 +32,10 @@ mkdir -p "$(dirname "$LOG")"
 fail() {
   echo "$(date +%Y-%m-%dT%H:%M:%S%z) FAIL: $1" >> "$LOG"
   osascript -e "display notification \"$1\" with title \"Tessera mini heartbeat\" sound name \"Basso\"" 2>/dev/null
+  # Modal fallback: persists until dismissed (or 1 h), unlike the droppable banner above.
+  # Blocking on purpose — launchd reaps the process group on exit, so a backgrounded dialog
+  # would die with the script. 1 h cap < the 6 h StartInterval, so runs never overlap.
+  osascript -e "tell application \"System Events\" to display dialog \"$1\" with title \"Tessera mini heartbeat FAIL\" buttons {\"OK\"} default button 1 with icon caution giving up after 3600" >/dev/null 2>&1
   exit 1
 }
 

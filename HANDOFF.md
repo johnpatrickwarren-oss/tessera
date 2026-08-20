@@ -26,6 +26,24 @@ construction validity and revoke (B→A) when it breaks.
 
 ## What shipped (newest first)
 
+- **MINI OUTAGE #2 — 32.7 h GAP, EXCISE-AND-CONTINUE (2026-08-19, operator ruling).** Power
+  outage killed collection 2026-08-18T17:54:13Z; mini auto-booted 25 min later (the 07-27
+  autorestart fix worked) but **FileVault held it at the unlock screen ~32 h** — Data volume
+  locked, so the collector LaunchDaemon never ran (`launchctl print`: runs = 1) and
+  tailscale/ssh were down until a console login at 2026-08-20T02:37:50Z restarted everything.
+  Exact excised seam: **t ∈ (1787075653, 1787193470)**, no `2026-08-19.ndjson` exists.
+  Ruling: keep the 22.0 d pre-gap baseline, excise the seam, gate slips only by the missing
+  ticks → **clears ~2026-09-22/23** (was ~09-21). At bundle time the baseline must be built as
+  TWO windows split at the seam — `mini-bundle` throws on gaps > 60 s and `--allow-gaps`
+  forward-fills (variance collapse), it does not excise. Two defects found and one fixed:
+  (1) `tools/mini-heartbeat.sh` FAILed six times 08-17→08-19 and every `display notification`
+  dropped silently — **fixed: FAIL now also raises a modal dialog** (persists ≤ 1 h; delivery
+  verified). (2) The tailnet path to the mini was already dead **08-17T09:43 PDT, ~25 h before
+  the power event**, while the collector was demonstrably writing (full-size raw-2026-08-17) —
+  cause unestablished; resolved by a tailscale restart. **OPEN: FileVault blocks all unattended
+  recovery** (no daemon, no tailscale until physical login); recommendation on the table is
+  FileVault off + auto-login on this dedicated box — operator decision pending.
+
 - **AUDIT STRAGGLERS CLOSED (2026-07-29, `research/2026-07-29-audit-stragglers-closed.md`).**
   The 2026-07-02 audit's STILL-OPEN list is now empty. (1) **Sequential-UI BUILT (engine ADR
   0025, PR #41 → engine main 94fa65e)**: predictable-numerator UI e-process — E[E_τ] ≤ 1 at
@@ -215,7 +233,8 @@ construction validity and revoke (B→A) when it breaks.
   workload as load-bearing (~30× SNR loss in passive counters) and fixed fixed-split dilution
   (CORRECTION 1). **ADR 0024** (PR #56): DSIPTS/learned-forecaster residualization DEFERRED,
   entry-gated (O6). **Mini 1 Hz real-telemetry baseline** running since 07-04; the 56-day
-  baseline-guard gate clears ~2026-08-29.
+  baseline-guard gate clears ~2026-09-22/23 (clock restarted 07-27 after the 14 d outage, then
+  slipped ~1.4 d for the 08-18→08-19 excised seam — see the 2026-08-19 entry above).
 
 - **60d @ 1 Hz LONG-BASELINE RE-VALIDATION on the mac mini M4 Pro (2026-07-02,
   `runs/2026-07-02-1hz-longbaseline-revalidation/`).** The one production path still resting on
