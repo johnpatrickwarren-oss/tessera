@@ -46,3 +46,30 @@ jobs:
         # Deterministic, offline ratchet vs the committed baseline. Exit 3 = a
         # blocked regression; exit 2 = engine unavailable (fails closed).
         run: npx --yes @johnpwarren.dev/sprag check . --invariants invariants.json --baseline-in baseline.json
+
+  # Engine-pin staleness tripwire — remediation 2026-08-24. The engine's own CI fails when
+  # its latest tag goes stale on detector semantics, but nothing watched the consumer side:
+  # Tessera sat on v0.6.4-pre while the engine reached v0.6.7-pre, missing the log-domain
+  # overflow fix and the Family D disjoint-window repair. This job fails a push to main when
+  # the pinned engine tag is behind the engine's latest release tag. The fix when it fires:
+  # bump the pin in package.json, `pnpm install`, run the suite (AC-R71-3 regenerates the
+  # canned demo artifacts in place — commit them with the bump), and push.
+  # Mirrors the engine's tag-staleness job in running on push only, so an engine release
+  # landing mid-flight cannot fail unrelated PRs.
+  engine-pin-staleness:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Pinned engine tag is the engine's latest release
+        run: |
+          set -euo pipefail
+          pinned=$(node -e "console.log(require('./package.json').dependencies['@johnpatrickwarren-oss/deploysignal-engine'].split('#')[1])")
+          latest=$(git ls-remote --tags --refs https://github.com/johnpatrickwarren-oss/deploysignal-engine \
+            | awk -F/ '{print $NF}' | grep -E '^v[0-9]' | sort -V | tail -1)
+          echo "pinned: $pinned; engine latest: $latest"
+          if [ "$pinned" != "$latest" ]; then
+            echo "::error::Engine pin $pinned is behind the engine's latest tag $latest — bump package.json, pnpm install, rerun the suite, commit the regenerated demo artifacts."
+            exit 1
+          fi

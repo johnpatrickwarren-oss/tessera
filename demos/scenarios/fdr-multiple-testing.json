@@ -2165,7 +2165,7 @@
           "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
         },
         "family_c": {
-          "statistic": 747022730.507761,
+          "statistic": 747022730.507764,
           "threshold": 1,
           "fired": true,
           "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
@@ -2266,7 +2266,7 @@
           "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
         },
         "family_c": {
-          "statistic": 2988054065.336207,
+          "statistic": 2988054065.336221,
           "threshold": 1,
           "fired": true,
           "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
@@ -2367,7 +2367,7 @@
           "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
         },
         "family_c": {
-          "statistic": 11951940457.646849,
+          "statistic": 11951940457.64692,
           "threshold": 1,
           "fired": true,
           "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
@@ -2468,7 +2468,7 @@
           "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
         },
         "family_c": {
-          "statistic": 47806527673.26167,
+          "statistic": 47806527673.261955,
           "threshold": 1,
           "fired": true,
           "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
@@ -2569,7 +2569,7 @@
           "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
         },
         "family_c": {
-          "statistic": 191221701138.83237,
+          "statistic": 191221701138.83368,
           "threshold": 1,
           "fired": true,
           "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
@@ -2670,7 +2670,7 @@
           "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
         },
         "family_c": {
-          "statistic": 764870736221.657,
+          "statistic": 764870736221.6627,
           "threshold": 1,
           "fired": true,
           "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
@@ -2771,7 +2771,7 @@
           "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
         },
         "family_c": {
-          "statistic": 3059429063550.679,
+          "statistic": 3059429063550.7046,
           "threshold": 1,
           "fired": true,
           "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
@@ -2872,7 +2872,7 @@
           "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
         },
         "family_c": {
-          "statistic": 12237538103226.426,
+          "statistic": 12237538103226.533,
           "threshold": 1,
           "fired": true,
           "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
@@ -2973,7 +2973,7 @@
           "derivation": "demo-substrate proxy: max|M_t − 1| across shards (production Family B = sequential-MMD over multi-dim FAMILY_C_SIGNALS windows; not invoked here)"
         },
         "family_c": {
-          "statistic": 48949586285167.52,
+          "statistic": 48949586285167.98,
           "threshold": 1,
           "fired": true,
           "derivation": "demo-substrate proxy: Σ_i (M_t,i − fleet_mean)² (production Family C = Hotelling T² + safe-test betting + RFF over FamilyCPerCell-calibrated cells; not invoked here)"
