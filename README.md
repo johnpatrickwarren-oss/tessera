@@ -196,7 +196,7 @@ The full audit trail is preserved in this repo's commit history (every round's r
 - `MEMORIAL.md` — Cross-round violation + confirmation ledger
 - `specs/Q-RNN-SPEC.md` — Per-round Architect specifications
 
-CLAUDE-*.md files at the repo root hold the per-role pipeline disciplines (CLAUDE-COMMON.md + CLAUDE-ARCHITECT.md + CLAUDE-IMPLEMENTER.md + CLAUDE-REVIEWER.md + CLAUDE-MEMORIAL.md + CLAUDE-COORDINATOR.md). The architecture ratchet gates declared in `arch-invariants.json` are enforced by the external Anchor harness during pipeline rounds (the gate runner is not vendored here); repository CI (`.github/workflows/ci.yml`) runs typecheck + tests + the browser-bundle build on every push/PR.
+The four-role pipeline was retired on 2026-06-22. The current workflow is direct commits gated by sprag (`invariants.json` / `baseline.json` — enforced in the "Architectural gate" CI step and the commit hook) plus the Anchor behavioral disciplines (spec-first, independent cold-eye review, durable trail in `HANDOFF.md` + `decisions/`). The pipeline machinery — `run-pipeline.sh`, the six per-role CLAUDE-*.md discipline files with their accumulated reinforcement history, and the multi-cluster templates — is preserved read-only in [`archive/anchor-pipeline/`](./archive/anchor-pipeline/README.md). Repository CI (`.github/workflows/ci.yml`) runs typecheck + tests + the browser-bundle build + the sprag gate + the engine-pin staleness check on every push/PR.
 
 ## Layout
 
@@ -206,7 +206,8 @@ tessera/
 ├── LICENSE                       # Apache 2.0
 ├── HANDOFF.md                    # SINGLE SOURCE OF TRUTH for current status
 │                                 #   (date · suite counts · what's built · what's next)
-├── STATE.md                      # Durable decision/arc trail (point-in-time history)
+├── STATE.md                      # Thin pointer to HANDOFF.md (arc history frozen at
+│                                 #   docs/STATE-HISTORY.md; kept for the sprag durable-trail gate)
 ├── RESEARCH-INDEX.md             # Canonical research entry point: negative-results registry
 │                                 #   (closed tunings) + index into research/ and the engine ADRs
 ├── package.json                  # pnpm-managed (packageManager: pnpm@11.x)
@@ -216,8 +217,8 @@ tessera/
 │                                 #   pin checked against the engine's latest tag in CI)
 ├── pnpm-lock.yaml + pnpm-workspace.yaml
 ├── tsconfig.json + tsconfig.test.json
-├── CLAUDE-*.md                   # Anchor pipeline role disciplines
-├── run-pipeline.sh               # Anchor four-role pipeline orchestrator
+├── archive/anchor-pipeline/      # RETIRED four-role pipeline (run-pipeline.sh, CLAUDE-*.md
+│                                 #   role disciplines, templates/) — see its README
 ├── bench/                        # clustersynth perf bench (fixtures generated locally)
 ├── coverage-matrices/            # R72/R77/R78 deterministic coverage + envelope matrices
 ├── decisions/                    # ADR trail (0001–0027): validity findings, walls, adoptions
@@ -227,9 +228,9 @@ tessera/
 ├── lean/                         # Machine-checked proof chain (Lean 4: EValue, EBH, Conformal
 │                                 #   — sorry-free; see lean/README.md)
 ├── research/                     # Dated research notes: audits, derivations, experiment reports
-├── scripts/                      # Pipeline scripts (verify-*.sh, finalize-round.sh, tier-router, …)
+├── scripts/                      # Retired-pipeline helper scripts (finalize-round.sh,
+│                                 #   tier-router, …) — kept for test/fixture references
 ├── shadow-results/               # Shadow-replay + study reports (JSON + md)
-├── templates/                    # Anchor project templates
 ├── test/                         # full suite (per-AC; per-round files q01–q88 + e2e harnesses) — live count in HANDOFF.md
 └── tools/                        # Product CLIs: demo scenarios, canned-demo + browser-bundle
                                   #   builders, coverage/envelope generators, baseline curation,

@@ -8,8 +8,8 @@ import { resolve } from 'node:path';
 
 const SELECTOR_PATH = resolve(__dirname, '..', 'scripts', 'mu-model-select.js');
 const FIXTURES_DIR = resolve(__dirname, '..', 'scripts', 'mu-model-select-fixtures');
-const PIPELINE_SH = resolve(__dirname, '..', 'run-pipeline.sh');
-const CLAUDE_REVIEWER_MD = resolve(__dirname, '..', 'CLAUDE-REVIEWER.md');
+const PIPELINE_SH = resolve(__dirname, '..', 'archive', 'anchor-pipeline', 'run-pipeline.sh');
+const CLAUDE_REVIEWER_MD = resolve(__dirname, '..', 'archive', 'anchor-pipeline', 'CLAUDE-REVIEWER.md');
 const PACKAGE_JSON = resolve(__dirname, '..', 'package.json');
 
 interface SelectorOut {

@@ -76,7 +76,8 @@ function resolveRoleClaudeFile(role: Role, projectRoot: string): string {
     'MEMORIAL-UPDATER':  'CLAUDE-MEMORIAL.md',
     'COORDINATOR':       'CLAUDE-COORDINATOR.md',
   };
-  return join(projectRoot, map[role]);
+  // Role files archived 2026-08-24 (pipeline retired 2026-06-22) — see archive/anchor-pipeline/README.md.
+  return join(projectRoot, 'archive', 'anchor-pipeline', map[role]);
 }
 
 // Extract the directive section from NEXT-ROLE.md using the same shape as
@@ -115,7 +116,7 @@ function loadSpecTriad(projectRoot: string, round: string): string[] {
 
 function buildPrefix(projectRoot: string, round: string): string {
   const sections: string[] = [];
-  const commonPath = join(projectRoot, 'CLAUDE-COMMON.md');
+  const commonPath = join(projectRoot, 'archive', 'anchor-pipeline', 'CLAUDE-COMMON.md');
   if (!existsSync(commonPath)) {
     process.stderr.write(`build-role-context: CLAUDE-COMMON.md not found at ${commonPath}\n`);
     process.exit(1);
