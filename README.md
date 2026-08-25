@@ -204,18 +204,31 @@ CLAUDE-*.md files at the repo root hold the per-role pipeline disciplines (CLAUD
 tessera/
 ├── README.md                     # This file
 ├── LICENSE                       # Apache 2.0
+├── HANDOFF.md                    # SINGLE SOURCE OF TRUTH for current status
+│                                 #   (date · suite counts · what's built · what's next)
+├── STATE.md                      # Durable decision/arc trail (point-in-time history)
+├── RESEARCH-INDEX.md             # Canonical research entry point: negative-results registry
+│                                 #   (closed tunings) + index into research/ and the engine ADRs
 ├── package.json                  # pnpm-managed (packageManager: pnpm@11.x)
 │                                 #   engine dep: @johnpatrickwarren-oss/deploysignal-engine
 │                                 #   (Family A/C/D/E detectors, topology adapters, e-BH,
-│                                 #   per-shard runtime, ds-integration — extracted R90/R94)
+│                                 #   per-shard runtime, ds-integration — extracted R90/R94;
+│                                 #   pin checked against the engine's latest tag in CI)
 ├── pnpm-lock.yaml + pnpm-workspace.yaml
 ├── tsconfig.json + tsconfig.test.json
 ├── CLAUDE-*.md                   # Anchor pipeline role disciplines
 ├── run-pipeline.sh               # Anchor four-role pipeline orchestrator
 ├── bench/                        # clustersynth perf bench (fixtures generated locally)
 ├── coverage-matrices/            # R72/R77/R78 deterministic coverage + envelope matrices
+├── decisions/                    # ADR trail (0001–0027): validity findings, walls, adoptions
 ├── demos/                        # Browser dashboard + worker + DEMO-SCRIPT + scenario JSON
+├── docs/                         # Specs + methodology (incl. METHODOLOGY-scale-and-duration-
+│                                 #   testing.md — read before any scale/duration test)
+├── lean/                         # Machine-checked proof chain (Lean 4: EValue, EBH, Conformal
+│                                 #   — sorry-free; see lean/README.md)
+├── research/                     # Dated research notes: audits, derivations, experiment reports
 ├── scripts/                      # Pipeline scripts (verify-*.sh, finalize-round.sh, tier-router, …)
+├── shadow-results/               # Shadow-replay + study reports (JSON + md)
 ├── templates/                    # Anchor project templates
 ├── test/                         # full suite (per-AC; per-round files q01–q88 + e2e harnesses) — live count in HANDOFF.md
 └── tools/                        # Product CLIs: demo scenarios, canned-demo + browser-bundle
