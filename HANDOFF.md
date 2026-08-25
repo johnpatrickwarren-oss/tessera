@@ -1,7 +1,9 @@
 # Handoff — Tessera two-mode architecture (ADRs 0019–0025 + scale validation)
 
-> **SINGLE SOURCE OF TRUTH for current status** (date · suite · what's built · what's next). `STATE.md` is the
-> durable decision/arc trail (history); `README.md` defers here for the live count. Keep this header current.
+> **SINGLE SOURCE OF TRUTH for current status AND the ongoing arc history** (date · suite · what's built ·
+> what's next). Root `STATE.md` is a thin pointer here; the pre-2026-06-28 arc history is frozen at
+> `docs/STATE-HISTORY.md`; decisions live in `decisions/` (ADRs). `README.md` defers here for the live
+> count. Keep this header current.
 
 **Date:** 2026-07-28 · **Branch:** `main` · **clustersynth
 HEAD:** `b0f0530` (main; control-arm + `CS_FAULT_MAG` merged).
