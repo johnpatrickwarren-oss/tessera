@@ -1,176 +1,23 @@
-// tools/calibration-monitor.ts — the RUNTIME CALIBRATION MONITOR that makes `construction_valid`
-// REVOCABLE (ADR 0019 follow-up #2; rule 1: "construction_valid is not a static stamp ... revocable at
-// runtime"). Anytime-valid calibration monitoring (biblio lead: Farran 2026).
+// tools/calibration-monitor.ts — the RUNTIME CALIBRATION MONITOR, now served by the engine.
 //
-// WHY THIS EXISTS. A `construction_valid` emitter's increment is a valid e-value ONLY on the conditional
-// null it was constructed for. The emitter-prototype proved the gap: the normalized-mixture increment is
-// construction-valid *on N(0,1)* yet produced healthy mean(e) ~ 1e150 because the live residual was NOT
-// N(0,1) (time-varying drift / wrong scale). A class without a live monitor manufactures false
-// confidence. So Mode-B membership must be CHECKED at runtime and REVOKED the moment the conditional
-// null breaks. This module is that check; it sets `EmitterContract.calibrationMonitorPassing`, which the
-// validity-class gate (tools/emitter-contract.ts) already consumes — a failing monitor demotes the
-// emitter B→A automatically.
+// Since engine v0.6.8-pre the monitor lives at `fleet/calibration-monitor` in
+// @johnpatrickwarren-oss/deploysignal-engine (engine ADR 0027), ported from this file line for
+// line: same increments (gInc over λ ∈ {±0.5, ±1, ±2}, cap 100; gBounded over the eight ±λ with
+// clip 3), same log-space update and 1e-300 floor, same sticky revocation at log(1/alpha), same
+// per-λ capital averaging for the bounded kind. Tessera ADR 0028 records the swap; the
+// field-by-field equivalence run that justified it (11,178 comparisons across six option sets
+// and nine residual streams, zero mismatches, engine pin v0.6.9-pre) is in that ADR.
 //
-// THE TEST (anytime-valid, Ville's inequality). Under a VALID null the emitter increment g satisfies
-// E[g(r_t) | F_{t-1}] ≤ 1, so the running product W_t = ∏_{s≤t} g(r_s) is a nonnegative test
-// (super)martingale with W_0 = 1 and E[W_t | H0] ≤ 1. Ville: P(sup_t W_t ≥ 1/α | H0) ≤ α. We feed W a
-// stream of residuals that are SUPPOSED to be null (a concurrent control cohort in Mode B; a believed-
-// healthy reference otherwise). If W ever exceeds 1/α_cal, that is anytime-valid evidence — false-alarm
-// probability ≤ α_cal over ALL time — that the residual's null does NOT hold for this increment, i.e. the
-// calibration is broken. We then REVOKE (passing := false, sticky): the emitter is no longer
-// construction-valid for this horizon and the gate routes it to Mode A.
-//
-// SOUND DISTINCTION from the per-shard PREFIX AUDIT (ADR 0019 § Evidence, "NO-GO"). The prefix audit
-// tried to CERTIFY FUTURE validity from a past window and failed because the breaking drift is
-// time-varying (clean prefix, drifts later). This monitor makes NO claim about the future: it is a
-// RUNNING revocation that watches the PRESENT and demotes the moment calibration breaks. Anytime-validity
-// is exactly what lets it run forever at a controlled false-revocation rate. Revoke-on-break is sound
-// even though certify-the-future is not.
-//
-// SCOPE (named honestly). W tests MARGINAL calibration of the increment — it catches the binding
-// ADR 0019 failure mode (residual mean/scale wrong → E[g] > 1). Pure serial dependence with a
-// perfect marginal N(0,1) is a subtler failure this marginal test is weak against;
-// conditional/serial calibration testing is the harder O5 frontier. We test the failure that
-// actually broke FDR, and name the boundary. Tessera-original.
-//
-// INCREMENT-FAMILY COHERENCE (ADR 0027, 2026-07-28). The monitor must test the SAME increment
-// family the emitter accumulates: a bounded-family emitter (the FDR-bearing default since the
-// 2026-07-02 audit — exact validity under any tail and any standardizing-scale error) monitored
-// with the Gaussian-LR gInc gets FALSELY demoted by heavy tails / σ̂ error its own increment
-// absorbs, while a gaussian-family emitter NEEDS the strict gInc test (a 10 % σ̂ under-estimate
-// drives ITS null mean 0.52 → 7.6 — audit F7 — and the monitor must catch exactly that). The
-// default `incrementKind` is therefore 'bounded', matching `e-value.ts`'s certified-constructor
-// default; gaussian-family emitters pass 'gaussian' explicitly. Linear bets cannot be mixed
-// per-tick (mean_λ(1+λc) ≡ 1), so the bounded kind maintains one capital per λ and Ville runs on
-// their average — a convex combination of martingales.
-
-import { gInc, gBounded, BOUND_LAMBDAS } from './mixture-evalue.js';
-import type { EmitterContract } from './emitter-contract.js';
-import type { IncrementKind } from './mixture-evalue.js';
-
-export interface CalibrationMonitorOptions {
-  /** Anytime-valid level: revoke when the calibration test martingale W ≥ 1/alpha. Default 0.01 (so the
-   *  false-revocation probability over ALL time is ≤ 1%). */
-  alpha?: number;
-  /** Which increment family to test (ADR 0027: match the emitter). Default 'bounded' — the
-   *  FDR-bearing default family. Ignored when a custom `increment` is supplied. */
-  incrementKind?: IncrementKind;
-  /** A custom emitter increment under test (E[g|H0] ≤ 1) — single-product path, overrides
-   *  `incrementKind`. */
-  increment?: (r: number) => number;
-}
-
-export interface CalibrationMonitorState {
-  /** log of the calibration test martingale W (log-space for numerical stability under long streams).
-   *  For the bounded kind this is the log of the AVERAGE of the per-λ capitals. */
-  logW: number;
-  /** per-λ log-capitals (bounded kind only; null for gaussian/custom). */
-  logWByLambda: number[] | null;
-  /** running max of logW (the e-value evidence-so-far is exp(peakLogW)). */
-  peakLogW: number;
-  /** number of believed-null residuals ingested. */
-  ticks: number;
-  /** false once revoked — STICKY (anytime-valid evidence does not un-accumulate). */
-  passing: boolean;
-  /** the revocation threshold in log space, log(1/alpha). */
-  threshold: number;
-  /** the increment under test (single-product path; identity placeholder for bounded). */
-  increment: (r: number) => number;
-}
-
-/** A fresh, passing calibration monitor. */
-export function freshCalibrationMonitor(opts: CalibrationMonitorOptions = {}): CalibrationMonitorState {
-  const alpha = opts.alpha ?? 0.01;
-  if (!(alpha > 0 && alpha <= 1)) throw new Error(`calibration-monitor: alpha must be in (0,1], got ${alpha}`);
-  const kind: IncrementKind = opts.incrementKind ?? 'bounded';
-  const bounded = !opts.increment && kind === 'bounded';
-  return {
-    logW: 0, logWByLambda: bounded ? BOUND_LAMBDAS.map(() => 0) : null,
-    peakLogW: 0, ticks: 0, passing: true,
-    threshold: Math.log(1 / alpha), increment: opts.increment ?? gInc,
-  };
-}
-
-/** log of the mean of exp(xs) (stable). */
-function logMeanExp(xs: ReadonlyArray<number>): number {
-  let m = -Infinity;
-  for (const x of xs) if (x > m) m = x;
-  if (!Number.isFinite(m)) return m;
-  let s = 0;
-  for (const x of xs) s += Math.exp(x - m);
-  return m + Math.log(s / xs.length);
-}
-
-/** Ingest ONE believed-null residual: multiply it into the calibration test martingale and revoke
- *  (sticky) if W has ever crossed 1/alpha. Mutates and returns the state. */
-export function updateCalibration(state: CalibrationMonitorState, r: number): CalibrationMonitorState {
-  if (state.logWByLambda) {
-    for (let i = 0; i < BOUND_LAMBDAS.length; i++) {
-      state.logWByLambda[i] += Math.log(gBounded(r, BOUND_LAMBDAS[i]));
-    }
-    state.logW = logMeanExp(state.logWByLambda);
-  } else {
-    const g = state.increment(r);
-    // log-space update; g ≥ 0. A zero increment would send logW → −∞; clamp to a tiny floor so a single
-    // unlucky tick cannot permanently sink the martingale (it only ever makes revocation HARDER, which is
-    // conservative for the false-revocation guarantee).
-    state.logW += Math.log(Math.max(g, 1e-300));
-  }
-  if (state.logW > state.peakLogW) state.peakLogW = state.logW;
-  state.ticks++;
-  if (state.peakLogW >= state.threshold) state.passing = false;
-  return state;
-}
-
-/** Ingest a batch of believed-null residuals in order. */
-export function updateCalibrationBatch(state: CalibrationMonitorState, rs: ReadonlyArray<number>): CalibrationMonitorState {
-  for (const r of rs) updateCalibration(state, r);
-  return state;
-}
-
-export interface CalibrationVerdict {
-  passing: boolean;
-  ticks: number;
-  /** evidence-so-far against calibration as an e-value (exp of the running-max log martingale). */
-  eValue: number;
-  /** the 1/alpha e-value at which the monitor revokes. */
-  revokeAt: number;
-}
-
-/** The monitor's verdict (does NOT mutate). */
-export function calibrationVerdict(state: CalibrationMonitorState): CalibrationVerdict {
-  return {
-    passing: state.passing,
-    ticks: state.ticks,
-    eValue: Math.exp(Math.min(state.peakLogW, 700)), // clamp exp to avoid Infinity in the report
-    revokeAt: Math.exp(Math.min(state.threshold, 700)),
-  };
-}
-
-/** Run the calibration monitor over a stream of believed-null REFERENCE residuals (a concurrent control
- *  cohort in Mode B; a believed-healthy reference otherwise — the CALLER owns choosing a genuinely-null
- *  feed, exactly as the prefix-audit NO-GO requires) and return the contract with
- *  `calibrationMonitorPassing` set from the monitor. For a `construction_valid` emitter this is what
- *  keeps it Mode B (passing) or demotes it B→A (revoked); for other classes the mode is unchanged but
- *  the monitor still reports.
- *
- *  `referenceNullResiduals` may be a single concatenated stream or several streams (e.g. one per control
- *  shard) — they are ingested in order into one shared martingale (pooling across the cohort gives the
- *  test power that a short per-shard prefix lacks). */
-export function applyCalibrationMonitor(
-  contract: EmitterContract,
-  referenceNullResiduals: ReadonlyArray<number> | ReadonlyArray<ReadonlyArray<number>>,
-  opts: CalibrationMonitorOptions = {},
-): { contract: EmitterContract; monitor: CalibrationMonitorState; verdict: CalibrationVerdict } {
-  const monitor = freshCalibrationMonitor(opts);
-  const streams: ReadonlyArray<ReadonlyArray<number>> =
-    Array.isArray(referenceNullResiduals[0])
-      ? (referenceNullResiduals as ReadonlyArray<ReadonlyArray<number>>)
-      : [referenceNullResiduals as ReadonlyArray<number>];
-  for (const s of streams) updateCalibrationBatch(monitor, s);
-  return {
-    contract: { ...contract, calibrationMonitorPassing: monitor.passing },
-    monitor,
-    verdict: calibrationVerdict(monitor),
-  };
-}
+// This file is a re-export so every caller path (`./calibration-monitor.js`) and every ADR that
+// cites it stays valid. Scope, contract, and the caller-owns-the-null rule are unchanged and are
+// documented on the engine module.
+export {
+  freshCalibrationMonitor,
+  updateCalibration,
+  updateCalibrationBatch,
+  calibrationVerdict,
+  applyCalibrationMonitor,
+  type CalibrationMonitorOptions,
+  type CalibrationMonitorState,
+  type CalibrationVerdict,
+} from '@johnpatrickwarren-oss/deploysignal-engine/fleet/calibration-monitor';
