@@ -31,6 +31,12 @@ import {
   freshFleetEProcessState,
   type FleetEProcessState,
 } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/combine';
+
+// Engine v0.6.10-pre (engine ADR 0028): `combineProduct` refuses to run unless the caller asserts
+// its inputs are independent or sequential e-values. These acceptance tests build their inputs, so
+// the assertion is true where it is passed; AC-14's correlated-drift cell is the registered
+// demonstration that the premise matters and runs through the unguarded harness variant.
+const combineProductSeq = (x: ReadonlyArray<number>) => combineProduct(x, { sequential: true });
 import {
   freshBettingState,
   updateBettingState,
@@ -96,13 +102,13 @@ test('R12 AC-1 — fleetMergeFamilyA returns FleetMergeStepResult; output equals
     { M: 0.5, bet: 0, n: 1, alphaConsumed: 0, runningMean: 0, runningSecondMoment: 0, onsFallbackCount: 0 },
   ];
   const fleet_state = freshFleetEProcessState();
-  const out: FleetMergeStepResult = fleetMergeFamilyA(states, combineProduct, fleet_state, LOG_THRESHOLD);
+  const out: FleetMergeStepResult = fleetMergeFamilyA(states, combineProductSeq, fleet_state, LOG_THRESHOLD);
   // Shape:
   assert.strictEqual(typeof out.log_fleet_e, 'number');
   assert.strictEqual(out.fleet_state, fleet_state);  // same reference (in-place contract)
   // Structural identity: wrapper output == direct primitive call on extracted log-e.
   const extracted = states.map(s => Math.log(Math.max(s.M, WEALTH_FLOOR)));
-  const direct = combineProduct(extracted);
+  const direct = combineProductSeq(extracted);
   assert.strictEqual(out.log_fleet_e, direct.log_fleet_e);
 });
 
@@ -116,7 +122,7 @@ test('R12 AC-2 — fleetMergeFamilyA accepts both combineProduct and combineAver
   const fleet_state_poe = freshFleetEProcessState();
   const fleet_state_aoe = freshFleetEProcessState();
   // Verify CombinePrimitive type accepts both R11 exports.
-  const poe: CombinePrimitive = combineProduct;
+  const poe: CombinePrimitive = combineProductSeq;
   const aoe: CombinePrimitive = combineAverage;
   const out_poe = fleetMergeFamilyA(states, poe, fleet_state_poe, LOG_THRESHOLD);
   const out_aoe = fleetMergeFamilyA(states, aoe, fleet_state_aoe, LOG_THRESHOLD);
@@ -135,9 +141,9 @@ test('R12 AC-3 — fleetMergeFamilyC: output equals combineProduct applied to ex
     makeFamilyCState(1.5),
   ];
   const fleet_state = freshFleetEProcessState();
-  const out = fleetMergeFamilyC(states, combineProduct, fleet_state, LOG_THRESHOLD);
+  const out = fleetMergeFamilyC(states, combineProductSeq, fleet_state, LOG_THRESHOLD);
   const extracted = states.map(s => s.log_S_t);
-  const direct = combineProduct(extracted);
+  const direct = combineProductSeq(extracted);
   assert.strictEqual(out.log_fleet_e, direct.log_fleet_e);
   // Numerical cross-check: sum of [0.5, 1.0, 1.5] = 3.0.
   assert.strictEqual(out.log_fleet_e, 3.0);
@@ -151,7 +157,7 @@ test('R12 AC-4 — fleetMergeFamilyA applies WEALTH_FLOOR when state.M = 0 (no M
     { M: 1, bet: 0, n: 1, alphaConsumed: 0, runningMean: 0, runningSecondMoment: 0, onsFallbackCount: 0 },
   ];
   const fleet_state = freshFleetEProcessState();
-  const out = fleetMergeFamilyA(states, combineProduct, fleet_state, LOG_THRESHOLD);
+  const out = fleetMergeFamilyA(states, combineProductSeq, fleet_state, LOG_THRESHOLD);
   // Expected: log(max(0, 1e-12)) + log(max(1, 1e-12)) = log(1e-12) + log(1) = -27.631 + 0.
   const expected = Math.log(WEALTH_FLOOR) + Math.log(1);
   assert.ok(Number.isFinite(out.log_fleet_e));
@@ -181,7 +187,7 @@ test('R12 AC-6 — fleetMergeFamilyA does NOT mutate any per_shard_states[i]', (
   // Deep clone for before-state comparison.
   const snapshot = states_before.map(s => ({ ...s }));
   const fleet_state = freshFleetEProcessState();
-  fleetMergeFamilyA(states_before, combineProduct, fleet_state, LOG_THRESHOLD);
+  fleetMergeFamilyA(states_before, combineProductSeq, fleet_state, LOG_THRESHOLD);
   // Every field unchanged on every state.
   assert.deepStrictEqual(states_before, snapshot);
 });
@@ -196,7 +202,7 @@ test('R12 AC-7 — fleetMergeFamilyC does NOT mutate any per_shard_states[i]', (
   // requiring shallow array copy in addition to top-level field copy).
   const snapshot = states_before.map(s => ({ ...s, q_running_sum: [...s.q_running_sum] }));
   const fleet_state = freshFleetEProcessState();
-  fleetMergeFamilyC(states_before, combineProduct, fleet_state, LOG_THRESHOLD);
+  fleetMergeFamilyC(states_before, combineProductSeq, fleet_state, LOG_THRESHOLD);
   assert.deepStrictEqual(states_before, snapshot);
 });
 
@@ -206,7 +212,7 @@ test('R12 AC-8 — fleetMergeFamilyA returns the same fleet_state reference (in-
     { M: 2.0, bet: 0, n: 1, alphaConsumed: 0, runningMean: 0, runningSecondMoment: 0, onsFallbackCount: 0 },
   ];
   const fleet_state = freshFleetEProcessState();
-  const out = fleetMergeFamilyA(states, combineProduct, fleet_state, LOG_THRESHOLD);
+  const out = fleetMergeFamilyA(states, combineProductSeq, fleet_state, LOG_THRESHOLD);
   assert.strictEqual(out.fleet_state, fleet_state);
   // Mutation visible on original handle:
   assert.notStrictEqual(fleet_state.n, 0);  // n was 0 before; incremented by updateFleetEProcessState
@@ -248,7 +254,7 @@ test('R12 AC-11 — fleetMergeFamilyA sticky-fire propagates: high M crosses log
   ];
   const fleet_state = freshFleetEProcessState();
   assert.strictEqual(fleet_state.fired, false);
-  fleetMergeFamilyA(states, combineProduct, fleet_state, LOG_THRESHOLD);
+  fleetMergeFamilyA(states, combineProductSeq, fleet_state, LOG_THRESHOLD);
   assert.strictEqual(fleet_state.fired, true);
   assert.strictEqual(fleet_state.tick_at_first_fire, 0);
 });
@@ -261,7 +267,7 @@ test('R12 AC-12 — fleetMergeFamilyC sticky-fire propagates: high log_S_t cross
     makeFamilyCState(5),
   ];
   const fleet_state = freshFleetEProcessState();
-  fleetMergeFamilyC(states, combineProduct, fleet_state, LOG_THRESHOLD);
+  fleetMergeFamilyC(states, combineProductSeq, fleet_state, LOG_THRESHOLD);
   assert.strictEqual(fleet_state.fired, true);
   assert.strictEqual(fleet_state.tick_at_first_fire, 0);
 });
@@ -270,7 +276,7 @@ test('R12 AC-12 — fleetMergeFamilyC sticky-fire propagates: high log_S_t cross
 test('R12 AC-13 — fleetMergeFamilyA + fleetMergeFamilyC each throw on empty per_shard_states (R11 primitive bubble-up)', () => {
   const fleet_state = freshFleetEProcessState();
   assert.throws(
-    () => fleetMergeFamilyA([], combineProduct, fleet_state, LOG_THRESHOLD),
+    () => fleetMergeFamilyA([], combineProductSeq, fleet_state, LOG_THRESHOLD),
     /empty input/,
   );
   assert.throws(
@@ -281,7 +287,7 @@ test('R12 AC-13 — fleetMergeFamilyA + fleetMergeFamilyC each throw on empty pe
 
 // ─── R12 AC-14 — empirical wiring: PoE-iid fleet FPR ≤ Wilson bound ──────
 test('R12 AC-14 — empirical wiring: fleetMergeFamilyA with combineProduct under iid H₀ at N=50/T=50/N_traj=100: fleet FPR ≤ Wilson bound', () => {
-  const fpr = measureFleetFireRateFamilyA(combineProduct, 0xE120A001);
+  const fpr = measureFleetFireRateFamilyA(combineProductSeq, 0xE120A001);
   console.log(`  R12 wiring PoE-iid     fpr=${fpr.toFixed(5)} bound=${FPR_BOUND.toFixed(5)}`);
   assert.ok(
     fpr <= FPR_BOUND,

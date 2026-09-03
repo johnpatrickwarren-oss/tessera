@@ -16,12 +16,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   combineProduct,
+  combineProductUnguarded,
   combineAverage,
   freshFleetEProcessState,
   updateFleetEProcessState,
   type FleetEProcessState,
   type FleetMergeOutput,
 } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/combine';
+
+// Engine v0.6.10-pre (engine ADR 0028): `combineProduct` refuses to run unless the caller asserts
+// its inputs are independent or sequential e-values. These acceptance tests build their inputs, so
+// the assertion is true where it is passed; AC-14's correlated-drift cell is the registered
+// demonstration that the premise matters and runs through the unguarded harness variant.
+const combineProductSeq = (x: ReadonlyArray<number>) => combineProduct(x, { sequential: true });
 import {
   freshBettingState,
   updateBettingState,
@@ -116,11 +123,13 @@ function measureFleetFireRate(
 // ─── R11 AC-1 — combineProduct primitive surface + empty-input + shape ──
 test('R11 AC-1 — combineProduct returns FleetMergeOutput; throws on empty input', () => {
   // Shape:
-  const out: FleetMergeOutput = combineProduct([0, 0, 0]);
+  const out: FleetMergeOutput = combineProductSeq([0, 0, 0]);
   assert.strictEqual(typeof out.log_fleet_e, 'number');
   assert.strictEqual(out.log_fleet_e, 0);  // log(1·1·1) = 0
   // Empty-input throws:
-  assert.throws(() => combineProduct([]), /empty input/);
+  assert.throws(() => combineProductSeq([]), /empty input/);
+  // the ADR 0028 gate itself: no assertion, no product
+  assert.throws(() => combineProduct([0, 0, 0]), /sequential/);
 });
 
 // ─── R11 AC-2 — combineAverage primitive surface + empty-input + shape ──
@@ -133,8 +142,8 @@ test('R11 AC-2 — combineAverage returns FleetMergeOutput; throws on empty inpu
 
 // ─── R11 AC-3 — single-shard (N=1) identity for both primitives ─────────
 test('R11 AC-3 — at N=1, both primitives reduce to identity', () => {
-  assert.strictEqual(combineProduct([2.5]).log_fleet_e, 2.5);
-  assert.strictEqual(combineProduct([-1.0]).log_fleet_e, -1.0);
+  assert.strictEqual(combineProductSeq([2.5]).log_fleet_e, 2.5);
+  assert.strictEqual(combineProductSeq([-1.0]).log_fleet_e, -1.0);
   // combineAverage at N=1: logSumExp([x]) − log(1) = x − 0 = x.
   // Use approx-equality with small tolerance for FP rounding through Math.exp/Math.log round-trip.
   assert.ok(Math.abs(combineAverage([2.5]).log_fleet_e - 2.5) < 1e-12);
@@ -143,7 +152,7 @@ test('R11 AC-3 — at N=1, both primitives reduce to identity', () => {
 
 // ─── R11 AC-4 — combineProduct closed-form ──────────────────────────────
 test('R11 AC-4 — combineProduct: log(e^1·e^2·e^3) = 6', () => {
-  const out = combineProduct([1, 2, 3]);
+  const out = combineProductSeq([1, 2, 3]);
   assert.strictEqual(out.log_fleet_e, 6);  // exact under double-precision sum
 });
 
@@ -249,7 +258,7 @@ test('R11 AC-12 — primitives accept log-e-values regardless of source family',
     alphaConsumed: 0,
   };
   // Both primitives accept the mixed input identically.
-  const out_p = combineProduct([fa_log_e, fc_state.log_S_t]);
+  const out_p = combineProductSeq([fa_log_e, fc_state.log_S_t]);
   const out_a = combineAverage([fa_log_e, fc_state.log_S_t]);
   assert.strictEqual(typeof out_p.log_fleet_e, 'number');
   assert.strictEqual(typeof out_a.log_fleet_e, 'number');
@@ -262,7 +271,7 @@ test('R11 AC-12 — primitives accept log-e-values regardless of source family',
 
 // ─── R11 AC-13 — PR-F1 cell (combineProduct, iid_H0): fleet FPR ≤ Wilson bound ─
 test('R11 AC-13 — PR-F1 (PoE, iid H₀): fleet FPR ≤ α_fleet + 3·√(α_fleet(1−α_fleet)/N_fleet_traj)', () => {
-  const fpr = measureFleetFireRate(combineProduct, 'iid', 0xE100B001);
+  const fpr = measureFleetFireRate(combineProductSeq, 'iid', 0xE100B001);
   console.log(`  R11 PR-F1 PoE-iid       fpr=${fpr.toFixed(5)} bound=${FPR_BOUND.toFixed(5)}`);
   assert.ok(
     fpr <= FPR_BOUND,
@@ -272,7 +281,7 @@ test('R11 AC-13 — PR-F1 (PoE, iid H₀): fleet FPR ≤ α_fleet + 3·√(α_fl
 
 // ─── R11 AC-14 — PR-F1 cell (combineProduct, correlated_H0): REPORTING-ONLY ─
 test('R11 AC-14 — PR-F1 (PoE, correlated-drift H₀): REPORTING-only — load-bearing demonstration of MD-F1 cond.-indep. assumption violation', () => {
-  const fpr = measureFleetFireRate(combineProduct, 'correlated', 0xE100B002);
+  const fpr = measureFleetFireRate(combineProductUnguarded, 'correlated', 0xE100B002);
   // REPORTING: log observed for the pair-review record. Does NOT bind to any
   // specific value (per R07 OBSERVED-binding-scope reinforcement; expected FPR
   // is theoretically NOT bounded by α_fleet under correlated drift — this is
