@@ -36,3 +36,5 @@ test/_substrate/clustersynth-*.json
 probe-data/
 tools/probe/build/
 research/2026-09-action-surface/results/sim/
+research/2026-09-e-by-t2/results/sim/
+research/2026-09-e-by-t2/bundles/
