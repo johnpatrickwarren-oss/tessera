@@ -27,12 +27,31 @@
 
 import { certifiedFdrBenjaminiHochberg, modeOf, type EmitterContract, type Mode } from './emitter-contract.js';
 import { freshCalibrationMonitor, updateCalibrationBatch, type CalibrationMonitorState } from './calibration-monitor.js';
+import { eBenjaminiYekutieli } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-by';
+
+/** ADR 0029 — the mixing variance ρ of the per-window confidence sequence read from `csInputs`, on the
+ *  unit-variance standardized contrast residual. Registered with study 2026-09-action-surface; do not move. */
+export const CS_SIGMA_SQUARED_PRIOR = 1;
+
+/** ADR 0029 — the e-BY effect interval a dispatched action carries: the WINDOW-MEAN contrast shift from
+ *  the baseline fit, in standardized units, at level `alphaI = fcrDelta·|S'|/K` (Ramdas–Wang 2025 Thm
+ *  13.7: FCR ≤ fcrDelta for any selection rule under any dependence, given the premise the loop's
+ *  'gaussian' calibration monitors test). Not the post-onset shift the SR onset mixture detects. */
+export interface EffectInterval { alphaI: number; t: number; center: number; halfWidth: number; lower: number; upper: number }
 
 export type WithdrawReason = 'resolved' | 'revoked';
 
 /** An FDR-controlled discovery promoted to an action. The SINK maps this to a concrete effect (block /
  *  page / remediate); the loop guarantees it is only ever emitted for a Mode-B (guaranteed) emitter. */
-export interface FleetAction { emitter: string; shard: string; cycle: number; eValue: number; q: number }
+export interface FleetAction {
+  emitter: string; shard: string; cycle: number; eValue: number; q: number;
+  /** ADR 0029 — this shard's log-margin to the cycle's realized e-BH threshold (≥ 0: selected). Diagnostic. */
+  logMargin?: number;
+  /** ADR 0029 — the cycle's realized e-BH threshold, log domain. Diagnostic. */
+  logThresholdE?: number;
+  /** ADR 0029 — present iff the seam supplied `csInputs` for this shard (a baseline fit was used). */
+  effect?: EffectInterval;
+}
 
 /** One step of an active mechanism probe (one diag level run against the shard). */
 export interface ProbeStep { level: number; code: number; stderr: string }
@@ -95,12 +114,18 @@ export interface EmitterCycle {
   calibrationSamples: number[][];
   /** The Wall-A whiteness verdict for the construction this cycle (serial-dependence guard). */
   whitenessPass: boolean;
+  /** ADR 0029 — per shard, aligned with `shards`: the standardized residual window's sum and length
+   *  (the level-free inputs of the mixture confidence sequence), or null where the seam self-fitted
+   *  the window (an interval would be degenerate). Optional: a cycle without it is unchanged. */
+  csInputs?: ReadonlyArray<{ S_t: number; t: number } | null>;
 }
 
 export interface EmitterReport {
   emitter: string; mode: Mode; modeChanged: boolean; constructionValid: boolean;
   calibFrac: number; whitenessPass: boolean;
   selected: number; dispatched: number; withdrawn: number; standing: number;
+  /** ADR 0029 — the cycle's realized e-BH threshold (log domain) when the emitter ran e-BH (Mode B). */
+  logThresholdE?: number;
 }
 export interface CycleReport {
   cycle: number;
@@ -111,6 +136,8 @@ export interface CycleReport {
 
 export interface ModeBLoopOptions {
   q?: number; alpha?: number; calibFracThreshold?: number; sink: ActionSink;
+  /** ADR 0029 — the FCR level of the e-BY effect intervals on dispatched actions (default: q). */
+  fcrDelta?: number;
   /** Optional result-feedback source (e.g. the DiagProbeSink itself); polled at the START of each step,
    *  so an outcome's `standing` reflects the set the probe was dispatched against, before this cycle's
    *  reconcile can resolve it. */
@@ -122,6 +149,7 @@ export class ModeBLoop {
   private readonly alpha: number;
   private readonly calibThresh: number;
   private readonly sink: ActionSink;
+  private readonly fcrDelta: number;
   private readonly feedback?: FeedbackSource;
   private readonly monitors = new Map<string, CalibrationMonitorState[]>(); // emitter → per-shard monitors
   private readonly standing = new Map<string, Map<string, FleetAction>>();   // emitter → shard → action
@@ -132,6 +160,7 @@ export class ModeBLoop {
     this.alpha = opts.alpha ?? 0.01;
     this.calibThresh = opts.calibFracThreshold ?? 0.8;
     this.sink = opts.sink;
+    this.fcrDelta = opts.fcrDelta ?? this.q;
     this.feedback = opts.feedback;
   }
 
@@ -177,20 +206,51 @@ export class ModeBLoop {
 
     // Mode B → the GATED e-BH discovery set; Mode A → no FDR-keyed discoveries (abstain).
     const discovered = new Map<string, number>();
-    if (mode === 'B') for (const i of certifiedFdrBenjaminiHochberg(ec.eValues.map(eFromGeometricMixture), this.q, contract, `mode-b-loop:${id}`).selected) discovered.set(ec.shards[i], ec.eValues[i]);
+    const extras = new Map<string, Pick<FleetAction, 'logMargin' | 'logThresholdE' | 'effect'>>();
+    let logThresholdE: number | undefined;
+    if (mode === 'B') {
+      const sel = certifiedFdrBenjaminiHochberg(ec.eValues.map(eFromGeometricMixture), this.q, contract, `mode-b-loop:${id}`);
+      logThresholdE = sel.logThresholdE;
+      for (const i of sel.selected) { discovered.set(ec.shards[i], ec.eValues[i]); extras.set(ec.shards[i], { logMargin: sel.logMargins[i], logThresholdE }); }
+      for (const [shard, effect] of this.effectIntervals(ec, sel.selected)) extras.get(shard)!.effect = effect;
+    }
 
-    const { dispatched, withdrawn, standing } = this.reconcile(id, cycle, discovered, prev === 'B' && mode === 'A');
-    return { emitter: id, mode, modeChanged: mode !== prev, constructionValid, calibFrac, whitenessPass: ec.whitenessPass, selected: discovered.size, dispatched, withdrawn, standing };
+    const { dispatched, withdrawn, standing } = this.reconcile(id, cycle, discovered, prev === 'B' && mode === 'A', extras);
+    return { emitter: id, mode, modeChanged: mode !== prev, constructionValid, calibFrac, whitenessPass: ec.whitenessPass, selected: discovered.size, dispatched, withdrawn, standing, ...(logThresholdE !== undefined ? { logThresholdE } : {}) };
+  }
+
+  /** ADR 0029 — e-BY intervals for the selected shards that carry `csInputs`: universe K = all shards
+   *  this cycle, S' = the selected shards with inputs, α_i = fcrDelta·|S'|/K. Empty without inputs. */
+  private effectIntervals(ec: EmitterCycle, selected: readonly number[]): Map<string, EffectInterval> {
+    const out = new Map<string, EffectInterval>();
+    if (!ec.csInputs) return out;
+    const withInputs = selected.filter((i) => ec.csInputs![i] != null);
+    if (withInputs.length === 0) return out;
+    const eby = eBenjaminiYekutieli(
+      withInputs.map((i) => ({ id: ec.shards[i], level_free: { S_t: ec.csInputs![i]!.S_t, t: ec.csInputs![i]!.t, sigma_squared: 1, sigma_squared_prior: CS_SIGMA_SQUARED_PRIOR } })),
+      ec.shards.length, this.fcrDelta,
+    );
+    eby.intervals.forEach((iv, k) => out.set(iv.id, { alphaI: iv.alpha_i, t: ec.csInputs![withInputs[k]]!.t, center: iv.center, halfWidth: iv.half_width, lower: iv.lower, upper: iv.upper }));
+    return out;
   }
 
   /** Diff the new discovery set against standing actions: dispatch new ones, withdraw gone ones (reason
    *  'revoked' on a B→A transition, else 'resolved'). Debounced — a still-standing discovery is not
    *  re-dispatched. (When mode is A, `discovered` is empty, so a B→A transition withdraws everything.) */
-  private reconcile(id: string, cycle: number, discovered: Map<string, number>, revoked: boolean): { dispatched: number; withdrawn: number; standing: number } {
+  private reconcile(
+    id: string, cycle: number, discovered: Map<string, number>, revoked: boolean,
+    extras: Map<string, Pick<FleetAction, 'logMargin' | 'logThresholdE' | 'effect'>> = new Map(),
+  ): { dispatched: number; withdrawn: number; standing: number } {
     const stand = this.standing.get(id) ?? new Map<string, FleetAction>();
     let dispatched = 0, withdrawn = 0;
     for (const [shard, e] of discovered) {
-      if (!stand.has(shard)) { const a: FleetAction = { emitter: id, shard, cycle, eValue: e, q: this.q }; stand.set(shard, a); this.sink.dispatch(a); dispatched++; }
+      if (!stand.has(shard)) {
+        // ADR 0029: the diagnostic fields ride on the action only when the cycle produced them, so a
+        // cycle without csInputs dispatches the pre-0029 shape byte for byte (undefined keys are omitted).
+        const x = extras.get(shard);
+        const a: FleetAction = { emitter: id, shard, cycle, eValue: e, q: this.q, ...(x?.logMargin !== undefined ? { logMargin: x.logMargin, logThresholdE: x.logThresholdE } : {}), ...(x?.effect ? { effect: x.effect } : {}) };
+        stand.set(shard, a); this.sink.dispatch(a); dispatched++;
+      }
     }
     for (const [shard, a] of [...stand]) {
       if (!discovered.has(shard)) { this.sink.withdraw(a, revoked ? 'revoked' : 'resolved'); stand.delete(shard); withdrawn++; }

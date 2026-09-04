@@ -124,3 +124,12 @@ nothing ships; a contradiction with Theorem 13.7 (or Proposition 9.12) is filed 
 The estimation premise (fits fixed by design); multi-cycle accumulation (the interval is per
 window, and the loop's running e-value is not the CS's object); the 'bounded' increment kind;
 real telemetry; clustersynth bundles (the reference feed) beyond the existing end-to-end test.
+
+## Amendment A1 — 2026-09-03, before any run: the margin fields ride on every Mode-B dispatch
+
+§2 and P4 said a cycle without `csInputs` produces actions byte-identical to today's. The margin
+and threshold come from the e-BH call the loop makes on every Mode-B cycle and have nothing to do
+with `csInputs`; coupling them to it would withhold a free diagnostic. Registered change: every
+Mode-B dispatch carries `logMargin` and `logThresholdE`; only `effect` depends on `csInputs`.
+P4's last clause becomes: a cycle with `csInputs` omitted produces `FleetAction`s equal to
+today's shape plus those two fields and no `effect`. No endpoint, band, seed or bar moves.
