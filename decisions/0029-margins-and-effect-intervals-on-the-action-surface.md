@@ -32,7 +32,8 @@ seam already computes carries the level-free inputs of a confidence sequence.
    `logMargin`, `logThresholdE` and `effect` on the `FleetAction`; `EmitterReport` gains
    `logThresholdE`; the audit sink writes the fields when present.
 4. Nothing else moves. Selection, α, the Mode gate, reconcile, sink effects, demo bundles: unchanged.
-   A cycle without `csInputs` yields actions and records byte-identical to today's.
+   Every Mode-B dispatch carries the two margin fields (study Amendment A1); a cycle without
+   `csInputs` carries no `effect` and is otherwise today's action.
 
 ## What the interval means, and its premise
 

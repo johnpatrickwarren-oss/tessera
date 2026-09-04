@@ -226,6 +226,13 @@ export interface CertifiedSelection {
   readonly evidence: EvidenceClass;
   readonly certificateIds: readonly string[];
   readonly openPremises: readonly string[];
+  /** ADR 0029 — the realized e-BH threshold, log domain: log(N/(q·max(K,1))) (engine ADR 0027;
+   *  Ramdas–Wang 2025 Proposition 9.12). DIAGNOSTIC: data-dependent, moves with K; no claim of
+   *  its own — the FDR reading of `selected` is exactly as before. */
+  readonly logThresholdE: number;
+  /** ADR 0029 — per-input log-margin to `logThresholdE`, index-aligned with the inputs: ≥ 0 iff
+   *  the input is in `selected` (ties at the boundary selected). Floored, never −Infinity. */
+  readonly logMargins: readonly number[];
 }
 
 /**
@@ -261,10 +268,10 @@ export function certifiedFdrBenjaminiHochberg(
     else throw new Error(msg);
   }
 
-  const { selected, K } = eBenjaminiHochberg(perShardEValues.map((e) => e.value), qLevel);
+  const { selected, K, log_threshold_e, log_margin } = eBenjaminiHochberg(perShardEValues.map((e) => e.value), qLevel);
   const certificateIds = [...new Set(perShardEValues.flatMap((e) => certificateChain(e).map((x) => x.id)))];
   const premises = [...new Set(perShardEValues.flatMap(openPremises))];
-  return { selected: [...selected], K, evidence: got, certificateIds, openPremises: premises };
+  return { selected: [...selected], K, evidence: got, certificateIds, openPremises: premises, logThresholdE: log_threshold_e, logMargins: [...log_margin] };
 }
 
 /** Partition a set of emitters by mode (the "exclude" path for continuous fleet observation): the

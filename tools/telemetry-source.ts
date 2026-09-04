@@ -91,18 +91,25 @@ export function liveModeBEmitter(counter: string): EmitterContract {
 export function windowToEmitter(w: RawCounterWindow, fits: Map<string, ContrastFit> | undefined, feed: TelemetryFeed): EmitterCycle {
   const shards: string[] = [];
   const eValues: number[] = [];
+  // ADR 0029 — the level-free inputs of the per-window confidence sequence: the standardized residual's
+  // sum and length, only where a BASELINE fit standardized it (a self-fit centers on the window's own
+  // median, so its residual mean is ≈ 0 by construction and an interval would be degenerate).
+  const csInputs: Array<{ S_t: number; t: number } | null> = [];
   for (const u of w.detection) {
     const d = contrast(u);
-    const fit = fits?.get(u.shard) ?? fitContrast(d);
+    const baselineFit = fits?.get(u.shard);
+    const fit = baselineFit ?? fitContrast(d);
     shards.push(u.shard);
-    eValues.push(normalizedMixtureEValue(applyContrast(d, fit)));
+    const r = applyContrast(d, fit);
+    eValues.push(normalizedMixtureEValue(r));
+    csInputs.push(baselineFit ? { S_t: r.reduce((s, x) => s + x, 0), t: r.length } : null);
   }
   const calibrationSamples = w.cohort.map((c) => { const d = contrast(c); return applyContrast(d, fitContrast(d)); });
   const whitenessPass = calibrationSamples.length
     ? calibrationSamples.filter((r) => Math.abs(autocorr(r, 1)) <= 0.1).length / calibrationSamples.length >= 0.5
     : false;
   const contract = feed.emitterFor?.(w.counter) ?? liveModeBEmitter(w.counter);
-  return { contract, shards, eValues, calibrationSamples, whitenessPass };
+  return { contract, shards, eValues, calibrationSamples, whitenessPass, csInputs };
 }
 
 /** The live cycle source: fit the per-shard baselines once (enforcing the ≥2-month guard), then turn each
