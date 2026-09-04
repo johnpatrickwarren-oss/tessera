@@ -1,8 +1,7 @@
 # ADR 0029 — e-BH margins and e-BY effect intervals on the Mode-B action surface
 
 - **Date:** 2026-09-03
-- **Status:** PROPOSED, gated on study `2026-09-action-surface`
-  (`research/2026-09-action-surface/PREREGISTRATION.md` §4); the results append records the outcome.
+- **Status:** ACCEPTED — measured (study `2026-09-action-surface`, ship rule §4 met; results append below).
 - **Builds on:** ADR 0019 (the Mode-B loop and its calibration gate), ADR 0025 (proof-carrying
   e-values and the certified e-BH entry point), ADR 0027 (the 'gaussian' increment the monitors
   test), ADR 0028 (the engine calibration monitor); engine ADR 0027 (`log_threshold_e`,
@@ -51,6 +50,17 @@ Cross-cycle accumulation (the loop's running e-value is one e-process across cyc
 is per window); the 'bounded' increment kind (no CS is built for it here); clustersynth
 harnesses, which call the engine's e-BH directly under `anchor:allow` and are not on this path.
 
-## Results append
+## Results append — 2026-09-03, run `run-20260904T042039Z`
 
-(Filled after the registered run.)
+K = 40 shards (4 faulted), T = 300, N = 500 per Δ, fixed baseline fits, Monte-Carlo truth from
+2,000 windows (se 0.0013), 10 s, 0 closed-form deviations, 0 margin-sign
+mismatches, Mode A dispatched nothing, the no-`csInputs` shape check HELD. **P1a HELD** (top-3
+extremeness on null windows: FCR 0.0200 at δ = 0.05, 0.0287 at δ = 0.10 — 0.4 and 0.29 of the
+level, the closest approach in the four consumer/engine measurements so far, with 3 of 40 shards
+selected by extremeness and intervals at δ·3/40). **P1b HELD** (the loop's own dispatch on faulted
+windows, ≈ 4.03 shards per cycle: FCR 0.0000 / 0.0005 at Δ = 4, 0.0004 / 0.0004 at Δ = 8).
+**P2**: 14 false dispatches in 500 cycles at Δ = 4 and 15 at Δ = 8 (e-BH at q = 0.05), of which
+1 missed 0 at Δ = 8. **P3**: every dispatched faulted shard's interval excludes 0; mean
+half-width 0.233 at δ = 0.05 against residual shifts of 1.32–1.72 (Δ = 4) and 2.64–3.39 (Δ = 8) — the
+spread across faulted shards is the per-shard fit (scale, φ), which the fixed-fit design makes
+part of the estimand; width ratio e-BY/naive 1.18–1.20. **P4 HELD.** Ship rule met; ACCEPTED.

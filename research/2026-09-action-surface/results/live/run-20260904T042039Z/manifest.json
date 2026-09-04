@@ -1,0 +1,55 @@
+{
+  "study": "2026-09-action-surface",
+  "run": "run-20260904T042039Z",
+  "mode": "live",
+  "quick": false,
+  "git_sha": "344499f04a6ecd4c8edb531e167cc746418b02d6",
+  "engine_version": "0.6.11-pre",
+  "harness_sha256": "b7ad1f37e9100be52d1e2a7f9208822bc0bfbd1b595ffbe5b21125a127d63d22",
+  "n": 500,
+  "K": 40,
+  "F": 4,
+  "T": 300,
+  "cohort": 10,
+  "phi": 0.5,
+  "q": 0.05,
+  "deltas": [
+    0.05,
+    0.1
+  ],
+  "shifts": [
+    0,
+    4,
+    8
+  ],
+  "top": 3,
+  "seed": 20260908,
+  "truth_seed": 40000001,
+  "truth_M": 2000,
+  "fit_seed": 47710,
+  "fit_ticks": 800,
+  "truth": [
+    {
+      "delta_shift": 4,
+      "mean_theta": 1.4796918750613413,
+      "min_theta": 1.322806981123562,
+      "max_theta": 1.7157945744596044,
+      "mean_se": 0.001320161918127168
+    },
+    {
+      "delta_shift": 8,
+      "mean_theta": 2.92398159718137,
+      "min_theta": 2.6404136050654046,
+      "max_theta": 3.394349868641154,
+      "mean_se": 0.0013332182292841097
+    }
+  ],
+  "mode_a_dispatches": 0,
+  "mode_a_intervals": 0,
+  "shape_check": "HELD",
+  "wall_seconds": 10,
+  "argv": [
+    "--mode",
+    "live"
+  ]
+}
