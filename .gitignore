@@ -35,3 +35,4 @@ test/_substrate/clustersynth-*.json
 !test/_substrate/clustersynth-gb200-s0.json
 probe-data/
 tools/probe/build/
+research/2026-09-action-surface/results/sim/
