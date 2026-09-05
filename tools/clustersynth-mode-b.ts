@@ -94,7 +94,12 @@ export function clustersynthModeBEmitter(calibrationMonitorPassing: boolean): Em
  *  Mode B detects PER-SHARD (gpu-level) anomalies: a fault applied to one treatment shard but NOT its
  *  control twin, so it survives the contrast. CDU/POD faults are SHARED-INFRA / COMMON-MODE events
  *  (faults.ts: "a shared-infra fault IS a factor perturbation") — the concurrent control loads on the
- *  same factor, so the contrast CANCELS them BY DESIGN. That is the point of a spatial null, not a miss:
+ *  same factor and, since clustersynth 3e6b6a9 (C73, 2026-09-04), CARRIES the same cdu/pod perturbation,
+ *  so the contrast cancels them. Before that commit the twin was fault-free at every level and a shared
+ *  fault LEAKED into the contrast as −λ·(perturbation) for every shard under the domain (one cdu
+ *  detachment put 288 of 288 shards on the Mode-B action surface): on a bundle generated before it,
+ *  a shard that fires under a shared event is scored here as a FALSE positive, and the FDP is
+ *  over-counted by that amount. That the contrast cancels shared events is the point of a spatial null:
  *  fleet-wide events are out of scope for a per-shard detector (a fleet-level monitor owns them). So the
  *  positive set is the gpu-level faults that actually perturb THIS counter (its own counter, or
  *  counter=null = all counters). A pure variance_collapse (no mean change) may evade the mean-shift
