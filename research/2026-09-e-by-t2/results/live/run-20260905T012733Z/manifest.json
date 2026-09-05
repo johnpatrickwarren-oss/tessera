@@ -1,0 +1,114 @@
+{
+  "study": "2026-09-e-by-t2",
+  "run": "run-20260905T012733Z",
+  "mode": "live",
+  "quick": false,
+  "tessera_sha": "c93ae9288fb3ced66ee823c39c9b5781a8e0493e",
+  "engine_version": "0.6.11-pre",
+  "clustersynth_sha": "c1387a4da67242e0807facd04929b5d975c795b0",
+  "harness_sha256": {
+    "config.mjs": "937f749f69588ccbe467f801ac8c765a408cfec471b3e0f4e410ae4ee6e6b807",
+    "gen.mjs": "d33f4cfcb86acaa0efcb9bc61938203a822adf358fd1887b5d17bc34321a968d",
+    "feed.mjs": "a8ff343b0126dd0bbbbdd90f576a5aa0cab6f58b93e146cd70501dc390bae272",
+    "truth.mjs": "78f8608316e4fbc343a011b88f10cc3c95591ca051120eba40fa8b36f4f6a68e",
+    "score.mjs": "61b1f72b51281f32bde86b6baa21e65016a43535fd4722ba779683ae307e737f",
+    "run.mjs": "a7f98544a553bf0fe94f41a7d97bb0056d5680d962353f2498c5b3000c669a54"
+  },
+  "report_sha256": "dc5c02bfd795851bbe8e70d970f05a50b9c92fa6bae60af4316a60e67609484c",
+  "counter": "gpu_temp_c",
+  "dt_s": 3600,
+  "t_healthy": 1440,
+  "t_mon": 2880,
+  "mon_start": 1440,
+  "n_cycles": 12,
+  "q": 0.1,
+  "deltas": [
+    0.05,
+    0.1
+  ],
+  "rho": 1,
+  "K": 288,
+  "base_ts": 1700000000,
+  "fault_rate": 0.1,
+  "shared_faults": 0,
+  "bands": [
+    "1:2",
+    "2:4",
+    "4:8"
+  ],
+  "arms": [
+    "infamily",
+    "nonlinear",
+    "hidden",
+    "heavy"
+  ],
+  "seeds": [
+    72001,
+    72102,
+    72203,
+    72304,
+    72405,
+    72506,
+    72607,
+    72708,
+    72809,
+    72910,
+    73011,
+    73112,
+    73213,
+    73314,
+    73415,
+    73516,
+    73617,
+    73718,
+    73819,
+    73920
+  ],
+  "n_replications": 240,
+  "min_level_actions": 50,
+  "structural": {
+    "no_effect": 0,
+    "closed_form": 0,
+    "alpha_i": 0,
+    "margin_sign": 0,
+    "delta_dispatch_mismatch": 0,
+    "hidden_counters_mismatch": 0,
+    "feed_offset0_equal": true
+  },
+  "equality": {
+    "nonlinear_dispatch_differs": 5,
+    "hidden_dispatch_differs": 0,
+    "cells": 60
+  },
+  "null_check": {
+    "infamily": {
+      "n": 16440,
+      "mean": -0.0007772015449771248,
+      "sd": 0.04281864005457075,
+      "noise_only_sd": 0.026352313834736494
+    },
+    "nonlinear": {
+      "n": 16440,
+      "mean": -0.0007668668276556345,
+      "sd": 0.04281198489872385,
+      "noise_only_sd": 0.026352313834736494
+    },
+    "hidden": {
+      "n": 16440,
+      "mean": -0.0007772015449771248,
+      "sd": 0.04281864005457075,
+      "noise_only_sd": 0.026352313834736494
+    },
+    "heavy": {
+      "n": 16440,
+      "mean": -0.0016458307892217691,
+      "sd": 0.04833439415198203,
+      "noise_only_sd": 0.026352313834736494
+    }
+  },
+  "exceptions": 0,
+  "argv": [
+    "--mode",
+    "live"
+  ]
+}
