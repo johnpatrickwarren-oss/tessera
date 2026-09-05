@@ -230,3 +230,38 @@ axis (its confound is on the record; it is common-mode and cancels like `nonline
 'bounded' increment kind; counters other than `gpu_temp_c`; the per-cycle selected-set FCP the
 theorem is actually about (the study scores the dispatch surface the loop ships); cross-cycle
 accumulation; and the FDR of the selection itself, which is e-BH's business and not this study's.
+
+## Amendment A1 — 2026-09-04, before any scored run: gpu-level faults only; detachment is counter-agnostic
+
+Found by the registered smoke on seed 72001 (band `4:8`, `infamily`), no cell scored.
+
+1. **Shared cdu/pod events are off** (`faults.sharedFaults = 0`; levels and types otherwise as
+   registered). The default two shared events per bundle are drawn uniformly over the four types;
+   a cdu or pod `detachment` or `variance_collapse` puts every shard under it in class `other`
+   for the fault's span, so three replications in four would have had almost no scorable action.
+   The smoke showed it: a cdu-0 `detachment` over ticks [983, 1926) and a pod `variance_collapse`
+   over [926, 2221) each covered all 288 shards; the loop dispatched 288 of 288 at cycle 0 with
+   interval centers from −4 to −24 — the contrast carried −λ_cool·f_cool because the twin holds
+   `NO_FAULTS` (`scenario.ts`) while the treatment lost its cooling factor. That observation is
+   itself filed on the wiki (a shared-infra fault is not cancelled by the contrast, against the
+   prose in `tools/clustersynth-mode-b.ts`); it is not this study's endpoint.
+2. **A `detachment` label touches every counter.** `clustersynth/src/harness/faults.ts`
+   `buildApplier().detached()` tests type, factor kind and time only — never the label's
+   `counter` — so a gpu-level detachment labelled on `sm_util` still removes the `job` factor from
+   `gpu_temp_c`. §3's class rule now reads: labels with `i ∈ affected_shards` and
+   (`type = detachment` or `counter ∈ {gpu_temp_c, null}`). The smoke found six shards dispatched
+   as `null` under the un-amended rule, all gpu detachments labelled on other counters.
+3. Reported, not scored, from the same smoke: with faults off in the window the loop selected
+   nothing in twelve cycles; on the null shards the full-window `S_T/T` had sd 0.046 against the
+   noise-only 0.026, so the fixed-fit bias is real and about 0.04 in residual units — an order
+   of magnitude under the narrowest half-width (0.38 at t = 120). Every `level` and `path`
+   interval in the smoke covered its exact truth.
+
+No endpoint, bar, band, seed, arm or size moves.
+
+## Amendment A2 — 2026-09-04, before any scored run: the executability floor applies to P1b as well
+
+The quick sim (never scored) rendered the `heavy` arm's P1b as HELD on zero scored actions —
+the FCP convention `misses/(|S| ∨ 1)` makes an empty selection a perfect one. §4's floor now reads:
+an arm with fewer than 50 level actions is NOT-EXECUTABLE for P1a, and an arm with fewer than 50
+scored actions is NOT-EXECUTABLE for P1b. No bar, band, seed, arm or size moves.
