@@ -37,7 +37,7 @@ import {
   makeResetPair,
   makeVariableIntervalSequence,
 } from './_substrate/synthetic-counter-generator';
-import { TrendBuffer } from '@johnpatrickwarren-oss/deploysignal-engine/core';
+import { rateSummary } from './_substrate/rate-summary.js';
 import type { TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 const WELL_FORMED = readFileSync('test/_substrate/nvlink-fixture-well-formed.txt', 'utf8');
@@ -162,19 +162,19 @@ test('AC-R30-12: ingestNvlinkErrorCounter on makeResetPair (counter_width=32 bak
 });
 
 // AC-R30-13: ingestNvlinkErrorCounter on makeVariableIntervalSequence integrates with TrendBuffer
-test('AC-R30-13: variable-interval ingestion produces comparable per-second rates via TrendBuffer', () => {
+test('AC-R30-13: variable-interval ingestion produces a constant per-second rate (mean ≈ 10, normalized OLS slope ≈ 0; was read from the DeploySignal TrendBuffer until engine ADR 0033)', () => {
   const samples = makeVariableIntervalSequence({
     intervals_seconds: [1.0, 1.2, 1.5, 1.0, 1.2, 1.5, 1.0, 1.2, 1.5, 1.0],
     rate_per_second: 10,
   });
-  const tb = new TrendBuffer(20);
+  const rates: number[] = [];
   for (let i = 1; i < samples.length; i++) {
     const out = ingestNvlinkErrorCounter(samples[i - 1], samples[i], { expected_scrape_interval_seconds: 1.0 });
     assert.strictEqual(out.slope_quality, 'normal', `pair ${i}: not degraded`);
     assert.notStrictEqual(out.value, null);
-    tb.push('nvlink_test_signal', out.value!);
+    rates.push(out.value!);
   }
-  const snap = tb.get('nvlink_test_signal');
+  const snap = rateSummary(rates);
   // Tolerances per § 1.8 R25 disposition (Option A): 0.001 / 0.01. NOT 1e-9 (empirically infeasible per R25 MAJOR-3).
   assert.ok(Math.abs(snap.mean - 10) < 0.001, `mean=${snap.mean} expected ≈10 (tol 0.001)`);
   assert.ok(Math.abs(snap.slopeNorm) < 0.01,  `slopeNorm=${snap.slopeNorm} expected near zero (tol 0.01)`);

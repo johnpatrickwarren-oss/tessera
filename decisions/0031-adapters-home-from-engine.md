@@ -47,11 +47,12 @@ engine only because the R90 extract moved the whole in-repo `engine/` tree at on
 
 ## Not done, and why
 
-- `test/q25-l0-contract.test.ts` and `test/q30-nvlink-adapter.test.ts` still import `TrendBuffer`
-  from the engine's `core`, a DeploySignal runtime module that leaves the engine at its major. The
-  two assertions (AC-R25-12, AC-R30-13) are integration claims against that buffer; they need
-  either a local buffer or a restated assertion before the engine major. Registered on knowledge
-  WORKLIST C83.
+- `test/q25-l0-contract.test.ts` and `test/q30-nvlink-adapter.test.ts` imported `TrendBuffer` from
+  the engine's `core`, a DeploySignal runtime module that leaves the engine at its major. **Done
+  2026-09-23 (the PR after this one):** the two assertions (AC-R25-12, AC-R30-13) now read the
+  mean and normalized OLS slope from `test/_substrate/rate-summary.ts`, which defines both numbers
+  with the maths TrendBuffer used, so the tolerances keep their meaning; the claim is restated as
+  what it always was — a constant per-second rate under variable scrape intervals.
 - The alternative to fourteen `require-tests` suppressions — renaming Tessera's round-numbered
   tests to base names — was not taken: the `q##-` names carry the round they closed.
 
