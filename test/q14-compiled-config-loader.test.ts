@@ -4,7 +4,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadCompiledConfig } from '@johnpatrickwarren-oss/deploysignal-engine/loader';
+import { loadCompiledConfig } from '../tools/loader.js';
 import type { CompiledConfig } from '@johnpatrickwarren-oss/deploysignal-engine/types/config';
 
 /** Minimal valid CompiledConfig for loader tests. */

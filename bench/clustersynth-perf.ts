@@ -31,8 +31,8 @@ import {
   computeUt,
   BASELINE_POOL_SIZE,
 } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/sequential-mmd';
-import { attributeCommonMode } from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
-import type { FiredShardEvent } from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+import { attributeCommonMode } from '../tools/topology/common-mode-attribution.js';
+import type { FiredShardEvent } from '../tools/topology/common-mode-attribution.js';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
 // ── Config ───────────────────────────────────────────────────────────

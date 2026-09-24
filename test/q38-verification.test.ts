@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import { test } from 'node:test';
 import type { TopologySnapshot } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
-import { attributeCommonMode } from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+import { attributeCommonMode } from '../tools/topology/common-mode-attribution.js';
 
 const ROOT = resolve(__dirname, '..');
 

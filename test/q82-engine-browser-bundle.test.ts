@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import {
   computeSnapshotHash,
   pureJsSha256,
-} from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+} from '../tools/topology-overlay.js';
 
 // ── AC-R82-6: computeSnapshotHash sync surface preserved (Node path) ──
 test('AC-R82-6: computeSnapshotHash returns a 64-char hex sync', () => {

@@ -20,15 +20,15 @@ export {
   pureJsSha256,
   StaticTopologySource,
   TopologyEnricher,
-} from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+} from './tools/topology-overlay';
 
 export * as detectors from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
 export * as familyA from '@johnpatrickwarren-oss/deploysignal-engine/detectors/family-a-mixture-supermartingale';
 export * as familyC from '@johnpatrickwarren-oss/deploysignal-engine/detectors/family-c-betting-e-process';
 export * as eBH from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 export * as runtime from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
-export * as freezeHook from '@johnpatrickwarren-oss/deploysignal-engine/events/freeze-hook';
-export * as commonMode from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+export * as freezeHook from './tools/events/freeze-hook';
+export * as commonMode from './tools/topology/common-mode-attribution';
 export * as types from '@johnpatrickwarren-oss/deploysignal-engine/types';
 `;
 

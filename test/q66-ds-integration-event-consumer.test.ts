@@ -9,17 +9,17 @@ import { readFileSync } from 'node:fs';
 import {
   DsEventConsumer,
   type DsToTesseraAuthHeaders,
-} from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-consumer';
+} from '../tools/ds-integration/event-consumer.js';
 import {
   createFreezeHookFromDsEvents,
   mapEventClassToKind,
-} from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/freeze-hook-factory';
+} from '../tools/ds-integration/freeze-hook-factory.js';
 import {
   DS_TO_TESSERA_EVENT_ENDPOINT,
   type DeployEventPayload,
   type DsToTesseraEventRequest,
   type DsToTesseraEventResponse,
-} from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-contract';
+} from '../tools/ds-integration/event-contract.js';
 
 const VALID_HEADERS: DsToTesseraAuthHeaders & Record<string, string> = {
   'x-ds-instance-id': 'ds-test',

@@ -2,12 +2,12 @@
 // VERBATIM scenario body from tools/build-canned-demos.ts (no computation changes);
 // the freeze-hook + residual setup is factored into a contiguous setup helper.
 
-import { DsEventConsumer } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-consumer';
+import { DsEventConsumer } from './ds-integration/event-consumer.js';
 import { createFreezeHookFromDsEvents }
-  from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/freeze-hook-factory';
+  from './ds-integration/freeze-hook-factory.js';
 import { initialPerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
 import type { ExtendedSampleObservation } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
-import type { DeployEventPayload } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-contract';
+import type { DeployEventPayload } from './ds-integration/event-contract.js';
 
 import type { ScenarioJson, WindowEntry } from './_build-canned-demos-types.js';
 import { SCENARIO_SEEDS } from './_build-canned-demos-types.js';

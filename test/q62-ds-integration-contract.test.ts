@@ -19,7 +19,7 @@ import {
   type DsToTesseraEventResponse,
   type DsToTesseraEventEndpoint,
   DS_TO_TESSERA_EVENT_ENDPOINT,
-} from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration';
+} from '../tools/ds-integration/index.js';
 
 // ───────────────────────────────────────────────────────────────────────
 // AC-R62-1: barrel exports the named symbols

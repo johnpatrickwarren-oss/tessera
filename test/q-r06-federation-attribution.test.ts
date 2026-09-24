@@ -18,7 +18,7 @@ import type { TopologySnapshot } from '@johnpatrickwarren-oss/deploysignal-engin
 import {
   attributeCommonMode,
   type FiredShardEvent,
-} from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+} from '../tools/topology/common-mode-attribution.js';
 
 const C0_PATH = join(__dirname, '_substrate', 'clustersynth-gb200-c0.json');
 

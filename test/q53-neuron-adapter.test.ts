@@ -23,8 +23,8 @@ import { execFileSync } from 'node:child_process';
 import {
   parseNeuronLsJson,
   NeuronTopologySource,
-} from '@johnpatrickwarren-oss/deploysignal-engine/topology/neuron-source';
-import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+} from '../tools/topology/neuron-source.js';
+import { computeSnapshotHash } from '../tools/topology-overlay.js';
 import type { TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 const TRAINIUM   = readFileSync('test/_substrate/neuron-fixture-trainium-2d-torus.json', 'utf8');
