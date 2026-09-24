@@ -23,7 +23,7 @@ import {
   type CounterMetadata,
   type RateSample,
 } from '../tools/l0/counter-rate-transform.js';
-import { TrendBuffer } from '@johnpatrickwarren-oss/deploysignal-engine/core';
+import { rateSummary } from './_substrate/rate-summary.js';
 import {
   makeCleanPair, makeMissedScrapePair, makeWrap32Pair, makeResetPair,
   makeVariableIntervalSequence,
@@ -152,21 +152,21 @@ test('AC-R25-11: makeResetPair places prev below wrap threshold AND next < prev'
 });
 
 // AC-R25-12: TrendBuffer integration — variable scrape intervals produce comparable per-second rates
-test('AC-R25-12: variable-interval L0-transformed rates integrate cleanly with TrendBuffer (constant per-second rate)', () => {
+test('AC-R25-12: variable-interval L0-transformed rates are a constant per-second rate (mean ≈ 10, normalized OLS slope ≈ 0; was read from the DeploySignal TrendBuffer until engine ADR 0033)', () => {
   const samples = makeVariableIntervalSequence({
     intervals_seconds: [1.0, 1.2, 1.5, 1.0, 1.2, 1.5, 1.0, 1.2, 1.5, 1.0],
     rate_per_second: 10,
   });
   // 11 samples → 10 consecutive pairs. All intervals ≤ 1.5 = 1.0 × (1 + 0.5) → no degraded flag.
   const meta: CounterMetadata = { semantic_type: 'counter', counter_width: 64 };
-  const tb = new TrendBuffer(20);
+  const rates: number[] = [];
   for (let i = 1; i < samples.length; i++) {
     const out = transformPair(samples[i - 1], samples[i], meta, { expected_scrape_interval_seconds: 1.0 });
     assert.strictEqual(out.slope_quality, 'normal', `pair ${i}: not degraded`);
     assert.notStrictEqual(out.value, null);
-    tb.push('test_signal', out.value!);
+    rates.push(out.value!);
   }
-  const snap = tb.get('test_signal');
+  const snap = rateSummary(rates);
   // Mean rate is per-second rate (10); slopeNorm near zero (constant rate).
   // Tolerances per operator Option A (ESCALATE-R25-01): § 1.8 values (0.001 / 0.01).
   // § 4.3/§ 5.1 1e-9 was empirically infeasible (float64 1.2 not exact; |mean-10| ≈ 1.2e-7).
