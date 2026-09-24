@@ -30,77 +30,15 @@
 // Tessera-original code. NOT vendored.
 
 /** Result of fitting an AR(1) model to a baseline sample. */
-export interface Ar1Fit {
-  /** Bias-corrected lag-1 autoregressive coefficient. */
-  phi: number;
-  /** Innovation (residual) variance of x_t - phi*x_{t-1} on the baseline — i.e.
-   *  ~ sigma^2_marginal * (1 - phi^2). This IS the quantity production passes as the
-   *  engine's `sigmaSquared` when `ar1_phi` is set: fit-production-substrate stamps
-   *  `baseline_sigma_squared = innovation variance`, and updateBettingState
-   *  standardizes the whitened residual against it. (Passing the raw MARGINAL
-   *  variance instead would over-scale and over-conservatize z — see ADR 0001.) */
-  sigma2: number;
-}
 
-/**
- * Estimate an AR(1) coefficient + innovation variance from a held-out baseline
- * sample, with the Kendall median-unbiased small-sample correction applied.
- *
- * OLS lag-1 autocorrelation is biased downward by approximately (1+3*phi)/n;
- * under-estimating phi leaves residual autocorrelation after whitening, which
- * re-inflates type-I error at high phi. The correction phi* = phi_ols +
- * (1+3*phi_ols)/n removes the leading-order bias.
- *
- * Pure: does not mutate `samples`. Degenerate inputs (n < 2, zero variance)
- * return phi=0 (whitening becomes identity) and sigma2 = sample variance.
- */
-export function estimateAr1(samples: ReadonlyArray<number>): Ar1Fit {
-  const n = samples.length;
-  if (n < 2) {
-    return { phi: 0, sigma2: n === 1 ? 0 : 1 };
-  }
-  let mean = 0;
-  for (const v of samples) mean += v;
-  mean /= n;
-
-  let num = 0;
-  let den = 0;
-  for (let i = 1; i < n; i++) num += (samples[i] - mean) * (samples[i - 1] - mean);
-  for (let i = 0; i < n; i++) den += (samples[i] - mean) * (samples[i] - mean);
-
-  // Zero-variance baseline: no autocorrelation structure to remove — identity whitening.
-  if (!(den > 0)) return { phi: 0, sigma2: 1 };
-
-  const phiOls = num / den;
-  // Kendall median-unbiased AR(1) small-sample correction.
-  let phi = phiOls + (1 + 3 * phiOls) / n;
-  // Clip to [-0.95, 0.95] — IDENTICAL to the engine's ar1Phi /
-  // computePerSignalAr1Phi clip, so this validator's stamped phi mirrors what
-  // production would whiten with. The ceiling caps near-unit-root signals
-  // (rho > 0.95), which the matrix exposes as a genuine cliff (e.g. rho=0.99 ->
-  // severe under-whitening); near-unit-root handling is a stationarity-premise
-  // concern routed to the self-normalized fallback (engine ADR 0003), not a
-  // clip the validator should loosen.
-  const CLIP = 0.95;
-  if (phi > CLIP) phi = CLIP;
-  if (phi < -CLIP) phi = -CLIP;
-
-  // Innovation variance of the whitened baseline.
-  let rss = 0;
-  for (let i = 1; i < n; i++) {
-    const r = (samples[i] - mean) - phi * (samples[i - 1] - mean);
-    rss += r * r;
-  }
-  const sigma2 = n > 1 ? rss / (n - 1) : 1;
-  return { phi, sigma2: sigma2 > 0 ? sigma2 : 1 };
-}
-
-/**
- * Whiten a single observation: return the AR(1) innovation x_t - phi*x_{t-1}.
- *
- * At the start of a stream there is no prior observation to difference against,
- * so `xPrev === null` returns `x` unchanged. Pure.
- */
-export function whiten(x: number, xPrev: number | null, phi: number): number {
-  return xPrev === null ? x : x - phi * xPrev;
-}
+// ── Served by the engine since engine v0.6.12-pre (Tessera ADR 0030, engine ADR 0033 step 2) ──
+//
+// `estimateAr1` and `whiten` were ported into the engine's per-shard/contrast.ts line for line as
+// `estimateContrastAr1` / `whitenContrast` (engine ADR 0032) and held in lockstep by the engine's
+// test/contrast.test.ts. Verified body-identical again on 2026-09-23 before this file became a
+// re-export. The names here are unchanged so every caller path and every citation stays valid.
+export {
+  estimateContrastAr1 as estimateAr1,
+  whitenContrast as whiten,
+  type ContrastAr1Fit as Ar1Fit,
+} from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/contrast';

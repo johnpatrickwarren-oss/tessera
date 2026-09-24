@@ -17,53 +17,17 @@
 
 import { supAdjuster } from './supfdr.js';
 
-const LAMBDAS = [0.5, 1, 2, -0.5, -1, -2];
-const G_CAP = 100; // bound the per-tick increment: E[min(g,cap)] ≤ E[g] = 1 (conservative)
-
-/** Gaussian-LR mixture increment, capped. E[g | N(0,1)] ≤ 1 by construction.
- *  SENSITIVITY (2026-07-02 audit F7): validity needs the residual to be genuinely ~N(0,1) — a 10%
- *  UNDER-estimate of the standardizing scale drives the mixture e-value's null mean from ~0.5 to ~7.6
- *  (measured), and heavy tails (real-telemetry kurtosis up to ~1540, ADR 0011) break E ≤ 1 outright.
- *  Where the residual scale is a plug-in estimate (every production path), prefer gIncHoeffding. */
-export function gInc(r: number): number {
-  let s = 0;
-  for (const lam of LAMBDAS) s += Math.exp(lam * r - 0.5 * lam * lam);
-  return Math.min(G_CAP, s / LAMBDAS.length);
-}
-
-/** Clip bound for the bounded-bet increment (residual σ-units). */
-export const BOUND_CLIP = 3;
-/** Linear-bet grid: |λ| < 1 keeps every wealth factor strictly positive. Small λ for small sustained
- *  (or heavily-whitened near-unit-root) shifts; large λ for fast growth on big faults. */
-export const BOUND_LAMBDAS = [0.1, 0.3, 0.6, 0.9, -0.1, -0.3, -0.6, -0.9];
-
-/** DISTRIBUTION-ROBUST linear (Kelly) bounded-bet wealth factor (2026-07-02 audit fix, F7/F9).
- *
- *  g_λ(r) = 1 + λ·c/B,  c = clip(r, ±B),  B = BOUND_CLIP,  |λ| < 1.
- *
- *  Validity is EXACT and distribution-free: E[g_λ|F] = 1 + λ·E[c|F]/B = 1 whenever the clipped
- *  residual is conditionally mean-zero — for ANY tail (bounded) and ANY standardizing-scale error
- *  (clipping + linearity absorb it; contrast gInc, where a 10% scale error inflates the null mean
- *  ~15×). The one surviving nuisance is the CENTER: E[c|F] = ε inflates per-tick by 1 + λε/B —
- *  first-order like every increment, and exactly what the calibration monitor tests best. Power:
- *  E[log g] ≈ λ(δ/B) − λ²/2·E[(c/B)²] — the same λδ − λ²/2 shape as the Gaussian-LR mixture for
- *  small shifts (no Hoeffding-style B²/2 penalty, which an earlier draft paid and which zeroed power
- *  on heavily-whitened near-unit-root counters), capped growth log(1+λ) per tick on huge faults
- *  (slower than the Gaussian mixture's exponential bets — a latency cost, not a terminal-power one).
- *
- *  IMPORTANT: linear bets CANNOT be mixed per-tick (mean_λ(1+λc) ≡ 1 — the mixture must be over
- *  CAPITAL processes, one product per λ, combined at the onset-mixture level). The mixture functions
- *  below maintain one SR recursion per λ and average the resulting e-processes — a convex
- *  combination of e-processes, still an e-process. */
-export function gBounded(r: number, lam: number): number {
-  const c = r > BOUND_CLIP ? BOUND_CLIP : r < -BOUND_CLIP ? -BOUND_CLIP : r;
-  return 1 + (lam * c) / BOUND_CLIP;
-}
-
-/** Which increment family a mixture e-value accumulates. 'gaussian' = gInc (max power, needs a
- *  genuinely N(0,1) residual); 'bounded' = linear bounded bets (distribution-robust — exact validity
- *  under a conditionally mean-zero clipped residual; the Mode B / FDR-bearing default). */
-export type IncrementKind = 'gaussian' | 'bounded';
+// ── Increments: served by the engine (Tessera ADR 0030, engine ADR 0033 step 2) ──────────────
+//
+// gInc (λ ∈ ±{0.5, 1, 2}, cap 100) and the bounded bet (BOUND_CLIP 3, the eight ±λ, gBounded)
+// were ported into the engine's fleet/calibration-monitor.ts with these constants verbatim
+// (engine ADR 0027; Tessera ADR 0028 measured the equivalence field by field). Verified
+// body-identical again on 2026-09-23. Imported and re-exported here so this module and the
+// engine's monitor can never drift apart on the increment family (ADR 0027 coherence rule).
+import {
+  gInc, G_CAP, BOUND_CLIP, BOUND_LAMBDAS, gBounded, type IncrementKind,
+} from '@johnpatrickwarren-oss/deploysignal-engine/fleet/calibration-monitor';
+export { gInc, G_CAP, BOUND_CLIP, BOUND_LAMBDAS, gBounded, type IncrementKind };
 
 /** The normalized convex onset-mixture e-value for a standardized residual series: the running max
  *  of mixE_t = (M^SR_t + (T−1−t)) / T (a convex combination of e-processes, E ≤ 1), passed through
