@@ -24,13 +24,13 @@ import {
   parseNvlinkStatus,
   NvlinkTopologySource,
   ingestNvlinkErrorCounter,
-} from '@johnpatrickwarren-oss/deploysignal-engine/topology/nvlink-source';
-import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+} from '../tools/topology/nvlink-source.js';
+import { computeSnapshotHash } from '../tools/topology-overlay.js';
 import {
   transformPair,
   UINT32_MOD,
   type CounterMetadata,
-} from '@johnpatrickwarren-oss/deploysignal-engine/l0/counter-rate-transform';
+} from '../tools/l0/counter-rate-transform.js';
 import {
   makeWrap32Pair,
   makeMissedScrapePair,

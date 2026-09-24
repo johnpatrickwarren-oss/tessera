@@ -5,14 +5,14 @@
 // behavior change; pure relocation.
 
 // ── Engine imports (.js extension; matches R70/R71 convention) ──
-import { attributeCommonMode, type FiredShardEvent } from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
-import { DsEventConsumer } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-consumer';
-import { createFreezeHookFromDsEvents } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/freeze-hook-factory';
+import { attributeCommonMode, type FiredShardEvent } from './topology/common-mode-attribution.js';
+import { DsEventConsumer } from './ds-integration/event-consumer.js';
+import { createFreezeHookFromDsEvents } from './ds-integration/freeze-hook-factory.js';
 import { initialPerShardResidual } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/warm-start';
 import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 import { combineAverage, freshFleetEProcessState, updateFleetEProcessState } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/combine';
 import type { ExtendedSampleObservation } from '@johnpatrickwarren-oss/deploysignal-engine/per-shard/runtime';
-import type { DeployEventPayload } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-contract';
+import type { DeployEventPayload } from './ds-integration/event-contract.js';
 
 import {
   freshBettingState,

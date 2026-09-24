@@ -16,8 +16,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { HardwareTopologySource } from '@johnpatrickwarren-oss/deploysignal-engine/hardware-topology-source';
-import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+import { HardwareTopologySource } from '../tools/hardware-topology-source.js';
+import { computeSnapshotHash } from '../tools/topology-overlay.js';
 import { makeV9YMultiRackCluster } from './_substrate/v9Y-multi-rack-cluster';
 import type { TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 

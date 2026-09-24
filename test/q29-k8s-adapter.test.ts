@@ -11,8 +11,8 @@ import { execFileSync } from 'node:child_process';
 import {
   K8sNodeLabelSource,
   type K8sNodeList,
-} from '@johnpatrickwarren-oss/deploysignal-engine/topology/k8s-source';
-import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+} from '../tools/topology/k8s-source.js';
+import { computeSnapshotHash } from '../tools/topology-overlay.js';
 
 function loadFixture(name: string): K8sNodeList {
   return JSON.parse(readFileSync(resolve(__dirname, '_substrate', name), 'utf8')) as K8sNodeList;

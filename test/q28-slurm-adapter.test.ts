@@ -18,8 +18,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { SlurmTopologySource, parseSlurmTopologyConf, expandSlurmHostlist } from '@johnpatrickwarren-oss/deploysignal-engine/topology/slurm-source';
-import { computeSnapshotHash, type TopologySource, TopologyEnricher } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+import { SlurmTopologySource, parseSlurmTopologyConf, expandSlurmHostlist } from '../tools/topology/slurm-source.js';
+import { computeSnapshotHash, type TopologySource, TopologyEnricher } from '../tools/topology-overlay.js';
 import type { VerdictGroup, TopologyCandidateEvent } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 
 // Fixture-reading: relative-from-cwd path per established pattern at

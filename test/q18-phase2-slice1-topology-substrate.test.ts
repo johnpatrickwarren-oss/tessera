@@ -20,7 +20,7 @@ import type {
   VerdictGroup,
   FusedVerdict,
 } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
-import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+import { computeSnapshotHash } from '../tools/topology-overlay.js';
 import { makeV9XSingleRackCluster } from './_substrate/v9X-cluster';
 
 test('AC-R18-1: TopologyNode.kind union accepts "gpu_shard" and "rack" literals', () => {

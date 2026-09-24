@@ -4,7 +4,7 @@
 // and the terminal candidate mapping is delegated to mapTerminalCandidates() in core.
 
 import { attributeCommonMode, type FiredShardEvent, DEFAULT_MIN_MEMBER_COUNT }
-  from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+  from './topology/common-mode-attribution.js';
 import type { TopologySnapshot, TopologyNode, TopologyEdge }
   from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 

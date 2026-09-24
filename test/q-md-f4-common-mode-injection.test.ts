@@ -13,9 +13,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   attributeCommonMode,
-} from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
-import type { FiredShardEvent } from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
-import { computeSnapshotHash } from '@johnpatrickwarren-oss/deploysignal-engine/topology-overlay';
+} from '../tools/topology/common-mode-attribution.js';
+import type { FiredShardEvent } from '../tools/topology/common-mode-attribution.js';
+import { computeSnapshotHash } from '../tools/topology-overlay.js';
 import { makeV9YMultiRackCluster } from './_substrate/v9Y-multi-rack-cluster';
 import type { TopologySnapshot } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
 

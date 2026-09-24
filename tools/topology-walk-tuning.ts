@@ -23,7 +23,7 @@ import {
   attributeCommonMode,
   type FiredShardEvent,
   type CommonModeAttributionResult,
-} from '@johnpatrickwarren-oss/deploysignal-engine/topology/common-mode-attribution';
+} from './topology/common-mode-attribution.js';
 import type {
   TopologySnapshot, TopologyNode, TopologyEdge,
 } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';

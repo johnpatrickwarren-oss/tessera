@@ -8,7 +8,7 @@
 // ── Engine imports (.js extension; matches R70/R71 convention) ──
 import { freshBettingState, updateBettingState } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/betting-e-process';
 import type { TopologySnapshot, TopologyNode, TopologyEdge } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
-import type { DeployEventPayload } from '@johnpatrickwarren-oss/deploysignal-engine/ds-integration/event-contract';
+import type { DeployEventPayload } from './ds-integration/event-contract.js';
 
 // Re-export the betting-state surfaces the variation runners need so siblings
 // import them from one place (no behavior change; identical bindings).
