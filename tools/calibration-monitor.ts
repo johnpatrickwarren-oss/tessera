@@ -17,6 +17,12 @@ export {
   updateCalibrationBatch,
   calibrationVerdict,
   applyCalibrationMonitor,
+  // ADR 0033: the increment ESTIMATOR (the C26 instrument; engine ADR 0035's `incrementMean` assertion).
+  freshIncrementEstimator,
+  updateIncrementEstimator,
+  incrementEstimate,
+  type IncrementEstimatorState,
+  type IncrementEstimate,
   type CalibrationMonitorOptions,
   type CalibrationMonitorState,
   type CalibrationVerdict,
