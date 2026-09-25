@@ -28,7 +28,9 @@
 // baseline regime"; THIS gate asks "is this emitter even admitted to Mode B by its contract class +
 // live calibration monitor".
 
-import { eBenjaminiHochberg } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
+import { eBenjaminiHochberg, type EBenjaminiHochbergOutput } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
+import { eBenjaminiHochbergGuarded } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh-guarded';
+import type { FdrPathAssertions } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/validity-envelope';
 import {
   type EValue, type EvidenceClass, weakest, meetsEvidence, certificateChain, openPremises,
 } from './e-value.js';
@@ -106,6 +108,14 @@ export interface EmitterContract {
    *  checked here (the CORR 4 prose rule still binds the operator). Rack scope is exempt — its
    *  premise is N-free (measured clean at ς̂ 0.607, N 20160). */
   selectionDomainUnits?: number;
+  /** ADR 0032 — the engine construction this emitter's e-values ARE, keyed into the engine's guarded
+   *  e-BH (`DETECTOR_ENVELOPES`: `onset_mixture_gaussian`, `onset_mixture_bounded`, `contrast_null_*`,
+   *  …), with the regime assertion the caller stands behind (`mMuchGreaterThanN`: the baseline fit is
+   *  much longer than the monitoring horizon; `trueBaseline`: a known offset). When set,
+   *  `certifiedFdrBenjaminiHochberg` routes through `eBenjaminiHochbergGuarded`, which REFUSES BY NAME
+   *  outside the envelope; the assertion is then a greppable line in this repo. When absent, the
+   *  ungated path runs and the selection records `engineGate: 'not-declared'`. */
+  engineEnvelope?: { detectorId: string; assertions?: FdrPathAssertions; calLen?: number };
 }
 
 /** The fleet size at/above which N13 makes fleet-scoped conformal_rank e-BH unprotectable by any
@@ -233,6 +243,10 @@ export interface CertifiedSelection {
   /** ADR 0029 — per-input log-margin to `logThresholdE`, index-aligned with the inputs: ≥ 0 iff
    *  the input is in `selected` (ties at the boundary selected). Floored, never −Infinity. */
   readonly logMargins: readonly number[];
+  /** ADR 0032 — whether the engine's guarded e-BH admitted these inputs by envelope (`admitted`), or
+   *  the contract declared no engine envelope and the ungated path ran (`not-declared`). A refusal
+   *  never reaches here: the guard throws. */
+  readonly engineGate: 'admitted' | 'not-declared';
 }
 
 /**
@@ -268,10 +282,22 @@ export function certifiedFdrBenjaminiHochberg(
     else throw new Error(msg);
   }
 
-  const { selected, K, log_threshold_e, log_margin } = eBenjaminiHochberg(perShardEValues.map((e) => e.value), qLevel);
+  const { engineGate, out: { selected, K, log_threshold_e, log_margin } } = runFdr(perShardEValues.map((e) => e.value), qLevel, c);
   const certificateIds = [...new Set(perShardEValues.flatMap((e) => certificateChain(e).map((x) => x.id)))];
   const premises = [...new Set(perShardEValues.flatMap(openPremises))];
-  return { selected: [...selected], K, evidence: got, certificateIds, openPremises: premises, logThresholdE: log_threshold_e, logMargins: [...log_margin] };
+  return { selected: [...selected], K, evidence: got, certificateIds, openPremises: premises, logThresholdE: log_threshold_e, logMargins: [...log_margin], engineGate };
+}
+
+/** ADR 0032: the engine's guarded e-BH when the contract names its engine envelope (refuses by
+ *  name outside the regime), the ungated e-BH otherwise — recorded either way. */
+function runFdr(values: ReadonlyArray<number>, q: number, c: EmitterContract):
+  { engineGate: CertifiedSelection['engineGate']; out: EBenjaminiHochbergOutput } {
+  if (c.engineEnvelope) {
+    const { detectorId, assertions, calLen } = c.engineEnvelope;
+    return { engineGate: 'admitted', out: eBenjaminiHochbergGuarded(values.map((eValue) => ({ detectorId, eValue, assertions, calLen })), q) };
+  }
+  // anchor:allow certified-fdr-path: the ungated fallback for contracts with no engine envelope yet (ADR 0032 records which)
+  return { engineGate: 'not-declared', out: eBenjaminiHochberg(values, q) };
 }
 
 /** Partition a set of emitters by mode (the "exclude" path for continuous fleet observation): the

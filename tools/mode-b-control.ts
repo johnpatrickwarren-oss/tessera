@@ -156,6 +156,11 @@ export function controlContrastEmitter(calibrationMonitorPassing: boolean): Emit
     horizon: 'monitoring window',
     validityClass: 'construction_valid',
     calibrationMonitorPassing,
+    // ADR 0032: NO engineEnvelope, deliberately. This residual is PREFIX-standardised — the centre
+    // and scale come from the early part of the same window — so fit ≫ horizon cannot be asserted
+    // and the engine's onset_mixture_gaussian envelope would refuse it (the contrast-null study's
+    // finding, engine ADR 0032). The selection records engineGate 'not-declared'; the control
+    // study's FDR reading rests on ADR 0019's measurements, not on the engine's admission.
   };
 }
 

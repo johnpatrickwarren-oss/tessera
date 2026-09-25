@@ -135,9 +135,29 @@ import type {
   TopologyNode,
   TopologySnapshot,
   VerdictGroup,
-  VerdictGroupEnrichedWithTopologyAuditEvent,
   VerdictGroupWithTopology,
 } from '@johnpatrickwarren-oss/deploysignal-engine/types';
+
+// Returned with the overlay (engine v0.9.0-pre removed DeploySignal's audit-record schema from
+// `types/audit.ts`; this event is the overlay's own, Tessera-original R48 D4). Same shape as the
+// engine v0.8.0-pre declaration.
+import type { VerdictGroupId } from '@johnpatrickwarren-oss/deploysignal-engine/types/verdict';
+
+/** Audit-event payload emitted after a successful (or degraded) enrichment pass. Top-level audit
+ *  event per REPLY-48 D4 (strict-additive, parallel to REPLY-47 D4 pattern — VerdictGroup record
+ *  stays unchanged). `top_candidate` is projected from `VerdictGroupWithTopology.candidates[0]`
+ *  (highest-ranked per the overlap-desc / distance-asc / node-id-asc sort); `null` when the
+ *  candidate list is empty. */
+export interface VerdictGroupEnrichedWithTopologyAuditEvent {
+  type: 'verdict_group_enriched_with_topology';
+  group_id: VerdictGroupId;
+  topology_source_id: string;
+  topology_snapshot_hash: string | null;
+  n_candidates: number;
+  top_candidate: TopologyCandidate | null;
+  enriched_at_ts: number;
+  enrichment_error: string | null;
+}
 
 // ── TopologySource interface + concrete impls ──────────────────────
 

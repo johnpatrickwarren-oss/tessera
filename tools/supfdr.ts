@@ -40,10 +40,10 @@
 import { eBenjaminiHochberg, type EBenjaminiHochbergOutput } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
 
 /** The √E − 1 adjuster (clamped to 0 below E = 1). Maps a running-max e-process value to a valid
- *  all-times e-value. ∫_1^∞ A(e)/e² de = 1 exactly (see test/supfdr.test.ts). */
-export function supAdjuster(e: number): number {
-  return e > 1 ? Math.sqrt(e) - 1 : 0;
-}
+ *  all-times e-value; ∫_1^∞ A(e)/e² de = 1 exactly (test/supfdr.test.ts). Served by the engine since
+ *  v0.9.0-pre (engine ADR 0034, Tessera ADR 0032): the same three lines, imported and re-exported. */
+import { supAdjuster } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/onset-mixture-e-value';
+export { supAdjuster };
 
 /** Cumulative (running) maximum of a per-shard e-process series. S_t = max_{s≤t} E_s. */
 export function runningMax(eProcess: ReadonlyArray<number>): number[] {

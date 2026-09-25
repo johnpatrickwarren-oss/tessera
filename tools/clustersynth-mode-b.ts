@@ -87,6 +87,11 @@ export function clustersynthModeBEmitter(calibrationMonitorPassing: boolean): Em
     horizon: 'monitoring window',
     validityClass: 'construction_valid',
     calibrationMonitorPassing,
+    // ADR 0032: the normalized onset mixture with the Gaussian increment IS the engine's
+    // onset_mixture_gaussian construction; its plug-in centre/scale come from the ≥ 2-month healthy
+    // contrast (baselineVersion) against a monitoring window of hundreds of ticks — fit ≫ horizon,
+    // the regime the engine's envelope admits. Asserted here, where it can be read and disputed.
+    engineEnvelope: { detectorId: 'onset_mixture_gaussian', assertions: { mMuchGreaterThanN: true } },
   };
 }
 
