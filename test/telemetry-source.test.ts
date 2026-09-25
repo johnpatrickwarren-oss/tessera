@@ -25,7 +25,7 @@ const series = (len: number, rng: () => number, add = 0): number[] => Array.from
 /** A synthetic live feed: a long healthy baseline, a monitoring window where `faulted` shards carry a
  *  sustained mean shift in the treatment (so the contrast survives centering), and a healthy known-null
  *  cohort (the baseline replayed in per-cycle slices). */
-function syntheticFeed(baseLen: number, dt: number, monT: number, nCycles: number, faulted: Set<string>, shift: number): TelemetryFeed {
+function syntheticFeed(baseLen: number, dt: number, monT: number, nCycles: number, faulted: Set<string>, shift: number, lightTails = false): TelemetryFeed {
   const rng = mulberry32(42);
   const baseT = new Map<string, number[]>(), baseC = new Map<string, number[]>(), monTr = new Map<string, number[]>(), monC = new Map<string, number[]>();
   for (const s of SHARDS) {
@@ -43,9 +43,14 @@ function syntheticFeed(baseLen: number, dt: number, monT: number, nCycles: numbe
       return [{
         counter: COUNTER,
         detection: SHARDS.map((s) => ({ shard: s, treatment: monTr.get(s)!.slice(0, monEnd), control: monC.get(s)!.slice(0, monEnd) })),
-        cohort: SHARDS.map((s) => ({ treatment: baseT.get(s)!.slice(lo, hi), control: baseC.get(s)!.slice(lo, hi) })),
+        // ADR 0033: the cohort is each unit's own baseline replayed, so it names the unit and is
+        // standardised by the ≥ 2-month fit, not self-fit on the slice.
+        cohort: SHARDS.map((s) => ({ shard: s, treatment: baseT.get(s)!.slice(lo, hi), control: baseC.get(s)!.slice(lo, hi) })),
       }];
     },
+    // ADR 0033: the synthetic feed is N(0,1) by construction (`series` draws gaussian), the stated ground
+    // for the lightTails promise where a test asks for it; the default live contract promises nothing.
+    ...(lightTails ? { emitterFor: (counter: string) => liveModeBEmitter(counter, { lightTails: true }) } : {}),
   };
 }
 
@@ -89,8 +94,20 @@ test('liveCycles enforces the ≥2-month baseline guard (short window throws)', 
   );
 });
 
+test('ADR 0033: the default live contract on an hourly feed is REFUSED by the engine gate — the measured increment mean is inconclusive at this size and nothing is promised', async () => {
+  const feed = syntheticFeed(1400, 3600, 240, 4, new Set(['s0']), 8);
+  const sink = new RecordingSink();
+  const reports = await runModeBLoopLive(feed, new ModeBLoop({ q: 0.1, sink }), sink);
+  const e = reports.at(-1)!.emitters[0];
+  assert.equal(e.engineGate, 'refused');
+  assert.match(e.engineRefusal ?? '', /inconclusive/);
+  assert.ok(e.incrementMean && e.incrementMean.upper95 > 1.0005 && e.incrementMean.lower95 < 1.0005, `inconclusive interval, got ${JSON.stringify(e.incrementMean)}`);
+  assert.equal(e.mode, 'A');
+  assert.equal(sink.dispatched.length, 0, 'no action without the engine admission');
+});
+
 test('end-to-end live loop: the faulted shard is dispatched as an FDR-controlled action (Mode B)', async () => {
-  const feed = syntheticFeed(1400, 3600, 240, 4, new Set(['s0']), 8); // 1400×3600s ≈ 58.3 days ≥ 56
+  const feed = syntheticFeed(1400, 3600, 240, 4, new Set(['s0']), 8, /*lightTails*/ true); // 1400×3600s ≈ 58.3 days ≥ 56
   const sink = new RecordingSink();
   const loop = new ModeBLoop({ q: 0.1, sink });
   const reports = await runModeBLoopLive(feed, loop, sink);
@@ -107,7 +124,7 @@ test('runModeBLoopLive drains a buffered sink each cycle (effects flush in order
   const recording = new RecordingSink();
   const sink = new FanOutSink([recording, webhook]); // drainable (webhook child)
   const loop = new ModeBLoop({ q: 0.1, sink });
-  const feed = syntheticFeed(1400, 3600, 240, 4, new Set(['s0']), 8);
+  const feed = syntheticFeed(1400, 3600, 240, 4, new Set(['s0']), 8, /*lightTails*/ true);
   await runModeBLoopLive(feed, loop, sink);
   assert.equal(recording.dispatched.length, 1);
   assert.deepEqual(posts, ['dispatch'], 'the dispatch was POSTed to the control plane via drain');

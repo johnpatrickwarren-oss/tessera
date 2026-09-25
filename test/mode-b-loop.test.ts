@@ -141,3 +141,58 @@ test('two emitters route independently in the same cycle (parallel, per-emitter)
   assert.equal(sink.dispatched.length, 1);
   assert.equal(sink.dispatched[0].emitter, 'valid');
 });
+
+
+// ── ADR 0033 (engine ADR 0035): the engine gate's tail premise, measured by the loop ─────────────────
+
+function enveloped(id: string, lightTails = false): EmitterContract {
+  return { ...emitter(id), engineEnvelope: { detectorId: 'onset_mixture_gaussian', assertions: { mMuchGreaterThanN: true, ...(lightTails ? { lightTails: true } : {}) } } };
+}
+/** A t3 cohort (unit variance): the Gaussian increment's mean is 1.6 on it (engine h0-battery A6). */
+function heavyCohort(seed: number): number[][] {
+  const rng = mulberry32(seed);
+  const t3 = () => { const z = gaussian(rng); const chi = gaussian(rng) ** 2 + gaussian(rng) ** 2 + gaussian(rng) ** 2; return (z / Math.sqrt(chi / 3)) / Math.sqrt(3); };
+  return Array.from({ length: COHORT }, () => Array.from({ length: PER_CYCLE }, t3));
+}
+
+test('ADR 0033: a contract naming the envelope is REFUSED on a short Gaussian cohort without the promise — inconclusive, Mode A, no dispatch, reason on the report', () => {
+  const sink = new RecordingSink();
+  const loop = new ModeBLoop({ q: 0.1, sink });
+  const r = loop.step(0, [{ contract: enveloped('e'), shards: SHARDS, eValues: eValues([0]), calibrationSamples: cohort(1), whitenessPass: true }]);
+  const e = r.emitters[0];
+  assert.equal(e.engineGate, 'refused');
+  assert.match(e.engineRefusal ?? '', /inconclusive/);
+  assert.equal(e.incrementMean?.n, COHORT * PER_CYCLE);
+  assert.equal(e.constructionValid, true, 'the monitors pass — this is the ENGINE gate refusing, not the contract gate');
+  assert.equal(e.mode, 'A');
+  assert.equal(sink.dispatched.length, 0);
+});
+
+test('ADR 0033: with the promise the same cohort is admitted and dispatches; a heavy-tailed cohort then REFUTES the promise and the action is withdrawn as revoked', () => {
+  const sink = new RecordingSink();
+  const loop = new ModeBLoop({ q: 0.1, sink });
+  const r0 = loop.step(0, [{ contract: enveloped('e', true), shards: SHARDS, eValues: eValues([0]), calibrationSamples: cohort(1), whitenessPass: true }]);
+  assert.equal(r0.emitters[0].engineGate, 'admitted');
+  assert.equal(r0.emitters[0].mode, 'B');
+  assert.equal(sink.dispatched.length, 1);
+  // three cycles of t3 residuals: 1,200 more increments at E[g] = 1.6 pull the pooled lower bound above 1.0005
+  let last = r0;
+  for (let c = 1; c <= 3; c++) last = loop.step(c, [{ contract: enveloped('e', true), shards: SHARDS, eValues: eValues([0]), calibrationSamples: heavyCohort(100 + c), whitenessPass: true }]);
+  const e = last.emitters[0];
+  assert.equal(e.engineGate, 'refused', `expected the measurement to refute; interval ${JSON.stringify(e.incrementMean)}`);
+  assert.match(e.engineRefusal ?? '', /REFUTES.*no promise overrides/s);
+  assert.equal(e.mode, 'A');
+  assert.equal(sink.withdrawn.length, 1);
+  assert.equal(sink.withdrawn[0].reason, 'revoked');
+  // rearm drops the estimator with the monitors: a fresh Gaussian cohort is inconclusive again, not refuted
+  loop.rearm('e');
+  const r5 = loop.step(5, [{ contract: enveloped('e', true), shards: SHARDS, eValues: eValues([0]), calibrationSamples: cohort(9), whitenessPass: true }]);
+  assert.equal(r5.emitters[0].engineGate, 'admitted');
+});
+
+test('ADR 0033: a contract naming no envelope is not-declared and unchanged', () => {
+  const loop = new ModeBLoop({ q: 0.1, sink: new RecordingSink() });
+  const r = loop.step(0, [cyc('e', eValues([0]), cohort(1), true)]);
+  assert.equal(r.emitters[0].engineGate, 'not-declared');
+  assert.equal(r.emitters[0].mode, 'B');
+});

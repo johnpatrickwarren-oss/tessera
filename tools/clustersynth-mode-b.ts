@@ -39,8 +39,9 @@ import { normalizedMixtureEValue } from './mixture-evalue.js';
 // monitoring mean-shift-only faults under distribution doubt can pass 'bounded' explicitly.
 const MODE_B_INCREMENT: import('./mixture-evalue.js').IncrementKind = 'gaussian';
 const normalizedMixtureEValue_H = (r: number[]): number => normalizedMixtureEValue(r, MODE_B_INCREMENT);
-import { freshCalibrationMonitor, updateCalibrationBatch } from './calibration-monitor.js';
-import { certifiedFdrBenjaminiHochberg, modeOf, ineligibilityReason, type EmitterContract } from './emitter-contract.js';
+import { freshCalibrationMonitor, updateCalibrationBatch, freshIncrementEstimator, updateIncrementEstimator, incrementEstimate, type IncrementEstimatorState } from './calibration-monitor.js';
+import { gInc } from './mixture-evalue.js';
+import { certifiedFdrBenjaminiHochberg, ineligibilityReason, engineAdmission, modeUnderGate, gateFields, type EmitterContract } from './emitter-contract.js';
 import { eFromNormalizedMixture, eMin, type EValue } from './e-value.js';
 import { fitContrast, fitContrastFast, applyContrast, composeFit, type ContrastFit } from './contrast.js';
 import { autocorr } from './conditional-markov.js';
@@ -76,8 +77,9 @@ const ser = (b: ScenarioBundle, shard: string, counter: string): number[] | unde
 
 /** The emitter contract for the clustersynth concurrent-control contrast (construction_valid, gated by
  *  the live calibration monitor + whiteness verdict). */
-export function clustersynthModeBEmitter(calibrationMonitorPassing: boolean): EmitterContract {
+export function clustersynthModeBEmitter(calibrationMonitorPassing: boolean, incrementMean?: { lower95: number; upper95: number; n: number }): EmitterContract {
   return {
+    ...(incrementMean ? { incrementMean } : {}),
     id: 'clustersynth-mode-b/control-contrast',
     baselineVersion: '≥2-month healthy contrast (treatment − concurrent control)',
     conditioningVariables: ['concurrent control twin (shares factor instances + loadings)'],
@@ -91,8 +93,41 @@ export function clustersynthModeBEmitter(calibrationMonitorPassing: boolean): Em
     // onset_mixture_gaussian construction; its plug-in centre/scale come from the ≥ 2-month healthy
     // contrast (baselineVersion) against a monitoring window of hundreds of ticks — fit ≫ horizon,
     // the regime the engine's envelope admits. Asserted here, where it can be read and disputed.
-    engineEnvelope: { detectorId: 'onset_mixture_gaussian', assertions: { mMuchGreaterThanN: true } },
+    // ADR 0033 (engine ADR 0035): the envelope also carries the 'mgf' tail premise. The measurement
+    // (`incrementMean`, pooled over the healthy calibration feed) is inconclusive at hourly cadence — the
+    // capped Gaussian increment's half-width at ~10⁵ increments is ~0.01 against a bound 0.0028 above its
+    // N(0,1) mean — so the contract PROMISES `lightTails` on a stated ground: clustersynth's generator
+    // draws Gaussian innovations (tools/clustersynth-telemetry.ts:140-157, `gaussian(rng)` for the
+    // common mode, the level and the per-shard AR(1) noise). A scenario with heavy-tailed innovations
+    // must not reuse this contract; a REFUTING measurement overrides the promise at the gate regardless.
+    engineEnvelope: { detectorId: 'onset_mixture_gaussian', assertions: { mMuchGreaterThanN: true, lightTails: true } },
   };
+}
+
+/** ADR 0033 — the pooled increment estimator over standardized believed-null feeds, same family as the
+ *  emitter (MODE_B_INCREMENT = 'gaussian' → gInc). A mergeable Welford state (the streaming path pools
+ *  per-pair states in the reducer). */
+export function incrementStateOf(standardized: ReadonlyArray<ReadonlyArray<number>>): IncrementEstimatorState {
+  const est = freshIncrementEstimator();
+  for (const s of standardized) for (const r of s) updateIncrementEstimator(est, Math.log(gInc(r)));
+  return est;
+}
+/** Chan–Golub–LeVeque pooling of two Welford states. */
+export function mergeIncrementStates(a: IncrementEstimatorState, b: IncrementEstimatorState): IncrementEstimatorState {
+  if (a.n === 0) return { ...b }; if (b.n === 0) return { ...a };
+  const n = a.n + b.n; const delta = b.mean - a.mean;
+  return { n, mean: a.mean + delta * b.n / n, m2: a.m2 + b.m2 + delta * delta * a.n * b.n / n, max: Math.max(a.max, b.max) };
+}
+/** ADR 0033 — the streaming reducer's pooled state over the per-pair records that carry one. */
+function pooledIncrementMean(recs: ReadonlyArray<{ inc?: IncrementEstimatorState }>): { lower95: number; upper95: number; n: number } | undefined {
+  let acc = freshIncrementEstimator();
+  for (const r of recs) if (r.inc) acc = mergeIncrementStates(acc, r.inc);
+  return incrementMeanOf(acc);
+}
+export function incrementMeanOf(est: IncrementEstimatorState): { lower95: number; upper95: number; n: number } | undefined {
+  if (est.n < 2) return undefined;
+  const e = incrementEstimate(est);
+  return Number.isFinite(e.lower95) && Number.isFinite(e.upper95) ? { lower95: e.lower95, upper95: e.upper95, n: e.n } : undefined;
 }
 
 /** The ANOMALOUS treatment shards for a counter — the FDR positive set for the per-shard spatial null.
@@ -144,6 +179,11 @@ export interface ModeBCounterResult {
   monitorPassing: boolean; whiteFrac: number;
   /** controls flagged contaminated this counter via the c1−c2 sibling null (ADR 0022 triad; 0 if no triad). */
   flaggedControls: number;
+  /** ADR 0033 — the engine gate's verdict on the contract (a refusal is Mode A with the engine's reason) and
+   *  the pooled increment mean on the calibration feed it was given. */
+  engineGate: 'admitted' | 'refused' | 'not-declared';
+  engineRefusal?: string;
+  incrementMean?: { lower95: number; upper95: number; n: number };
 }
 
 /** Wall-A whiteness threshold: an EFFECT-SIZE gate (|ρ₁| ≤ 0.1 — the level at which serial dependence
@@ -306,8 +346,10 @@ export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, 
   const { fits, calStd, fullHorizonFeed } = cadenceAwareFit(healthy, mon, usable, counter);
   const whiteFrac = whiteFraction(calStd);
   const monitorPassing = calibrationPassFraction(calStd, 0.01, fullHorizonFeed) >= 0.8 && whiteFrac >= 0.5;
-  const emitter = clustersynthModeBEmitter(monitorPassing);
-  const mode = modeOf(emitter);
+  const incrementMean = incrementMeanOf(incrementStateOf(calStd)); // ADR 0033: same feed the monitor read
+  const emitter = clustersynthModeBEmitter(monitorPassing, incrementMean);
+  const admission = engineAdmission(emitter);
+  const mode = modeUnderGate(emitter, admission);
 
   // Detection: the spatial-null e-value per pair on the monitoring contrast; #1 gates e-BH on Mode B.
   const e = usable.map((p, i) => normalizedMixtureEValue_H(applyContrast(sub(ser(mon, p.treatment, counter)!, ser(mon, p.control, counter)!), fits[i])));
@@ -327,7 +369,7 @@ export function scoreCounterModeB(healthy: ScenarioBundle, mon: ScenarioBundle, 
     counter, nFault, mode,
     selected: sel.length, falsePos: fp, fdp: sel.length ? fp / sel.length : 0, power: nFault ? tp / nFault : NaN,
     temporalSelected: t.K, temporalFdp: t.K ? t.fp / t.K : 0, temporalPower: nFault ? t.tp / nFault : NaN,
-    monitorPassing, whiteFrac, flaggedControls,
+    monitorPassing, whiteFrac, flaggedControls, ...gateFields(admission, incrementMean),
   };
 }
 
@@ -398,7 +440,9 @@ interface CmbWorkerInput { __cmb_worker: true; monDir: string; byteStart: number
  *  control), eC2 = the t−c2 second-sibling detection e-value. reduceCmbCounter applies the MIN RULE
  *  e = min(e_{t−c1}, e_{t−c2}) (2026-07-02 audit correction — see applyTriadRouting's header for why the
  *  old flag-then-substitute routing was invalid). Absent ⇒ no triad ⇒ the bare t−c1 contrast as before. */
-interface CmbRecord { c: string; s: string; e: number; tE: number; calibPass: boolean; white: boolean; flagE?: number; eC2?: number }
+interface CmbRecord { c: string; s: string; e: number; tE: number; calibPass: boolean; white: boolean; flagE?: number; eC2?: number;
+  /** ADR 0033 — this pair's increment-estimator state over the same calibration feed `calibPass` read. */
+  inc?: IncrementEstimatorState }
 
 /** Yield [line, startOffset] for complete lines from byteStart to EOF (skipping a partial leading line that
  *  STRADDLES byteStart). Does NOT stop at any byteEnd — the pair state machine decides ownership/stopping.
@@ -519,6 +563,7 @@ function runCmbWorker(input: CmbWorkerInput): CmbRecord[] {
         e: normalizedMixtureEValue_H(applyContrast(d, composeFit({ ...dynFit, center: cTC1 }, dynFit))),
         tE: normalizedMixtureEValue_H(applyContrast(t.v, tFit)),
         calibPass: fullCalibrationPass(sibStd), // in-sample sibling feed → detection-length monitor (no cap)
+        inc: incrementStateOf([sibStd]),
         white: Math.abs(autocorr(sibStd, 1)) <= whitenessThresh(sibStd.length),
         flagE: prefixContrastE(c.v, c2.v), // flag stays prefix-fit (reporting-only; its own contrast IS the sibling)
         eC2: normalizedMixtureEValue_H(applyContrast(t.v.map((x, i) => x - c2.v[i]), composeFit({ ...dynFit, center: cTC2 }, dynFit))),
@@ -532,6 +577,7 @@ function runCmbWorker(input: CmbWorkerInput): CmbRecord[] {
         e: normalizedMixtureEValue_H(std),
         tE: normalizedMixtureEValue_H(applyContrast(t.v, tFit)),
         calibPass: prefixCalibrationPass(prefixStd),
+        inc: incrementStateOf([prefixStd.length > CALIB_FEED_CAP ? prefixStd.slice(0, CALIB_FEED_CAP) : prefixStd]),
         white: Math.abs(autocorr(prefixStd, 1)) <= whitenessThresh(prefixStd.length),
       };
       if (c2) { // triad without baseline centers (caller didn't supply) → legacy prefix fits
@@ -552,8 +598,10 @@ function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyAr
   const nFault = isFault.filter(Boolean).length;
   const whiteFrac = recs.filter((r) => r.white).length / recs.length;
   const monitorPassing = recs.filter((r) => r.calibPass).length / recs.length >= 0.8 && whiteFrac >= 0.5;
-  const emitter = clustersynthModeBEmitter(monitorPassing);
-  const mode = modeOf(emitter);
+  const incrementMean = pooledIncrementMean(recs); // ADR 0033
+  const emitter = clustersynthModeBEmitter(monitorPassing, incrementMean);
+  const admission = engineAdmission(emitter);
+  const mode = modeUnderGate(emitter, admission);
 
   // ADR 0022 control triad — MIN RULE (2026-07-02 audit correction; see applyTriadRouting's header):
   // when every pair carries a second twin (#ctrl2), the detection e-value is min(e_{t−c1}, e_{t−c2}) —
@@ -581,7 +629,7 @@ function reduceCmbCounter(counter: string, recs: CmbRecord[], faults: ReadonlyAr
     counter, nFault, mode,
     selected: sel.length, falsePos: fp, fdp: sel.length ? fp / sel.length : 0, power: nFault ? tp / nFault : NaN,
     temporalSelected: tSel.length, temporalFdp: tSel.length ? tFp / tSel.length : 0, temporalPower: nFault ? tTp / nFault : NaN,
-    monitorPassing, whiteFrac, flaggedControls,
+    monitorPassing, whiteFrac, flaggedControls, ...gateFields(admission, incrementMean),
   };
 }
 

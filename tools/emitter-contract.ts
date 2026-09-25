@@ -29,8 +29,8 @@
 // live calibration monitor".
 
 import { eBenjaminiHochberg, type EBenjaminiHochbergOutput } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh';
-import { eBenjaminiHochbergGuarded } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh-guarded';
-import type { FdrPathAssertions } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/validity-envelope';
+import { eBenjaminiHochbergGuarded, envelopeFor } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-bh-guarded';
+import { assertValidForFdrPath, type FdrPathAssertions } from '@johnpatrickwarren-oss/deploysignal-engine/detectors/validity-envelope';
 import {
   type EValue, type EvidenceClass, weakest, meetsEvidence, certificateChain, openPremises,
 } from './e-value.js';
@@ -116,6 +116,45 @@ export interface EmitterContract {
    *  outside the envelope; the assertion is then a greppable line in this repo. When absent, the
    *  ungated path runs and the selection records `engineGate: 'not-declared'`. */
   engineEnvelope?: { detectorId: string; assertions?: FdrPathAssertions; calLen?: number };
+  /** ADR 0033 (engine ADR 0035) — the MEASURED per-tick increment mean of this emitter's increment family
+   *  on its believed-null feed, from the engine's increment estimator (the C26 instrument), set at runtime
+   *  like `calibrationMonitorPassing` (the loop pools it over the cohort across cycles; the clustersynth
+   *  study pools it over the healthy calibration feed). Passed to the engine gate as the `incrementMean`
+   *  assertion: a lower bound above the card bound 1.0005 REFUTES the envelope's tail premise and refuses
+   *  regardless of any promise; an upper bound below it CLEARS it; anything else is inconclusive and the
+   *  gate falls back to the promise in `engineEnvelope.assertions` (`lightTails` / `clipMeanZero`), or
+   *  refuses. The calibration monitor's `passing` is NOT this: ∏g drifts at E[log g] and the monitor
+   *  revoked 1.25% of t₃ feeds at oracle scale while the estimator read 1.6 (engine ADR 0035). */
+  incrementMean?: { lower95: number; upper95: number; n: number };
+}
+
+/** ADR 0033 — the assertions the engine gate sees for this contract: the static ones on `engineEnvelope`
+ *  plus the runtime `incrementMean` measurement when the contract carries one. */
+export function engineAssertions(c: EmitterContract): FdrPathAssertions | undefined {
+  if (!c.engineEnvelope) return undefined;
+  const a = c.engineEnvelope.assertions ?? {};
+  return c.incrementMean ? { ...a, incrementMean: { lower95: c.incrementMean.lower95, upper95: c.incrementMean.upper95 } } : a;
+}
+
+/** ADR 0033 — would the engine's guard admit this contract right now? `not-declared` when it names no
+ *  envelope; `refused` with the engine's own reason when it does and the guard would throw. The loop and
+ *  the clustersynth study treat a refusal as a demotion to Mode A (the emitter is not FDR-bearing this
+ *  cycle), the same operational semantics as a failing calibration monitor; `certifiedFdrBenjaminiHochberg`
+ *  keeps the ADR 0032 semantics and throws. */
+export type EngineAdmission = { gate: 'admitted' | 'refused' | 'not-declared'; reason?: string };
+/** ADR 0033 — the mode under the engine gate: a refusal is Mode A, else the contract's own mode. */
+export function modeUnderGate(c: EmitterContract, a: EngineAdmission): Mode { return a.gate === 'refused' ? 'A' : modeOf(c); }
+/** ADR 0033 — the report/result fields the gate verdict and the measurement contribute (undefined keys omitted). */
+export function gateFields(a: EngineAdmission, incrementMean?: { lower95: number; upper95: number; n: number }):
+  { engineGate: EngineAdmission['gate']; engineRefusal?: string; incrementMean?: { lower95: number; upper95: number; n: number } } {
+  return { engineGate: a.gate, ...(a.reason ? { engineRefusal: a.reason } : {}), ...(incrementMean ? { incrementMean } : {}) };
+}
+export function engineAdmission(c: EmitterContract): EngineAdmission {
+  if (!c.engineEnvelope) return { gate: 'not-declared' };
+  const env = envelopeFor(c.engineEnvelope.detectorId);
+  if (!env) return { gate: 'refused', reason: `no validity envelope for detector "${c.engineEnvelope.detectorId}"` };
+  try { assertValidForFdrPath(env, engineAssertions(c) ?? {}); return { gate: 'admitted' }; }
+  catch (e) { return { gate: 'refused', reason: (e as Error).message }; }
 }
 
 /** The fleet size at/above which N13 makes fleet-scoped conformal_rank e-BH unprotectable by any
@@ -293,7 +332,8 @@ export function certifiedFdrBenjaminiHochberg(
 function runFdr(values: ReadonlyArray<number>, q: number, c: EmitterContract):
   { engineGate: CertifiedSelection['engineGate']; out: EBenjaminiHochbergOutput } {
   if (c.engineEnvelope) {
-    const { detectorId, assertions, calLen } = c.engineEnvelope;
+    const { detectorId, calLen } = c.engineEnvelope;
+    const assertions = engineAssertions(c); // ADR 0033: the runtime incrementMean rides with the static assertions
     return { engineGate: 'admitted', out: eBenjaminiHochbergGuarded(values.map((eValue) => ({ detectorId, eValue, assertions, calLen })), q) };
   }
   // anchor:allow certified-fdr-path: the ungated fallback for contracts with no engine envelope yet (ADR 0032 records which)

@@ -72,18 +72,32 @@ test('Mode B (spatial null) controls FDR with recall on every faulted counter; b
   const healthy = loadScenarioBundle(BASE);
   const mon = loadScenarioBundle(MON);
   const pairs = loadControlPairs(MON);
-  let selOk = 0, fpOk = 0, tpOk = 0, fT = 0, tTpOk = 0, scored = 0;
+  let selOk = 0, fpOk = 0, tpOk = 0, fT = 0, tTpOk = 0, scored = 0, refused = 0;
   for (const c of mon.counters.map((x) => x.name)) {
     const r = scoreCounterModeB(healthy, mon, pairs, c, 0.1);
     if (!r || r.nFault === 0) continue;
+    // ADR 0033: this fixture's healthy window is 150 ticks (plumbing-only, CS_ALLOW_SHORT). The engine's
+    // increment-mean measurement reads the 150-tick plug-in fit as E[g] ≈ 1.03 on the calibration feed and
+    // REFUTES the tail premise where the interval clears the bound — those counters are Mode A with the
+    // engine's reason, and the lightTails promise does not save them. At the registered ≥ 2-month fit the
+    // same measurement is indistinguishable from oracle (tools/telemetry-source.ts RawPair.shard).
+    if (r.engineGate === 'refused') {
+      refused++;
+      assert.equal(r.mode, 'A', `${c}: an engine refusal is Mode A`);
+      assert.match(r.engineRefusal ?? '', /REFUTES/, `${c}: the refusal is the measurement, not a missing promise`);
+      assert.ok(r.incrementMean && r.incrementMean.lower95 > 1.0005, `${c}: ${JSON.stringify(r.incrementMean)}`);
+      assert.equal(r.selected, 0);
+      continue;
+    }
     scored++;
+    assert.equal(r.engineGate, 'admitted');
     assert.equal(r.mode, 'B', `${c} construction should be valid (Mode B)`);
     assert.ok(r.fdp <= 0.1 + 1e-9, `${c} spatial FDP ${r.fdp} should be ≤ q`);
     assert.ok(r.power >= 0.8, `${c} spatial power ${r.power} should be high`);
     selOk += r.selected; fpOk += r.falsePos; tpOk += r.selected - r.falsePos; fT += r.nFault;
     tTpOk += Math.round((Number.isNaN(r.temporalPower) ? 0 : r.temporalPower) * r.nFault);
   }
-  assert.ok(scored >= 4, 'most counters carry faults to score');
+  assert.ok(scored >= 2 && refused >= 1 && scored + refused >= 4, `admitted ${scored}, refused ${refused} — the short fixture is refused where measured and scored where admitted`);
   // aggregate: FDR controlled with strong recall, and the contrast strictly beats the naive temporal null.
   assert.equal(fpOk, 0, `aggregate false positives ${fpOk} should be 0 at this scale`);
   assert.ok(tpOk / fT >= 0.8, `aggregate recall ${(tpOk / fT).toFixed(2)} should be high`);

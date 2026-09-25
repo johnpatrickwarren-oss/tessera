@@ -37,7 +37,16 @@ import type { ActionSink } from './mode-b-loop.js';
 
 /** A treatment series paired with its concurrent-control twin (same length). The model-free contrast
  *  treatment − control is the spatial null: shared common-mode cancels, an idiosyncratic fault survives. */
-export interface RawPair { treatment: number[]; control: number[] }
+export interface RawPair {
+  treatment: number[]; control: number[];
+  /** ADR 0033 — the baseline unit whose ≥ 2-month fit standardises this pair when it is that unit's
+   *  known-null stream (the reference feed and any deployment replaying its own baseline). Absent ⇒ the
+   *  cohort pair is SELF-fit on its own slice, and the engine's increment-mean measurement reads the
+   *  slice's plug-in error as E[g] > 1: 1.51 at 25 ticks, 1.03 at 150, 1.006 at 350, indistinguishable
+   *  from oracle at 1,440 (Gaussian AR(1) contrasts, 200 replications). A long-running loop on
+   *  self-fit slices refutes its own premise at any finite slice length. */
+  shard?: string;
+}
 /** A detection unit: a treatment shard's pair, identified for the FDR discovery set. */
 export interface RawDetectionUnit extends RawPair { shard: string }
 
@@ -70,7 +79,7 @@ const contrast = (p: RawPair): number[] => p.treatment.map((x, i) => x - p.contr
 
 /** The generic Mode-B emitter contract for a live concurrent-control counter: construction_valid, gated at
  *  runtime by the loop's calibration monitor + the whiteness verdict carried on each cycle (ADR 0019). */
-export function liveModeBEmitter(counter: string): EmitterContract {
+export function liveModeBEmitter(counter: string, opts: { lightTails?: boolean } = {}): EmitterContract {
   return {
     id: `live-mode-b/${counter}`,
     baselineVersion: '≥2-month healthy contrast (treatment − concurrent control)',
@@ -82,9 +91,23 @@ export function liveModeBEmitter(counter: string): EmitterContract {
     validityClass: 'construction_valid',
     // ADR 0032: normalized (and, in the loop, geometric) onset mixture, Gaussian increment, on a
     // residual standardised by the ≥ 2-month healthy contrast against a live window — fit ≫ horizon.
-    engineEnvelope: { detectorId: 'onset_mixture_gaussian', assertions: { mMuchGreaterThanN: true } },
+    // ADR 0033 (engine ADR 0035): the envelope also carries the 'mgf' tail premise, and a live feed
+    // makes NO promise by default — the loop MEASURES the increment mean on the known-null cohort and
+    // passes it as `incrementMean`. At 1 Hz a ≥ 2-month cohort is millions of increments and the
+    // interval decides; at hourly cadence it is ~1,400 per unit, the interval is inconclusive, and the
+    // gate REFUSES: the emitter runs Mode A with the reason on the report until a deployment states
+    // the ground for `lightTails` here (opts) or the feed is long enough to clear.
+    engineEnvelope: { detectorId: 'onset_mixture_gaussian', assertions: { mMuchGreaterThanN: true, ...(opts.lightTails ? { lightTails: true } : {}) } },
     // calibrationMonitorPassing is set by the loop from the accumulated per-shard monitors + whiteness.
   };
+}
+
+/** ADR 0033 — a cohort pair's standardized residual: by its unit's baseline fit when it names one and the
+ *  fit exists, else self-fit on the slice (and the loop's increment estimator prices that). */
+function cohortResidual(c: RawPair, fits: Map<string, ContrastFit> | undefined): number[] {
+  const d = contrast(c);
+  const baseline = c.shard === undefined ? undefined : fits?.get(c.shard);
+  return applyContrast(d, baseline ?? fitContrast(d));
 }
 
 /** Turn one raw window into the loop's EmitterCycle, using the per-shard baseline fits where available
@@ -107,7 +130,9 @@ export function windowToEmitter(w: RawCounterWindow, fits: Map<string, ContrastF
     eValues.push(normalizedMixtureEValue(r));
     csInputs.push(baselineFit ? { S_t: r.reduce((s, x) => s + x, 0), t: r.length } : null);
   }
-  const calibrationSamples = w.cohort.map((c) => { const d = contrast(c); return applyContrast(d, fitContrast(d)); });
+  // ADR 0033: standardise the cohort by the baseline fit where the pair names its unit (fit ≫ slice), else
+  // self-fit — and then the increment estimator in the loop measures the self-fit's price honestly.
+  const calibrationSamples = w.cohort.map((c) => cohortResidual(c, fits));
   const whitenessPass = calibrationSamples.length
     ? calibrationSamples.filter((r) => Math.abs(autocorr(r, 1)) <= 0.1).length / calibrationSamples.length >= 0.5
     : false;
@@ -179,10 +204,15 @@ export function bundleFeed(healthyDir: string, monDir: string, nCycles: number):
         return {
           counter: c,
           detection: ps.map((p) => ({ shard: p.treatment, treatment: ser(mon, p.treatment, c)!.slice(0, monEnd), control: ser(mon, p.control, c)!.slice(0, monEnd) })),
-          cohort: ps.map((p) => ({ treatment: ser(healthy, p.treatment, c)!.slice(calLo, calHi), control: ser(healthy, p.control, c)!.slice(calLo, calHi) })),
+          cohort: ps.map((p) => ({ shard: p.treatment, treatment: ser(healthy, p.treatment, c)!.slice(calLo, calHi), control: ser(healthy, p.control, c)!.slice(calLo, calHi) })),
         };
       }).filter((w) => w.detection.length);
     },
+    // ADR 0033: this reference feed replays clustersynth bundles, whose generator draws Gaussian innovations
+    // (tools/clustersynth-telemetry.ts:140-157) — the stated ground for the lightTails promise, the same
+    // one clustersynthModeBEmitter makes. A real deployment writes its own feed and states its own ground,
+    // or lets the measurement decide.
+    emitterFor: (counter: string) => liveModeBEmitter(counter, { lightTails: true }),
   };
 }
 

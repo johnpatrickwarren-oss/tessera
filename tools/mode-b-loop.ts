@@ -25,8 +25,9 @@
 // act" / "stand down". The per-shard contrast e-values + calibration samples are computed by the caller
 // (e.g. tools/clustersynth-mode-b.ts); the loop orchestrates. Tessera-original.
 
-import { certifiedFdrBenjaminiHochberg, modeOf, type EmitterContract, type Mode } from './emitter-contract.js';
-import { freshCalibrationMonitor, updateCalibrationBatch, type CalibrationMonitorState } from './calibration-monitor.js';
+import { certifiedFdrBenjaminiHochberg, engineAdmission, modeUnderGate, gateFields, type EmitterContract, type Mode } from './emitter-contract.js';
+import { freshCalibrationMonitor, updateCalibrationBatch, freshIncrementEstimator, updateIncrementEstimator, incrementEstimate, type CalibrationMonitorState, type IncrementEstimatorState } from './calibration-monitor.js';
+import { gInc } from './mixture-evalue.js';
 import { eBenjaminiYekutieli } from '@johnpatrickwarren-oss/deploysignal-engine/fleet/e-by';
 
 /** ADR 0029 — the mixing variance ρ of the per-window confidence sequence read from `csInputs`, on the
@@ -123,6 +124,12 @@ export interface EmitterCycle {
 export interface EmitterReport {
   emitter: string; mode: Mode; modeChanged: boolean; constructionValid: boolean;
   calibFrac: number; whitenessPass: boolean;
+  /** ADR 0033 — the engine gate's verdict on this cycle's contract: `refused` demotes the emitter to Mode A
+   *  with the engine's reason; `not-declared` when the contract names no envelope. */
+  engineGate: 'admitted' | 'refused' | 'not-declared';
+  engineRefusal?: string;
+  /** ADR 0033 — the pooled increment mean over the cohort so far (the C26 instrument), when measured. */
+  incrementMean?: { lower95: number; upper95: number; n: number };
   selected: number; dispatched: number; withdrawn: number; standing: number;
   /** ADR 0029 — the cycle's realized e-BH threshold (log domain) when the emitter ran e-BH (Mode B). */
   logThresholdE?: number;
@@ -152,6 +159,7 @@ export class ModeBLoop {
   private readonly fcrDelta: number;
   private readonly feedback?: FeedbackSource;
   private readonly monitors = new Map<string, CalibrationMonitorState[]>(); // emitter → per-shard monitors
+  private readonly estimators = new Map<string, IncrementEstimatorState>();  // emitter → pooled increment estimator (ADR 0033)
   private readonly standing = new Map<string, Map<string, FleetAction>>();   // emitter → shard → action
   private readonly lastMode = new Map<string, Mode>();
 
@@ -167,7 +175,7 @@ export class ModeBLoop {
   /** Re-establish a revoked emitter's construction (e.g. after a re-baseline): drop its accumulated
    *  monitors so a FRESH anytime-valid test starts next cycle. Standing actions (there should be none
    *  while revoked) are untouched. */
-  rearm(emitterId: string): void { this.monitors.delete(emitterId); }
+  rearm(emitterId: string): void { this.monitors.delete(emitterId); this.estimators.delete(emitterId); }
 
   step(cycle: number, emitters: EmitterCycle[]): CycleReport {
     const feedback = this.takeFeedback();
@@ -192,15 +200,33 @@ export class ModeBLoop {
     // 'gaussian' default — the monitors must test that family.
     if (!mons || mons.length !== samples.length) { mons = samples.map(() => freshCalibrationMonitor({ alpha: this.alpha, incrementKind: 'gaussian' })); this.monitors.set(id, mons); }
     samples.forEach((s, i) => updateCalibrationBatch(mons![i], s));
+    // ADR 0033: the pooled increment estimator on the same believed-null residuals, same family ('gaussian',
+    // gInc). Pooling is right here — it is a mean, not a martingale — and the engine gate reads it.
+    let est = this.estimators.get(id);
+    if (!est) { est = freshIncrementEstimator(); this.estimators.set(id, est); }
+    for (const s of samples) for (const r of s) updateIncrementEstimator(est, Math.log(gInc(r)));
     return mons.length ? mons.filter((m) => m.passing).length / mons.length : 1;
+  }
+
+  /** ADR 0033 — the pooled increment mean for the gate, once at least two increments are in. */
+  private incrementMeanOf(id: string): { lower95: number; upper95: number; n: number } | undefined {
+    const est = this.estimators.get(id);
+    if (!est || est.n < 2) return undefined;
+    const e = incrementEstimate(est);
+    return Number.isFinite(e.lower95) && Number.isFinite(e.upper95) ? { lower95: e.lower95, upper95: e.upper95, n: e.n } : undefined;
   }
 
   private stepEmitter(cycle: number, ec: EmitterCycle): EmitterReport {
     const id = ec.contract.id;
     const calibFrac = this.updateMonitors(id, ec.calibrationSamples);
     const constructionValid = calibFrac >= this.calibThresh && ec.whitenessPass;
-    const contract: EmitterContract = { ...ec.contract, calibrationMonitorPassing: constructionValid };
-    const mode = modeOf(contract);
+    const incrementMean = this.incrementMeanOf(id);
+    const contract: EmitterContract = { ...ec.contract, calibrationMonitorPassing: constructionValid, ...(incrementMean ? { incrementMean } : {}) };
+    // ADR 0033: an engine refusal (the envelope's premise not asserted, or REFUTED by the measurement) is a
+    // demotion, exactly as a failing monitor is — the emitter is not FDR-bearing this cycle and its
+    // standing actions are withdrawn as 'revoked'. The reason rides on the report.
+    const admission = engineAdmission(contract);
+    const mode: Mode = modeUnderGate(contract, admission);
     const prev = this.lastMode.get(id) ?? 'A';
     this.lastMode.set(id, mode);
 
@@ -216,7 +242,7 @@ export class ModeBLoop {
     }
 
     const { dispatched, withdrawn, standing } = this.reconcile(id, cycle, discovered, prev === 'B' && mode === 'A', extras);
-    return { emitter: id, mode, modeChanged: mode !== prev, constructionValid, calibFrac, whitenessPass: ec.whitenessPass, selected: discovered.size, dispatched, withdrawn, standing, ...(logThresholdE !== undefined ? { logThresholdE } : {}) };
+    return { emitter: id, mode, modeChanged: mode !== prev, constructionValid, calibFrac, whitenessPass: ec.whitenessPass, ...gateFields(admission, incrementMean), selected: discovered.size, dispatched, withdrawn, standing, ...(logThresholdE !== undefined ? { logThresholdE } : {}) };
   }
 
   /** ADR 0029 — e-BY intervals for the selected shards that carry `csInputs`: universe K = all shards
