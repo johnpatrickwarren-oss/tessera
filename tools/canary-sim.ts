@@ -533,6 +533,8 @@ export function canaryEmitter(monitorPassing: boolean): EmitterContract {
     horizon: 'continuous; validity per-increment by randomization',
     validityClass: 'construction_valid',
     calibrationMonitorPassing: monitorPassing,
+    // ADR 0032: NO engineEnvelope — the engine has no envelope for the conformal-rank construction
+    // yet (knowledge WORKLIST C83); until it does the selection records engineGate 'not-declared'.
   };
 }
 

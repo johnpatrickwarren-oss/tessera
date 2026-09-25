@@ -80,6 +80,9 @@ export function liveModeBEmitter(counter: string): EmitterContract {
     stoppingAggregation: 'per-shard running e-value → fleet e-BH',
     horizon: 'live monitoring window',
     validityClass: 'construction_valid',
+    // ADR 0032: normalized (and, in the loop, geometric) onset mixture, Gaussian increment, on a
+    // residual standardised by the ≥ 2-month healthy contrast against a live window — fit ≫ horizon.
+    engineEnvelope: { detectorId: 'onset_mixture_gaussian', assertions: { mMuchGreaterThanN: true } },
     // calibrationMonitorPassing is set by the loop from the accumulated per-shard monitors + whiteness.
   };
 }
